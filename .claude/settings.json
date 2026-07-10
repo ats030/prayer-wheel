@@ -24,6 +24,17 @@
       }
     ]
   },
+  "extraKnownMarketplaces": {
+    "ai-workflow": {
+      "source": {
+        "source": "directory",
+        "path": "/home/ats030/ai-workflow"
+      }
+    }
+  },
   "theme": "dark",
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "enabledPlugins": {
+    "grill-me@ai-workflow": true
+  }
 }
