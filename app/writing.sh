@@ -6,7 +6,7 @@ cd "$HOME"
 # Run from the local checkout (not the pCloud FUSE working copy) so a FUSE
 # stall can't fault the process and static assets serve from local disk.
 # Deploy = git pull in ~/app/writing + restart (see scripts/deploy.sh).
-export PYTHONPATH="$HOME/app/writing/src"
+export PYTHONPATH="$HOME/app/app-hub/src:$HOME/app/writing/src${PYTHONPATH:+:$PYTHONPATH}"
 
 # Pull latest on startup so a plain `systemctl restart writing.service` picks up
 # pushed changes without running scripts/deploy.sh by hand. Best-effort: a

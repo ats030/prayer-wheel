@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -14,6 +15,19 @@ from app_hub.db import (
     record_artifact,
     recent_artifacts,
 )
+from app_hub.hooks import record_image_gallery_save, record_writing_draft_save
+
+
+class DummyDraft:
+    name = "draft"
+    title = "Draft Title"
+    form = "summary"
+    technical = True
+    status = "draft"
+    source_refs = ["https://example.com/source"]
+    theme = "記事テーマ"
+    created = "2026-07-12 10:00"
+    updated = "2026-07-12 10:10"
 
 
 class AppHubTests(unittest.TestCase):
@@ -131,6 +145,49 @@ class AppHubTests(unittest.TestCase):
             self.assertEqual(len(rows), 3)
             self.assertEqual(len(sources), 1)
             self.assertEqual(hash_file(png), hash_file(png))
+
+    def test_hooks_record_without_full_body_or_prompt_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            db = root / "hub.sqlite"
+            old_db = os.environ.get("APP_HUB_DB_PATH")
+            os.environ["APP_HUB_DB_PATH"] = str(db)
+            try:
+                draft = root / "draft.md"
+                body = "本文です。https://example.com/body も参照します。"
+                draft.write_text("---\ntitle: Draft Title\n---\n" + body, encoding="utf-8")
+                record_writing_draft_save(draft, DummyDraft(), body)
+
+                png = root / "image.png"
+                png.write_bytes(b"\x89PNG\r\n\x1a\nfake")
+                sidecar = root / "image.json"
+                params = {
+                    "生成日時": "2026-07-12 10:20:00",
+                    "入力プロンプト": "猫の線画",
+                    "送信プロンプト": "cat line art with a very specific full prompt",
+                    "送信ネガティブ": "low quality",
+                    "チェックポイント": "sd_xl_base",
+                }
+                sidecar.write_text(json.dumps(params), encoding="utf-8")
+                record_image_gallery_save(png, sidecar, params)
+            finally:
+                if old_db is None:
+                    os.environ.pop("APP_HUB_DB_PATH", None)
+                else:
+                    os.environ["APP_HUB_DB_PATH"] = old_db
+
+            with connect(db) as con:
+                rows = list(recent_artifacts(limit=10, con=con))
+                metadata = "\n".join(
+                    row["metadata_json"]
+                    for row in con.execute("SELECT metadata_json FROM artifacts")
+                )
+                sources = list(con.execute("SELECT * FROM sources"))
+
+            self.assertEqual(len(rows), 2)
+            self.assertEqual(len(sources), 2)
+            self.assertNotIn(body, metadata)
+            self.assertNotIn("cat line art with a very specific full prompt", metadata)
 
 
 if __name__ == "__main__":
