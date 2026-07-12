@@ -57,6 +57,112 @@ def print_table(rows: list[dict], columns: list[tuple[str, str, int]]) -> None:
         )
 
 
+def _check(name: str, level: str, detail: object = "") -> dict:
+    return {
+        "name": name,
+        "level": level,
+        "ok": level == "ok",
+        "detail": "" if detail is None else str(detail),
+    }
+
+
+def _writable_dir_check(name: str, path: Path) -> dict:
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+        probe = path / ".app-hub-doctor.tmp"
+        probe.write_text("ok", encoding="utf-8")
+        probe.unlink(missing_ok=True)
+    except Exception as exc:
+        return _check(name, "error", f"{path}: not writable ({exc})")
+    return _check(name, "ok", str(path))
+
+
+def _target_dir_check(name: str, path: Path) -> dict:
+    if path.exists() and path.is_dir():
+        return _check(name, "ok", str(path))
+    return _check(name, "warning", f"{path}: missing")
+
+
+def _db_counts(con) -> dict[str, int]:
+    return {
+        table: int(con.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
+        for table in ("runs", "artifacts", "sources", "events")
+    }
+
+
+def doctor_report(
+    *,
+    db_path: Path | str | None = None,
+    image_gallery: Path = IMAGE_GALLERY,
+    writing_dir: Path = WRITING_DIR,
+    zenn_articles_dir: Path = ZENN_ARTICLES_DIR,
+) -> dict:
+    checks: list[dict] = []
+    checks.append(_writable_dir_check("data_dir", config.data_dir()))
+    checks.append(_writable_dir_check("cache_dir", config.cache_dir()))
+
+    db_target = Path(db_path).expanduser() if db_path else config.db_path()
+    try:
+        with connect(db_target) as con:
+            init_db(con)
+            quick_check = con.execute("PRAGMA quick_check").fetchone()[0]
+            con.execute("CREATE TEMP TABLE app_hub_doctor_probe(x TEXT)")
+            con.execute("INSERT INTO app_hub_doctor_probe(x) VALUES('ok')")
+            fts = con.execute("SELECT value FROM meta WHERE key='fts5'").fetchone()
+            counts = _db_counts(con)
+        if quick_check == "ok":
+            fts_value = fts["value"] if fts else "unknown"
+            detail = f"{db_target}; fts5={fts_value}; counts={counts}"
+            checks.append(_check("database", "ok", detail))
+        else:
+            checks.append(_check("database", "error", f"quick_check={quick_check}"))
+    except Exception as exc:
+        checks.append(_check("database", "error", f"{db_target}: {exc}"))
+
+    try:
+        from app_hub import hooks  # noqa: F401
+    except Exception as exc:
+        checks.append(_check("hooks_import", "error", str(exc)))
+    else:
+        checks.append(_check("hooks_import", "ok", "app_hub.hooks"))
+
+    checks.extend(
+        [
+            _target_dir_check("image_gallery", Path(image_gallery).expanduser()),
+            _target_dir_check("writing_dir", Path(writing_dir).expanduser()),
+            _target_dir_check(
+                "zenn_articles_dir", Path(zenn_articles_dir).expanduser()
+            ),
+        ]
+    )
+
+    error_log = config.error_log_path()
+    log_rows = _hub_error_log_rows(5)
+    if log_rows:
+        checks.append(
+            _check("error_log", "warning", f"{error_log}: {len(log_rows)} recent lines")
+        )
+    else:
+        checks.append(_check("error_log", "ok", str(error_log)))
+
+    levels = [check["level"] for check in checks]
+    if "error" in levels:
+        status = "error"
+    elif "warning" in levels:
+        status = "warning"
+    else:
+        status = "ok"
+    return {
+        "status": status,
+        "checks": checks,
+        "summary": {
+            "errors": levels.count("error"),
+            "warnings": levels.count("warning"),
+            "ok": levels.count("ok"),
+        },
+    }
+
+
 def cmd_init(args: argparse.Namespace) -> int:
     with connect(args.db) as con:
         init_db(con)
@@ -175,6 +281,23 @@ def cmd_failures(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_doctor(args: argparse.Namespace) -> int:
+    report = doctor_report(db_path=Path(args.db).expanduser() if args.db else None)
+    if args.json:
+        print_json(report)
+    else:
+        print(f"status: {report['status']}")
+        print_table(
+            report["checks"],
+            [
+                ("level", "LEVEL", 8),
+                ("name", "CHECK", 24),
+                ("detail", "DETAIL", 88),
+            ],
+        )
+    return 1 if report["status"] == "error" else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="app-hub")
     parser.add_argument("--db", default=None, help="SQLite DB path")
@@ -214,6 +337,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_failures.add_argument("--json", action="store_true", help="print JSON")
     p_failures.add_argument("-n", "--limit", type=int, default=20)
     p_failures.set_defaults(func=cmd_failures)
+
+    p_doctor = sub.add_parser("doctor", help="run local app-hub diagnostics")
+    p_doctor.add_argument("--json", action="store_true", help="print JSON")
+    p_doctor.set_defaults(func=cmd_doctor)
     return parser
 
 

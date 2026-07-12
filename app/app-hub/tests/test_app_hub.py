@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 
 from app_hub.backfill import backfill_all, split_frontmatter
+from app_hub.cli import doctor_report
 from app_hub.db import (
     connect,
     find_artifacts,
@@ -145,6 +146,46 @@ class AppHubTests(unittest.TestCase):
             self.assertEqual(len(rows), 3)
             self.assertEqual(len(sources), 1)
             self.assertEqual(hash_file(png), hash_file(png))
+
+    def test_doctor_report_ok_with_temp_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            db = root / "hub.sqlite"
+            data = root / "data"
+            cache = root / "cache"
+            gallery = root / "gallery"
+            writing = root / "writing"
+            zenn = root / "zenn"
+            for path in (gallery, writing, zenn):
+                path.mkdir()
+
+            old_data = os.environ.get("APP_HUB_DATA_DIR")
+            old_cache = os.environ.get("APP_HUB_CACHE_DIR")
+            os.environ["APP_HUB_DATA_DIR"] = str(data)
+            os.environ["APP_HUB_CACHE_DIR"] = str(cache)
+            try:
+                report = doctor_report(
+                    db_path=db,
+                    image_gallery=gallery,
+                    writing_dir=writing,
+                    zenn_articles_dir=zenn,
+                )
+            finally:
+                if old_data is None:
+                    os.environ.pop("APP_HUB_DATA_DIR", None)
+                else:
+                    os.environ["APP_HUB_DATA_DIR"] = old_data
+                if old_cache is None:
+                    os.environ.pop("APP_HUB_CACHE_DIR", None)
+                else:
+                    os.environ["APP_HUB_CACHE_DIR"] = old_cache
+
+            self.assertEqual(report["status"], "ok")
+            self.assertEqual(report["summary"]["errors"], 0)
+            names = {check["name"] for check in report["checks"]}
+            self.assertIn("database", names)
+            self.assertIn("hooks_import", names)
+            self.assertIn("error_log", names)
 
     def test_hooks_record_without_full_body_or_prompt_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

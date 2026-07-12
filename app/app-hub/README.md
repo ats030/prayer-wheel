@@ -17,6 +17,7 @@ Run:
 ~/app/app-hub/app-hub recent
 ~/app/app-hub/app-hub find DuckDB
 ~/app/app-hub/app-hub failures
+~/app/app-hub/app-hub doctor
 ```
 
 Use `--json` on list commands for machine-readable output.
