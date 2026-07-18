@@ -1,5 +1,6 @@
 {
   "model": "claude-fable-5[1m]",
+  "cleanupPeriodDays": 365,
   "hooks": {
     "PreCompact": [
       {
@@ -24,6 +25,9 @@
       }
     ]
   },
+  "enabledPlugins": {
+    "grill-me@ai-workflow": true
+  },
   "extraKnownMarketplaces": {
     "ai-workflow": {
       "source": {
@@ -33,8 +37,5 @@
     }
   },
   "theme": "dark",
-  "agentPushNotifEnabled": true,
-  "enabledPlugins": {
-    "grill-me@ai-workflow": true
-  }
+  "agentPushNotifEnabled": true
 }
