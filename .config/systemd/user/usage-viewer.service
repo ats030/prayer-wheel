@@ -1,0 +1,17 @@
+[Unit]
+Description=AI使用量 (port 8516)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ats030
+EnvironmentFile=-/home/ats030/.env
+ExecStart=/home/ats030/app/usage-viewer.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=usage-viewer
+
+[Install]
+WantedBy=default.target

@@ -30,6 +30,7 @@ APP_EMOJI = {
     "patent-miner.service": "💡",
     "rekimeshi-web.service": "🍚",
     "rss-reader.service": "📰",
+    "usage-viewer.service": "🧮",
     "web-clipper.service": "📎",
     "writing.service": "✍️",
     "x-analyzer.service": "📊",
