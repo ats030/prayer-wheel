@@ -41,7 +41,7 @@ LOCAL_MACHINE = "ubuntu-server-app"
 REMOTE_APPS = (
     {"machine": "pi-agent", "host": "100.80.127.73", "port": 8501, "name": "Web App", "emoji": "🥧"},
     {"machine": "m5-plus", "host": "100.106.155.99", "port": 8504, "name": "Web App :8504", "emoji": "🖥️"},
-    {"machine": "m5-plus", "host": "100.106.155.99", "port": 8506, "name": "Web App :8506", "emoji": "🖥️"},
+    {"machine": "m5-plus", "host": "100.106.155.99", "port": 8506, "name": "Web App :8506", "emoji": "🧰"},
     {"machine": "evo-x2", "host": "100.104.252.110", "port": 3000, "name": "Open WebUI", "emoji": "🤖"},
     {"machine": "evo-x2", "host": "100.104.252.110", "port": 8188, "name": "ComfyUI", "emoji": "🎛️"},
     {"machine": "evo-x2", "host": "100.104.252.110", "port": 8501, "name": "評価機", "emoji": "🧪"},
@@ -268,7 +268,7 @@ function render(services) {
       const dead = s.status !== "up" ? " dead" : "";
       const icon = s.unit
         ? `/api/favicon/${s.port}?v=emoji-2`
-        : `/api/remote-favicon/${encodeURIComponent(s.machine)}/${s.port}`;
+        : `/api/remote-favicon/${encodeURIComponent(s.machine)}/${s.port}?v=2`;
       return `<a class="card${dead}" href="${url}" target="_blank" rel="noopener">
       <div class="card-head"><img class="favicon" src="${icon}" alt=""><div class="name">${esc(s.name)}</div></div>
       <div class="meta"><span class="dot ${s.status}"></span>${LABELS[s.status]} · :${s.port}</div>
