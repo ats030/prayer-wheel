@@ -1,6 +1,7 @@
 [Unit]
 Description=AI使用量 (port 8516)
-After=network-online.target
+After=network-online.target home-ats030-pCloudDrive.mount
+Requires=home-ats030-pCloudDrive.mount
 
 [Service]
 Type=simple
