@@ -8,6 +8,7 @@ Description の「(port 85xx)」表記からWebアプリを検出してリンク
 import re
 import socket
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -20,6 +21,7 @@ PORT_RE = re.compile(r"port\s*(\d{4,5})", re.IGNORECASE)
 app = FastAPI(title="App Portal")
 APP_EMOJI = {
     "kangaeru-mame.service": "🫛",
+    "calendar-viewer.service": "📅",
     "gathering-information.service": "🔎",
     "image-editor.service": "🪄",
     "image-generator.service": "🎨",
@@ -34,6 +36,30 @@ APP_EMOJI = {
     "x-post.service": "🐦",
 }
 DEFAULT_APP_EMOJI = "🧩"
+
+LOCAL_MACHINE = "ubuntu-server-app"
+REMOTE_APPS = (
+    {"machine": "pi-agent", "host": "100.80.127.73", "port": 8501, "name": "Web App", "emoji": "🥧"},
+    {"machine": "m5-plus", "host": "100.106.155.99", "port": 8504, "name": "Web App :8504", "emoji": "🖥️"},
+    {"machine": "m5-plus", "host": "100.106.155.99", "port": 8506, "name": "Web App :8506", "emoji": "🖥️"},
+    {"machine": "evo-x2", "host": "100.104.252.110", "port": 3000, "name": "Open WebUI", "emoji": "🤖"},
+    {"machine": "evo-x2", "host": "100.104.252.110", "port": 8188, "name": "ComfyUI", "emoji": "🎛️"},
+    {"machine": "evo-x2", "host": "100.104.252.110", "port": 8501, "name": "評価機", "emoji": "🧪"},
+    {"machine": "evo-x2", "host": "100.104.252.110", "port": 8503, "name": "AI Workflow Atlas", "emoji": "🗺️"},
+)
+
+
+def _local_probe_hosts() -> tuple[str, ...]:
+    hosts = ["127.0.0.1"]
+    try:
+        result = subprocess.run(["tailscale", "ip", "-4"], capture_output=True, text=True, timeout=2)
+        hosts.extend(line.strip() for line in result.stdout.splitlines() if line.strip())
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return tuple(dict.fromkeys(hosts))
+
+
+LOCAL_PROBE_HOSTS = _local_probe_hosts()
 
 
 def discover_units() -> list[dict]:
@@ -58,12 +84,14 @@ def discover_units() -> list[dict]:
     return units
 
 
-def port_open(port: int) -> bool:
-    try:
-        with socket.create_connection(("127.0.0.1", port), timeout=0.5):
-            return True
-    except OSError:
-        return False
+def port_open(port: int, hosts: tuple[str, ...] | None = None) -> bool:
+    for host in hosts or LOCAL_PROBE_HOSTS:
+        try:
+            with socket.create_connection((host, port), timeout=0.5):
+                return True
+        except OSError:
+            continue
+    return False
 
 
 def derive_status(service_state: str, port: int | None) -> str:
@@ -92,7 +120,28 @@ def collect_status() -> list[dict]:
     for unit, state in zip(units, states):
         unit["service_state"] = state
         unit["status"] = derive_status(state, unit["port"])
-    return units
+        unit["machine"] = LOCAL_MACHINE
+        unit["url"] = None
+        unit["emoji"] = APP_EMOJI.get(unit["unit"], DEFAULT_APP_EMOJI)
+    return units + collect_remote_status()
+
+
+def _remote_status(remote: dict) -> dict:
+    item = dict(remote)
+    is_open = port_open(item["port"], (item["host"],))
+    item.update(
+        unit=None,
+        service_state="active" if is_open else "unreachable",
+        status="up" if is_open else "down",
+        url=f"http://{item['host']}:{item['port']}/",
+    )
+    return item
+
+
+def collect_remote_status() -> list[dict]:
+    # Probe concurrently so an offline PC costs one timeout, not one per app.
+    with ThreadPoolExecutor(max_workers=len(REMOTE_APPS)) as executor:
+        return list(executor.map(_remote_status, REMOTE_APPS))
 
 
 
@@ -126,6 +175,15 @@ def api_favicon(port: int) -> Response:
     return Response(data, media_type=media_type, headers={"Cache-Control": "public, max-age=3600"})
 
 
+@app.get("/api/remote-favicon/{machine}/{port}")
+def api_remote_favicon(machine: str, port: int) -> Response:
+    item = next((app for app in REMOTE_APPS if app["machine"] == machine and app["port"] == port), None)
+    if item is None:
+        return Response(status_code=404)
+    data, media_type = _emoji_icon(item["emoji"])
+    return Response(data, media_type=media_type, headers={"Cache-Control": "public, max-age=3600"})
+
+
 PAGE = """<!doctype html>
 <html lang="ja">
 <head>
@@ -154,6 +212,8 @@ PAGE = """<!doctype html>
   h1 { font-size: 1.4rem; margin-bottom: 1.5rem; }
   h2 { font-size: 0.9rem; color: var(--muted); margin: 2rem 0 0.8rem;
        text-transform: uppercase; letter-spacing: 0.05em; }
+  h2 .machine-state { font-size: 0.72rem; font-weight: 400; text-transform: none;
+                      letter-spacing: 0; margin-left: 0.45rem; }
   .grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 0.8rem;
@@ -196,15 +256,25 @@ function esc(s) {
 
 function render(services) {
   const apps = services.filter(s => s.port !== null);
-  const bg = services.filter(s => s.port === null);
+  const bg = services.filter(s => s.port === null && s.machine === "ubuntu-server-app");
+  const machines = [...new Set(apps.map(s => s.machine))];
 
-  document.getElementById("apps").innerHTML = apps.map(s => {
-    const url = `http://${location.hostname}:${s.port}/`;
-    const dead = s.status !== "up" ? " dead" : "";
-    return `<a class="card${dead}" href="${url}" target="_blank" rel="noopener">
-      <div class="card-head"><img class="favicon" src="/api/favicon/${s.port}?v=emoji-2" alt=""><div class="name">${esc(s.name)}</div></div>
+  document.getElementById("apps").className = "";
+  document.getElementById("apps").innerHTML = machines.map(machine => {
+    const machineApps = apps.filter(s => s.machine === machine);
+    const available = machineApps.some(s => s.status === "up");
+    const cards = machineApps.map(s => {
+      const url = s.url || `http://${location.hostname}:${s.port}/`;
+      const dead = s.status !== "up" ? " dead" : "";
+      const icon = s.unit
+        ? `/api/favicon/${s.port}?v=emoji-2`
+        : `/api/remote-favicon/${encodeURIComponent(s.machine)}/${s.port}`;
+      return `<a class="card${dead}" href="${url}" target="_blank" rel="noopener">
+      <div class="card-head"><img class="favicon" src="${icon}" alt=""><div class="name">${esc(s.name)}</div></div>
       <div class="meta"><span class="dot ${s.status}"></span>${LABELS[s.status]} · :${s.port}</div>
     </a>`;
+    }).join("");
+    return `<section><h2>${esc(machine)}<span class="machine-state">${available ? "オンライン" : "到達不可"}</span></h2><div class="grid">${cards}</div></section>`;
   }).join("");
 
   document.getElementById("background").innerHTML = bg.map(s =>
