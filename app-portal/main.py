@@ -28,7 +28,7 @@ APP_EMOJI = {
     "patent-miner.service": "💡",
     "rekimeshi-web.service": "🍚",
     "rss-reader.service": "📰",
-    "web-clipper.service": "✂️",
+    "web-clipper.service": "📎",
     "writing.service": "✍️",
     "x-analyzer.service": "📊",
     "x-post.service": "🐦",
@@ -202,7 +202,7 @@ function render(services) {
     const url = `http://${location.hostname}:${s.port}/`;
     const dead = s.status !== "up" ? " dead" : "";
     return `<a class="card${dead}" href="${url}" target="_blank" rel="noopener">
-      <div class="card-head"><img class="favicon" src="/api/favicon/${s.port}?v=emoji-1" alt=""><div class="name">${esc(s.name)}</div></div>
+      <div class="card-head"><img class="favicon" src="/api/favicon/${s.port}?v=emoji-2" alt=""><div class="name">${esc(s.name)}</div></div>
       <div class="meta"><span class="dot ${s.status}"></span>${LABELS[s.status]} · :${s.port}</div>
     </a>`;
   }).join("");
