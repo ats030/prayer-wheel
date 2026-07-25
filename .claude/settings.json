@@ -1,7 +1,18 @@
 {
-  "model": "claude-fable-5[1m]",
   "cleanupPeriodDays": 365,
+  "model": "opus",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/ats030/.local/bin/rtk hook claude"
+          }
+        ]
+      }
+    ],
     "PreCompact": [
       {
         "matcher": "",
