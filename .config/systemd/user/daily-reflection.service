@@ -1,0 +1,20 @@
+[Unit]
+Description=Daily Reflection (port 8507)
+After=network-online.target home-ats030-pCloudDrive.mount
+Requires=home-ats030-pCloudDrive.mount
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ats030/pCloudDrive/Python/daily-reflection
+EnvironmentFile=-/home/ats030/.env
+# 当機はTZ=UTC。ブラウザ(JST)が送る日付と抽出の日付境界を揃える。
+Environment=TZ=Asia/Tokyo
+ExecStart=/bin/sh /home/ats030/pCloudDrive/Python/daily-reflection/run.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=daily-reflection
+
+[Install]
+WantedBy=default.target

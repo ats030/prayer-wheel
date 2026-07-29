@@ -1,0 +1,13 @@
+[Unit]
+Description=Daily Reflection auto report timer (00:00 JST)
+
+[Timer]
+# 当機はTZ=UTCのため Asia/Tokyo を明示し、日本時間の0:00に発火させる
+OnCalendar=*-*-* 00:00:00 Asia/Tokyo
+
+# 停止中に発火時刻を過ぎた場合は起動後に実行
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
