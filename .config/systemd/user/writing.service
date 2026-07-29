@@ -1,0 +1,20 @@
+[Unit]
+Description=Writing (Zenn 執筆支援, port 8510)
+After=network-online.target home-ats030-pCloudDrive.mount
+Requires=home-ats030-pCloudDrive.mount
+
+[Service]
+Type=simple
+Environment=TZ=Asia/Tokyo
+WorkingDirectory=/home/ats030
+EnvironmentFile=-/home/ats030/.env
+ExecStart=/usr/bin/env SEARXNG_API_URL=http://127.0.0.1:8081/search /home/ats030/app/writing.sh
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=8
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=writing
+
+[Install]
+WantedBy=default.target

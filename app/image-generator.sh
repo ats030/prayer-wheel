@@ -1,5 +1,8 @@
 #!/bin/sh
-set -e
+set -eu
+
+TAILNET_IP="$(tailscale ip -4 | head -n 1)"
+test -n "$TAILNET_IP"
 
 cd "$HOME"
 
@@ -9,4 +12,4 @@ export PYTHONPATH="$HOME/app/app-hub/src${PYTHONPATH:+:$PYTHONPATH}"
 
 exec /home/ats030/.local/bin/uv run \
     --directory ~/pCloudDrive/Python/image-generator \
-    streamlit run app.py --server.port 8512
+    uvicorn main:app --host "$TAILNET_IP" --port 8512
