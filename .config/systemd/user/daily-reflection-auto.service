@@ -9,6 +9,8 @@ WorkingDirectory=/home/ats030/pCloudDrive/Python/daily-reflection
 EnvironmentFile=-/home/ats030/.env
 # 当機はTZ=UTC。ログの日付境界を日本時間に合わせる。
 Environment=TZ=Asia/Tokyo
+# bd は既定PATHに無く、cwd からの探索でもDBに辿り着かないため明示する。
+Environment=BEADS_DIR=/home/ats030/.beads
 ExecStart=/home/ats030/.venv/bin/python /home/ats030/pCloudDrive/Python/daily-reflection/auto_generate.py
 # 生成900秒 × 3回 + 再試行待ち120秒 を収める
 TimeoutStartSec=3600

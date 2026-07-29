@@ -9,6 +9,8 @@ WorkingDirectory=/home/ats030/pCloudDrive/Python/daily-reflection
 EnvironmentFile=-/home/ats030/.env
 # 当機はTZ=UTC。ブラウザ(JST)が送る日付と抽出の日付境界を揃える。
 Environment=TZ=Asia/Tokyo
+# bd は既定PATHに無く、cwd からの探索でもDBに辿り着かないため明示する。
+Environment=BEADS_DIR=/home/ats030/.beads
 ExecStart=/bin/sh /home/ats030/pCloudDrive/Python/daily-reflection/run.sh
 Restart=on-failure
 RestartSec=10
