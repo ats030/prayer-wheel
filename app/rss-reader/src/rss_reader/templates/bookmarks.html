@@ -2,7 +2,7 @@
 {% block title %}ブックマーク — RSS Reader{% endblock %}
 
 {% block body %}
-<div class="wrap">
+<div class="wrap list-wrap">
   <div class="page-head">
     <div>
       <span class="eyebrow">{{ saved_count }} / {{ total }} 保存済み</span>
@@ -16,78 +16,89 @@
         <label for="q">キーワード検索</label>
         <input type="text" id="q" name="q" value="{{ q }}" placeholder="フィード名・タグで検索…" autocomplete="off">
       </div>
-      <div class="field">
-        <label>&nbsp;</label>
-        <button type="submit" class="btn btn-primary">絞り込む</button>
-      </div>
+      <button type="submit" class="btn btn-primary">絞り込む</button>
     </div>
     {% if all_genres or all_tags %}
       <details class="chip-group" {% if sel_genres or sel_tags %}open{% endif %}>
-        <summary class="muted small">ジャンル・タグで絞り込み</summary>
-        <div class="chips">
-          {% for g in all_genres %}
-            <label class="chip">
-              <input type="checkbox" name="genre" value="{{ g }}" {% if g in sel_genres %}checked{% endif %}>
-              <span>{{ g }}</span>
-            </label>
-          {% endfor %}
+        <summary>ジャンル・タグで絞り込み
+          {%- if sel_genres or sel_tags %}
+            <span class="badge">{{ sel_genres|length + sel_tags|length }}</span>
+          {%- endif %}</summary>
+        <div class="chip-set">
+          <span class="chip-label">ジャンル</span>
+          <div class="chips">
+            {% for g in all_genres %}
+              <label class="chip">
+                <input type="checkbox" name="genre" value="{{ g }}" {% if g in sel_genres %}checked{% endif %}>
+                <span>{{ g }}</span>
+              </label>
+            {% endfor %}
+          </div>
         </div>
-        <div class="chips">
-          {% for t in all_tags %}
-            <label class="chip">
-              <input type="checkbox" name="tag" value="{{ t }}" {% if t in sel_tags %}checked{% endif %}>
-              <span>{{ t }}</span>
-            </label>
-          {% endfor %}
+        <div class="chip-set">
+          <span class="chip-label">タグ</span>
+          <div class="chips">
+            {% for t in all_tags %}
+              <label class="chip">
+                <input type="checkbox" name="tag" value="{{ t }}" {% if t in sel_tags %}checked{% endif %}>
+                <span>{{ t }}</span>
+              </label>
+            {% endfor %}
+          </div>
         </div>
       </details>
     {% endif %}
   </form>
 
-  <p class="muted small">{{ rows|length }} 件表示 / 登録 {{ total }} 件（保存済み {{ saved_count }} 件）</p>
+  <p class="list-head muted small">{{ rows|length }} 件表示 / 登録 {{ total }} 件（保存済み {{ saved_count }} 件）</p>
 
-  {% for row in rows %}
-    <article class="card bm-row" data-url="{{ row.url }}">
-      {% if row.thumb %}<img class="bm-art" src="{{ row.thumb }}" alt="" loading="lazy">{% endif %}
-      <div class="bm-main">
-        <h2 class="bm-title">
-          <a href="/?feed={{ row.url|urlencode }}">{{ row.title }}</a>
-          {% if row.bookmark and row.bookmark.media_type %}<span class="badge">{{ row.bookmark.media_type }}</span>{% endif %}
-          {% if not row.bookmark %}<span class="badge">未保存</span>{% endif %}
-        </h2>
-        {% if row.bookmark %}
-          {% if row.bookmark.authors %}<p class="muted small">著者: {{ row.bookmark.authors|join(' / ') }}</p>{% endif %}
-          {% if row.bookmark.tags %}
-            <p class="tags">{% for t in row.bookmark.tags %}<span class="badge tag">{{ t }}</span>{% endfor %}</p>
-          {% endif %}
-          {% if row.bookmark.description %}
-            <p class="muted small">{{ row.bookmark.description[:120] }}{% if row.bookmark.description|length > 120 %}…{% endif %}</p>
-          {% endif %}
-          <p class="muted small">登録: {{ row.bookmark.bookmarked_at[:10] }}</p>
+  {# カードを積まず1枚のリストにする。39行あるので1行の高さが密度を決める #}
+  <div class="card bm-list">
+    {% for row in rows %}
+      <article class="bm-row" data-url="{{ row.url }}">
+        {# 未保存行はサムネイルを持たないが、列を揃えるため場所だけ確保する #}
+        {% if row.thumb %}
+          <img class="bm-art" src="{{ row.thumb }}" alt="" loading="lazy">
+        {% else %}
+          <span class="bm-art"></span>
         {% endif %}
-        <p class="muted small feed-url">{{ row.url }}</p>
+        <div class="bm-main">
+          <div class="bm-title">
+            <a href="/?feed={{ row.url|urlencode }}" title="{{ row.url }}">{{ row.title }}</a>
+            {% if row.bookmark and row.bookmark.media_type %}<span class="badge">{{ row.bookmark.media_type }}</span>{% endif %}
+            {% if not row.bookmark %}<span class="badge unsaved">未保存</span>{% endif %}
+          </div>
+          {% if row.bookmark %}
+            <div class="bm-sub">
+              {% if row.bookmark.tags %}
+                <span class="tags">{% for t in row.bookmark.tags %}<span class="badge tag">{{ t }}</span>{% endfor %}</span>
+              {% endif %}
+              {% if row.bookmark.description %}<span class="bm-desc">{{ row.bookmark.description }}</span>{% endif %}
+            </div>
+          {% endif %}
+        </div>
+        {% if row.bookmark %}<span class="bm-date muted small">{{ row.bookmark.bookmarked_at[:10] }}</span>{% endif %}
+        <div class="bm-actions reveal">
+          <button type="button" class="btn btn-ghost btn-xs bm-tag-edit">
+            {% if row.bookmark %}タグ{% else %}保存{% endif %}
+          </button>
+          {% if row.bookmark %}
+            <button type="button" class="btn btn-ghost btn-xs bm-remove" data-url="{{ row.url }}">削除</button>
+          {% endif %}
+        </div>
         <div class="bm-tag-editor" hidden>
           <label>タグ（カンマ区切り）</label>
           <input type="text" class="bm-tag-input" value="{{ row.bookmark.tags|join(', ') if row.bookmark else '' }}">
           <div class="row">
             <button type="button" class="btn btn-primary btn-xs bm-tag-save">保存</button>
-            <button type="button" class="btn btn-secondary btn-xs bm-tag-suggest">再生成</button>
+            <button type="button" class="btn btn-secondary btn-xs bm-tag-suggest">タグを自動生成</button>
             <button type="button" class="btn btn-ghost btn-xs bm-tag-close">閉じる</button>
           </div>
         </div>
-      </div>
-      <div class="bm-actions">
-        <a class="btn btn-secondary btn-xs" href="/?feed={{ row.url|urlencode }}">開く</a>
-        <button type="button" class="btn btn-secondary btn-xs bm-tag-edit">
-          {% if row.bookmark %}タグ編集{% else %}保存{% endif %}
-        </button>
-        {% if row.bookmark %}
-          <button type="button" class="btn btn-danger btn-xs bm-remove" data-url="{{ row.url }}">削除</button>
-        {% endif %}
-      </div>
-    </article>
-  {% else %}
-    <p class="empty">条件に一致するフィードはありません。フィルターや検索ワードを見直してください。</p>
-  {% endfor %}
+      </article>
+    {% else %}
+      <p class="empty">条件に一致するフィードはありません。フィルターや検索ワードを見直してください。</p>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

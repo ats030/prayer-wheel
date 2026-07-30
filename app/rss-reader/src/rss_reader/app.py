@@ -122,6 +122,14 @@ def _collect(scope: str, feed_url: str) -> tuple[list[FeedItem], datetime | None
     return items, oldest, uncached, saved
 
 
+def _media_majority(items: list[FeedItem]) -> bool:
+    """True when most items carry a duration or episode number."""
+    if not items:
+        return False
+    with_media = sum(1 for i in items if i.duration or i.episode_number)
+    return with_media * 2 >= len(items)
+
+
 def _page(
     scope: str,
     feed_url: str,
@@ -148,6 +156,10 @@ def _page(
 
     return {
         "items": page,
+        # 再生時間・話数の列は過半数の記事が持つときだけ確保する。
+        # 1件でも確保すると、ポッドキャストが数件混ざるだけの新着一覧で
+        # 全行のタイトル幅を 130px 削ってしまう。
+        "has_media": _media_majority(ordered),
         "shown": min(params.offset + PAGE_SIZE, len(ordered)),
         "matched": len(ordered),
         "total": len(items),

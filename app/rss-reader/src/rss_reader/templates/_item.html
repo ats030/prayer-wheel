@@ -1,16 +1,21 @@
-{% macro item_row(item, show_feed) %}
+{# メタ情報は固定幅グリッドのセルとして出す。値がなくても空セルを描くことで
+   行をまたいで列が揃い、一覧を上から下へスキャンできる。 #}
+{% macro item_row(item, show_feed, has_media) %}
 <details class="item">
   <summary>
     <span class="item-title">{{ item.title }}</span>
     <span class="item-meta">
-      {%- if item.score is not none %}
-        <span class="badge score{% if item.score >= score_high %} hot{% endif %}">
-          {%- if item.score >= score_high %}🔥 {% endif %}{{ '%.1f'|format(item.score) }}</span>
+      <span class="c-score">
+        {%- if item.score is not none -%}
+          <span class="badge score{% if item.score >= score_high %} hot{% endif %}">{{ '%.1f'|format(item.score) }}</span>
+        {%- endif -%}
+      </span>
+      {%- if show_feed %}<span class="c-feed" title="{{ item.feed_title }}">{{ item.feed_title }}</span>{% endif %}
+      <span class="c-date">{{ item.published|dt if item.published else '日付不明' }}</span>
+      {%- if has_media %}
+        <span class="c-dur">{{ item.duration or '' }}</span>
+        <span class="c-ep">{% if item.episode_number %}ep.{{ item.episode_number }}{% endif %}</span>
       {%- endif %}
-      {%- if show_feed %}<span class="feed-name">{{ item.feed_title }}</span>{% endif %}
-      <span>{{ item.published|dt if item.published else '日付不明' }}</span>
-      {%- if item.duration %}<span>{{ item.duration }}</span>{% endif %}
-      {%- if item.episode_number %}<span>ep.{{ item.episode_number }}</span>{% endif %}
     </span>
   </summary>
   <div class="item-body">
@@ -21,7 +26,7 @@
     {% if item.summary %}<p class="item-summary">{{ item.summary }}</p>{% endif %}
     {% if is_podcast(item) %}
       <audio controls preload="none" src="{{ item.enclosure_url }}"></audio>
-      {% if item.link %}<p><a href="{{ item.link }}" target="_blank" rel="noopener">エピソードページを開く</a></p>{% endif %}
+      {% if item.link %}<p><a href="{{ item.link }}" target="_blank" rel="noopener">エピソードページを開く ↗</a></p>{% endif %}
     {% else %}
       <div class="row">
         <a href="{{ item.link }}" target="_blank" rel="noopener">元記事を開く ↗</a>

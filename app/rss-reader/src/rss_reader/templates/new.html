@@ -2,7 +2,7 @@
 {% block title %}新着 — RSS Reader{% endblock %}
 
 {% block body %}
-<div class="wrap" data-scope="new" data-feed="" data-llm="0">
+<div class="wrap list-wrap" data-scope="new" data-feed="" data-llm="0">
   <div class="page-head">
     <div>
       <span class="eyebrow">{{ saved|length }} feeds</span>
@@ -36,23 +36,31 @@
       </div>
 
       <details class="chip-group" {% if params.genre or params.feed_name %}open{% endif %}>
-        <summary class="muted small">ジャンル・フィードで絞り込み
-          {%- if params.genre or params.feed_name %}（{{ params.genre|length + params.feed_name|length }} 件選択中）{% endif %}</summary>
-        <div class="chips">
-          {% for g in genres %}
-            <label class="chip">
-              <input type="checkbox" name="genre" value="{{ g }}" {% if g in params.genre %}checked{% endif %}>
-              <span>{{ g }}</span>
-            </label>
-          {% endfor %}
+        <summary>ジャンル・フィードで絞り込み
+          {%- if params.genre or params.feed_name %}
+            <span class="badge">{{ params.genre|length + params.feed_name|length }}</span>
+          {%- endif %}</summary>
+        <div class="chip-set">
+          <span class="chip-label">ジャンル</span>
+          <div class="chips">
+            {% for g in genres %}
+              <label class="chip">
+                <input type="checkbox" name="genre" value="{{ g }}" {% if g in params.genre %}checked{% endif %}>
+                <span>{{ g }}</span>
+              </label>
+            {% endfor %}
+          </div>
         </div>
-        <div class="chips">
-          {% for f in feed_names %}
-            <label class="chip">
-              <input type="checkbox" name="feed_name" value="{{ f }}" {% if f in params.feed_name %}checked{% endif %}>
-              <span>{{ f }}</span>
-            </label>
-          {% endfor %}
+        <div class="chip-set">
+          <span class="chip-label">フィード</span>
+          <div class="chips">
+            {% for f in feed_names %}
+              <label class="chip">
+                <input type="checkbox" name="feed_name" value="{{ f }}" {% if f in params.feed_name %}checked{% endif %}>
+                <span title="{{ f }}">{{ f }}</span>
+              </label>
+            {% endfor %}
+          </div>
         </div>
       </details>
     </form>

@@ -24,7 +24,7 @@
       {% for url in saved %}
         <div class="feed-row{% if url == active %} active{% endif %}">
           <a class="feed-link" href="/?feed={{ url|urlencode }}" title="{{ url }}">{{ feed_titles[url] }}</a>
-          <button type="button" class="btn btn-ghost btn-xs remove-feed" data-url="{{ url }}"
+          <button type="button" class="btn btn-ghost btn-xs remove-feed reveal" data-url="{{ url }}"
                   title="このフィードを削除" aria-label="{{ feed_titles[url] }} を削除">×</button>
         </div>
       {% else %}
@@ -33,7 +33,7 @@
     </div>
 
     <details class="card profile-card" id="profileCard">
-      <summary class="section-title">あなたの興味プロファイル</summary>
+      <summary>あなたの興味プロファイル</summary>
       <div class="profile-body muted small">読み込み中…</div>
       <button type="button" class="btn btn-secondary btn-xs" id="genProfile">生成・更新</button>
     </details>
@@ -53,11 +53,12 @@
           <h1>{{ meta.title if meta else active }}
             {% if meta and meta.media_type %}<span class="badge">{{ meta.media_type }}</span>{% endif %}
           </h1>
-          {% if meta and meta.description %}<p class="muted">{{ meta.description[:180] }}</p>{% endif %}
-          {% if meta and meta.feed_authors %}
-            <p class="muted small">著者: {{ meta.feed_authors|join(' / ') }}</p>
-          {% endif %}
-          <p class="muted small">最終更新: {{ fetched_at|dt }}</p>
+          {# 全文を出して CSS で2行に抑える。文字数で切ると URL の途中で途切れる #}
+          {% if meta and meta.description %}<p class="feed-desc">{{ meta.description }}</p>{% endif %}
+          <p class="feed-head-meta">
+            {%- if meta and meta.feed_authors %}<span>{{ meta.feed_authors|join(' / ') }}</span>{% endif %}
+            <span>最終更新 {{ fetched_at|dt }}</span>
+          </p>
         </div>
         <div class="feed-head-actions">
           <button type="button" class="btn btn-secondary btn-xs" id="refreshFeed" data-url="{{ active }}">↻ 更新</button>
@@ -93,12 +94,12 @@
               {% for o in sort_orders %}<option value="{{ o }}" {% if o == params.sort %}selected{% endif %}>{{ o }}</option>{% endfor %}
             </select>
           </div>
-        </div>
-        <div class="row">
-          <button type="button" class="btn btn-secondary btn-xs" id="runScoring" data-url="{{ active }}">
-            Ollama スコアリング
-          </button>
-          {% if include_llm %}<span class="muted small">LLM スコアを反映中</span>{% endif %}
+          <div class="field">
+            <label for="runScoring">スコア{% if include_llm %} <span class="dot-on" title="LLM スコア反映中"></span>{% endif %}</label>
+            <button type="button" class="btn btn-secondary" id="runScoring" data-url="{{ active }}">
+              Ollama で採点
+            </button>
+          </div>
         </div>
       </form>
 

@@ -1,91 +1,188 @@
-/* rss-reader specific components. Tokens and base rules come from linear.css. */
+/* rss-reader specific components. Tokens and base rules come from linear.css.
+   Spacing sticks to the 8/12/16/24/32 scale in DESIGN.md. */
 
 .nav-links a.active { background: var(--surface-2); color: var(--ink); }
-.btn-xs { font-size: 13px; padding: 5px 10px; }
+.btn-xs { font-size: 12px; padding: 4px 9px; }
 .small { font-size: 12px; }
-p.small, p.muted { margin: 2px 0; }
 .muted { color: var(--ink-subtle); }
+p.small, p.muted { margin: 2px 0; }
 
-/* --- reader layout --- */
+/* 破壊的・二次的な操作は行のホバー／フォーカス時だけ出す。
+   39行の一覧に常時ボタンが並ぶと、それ自体がノイズになる。 */
+.reveal { opacity: 0; transition: opacity 0.12s ease; }
+.bm-row:hover .reveal,
+.bm-row:focus-within .reveal,
+.feed-row:hover .reveal,
+.feed-row:focus-within .reveal { opacity: 1; }
+@media (hover: none) { .reveal { opacity: 1; } }
+
+/* --- layout --- */
+/* 一覧ページは linear.css の 1100px より広げる。メタ列に約 300px 使うため、
+   1100px のままだと記事タイトルが早く折り返してスキャンしづらい */
+.list-wrap { max-width: 1280px; }
 .reader-wrap {
   display: grid;
-  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
-  gap: 20px;
+  grid-template-columns: minmax(216px, 264px) minmax(0, 1fr);
+  gap: 24px;
   align-items: start;
-  max-width: 1400px;
+  max-width: 1360px;
 }
-.side { display: grid; gap: 16px; position: sticky; top: 72px; }
+.side { display: grid; gap: 12px; position: sticky; top: 72px; }
 .side .card { padding: 16px; }
 .main { min-width: 0; display: grid; gap: 16px; }
+/* 1カラムに畳むときは記事一覧を先に出す。サイドバー（追加フォーム＋39件の
+   フィード一覧）が先頭にあると、記事に届くまで画面2つ分スクロールさせられる */
 @media (max-width: 900px) {
   .reader-wrap { grid-template-columns: 1fr; }
-  .side { position: static; }
+  .side { position: static; order: 2; }
+  .main { order: 1; }
+  .feed-list { max-height: 320px; }
 }
 
-/* --- feed list --- */
-.feed-list { max-height: 46vh; overflow-y: auto; }
+/* --- sidebar: add form --- */
+.add-feed .field { margin-bottom: 12px; }
+.candidates { margin-top: 12px; border-top: 1px solid var(--hairline); padding-top: 12px; }
+.candidate-list { display: grid; gap: 6px; }
+.candidate-list button { width: 100%; text-align: left; word-break: break-all; font-size: 12px; }
+
+/* --- sidebar: feed list --- */
+.feed-list { max-height: 48vh; overflow-y: auto; }
 .feed-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   border-radius: var(--r-sm);
-  padding: 2px 4px;
+  padding: 0 2px 0 6px;
 }
 .feed-row:hover { background: var(--surface-2); }
-.feed-row.active { background: var(--surface-3); }
-.feed-row.active .feed-link { color: var(--primary-hover); }
+.feed-row.active { background: var(--surface-3); box-shadow: inset 2px 0 0 var(--primary); }
+.feed-row.active .feed-link { color: var(--ink); }
 .feed-link {
   flex: 1;
   min-width: 0;
-  color: var(--ink-muted);
+  color: var(--ink-subtle);
   font-size: 13px;
-  padding: 5px 4px;
+  padding: 6px 2px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .feed-link:hover { color: var(--ink); text-decoration: none; }
+.remove-feed { padding: 2px 6px; line-height: 1; }
 
-.candidates { margin-top: 12px; border-top: 1px solid var(--hairline); padding-top: 12px; }
-.candidate-list { display: grid; gap: 6px; }
-.candidate-list button { width: 100%; text-align: left; word-break: break-all; font-size: 12px; }
-
-.profile-card summary { cursor: pointer; list-style: none; }
-.profile-card summary::-webkit-details-marker { display: none; }
-.profile-body { white-space: pre-wrap; margin: 8px 0; }
+/* --- sidebar: interest profile --- */
+.profile-card { padding: 12px 16px; }
+.profile-card > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-subtle);
+  font-size: 13px;
+}
+.profile-card > summary::-webkit-details-marker { display: none; }
+.profile-card > summary::before {
+  content: "▸";
+  font-size: 10px;
+  transition: transform 0.12s ease;
+}
+.profile-card[open] > summary::before { transform: rotate(90deg); }
+.profile-card > summary:hover { color: var(--ink); }
+.profile-body { white-space: pre-wrap; margin: 12px 0; font-size: 13px; }
 
 /* --- feed header --- */
-.feed-head { display: flex; gap: 16px; align-items: flex-start; }
-.feed-head h1 { font-size: 22px; margin: 0 0 6px; }
+.feed-head { display: flex; gap: 16px; align-items: flex-start; padding: 16px 20px; }
+.feed-head h1 {
+  font-size: 20px;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 .feed-head-main { flex: 1; min-width: 0; }
-.feed-head-actions { display: grid; gap: 6px; }
-.feed-art { width: 64px; height: 64px; object-fit: cover; border-radius: var(--r-md); }
+/* 説明文は本文ではなく補足。2行で切って見出しとの階層を保つ */
+.feed-desc {
+  margin: 0;
+  color: var(--ink-subtle);
+  font-size: 13px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.feed-head-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 8px 0 0;
+  color: var(--ink-tertiary);
+  font-size: 12px;
+}
+.feed-head-actions { display: grid; gap: 6px; justify-items: stretch; }
+.feed-art { width: 56px; height: 56px; object-fit: cover; border-radius: var(--r-md); flex-shrink: 0; }
 
-.tag-editor .row { margin-top: 10px; }
+.tag-editor { padding: 16px 20px; }
+.tag-editor .row { margin-top: 12px; }
 
 /* --- filters --- */
-.filters { padding: 16px; display: grid; gap: 12px; }
-.filter-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.filters { padding: 16px 20px; display: grid; gap: 12px; }
+.filter-row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
 .filter-row .field { margin: 0; }
 .filter-row .field.grow { flex: 1; min-width: 200px; }
-.filter-row select { width: auto; min-width: 120px; }
+.filter-row select, .filter-row .btn { width: auto; min-width: 116px; height: 37px; }
+.dot-on {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  vertical-align: middle;
+}
 
-.chip-group summary { cursor: pointer; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip-group > summary {
+  cursor: pointer;
+  color: var(--ink-subtle);
+  font-size: 12px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chip-group > summary::-webkit-details-marker { display: none; }
+.chip-group > summary::before { content: "▸"; font-size: 10px; transition: transform 0.12s ease; }
+.chip-group[open] > summary::before { transform: rotate(90deg); }
+.chip-group > summary:hover { color: var(--ink); }
+.chip-set { display: flex; align-items: baseline; gap: 12px; margin-top: 12px; }
+.chip-label {
+  flex-shrink: 0;
+  width: 52px;
+  color: var(--ink-tertiary);
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  max-width: 240px;
   margin: 0;
   font-size: 12px;
-  color: var(--ink-muted);
+  color: var(--ink-subtle);
   background: var(--surface-2);
   border: 1px solid var(--hairline);
   border-radius: var(--r-pill);
   padding: 3px 10px;
   cursor: pointer;
 }
-.chip input { width: auto; margin: 0; accent-color: var(--primary); }
+/* チェックボックスの四角は消し、チップ自体の状態で選択を表す */
+.chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+.chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip:hover { border-color: var(--hairline-strong); color: var(--ink-muted); }
+.chip:has(input:focus-visible) { outline: 2px solid rgba(94, 105, 209, 0.5); }
 .chip:has(input:checked) {
   border-color: var(--primary);
   color: var(--ink);
@@ -99,8 +196,8 @@ p.small, p.muted { margin: 2px 0; }
 .item > summary {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  padding: 10px 8px;
+  gap: 16px;
+  padding: 9px 8px;
   cursor: pointer;
   list-style: none;
   border-radius: var(--r-sm);
@@ -108,54 +205,139 @@ p.small, p.muted { margin: 2px 0; }
 .item > summary::-webkit-details-marker { display: none; }
 .item > summary:hover { background: var(--surface-2); }
 .item[open] > summary { background: var(--surface-2); }
+.item > summary:focus-visible { outline: 2px solid rgba(94, 105, 209, 0.5); }
 .item-title { flex: 1; min-width: 0; font-size: 14px; font-weight: 500; }
+
+/* メタ情報は固定幅の列にして、行をまたいで縦に揃える。
+   列構成は一覧の内容（フィード名の有無・再生時間の有無）で切り替える。 */
 .item-meta {
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
   align-items: baseline;
-  gap: 10px;
+  gap: 12px;
   flex-shrink: 0;
-  color: var(--ink-subtle);
+  color: var(--ink-tertiary);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
-.item-meta .feed-name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.badge.score { color: var(--ink-subtle); }
-.badge.score.hot { color: var(--warning); }
+.items .item-meta { grid-template-columns: 40px 108px; }
+.items.with-feed .item-meta { grid-template-columns: 40px 132px 108px; }
+.items.with-media .item-meta { grid-template-columns: 40px 108px 56px 44px; }
+.items.with-feed.with-media .item-meta { grid-template-columns: 40px 132px 108px 56px 44px; }
+.c-score { text-align: right; }
+.c-date, .c-dur, .c-ep { text-align: right; }
+.c-feed {
+  color: var(--ink-subtle);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.badge.score { color: var(--ink-subtle); padding: 2px 7px; }
+.badge.score.hot { color: var(--warning); background: color-mix(in srgb, var(--warning) 14%, transparent); }
 .badge.tag { color: var(--primary-hover); }
-.item-body { padding: 4px 8px 18px; display: grid; gap: 10px; justify-items: start; }
-.item-summary { margin: 0; color: var(--ink-muted); font-size: 14px; max-width: 78ch; }
-.item-art { width: 120px; border-radius: var(--r-md); }
+
+/* 列を minmax(0, 1fr) にしておかないと max-content 幅になり、
+   子の max-width が画面幅ではなく本文の自然幅を基準にしてしまう */
+.item-body {
+  padding: 4px 8px 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  justify-items: start;
+}
+.item-body > * { max-width: 100%; }
+.item-summary { margin: 0; color: var(--ink-muted); font-size: 14px; max-width: min(78ch, 100%); }
+.item-art { width: 112px; border-radius: var(--r-md); }
 .item-body audio { width: min(100%, 480px); }
 .article-body {
   white-space: pre-wrap;
-  max-width: 78ch;
+  max-width: min(78ch, 100%);
   color: var(--ink-muted);
   font-size: 14px;
   border-left: 2px solid var(--hairline-strong);
-  padding-left: 14px;
+  padding-left: 16px;
 }
 .list-more { padding: 16px 0; }
 
 /* 狭い画面ではメタ情報を折り返すのではなくタイトルの下に落とす
    （横並びのままだと非伸縮のメタがタイトルを1文字幅まで潰す） */
 @media (max-width: 700px) {
+  .feed-head { flex-wrap: wrap; padding: 16px; }
+  .feed-head-actions { flex-basis: 100%; grid-auto-flow: column; justify-content: start; }
+  .filter-row .field.grow { flex-basis: 100%; }
   .item > summary { flex-direction: column; align-items: stretch; gap: 4px; }
-  .item-meta { flex-wrap: wrap; }
-  .item-meta .feed-name { max-width: 100%; }
-  .bm-row { flex-wrap: wrap; }
-  .bm-actions { grid-auto-flow: column; }
+  .item-meta { grid-auto-flow: row dense; justify-content: start; gap: 4px 12px; }
+  .items .item-meta,
+  .items.with-feed .item-meta,
+  .items.with-media .item-meta,
+  .items.with-feed.with-media .item-meta { grid-template-columns: auto auto auto auto auto; }
+  .c-score, .c-date, .c-dur, .c-ep, .c-feed { text-align: left; }
+  .c-feed { max-width: 40vw; }
 }
 
 /* --- bookmarks --- */
-.bm-row { display: flex; gap: 16px; align-items: flex-start; padding: 16px; margin-bottom: 10px; }
-.bm-art { width: 48px; height: 48px; object-fit: cover; border-radius: var(--r-md); }
-.bm-main { flex: 1; min-width: 0; }
-.bm-title { font-size: 15px; font-weight: 600; margin: 0 0 6px; }
-.bm-actions { display: grid; gap: 6px; }
-.tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
-.feed-url { word-break: break-all; }
-.bm-tag-editor { margin-top: 12px; border-top: 1px solid var(--hairline); padding-top: 12px; }
+.bm-list { padding: 4px 8px; }
+.bm-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--hairline);
+}
+.bm-row:last-of-type { border-bottom: none; }
+.bm-row:hover { background: var(--surface-2); border-radius: var(--r-sm); }
+.bm-art { width: 24px; height: 24px; object-fit: cover; border-radius: var(--r-sm); }
+.bm-main { min-width: 0; }
+.bm-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.bm-title a { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bm-title a:hover { color: var(--primary-hover); text-decoration: none; }
+.bm-title .badge { flex-shrink: 0; }
+.badge { white-space: nowrap; }
+.badge.unsaved { color: var(--ink-tertiary); }
+.bm-sub {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 3px;
+  min-width: 0;
+}
+.tags { display: flex; gap: 4px; flex-shrink: 0; }
+.bm-desc {
+  color: var(--ink-tertiary);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bm-date { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bm-actions { display: flex; gap: 2px; }
+.bm-remove:hover { color: var(--danger); }
+/* タグ編集は行全幅を使う（グリッドの次の行に流す） */
+.bm-tag-editor {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  border-top: 1px solid var(--hairline);
+  padding-top: 12px;
+}
 .bm-tag-editor .row { margin-top: 8px; }
+
+@media (max-width: 700px) {
+  .bm-row { grid-template-columns: 24px minmax(0, 1fr) auto; }
+  .bm-date { display: none; }
+  .bm-sub { flex-wrap: wrap; gap: 4px 8px; }
+  /* flex-shrink:0 のままだと max-content 幅に張り付いて折り返さない */
+  .tags { flex-wrap: wrap; flex-shrink: 1; min-width: 0; }
+  /* ジャンルはタグ側にもほぼ同じ語が出るため、幅が要るときはタイトルを優先する */
+  .bm-title .badge:not(.unsaved) { display: none; }
+  .bm-desc { flex-basis: 100%; }
+}
 
 /* --- job progress bar --- */
 .job-bar {
