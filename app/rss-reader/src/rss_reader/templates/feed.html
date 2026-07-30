@@ -95,10 +95,11 @@
             </select>
           </div>
           <div class="field">
-            <label for="runScoring">スコア{% if include_llm %} <span class="dot-on" title="LLM スコア反映中"></span>{% endif %}</label>
-            <button type="button" class="btn btn-secondary" id="runScoring" data-url="{{ active }}">
-              Ollama で採点
-            </button>
+            <label for="runScoring">スコア
+              <span class="muted small">上位{{ llm_scored }}件がLLM採点済み</span>
+            </label>
+            <button type="button" class="btn btn-secondary" id="runScoring"
+                    data-scope="feed" data-url="{{ active }}">Ollama で採点</button>
           </div>
         </div>
       </form>

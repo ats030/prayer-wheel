@@ -1,4 +1,5 @@
-{% import "_item.html" as m %}
+{# with context: score_high はグローバルではなくページ側の値なのでマクロへ渡す #}
+{% import "_item.html" as m with context %}
 <div class="list-head muted small">{{ matched }} 件 / 全 {{ total }} 件</div>
 <div class="items{% if show_feed %} with-feed{% endif %}{% if has_media %} with-media{% endif %}">
   {% for item in items %}{{ m.item_row(item, show_feed, has_media) }}{% endfor %}

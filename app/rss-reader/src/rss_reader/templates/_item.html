@@ -7,7 +7,15 @@
     <span class="item-meta">
       <span class="c-score">
         {%- if item.score is not none -%}
-          <span class="badge score{% if item.score >= score_high %} hot{% endif %}">{{ '%.1f'|format(item.score) }}</span>
+          {#- 何が点数を作ったかを追えるようにする（writing の findings と同趣旨）。
+              p.llm だと欠損時に Undefined になり `is not none` を通ってしまうので
+              .get() で明示的に取り出す。 -#}
+          {%- set p = item.score_parts or {} -%}
+          {%- set llm = p.get('llm') -%}
+          <span class="badge score{% if item.score >= score_high %} hot{% endif %}{% if llm is not none %} llm{% endif %}"
+                title="新規性 {{ '%.2f'|format(p.get('novelty', 0)) }} / 意外性 {{ '%.2f'|format(p.get('surprise', 0)) }} / 具体性 {{ '%.2f'|format(p.get('specificity', 0)) }} / 告知度 {{ '%.2f'|format(p.get('announce', 0)) }} / フィード内順位 {{ '%.0f'|format(p.get('relative', 0) * 100) }}%{% if llm is not none %}&#10;LLM {{ '%.2f'|format(llm) }}{% if p.get('reason') %} — {{ p.get('reason') }}{% endif %}{% endif %}">
+            {{- '%.1f'|format(item.score) -}}
+          </span>
         {%- endif -%}
       </span>
       {%- if show_feed %}<span class="c-feed" title="{{ item.feed_title }}">{{ item.feed_title }}</span>{% endif %}

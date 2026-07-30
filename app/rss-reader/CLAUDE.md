@@ -49,7 +49,10 @@ src/rss_reader/
 │   ├── bookmarks.py    BookmarkStore（bookmarks.json）
 │   ├── classifier.py   メディアタイプ判定・著者抽出
 │   ├── extractor.py    記事本文抽出（trafilatura → readability → bs4）
-│   ├── scorer.py       ルールスコア + Ollama スコア + 興味プロファイル
+│   ├── scorer.py       2段構えの記事スコアリング（下記参照）
+│   ├── vocab.py        文脈つき正規表現の語彙（新規性/意外性/告知）
+│   ├── profile.py      興味プロファイル（Obsidian 索引 → Ollama）
+│   ├── llm.py          Ollama クライアント（JSON抽出・repair・clamp）
 │   ├── tagger.py       自動タグ生成（Ollama → キーワード抽出フォールバック）
 │   └── translator.py   英語記事の日本語化（RSS_TRANSLATE_TO_JA=1 で有効）
 ├── templates/        Jinja2（base / feed / new / bookmarks / _items / _item）
@@ -86,6 +89,42 @@ src/rss_reader/
 Streamlit 版の `st.progress` に相当するのが `base.html` の `#jobBar`。
 ジョブ状態はプロセス内メモリのみ（再起動で消えるが、更新結果は逐次キャッシュに書かれている）。
 
+### 記事スコアリング（`core/scorer.py`）
+
+2段構え。他アプリの設計をそのまま踏襲している。
+
+**第1段（全件・数ms）** — patent-miner/scorer.py と同型の加重合成。
+各成分は 0..1、重みの合計で割るので重みを変えてもスケールが保たれる。
+
+| 成分 | 内容 |
+|---|---|
+| novelty | 世界初・記録更新・買収・サービス終了など（`vocab.NOVELTY`） |
+| surprise | 予想外・逆転・論争など（`vocab.SURPRISE`） |
+| specificity | 単位つき数値の密度。バッチ内 p90 で対数正規化 |
+| announce | 告知・宣伝（**負**）。加点軸に混ぜず合成後に乗算で減点 |
+| relative | 同じフィード内での百分位。x-analyzer が母数で割るのと同じ狙い |
+
+**ゲート → 第2段（上位N件のみ）** — writing/evaluate.py と同型の多軸JSON評価
+（specificity / originality / promo）。promo は減算する。実測 約3.5秒/件なので
+全1,800件では1.7時間かかる。旧実装は全件採点する作りだったため一度も実行されて
+いなかった（スコアキャッシュが空だった）。
+
+LLM は置き換えではなく**倍率**として効かせる（`×(1 ± w_llm)`）。中立なら素通し
+なので、未採点の記事と採点済みの記事を同じ尺度で比較できる。
+
+**スコアに入れないもの**: 鮮度（旧実装では重み0.4・総合との相関 +0.765 で、
+重要度順が実質日付順になっていた）と、ブックマーク済みかどうか（39フィード中29が
+対象で記事の84%に定数2.0点が付いていた）。どちらも UI のフィルタで表現する。
+
+重みは `~/data/score_weights.json`（`/settings` 画面で編集）。配点を変えたら
+`high_threshold`（🔥の閾値）を実データの p97 に再較正すること。
+
+### 興味プロファイル（`core/profile.py`）
+
+`~/.cache/writing/cognitive_index.json`（writing アプリが構築する Obsidian の
+ローカル索引）から最近のノート見出しと頻出タグを読み、Ollama で要約する。
+pCloud 上の vault は**直接読まない**。索引が無ければブックマークのみに退避する。
+
 ### キャッシュ
 
 - フィード本体: `~/data/feed_cache/*.json`。読み出しは `feed_cache._read()` が mtime をキーに
@@ -104,7 +143,10 @@ Streamlit 版の `st.progress` に相当するのが `base.html` の `#jobBar`�
 | GET | `/api/jobs/{id}` | ジョブの進捗 |
 | POST | `/api/feeds/detect` `/add` `/remove` `/refresh` `/refresh-all` | フィード管理 |
 | POST | `/api/bookmarks/save` `/remove` `/suggest-tags` | ブックマーク管理 |
-| POST | `/api/score` `/api/profile/generate` | Ollama スコアリング・興味プロファイル |
+| POST | `/api/score` | 第2段。`{scope, url}` で対象を指定し上位N件を採点 |
+| POST | `/api/profile/generate` | 興味プロファイルの生成 |
+| GET | `/settings` | スコア配点の編集 |
+| POST | `/api/settings` `/api/settings/reset` | 重みの保存・既定値化 |
 
 ## デザイン
 

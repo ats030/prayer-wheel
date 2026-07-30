@@ -29,3 +29,5 @@ class FeedItem:
     author: str | None = None
     media_type: str = ""
     score: float | None = None
+    # スコアの内訳。表示用の派生データなのでキャッシュには保存しない。
+    score_parts: dict | None = None

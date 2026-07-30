@@ -42,6 +42,8 @@ def _read(p: Path) -> dict | None:
 def _serialize_item(item: FeedItem) -> dict:
     d = asdict(item)
     d["published"] = item.published.isoformat() if item.published else None
+    # score / score_parts はリクエストごとに計算し直す派生データ
+    d.pop("score_parts", None)
     return d
 
 

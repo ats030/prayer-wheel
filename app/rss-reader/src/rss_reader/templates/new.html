@@ -33,6 +33,14 @@
             {% for o in sort_orders %}<option value="{{ o }}" {% if o == params.sort %}selected{% endif %}>{{ o }}</option>{% endfor %}
           </select>
         </div>
+        <div class="field">
+          <label for="runScoring">スコア
+            <span class="muted small">表示中{{ llm_scored }}件がLLM採点済み</span>
+          </label>
+          <button type="button" class="btn btn-secondary" id="runScoring" data-scope="new" data-url="">
+            Ollama で採点
+          </button>
+        </div>
       </div>
 
       <details class="chip-group" {% if params.genre or params.feed_name %}open{% endif %}>

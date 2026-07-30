@@ -49,6 +49,6 @@ FEED_KEYWORDS_IN_HREF = ("rss", "feed", "atom", "xml")
 
 SCORE_CACHE_TTL = 86400
 
-SCORE_HALF_LIFE_HOURS = float(os.environ.get("SCORE_HALF_LIFE_HOURS", "168"))
-
-SCORE_HIGH_THRESHOLD = float(os.environ.get("SCORE_HIGH_THRESHOLD", "7.0"))
+# スコアの配点・閾値は settings.py（~/data/score_weights.json）に移した。
+# 定数のままでは実データを見て調整できず、旧実装では重み 0.4 の鮮度成分が
+# 順位をほぼ決めていることに気づけなかった。

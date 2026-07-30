@@ -374,14 +374,16 @@ const scoreBtn = $('#runScoring');
 if (scoreBtn) {
   scoreBtn.addEventListener('click', async () => {
     try {
-      await runJob('/api/score', { url: scoreBtn.dataset.url }, scoreBtn);
-      // llm=1 でスコアを反映した状態で読み直す
-      const params = currentParams();
-      params.set('feed', wrap.dataset.feed);
-      params.set('llm', '1');
-      location.href = `/?${params}`;
+      const job = await runJob(
+        '/api/score',
+        { scope: scoreBtn.dataset.scope, url: scoreBtn.dataset.url },
+        scoreBtn,
+      );
+      const r = job.result || {};
+      toast(`${r.scored ?? 0}/${r.attempted ?? 0} 件を採点しました。`);
+      location.reload();
     } catch (err) {
-      toast(`スコアリングに失敗しました: ${err.message}`);
+      toast(`スコアリングに失敗しました: ${err.message}`, 5000);
     }
   });
 }
@@ -397,7 +399,9 @@ if (profileCard) {
     try {
       const res = await fetch('/api/profile');
       const data = await res.json();
-      body.textContent = data.profile || 'まだ生成されていません。「生成・更新」を押してください。';
+      body.textContent = data.profile
+        ? (data.source === 'vault' ? `（出典: Obsidian）\n${data.profile}` : data.profile)
+        : 'まだ生成されていません。「生成・更新」を押してください。';
     } catch {
       body.textContent = 'プロファイルを取得できませんでした。';
     }
@@ -406,9 +410,46 @@ if (profileCard) {
   $('#genProfile').addEventListener('click', async (e) => {
     try {
       const job = await runJob('/api/profile/generate', {}, e.currentTarget);
-      body.textContent = (job.result && job.result.profile) || '生成できませんでした。';
+      const r = job.result || {};
+      body.textContent = r.profile || '生成できませんでした。';
+      if (r.source === 'vault') toast('Obsidian の索引からプロファイルを生成しました。');
     } catch (err) {
       toast(`生成に失敗しました: ${err.message}`);
     }
+  });
+}
+
+// --- スコア設定 ----------------------------------------------------------
+
+const weightForm = $('#weightForm');
+if (weightForm) {
+  const state = $('#saveState');
+  const sync = (el) => {
+    const out = weightForm.querySelector(`output[for="${el.id}"]`);
+    if (out) out.textContent = el.type === 'range' && el.step === '0.1'
+      ? Number(el.value).toFixed(1)
+      : Number(el.value).toFixed(2);
+  };
+  weightForm.querySelectorAll('input').forEach(sync);
+  weightForm.addEventListener('input', (e) => sync(e.target));
+
+  async function push(url) {
+    const values = {};
+    for (const [k, v] of new FormData(weightForm)) values[k] = Number(v);
+    const data = await postJSON(url, url.endsWith('reset') ? {} : values);
+    for (const [k, v] of Object.entries(data.weights || {})) {
+      const el = weightForm.querySelector(`[name="${k}"]`);
+      if (el) { el.value = v; sync(el); }
+    }
+    state.textContent = `保存しました（${new Date().toLocaleTimeString()}）`;
+  }
+
+  weightForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try { await push('/api/settings'); } catch (err) { toast(`保存に失敗しました: ${err.message}`); }
+  });
+  $('#resetWeights').addEventListener('click', async () => {
+    try { await push('/api/settings/reset'); toast('既定値に戻しました。'); }
+    catch (err) { toast(`失敗しました: ${err.message}`); }
   });
 }

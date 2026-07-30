@@ -232,9 +232,54 @@ p.small, p.muted { margin: 2px 0; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.badge.score { color: var(--ink-subtle); padding: 2px 7px; }
+.badge.score { color: var(--ink-subtle); padding: 2px 7px; cursor: help; }
 .badge.score.hot { color: var(--warning); background: color-mix(in srgb, var(--warning) 14%, transparent); }
+/* LLM 採点済みは下線で区別する（色は 🔥 のために取っておく） */
+.badge.score.llm { box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--primary) 70%, transparent); }
 .badge.tag { color: var(--primary-hover); }
+.badge.ok { color: var(--success); }
+.badge.ng { color: var(--danger); }
+
+/* --- スコア設定 --- */
+.settings-wrap { max-width: 1180px; }
+.settings-wrap .grid.two { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; }
+.side-col { display: grid; gap: 16px; }
+.settings-wrap .section-title { margin-top: 24px; }
+.settings-wrap .section-title:first-child { margin-top: 0; }
+.weight-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 160px 48px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.weight-row:last-of-type { border-bottom: none; }
+.weight-row label { margin: 0; display: grid; gap: 2px; }
+.weight-row input[type="range"] { width: 100%; accent-color: var(--primary); }
+.weight-row input[type="number"] { width: 100%; grid-column: 2 / -1; }
+.weight-row output { text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; color: var(--ink-muted); }
+.chip.static { cursor: default; }
+.chip.static em { font-style: normal; color: var(--ink-tertiary); margin-left: 4px; }
+.profile-preview {
+  white-space: pre-wrap;
+  font-family: var(--font);
+  font-size: 12px;
+  color: var(--ink-muted);
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  padding: 12px;
+  margin: 8px 0 0;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.reasons { margin: 0; padding-left: 18px; }
+.reasons li { margin-bottom: 8px; }
+code { font-family: var(--mono); font-size: 12px; color: var(--ink-muted); }
+@media (max-width: 900px) {
+  .settings-wrap .grid.two { grid-template-columns: 1fr; }
+  .weight-row { grid-template-columns: minmax(0, 1fr) 100px 44px; }
+}
 
 /* 列を minmax(0, 1fr) にしておかないと max-content 幅になり、
    子の max-width が画面幅ではなく本文の自然幅を基準にしてしまう */
