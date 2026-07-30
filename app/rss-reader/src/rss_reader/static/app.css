@@ -1,0 +1,178 @@
+/* rss-reader specific components. Tokens and base rules come from linear.css. */
+
+.nav-links a.active { background: var(--surface-2); color: var(--ink); }
+.btn-xs { font-size: 13px; padding: 5px 10px; }
+.small { font-size: 12px; }
+p.small, p.muted { margin: 2px 0; }
+.muted { color: var(--ink-subtle); }
+
+/* --- reader layout --- */
+.reader-wrap {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  max-width: 1400px;
+}
+.side { display: grid; gap: 16px; position: sticky; top: 72px; }
+.side .card { padding: 16px; }
+.main { min-width: 0; display: grid; gap: 16px; }
+@media (max-width: 900px) {
+  .reader-wrap { grid-template-columns: 1fr; }
+  .side { position: static; }
+}
+
+/* --- feed list --- */
+.feed-list { max-height: 46vh; overflow-y: auto; }
+.feed-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--r-sm);
+  padding: 2px 4px;
+}
+.feed-row:hover { background: var(--surface-2); }
+.feed-row.active { background: var(--surface-3); }
+.feed-row.active .feed-link { color: var(--primary-hover); }
+.feed-link {
+  flex: 1;
+  min-width: 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+  padding: 5px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.feed-link:hover { color: var(--ink); text-decoration: none; }
+
+.candidates { margin-top: 12px; border-top: 1px solid var(--hairline); padding-top: 12px; }
+.candidate-list { display: grid; gap: 6px; }
+.candidate-list button { width: 100%; text-align: left; word-break: break-all; font-size: 12px; }
+
+.profile-card summary { cursor: pointer; list-style: none; }
+.profile-card summary::-webkit-details-marker { display: none; }
+.profile-body { white-space: pre-wrap; margin: 8px 0; }
+
+/* --- feed header --- */
+.feed-head { display: flex; gap: 16px; align-items: flex-start; }
+.feed-head h1 { font-size: 22px; margin: 0 0 6px; }
+.feed-head-main { flex: 1; min-width: 0; }
+.feed-head-actions { display: grid; gap: 6px; }
+.feed-art { width: 64px; height: 64px; object-fit: cover; border-radius: var(--r-md); }
+
+.tag-editor .row { margin-top: 10px; }
+
+/* --- filters --- */
+.filters { padding: 16px; display: grid; gap: 12px; }
+.filter-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.filter-row .field { margin: 0; }
+.filter-row .field.grow { flex: 1; min-width: 200px; }
+.filter-row select { width: auto; min-width: 120px; }
+
+.chip-group summary { cursor: pointer; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+  cursor: pointer;
+}
+.chip input { width: auto; margin: 0; accent-color: var(--primary); }
+.chip:has(input:checked) {
+  border-color: var(--primary);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+/* --- item list --- */
+.list-head { margin: 4px 2px 8px; }
+.items { border-top: 1px solid var(--hairline); }
+.item { border-bottom: 1px solid var(--hairline); }
+.item > summary {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 8px;
+  cursor: pointer;
+  list-style: none;
+  border-radius: var(--r-sm);
+}
+.item > summary::-webkit-details-marker { display: none; }
+.item > summary:hover { background: var(--surface-2); }
+.item[open] > summary { background: var(--surface-2); }
+.item-title { flex: 1; min-width: 0; font-size: 14px; font-weight: 500; }
+.item-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-shrink: 0;
+  color: var(--ink-subtle);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.item-meta .feed-name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.badge.score { color: var(--ink-subtle); }
+.badge.score.hot { color: var(--warning); }
+.badge.tag { color: var(--primary-hover); }
+.item-body { padding: 4px 8px 18px; display: grid; gap: 10px; justify-items: start; }
+.item-summary { margin: 0; color: var(--ink-muted); font-size: 14px; max-width: 78ch; }
+.item-art { width: 120px; border-radius: var(--r-md); }
+.item-body audio { width: min(100%, 480px); }
+.article-body {
+  white-space: pre-wrap;
+  max-width: 78ch;
+  color: var(--ink-muted);
+  font-size: 14px;
+  border-left: 2px solid var(--hairline-strong);
+  padding-left: 14px;
+}
+.list-more { padding: 16px 0; }
+
+/* 狭い画面ではメタ情報を折り返すのではなくタイトルの下に落とす
+   （横並びのままだと非伸縮のメタがタイトルを1文字幅まで潰す） */
+@media (max-width: 700px) {
+  .item > summary { flex-direction: column; align-items: stretch; gap: 4px; }
+  .item-meta { flex-wrap: wrap; }
+  .item-meta .feed-name { max-width: 100%; }
+  .bm-row { flex-wrap: wrap; }
+  .bm-actions { grid-auto-flow: column; }
+}
+
+/* --- bookmarks --- */
+.bm-row { display: flex; gap: 16px; align-items: flex-start; padding: 16px; margin-bottom: 10px; }
+.bm-art { width: 48px; height: 48px; object-fit: cover; border-radius: var(--r-md); }
+.bm-main { flex: 1; min-width: 0; }
+.bm-title { font-size: 15px; font-weight: 600; margin: 0 0 6px; }
+.bm-actions { display: grid; gap: 6px; }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.feed-url { word-break: break-all; }
+.bm-tag-editor { margin-top: 12px; border-top: 1px solid var(--hairline); padding-top: 12px; }
+.bm-tag-editor .row { margin-top: 8px; }
+
+/* --- job progress bar --- */
+.job-bar {
+  position: sticky;
+  top: 56px;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 24px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--hairline);
+  font-size: 13px;
+}
+/* display:flex would otherwise beat the UA [hidden] rule */
+.job-bar[hidden] { display: none; }
+.job-track { flex: 1; height: 4px; background: var(--surface-3); border-radius: var(--r-pill); overflow: hidden; }
+.job-fill { display: block; height: 100%; width: 0; background: var(--primary); transition: width 0.2s ease; }
+.job-count { font-variant-numeric: tabular-nums; }
+.btn.busy { opacity: 0.6; pointer-events: none; }

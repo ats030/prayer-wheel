@@ -1,0 +1,36 @@
+{% macro item_row(item, show_feed) %}
+<details class="item">
+  <summary>
+    <span class="item-title">{{ item.title }}</span>
+    <span class="item-meta">
+      {%- if item.score is not none %}
+        <span class="badge score{% if item.score >= score_high %} hot{% endif %}">
+          {%- if item.score >= score_high %}🔥 {% endif %}{{ '%.1f'|format(item.score) }}</span>
+      {%- endif %}
+      {%- if show_feed %}<span class="feed-name">{{ item.feed_title }}</span>{% endif %}
+      <span>{{ item.published|dt if item.published else '日付不明' }}</span>
+      {%- if item.duration %}<span>{{ item.duration }}</span>{% endif %}
+      {%- if item.episode_number %}<span>ep.{{ item.episode_number }}</span>{% endif %}
+    </span>
+  </summary>
+  <div class="item-body">
+    {% if item.author %}<p class="muted small">著者: {{ item.author }}</p>{% endif %}
+    {% if is_podcast(item) and item.image_url %}
+      <img class="item-art" src="{{ item.image_url }}" alt="" loading="lazy">
+    {% endif %}
+    {% if item.summary %}<p class="item-summary">{{ item.summary }}</p>{% endif %}
+    {% if is_podcast(item) %}
+      <audio controls preload="none" src="{{ item.enclosure_url }}"></audio>
+      {% if item.link %}<p><a href="{{ item.link }}" target="_blank" rel="noopener">エピソードページを開く</a></p>{% endif %}
+    {% else %}
+      <div class="row">
+        <a href="{{ item.link }}" target="_blank" rel="noopener">元記事を開く ↗</a>
+        {% if item.link %}
+          <button type="button" class="btn btn-secondary btn-xs read-article" data-url="{{ item.link }}">本文を読む</button>
+        {% endif %}
+      </div>
+      <div class="article-body" hidden></div>
+    {% endif %}
+  </div>
+</details>
+{% endmacro %}

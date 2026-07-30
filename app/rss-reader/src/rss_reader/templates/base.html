@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}RSS Reader{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%93%A1</text></svg>">
+  <link rel="stylesheet" href="/static/linear.css?v={{ static_version }}">
+  <link rel="stylesheet" href="/static/app.css?v={{ static_version }}">
+</head>
+<body>
+  <nav class="nav">
+    <a class="brand" href="/">rss<span class="dot">.</span></a>
+    <div class="nav-links" aria-label="メインナビゲーション">
+      <a href="/" {% if page == 'feed' %}class="active" aria-current="page"{% endif %}>フィード</a>
+      <a href="/new" {% if page == 'new' %}class="active" aria-current="page"{% endif %}>新着</a>
+      <a href="/bookmarks" {% if page == 'bookmarks' %}class="active" aria-current="page"{% endif %}>ブックマーク</a>
+    </div>
+    <span class="spacer"></span>
+    <button type="button" class="btn btn-secondary btn-xs" id="refreshAll">↻ 全更新</button>
+  </nav>
+
+  <div class="job-bar" id="jobBar" hidden>
+    <span class="job-label"></span>
+    <span class="job-track"><span class="job-fill"></span></span>
+    <span class="job-count muted"></span>
+  </div>
+
+  {% block body %}{% endblock %}
+
+  <div class="toast" id="toast"></div>
+  <script src="/static/app.js?v={{ static_version }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,15 @@
+{% import "_item.html" as m %}
+<div class="list-head muted small">{{ matched }} 件 / 全 {{ total }} 件</div>
+<div class="items">
+  {% for item in items %}{{ m.item_row(item, show_feed) }}{% endfor %}
+</div>
+<div class="list-more">
+  {% if has_more %}
+    <button type="button" class="btn btn-secondary load-more" data-offset="{{ next_offset }}">
+      もっと見る（残り {{ matched - shown }} 件）
+    </button>
+  {% endif %}
+</div>
+{% if not items %}
+  <p class="empty">条件に一致する記事はありません。期間・フィード・ジャンル・検索ワードを見直してください。</p>
+{% endif %}

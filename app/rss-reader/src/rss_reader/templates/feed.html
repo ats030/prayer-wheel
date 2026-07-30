@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}{{ meta.title if meta else 'RSS Reader' }} — RSS Reader{% endblock %}
+
+{% block body %}
+<div class="wrap reader-wrap"
+     data-scope="feed" data-feed="{{ active }}" data-llm="{{ 1 if include_llm else 0 }}">
+
+  <aside class="side">
+    <form class="card add-feed" id="addFeed">
+      <h2 class="section-title">フィードを追加</h2>
+      <div class="field">
+        <input type="text" name="url" id="addUrl" autocomplete="off"
+               placeholder="https://example.com または /feed.xml">
+      </div>
+      <button type="submit" class="btn btn-primary" id="addBtn">追加・検索</button>
+      <div class="candidates" id="candidates" hidden>
+        <p class="muted small">複数のフィードが見つかりました。購読するものを選んでください。</p>
+        <div class="candidate-list"></div>
+      </div>
+    </form>
+
+    <div class="card feed-list">
+      <h2 class="section-title">保存済みフィード（{{ saved|length }}）</h2>
+      {% for url in saved %}
+        <div class="feed-row{% if url == active %} active{% endif %}">
+          <a class="feed-link" href="/?feed={{ url|urlencode }}" title="{{ url }}">{{ feed_titles[url] }}</a>
+          <button type="button" class="btn btn-ghost btn-xs remove-feed" data-url="{{ url }}"
+                  title="このフィードを削除" aria-label="{{ feed_titles[url] }} を削除">×</button>
+        </div>
+      {% else %}
+        <p class="empty">保存済みフィードはありません。</p>
+      {% endfor %}
+    </div>
+
+    <details class="card profile-card" id="profileCard">
+      <summary class="section-title">あなたの興味プロファイル</summary>
+      <div class="profile-body muted small">読み込み中…</div>
+      <button type="button" class="btn btn-secondary btn-xs" id="genProfile">生成・更新</button>
+    </details>
+  </aside>
+
+  <main class="main">
+    {% if not active %}
+      <div class="card">
+        <h1>RSS Reader へようこそ</h1>
+        <p class="muted">左のフォームに RSS/Atom フィードの URL、または Web ページの URL を入力してください。
+          フィードは自動的に検出されます。</p>
+      </div>
+    {% else %}
+      <header class="feed-head card">
+        {% if thumb %}<img class="feed-art" src="{{ thumb }}" alt="" loading="lazy">{% endif %}
+        <div class="feed-head-main">
+          <h1>{{ meta.title if meta else active }}
+            {% if meta and meta.media_type %}<span class="badge">{{ meta.media_type }}</span>{% endif %}
+          </h1>
+          {% if meta and meta.description %}<p class="muted">{{ meta.description[:180] }}</p>{% endif %}
+          {% if meta and meta.feed_authors %}
+            <p class="muted small">著者: {{ meta.feed_authors|join(' / ') }}</p>
+          {% endif %}
+          <p class="muted small">最終更新: {{ fetched_at|dt }}</p>
+        </div>
+        <div class="feed-head-actions">
+          <button type="button" class="btn btn-secondary btn-xs" id="refreshFeed" data-url="{{ active }}">↻ 更新</button>
+          <button type="button" class="btn {% if bookmark %}btn-secondary{% else %}btn-primary{% endif %} btn-xs"
+                  id="bookmarkBtn" data-url="{{ active }}">
+            {% if bookmark %}★ 保存済み{% else %}☆ 保存{% endif %}
+          </button>
+        </div>
+      </header>
+
+      <div class="tag-editor card" id="tagEditor" hidden>
+        <label for="tagInput">タグ（カンマ区切り）</label>
+        <input type="text" id="tagInput" value="{{ bookmark.tags|join(', ') if bookmark else '' }}">
+        <div class="row">
+          <button type="button" class="btn btn-primary btn-xs" id="tagSave">保存</button>
+          <button type="button" class="btn btn-secondary btn-xs" id="tagSuggest">タグを自動生成</button>
+          {% if bookmark %}
+            <button type="button" class="btn btn-danger btn-xs" id="tagDelete">ブックマーク削除</button>
+          {% endif %}
+          <button type="button" class="btn btn-ghost btn-xs" id="tagCancel">閉じる</button>
+        </div>
+      </div>
+
+      <form class="filters card" id="filters">
+        <div class="filter-row">
+          <div class="field grow">
+            <label for="q">キーワード検索</label>
+            <input type="text" id="q" name="q" value="{{ params.q }}" placeholder="検索ワードを入力…" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="sort">並び順</label>
+            <select id="sort" name="sort">
+              {% for o in sort_orders %}<option value="{{ o }}" {% if o == params.sort %}selected{% endif %}>{{ o }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <button type="button" class="btn btn-secondary btn-xs" id="runScoring" data-url="{{ active }}">
+            Ollama スコアリング
+          </button>
+          {% if include_llm %}<span class="muted small">LLM スコアを反映中</span>{% endif %}
+        </div>
+      </form>
+
+      <section id="list" class="list">
+        {% include "_items.html" %}
+      </section>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}

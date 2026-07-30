@@ -1,0 +1,18 @@
+[Unit]
+Description=RSS Reader (FastAPI, port 8505)
+# コード・データとも ~ 配下のローカルディスクに移したため pCloud マウント依存は不要
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ats030
+EnvironmentFile=-/home/ats030/.env
+ExecStart=/home/ats030/app/rss-reader.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rss-reader
+
+[Install]
+WantedBy=default.target

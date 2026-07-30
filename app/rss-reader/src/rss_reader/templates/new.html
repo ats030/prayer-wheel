@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}新着 — RSS Reader{% endblock %}
+
+{% block body %}
+<div class="wrap" data-scope="new" data-feed="" data-llm="0">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">{{ saved|length }} feeds</span>
+      <h1>新着記事</h1>
+      <p class="muted small">最終更新: {{ fetched_at|dt }}（保存済みの最古）
+        {%- if uncached %} · 未キャッシュ {{ uncached }} 件は「全更新」で取得できます{% endif %}</p>
+    </div>
+  </div>
+
+  {% if not saved %}
+    <p class="empty">フィードが登録されていません。フィード画面から追加してください。</p>
+  {% else %}
+    <form class="filters card" id="filters">
+      <div class="filter-row">
+        <div class="field grow">
+          <label for="q">キーワード検索</label>
+          <input type="text" id="q" name="q" value="{{ params.q }}" placeholder="検索ワードを入力…" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="period">期間</label>
+          <select id="period" name="period">
+            {% for p in periods %}<option value="{{ p }}" {% if p == params.period %}selected{% endif %}>{{ p }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="sort">並び順</label>
+          <select id="sort" name="sort">
+            {% for o in sort_orders %}<option value="{{ o }}" {% if o == params.sort %}selected{% endif %}>{{ o }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <details class="chip-group" {% if params.genre or params.feed_name %}open{% endif %}>
+        <summary class="muted small">ジャンル・フィードで絞り込み
+          {%- if params.genre or params.feed_name %}（{{ params.genre|length + params.feed_name|length }} 件選択中）{% endif %}</summary>
+        <div class="chips">
+          {% for g in genres %}
+            <label class="chip">
+              <input type="checkbox" name="genre" value="{{ g }}" {% if g in params.genre %}checked{% endif %}>
+              <span>{{ g }}</span>
+            </label>
+          {% endfor %}
+        </div>
+        <div class="chips">
+          {% for f in feed_names %}
+            <label class="chip">
+              <input type="checkbox" name="feed_name" value="{{ f }}" {% if f in params.feed_name %}checked{% endif %}>
+              <span>{{ f }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </details>
+    </form>
+
+    <section id="list" class="list">
+      {% include "_items.html" %}
+    </section>
+  {% endif %}
+</div>
+{% endblock %}
