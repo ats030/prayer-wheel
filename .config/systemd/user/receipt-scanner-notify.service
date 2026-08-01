@@ -1,0 +1,13 @@
+[Unit]
+Description=Receipt Scanner 賞味期限の定期通知
+After=network-online.target home-ats030-pCloudDrive.mount
+Requires=home-ats030-pCloudDrive.mount
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ats030
+EnvironmentFile=-/home/ats030/.env
+ExecStart=/home/ats030/app/receipt-scanner-notify.sh
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=receipt-scanner-notify
