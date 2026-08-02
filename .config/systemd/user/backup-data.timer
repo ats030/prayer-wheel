@@ -1,0 +1,10 @@
+[Unit]
+Description=~/data の日次バックアップ
+
+[Timer]
+OnCalendar=*-*-* 19:30:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

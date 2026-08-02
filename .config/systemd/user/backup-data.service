@@ -1,0 +1,7 @@
+[Unit]
+Description=~/data の日次バックアップ (pcloud:backup/ubuntu-server-app)
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/ats030/app/backup-data.sh
