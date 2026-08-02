@@ -23,6 +23,9 @@
       <h2 class="section-title">保存済みフィード（{{ saved|length }}）</h2>
       {% for url in saved %}
         <div class="feed-row{% if url == active %} active{% endif %}">
+          {%- if url in failing %}
+            <span class="feed-warn" title="{{ failing[url].last_error }}">⚠</span>
+          {%- endif %}
           <a class="feed-link" href="/feed?feed={{ url|urlencode }}" title="{{ url }}">{{ feed_titles[url] }}</a>
           <button type="button" class="btn btn-ghost btn-xs remove-feed reveal" data-url="{{ url }}"
                   title="このフィードを削除" aria-label="{{ feed_titles[url] }} を削除">×</button>
@@ -68,6 +71,12 @@
           </button>
         </div>
       </header>
+
+      {% if active in failing %}
+        {% set fail = failing[active] %}
+        <p class="alert card">⚠ このフィードは取得に失敗しています{% if fail.days %}（{{ fail.days }}日前から）{% endif %}
+          — <span class="muted">{{ fail.last_error }}</span></p>
+      {% endif %}
 
       <div class="tag-editor card" id="tagEditor" hidden>
         <label for="tagInput">タグ（カンマ区切り）</label>

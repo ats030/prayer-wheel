@@ -1,0 +1,17 @@
+[Unit]
+Description=rss-reader - 全フィード更新 + 上位N件のLLM採点
+After=network-online.target rss-reader.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ats030
+ExecStart=/home/ats030/app/rss-reader-refresh.sh
+# 更新39件 + 採点50件で実測3〜5分。スクリプト側の打ち切りより少し長く取る
+TimeoutStartSec=2400
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rss-reader-refresh
+
+[Install]
+WantedBy=default.target

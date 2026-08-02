@@ -25,7 +25,7 @@ from pydantic import BaseModel
 
 from . import jobs, service, settings
 from .config import PAGE_SIZE
-from .core import feed_cache
+from .core import feed_cache, feed_status
 from .core.bookmarks import Bookmark, BookmarkStore
 from .core.models import FeedItem
 
@@ -172,6 +172,7 @@ def _page(
         "fetched_at": fetched_at,
         "uncached": uncached,
         "saved": saved,
+        "failing": service.failing_feeds(saved),
         "genres": sorted({i.media_type for i in items if i.media_type}),
         "feed_names": sorted({i.feed_title for i in items}),
         "include_llm": include_llm,
@@ -323,7 +324,9 @@ class TagsBody(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"ok": True, "feeds": len(service.feed_store.load())}
+    saved = service.feed_store.load()
+    failing = service.failing_feeds(saved)
+    return {"ok": True, "feeds": len(saved), "failing": len(failing)}
 
 
 @app.get("/api/jobs/{job_id}")
@@ -369,6 +372,7 @@ def add_feed(body: UrlBody):
 def remove_feed(body: UrlBody):
     service.feed_store.remove(body.url)
     feed_cache.remove(body.url)
+    feed_status.forget(body.url)
     return {"ok": True}
 
 

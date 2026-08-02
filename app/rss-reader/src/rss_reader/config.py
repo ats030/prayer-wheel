@@ -47,7 +47,11 @@ HEURISTIC_PATHS = [
 
 FEED_KEYWORDS_IN_HREF = ("rss", "feed", "atom", "xml")
 
-SCORE_CACHE_TTL = 86400
+# LLM採点の保持期間。1日にしていたときは、実測で 154件の採点が全て期限切れになり
+# live=0 —— 1件3.5秒×上位50件かけた結果を毎日捨てて、重要度順がルールスコアだけで
+# 動いていた。記事本体は feed_cache に数週間残る（最古で61日前）ので、採点だけを
+# 短命にする理由がない。キーは記事URLなので、消えた記事の分は使われず期限切れになる。
+SCORE_CACHE_TTL = 30 * 86400
 
 # スコアの配点・閾値は settings.py（~/data/score_weights.json）に移した。
 # 定数のままでは実データを見て調整できず、旧実装では重み 0.4 の鮮度成分が

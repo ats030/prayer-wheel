@@ -1,0 +1,12 @@
+[Unit]
+Description=rss-reader - フィード自動更新タイマー (1時間ごと)
+
+[Timer]
+# 起動直後にも1回（再起動後すぐトップページが最新になる）
+OnBootSec=5min
+OnCalendar=*-*-* *:05:00 Asia/Tokyo
+Persistent=true
+AccuracySec=2min
+
+[Install]
+WantedBy=timers.target

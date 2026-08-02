@@ -12,6 +12,22 @@
     </div>
   </div>
 
+  {% if failing %}
+    {# 失敗したフィードは古い記事を返し続けるだけなので、一覧を見ても気づけない #}
+    <details class="alert card">
+      <summary>⚠ {{ failing|length }} 件のフィードが取得に失敗しています</summary>
+      <ul class="fail-list">
+        {% for url, fail in failing.items() %}
+          <li>
+            <a href="/feed?feed={{ url|urlencode }}">{{ fail.title }}</a>
+            {%- if fail.days %} <span class="muted">（{{ fail.days }}日前から）</span>{% endif %}
+            <span class="muted small">{{ fail.last_error }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </details>
+  {% endif %}
+
   {% if not saved %}
     <p class="empty">フィードが登録されていません。フィード画面から追加してください。</p>
   {% else %}

@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 ~/app/rss-reader.sh                      # ポート 8505 で起動
 systemctl --user restart rss-reader      # サービスとして再起動
+systemctl --user start rss-reader-refresh.service  # 全更新＋LLM採点を手動で1回
 ```
 
 `PYTHONPATH=$HOME/app/rss-reader/src` を通したうえで `uv run uvicorn rss_reader.app:app` を実行する。
@@ -28,7 +29,28 @@ systemctl --user restart rss-reader      # サービスとして再起動
 | `~/data/feeds.json` | 購読フィードURLの一覧 |
 | `~/data/bookmarks.json` | ブックマーク（タグ・メタ情報つき） |
 | `~/data/feed_cache/*.json` | フィードごとの取得結果（meta + items + fetched_at） |
+| `~/data/feed_status.json` | 取得に失敗しているフィードだけの記録（成功したら消える） |
 | `~/cache/` | diskcache（記事本文・LLMスコア・翻訳・興味プロファイル） |
+
+## 自動更新
+
+`rss-reader-refresh.timer`（毎時05分 + 起動5分後）が `app/rss-reader-refresh.sh` を叩き、
+全フィード更新 → 上位N件の LLM 採点を順に走らせる。トップページが新着なので、
+開いた時点で最新かつ採点済みであってほしい（採点は1件約3.5秒で、ブラウザを開いてから
+回すには遅すぎる）。ジョブは非同期なので、スクリプトは `/api/jobs/{id}` を完了まで
+ポーリングする — 更新の途中で採点を始めると古い記事プールを対象にしてしまう。
+
+```bash
+systemctl --user list-timers rss-reader-refresh.timer
+journalctl --user -u rss-reader-refresh -n 20
+```
+
+### 取得に失敗したフィード
+
+失敗したフィードはキャッシュを書き換えないので、UI からは「新着が無いフィード」と
+見分けが付かない（実際に61日ぶん古いフィードが放置されていた）。`core/feed_status.py`
+が失敗中のフィードだけを記録し、成功した時点で消す。新着画面のヘッダに件数、
+フィード画面のサイドバーに ⚠、対象フィードを開くとエラー本文が出る。
 
 ## アーキテクチャ
 
@@ -45,6 +67,7 @@ src/rss_reader/
 │   ├── fetcher.py      requests.Session ラッパー
 │   ├── parser.py       feedparser → FeedItem / FeedMeta
 │   ├── feed_cache.py   フィード取得結果の永続化（mtime キーのメモ化つき）
+│   ├── feed_status.py  取得に失敗しているフィードの記録（feed_status.json）
 │   ├── persistence.py  FeedStore（feeds.json）
 │   ├── bookmarks.py    BookmarkStore（bookmarks.json）
 │   ├── classifier.py   メディアタイプ判定・著者抽出
@@ -130,6 +153,9 @@ pCloud 上の vault は**直接読まない**。索引が無ければブック�
 - フィード本体: `~/data/feed_cache/*.json`。読み出しは `feed_cache._read()` が mtime をキーに
   パース済み JSON をプロセス内に保持する（新着ページは全39フィード・約1,800記事を読むため）
 - 記事本文・LLMスコア・翻訳・プロファイル: `diskcache`（`~/cache/`）
+- LLMスコアの TTL は30日（`config.SCORE_CACHE_TTL`）。1日にしていたときは実測で採点154件が
+  すべて期限切れ（live=0）になり、1件3.5秒×上位50件かけた結果を毎日捨てていた。記事本体は
+  feed_cache に数週間残るので、採点だけを短命にする理由がない
 
 ## 主なエンドポイント
 

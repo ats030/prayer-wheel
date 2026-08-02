@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
 from .config import REFRESH_WORKERS
-from .core import feed_cache
+from .core import feed_cache, feed_status
 from .core.fetcher import fetch_bytes, fetch_favicon
 from .core.models import FeedItem, FeedMeta
 from .core.parser import parse_feed, parse_feed_meta
@@ -21,10 +21,16 @@ feed_store = FeedStore()
 # --- 取得 ---------------------------------------------------------------
 
 def refresh_feed(url: str) -> tuple[FeedMeta, list[FeedItem], datetime]:
-    raw, _ = fetch_bytes(url)
-    meta = parse_feed_meta(url, raw)
-    items = parse_feed(url, raw)
+    # 成否の記録はここに置く。単発更新・追加・全更新のどの経路からでも通るため。
+    try:
+        raw, _ = fetch_bytes(url)
+        meta = parse_feed_meta(url, raw)
+        items = parse_feed(url, raw)
+    except Exception as exc:
+        feed_status.record_failure(url, exc)
+        raise
     fetched_at = feed_cache.save(url, meta, items)
+    feed_status.record_success(url)
     return meta, items, fetched_at
 
 
@@ -95,6 +101,34 @@ def cached_items(urls: list[str]) -> tuple[list[FeedItem], datetime | None, int]
         if oldest is None or fetched_at < oldest:
             oldest = fetched_at
     return items, oldest, uncached
+
+
+def failing_feeds(urls: list[str]) -> dict[str, dict]:
+    """登録中のフィードのうち取得に失敗しているもの。UI の警告表示に使う。
+
+    ``failing_since`` は経過日数（``days``）に均しておく。テンプレート側で
+    日時計算をさせないため。
+    """
+    status = feed_status.load()
+    out: dict[str, dict] = {}
+    for url in urls:
+        entry = status.get(url)
+        if entry is None:
+            continue
+        since = _parse_iso(entry.get("failing_since"))
+        out[url] = {
+            **entry,
+            "days": (datetime.now(timezone.utc) - since).days if since else None,
+            "title": feed_title(url),
+        }
+    return out
+
+
+def _parse_iso(value: str | None) -> datetime | None:
+    try:
+        return _aware(datetime.fromisoformat(value)) if value else None
+    except ValueError:
+        return None
 
 
 # --- 絞り込み・並び替え --------------------------------------------------
