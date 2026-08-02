@@ -12,8 +12,8 @@
   <nav class="nav">
     <a class="brand" href="/">rss<span class="dot">.</span></a>
     <div class="nav-links" aria-label="メインナビゲーション">
-      <a href="/" {% if page == 'feed' %}class="active" aria-current="page"{% endif %}>フィード</a>
-      <a href="/new" {% if page == 'new' %}class="active" aria-current="page"{% endif %}>新着</a>
+      <a href="/" {% if page == 'new' %}class="active" aria-current="page"{% endif %}>新着</a>
+      <a href="/feed" {% if page == 'feed' %}class="active" aria-current="page"{% endif %}>フィード</a>
       <a href="/bookmarks" {% if page == 'bookmarks' %}class="active" aria-current="page"{% endif %}>ブックマーク</a>
       <a href="/settings" {% if page == 'settings' %}class="active" aria-current="page"{% endif %}>スコア設定</a>
     </div>

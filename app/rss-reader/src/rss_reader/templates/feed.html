@@ -23,7 +23,7 @@
       <h2 class="section-title">保存済みフィード（{{ saved|length }}）</h2>
       {% for url in saved %}
         <div class="feed-row{% if url == active %} active{% endif %}">
-          <a class="feed-link" href="/?feed={{ url|urlencode }}" title="{{ url }}">{{ feed_titles[url] }}</a>
+          <a class="feed-link" href="/feed?feed={{ url|urlencode }}" title="{{ url }}">{{ feed_titles[url] }}</a>
           <button type="button" class="btn btn-ghost btn-xs remove-feed reveal" data-url="{{ url }}"
                   title="このフィードを削除" aria-label="{{ feed_titles[url] }} を削除">×</button>
         </div>

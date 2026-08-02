@@ -219,7 +219,7 @@ if (addForm) {
   async function selectFeed(url, btn) {
     try {
       await runJob('/api/feeds/add', { url }, btn);
-      location.href = `/?feed=${encodeURIComponent(url)}`;
+      location.href = `/feed?feed=${encodeURIComponent(url)}`;
     } catch (err) {
       toast(`フィードの追加に失敗しました: ${err.message}`);
     }
@@ -260,7 +260,8 @@ if (addForm) {
     if (!confirm('このフィードを削除しますか？')) return;
     try {
       await postJSON('/api/feeds/remove', { url: btn.dataset.url });
-      location.href = '/';
+      // 削除後はフィード画面の先頭フィードに戻す（トップは新着なので指定が要る）
+      location.href = '/feed';
     } catch (err) {
       toast(`削除に失敗しました: ${err.message}`);
     }

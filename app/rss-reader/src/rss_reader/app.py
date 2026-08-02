@@ -18,7 +18,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -182,7 +182,7 @@ def _page(
 
 # --- ページ -------------------------------------------------------------
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/feed", response_class=HTMLResponse)
 def feed_page(request: Request, feed: str = "", llm: int = 0):
     params = _list_params(
         q=request.query_params.get("q", ""),
@@ -216,7 +216,7 @@ def feed_page(request: Request, feed: str = "", llm: int = 0):
     return templates.TemplateResponse(request, "feed.html", ctx)
 
 
-@app.get("/new", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse)
 def new_page(request: Request):
     params = _list_params(
         q=request.query_params.get("q", ""),
@@ -229,6 +229,13 @@ def new_page(request: Request):
     ctx = _page("new", "", params, include_llm=False)
     ctx.update({"request": request, "page": "new"})
     return templates.TemplateResponse(request, "new.html", ctx)
+
+
+@app.get("/new")
+def new_page_redirect(request: Request):
+    """新着はトップページに移した。旧 URL のブックマークを救済する。"""
+    query = request.url.query
+    return RedirectResponse(f"/?{query}" if query else "/", status_code=301)
 
 
 @app.get("/bookmarks", response_class=HTMLResponse)

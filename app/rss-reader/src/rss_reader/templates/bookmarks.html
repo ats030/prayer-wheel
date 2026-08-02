@@ -64,7 +64,7 @@
         {% endif %}
         <div class="bm-main">
           <div class="bm-title">
-            <a href="/?feed={{ row.url|urlencode }}" title="{{ row.url }}">{{ row.title }}</a>
+            <a href="/feed?feed={{ row.url|urlencode }}" title="{{ row.url }}">{{ row.title }}</a>
             {% if row.bookmark and row.bookmark.media_type %}<span class="badge">{{ row.bookmark.media_type }}</span>{% endif %}
             {% if not row.bookmark %}<span class="badge unsaved">未保存</span>{% endif %}
           </div>
