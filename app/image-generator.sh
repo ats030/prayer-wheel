@@ -11,5 +11,5 @@ export UV_PROJECT_ENVIRONMENT="$HOME/.venv/image-generator"
 export PYTHONPATH="$HOME/app/app-hub/src${PYTHONPATH:+:$PYTHONPATH}"
 
 exec /home/ats030/.local/bin/uv run \
-    --directory ~/pCloudDrive/Python/image-generator \
+    --directory /home/ats030/image-generator-work \
     uvicorn main:app --host "$TAILNET_IP" --port 8512

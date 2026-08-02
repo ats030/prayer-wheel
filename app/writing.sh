@@ -18,4 +18,4 @@ GIT_SSH_COMMAND="ssh -o BatchMode=yes" timeout 60 \
   || echo "writing.sh: git pull skipped (offline or non-ff); serving current checkout" >&2
 
 exec /home/ats030/.local/bin/uv run uvicorn writing.app:app \
-  --host 0.0.0.0 --port 8510
+  --host 0.0.0.0 --port 8510 --timeout-graceful-shutdown 5
