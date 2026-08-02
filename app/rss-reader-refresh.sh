@@ -28,9 +28,10 @@ run_job() {
 
   job_id=$(printf '%s' "$response" | jq -r '.job.id // empty')
   if [ -z "$job_id" ]; then
-    # 400（フィード未登録・採点対象なし）はエラーではなく「やることがない」
+    # 400（フィード未登録・上位記事は採点済み）はエラーではなく「やることがない」。
+    # 呼び出し側が exit 3 に落とせるよう、障害の 1 とは別の 3 で返す。
     echo "$label: 起動せず — $(printf '%s' "$response" | jq -r '.detail // .')"
-    return 0
+    return 3
   fi
 
   waited=0
@@ -69,11 +70,34 @@ curl -sS -m 10 "$BASE/health" >/dev/null || {
   exit 1
 }
 
-run_job "フィード更新" /api/feeds/refresh-all '{}'
-run_job "LLM採点" /api/score '{"scope":"new"}'
+# 「やることが無かった」(3) と障害 (1) を分ける。上位記事が全部採点済みの回は
+# 毎時ふつうに起きるので、これを failure にすると通知が狼少年になる
+# （CLAUDE.md「終了コード」。rekimeshi-bot が週17回の偽 FAILURE を出していた例）。
+did_work=0
+
+step() {
+  # set -e に終了コードを奪われないよう、いったん外して受け取る
+  set +e
+  run_job "$@"
+  code=$?
+  set -e
+  case "$code" in
+    0) did_work=1 ;;
+    3) ;;         # 対象なし。設計どおりなので続行する
+    *) exit 1 ;;  # 本物の障害
+  esac
+}
+
+step "フィード更新" /api/feeds/refresh-all '{}'
+step "LLM採点" /api/score '{"scope":"new"}'
 
 failing=$(curl -sS -m 10 "$BASE/health" | jq -r '.failing // 0')
 if [ "$failing" -gt 0 ]; then
   echo "取得に失敗しているフィード: ${failing}件（/ の警告に一覧が出ます）"
+fi
+
+if [ "$did_work" = 0 ]; then
+  echo "更新も採点も対象がありませんでした"
+  exit 3
 fi
 exit 0

@@ -12,7 +12,10 @@
   - 本文が MIN_BODY_CHARS 未満 (空描画)。実測の最小は image-editor の74文字
   - コンソールに error が出ている
   - 同一オリジンへのリクエストが 5xx を返した ← app-portal の事例はこれで捕まる
-  - 本文にトレースバックやサーバエラーの文字列が出ている
+  - 本文が短く、かつトレースバックやサーバエラーの文字列だけが出ている
+
+文字列一致は本文が短いときにしか使わない。任意のテキストを表示するアプリでは
+本文にエラー文字列が普通に現れる (初版は daily-reflection の振り返りメモを誤検知した)。
 
 対象は systemd ユニットの Description "(port NNNN)" から拾う。app-portal が
 一覧を作るのと同じ出所なので、サービスを足せば自動で対象に入る。
@@ -30,6 +33,9 @@ from playwright.sync_api import sync_playwright
 UNIT_DIR = Path.home() / ".config/systemd/user"
 PORT_RE = re.compile(r"port\s*(\d{4,5})", re.I)
 MIN_BODY_CHARS = 40
+# エラーページ判定に使う本文長の上限。これを超える本文は「中身のある画面」とみなし、
+# エラー文字列が含まれていても内容として扱う (下の ERROR_MARKERS の注記を参照)
+ERROR_PAGE_MAX_CHARS = 300
 NAV_TIMEOUT_MS = 20000
 ERROR_MARKERS = (
     "Traceback (most recent call last)",
@@ -87,10 +93,17 @@ def check(browser, host: str, target: dict) -> list[str]:
         body = page.inner_text("body").strip()
         if len(body) < MIN_BODY_CHARS:
             problems.append(f"本文が{len(body)}文字しかない")
-        for marker in ERROR_MARKERS:
-            if marker in body:
-                problems.append(f"本文にエラー表示: {marker}")
-                break
+        # エラー文字列は「本文がそれだけ」のときにしか判定に使えない。本文全体を
+        # 対象にしたら daily-reflection を誤検知した —— 振り返りメモを表示する
+        # アプリで、メモ本文に「500だと画面にInternal Server Errorしか出ない」と
+        # 書かれていた。任意のテキストを表示するアプリでは文字列一致は成立しない。
+        # 実際のエラーページは短い (Starlette の 500 応答は本文 "Internal Server Error"
+        # の21文字)。長い本文中の言及は、下のコンソールerrorと5xx応答の判定に任せる。
+        if len(body) < ERROR_PAGE_MAX_CHARS:
+            for marker in ERROR_MARKERS:
+                if marker in body:
+                    problems.append(f"本文にエラー表示: {marker}")
+                    break
         if console_errors:
             problems.append(f"コンソールerror: {console_errors[0]}")
         if server_errors:
