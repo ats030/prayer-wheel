@@ -3,3 +3,11 @@
 .env.*
 # .env.* に当たらない命名（ハイフン区切り）のバックアップも除外する
 .env-backup-*/
+
+# サービスのローカルチェックアウト（デプロイ先。それぞれ独自の .git を持つ）。
+# 編集は pCloudDrive 側の作業コピーで行い、push してから app/deploy.sh <名前> で取り込む。
+# 移行を増やしたらここに足すこと。app/rss-reader はこのリポジトリ自身が持つので対象外。
+/app/writing/
+/app/app-portal/
+/app/calendar-viewer/
+/app/web-clipper/
