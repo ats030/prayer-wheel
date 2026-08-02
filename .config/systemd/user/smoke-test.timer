@@ -1,0 +1,11 @@
+[Unit]
+Description=Webアプリのブラウザスモークテスト
+
+[Timer]
+# デプロイ後の退行を数時間以内に拾う程度の頻度。1回あたり20本で1〜2分かかる
+OnCalendar=*-*-* 02,08,14,20:40:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
