@@ -7,6 +7,18 @@
 open index.html          # これだけ。ビルドもインストールも不要
 ```
 
+スマホなど別端末から見るときは tailnet 越しに配信している。
+
+```
+http://100.94.207.13:8521/     # または app-portal (8500) の一覧から
+systemctl --user status pegboard-hook-generator
+```
+
+配信は `python3 -m http.server` だけで済ませている。完全な静的ファイルなので
+uvicorn も FastAPI も要らず、pCloudDrive も参照しないので FUSE ストールの影響を
+受けない (`ats030-e5z7`)。売り物の実体はあくまで `index.html` 単体であり、この
+サービスは手元で確認するための足場にすぎない。
+
 ## なぜ作ったか
 
 `~/pCloudDrive/CAD/PrintableFiles/` には `Hook-1-10` / `Hook-1-20` / `Hook-1-30` /
