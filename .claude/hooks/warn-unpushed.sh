@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # CLAUDE.md の完了条件は「git push が成功するまで」。取り残しを機械で拾う。
 pending=""
 for repo in "$HOME" "$HOME"/app/*/; do
