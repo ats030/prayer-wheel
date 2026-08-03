@@ -13,6 +13,29 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(bd *)",
+            "command": "$HOME/.claude/hooks/beads-restore-reorder.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/warn-unpushed.sh"
+          }
+        ]
+      }
+    ],
     "PreCompact": [
       {
         "matcher": "",
@@ -37,7 +60,8 @@
     ]
   },
   "enabledPlugins": {
-    "grill-me@ai-workflow": true
+    "grill-me@ai-workflow": true,
+    "thinking-workflow@ai-workflow": true
   },
   "extraKnownMarketplaces": {
     "ai-workflow": {
@@ -48,5 +72,6 @@
     }
   },
   "theme": "dark",
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "language": "japanese"
 }
