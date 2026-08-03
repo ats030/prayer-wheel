@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>有孔ボードフック ジェネレータ</title>
+<style>
+:root{
+  --bg:#08090c; --surface:#0d0f14; --raised:#12141b; --hover:#171923;
+  --border:#242633; --border-strong:#343747;
+  --text:#f4f4f5; --muted:#a1a1aa; --subtle:#71717a;
+  --accent:#7c3aed; --accent-soft:#a78bfa;
+  --success:#34d399; --warning:#fbbf24; --danger:#fb7185;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg); color:var(--text);
+  font:14px/1.55 Inter,-apple-system,"SF Pro Text","Segoe UI",Helvetica,Arial,
+       "Hiragino Sans","Noto Sans JP",sans-serif;
+}
+.app{display:flex; height:100vh; align-items:stretch; overflow:hidden}
+.panel{
+  width:320px; flex:0 0 320px; background:var(--surface);
+  border-right:1px solid var(--border); padding:24px 20px 32px; overflow-y:auto;
+}
+.main{flex:1; min-width:0; display:flex; flex-direction:column; padding:24px 24px 32px; gap:16px}
+h1{font-size:16px; font-weight:600; margin:0 0 4px}
+.sub{font-size:12px; color:var(--subtle); margin:0 0 24px}
+h2{font-size:12px; font-weight:600; color:var(--muted); margin:24px 0 12px;
+   text-transform:uppercase; letter-spacing:.04em}
+h2:first-of-type{margin-top:0}
+
+.field{margin-bottom:16px}
+.field-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; gap:8px}
+.field-head label{font-size:13px; color:var(--text)}
+.field-head .unit{font-size:12px; color:var(--subtle)}
+.row{display:flex; gap:8px; align-items:center}
+input[type=range]{
+  flex:1; min-width:0; -webkit-appearance:none; appearance:none;
+  height:4px; border-radius:2px; background:var(--border-strong); outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
+  background:var(--accent); border:2px solid var(--surface); cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{
+  width:14px; height:14px; border-radius:50%; border:2px solid var(--surface);
+  background:var(--accent); cursor:pointer;
+}
+input[type=range]:focus-visible{box-shadow:0 0 0 2px var(--accent)}
+input[type=number]{
+  width:68px; flex:0 0 68px; background:var(--raised); color:var(--text);
+  border:1px solid var(--border); border-radius:6px; padding:5px 7px;
+  font:inherit; font-size:13px; font-variant-numeric:tabular-nums; text-align:right;
+}
+input[type=number]:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 2px rgba(124,58,237,.3)}
+
+.presets{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px}
+button{
+  font:inherit; font-size:13px; cursor:pointer; border-radius:6px;
+  border:1px solid var(--border); background:var(--raised); color:var(--text);
+  padding:6px 11px; transition:background .12s, border-color .12s;
+}
+button:hover{background:var(--hover); border-color:var(--border-strong)}
+button:focus-visible{outline:none; border-color:var(--accent); box-shadow:0 0 0 2px rgba(124,58,237,.3)}
+.presets button{padding:5px 9px; font-size:12px; color:var(--muted)}
+.btn-primary{
+  background:var(--accent); border-color:var(--accent); color:#fff;
+  font-weight:500; padding:9px 16px;
+}
+.btn-primary:hover{background:#8b5cf6; border-color:#8b5cf6}
+
+.canvas-wrap{
+  flex:1; min-height:340px; position:relative;
+  background:var(--surface); border:1px solid var(--border); border-radius:8px; overflow:hidden;
+}
+/* min-height 指定の親に対して height:100% は解決しないため絶対配置で埋める */
+canvas{position:absolute; inset:0; width:100%; height:100%; display:block; cursor:grab; touch-action:none}
+canvas:active{cursor:grabbing}
+.hint{
+  position:absolute; left:12px; bottom:10px; font-size:12px; color:var(--subtle);
+  pointer-events:none;
+}
+
+.readout{display:flex; gap:8px; flex-wrap:wrap}
+.stat{
+  background:var(--raised); border:1px solid var(--border); border-radius:6px;
+  padding:8px 12px; min-width:96px;
+}
+.stat .k{font-size:11px; color:var(--subtle); display:block}
+.stat .v{font-size:14px; font-variant-numeric:tabular-nums}
+
+.status{
+  display:flex; align-items:flex-start; gap:8px; font-size:13px; padding:10px 12px;
+  border-radius:6px; border:1px solid var(--border); background:var(--raised);
+}
+.status .dot{width:8px; height:8px; border-radius:50%; margin-top:6px; flex:0 0 8px}
+.status.ok .dot{background:var(--success)}
+.status.warn .dot{background:var(--warning)}
+.status.bad .dot{background:var(--danger)}
+.status.ok{border-color:rgba(52,211,153,.35)}
+.status.warn{border-color:rgba(251,191,36,.35)}
+.status.bad{border-color:rgba(251,113,133,.35)}
+
+.actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.actions .note{font-size:12px; color:var(--subtle)}
+
+@media (max-width:900px){
+  .app{flex-direction:column; height:auto; min-height:100vh; overflow:visible}
+  .panel{width:auto; flex:none; border-right:none; border-bottom:1px solid var(--border); order:2}
+  .main{order:1; padding:16px}
+  .canvas-wrap{min-height:280px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="panel">
+    <h1>有孔ボードフック ジェネレータ</h1>
+    <p class="sub">寸法を指定して STL を書き出します。処理はすべてこのページ内で完結し、データは送信されません。</p>
+
+    <div class="presets" id="presets"></div>
+
+    <h2>フック形状</h2>
+    <div id="group-hook"></div>
+
+    <h2>有孔ボード規格</h2>
+    <div id="group-board"></div>
+
+    <h2>寸法の詳細</h2>
+    <div id="group-adv"></div>
+  </aside>
+
+  <main class="main">
+    <div class="canvas-wrap">
+      <canvas id="view"></canvas>
+      <div class="hint">ドラッグで回転 / ホイールで拡大縮小</div>
+    </div>
+
+    <div class="readout" id="readout"></div>
+    <div class="status" id="status"><span class="dot"></span><span class="msg"></span></div>
+
+    <div class="actions">
+      <button class="btn-primary" id="download">STL をダウンロード</button>
+      <button id="reset">向きをリセット</button>
+      <span class="note" id="meta"></span>
+    </div>
+  </main>
+</div>
+
+<script>
+"use strict";
+
+/* ---------------------------------------------------------------------------
+ * パラメータ定義
+ *
+ * 既定値は既存製品 (Hook-1-10 / -20 / -30, Hook-1-*-30) の STL 実測に合わせた。
+ *   全幅 X = 5.0mm 固定 / 全高 Z = 38.0mm 固定 / 奥行は 10mm 刻みの等差
+ *   ペグピッチ 25mm (日本の有孔ボード規格)
+ * ------------------------------------------------------------------------ */
+const SPEC = [
+  {key:"depth",     group:"hook",  label:"奥行",           unit:"mm",  min:5,   max:80, step:1,   value:10,
+   help:"スパイン前面から先端内側までの有効寸法"},
+  {key:"tipAngle",  group:"hook",  label:"先端の角度",     unit:"°",   min:60,  max:150,step:5,   value:90,
+   help:"アームからの角度。90=垂直、90超で内向きに倒れる"},
+  {key:"tipLen",    group:"hook",  label:"先端の長さ",     unit:"mm",  min:0,   max:30, step:1,   value:10},
+  {key:"bodyW",     group:"hook",  label:"幅",             unit:"mm",  min:3,   max:20, step:0.5, value:5},
+
+  {key:"holeD",     group:"board", label:"穴径",           unit:"mm",  min:3,   max:12, step:0.5, value:5},
+  {key:"pitch",     group:"board", label:"穴ピッチ",       unit:"mm",  min:15,  max:60, step:1,   value:25},
+  {key:"boardT",    group:"board", label:"ボード板厚",     unit:"mm",  min:2,   max:15, step:0.5, value:5.5},
+
+  {key:"bodyT",     group:"adv",   label:"本体の厚み",     unit:"mm",  min:3,   max:12, step:0.5, value:5},
+  {key:"prongW",    group:"adv",   label:"ペグ幅",         unit:"mm",  min:2,   max:12, step:0.1, value:3.8},
+  {key:"prongT",    group:"adv",   label:"ペグ厚",         unit:"mm",  min:1.5, max:12, step:0.1, value:2.8},
+  {key:"lockDrop",  group:"adv",   label:"抜け止めの下がり",unit:"mm", min:0,   max:20, step:1,   value:6},
+  {key:"tipT",      group:"adv",   label:"先端の厚み",     unit:"mm",  min:2,   max:12, step:0.5, value:4},
+  {key:"gap",       group:"adv",   label:"背面クリアランス",unit:"mm", min:0,   max:2,  step:0.1, value:0.4},
+];
+
+const PRESETS = [
+  {label:"奥行10 / 90°", set:{depth:10, tipAngle:90}},
+  {label:"奥行20 / 90°", set:{depth:20, tipAngle:90}},
+  {label:"奥行30 / 90°", set:{depth:30, tipAngle:90}},
+  {label:"奥行10 / 120°", set:{depth:10, tipAngle:120}},
+];
+
+const P = {};
+for (const s of SPEC) P[s.key] = s.value;
+
+/* ---------------------------------------------------------------------------
+ * 形状: YZ平面上の中心線に沿って矩形断面をスイープする。
+ *   +Y = ボード前面から手前 (物を掛ける側)、+Z = 上、X = 幅方向
+ *   ボード前面を y=0 とし、ボードは y=-boardT まで奥に続く。
+ * ------------------------------------------------------------------------ */
+function buildPath(p){
+  const lipY   = -(p.boardT + p.prongT / 2 + p.gap);   // 抜け止めはボード裏側
+  const spineY = p.bodyT / 2;                          // 背面を y=0 に合わせる
+  const armEndY = p.bodyT + p.depth + p.tipT / 2;
+  const th = p.tipAngle * Math.PI / 180;
+
+  const pts = [
+    {y: lipY,     z: p.pitch - p.lockDrop, t: p.prongT, w: p.prongW}, // 抜け止め先端
+    {y: lipY,     z: p.pitch,              t: p.prongT, w: p.prongW}, // 裏側の角
+    {y: 0,        z: p.pitch,              t: p.prongT, w: p.prongW}, // ボード前面
+    {y: spineY,   z: p.pitch,              t: p.bodyT,  w: p.bodyW},  // 肩 (ペグ→本体)
+    {y: spineY,   z: 0,                    t: p.bodyT,  w: p.bodyW},  // スパイン下端
+    {y: armEndY,  z: 0,                    t: p.bodyT,  w: p.bodyW},  // アーム先端
+  ];
+  if (p.tipLen > 0.05) {
+    pts.push({
+      y: armEndY + p.tipLen * Math.cos(th),
+      z: p.tipLen * Math.sin(th),
+      t: p.tipT, w: p.bodyW,
+    });
+  }
+  return pts;
+}
+
+function segNormal(a, b){
+  const dy = b.y - a.y, dz = b.z - a.z;
+  const L = Math.hypot(dy, dz) || 1;
+  return {y: -dz / L, z: dy / L};
+}
+
+// 中心線の各点で断面の4隅を出す。屈曲部はマイター (法線の平均) で継ぐ。
+function sectionsOf(pts){
+  const out = [];
+  for (let i = 0; i < pts.length; i++){
+    const nPrev = i > 0 ? segNormal(pts[i-1], pts[i]) : null;
+    const nNext = i < pts.length - 1 ? segNormal(pts[i], pts[i+1]) : null;
+    let n, scale = 1;
+    if (nPrev && nNext){
+      const sy = nPrev.y + nNext.y, sz = nPrev.z + nNext.z;
+      const L = Math.hypot(sy, sz);
+      if (L < 1e-6){ n = nNext; }                       // 折り返し。素直に諦める
+      else {
+        n = {y: sy / L, z: sz / L};
+        const d = n.y * nNext.y + n.z * nNext.z;
+        scale = Math.min(4, 1 / Math.max(0.25, d));     // 鋭角での発散を抑える
+      }
+    } else {
+      n = nPrev || nNext;
+    }
+    const ht = pts[i].t / 2 * scale, hw = pts[i].w / 2;
+    const p = pts[i];
+    out.push([
+      {x:  hw, y: p.y + n.y * ht, z: p.z + n.z * ht},
+      {x: -hw, y: p.y + n.y * ht, z: p.z + n.z * ht},
+      {x: -hw, y: p.y - n.y * ht, z: p.z - n.z * ht},
+      {x:  hw, y: p.y - n.y * ht, z: p.z - n.z * ht},
+    ]);
+  }
+  return out;
+}
+
+function buildMesh(p){
+  const secs = sectionsOf(buildPath(p));
+  const tris = [];
+  const quad = (a, b, c, d) => { tris.push([a, b, c]); tris.push([a, c, d]); };
+
+  for (let i = 0; i < secs.length - 1; i++){
+    const A = secs[i], B = secs[i+1];
+    for (let k = 0; k < 4; k++){
+      const k2 = (k + 1) % 4;
+      quad(A[k], A[k2], B[k2], B[k]);
+    }
+  }
+  const S = secs[0], E = secs[secs.length - 1];
+  quad(S[3], S[2], S[1], S[0]);
+  quad(E[0], E[1], E[2], E[3]);
+
+  return fixWinding(tris);
+}
+
+// 符号付き体積が負なら全三角形の巻き方向を反転して外向き法線に揃える。
+function fixWinding(tris){
+  let vol = 0;
+  for (const [a, b, c] of tris){
+    vol += (a.x * (b.y * c.z - b.z * c.y)
+          - a.y * (b.x * c.z - b.z * c.x)
+          + a.z * (b.x * c.y - b.y * c.x)) / 6;
+  }
+  if (vol < 0) return tris.map(([a, b, c]) => [a, c, b]);
+  return tris;
+}
+
+function normalOf(t){
+  const [a, b, c] = t;
+  const ux = b.x - a.x, uy = b.y - a.y, uz = b.z - a.z;
+  const vx = c.x - a.x, vy = c.y - a.y, vz = c.z - a.z;
+  let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+  const L = Math.hypot(nx, ny, nz) || 1;
+  return {x: nx / L, y: ny / L, z: nz / L};
+}
+
+function bboxOf(tris){
+  const mn = {x: Infinity, y: Infinity, z: Infinity};
+  const mx = {x: -Infinity, y: -Infinity, z: -Infinity};
+  for (const t of tris) for (const v of t) for (const k of "xyz"){
+    if (v[k] < mn[k]) mn[k] = v[k];
+    if (v[k] > mx[k]) mx[k] = v[k];
+  }
+  return {mn, mx, size: {x: mx.x - mn.x, y: mx.y - mn.y, z: mx.z - mn.z}};
+}
+
+/* --------------------------------------------------------------------------
+ * バイナリSTL
+ * ------------------------------------------------------------------------ */
+function toBinarySTL(tris){
+  const buf = new ArrayBuffer(84 + tris.length * 50);
+  const dv = new DataView(buf);
+  const header = "pegboard hook generator";
+  for (let i = 0; i < header.length; i++) dv.setUint8(i, header.charCodeAt(i));
+  dv.setUint32(80, tris.length, true);
+  let o = 84;
+  for (const t of tris){
+    const n = normalOf(t);
+    dv.setFloat32(o, n.x, true); dv.setFloat32(o+4, n.y, true); dv.setFloat32(o+8, n.z, true);
+    o += 12;
+    for (const v of t){
+      dv.setFloat32(o, v.x, true); dv.setFloat32(o+4, v.y, true); dv.setFloat32(o+8, v.z, true);
+      o += 12;
+    }
+    dv.setUint16(o, 0, true); o += 2;
+  }
+  return buf;
+}
+
+/* --------------------------------------------------------------------------
+ * プレビュー (canvas 2D / 画家のアルゴリズム)
+ * ------------------------------------------------------------------------ */
+const cv = document.getElementById("view");
+const ctx = cv.getContext("2d");
+const HOME_VIEW = {rotZ: -0.95, rotX: -0.45, zoom: 1};
+const view = Object.assign({drag: null}, HOME_VIEW);
+let mesh = [], box = null;
+
+function render(){
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if (!w || !h) return;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)){
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  if (!mesh.length || !box) return;
+
+  const mid = {
+    x: (box.mn.x + box.mx.x) / 2,
+    y: (box.mn.y + box.mx.y) / 2,
+    z: (box.mn.z + box.mx.z) / 2,
+  };
+  const c = {
+    cz: Math.cos(view.rotZ), sz: Math.sin(view.rotZ),
+    cx: Math.cos(view.rotX), sx: Math.sin(view.rotX),
+  };
+  const light = {x: -0.35, y: -0.5, z: 0.79};
+
+  // Z軸まわり → X軸まわりの順に回す。u,v が画面座標、depth が奥行き。
+  const rot = v => {
+    const x = v.x - mid.x, y = v.y - mid.y, z = v.z - mid.z;
+    const x1 = x * c.cz - y * c.sz;
+    const y1 = x * c.sz + y * c.cz;
+    const y2 = y1 * c.cx - z * c.sx;
+    const z2 = y1 * c.sx + z * c.cx;
+    return {u: x1, v: -z2, depth: y2};
+  };
+
+  // 投影後の実寸から倍率を決めるので、どんな寸法でも必ず画面に収まる。
+  const rt = mesh.map(t => t.map(rot));
+  let uMin = Infinity, uMax = -Infinity, vMin = Infinity, vMax = -Infinity;
+  for (const t of rt) for (const p of t){
+    if (p.u < uMin) uMin = p.u;
+    if (p.u > uMax) uMax = p.u;
+    if (p.v < vMin) vMin = p.v;
+    if (p.v > vMax) vMax = p.v;
+  }
+  const pad = Math.min(32, Math.min(w, h) * 0.08);
+  const s = Math.min((w - pad * 2) / Math.max(uMax - uMin, 1e-3),
+                     (h - pad * 2) / Math.max(vMax - vMin, 1e-3)) * view.zoom;
+  const cx = w / 2 - (uMin + uMax) / 2 * s;
+  const cy = h / 2 - (vMin + vMax) / 2 * s;
+
+  const faces = rt.map((pts3, i) => {
+    const n = normalOf(mesh[i]);
+    // 法線もカメラ回転に合わせる (Z→X の順)
+    const nx1 = n.x * c.cz - n.y * c.sz;
+    const ny1 = n.x * c.sz + n.y * c.cz;
+    const ny2 = ny1 * c.cx - n.z * c.sx;
+    const nz2 = ny1 * c.sx + n.z * c.cx;
+    return {
+      pts: pts3.map(p => ({sx: cx + p.u * s, sy: cy + p.v * s})),
+      depth: (pts3[0].depth + pts3[1].depth + pts3[2].depth) / 3,
+      lum: Math.max(0, nx1 * light.x + ny2 * light.y + nz2 * light.z),
+      back: ny2 > 0,
+    };
+  });
+  faces.sort((a, b) => b.depth - a.depth);
+
+  for (const f of faces){
+    if (f.back) continue;
+    const l = 0.16 + 0.84 * Math.pow(f.lum, 0.75);
+    const r = Math.round(150 * l + 24), g = Math.round(130 * l + 22), bl = Math.round(215 * l + 30);
+    ctx.fillStyle = `rgb(${r},${g},${bl})`;
+    ctx.strokeStyle = ctx.fillStyle;
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(f.pts[0].sx, f.pts[0].sy);
+    ctx.lineTo(f.pts[1].sx, f.pts[1].sy);
+    ctx.lineTo(f.pts[2].sx, f.pts[2].sy);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();   // 隣接三角形の継ぎ目に出る隙間を潰す
+  }
+}
+
+cv.addEventListener("pointerdown", e => {
+  view.drag = {x: e.clientX, y: e.clientY};
+  cv.setPointerCapture(e.pointerId);
+});
+cv.addEventListener("pointermove", e => {
+  if (!view.drag) return;
+  view.rotZ += (e.clientX - view.drag.x) * 0.01;
+  view.rotX += (e.clientY - view.drag.y) * 0.01;
+  view.rotX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, view.rotX));
+  view.drag = {x: e.clientX, y: e.clientY};
+  render();
+});
+const endDrag = () => { view.drag = null; };
+cv.addEventListener("pointerup", endDrag);
+cv.addEventListener("pointercancel", endDrag);
+cv.addEventListener("wheel", e => {
+  e.preventDefault();
+  view.zoom = Math.max(0.3, Math.min(4, view.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1)));
+  render();
+}, {passive: false});
+window.addEventListener("resize", render);
+// キャンバスの実寸が変わったら描き直す。1カラムへの切り替えや回転で倍率がずれるため。
+if (window.ResizeObserver) new ResizeObserver(render).observe(cv);
+
+/* --------------------------------------------------------------------------
+ * UI
+ * ------------------------------------------------------------------------ */
+function buildControls(){
+  for (const s of SPEC){
+    const wrap = document.createElement("div");
+    wrap.className = "field";
+    wrap.innerHTML = `
+      <div class="field-head">
+        <label for="f-${s.key}">${s.label}</label>
+        <span class="unit">${s.unit}</span>
+      </div>
+      <div class="row">
+        <input type="range" id="r-${s.key}" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.value}"
+               aria-label="${s.label}">
+        <input type="number" id="f-${s.key}" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.value}">
+      </div>`;
+    if (s.help){
+      const h = document.createElement("div");
+      h.style.cssText = "font-size:12px;color:var(--subtle);margin-top:4px";
+      h.textContent = s.help;
+      wrap.appendChild(h);
+    }
+    document.getElementById("group-" + s.group).appendChild(wrap);
+
+    const range = wrap.querySelector(`#r-${s.key}`);
+    const num = wrap.querySelector(`#f-${s.key}`);
+    const apply = v => {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return;
+      P[s.key] = Math.max(s.min, Math.min(s.max, n));
+      range.value = P[s.key];
+      update();
+    };
+    range.addEventListener("input", () => { num.value = range.value; apply(range.value); });
+    num.addEventListener("input", () => apply(num.value));
+  }
+
+  const host = document.getElementById("presets");
+  for (const pre of PRESETS){
+    const b = document.createElement("button");
+    b.textContent = pre.label;
+    b.addEventListener("click", () => {
+      for (const [k, v] of Object.entries(pre.set)){
+        P[k] = v;
+        const r = document.getElementById("r-" + k), n = document.getElementById("f-" + k);
+        if (r) r.value = v;
+        if (n) n.value = v;
+      }
+      update();
+    });
+    host.appendChild(b);
+  }
+}
+
+function fitCheck(){
+  // ペグ断面の外接円が穴に収まるか。矩形なので対角が効く。
+  const diag = Math.hypot(P.prongW, P.prongT);
+  const slack = P.holeD - diag;
+  if (slack < 0)    return {cls:"bad",  msg:`ペグが穴に入りません。断面の対角 ${diag.toFixed(2)}mm が穴径 ${P.holeD}mm を超えています。ペグ幅かペグ厚を小さくしてください。`};
+  if (slack < 0.25) return {cls:"warn", msg:`ペグと穴のすき間が ${slack.toFixed(2)}mm しかありません。印刷の反りや積層のふくらみで入らない可能性があります。`};
+  const lipReach = P.lockDrop;
+  if (lipReach < 2) return {cls:"warn", msg:`抜け止めの下がりが ${lipReach}mm と浅く、振動で外れやすくなります。`};
+  return {cls:"ok", msg:`ペグ断面の対角 ${diag.toFixed(2)}mm、穴とのすき間 ${slack.toFixed(2)}mm。φ${P.holeD}mm / ピッチ${P.pitch}mm のボードに適合します。`};
+}
+
+function fileName(){
+  return `pegboard-hook_D${P.depth}_A${P.tipAngle}_W${P.bodyW}.stl`.replace(/\s/g, "");
+}
+
+function update(){
+  mesh = buildMesh(P);
+  box = bboxOf(mesh);
+  render();
+
+  const stats = [
+    ["全高", box.size.z], ["全奥行", box.size.y], ["全幅", box.size.x],
+  ];
+  document.getElementById("readout").innerHTML = stats.map(([k, v]) =>
+    `<div class="stat"><span class="k">${k}</span><span class="v">${v.toFixed(1)} mm</span></div>`
+  ).join("") +
+    `<div class="stat"><span class="k">三角形</span><span class="v">${mesh.length}</span></div>`;
+
+  const st = fitCheck();
+  const el = document.getElementById("status");
+  el.className = "status " + st.cls;
+  el.querySelector(".msg").textContent = st.msg;
+
+  document.getElementById("meta").textContent = fileName();
+}
+
+document.getElementById("download").addEventListener("click", () => {
+  const blob = new Blob([toBinarySTL(mesh)], {type: "model/stl"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = fileName();
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  Object.assign(view, HOME_VIEW);
+  render();
+});
+
+buildControls();
+update();
+
+// 検証用にジオメトリを外へ出す (Playwright/Node から呼ぶ)
+window.__hook = {P, buildMesh, bboxOf, toBinarySTL, buildPath};
+</script>
+</body>
+</html>
