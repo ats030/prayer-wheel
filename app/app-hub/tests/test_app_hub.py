@@ -272,12 +272,24 @@ class AppHubTests(unittest.TestCase):
             self.assertIn('"author_answers": 1', metadata)
 
     def test_interview_hook_never_raises_on_a_missing_file(self) -> None:
-        record_writing_interview(
-            Path("/nonexistent/取材メモ.md"),
-            target="article:記事",
-            title="記事",
-            counts={},
-        )
+        # 失敗はエラーログ行になるので、利用者の ~/.cache を汚さないよう逃がす。
+        with tempfile.TemporaryDirectory() as tmp:
+            old_cache = os.environ.get("APP_HUB_CACHE_DIR")
+            os.environ["APP_HUB_CACHE_DIR"] = tmp
+            try:
+                record_writing_interview(
+                    Path(tmp) / "missing" / "取材メモ.md",
+                    target="article:記事",
+                    title="記事",
+                    counts={},
+                )
+            finally:
+                if old_cache is None:
+                    os.environ.pop("APP_HUB_CACHE_DIR", None)
+                else:
+                    os.environ["APP_HUB_CACHE_DIR"] = old_cache
+
+            self.assertTrue((Path(tmp) / "error.log").exists())
 
 
 if __name__ == "__main__":
