@@ -16,7 +16,11 @@ from app_hub.db import (
     record_artifact,
     recent_artifacts,
 )
-from app_hub.hooks import record_image_gallery_save, record_writing_draft_save
+from app_hub.hooks import (
+    record_image_gallery_save,
+    record_writing_draft_save,
+    record_writing_interview,
+)
 
 
 class DummyDraft:
@@ -229,6 +233,51 @@ class AppHubTests(unittest.TestCase):
             self.assertEqual(len(sources), 2)
             self.assertNotIn(body, metadata)
             self.assertNotIn("cat line art with a very specific full prompt", metadata)
+
+    def test_interview_hook_records_an_artifact_per_target(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            db = root / "hub.sqlite"
+            old_db = os.environ.get("APP_HUB_DB_PATH")
+            os.environ["APP_HUB_DB_PATH"] = str(db)
+            try:
+                sidecar = root / "取材メモ.md"
+                sidecar.write_text("---\nquestions: []\n---\n本文", encoding="utf-8")
+                record_writing_interview(
+                    sidecar,
+                    target="article:記事",
+                    title="記事",
+                    counts={"open": 2, "answered": 1, "dismissed": 0},
+                    answered_entries=[
+                        {"question": "何回失敗しましたか", "answer": "17回です"}
+                    ],
+                )
+            finally:
+                if old_db is None:
+                    os.environ.pop("APP_HUB_DB_PATH", None)
+                else:
+                    os.environ["APP_HUB_DB_PATH"] = old_db
+
+            with connect(db) as con:
+                rows = list(recent_artifacts(limit=10, con=con))
+                metadata = "\n".join(
+                    row["metadata_json"]
+                    for row in con.execute("SELECT metadata_json FROM artifacts")
+                )
+
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0]["kind"], "interview")
+            self.assertIn("取材メモ: 記事", rows[0]["title"])
+            self.assertIn("article:記事", metadata)
+            self.assertIn('"author_answers": 1', metadata)
+
+    def test_interview_hook_never_raises_on_a_missing_file(self) -> None:
+        record_writing_interview(
+            Path("/nonexistent/取材メモ.md"),
+            target="article:記事",
+            title="記事",
+            counts={},
+        )
 
 
 if __name__ == "__main__":

@@ -320,3 +320,67 @@ def record_writing_publish_result(
                 )
 
     _safe_record("record_writing_publish_result", _record)
+
+
+def record_writing_interview(
+    path: Path | str,
+    *,
+    target: str,
+    title: str,
+    counts: dict[str, int],
+    answered_entries: list[dict[str, Any]] | None = None,
+) -> None:
+    """Best-effort record for a writing interview sidecar.
+
+    The sidecar holds answers only the author could give, so other apps look
+    here for material that is not in the article body yet. Recorded on every
+    sidecar write; the artifact id is stable per target, so it updates in place.
+    """
+
+    def _record() -> None:
+        sidecar = Path(path)
+        entries = answered_entries or []
+        digest = hash_file(sidecar)
+        uri = file_uri(sidecar)
+        metadata = {
+            "path": str(sidecar),
+            "target": target,
+            "open": int(counts.get("open", 0)),
+            "answered": int(counts.get("answered", 0)),
+            "dismissed": int(counts.get("dismissed", 0)),
+            "author_answers": len(entries),
+        }
+        excerpt = _collapse_text(
+            "\n".join(
+                f"{item.get('question', '')} / {item.get('answer', '')}"
+                for item in entries[:5]
+            )
+        )
+        with connect() as con:
+            init_db(con)
+            run_id = stable_id("run", "writing", "save_interview", uri, digest)
+            record_run(
+                app="writing",
+                action="save_interview",
+                status="succeeded",
+                started_at=now_utc(),
+                ended_at=now_utc(),
+                params=metadata,
+                run_id=run_id,
+                con=con,
+            )
+            record_artifact(
+                app="writing",
+                kind="interview",
+                uri=uri,
+                sha256_value=digest,
+                run_id=run_id,
+                mime="text/markdown",
+                title=f"取材メモ: {title or target}",
+                excerpt=excerpt,
+                created_at=now_utc(),
+                metadata=metadata,
+                con=con,
+            )
+
+    _safe_record("record_writing_interview", _record)

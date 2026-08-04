@@ -8,6 +8,8 @@ Phase 1 is intentionally small:
 - cache/error log: `~/.cache/app-hub/`
 - source of truth remains each app's existing files/DBs
 - backfill only covers `image-generator` and `writing`
+- writing の取材メモは `kind=interview` の artifact として記録される
+  (著者にしか答えられない質問への回答。本文にまだ入っていない一次情報を探す口)
 
 Run:
 
