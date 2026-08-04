@@ -333,8 +333,9 @@ def record_writing_interview(
     """Best-effort record for a writing interview sidecar.
 
     The sidecar holds answers only the author could give, so other apps look
-    here for material that is not in the article body yet. Recorded on every
-    sidecar write; the artifact id is stable per target, so it updates in place.
+    here for material that is not in the article body yet. Like draft saves,
+    each distinct content hash lands as its own artifact row, so the answer
+    history stays visible; re-recording the same content is a no-op.
     """
 
     def _record() -> None:
