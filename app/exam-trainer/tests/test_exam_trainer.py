@@ -1011,3 +1011,94 @@ def test_generation_reports_throttling_as_the_reason(monkeypatch):
     summary = generate.generate_for_node(exam_id, "1")
     assert summary["verified"] == 0
     assert any("拒否" in reason for reason in summary["reasons"])
+
+
+# --- material by URL -----------------------------------------------------
+
+def _fake_extract(mapping):
+    from exam_trainer import web
+
+    def extract(url):
+        text = mapping.get(url)
+        if text is None:
+            return None
+        return web.Material(url=url, title=f"title of {url}", text=text)
+    return extract
+
+
+def test_urls_can_be_registered_as_material_without_search(monkeypatch):
+    """検索が止まっていても素材を入れられる経路。"""
+    from exam_trainer import materials, web
+
+    exam_id = bank.create_exam("G検定")
+    monkeypatch.setattr(
+        materials.web, "extract_url",
+        _fake_extract({"https://example.test/a": "誤差逆伝播法について" * 40}),
+    )
+
+    def explode(*a, **k):
+        raise AssertionError("URL 指定なら検索は走らない")
+
+    monkeypatch.setattr(web, "search_urls", explode)
+    result = materials.add_from_urls(exam_id, "3.1", ["https://example.test/a"])
+    assert len(result["added"]) == 1
+    assert materials.counts_by_node(exam_id) == {"3.1": 1}
+
+
+def test_registered_material_makes_generation_skip_the_search(monkeypatch):
+    from exam_trainer import materials, web
+
+    exam_id = bank.create_exam("G検定")
+    monkeypatch.setattr(
+        materials.web, "extract_url",
+        _fake_extract({"https://example.test/a": "活性化関数について" * 40}),
+    )
+    materials.add_from_urls(exam_id, "3.1", ["https://example.test/a"])
+
+    monkeypatch.setattr(web, "available", lambda: True)
+    monkeypatch.setattr(web, "gather", lambda *a, **k: (_ for _ in ()).throw(
+        AssertionError("素材があるのに検索した")
+    ))
+    got = materials.ensure(exam_id, {"path": "3.1", "title": "NN", "keywords": ""}, "G検定")
+    assert len(got) == 1
+
+
+def test_bad_urls_are_reported_individually(monkeypatch):
+    from exam_trainer import materials
+
+    exam_id = bank.create_exam("G検定")
+    monkeypatch.setattr(
+        materials.web, "extract_url",
+        _fake_extract({"https://example.test/ok": "本文" * 60}),
+    )
+    result = materials.add_from_urls(exam_id, "1", [
+        "https://example.test/ok",
+        "https://example.test/empty",   # 本文が取れない
+        "ftp://example.test/x",         # そもそも http ではない
+        "   ",                          # 空行
+    ])
+    assert len(result["added"]) == 1
+    reasons = {item["url"]: item["reason"] for item in result["failed"]}
+    assert "本文" in reasons["https://example.test/empty"]
+    assert "URL" in reasons["ftp://example.test/x"]
+    assert len(result["failed"]) == 2, "空行は失敗として数えない"
+
+
+def test_material_endpoint_refuses_when_nothing_could_be_read(client, monkeypatch):
+    from exam_trainer import materials
+
+    exam_id = bank.create_exam("G検定")
+    monkeypatch.setattr(materials.web, "extract_url", _fake_extract({}))
+    response = client.post(f"/api/exams/{exam_id}/materials", json={
+        "node_path": "1", "urls": ["https://example.test/x"],
+    })
+    assert response.status_code == 400
+    assert "本文を取り出せませんでした" in response.json()["detail"]
+
+
+def test_material_endpoint_requires_a_node_and_urls(client):
+    exam_id = bank.create_exam("G検定")
+    assert client.post(f"/api/exams/{exam_id}/materials", json={
+        "node_path": "", "urls": ["https://example.test/x"]}).status_code == 400
+    assert client.post(f"/api/exams/{exam_id}/materials", json={
+        "node_path": "1", "urls": ["  "]}).status_code == 400

@@ -69,6 +69,40 @@ def search_query(exam_name: str, node: dict) -> str:
     return " ".join(part for part in parts if part).strip()
 
 
+def add_from_urls(exam_id: int, node_path: str, urls: list[str]) -> dict:
+    """Fetch the given pages and keep them as material for one node.
+
+    The only other way material arrives is a SearXNG search, which stops dead
+    when the upstream engines throttle. Naming the pages directly also lets an
+    official syllabus page be the source instead of whatever a search surfaced.
+    """
+    added, failed = [], []
+    for raw in urls:
+        url = raw.strip()
+        if not url:
+            continue
+        if not url.startswith(("http://", "https://")):
+            failed.append({"url": url, "reason": "http(s) の URL ではありません"})
+            continue
+        material = web.extract_url(url)
+        if material is None:
+            # extract_url already rejects garbled text, so this covers both a
+            # failed fetch and a page with no extractable body.
+            failed.append({"url": url, "reason": "本文を取り出せませんでした"})
+            continue
+        save(exam_id, node_path, material.url, material.title, material.text)
+        added.append({"url": material.url, "title": material.title, "chars": len(material.text)})
+    return {"added": added, "failed": failed}
+
+
+def counts_by_node(exam_id: int) -> dict[str, int]:
+    rows = db.connection().execute(
+        "SELECT node_path, COUNT(*) AS n FROM material WHERE exam_id = ? GROUP BY node_path",
+        (exam_id,),
+    ).fetchall()
+    return {row["node_path"]: row["n"] for row in rows}
+
+
 def ensure(exam_id: int, node: dict, exam_name: str, limit: int = 4) -> list[dict]:
     """Return usable material for a node, collecting it first if needed."""
     existing = _fresh(list_for_node(exam_id, node["path"]))

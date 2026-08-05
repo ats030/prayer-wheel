@@ -6,6 +6,7 @@
   <div class="page-head">
     <h1 style="margin:0;">問題バンク</h1>
     <span class="spacer"></span>
+    <button class="btn btn-secondary" id="materialBtn" {% if not exam %}disabled{% endif %}>素材を追加</button>
     <button class="btn btn-secondary" id="addBtn" {% if not exam %}disabled{% endif %}>問題を追加</button>
     <button class="btn btn-primary" id="generateBtn"
             {% if not exam or not has_web %}disabled{% endif %}
@@ -98,6 +99,36 @@
     {% endif %}
   </div>
   {% endif %}
+</div>
+
+<div class="modal-bg" id="materialModal">
+  <div class="modal">
+    <h3>素材を追加</h3>
+    <p class="muted" style="margin-top:-8px;font-size:13px;">
+      問題の根拠にするページを直接指定します。検索が使えないときや、公式の解説ページを
+      確実に根拠にしたいときに使います。素材がある項目では、生成時に検索が走りません。
+    </p>
+    <div class="field">
+      <label for="matNode">シラバス項目</label>
+      <select id="matNode">
+        <option value="" selected>選んでください</option>
+        {% for item in syllabus %}
+        <option value="{{ item.path }}">{{ item.path }} {{ item.title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div id="matCount" class="panel-note" hidden></div>
+    <div class="field">
+      <label for="matUrls">URL（1行に1つ）</label>
+      <textarea id="matUrls" rows="5" spellcheck="false"
+                placeholder="https://ja.wikipedia.org/wiki/誤差逆伝播法&#10;https://例.jp/解説ページ"></textarea>
+    </div>
+    <div class="row" style="justify-content:flex-end;gap:8px;">
+      <span id="matStatus" class="muted" style="font-size:13px;margin-right:auto;"></span>
+      <button class="btn btn-ghost" id="matCancel">閉じる</button>
+      <button class="btn btn-primary" id="matConfirm">取り込む</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-bg" id="generateModal">

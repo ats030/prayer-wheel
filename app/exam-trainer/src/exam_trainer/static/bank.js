@@ -29,6 +29,71 @@
     }
   });
 
+  // --- material by URL ---------------------------------------------------
+  // The other way material arrives is a SearXNG search, which stops dead when
+  // its upstream engines throttle. Naming pages directly keeps generation
+  // possible, and lets an official page be the source.
+  const matModal = document.getElementById('materialModal');
+  const matBtn = document.getElementById('materialBtn');
+  if (matBtn && matModal) {
+    const matNode = document.getElementById('matNode');
+    const matCount = document.getElementById('matCount');
+    let materialCounts = {};
+
+    async function loadCounts() {
+      try {
+        const data = await (await fetch(`/api/exams/${EXAM_ID}/materials`)).json();
+        materialCounts = data.counts || {};
+      } catch (_) { materialCounts = {}; }
+      showCount();
+    }
+    function showCount() {
+      if (!matNode.value) { matCount.hidden = true; return; }
+      const n = materialCounts[matNode.value] || 0;
+      matCount.hidden = false;
+      matCount.textContent = n
+        ? `この項目には素材が${n}本あります。追加すると生成の材料が増えます。`
+        : 'この項目にはまだ素材がありません。生成しようとすると検索に行きます。';
+    }
+    matNode.addEventListener('change', showCount);
+
+    matBtn.addEventListener('click', () => {
+      document.getElementById('matStatus').textContent = '';
+      matModal.classList.add('show');
+      loadCounts();
+    });
+    document.getElementById('matCancel').addEventListener('click', () => matModal.classList.remove('show'));
+    matModal.addEventListener('click', (event) => {
+      if (event.target === matModal) matModal.classList.remove('show');
+    });
+
+    document.getElementById('matConfirm').addEventListener('click', async () => {
+      const status = document.getElementById('matStatus');
+      const btn = document.getElementById('matConfirm');
+      if (!matNode.value) { status.textContent = 'シラバス項目を選んでください'; return; }
+      const urls = document.getElementById('matUrls').value
+        .split('\n').map((line) => line.trim()).filter(Boolean);
+      if (!urls.length) { status.textContent = 'URL を入力してください'; return; }
+      btn.disabled = true;
+      status.textContent = `${urls.length}件を取り込み中…`;
+      try {
+        const data = await postJSON(`/api/exams/${EXAM_ID}/materials`, {
+          node_path: matNode.value, urls,
+        });
+        const chars = data.added.reduce((sum, item) => sum + item.chars, 0);
+        let text = `${data.added.length}件を取り込みました（計${chars}字）`;
+        if (data.failed.length) text += ` / 失敗 ${data.failed.length}件`;
+        status.textContent = text;
+        document.getElementById('matUrls').value = '';
+        await loadCounts();
+      } catch (err) {
+        status.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
   // --- generation jobs ---------------------------------------------------
   const genModal = document.getElementById('generateModal');
   const genBtn = document.getElementById('generateBtn');

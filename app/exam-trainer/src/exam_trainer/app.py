@@ -317,6 +317,37 @@ def list_missing(exam_id: int, target: int = 5, limit: int = 8) -> JSONResponse:
     return JSONResponse({"items": pending, "count": len(pending)})
 
 
+class MaterialIn(BaseModel):
+    node_path: str
+    urls: list[str]
+
+
+@app.post("/api/exams/{exam_id}/materials")
+def add_materials(exam_id: int, payload: MaterialIn) -> JSONResponse:
+    from . import materials
+
+    node_path = payload.node_path.strip()
+    if not node_path:
+        raise HTTPException(status_code=400, detail="シラバス項目を選んでください")
+    if not any(url.strip() for url in payload.urls):
+        raise HTTPException(status_code=400, detail="URL を1つ以上入力してください")
+    result = materials.add_from_urls(exam_id, node_path, payload.urls)
+    if not result["added"]:
+        raise HTTPException(
+            status_code=400,
+            detail="どのURLからも本文を取り出せませんでした: "
+            + " / ".join(f"{item['url']} ({item['reason']})" for item in result["failed"][:3]),
+        )
+    return JSONResponse(result)
+
+
+@app.get("/api/exams/{exam_id}/materials")
+def list_materials(exam_id: int) -> JSONResponse:
+    from . import materials
+
+    return JSONResponse({"counts": materials.counts_by_node(exam_id)})
+
+
 @app.get("/api/exams/{exam_id}/jobs")
 def list_jobs(exam_id: int) -> JSONResponse:
     return JSONResponse({"items": jobs.list_for_exam(exam_id)})
