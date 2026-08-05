@@ -273,6 +273,50 @@ def start_generation(exam_id: int, payload: GenerateIn) -> JSONResponse:
     return JSONResponse(job)
 
 
+class FillIn(BaseModel):
+    target: int = 5
+    # The worker runs one job at a time and each takes minutes, so an unbounded
+    # queue would be hours deep and unclear when it would end.
+    limit: int = 8
+
+
+@app.post("/api/exams/{exam_id}/generate-missing")
+def start_bulk_generation(exam_id: int, payload: FillIn) -> JSONResponse:
+    if not web.available():
+        raise HTTPException(
+            status_code=400,
+            detail="SEARXNG_API_URL が未設定です。根拠を集められないため生成できません",
+        )
+    if not web.reachable():
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"SearXNG ({settings.searxng_url}) に接続できません。"
+                "URL と searxng.service の稼働を確認してください"
+            ),
+        )
+    target = max(1, payload.target)
+    pending = bank.nodes_needing_questions(exam_id, target, limit=max(1, payload.limit))
+    if not pending:
+        raise HTTPException(
+            status_code=400,
+            detail=f"すべての項目が目標の{target}問に達しています",
+        )
+    queued = [
+        {"node_path": node["path"], "title": node["title"], "job_id": jobs.enqueue(
+            exam_id, node["path"], target,
+        )["id"]}
+        for node in pending
+    ]
+    return JSONResponse({"queued": queued, "count": len(queued)})
+
+
+@app.get("/api/exams/{exam_id}/missing")
+def list_missing(exam_id: int, target: int = 5, limit: int = 8) -> JSONResponse:
+    pending = bank.nodes_needing_questions(exam_id, max(1, target), limit=max(1, limit))
+    return JSONResponse({"items": pending, "count": len(pending)})
+
+
 @app.get("/api/exams/{exam_id}/jobs")
 def list_jobs(exam_id: int) -> JSONResponse:
     return JSONResponse({"items": jobs.list_for_exam(exam_id)})

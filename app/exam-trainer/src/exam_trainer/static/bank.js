@@ -38,7 +38,13 @@
   function renderJobs(items) {
     if (!panel) return;
     const active = (items || []).filter((job) => job.status === 'queued' || job.status === 'running');
-    const latest = active[0] || (items || [])[0];
+    // items arrives newest-first. Show the job actually running; with none
+    // running, show the oldest queued one, because that is the one about to
+    // start. Taking active[0] named the most recently queued node instead,
+    // which reads as "generating 2.2" while 4.1 is the one being worked on.
+    const latest = active.find((job) => job.status === 'running')
+      || active[active.length - 1]
+      || (items || [])[0];
     if (!latest) { panel.hidden = true; return; }
     panel.hidden = false;
     const title = document.getElementById('jobTitle');
@@ -50,7 +56,11 @@
       title.textContent = `生成が終わりました（${latest.node_path}）`;
       status.textContent = latest.status_text || '';
     } else {
-      title.textContent = `生成中（${latest.node_path}）`;
+      // With a bulk run the queue is several deep; showing only the running one
+      // makes it look like nothing else was accepted.
+      const waiting = active.length - 1;
+      title.textContent = `生成中（${latest.node_path}）`
+        + (waiting > 0 ? ` — 他に${waiting}項目が待機中` : '');
       status.textContent = latest.status_text || '待機中';
     }
     clearTimeout(pollTimer);
@@ -81,9 +91,50 @@
   }
 
   if (genBtn && genModal) {
+    const preview = document.getElementById('genPreview');
+    const nodeField = document.getElementById('genNodeField');
+    const limitField = document.getElementById('genLimitField');
+    const scopeInputs = Array.from(genModal.querySelectorAll('input[name="genScope"]'));
+    const scopeOf = () => (scopeInputs.find((el) => el.checked) || {}).value || 'one';
+    const numberOf = (id, fallback) => Number(document.getElementById(id).value) || fallback;
+
+    // Show which nodes a bulk run would take, so the queue is never a surprise.
+    async function refreshPreview() {
+      const bulk = scopeOf() === 'missing';
+      nodeField.hidden = bulk;
+      limitField.hidden = !bulk;
+      preview.hidden = !bulk;
+      if (!bulk) return;
+      preview.textContent = '対象を数えています…';
+      try {
+        const params = new URLSearchParams({
+          target: String(numberOf('genTarget', 5)),
+          limit: String(numberOf('genLimit', 8)),
+        });
+        const data = await (await fetch(`/api/exams/${EXAM_ID}/missing?${params}`)).json();
+        if (!data.count) {
+          preview.textContent = 'すべての項目が目標に達しています。';
+          return;
+        }
+        const lines = data.items.map((item) => {
+          const score = item.accuracy === null ? '未挑戦' : `正答率${Math.round(item.accuracy * 100)}%`;
+          return `${item.path} ${item.title}（${score} · ${item.have}問）`;
+        });
+        preview.textContent = `${data.count}項目を弱点の順に積みます: ` + lines.join(' / ');
+      } catch (_) {
+        preview.textContent = '対象を数えられませんでした。';
+      }
+    }
+
+    scopeInputs.forEach((el) => el.addEventListener('change', refreshPreview));
+    ['genTarget', 'genLimit'].forEach((id) => {
+      document.getElementById(id).addEventListener('change', refreshPreview);
+    });
+
     function openGenerate() {
       document.getElementById('genStatus').textContent = '';
       genModal.classList.add('show');
+      refreshPreview();
     }
     genBtn.addEventListener('click', openGenerate);
     // Arrived from a weakness branch with no questions: the node is already
@@ -97,7 +148,8 @@
       const status = document.getElementById('genStatus');
       const btn = document.getElementById('genConfirm');
       const node = document.getElementById('genNode');
-      if (!node || !node.value) {
+      const bulk = scopeOf() === 'missing';
+      if (!bulk && (!node || !node.value)) {
         // Two different situations produce an empty value: nothing registered
         // yet, or the placeholder still selected. Saying the wrong one sends
         // the user to the wrong screen.
@@ -110,12 +162,17 @@
       btn.disabled = true;
       status.textContent = 'ジョブを登録中…';
       try {
-        await postJSON(`/api/exams/${EXAM_ID}/generate`, {
-          node_path: node.value,
-          target: Number(document.getElementById('genTarget').value) || 5,
-        });
+        const target = numberOf('genTarget', 5);
+        if (bulk) {
+          const data = await postJSON(`/api/exams/${EXAM_ID}/generate-missing`, {
+            target, limit: numberOf('genLimit', 8),
+          });
+          toast(`${data.count}項目をキューに積みました。画面を閉じても続きます`, 4000);
+        } else {
+          await postJSON(`/api/exams/${EXAM_ID}/generate`, { node_path: node.value, target });
+          toast('生成を開始しました。画面を閉じても続きます');
+        }
         genModal.classList.remove('show');
-        toast('生成を開始しました。画面を閉じても続きます');
         pollJobs();
       } catch (err) {
         status.textContent = err.message;

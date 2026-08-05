@@ -760,3 +760,125 @@ def test_health_distinguishes_configured_from_reachable(client, monkeypatch):
     body = client.get("/health").json()
     assert body["web"] is False
     assert body["web_configured"] is True
+
+
+# --- bulk generation -----------------------------------------------------
+
+def _syllabus_with_children(exam_id: int) -> None:
+    bank.set_syllabus(exam_id, [
+        {"path": "1", "title": "親"},
+        {"path": "1.1", "title": "子A"},
+        {"path": "1.2", "title": "子B"},
+        {"path": "2", "title": "葉だけの項目"},
+    ])
+
+
+def test_only_leaves_are_generation_targets():
+    """親は子の集約なので、そこに問題を作ると子と重複する。"""
+    exam_id = bank.create_exam("G検定")
+    _syllabus_with_children(exam_id)
+    assert bank.leaf_paths(exam_id) == {"1.1", "1.2", "2"}
+    paths = [node["path"] for node in bank.nodes_needing_questions(exam_id, target=3)]
+    assert "1" not in paths
+    assert set(paths) == {"1.1", "1.2", "2"}
+
+
+def test_nodes_at_target_are_not_queued_again():
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "A"}, {"path": "2", "title": "B"}])
+    for index in range(2):
+        bank.add_question(
+            exam_id, "1", f"十分に長い問題文です その{index}。",
+            ["正しい説明", "誤った説明", "別の誤り"], 0, status="verified",
+        )
+    pending = {node["path"]: node for node in bank.nodes_needing_questions(exam_id, target=2)}
+    assert "1" not in pending, "目標に達した項目は積まない"
+    assert pending["2"]["missing"] == 2
+
+
+def test_held_and_draft_questions_do_not_count_towards_the_target():
+    """出題できない問題で「足りている」と判断すると、解くものが無いまま終わる。"""
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "A"}])
+    bank.add_question(exam_id, "1", "十分に長い問題文です。", ["ア", "イ", "ウ"], 0, status="held")
+    bank.add_question(exam_id, "1", "もう一つの問題文です。", ["ア", "イ", "ウ"], 0, status="draft")
+    pending = bank.nodes_needing_questions(exam_id, target=1)
+    assert [node["path"] for node in pending] == ["1"]
+
+
+def test_weak_nodes_are_queued_before_untried_and_perfect_ones():
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [
+        {"path": "1", "title": "苦手"},
+        {"path": "2", "title": "未挑戦"},
+        {"path": "3", "title": "全問正解"},
+    ])
+    weak = bank.add_question(
+        exam_id, "1", "苦手な項目の問題文です。", ["正解", "誤り", "別の誤り"], 0, status="verified",
+    )
+    perfect = bank.add_question(
+        exam_id, "3", "得意な項目の問題文です。", ["正解", "誤り", "別の誤り"], 0, status="verified",
+    )
+    bank.answer(weak, 1)      # wrong
+    bank.answer(perfect, 0)   # right
+
+    order = [node["path"] for node in bank.nodes_needing_questions(exam_id, target=5)]
+    assert order == ["1", "2", "3"], "苦手 → 未挑戦 → 正解済み の順に埋める"
+
+
+def test_bulk_queue_respects_the_limit():
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": str(i), "title": f"項目{i}"} for i in range(1, 11)])
+    assert len(bank.nodes_needing_questions(exam_id, target=5, limit=3)) == 3
+    assert len(bank.nodes_needing_questions(exam_id, target=5)) == 10
+
+
+def test_bulk_endpoint_queues_one_job_per_node(client, monkeypatch):
+    from exam_trainer import jobs, web
+
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "A"}, {"path": "2", "title": "B"}])
+    monkeypatch.setattr(web, "available", lambda: True)
+    monkeypatch.setattr(web, "reachable", lambda: True)
+
+    body = client.post(f"/api/exams/{exam_id}/generate-missing", json={"target": 3, "limit": 5}).json()
+    assert body["count"] == 2
+    assert {item["node_path"] for item in body["queued"]} == {"1", "2"}
+    assert len({item["job_id"] for item in body["queued"]}) == 2, "項目ごとに別のジョブ"
+
+    # 二度押しても増えない (enqueue が node ごとに冪等)。
+    again = client.post(f"/api/exams/{exam_id}/generate-missing", json={"target": 3, "limit": 5}).json()
+    assert {item["job_id"] for item in again["queued"]} == {item["job_id"] for item in body["queued"]}
+    assert len(jobs.list_for_exam(exam_id)) == 2
+
+
+def test_bulk_endpoint_says_so_when_nothing_is_missing(client, monkeypatch):
+    from exam_trainer import web
+
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "A"}])
+    bank.add_question(exam_id, "1", "十分に長い問題文です。", ["ア", "イ", "ウ"], 0, status="verified")
+    monkeypatch.setattr(web, "available", lambda: True)
+    monkeypatch.setattr(web, "reachable", lambda: True)
+    response = client.post(f"/api/exams/{exam_id}/generate-missing", json={"target": 1})
+    assert response.status_code == 400
+    assert "達しています" in response.json()["detail"]
+
+
+def test_bulk_endpoint_refuses_when_search_is_unreachable(client, monkeypatch):
+    from exam_trainer import web
+
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "A"}])
+    monkeypatch.setattr(web, "available", lambda: True)
+    monkeypatch.setattr(web, "reachable", lambda: False)
+    assert client.post(f"/api/exams/{exam_id}/generate-missing", json={}).status_code == 400
+
+
+def test_missing_preview_endpoint_reports_what_would_be_queued(client):
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "A"}, {"path": "2", "title": "B"}])
+    body = client.get(f"/api/exams/{exam_id}/missing?target=4&limit=1").json()
+    assert body["count"] == 1
+    assert body["items"][0]["missing"] == 4
+    assert body["items"][0]["accuracy"] is None

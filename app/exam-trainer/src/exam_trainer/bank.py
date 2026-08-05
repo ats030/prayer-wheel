@@ -375,6 +375,72 @@ def node_stats(exam_id: int) -> list[dict]:
     return stats
 
 
+def leaf_paths(exam_id: int) -> set[str]:
+    """Syllabus paths with no children.
+
+    Questions are written for leaves. A parent ("2") exists to aggregate its
+    children in the weakness tree; generating for it as well produces items that
+    duplicate what the leaves already cover.
+    """
+    paths = [node["path"] for node in list_syllabus(exam_id)]
+    return {
+        path for path in paths
+        if not any(other != path and other.startswith(f"{path}.") for other in paths)
+    }
+
+
+def nodes_needing_questions(exam_id: int, target: int, limit: int = 0) -> list[dict]:
+    """Leaves with fewer than `target` servable questions, weakest first.
+
+    Order: nodes you are getting wrong, then nodes you have never been asked
+    about, then the rest — so a bulk run spends the queue on what is actually
+    weak rather than on whatever sorts first.
+    """
+    leaves = leaf_paths(exam_id)
+    stats = {item["path"]: item for item in node_stats(exam_id)}
+    counts = {
+        row["path"]: row["n"]
+        for row in db.connection().execute(
+            "SELECT node_path AS path, COUNT(*) AS n FROM question"
+            " WHERE exam_id = ? AND status = 'verified' GROUP BY node_path",
+            (exam_id,),
+        ).fetchall()
+    }
+
+    pending = []
+    for node in list_syllabus(exam_id):
+        path = node["path"]
+        if path not in leaves:
+            continue
+        have = counts.get(path, 0)
+        if have >= target:
+            continue
+        stat = stats.get(path, {})
+        accuracy = stat.get("accuracy")
+        pending.append({
+            **node,
+            "have": have,
+            "missing": target - have,
+            "accuracy": accuracy,
+        })
+
+    def sort_key(item):
+        accuracy = item["accuracy"]
+        # 0: answered and imperfect, by accuracy ascending
+        # 1: never answered
+        # 2: answered with a perfect score (least urgent)
+        if accuracy is None:
+            bucket, within = 1, 0.0
+        elif accuracy >= 1.0:
+            bucket, within = 2, 0.0
+        else:
+            bucket, within = 0, accuracy
+        return (bucket, within, -item["missing"], item["path"])
+
+    pending.sort(key=sort_key)
+    return pending[:limit] if limit else pending
+
+
 def recent_reviews(exam_id: int, limit: int = 50) -> list[dict]:
     rows = db.connection().execute(
         "SELECT r.answered_at, r.correct, r.grade, q.stem, q.node_path"

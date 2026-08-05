@@ -109,6 +109,14 @@
       作問と別のパスで解き直して答えが割れたものは「要確認」に入り、出題されません。
     </p>
     <div class="field">
+      <label>対象</label>
+      <div class="row" style="gap:12px;">
+        <label class="check"><input type="radio" name="genScope" value="one" checked> 1項目を選ぶ</label>
+        <label class="check"><input type="radio" name="genScope" value="missing"> 不足している項目をまとめて</label>
+      </div>
+    </div>
+
+    <div class="field" id="genNodeField">
       <label for="genNode">シラバス項目</label>
       <!-- Opens unselected on purpose. With the first option preselected, a
            stray click on 生成を開始 spends minutes generating for 「1 人工知能とは」
@@ -120,12 +128,23 @@
         {% endfor %}
       </select>
     </div>
+
+    <div class="field" id="genLimitField" hidden>
+      <label for="genLimit">一度に積む項目数</label>
+      <input type="text" id="genLimit" value="8" style="width:90px;">
+    </div>
+
     <div class="field">
-      <label for="genTarget">目標の採用数</label>
+      <label for="genTarget">項目あたりの目標採用数</label>
       <input type="text" id="genTarget" value="5" style="width:90px;">
     </div>
+
+    <!-- What a bulk run would actually queue, before it is queued. -->
+    <div id="genPreview" class="panel-note" hidden></div>
+
     <p class="muted" style="font-size:13px;">
-      1問あたり生成と検証で2回モデルを呼ぶため数分かかります。画面を閉じても処理は続きます。
+      1問あたり生成と検証で2回モデルを呼ぶため数分かかります。まとめて積んだ場合も
+      1項目ずつ順に処理します。画面を閉じても続きます。
     </p>
     <div class="row" style="justify-content:flex-end;gap:8px;">
       <span id="genStatus" class="muted" style="font-size:13px;margin-right:auto;"></span>
