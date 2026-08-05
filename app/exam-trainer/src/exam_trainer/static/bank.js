@@ -53,8 +53,16 @@
       title.textContent = `生成に失敗しました（${latest.node_path}）`;
       status.textContent = latest.error || 'もう一度実行してください。';
     } else if (latest.status === 'done') {
-      title.textContent = `生成が終わりました（${latest.node_path}）`;
-      status.textContent = latest.status_text || '';
+      // Finishing with nothing adopted is not a failure, but calling it
+      // 「終わりました」 reads as success and hides the reason.
+      const summary = latest.summary || {};
+      const gotNothing = !summary.verified && !summary.held;
+      title.textContent = gotNothing
+        ? `問題を作れませんでした（${latest.node_path}）`
+        : `生成が終わりました（${latest.node_path}）`;
+      status.textContent = gotNothing
+        ? ((summary.reasons || [])[0] || latest.status_text || '')
+        : (latest.status_text || '');
     } else {
       // With a bulk run the queue is several deep; showing only the running one
       // makes it look like nothing else was accepted.

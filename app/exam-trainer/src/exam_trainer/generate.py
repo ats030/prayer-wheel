@@ -274,7 +274,12 @@ def generate_for_node(
     collected = materials.ensure(exam_id, node, exam["name"])
     summary["materials"] = len(collected)
     if not collected:
-        summary["reasons"].append("素材を取得できませんでした（SearXNG の設定と接続を確認してください）")
+        # "the topic has no pages" and "search is throttled right now" need
+        # opposite responses, so never merge them into one message.
+        summary["reasons"].append(
+            web.last_search_note()
+            or "素材を取得できませんでした（項目名とキーワードで記事が見つかりません）"
+        )
         return summary
 
     existing = [item["stem"] for item in bank.list_questions(exam_id, limit=500)]

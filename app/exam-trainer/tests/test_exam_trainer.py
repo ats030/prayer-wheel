@@ -502,14 +502,15 @@ def test_generation_stores_verified_and_held_separately(monkeypatch):
 
 
 def test_generation_without_material_reports_why(monkeypatch):
-    from exam_trainer import generate, materials
+    from exam_trainer import generate, materials, web
 
     exam_id = bank.create_exam("G検定")
     bank.set_syllabus(exam_id, [{"path": "1", "title": "定義"}])
     monkeypatch.setattr(materials, "ensure", lambda *a, **k: [])
+    monkeypatch.setattr(web, "last_search_note", lambda: "")
     summary = generate.generate_for_node(exam_id, "1")
     assert summary["verified"] == 0
-    assert any("SearXNG" in reason for reason in summary["reasons"])
+    assert any("記事が見つかりません" in reason for reason in summary["reasons"])
 
 
 # --- jobs ----------------------------------------------------------------
@@ -941,3 +942,72 @@ def test_garbled_extraction_is_discarded(monkeypatch):
     monkeypatch.setattr(web.httpx, "Client", _Client)
     assert web.extract_url("https://example.test/broken") is None, \
         "文字化け素材は根拠照合を素通りしてしまうので取り込まない"
+
+
+# --- search throttling ---------------------------------------------------
+
+def test_throttled_upstreams_are_reported_not_read_as_no_pages(monkeypatch):
+    """SearXNG は上流が全滅しても 200 と空配列を返す。「話題が無い」と区別する。
+
+    実際に起きた: 短時間に多数の検定を調べたら brave/duckduckgo/google が
+    「Suspended: too many requests」になり、生成が素材0で done になった。
+    """
+    from exam_trainer import web
+    from exam_trainer.config import settings as app_settings
+
+    payload = {
+        "results": [],
+        "unresponsive_engines": [
+            ["brave", "Suspended: too many requests"],
+            ["duckduckgo", "Suspended: access denied"],
+        ],
+    }
+
+    class _Resp:
+        def raise_for_status(self): pass
+        def json(self): return payload
+
+    class _Client:
+        def __init__(self, *a, **k): pass
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def get(self, *a, **k): return _Resp()
+
+    monkeypatch.setattr(app_settings, "searxng_url", "http://127.0.0.1:8081/search")
+    monkeypatch.setattr(web.httpx, "Client", _Client)
+    assert web.search_urls("何か") == []
+    note = web.last_search_note()
+    assert "拒否" in note and "brave" in note
+    assert "時間をおいて" in note, "待てば直ることが伝わらないと、話題を諦めてしまう"
+
+
+def test_no_results_without_suspension_is_not_blamed_on_throttling(monkeypatch):
+    from exam_trainer import web
+    from exam_trainer.config import settings as app_settings
+
+    class _Resp:
+        def raise_for_status(self): pass
+        def json(self): return {"results": [], "unresponsive_engines": []}
+
+    class _Client:
+        def __init__(self, *a, **k): pass
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def get(self, *a, **k): return _Resp()
+
+    monkeypatch.setattr(app_settings, "searxng_url", "http://127.0.0.1:8081/search")
+    monkeypatch.setattr(web.httpx, "Client", _Client)
+    assert web.search_urls("何か") == []
+    assert web.last_search_note() == ""
+
+
+def test_generation_reports_throttling_as_the_reason(monkeypatch):
+    from exam_trainer import generate, materials, web
+
+    exam_id = bank.create_exam("日本酒検定")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "特定名称酒"}])
+    monkeypatch.setattr(materials, "ensure", lambda *a, **k: [])
+    monkeypatch.setattr(web, "last_search_note", lambda: "検索エンジン側が一時的に応答を拒否しています")
+    summary = generate.generate_for_node(exam_id, "1")
+    assert summary["verified"] == 0
+    assert any("拒否" in reason for reason in summary["reasons"])

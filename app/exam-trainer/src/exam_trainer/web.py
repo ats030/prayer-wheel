@@ -81,7 +81,18 @@ def _search_endpoint() -> str:
     return base if base.endswith("/search") else base + "/search"
 
 
+# Set when SearXNG answered but its upstream engines were all refusing. Read by
+# the generation job so "no material" can name its cause.
+_last_search_note = ""
+
+
+def last_search_note() -> str:
+    return _last_search_note
+
+
 def search_urls(query: str, limit: int = 6) -> list[dict]:
+    global _last_search_note
+    _last_search_note = ""
     if not settings.searxng_url:
         logger.info("SEARXNG_API_URL not set; skipping search")
         return []
@@ -90,11 +101,38 @@ def search_urls(query: str, limit: int = 6) -> list[dict]:
         with httpx.Client(timeout=20, follow_redirects=True) as client:
             resp = client.get(_search_endpoint(), params=params)
             resp.raise_for_status()
-        results = resp.json().get("results", [])
+        payload = resp.json()
+        results = payload.get("results", [])
     except (httpx.HTTPError, ValueError) as exc:
         logger.warning("SearXNG search failed: %s", exc)
         return []
+
+    # SearXNG answers 200 with an empty result list when every upstream engine
+    # has throttled it, which looks identical to "this topic has no pages".
+    # Generating for many exams in a row triggers this, so the distinction
+    # matters: one means give up on the topic, the other means wait.
+    if not results:
+        suspended = _suspended_engines(payload)
+        if suspended:
+            _last_search_note = (
+                "検索エンジン側が一時的に応答を拒否しています（"
+                + "、".join(suspended[:3])
+                + "）。時間をおいて再実行してください"
+            )
+            logger.warning("SearXNG upstreams suspended: %s", suspended)
     return [hit for hit in results if not _blocked(hit.get("url", ""))][:limit]
+
+
+def _suspended_engines(payload: dict) -> list[str]:
+    out = []
+    for entry in payload.get("unresponsive_engines") or []:
+        if isinstance(entry, (list, tuple)) and entry:
+            name = str(entry[0])
+            reason = str(entry[1]) if len(entry) > 1 else ""
+            out.append(f"{name}: {reason}" if reason else name)
+        elif entry:
+            out.append(str(entry))
+    return out
 
 
 def _blocked(url: str) -> bool:
