@@ -882,3 +882,62 @@ def test_missing_preview_endpoint_reports_what_would_be_queued(client):
     assert body["count"] == 1
     assert body["items"][0]["missing"] == 4
     assert body["items"][0]["accuracy"] is None
+
+
+# --- encoding ------------------------------------------------------------
+
+def test_garbled_text_is_detected():
+    """charset を返さない Shift_JIS ページが utf-8 として読まれ、6000字の
+    文字化けが素材として通っていた（実測: nta.go.jp）。"""
+    from exam_trainer import web
+
+    assert web.looks_garbled("��u�������@")
+    assert web.looks_garbled("")
+    assert not web.looks_garbled("「清酒の製法品質表示基準」が制定された平成元年当時、清酒については")
+
+
+def test_extraction_decodes_shift_jis_without_a_charset_header(monkeypatch):
+    from exam_trainer import web
+
+    body = "<html><body><p>" + "清酒の製法品質表示基準について説明します。" * 8 + "</p></body></html>"
+    raw = body.encode("shift_jis")
+
+    class _Resp:
+        content = raw
+        # httpx guesses utf-8 when Content-Type carries no charset; decoding
+        # with it is exactly what produced the mojibake.
+        text = raw.decode("utf-8", errors="replace")
+        def raise_for_status(self): pass
+
+    class _Client:
+        def __init__(self, *a, **k): pass
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def get(self, *a, **k): return _Resp()
+
+    monkeypatch.setattr(web.httpx, "Client", _Client)
+    material = web.extract_url("https://example.test/sjis")
+    assert material is not None, "bytes を渡していれば読めるはず"
+    assert "清酒の製法品質表示基準" in material.text
+    assert "�" not in material.text
+
+
+def test_garbled_extraction_is_discarded(monkeypatch):
+    from exam_trainer import web
+
+    monkeypatch.setattr(web.trafilatura, "extract", lambda *a, **k: "�" * 500)
+    monkeypatch.setattr(web.trafilatura, "extract_metadata", lambda *a, **k: None)
+
+    class _Resp:
+        content = b"<html></html>"
+        def raise_for_status(self): pass
+
+    class _Client:
+        def __init__(self, *a, **k): pass
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def get(self, *a, **k): return _Resp()
+
+    monkeypatch.setattr(web.httpx, "Client", _Client)
+    assert web.extract_url("https://example.test/broken") is None, \
+        "文字化け素材は根拠照合を素通りしてしまうので取り込まない"

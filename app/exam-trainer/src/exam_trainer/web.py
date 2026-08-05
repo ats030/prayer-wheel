@@ -109,7 +109,11 @@ def extract_url(url: str) -> Material | None:
         ) as client:
             resp = client.get(url)
             resp.raise_for_status()
-        html = resp.text
+        # Bytes, not resp.text: pages that omit charset from Content-Type make
+        # httpx guess utf-8, and a Shift_JIS page then decodes to mojibake that
+        # still looks like 6000 usable characters. trafilatura detects the
+        # encoding itself when handed the raw bytes.
+        html = resp.content
     except httpx.HTTPError as exc:
         logger.warning("Download failed for %s: %s", url, exc)
         return None
@@ -123,7 +127,30 @@ def extract_url(url: str) -> Material | None:
     text = text.strip()
     if not text:
         return None
+    if looks_garbled(text):
+        logger.warning("Discarding garbled extraction from %s", url)
+        return None
     return Material(url=url, title=title, text=text)
+
+
+# Replacement chars and the CJK-compatibility block are what a mis-decoded
+# Japanese page leaves behind.
+_GARBLE_CHARS = "�" + "".join(chr(c) for c in range(0xF900, 0xF910))
+
+
+def looks_garbled(text: str, sample: int = 400) -> bool:
+    """Second line of defence for text that decoded wrong anyway.
+
+    A page can still come back broken (mislabelled charset, a proxy that
+    re-encodes). Garbled material is worse than no material here: the evidence
+    check would happily confirm that a garbled quote appears in a garbled
+    passage, and the question ships unreadable.
+    """
+    head = text[:sample]
+    if not head:
+        return True
+    bad = sum(head.count(char) for char in _GARBLE_CHARS)
+    return bad / len(head) > 0.02
 
 
 def gather(query: str, limit: int = 4, max_chars: int = 6000) -> list[Material]:
