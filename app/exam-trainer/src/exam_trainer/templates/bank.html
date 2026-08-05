@@ -109,7 +109,11 @@
     </p>
     <div class="field">
       <label for="genNode">シラバス項目</label>
+      <!-- Opens unselected on purpose. With the first option preselected, a
+           stray click on 生成を開始 spends minutes generating for 「1 人工知能とは」
+           that nobody asked for. -->
       <select id="genNode">
+        <option value="" {% if not node %}selected{% endif %}>選んでください</option>
         {% for item in syllabus %}
         <option value="{{ item.path }}" {% if item.path == node %}selected{% endif %}>{{ item.path }} {{ item.title }}</option>
         {% endfor %}

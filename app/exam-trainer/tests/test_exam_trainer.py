@@ -571,3 +571,38 @@ def test_screen_drops_a_passage_referencing_stem():
     verdict, reason = generate.screen(candidate, passage, [], embed=lambda t: [1.0])
     assert verdict == "drop"
     assert "本文中" in reason
+
+
+def test_generation_dialog_opens_with_no_node_selected(client):
+    """先頭の項目が選ばれた状態で開くと、選んだつもりのないまま数分のジョブが走る。"""
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [
+        {"path": "1", "title": "人工知能とは"},
+        {"path": "2", "title": "機械学習の具体的手法"},
+    ])
+    html = client.get(f"/bank?exam_id={exam_id}").text
+    dialog = html[html.index('id="genNode"'):]
+    dialog = dialog[:dialog.index("</select>")]
+    assert '<option value="" selected>選んでください</option>' in dialog
+    assert "selected" not in dialog.split("</option>", 1)[1], "実項目が既定で選ばれている"
+
+
+def test_generation_dialog_keeps_an_explicit_node_filter(client):
+    """範囲を絞って見ている最中は、その項目を引き継ぐ（既定ではなく明示の操作）。"""
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "人工知能とは"}, {"path": "2", "title": "機械学習"}])
+    html = client.get(f"/bank?exam_id={exam_id}&node=2").text
+    dialog = html[html.index('id="genNode"'):]
+    dialog = dialog[:dialog.index("</select>")]
+    assert '<option value="2" selected>' in dialog
+    assert '<option value="" >' in dialog or '<option value="">' in dialog
+
+
+def test_generation_endpoint_refuses_an_empty_node(client, monkeypatch):
+    from exam_trainer import web
+
+    exam_id = bank.create_exam("G検定")
+    monkeypatch.setattr(web, "available", lambda: True)
+    response = client.post(f"/api/exams/{exam_id}/generate", json={"node_path": ""})
+    assert response.status_code == 400
+    assert "選んで" in response.json()["detail"]

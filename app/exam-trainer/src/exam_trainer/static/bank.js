@@ -93,7 +93,16 @@
       const status = document.getElementById('genStatus');
       const btn = document.getElementById('genConfirm');
       const node = document.getElementById('genNode');
-      if (!node || !node.value) { status.textContent = 'シラバスを先に登録してください'; return; }
+      if (!node || !node.value) {
+        // Two different situations produce an empty value: nothing registered
+        // yet, or the placeholder still selected. Saying the wrong one sends
+        // the user to the wrong screen.
+        status.textContent = node && node.options.length > 1
+          ? 'シラバス項目を選んでください'
+          : 'シラバスを先に登録してください';
+        if (node) node.focus();
+        return;
+      }
       btn.disabled = true;
       status.textContent = 'ジョブを登録中…';
       try {
