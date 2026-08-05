@@ -50,7 +50,14 @@ _VERIFY_SYSTEM = (
     "あなたは資格試験の校閲者です。抜粋と問題を読み、"
     "抜粋だけを根拠に正解を1つ選びます。"
     "抜粋から一意に決まらない場合や、複数の選択肢が正解になりうる場合は "
-    "answer を -1 にして理由を書きます。出力はJSONのみです。"
+    "answer を -1 にして理由を書きます。"
+    # The proofreading pass rides along on the call that was happening anyway.
+    # Observed failure: a distractor came back as 「初めて見る問題を解いたもつ
+    # ときの、間違えた割合」— visibly broken Japanese, which tells the reader
+    # "this one is the wrong answer" without them knowing the subject.
+    "あわせて、誤字・脱字・助詞の誤りなど日本語として壊れている選択肢があれば、"
+    "その添字を flawed に入れます。表現の好みではなく、明らかな誤りだけを挙げます。"
+    "出力はJSONのみです。"
 )
 
 
@@ -75,8 +82,9 @@ def _verify_prompt(passage: str, stem: str, choices: list[str]) -> str:
     return (
         f"抜粋:\n---\n{passage}\n---\n\n"
         f"問題: {stem}\n選択肢:\n{listed}\n\n"
-        '出力形式: {"answer": 0, "reason": "根拠になった抜粋の記述", "unique": true}\n'
-        "unique は、抜粋から正解が一意に決まるなら true、決まらないなら false です。"
+        '出力形式: {"answer": 0, "reason": "根拠になった抜粋の記述", "unique": true, "flawed": []}\n'
+        "unique は、抜粋から正解が一意に決まるなら true、決まらないなら false です。\n"
+        "flawed は日本語として壊れている選択肢の添字の配列です（なければ空配列）。"
     )
 
 
@@ -157,7 +165,27 @@ def verify(passage: str, stem: str, choices: list[str], answer: int, model: str 
             f"検証側は {chr(65 + verified_answer)} を正解と判断しました"
             f"（作問側は {chr(65 + answer)}）: {data.get('reason', '')}"
         ).strip()
+    flawed = _flawed_labels(data.get("flawed"), len(choices))
+    if flawed:
+        # Not a wrong answer, so it is held rather than dropped: the fix is
+        # usually a one-character edit a human can make faster than a rerun.
+        return False, f"選択肢 {'・'.join(flawed)} の日本語が壊れています"
     return True, ""
+
+
+def _flawed_labels(raw, choice_count: int) -> list[str]:
+    """Turn the verifier's `flawed` indices into A/B/C labels, ignoring junk."""
+    if not isinstance(raw, list):
+        return []
+    labels = []
+    for value in raw:
+        try:
+            index = int(value)
+        except (TypeError, ValueError):
+            continue
+        if 0 <= index < choice_count:
+            labels.append(chr(65 + index))
+    return sorted(set(labels))
 
 
 def questions_from_passage(

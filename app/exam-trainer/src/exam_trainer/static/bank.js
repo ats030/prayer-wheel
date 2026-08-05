@@ -81,10 +81,14 @@
   }
 
   if (genBtn && genModal) {
-    genBtn.addEventListener('click', () => {
+    function openGenerate() {
       document.getElementById('genStatus').textContent = '';
       genModal.classList.add('show');
-    });
+    }
+    genBtn.addEventListener('click', openGenerate);
+    // Arrived from a weakness branch with no questions: the node is already
+    // selected server-side, so open straight onto it.
+    if (page.dataset.openGenerate && !genBtn.disabled) openGenerate();
     document.getElementById('genCancel').addEventListener('click', () => genModal.classList.remove('show'));
     genModal.addEventListener('click', (event) => {
       if (event.target === genModal) genModal.classList.remove('show');

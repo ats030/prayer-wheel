@@ -48,7 +48,15 @@ def health() -> dict:
         db.connection().execute("SELECT 1")
     except Exception as exc:  # pragma: no cover - only on a broken disk
         raise HTTPException(status_code=503, detail=str(exc)) from exc
-    return {"ok": True, "ollama": ollama_client.available(), "web": web.available()}
+    # `web` reports reachability, not merely that a URL is configured — a stale
+    # SEARXNG_API_URL previously read as healthy while every search came back
+    # empty.
+    return {
+        "ok": True,
+        "ollama": ollama_client.available(),
+        "web": web.reachable(),
+        "web_configured": web.available(),
+    }
 
 
 def _current_exam(exam_id: int | None) -> dict | None:
@@ -103,6 +111,7 @@ def bank_page(
     status: str = "",
     node: str = "",
     q: str = "",
+    generate: str = "",
 ) -> HTMLResponse:
     exam = _current_exam(exam_id)
     questions = bank.list_questions(exam["id"], status=status, node_prefix=node, query=q) if exam else []
@@ -115,6 +124,9 @@ def bank_page(
         syllabus=bank.list_syllabus(exam["id"]) if exam else [],
         jobs=jobs.list_for_exam(exam["id"], 5) if exam else [],
         has_web=web.available(),
+        # Set when arriving from a weakness-tree branch that has no questions,
+        # so the dialog is already open on the node that sent you here.
+        open_generate=bool(generate) and bool(node),
     )
 
 
@@ -244,6 +256,16 @@ def start_generation(exam_id: int, payload: GenerateIn) -> JSONResponse:
         raise HTTPException(
             status_code=400,
             detail="SEARXNG_API_URL が未設定です。根拠を集められないため生成できません",
+        )
+    # Told here rather than after a multi-minute job that quietly collects
+    # nothing. The two causes need different fixes, so they get different text.
+    if not web.reachable():
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"SearXNG ({settings.searxng_url}) に接続できません。"
+                "URL と searxng.service の稼働を確認してください"
+            ),
         )
     if not payload.node_path.strip():
         raise HTTPException(status_code=400, detail="シラバス項目を選んでください")

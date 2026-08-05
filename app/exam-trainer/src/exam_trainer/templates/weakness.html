@@ -42,7 +42,12 @@
           <div class="muted">{{ item.questions }}問</div>
         </div>
         {% endif %}
+        {# 問題が無い枝で「解く」を出しても空振りするので、そこは生成へ送る。 #}
+        {% if item.questions %}
         <a class="btn btn-secondary btn-xs" href="/?exam_id={{ exam.id }}&node={{ item.path }}">解く</a>
+        {% else %}
+        <a class="btn btn-secondary btn-xs" href="/bank?exam_id={{ exam.id }}&node={{ item.path }}&generate=1">問題を作る</a>
+        {% endif %}
       </div>
       {% endfor %}
     </div>

@@ -39,7 +39,41 @@ class Material:
 
 
 def available() -> bool:
+    """Is search configured? Says nothing about whether it answers."""
     return bool(settings.searxng_url)
+
+
+# Reachability is cached briefly: /health and the generate endpoint both ask,
+# and a dead host costs a full connect timeout each time.
+_REACHABLE_TTL_SEC = 30.0
+_reachable_cache: tuple[float, bool] | None = None
+
+
+def reachable(force: bool = False) -> bool:
+    """Does the configured SearXNG actually answer?
+
+    `available()` alone was what let a stale SEARXNG_API_URL sit unnoticed: the
+    UI offered web search because the setting was non-empty, while every search
+    silently returned nothing (the host had moved and search_urls swallows the
+    connection error). Anything that tells the user "web search works" must ask
+    this instead.
+    """
+    global _reachable_cache
+    if not settings.searxng_url:
+        return False
+    now = time.monotonic()
+    if not force and _reachable_cache and now - _reachable_cache[0] < _REACHABLE_TTL_SEC:
+        return _reachable_cache[1]
+    try:
+        with httpx.Client(timeout=httpx.Timeout(5.0, connect=3.0), follow_redirects=True) as client:
+            resp = client.get(_search_endpoint(), params={"q": "ping", "format": "json"})
+            resp.raise_for_status()
+            ok = isinstance(resp.json().get("results"), list)
+    except (httpx.HTTPError, ValueError) as exc:
+        logger.warning("SearXNG unreachable at %s: %s", settings.searxng_url, exc)
+        ok = False
+    _reachable_cache = (now, ok)
+    return ok
 
 
 def _search_endpoint() -> str:

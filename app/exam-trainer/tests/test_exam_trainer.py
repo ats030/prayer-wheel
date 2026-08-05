@@ -246,6 +246,7 @@ def test_health_reports_the_database(client, monkeypatch):
     # running on the machine; only the database check belongs here.
     monkeypatch.setattr(ollama_client, "available", lambda: True)
     monkeypatch.setattr(web, "available", lambda: False)
+    monkeypatch.setattr(web, "reachable", lambda: False)
     body = client.get("/health").json()
     assert body["ok"] is True
     assert body["ollama"] is True
@@ -606,3 +607,156 @@ def test_generation_endpoint_refuses_an_empty_node(client, monkeypatch):
     response = client.post(f"/api/exams/{exam_id}/generate", json={"node_path": ""})
     assert response.status_code == 400
     assert "選んで" in response.json()["detail"]
+
+
+# --- proofreading of choices --------------------------------------------
+
+def test_broken_japanese_in_a_choice_holds_the_question(monkeypatch):
+    """実生成で「初めて見る問題を解いたもつときの」という誤答選択肢が出た。
+
+    明らかに壊れた選択肢は「これは誤答だ」というヒントになり、知識ではなく
+    文面の粗さで正解が当てられてしまう。
+    """
+    from exam_trainer import generate, ollama_client
+
+    monkeypatch.setattr(
+        ollama_client, "generate_json",
+        lambda *a, **k: {"answer": 0, "unique": True, "flawed": [2]},
+    )
+    agrees, reason = generate.verify("抜粋", "問題", ["ア", "イ", "解いたもつときの割合"], 0)
+    assert not agrees
+    assert "C" in reason and "日本語" in reason
+
+
+def test_clean_choices_pass_the_proofreading_check(monkeypatch):
+    from exam_trainer import generate, ollama_client
+
+    monkeypatch.setattr(
+        ollama_client, "generate_json",
+        lambda *a, **k: {"answer": 0, "unique": True, "flawed": []},
+    )
+    agrees, reason = generate.verify("抜粋", "問題", ["ア", "イ", "ウ"], 0)
+    assert agrees and reason == ""
+
+
+def test_a_missing_flawed_field_is_treated_as_clean(monkeypatch):
+    """古い応答形式や省略で不合格にしない（flawed は追加項目）。"""
+    from exam_trainer import generate, ollama_client
+
+    monkeypatch.setattr(ollama_client, "generate_json", lambda *a, **k: {"answer": 0, "unique": True})
+    agrees, _ = generate.verify("抜粋", "問題", ["ア", "イ", "ウ"], 0)
+    assert agrees
+
+
+def test_out_of_range_flawed_indices_are_ignored():
+    from exam_trainer import generate
+
+    assert generate._flawed_labels([0, 2], 3) == ["A", "C"]
+    assert generate._flawed_labels([5, -1, "x", None], 3) == [], "範囲外や壊れた値で誤検知しない"
+    assert generate._flawed_labels("2", 3) == []
+    assert generate._flawed_labels([1, 1], 3) == ["B"], "重複は畳む"
+
+
+# --- weakness -> generation ---------------------------------------------
+
+def test_empty_branches_link_to_generation_not_to_studying(client):
+    """問題が無い枝で「解く」を出しても空振りするので、そこは生成へ送る。"""
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "問題あり"}, {"path": "2", "title": "問題なし"}])
+    question_id = bank.add_question(
+        exam_id, "1", "AI効果とは何を指すか。",
+        ["原理が分かると知能と見なされない", "人間を超える時点", "学習の発散"], 0, status="verified",
+    )
+    bank.answer(question_id, 0)
+    html = client.get(f"/weakness?exam_id={exam_id}").text
+    assert f"/?exam_id={exam_id}&node=1" in html, "問題のある枝は解きに行ける"
+    assert f"/bank?exam_id={exam_id}&node=2&generate=1" in html, "空の枝は生成へ送る"
+    assert f"/?exam_id={exam_id}&node=2" not in html
+
+
+def test_arriving_from_a_weakness_branch_opens_the_dialog_on_that_node(client):
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "A"}, {"path": "2.1", "title": "B"}])
+    html = client.get(f"/bank?exam_id={exam_id}&node=2.1&generate=1").text
+    assert 'data-open-generate="1"' in html
+    dialog = html[html.index('id="genNode"'):]
+    assert '<option value="2.1" selected>' in dialog[:dialog.index("</select>")]
+
+
+def test_generate_flag_without_a_node_does_not_open_the_dialog(client):
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "A"}])
+    html = client.get(f"/bank?exam_id={exam_id}&generate=1").text
+    assert "data-open-generate" not in html, "項目が無いまま開いても選ぶものがない"
+
+
+# --- search reachability -------------------------------------------------
+
+def test_available_and_reachable_mean_different_things(monkeypatch):
+    """設定があることと、応答があることを混同したのが元のバグ。"""
+    from exam_trainer import web
+    from exam_trainer.config import settings as app_settings
+
+    monkeypatch.setattr(app_settings, "searxng_url", "http://192.0.2.1:8081/search")
+    web._reachable_cache = None
+    assert web.available() is True, "設定はされている"
+    assert web.reachable() is False, "到達はできない"
+
+
+def test_reachable_is_false_without_configuration(monkeypatch):
+    from exam_trainer import web
+    from exam_trainer.config import settings as app_settings
+
+    monkeypatch.setattr(app_settings, "searxng_url", "")
+    web._reachable_cache = None
+    assert web.reachable() is False
+
+
+def test_reachability_is_cached(monkeypatch):
+    from exam_trainer import web
+    from exam_trainer.config import settings as app_settings
+
+    calls = {"n": 0}
+
+    class _Resp:
+        def raise_for_status(self): pass
+        def json(self): return {"results": []}
+
+    class _Client:
+        def __init__(self, *a, **k): pass
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def get(self, *a, **k):
+            calls["n"] += 1
+            return _Resp()
+
+    monkeypatch.setattr(app_settings, "searxng_url", "http://127.0.0.1:8081/search")
+    monkeypatch.setattr(web.httpx, "Client", _Client)
+    web._reachable_cache = None
+    assert web.reachable() is True
+    assert web.reachable() is True
+    assert calls["n"] == 1, "死んだホストへ毎回 connect timeout を払わない"
+    assert web.reachable(force=True) is True
+    assert calls["n"] == 2
+
+
+def test_generation_refuses_when_search_is_unreachable(client, monkeypatch):
+    from exam_trainer import web
+
+    exam_id = bank.create_exam("G検定")
+    monkeypatch.setattr(web, "available", lambda: True)
+    monkeypatch.setattr(web, "reachable", lambda: False)
+    response = client.post(f"/api/exams/{exam_id}/generate", json={"node_path": "1"})
+    assert response.status_code == 400
+    assert "接続できません" in response.json()["detail"], "数分走らせてから空振りに気づくのを防ぐ"
+
+
+def test_health_distinguishes_configured_from_reachable(client, monkeypatch):
+    from exam_trainer import ollama_client, web
+
+    monkeypatch.setattr(ollama_client, "available", lambda: True)
+    monkeypatch.setattr(web, "available", lambda: True)
+    monkeypatch.setattr(web, "reachable", lambda: False)
+    body = client.get("/health").json()
+    assert body["web"] is False
+    assert body["web_configured"] is True

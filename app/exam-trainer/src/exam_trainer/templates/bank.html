@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block title %}問題バンク — exam-trainer{% endblock %}
 {% block body %}
-<div class="wrap" id="bankPage" data-exam-id="{{ exam.id if exam else '' }}">
+<div class="wrap" id="bankPage" data-exam-id="{{ exam.id if exam else '' }}"
+     {% if open_generate %}data-open-generate="1"{% endif %}>
   <div class="page-head">
     <h1 style="margin:0;">問題バンク</h1>
     <span class="spacer"></span>
