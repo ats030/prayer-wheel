@@ -29,6 +29,89 @@
     }
   });
 
+  // --- generation jobs ---------------------------------------------------
+  const genModal = document.getElementById('generateModal');
+  const genBtn = document.getElementById('generateBtn');
+  const panel = document.getElementById('jobPanel');
+  let pollTimer = null;
+
+  function renderJobs(items) {
+    if (!panel) return;
+    const active = (items || []).filter((job) => job.status === 'queued' || job.status === 'running');
+    const latest = active[0] || (items || [])[0];
+    if (!latest) { panel.hidden = true; return; }
+    panel.hidden = false;
+    const title = document.getElementById('jobTitle');
+    const status = document.getElementById('jobStatus');
+    if (latest.status === 'error') {
+      title.textContent = `生成に失敗しました（${latest.node_path}）`;
+      status.textContent = latest.error || 'もう一度実行してください。';
+    } else if (latest.status === 'done') {
+      title.textContent = `生成が終わりました（${latest.node_path}）`;
+      status.textContent = latest.status_text || '';
+    } else {
+      title.textContent = `生成中（${latest.node_path}）`;
+      status.textContent = latest.status_text || '待機中';
+    }
+    clearTimeout(pollTimer);
+    // Only keep polling while something is actually running; a finished job
+    // does not need a timer waking the page up forever.
+    if (active.length) pollTimer = setTimeout(pollJobs, 4000);
+  }
+
+  async function pollJobs() {
+    if (!EXAM_ID) return;
+    try {
+      const data = await (await fetch(`/api/exams/${EXAM_ID}/jobs`)).json();
+      const before = document.getElementById('jobTitle').textContent;
+      renderJobs(data.items);
+      // A run that just finished has added questions the list doesn't show yet.
+      if (before.startsWith('生成中') && !document.getElementById('jobTitle').textContent.startsWith('生成中')) {
+        window.location.reload();
+      }
+    } catch (_) {
+      clearTimeout(pollTimer);
+      pollTimer = setTimeout(pollJobs, 8000);
+    }
+  }
+
+  if (panel) {
+    document.getElementById('jobRefresh').addEventListener('click', () => window.location.reload());
+    pollJobs();
+  }
+
+  if (genBtn && genModal) {
+    genBtn.addEventListener('click', () => {
+      document.getElementById('genStatus').textContent = '';
+      genModal.classList.add('show');
+    });
+    document.getElementById('genCancel').addEventListener('click', () => genModal.classList.remove('show'));
+    genModal.addEventListener('click', (event) => {
+      if (event.target === genModal) genModal.classList.remove('show');
+    });
+    document.getElementById('genConfirm').addEventListener('click', async () => {
+      const status = document.getElementById('genStatus');
+      const btn = document.getElementById('genConfirm');
+      const node = document.getElementById('genNode');
+      if (!node || !node.value) { status.textContent = 'シラバスを先に登録してください'; return; }
+      btn.disabled = true;
+      status.textContent = 'ジョブを登録中…';
+      try {
+        await postJSON(`/api/exams/${EXAM_ID}/generate`, {
+          node_path: node.value,
+          target: Number(document.getElementById('genTarget').value) || 5,
+        });
+        genModal.classList.remove('show');
+        toast('生成を開始しました。画面を閉じても続きます');
+        pollJobs();
+      } catch (err) {
+        status.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
   const modal = document.getElementById('addModal');
   const addBtn = document.getElementById('addBtn');
   if (!modal || !addBtn) return;

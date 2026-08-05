@@ -5,8 +5,25 @@
   <div class="page-head">
     <h1 style="margin:0;">問題バンク</h1>
     <span class="spacer"></span>
-    <button class="btn btn-primary" id="addBtn" {% if not exam %}disabled{% endif %}>問題を追加</button>
+    <button class="btn btn-secondary" id="addBtn" {% if not exam %}disabled{% endif %}>問題を追加</button>
+    <button class="btn btn-primary" id="generateBtn"
+            {% if not exam or not has_web %}disabled{% endif %}
+            title="{% if not has_web %}SEARXNG_API_URL が未設定のため生成できません{% else %}シラバス項目から根拠つきで生成します{% endif %}">
+      生成する
+    </button>
   </div>
+
+  {% if exam %}
+  <section class="job-panel" id="jobPanel" {% if not jobs %}hidden{% endif %}>
+    <div class="job-panel-copy">
+      <strong id="jobTitle">生成ジョブ</strong>
+      <span id="jobStatus" class="muted"></span>
+    </div>
+    <div class="job-panel-actions">
+      <button class="btn btn-ghost btn-xs" id="jobRefresh" type="button">更新</button>
+    </div>
+  </section>
+  {% endif %}
 
   {% if not exam %}
   <div class="card empty-state">
@@ -80,6 +97,37 @@
     {% endif %}
   </div>
   {% endif %}
+</div>
+
+<div class="modal-bg" id="generateModal">
+  <div class="modal">
+    <h3>問題を生成する</h3>
+    <p class="muted" style="margin-top:-8px;font-size:13px;">
+      シラバス項目のキーワードで Web を検索し、取れた本文の抜粋だけを根拠に作ります。
+      抜粋から答えが決まらない問題、引用が本文に見つからない問題は捨てます。
+      作問と別のパスで解き直して答えが割れたものは「要確認」に入り、出題されません。
+    </p>
+    <div class="field">
+      <label for="genNode">シラバス項目</label>
+      <select id="genNode">
+        {% for item in syllabus %}
+        <option value="{{ item.path }}" {% if item.path == node %}selected{% endif %}>{{ item.path }} {{ item.title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="genTarget">目標の採用数</label>
+      <input type="text" id="genTarget" value="5" style="width:90px;">
+    </div>
+    <p class="muted" style="font-size:13px;">
+      1問あたり生成と検証で2回モデルを呼ぶため数分かかります。画面を閉じても処理は続きます。
+    </p>
+    <div class="row" style="justify-content:flex-end;gap:8px;">
+      <span id="genStatus" class="muted" style="font-size:13px;margin-right:auto;"></span>
+      <button class="btn btn-ghost" id="genCancel">キャンセル</button>
+      <button class="btn btn-primary" id="genConfirm">生成を開始</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-bg" id="addModal">

@@ -263,3 +263,15 @@ input[type="text"]:focus, textarea:focus, select:focus {
   .meter { flex-basis: 80px; }
   .wrap { padding: 24px 16px; }
 }
+
+/* --- job banner: same markup and hidden-attribute handling as writing's
+   .job-panel, so a running job reads the same across the two apps. --- */
+.job-panel { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 0 16px; padding: 12px 14px; background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--r-md); }
+.job-panel[hidden] { display: none; }
+.job-panel-copy { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.job-panel-copy strong { font-size: 14px; font-weight: 500; }
+.job-panel-copy span { overflow-wrap: anywhere; font-size: 12px; }
+.job-panel-actions { display: flex; flex: 0 0 auto; gap: 8px; }
+@media (max-width: 760px) {
+  .job-panel { align-items: stretch; flex-direction: column; }
+}

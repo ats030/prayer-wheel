@@ -239,8 +239,17 @@ def test_pages_render_without_an_exam(client):
         assert "試験の設定" in response.text
 
 
-def test_health_reports_the_database(client):
-    assert client.get("/health").json() == {"ok": True}
+def test_health_reports_the_database(client, monkeypatch):
+    from exam_trainer import ollama_client, web
+
+    # Probing the real Ollama/SearXNG would make this test depend on what is
+    # running on the machine; only the database check belongs here.
+    monkeypatch.setattr(ollama_client, "available", lambda: True)
+    monkeypatch.setattr(web, "available", lambda: False)
+    body = client.get("/health").json()
+    assert body["ok"] is True
+    assert body["ollama"] is True
+    assert body["web"] is False
 
 
 def test_next_endpoint_never_reveals_the_answer(client):
@@ -274,3 +283,291 @@ def test_syllabus_endpoint_rejects_an_unparsable_outline(client):
     exam_id = bank.create_exam("G検定")
     response = client.post(f"/api/exams/{exam_id}/syllabus", json={"outline": "番号のない行\n"})
     assert response.status_code == 400
+
+
+# --- material / passages -------------------------------------------------
+
+def test_passages_prefer_paragraph_boundaries():
+    from exam_trainer import web
+
+    text = ("あ" * 700) + "。\n" + ("い" * 700) + "。"
+    chunks = web.passages(text, size=800, overlap=50)
+    assert len(chunks) >= 2
+    assert chunks[0].endswith("。"), "文の途中で切ると、切れた側について問う問題が出る"
+
+
+def test_passages_returns_short_text_whole():
+    from exam_trainer import web
+
+    assert web.passages("短い本文です。") == ["短い本文です。"]
+    assert web.passages("   ") == []
+
+
+def test_search_query_includes_the_exam_name():
+    from exam_trainer import materials
+
+    query = materials.search_query("G検定", {"path": "2.3", "title": "汎化", "keywords": "過学習, 交差検証"})
+    assert query.startswith("G検定"), "試験名がないと汎用の論文に流れる"
+    assert "過学習" in query
+
+
+def test_past_question_sites_are_filtered_out():
+    from exam_trainer import web
+
+    assert web._blocked("https://example.com/kakomon/2024")
+    assert not web._blocked("https://example.com/glossary/ai")
+
+
+# --- generation gates ----------------------------------------------------
+
+def test_evidence_must_appear_in_the_passage():
+    from exam_trainer import generate
+
+    passage = "AI効果とは、原理が解明されると知能とは見なされなくなる現象である。"
+    assert generate.grounded("原理が解明されると知能とは見なされなくなる現象", passage)
+    # Punctuation and spacing differences must not defeat the match.
+    assert generate.grounded("原理が解明されると、知能とは見なされなくなる 現象", passage)
+    assert not generate.grounded("チューリングテストは人間と区別できるかを問うものである", passage)
+
+
+def test_short_evidence_is_not_accepted_as_grounding():
+    from exam_trainer import generate
+
+    passage = "AI効果とは、原理が解明されると知能とは見なされなくなる現象である。"
+    assert not generate.grounded("AI効果", passage), "短い断片は偶然一致しうる"
+
+
+def test_screen_drops_an_invented_quote():
+    from exam_trainer import generate
+
+    passage = "教師あり学習では、正解ラベル付きのデータから入出力の対応を学習する。"
+    candidate = {
+        "stem": "教師あり学習の説明として正しいものはどれか。",
+        "choices": ["正解ラベル付きデータから学習する", "報酬から学習する", "ラベルなしで構造を見つける"],
+        "answer": 0,
+        "evidence": "強化学習では報酬を最大化する方策を学習する",  # 抜粋にない
+    }
+    verdict, reason = generate.screen(candidate, passage, [], embed=lambda text: [1.0])
+    assert verdict == "drop"
+    assert "根拠" in reason
+
+
+def test_screen_drops_a_malformed_question_before_any_model_call():
+    from exam_trainer import generate
+
+    def explode(text):
+        raise AssertionError("形が壊れた問題で埋め込みを呼んではいけない")
+
+    passage = "教師あり学習では、正解ラベル付きのデータから入出力の対応を学習する。"
+    candidate = {
+        "stem": "教師あり学習の説明として正しいものはどれか。",
+        "choices": ["同じ", "同じ", "別"],
+        "answer": 0,
+        "evidence": "正解ラベル付きのデータから入出力の対応を学習する",
+    }
+    verdict, _ = generate.screen(candidate, passage, [], embed=explode)
+    assert verdict == "drop"
+
+
+def test_screen_accepts_a_grounded_question():
+    from exam_trainer import generate
+
+    passage = "教師あり学習では、正解ラベル付きのデータから入出力の対応を学習する。"
+    candidate = {
+        "stem": "教師あり学習の説明として正しいものはどれか。",
+        "choices": ["正解ラベル付きのデータから学習する", "報酬signalから学習する", "ラベルなしで構造を探す"],
+        "answer": 0,
+        "evidence": "正解ラベル付きのデータから入出力の対応を学習する",
+    }
+    verdict, reason = generate.screen(candidate, passage, [], embed=lambda text: [1.0, 0.0])
+    assert verdict == "ok", reason
+
+
+def test_duplicate_detection_falls_back_when_embeddings_fail():
+    from exam_trainer import generate
+
+    def broken(text):
+        raise RuntimeError("ollama down")
+
+    assert generate.is_duplicate("同じ問題文です。", ["同じ問題文です。"], embed=broken), "完全一致は拾う"
+    assert not generate.is_duplicate("違う問題文です。", ["同じ問題文です。"], embed=broken), \
+        "埋め込みが落ちても生成は止めない"
+
+
+def test_duplicate_detection_uses_cosine_similarity():
+    from exam_trainer import generate
+
+    vectors = {"新しい問題": [1.0, 0.0], "既存の問題": [0.999, 0.01]}
+    assert generate.is_duplicate("新しい問題", ["既存の問題"], embed=lambda t: vectors[t])
+    vectors["既存の問題"] = [0.0, 1.0]
+    assert not generate.is_duplicate("新しい問題", ["既存の問題"], embed=lambda t: vectors[t])
+
+
+# --- verification --------------------------------------------------------
+
+def test_verifier_disagreement_holds_the_question(monkeypatch):
+    from exam_trainer import generate, ollama_client
+
+    monkeypatch.setattr(
+        ollama_client, "generate_json",
+        lambda *a, **k: {"answer": 2, "reason": "抜粋では別の記述", "unique": True},
+    )
+    agrees, reason = generate.verify("抜粋", "問題", ["ア", "イ", "ウ"], 0)
+    assert not agrees
+    assert "C" in reason, "どちらを正解と判断したかが分かること"
+
+
+def test_verifier_agreement_passes():
+    from exam_trainer import generate, ollama_client
+    import pytest as _pytest
+
+    with _pytest.MonkeyPatch.context() as mp:
+        mp.setattr(ollama_client, "generate_json", lambda *a, **k: {"answer": 0, "unique": True})
+        agrees, reason = generate.verify("抜粋", "問題", ["ア", "イ", "ウ"], 0)
+    assert agrees and reason == ""
+
+
+def test_ambiguous_question_is_not_verified(monkeypatch):
+    from exam_trainer import generate, ollama_client
+
+    monkeypatch.setattr(
+        ollama_client, "generate_json",
+        lambda *a, **k: {"answer": 0, "unique": False, "reason": "複数が正解になりうる"},
+    )
+    agrees, reason = generate.verify("抜粋", "問題", ["ア", "イ", "ウ"], 0)
+    assert not agrees
+    assert "一意" in reason
+
+
+def test_verifier_failure_holds_rather_than_passes(monkeypatch):
+    """検証を実行できないときに素通しさせない（fail closed）。"""
+    from exam_trainer import generate, ollama_client
+
+    def explode(*args, **kwargs):
+        raise ollama_client.OllamaError("connection refused")
+
+    monkeypatch.setattr(ollama_client, "generate_json", explode)
+    agrees, reason = generate.verify("抜粋", "問題", ["ア", "イ", "ウ"], 0)
+    assert not agrees
+    assert "検証" in reason
+
+
+# --- end to end (no network, no model) -----------------------------------
+
+def test_generation_stores_verified_and_held_separately(monkeypatch):
+    from exam_trainer import generate, materials, ollama_client, web
+
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": "2.1", "title": "教師あり学習", "keywords": "SVM"}])
+    passage = "教師あり学習では、正解ラベル付きのデータから入出力の対応を学習する。" * 3
+
+    monkeypatch.setattr(web, "available", lambda: True)
+    monkeypatch.setattr(materials, "ensure", lambda *a, **k: [
+        {"url": "https://example.test/ml", "title": "ML", "text": passage}
+    ])
+    monkeypatch.setattr(generate, "questions_from_passage", lambda *a, **k: [
+        {
+            "stem": "教師あり学習の説明として正しいものはどれか。",
+            "choices": ["正解ラベル付きのデータから学習する", "報酬から方策を学ぶ", "ラベルなしで構造を探す"],
+            "answer": 0,
+            "explanation": "定義のとおり。",
+            "evidence": "正解ラベル付きのデータから入出力の対応を学習する",
+        },
+        {
+            "stem": "教師あり学習で使われるデータの説明はどれか。",
+            "choices": ["正解ラベルが付いている", "報酬だけがある", "何も付いていない"],
+            "answer": 0,
+            "explanation": "同上。",
+            "evidence": "正解ラベル付きのデータから入出力の対応を学習する",
+        },
+    ])
+    monkeypatch.setattr(generate, "is_duplicate", lambda *a, **k: False)
+    # 1問目は同意、2問目は不一致。
+    answers = iter([{"answer": 0, "unique": True}, {"answer": 1, "unique": True}])
+    monkeypatch.setattr(ollama_client, "generate_json", lambda *a, **k: next(answers))
+
+    summary = generate.generate_for_node(exam_id, "2.1", target=2)
+    assert summary["verified"] == 1
+    assert summary["held"] == 1
+
+    verified = bank.list_questions(exam_id, status="verified")
+    held = bank.list_questions(exam_id, status="held")
+    assert len(verified) == 1 and len(held) == 1
+    assert verified[0]["source_refs"] == ["https://example.test/ml"]
+    assert verified[0]["origin"] == "generated"
+    assert "B" in held[0]["hold_reason"]
+    # そして held は出題キューに入らない。
+    assert bank.queue_counts(exam_id) == {"due": 0, "new": 1}
+
+
+def test_generation_without_material_reports_why(monkeypatch):
+    from exam_trainer import generate, materials
+
+    exam_id = bank.create_exam("G検定")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "定義"}])
+    monkeypatch.setattr(materials, "ensure", lambda *a, **k: [])
+    summary = generate.generate_for_node(exam_id, "1")
+    assert summary["verified"] == 0
+    assert any("SearXNG" in reason for reason in summary["reasons"])
+
+
+# --- jobs ----------------------------------------------------------------
+
+def test_enqueue_is_idempotent_per_node():
+    from exam_trainer import jobs
+
+    exam_id = bank.create_exam("G検定")
+    first = jobs.enqueue(exam_id, "1.1")
+    second = jobs.enqueue(exam_id, "1.1")
+    assert first["id"] == second["id"], "二度押しで二重生成しない"
+
+
+def test_running_jobs_are_requeued_after_a_restart():
+    from exam_trainer import jobs
+
+    exam_id = bank.create_exam("G検定")
+    job = jobs.enqueue(exam_id, "1.1")
+    db.connection().execute("UPDATE job SET status = 'running' WHERE id = ?", (job["id"],))
+    db.connection().commit()
+    jobs.recover_running()
+    assert jobs.get(job["id"])["status"] == "queued"
+
+
+def test_generation_endpoint_refuses_without_search(client, monkeypatch):
+    from exam_trainer import web
+
+    exam_id = bank.create_exam("G検定")
+    monkeypatch.setattr(web, "available", lambda: False)
+    response = client.post(f"/api/exams/{exam_id}/generate", json={"node_path": "1.1"})
+    assert response.status_code == 400
+    assert "SEARXNG" in response.json()["detail"]
+
+
+def test_stem_must_not_reference_the_passage():
+    """実際の生成で「抜粋における〜」という問題文が出た。解答者に抜粋は見えない。"""
+    problems = checks.check(
+        "抜粋における「汎化誤差」の説明として正しいものはどれか。",
+        ["初めて見る問題での誤り率", "訓練データでの誤り率", "モデル選択の手順"],
+        0,
+    )
+    assert any("抜粋" in problem for problem in problems)
+    assert not checks.check(
+        "「汎化誤差」の説明として正しいものはどれか。",
+        ["初めて見る問題での誤り率", "訓練データでの誤り率", "モデル選択の手順"],
+        0,
+    )
+
+
+def test_screen_drops_a_passage_referencing_stem():
+    from exam_trainer import generate
+
+    passage = "汎化誤差とは、初めて見るデータに対する誤りの割合のことである。" * 2
+    candidate = {
+        "stem": "本文中の「汎化誤差」の説明として正しいものはどれか。",
+        "choices": ["初めて見るデータでの誤り率", "訓練データでの誤り率", "学習率の大きさ"],
+        "answer": 0,
+        "evidence": "汎化誤差とは、初めて見るデータに対する誤りの割合のことである",
+    }
+    verdict, reason = generate.screen(candidate, passage, [], embed=lambda t: [1.0])
+    assert verdict == "drop"
+    assert "本文中" in reason

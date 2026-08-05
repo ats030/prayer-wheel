@@ -8,6 +8,7 @@ something and the result it produces.
 from __future__ import annotations
 
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -16,13 +17,24 @@ from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from pydantic import BaseModel
 
-from . import bank, db
+from . import bank, db, jobs, ollama_client, web
 from .config import settings
 
 logger = logging.getLogger(__name__)
 
 BASE_DIR = Path(__file__).parent
-app = FastAPI(title="exam-trainer")
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # A job that was mid-run when the service stopped would otherwise sit at
+    # "running" with nothing running it.
+    jobs.recover_running()
+    jobs.start_worker()
+    yield
+
+
+app = FastAPI(title="exam-trainer", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
@@ -36,7 +48,7 @@ def health() -> dict:
         db.connection().execute("SELECT 1")
     except Exception as exc:  # pragma: no cover - only on a broken disk
         raise HTTPException(status_code=503, detail=str(exc)) from exc
-    return {"ok": True}
+    return {"ok": True, "ollama": ollama_client.available(), "web": web.available()}
 
 
 def _current_exam(exam_id: int | None) -> dict | None:
@@ -101,6 +113,8 @@ def bank_page(
         node=node,
         query=q,
         syllabus=bank.list_syllabus(exam["id"]) if exam else [],
+        jobs=jobs.list_for_exam(exam["id"], 5) if exam else [],
+        has_web=web.available(),
     )
 
 
@@ -217,6 +231,29 @@ def answer(question_id: int, payload: AnswerIn) -> JSONResponse:
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     return JSONResponse(result)
+
+
+class GenerateIn(BaseModel):
+    node_path: str
+    target: int = 5
+
+
+@app.post("/api/exams/{exam_id}/generate")
+def start_generation(exam_id: int, payload: GenerateIn) -> JSONResponse:
+    if not web.available():
+        raise HTTPException(
+            status_code=400,
+            detail="SEARXNG_API_URL が未設定です。根拠を集められないため生成できません",
+        )
+    if not payload.node_path.strip():
+        raise HTTPException(status_code=400, detail="シラバス項目を選んでください")
+    job = jobs.enqueue(exam_id, payload.node_path.strip(), payload.target)
+    return JSONResponse(job)
+
+
+@app.get("/api/exams/{exam_id}/jobs")
+def list_jobs(exam_id: int) -> JSONResponse:
+    return JSONResponse({"items": jobs.list_for_exam(exam_id)})
 
 
 @app.get("/api/exams/{exam_id}/next")

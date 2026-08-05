@@ -30,6 +30,16 @@ BANNED_CHOICE_PATTERNS = (
     "該当なし", "すべて誤り", "いずれも誤り", "全て正しい", "全て誤り",
 )
 
+# The passage a question was generated from is scaffolding: the person
+# answering never sees it. A stem that says "抜粋における…" reads as a reading
+# comprehension question about a document that is not on screen. Observed in the
+# first real generation run, so it is checked rather than only discouraged in
+# the prompt.
+BANNED_STEM_PATTERNS = (
+    "抜粋", "本文中", "本文において", "この文章", "上記の文章", "上記の記述",
+    "次の文章", "以下の文章", "提示された文", "与えられた文",
+)
+
 
 def check(stem: str, choices: list[str], answer: int) -> list[str]:
     """Return a list of problems; empty means the shape is acceptable."""
@@ -39,6 +49,10 @@ def check(stem: str, choices: list[str], answer: int) -> list[str]:
 
     if len(stem) < 10:
         problems.append("問題文が短すぎます")
+    for banned in BANNED_STEM_PATTERNS:
+        if banned in stem:
+            problems.append(f"問題文が「{banned}」に言及しています（解答者には見えません）")
+            break
     if not (MIN_CHOICES <= len(cleaned) <= MAX_CHOICES):
         problems.append(f"選択肢は{MIN_CHOICES}〜{MAX_CHOICES}個にしてください")
     if any(not choice for choice in cleaned):
