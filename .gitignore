@@ -17,3 +17,7 @@
 /app/x-post/
 /app/memo/
 /app/tool-inventory/
+
+# Python のバイトコードキャッシュ (app/ 配下のアプリが生成する)
+__pycache__/
+*.pyc

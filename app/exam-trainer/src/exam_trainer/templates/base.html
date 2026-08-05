@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}exam-trainer{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%8E%93</text></svg>">
+  <link rel="stylesheet" href="/static/linear.css?v={{ static_version }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <nav class="nav">
+    <a class="brand" href="/">exam<span class="dot">.</span></a>
+    <div class="nav-links" aria-label="メインナビゲーション">
+      <a href="/{% if exam %}?exam_id={{ exam.id }}{% endif %}">解く</a>
+      <a href="/weakness{% if exam %}?exam_id={{ exam.id }}{% endif %}">弱点</a>
+      <a href="/bank{% if exam %}?exam_id={{ exam.id }}{% endif %}">問題バンク</a>
+      <a href="/settings{% if exam %}?exam_id={{ exam.id }}{% endif %}">試験の設定</a>
+    </div>
+    <span class="spacer"></span>
+    {% if exams | length > 1 %}
+    <select id="examSwitch" class="compact-select" style="width:auto;" aria-label="試験を切り替え">
+      {% for item in exams %}
+      <option value="{{ item.id }}" {% if exam and item.id == exam.id %}selected{% endif %}>{{ item.name }}</option>
+      {% endfor %}
+    </select>
+    {% endif %}
+    <span class="meta">{% block navmeta %}{% if exam %}{{ exam.name }}{% endif %}{% endblock %}</span>
+  </nav>
+  {% block body %}{% endblock %}
+  <div class="toast" id="toast"></div>
+  <script>
+    function toast(msg, ms) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), ms || 2600);
+    }
+    // Switching exams keeps you on the same screen; the exam is a filter over
+    // every page, not a place you navigate to.
+    const examSwitch = document.getElementById('examSwitch');
+    if (examSwitch) {
+      examSwitch.addEventListener('change', () => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('exam_id', examSwitch.value);
+        url.searchParams.delete('node');
+        window.location.href = url.toString();
+      });
+    }
+    async function postJSON(url, body) {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body || {}),
+      });
+      let data = {};
+      try { data = await res.json(); } catch (_) { /* empty body */ }
+      if (!res.ok) throw new Error(data.detail || '処理に失敗しました');
+      return data;
+    }
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

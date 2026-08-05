@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}問題バンク — exam-trainer{% endblock %}
+{% block body %}
+<div class="wrap" id="bankPage" data-exam-id="{{ exam.id if exam else '' }}">
+  <div class="page-head">
+    <h1 style="margin:0;">問題バンク</h1>
+    <span class="spacer"></span>
+    <button class="btn btn-primary" id="addBtn" {% if not exam %}disabled{% endif %}>問題を追加</button>
+  </div>
+
+  {% if not exam %}
+  <div class="card empty-state">
+    まだ試験がありません。<a href="/settings">試験の設定</a>で追加してください。
+  </div>
+  {% else %}
+  <div class="tabs" style="margin-bottom:16px;">
+    <a class="tab {% if not status %}active{% endif %}" href="/bank?exam_id={{ exam.id }}">すべて</a>
+    <a class="tab {% if status == 'verified' %}active{% endif %}" href="/bank?exam_id={{ exam.id }}&status=verified">
+      出題可 <span class="badge">{{ status_counts.get('verified', 0) }}</span>
+    </a>
+    <a class="tab {% if status == 'held' %}active{% endif %}" href="/bank?exam_id={{ exam.id }}&status=held">
+      要確認 <span class="badge">{{ status_counts.get('held', 0) }}</span>
+    </a>
+    <a class="tab {% if status == 'draft' %}active{% endif %}" href="/bank?exam_id={{ exam.id }}&status=draft">
+      未検証 <span class="badge">{{ status_counts.get('draft', 0) }}</span>
+    </a>
+    <a class="tab {% if status == 'rejected' %}active{% endif %}" href="/bank?exam_id={{ exam.id }}&status=rejected">
+      破棄 <span class="badge">{{ status_counts.get('rejected', 0) }}</span>
+    </a>
+  </div>
+
+  <div class="card">
+    <form class="filter-row" method="get" action="/bank">
+      <input type="hidden" name="exam_id" value="{{ exam.id }}">
+      <input type="hidden" name="status" value="{{ status }}">
+      <select name="node">
+        <option value="">全範囲</option>
+        {% for item in syllabus %}
+        <option value="{{ item.path }}" {% if item.path == node %}selected{% endif %}>{{ item.path }} {{ item.title }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="q" value="{{ query }}" placeholder="問題文を検索" style="width:240px;">
+      <button class="btn btn-secondary" type="submit">絞り込む</button>
+    </form>
+
+    {% if not questions %}
+    <div class="empty-state">
+      該当する問題がありません。「問題を追加」で手入力するか、シラバスから生成してください。
+    </div>
+    {% else %}
+    {% for item in questions %}
+    <div class="q-row" data-question-id="{{ item.id }}">
+      <div class="q-head">
+        <span class="badge">{{ item.node_path }}</span>
+        <span class="badge status-{{ item.status }}">{{ item.status }}</span>
+        {% if item.origin == 'generated' %}<span class="badge">生成</span>{% endif %}
+        <span class="spacer"></span>
+        {% if item.status != 'verified' %}
+        <button class="btn btn-secondary btn-xs" data-action="verified">出題可にする</button>
+        {% endif %}
+        {% if item.status != 'rejected' %}
+        <button class="btn btn-ghost btn-xs" data-action="rejected">破棄</button>
+        {% endif %}
+        <button class="btn btn-danger btn-xs" data-action="delete">削除</button>
+      </div>
+      <div class="q-stem">{{ item.stem }}</div>
+      <ol class="q-choices" type="A">
+        {% for choice in item.choices %}
+        <li class="{% if loop.index0 == item.answer %}is-answer{% endif %}">{{ choice }}</li>
+        {% endfor %}
+      </ol>
+      {% if item.hold_reason %}<div class="q-hold">⚠ {{ item.hold_reason }}</div>{% endif %}
+      {% if item.source_refs %}
+      <div class="evidence" style="margin-top:8px;">
+        {% for url in item.source_refs %}<a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ url }}</a>{% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="modal-bg" id="addModal">
+  <div class="modal">
+    <h3>問題を追加</h3>
+    <p class="muted" style="margin-top:-8px;font-size:13px;">
+      形の検査（正解が1つ・選択肢の重複・正解だけが長い）を通ったものだけ保存できます。
+    </p>
+    <div class="field">
+      <label for="qNode">シラバス項目</label>
+      <select id="qNode">
+        {% for item in syllabus %}
+        <option value="{{ item.path }}">{{ item.path }} {{ item.title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="qStem">問題文</label>
+      <textarea id="qStem" rows="3"></textarea>
+    </div>
+    <div class="field">
+      <label>選択肢（1行に1つ。先頭の行が A）</label>
+      <textarea id="qChoices" rows="4" placeholder="教師あり学習&#10;教師なし学習&#10;強化学習"></textarea>
+    </div>
+    <div class="field">
+      <label for="qAnswer">正解（A〜F）</label>
+      <input type="text" id="qAnswer" value="A" style="width:80px;">
+    </div>
+    <div class="field">
+      <label for="qExplanation">解説</label>
+      <textarea id="qExplanation" rows="2"></textarea>
+    </div>
+    <div class="field">
+      <label for="qSources">根拠URL（1行に1つ・任意）</label>
+      <textarea id="qSources" rows="2"></textarea>
+    </div>
+    <div class="row" style="justify-content:flex-end;gap:8px;">
+      <span id="addStatus" class="muted" style="font-size:13px;margin-right:auto;"></span>
+      <button class="btn btn-ghost" id="addCancel">キャンセル</button>
+      <button class="btn btn-primary" id="addConfirm">保存</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/bank.js?v={{ static_version }}"></script>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}試験の設定 — exam-trainer{% endblock %}
+{% block body %}
+<div class="wrap" id="settingsPage" data-exam-id="{{ exam.id if exam else '' }}">
+  <div class="page-head">
+    <h1 style="margin:0;">試験の設定</h1>
+  </div>
+
+  <h2 class="section-title">試験</h2>
+  <div class="card" style="margin-bottom:32px;">
+    {% for item in exams %}
+    <div class="exam-row">
+      <div>
+        <strong style="font-weight:500;">{{ item.name }}</strong>
+        <span class="muted" style="font-size:12px;margin-left:8px;">{{ item.slug }}</span>
+      </div>
+      <span class="spacer"></span>
+      {% if exam and item.id == exam.id %}<span class="badge">選択中</span>{% endif %}
+      <a class="btn btn-secondary btn-xs" href="/settings?exam_id={{ item.id }}">開く</a>
+      <button class="btn btn-danger btn-xs" data-delete-exam="{{ item.id }}">削除</button>
+    </div>
+    {% endfor %}
+    <div class="row" style="margin-top:16px;">
+      <input type="text" id="examName" placeholder="試験名（例: G検定）" style="max-width:280px;">
+      <button class="btn btn-primary" id="addExam">試験を追加</button>
+    </div>
+  </div>
+
+  {% if exam %}
+  <h2 class="section-title">{{ exam.name }} のシラバス</h2>
+  <div class="card">
+    <p class="muted" style="margin-top:0;font-size:13px;">
+      1行に1項目。「1.2 タイトル」の形式で、番号のドットが階層になります。
+      「| 」以降はキーワードで、生成時の検索語に使います。
+      問題は項目のパス文字列で紐づくので、登録し直しても既存の問題は消えません。
+    </p>
+    <div class="field">
+      <label for="outline">シラバス</label>
+      <textarea id="outline" class="outline-input" spellcheck="false"
+                placeholder="1 人工知能とは&#10;1.1 人工知能の定義 | AI効果, チューリングテスト&#10;2 機械学習の具体的手法&#10;2.1 教師あり学習 | 回帰, 分類, SVM">{{ outline }}</textarea>
+    </div>
+    <div class="row" style="justify-content:flex-end;">
+      <span id="syllabusStatus" class="muted" style="font-size:13px;margin-right:auto;">
+        {% if syllabus %}{{ syllabus | length }}項目を登録済み{% else %}未登録{% endif %}
+      </span>
+      <button class="btn btn-primary" id="saveSyllabus">シラバスを保存</button>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="margin-top:32px;">保存先</h2>
+  <div class="card">
+    <p class="muted" style="margin:0;font-size:13px;">
+      問題と解答履歴は <code>~/data/exam-trainer/bank.sqlite</code>（日次バックアップの対象）。
+      取得したWeb本文などの再生成できるものは <code>~/cache/exam-trainer/</code> に置きます。
+    </p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/settings.js?v={{ static_version }}"></script>
+{% endblock %}
