@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import logging
 import time
+import urllib.parse
 from dataclasses import dataclass
 
 import httpx
@@ -29,6 +30,35 @@ _UA = "Mozilla/5.0 (compatible; exam-trainer/1.0)"
 # risks reproducing copyrighted items; the app writes its own questions from
 # primary sources instead.
 BLOCKED_HOST_HINTS = ("kakomon", "過去問", "mondai-shu")
+
+# Pages that cannot carry an explanation whatever the query. Kept separate from
+# BLOCKED_HOST_HINTS because the reason differs: that list is about copyright,
+# this one about there being no body to extract. Measured across three exams
+# with six candidates per node, these filled roughly half the slots and yielded
+# 0-185 characters each; one node's entire candidate list was junk and its only
+# material ended up being the 185 characters on Yahoo's front page.
+#
+# The wasted fetch is the smaller cost. Material order decides what gets asked
+# (generate.py stops at the target), so a video page at the top of the list
+# starves the node it was collected for.
+UNUSABLE_URL_HINTS = (
+    # Video, social, shopping, courseware: no article body.
+    "youtube.com", "youtu.be", "instagram.com", "tiktok.com", "facebook.com",
+    "twitter.com", "pinterest.", "amazon.co", "rakuten.co", "udemy.com",
+    # Flashcards reproduce exam items — the BLOCKED_HOST_HINTS reason applies
+    # here too, but the hostname carries no hint of it.
+    "quizlet.com",
+    # Search engines' own pages. Meta-search backends hand back front pages and
+    # result listings as if they were results.
+    "/search?", "/results?", "search_query=",
+    "www.google.com/", "www.yahoo.co.jp/", "search.yahoo.", "www.bing.com/",
+    "duckduckgo.com/", "startpage.com/", "ecosia.org/", "zapmeta.",
+)
+
+# Enough text for at least one passage (web.passages splits at 1200) plus the
+# overlap. Below this a page may extract cleanly and still not support a single
+# question.
+MIN_MATERIAL_CHARS = 800
 
 
 @dataclass
@@ -120,7 +150,12 @@ def search_urls(query: str, limit: int = 6) -> list[dict]:
                 + "）。時間をおいて再実行してください"
             )
             logger.warning("SearXNG upstreams suspended: %s", suspended)
-    return [hit for hit in results if not _blocked(hit.get("url", ""))][:limit]
+    keep = [
+        hit
+        for hit in results
+        if not _blocked(hit.get("url", "")) and not _unusable(hit.get("url", ""))
+    ]
+    return keep[:limit]
 
 
 def _suspended_engines(payload: dict) -> list[str]:
@@ -138,6 +173,22 @@ def _suspended_engines(payload: dict) -> list[str]:
 def _blocked(url: str) -> bool:
     lowered = url.lower()
     return any(hint in lowered for hint in BLOCKED_HOST_HINTS)
+
+
+def _unusable(url: str) -> bool:
+    lowered = url.lower()
+    if any(hint in lowered for hint in UNUSABLE_URL_HINTS):
+        return True
+    split = urllib.parse.urlsplit(lowered)
+    # A bare front page is never an article about one syllabus item. Meta-search
+    # backends hand these back as results — a ministry's home page arrived as
+    # material for 自由民権運動 — and they extract to a menu of headlines that
+    # reads like prose to the generator.
+    if split.path in ("", "/") and not split.query:
+        return True
+    # trafilatura works on HTML, so a PDF costs a full download and returns
+    # nothing. Judged on the path so a query string cannot hide the extension.
+    return split.path.endswith(".pdf")
 
 
 def extract_url(url: str) -> Material | None:
@@ -205,9 +256,16 @@ def gather(query: str, limit: int = 4, max_chars: int = 6000) -> list[Material]:
         if not url:
             continue
         material = extract_url(url)
-        if material:
-            material.text = material.text[:max_chars]
-            materials.append(material)
+        if material is None:
+            continue
+        # A page can extract cleanly and still be a stub — a video description,
+        # a product blurb. Only search results are held to this: a URL the user
+        # named is their explicit choice, however short.
+        if len(material.text) < MIN_MATERIAL_CHARS:
+            logger.info("Skipping %s: only %d characters", url, len(material.text))
+            continue
+        material.text = material.text[:max_chars]
+        materials.append(material)
     return materials
 
 

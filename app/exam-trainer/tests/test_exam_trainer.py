@@ -319,6 +319,54 @@ def test_past_question_sites_are_filtered_out():
     assert not web._blocked("https://example.com/glossary/ai")
 
 
+def test_pages_with_no_article_body_are_filtered_out():
+    from exam_trainer import web
+
+    # All of these were returned as candidates by real searches and extracted
+    # to 0-185 characters.
+    assert web._unusable("https://www.youtube.com/watch?v=bcCT_nYQJbM")
+    assert web._unusable("https://www.instagram.com/reel/DO554qugYQN/")
+    assert web._unusable("https://www.tiktok.com/@user/video/7587734048219368722")
+    assert web._unusable("https://www.udemy.com/course/g-kentei/")
+    assert web._unusable("https://quizlet.com/jp/509027215/")
+    assert web._unusable("https://www.yahoo.co.jp/")
+    assert web._unusable("https://www.startpage.com/do/search?q=%E6%97%A5%E6%9C%AC%E5%8F%B2")
+    assert web._unusable("https://www.hello.ac/2025.his.pdf")
+    # A query string must not hide the extension.
+    assert web._unusable("https://example.com/paper.pdf?download=1")
+
+    assert not web._unusable("https://ja.wikipedia.org/wiki/%E7%B8%84%E6%96%87%E6%99%82%E4%BB%A3")
+    assert not web._unusable("https://kotobank.jp/word/%E8%87%AA%E7%94%B1%E6%B0%91%E6%A8%A9-77425")
+    # "pdf" elsewhere in the path is not a PDF.
+    assert not web._unusable("https://example.com/pdf-guide/history")
+
+
+def test_front_pages_are_not_material():
+    from exam_trainer import web
+
+    # China's ministry of commerce arrived as a candidate for 自由民権運動.
+    assert web._unusable("https://www.mofcom.gov.cn/")
+    assert web._unusable("https://example.com")
+    assert not web._unusable("https://example.com/history/meiji")
+
+
+def test_gather_skips_pages_too_short_to_carry_a_question(monkeypatch):
+    from exam_trainer import web
+
+    pages = {
+        "https://example.com/stub": "短すぎる説明。",
+        "https://example.com/article": "解説。" * 500,
+    }
+    monkeypatch.setattr(web, "search_urls", lambda q, limit=6: [{"url": u} for u in pages])
+    monkeypatch.setattr(
+        web, "extract_url", lambda url: web.Material(url=url, title=url, text=pages[url])
+    )
+
+    got = web.gather("なんらかのクエリ", limit=4)
+
+    assert [m.url for m in got] == ["https://example.com/article"]
+
+
 # --- generation gates ----------------------------------------------------
 
 def test_evidence_must_appear_in_the_passage():
