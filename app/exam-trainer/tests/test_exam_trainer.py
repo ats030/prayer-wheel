@@ -532,7 +532,10 @@ def test_generation_stores_verified_and_held_separately(monkeypatch):
     ])
     monkeypatch.setattr(generate, "is_duplicate", lambda *a, **k: False)
     # 1問目は同意、2問目は不一致。
-    answers = iter([{"answer": 0, "unique": True}, {"answer": 1, "unique": True}])
+    answers = iter([
+        {"answer": 0, "unique": True, "in_scope": True},
+        {"answer": 1, "unique": True, "in_scope": True},
+    ])
     monkeypatch.setattr(ollama_client, "generate_json", lambda *a, **k: next(answers))
 
     summary = generate.generate_for_node(exam_id, "2.1", target=2)
@@ -545,8 +548,71 @@ def test_generation_stores_verified_and_held_separately(monkeypatch):
     assert verified[0]["source_refs"] == ["https://example.test/ml"]
     assert verified[0]["origin"] == "generated"
     assert "B" in held[0]["hold_reason"]
+
     # そして held は出題キューに入らない。
     assert bank.queue_counts(exam_id) == {"due": 0, "new": 1}
+
+def test_generation_stops_inside_candidate_batch_at_target(monkeypatch):
+    from exam_trainer import generate, materials
+    exam_id = bank.create_exam("世界遺産検定3級")
+    bank.set_syllabus(exam_id, [{"path": "1.1", "title": "世界遺産の基礎知識"}])
+    passage = "世界遺産条約は文化遺産と自然遺産を保護する国際条約である。" * 4
+    monkeypatch.setattr(materials, "ensure", lambda *a, **k: [
+        {"url": "https://example.test/heritage", "title": "世界遺産", "text": passage}
+    ])
+    monkeypatch.setattr(generate, "questions_from_passage", lambda *a, **k: [
+        {
+            "stem": f"世界遺産条約について正しい説明はどれか（{index}）。",
+            "choices": ["文化遺産と自然遺産を保護する", "スポーツだけを保護する", "国内法である"],
+            "answer": 0,
+            "explanation": "条約の目的による。",
+            "evidence": "世界遺産条約は文化遺産と自然遺産を保護する国際条約である",
+        }
+        for index in range(3)
+    ])
+    monkeypatch.setattr(generate, "screen", lambda *a, **k: ("ok", ""))
+    monkeypatch.setattr(generate, "verify", lambda *a, **k: (True, ""))
+    summary = generate.generate_for_node(exam_id, "1.1", target=2)
+    assert summary["verified"] == 2
+    assert len(bank.list_questions(exam_id, status="verified")) == 2
+
+
+def test_generation_round_robins_across_materials(monkeypatch):
+    from exam_trainer import generate, materials, web
+    exam_id = bank.create_exam("歴史能力検定3級")
+    bank.set_syllabus(exam_id, [{"path": "1.1", "title": "旧石器・縄文時代"}])
+    sources = [
+        {"url": "https://example.test/a", "title": "A", "text": "A" * 3000},
+        {"url": "https://example.test/b", "title": "B", "text": "B" * 3000},
+    ]
+    monkeypatch.setattr(materials, "ensure", lambda *a, **k: sources)
+    monkeypatch.setattr(web, "passages", lambda text: [text[0] + "1", text[0] + "2"])
+    monkeypatch.setattr(generate, "questions_from_passage", lambda *a, **k: [{
+        "stem": f"{a[2]}の問題", "choices": ["正解", "誤答1", "誤答2"],
+        "answer": 0, "explanation": "説明", "evidence": "根拠" * 10,
+    }])
+    monkeypatch.setattr(generate, "screen", lambda *a, **k: ("ok", ""))
+    monkeypatch.setattr(generate, "verify", lambda *a, **k: (True, ""))
+    summary = generate.generate_for_node(exam_id, "1.1", target=2)
+    assert summary["verified"] == 2
+    assert {q["source_refs"][0] for q in bank.list_questions(exam_id)} == {
+        "https://example.test/a", "https://example.test/b"
+    }
+
+
+def test_out_of_scope_question_is_held(monkeypatch):
+    from exam_trainer import generate, ollama_client
+    monkeypatch.setattr(ollama_client, "generate_json", lambda *a, **k: {
+        "answer": 0, "unique": True, "in_scope": False,
+        "scope_reason": "野球場建設計画は試験項目の周辺的な逸話です",
+    })
+    agrees, reason = generate.verify(
+        "抜粋", "野球場建設が中止された理由は何か", ["遺跡", "費用", "天候"], 0,
+        node_title="旧石器・縄文時代",
+    )
+    assert not agrees
+    assert "出題範囲" in reason
+
 
 
 def test_generation_without_material_reports_why(monkeypatch):

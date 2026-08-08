@@ -77,12 +77,28 @@ def _generate_prompt(node_title: str, keywords: str, passage: str, count: int) -
     )
 
 
-def _verify_prompt(passage: str, stem: str, choices: list[str]) -> str:
+def _verify_prompt(
+    passage: str,
+    stem: str,
+    choices: list[str],
+    node_title: str = "",
+    keywords: str = "",
+) -> str:
     listed = "\n".join(f"{index}: {choice}" for index, choice in enumerate(choices))
+    scope = ""
+    if node_title:
+        hint = f"（キーワード: {keywords}）" if keywords else ""
+        scope = (
+            f"出題範囲: {node_title}{hint}\n"
+            "問題がこの出題範囲の知識を直接問うなら in_scope を true、"
+            "記事中の周辺的な逸話や範囲外の知識を問うなら false にしてください。\n\n"
+        )
     return (
-        f"抜粋:\n---\n{passage}\n---\n\n"
+        scope
+        + f"抜粋:\n---\n{passage}\n---\n\n"
         f"問題: {stem}\n選択肢:\n{listed}\n\n"
-        '出力形式: {"answer": 0, "reason": "根拠になった抜粋の記述", "unique": true, "flawed": []}\n'
+        '出力形式: {"answer": 0, "reason": "根拠になった抜粋の記述", '
+        '"unique": true, "in_scope": true, "scope_reason": "出題範囲との関係", "flawed": []}\n'
         "unique は、抜粋から正解が一意に決まるなら true、決まらないなら false です。\n"
         "flawed は日本語として壊れている選択肢の添字の配列です（なければ空配列）。"
     )
@@ -140,11 +156,19 @@ def is_duplicate(stem: str, existing_stems: list[str], embed=None) -> bool:
     return False
 
 
-def verify(passage: str, stem: str, choices: list[str], answer: int, model: str = "") -> tuple[bool, str]:
+def verify(
+    passage: str,
+    stem: str,
+    choices: list[str],
+    answer: int,
+    model: str = "",
+    node_title: str = "",
+    keywords: str = "",
+) -> tuple[bool, str]:
     """Second opinion on a question. Returns (agrees, reason-when-not)."""
     try:
         data = ollama_client.generate_json(
-            _verify_prompt(passage, stem, choices),
+            _verify_prompt(passage, stem, choices, node_title, keywords),
             system=_VERIFY_SYSTEM,
             model=model or settings.model,
         )
@@ -152,6 +176,9 @@ def verify(passage: str, stem: str, choices: list[str], answer: int, model: str 
         return False, f"検証を実行できませんでした: {exc}"
     if not isinstance(data, dict):
         return False, "検証の応答を解釈できませんでした"
+    if node_title and data.get("in_scope") is not True:
+        reason = str(data.get("scope_reason", "")).strip()
+        return False, f"シラバスの出題範囲に適合しません: {reason}".rstrip()
     if data.get("unique") is False:
         return False, f"抜粋から正解が一意に決まりません: {data.get('reason', '')}".strip()
     try:
@@ -284,8 +311,21 @@ def generate_for_node(
 
     existing = [item["stem"] for item in bank.list_questions(exam_id, limit=500)]
 
-    for material in collected:
-        for passage in web.passages(material["text"]):
+    # Visit the first passage of every source before the second passage of any
+    # source. A source-by-source scan fills the target from whichever row sorts
+    # first, even when several independent sources were collected.
+    pending = [
+        (material, iter(web.passages(material["text"])))
+        for material in collected
+    ]
+    while pending:
+        next_round = []
+        for material, passages in pending:
+            try:
+                passage = next(passages)
+            except StopIteration:
+                continue
+            next_round.append((material, passages))
             if summary["verified"] >= target:
                 report(f"目標の{target}問に到達しました")
                 return summary
@@ -298,6 +338,9 @@ def generate_for_node(
                 continue
 
             for candidate in candidates:
+                if summary["verified"] >= target:
+                    report(f"目標の{target}問に到達しました")
+                    return summary
                 verdict, reason = screen(candidate, passage, existing)
                 if verdict == "drop":
                     summary["dropped"] += 1
@@ -305,7 +348,8 @@ def generate_for_node(
                     continue
 
                 agrees, disagreement = verify(
-                    passage, candidate["stem"], candidate["choices"], candidate["answer"], model=model
+                    passage, candidate["stem"], candidate["choices"], candidate["answer"],
+                    model=model, node_title=node["title"], keywords=node["keywords"],
                 )
                 status = "verified" if agrees else "held"
                 bank.add_question(
@@ -323,4 +367,5 @@ def generate_for_node(
                 report(
                     f"採用 {summary['verified']} / 要確認 {summary['held']} / 破棄 {summary['dropped']}"
                 )
+        pending = next_round
     return summary
