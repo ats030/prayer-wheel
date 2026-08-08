@@ -184,6 +184,16 @@ SearXNG は上流の検索エンジン（brave / duckduckgo / google / startpage
   「不足している項目をまとめて」を選ぶと、目標数に満たない項目をキューに積む
 - **試験の設定** — 試験の追加とシラバスの登録
 
+## 公開画面と管理画面
+
+- 公開: `/`（学習）、`/weakness`（弱点）
+- 管理: `/admin/bank`（問題バンク）、`/admin/settings`（試験設定）
+- 管理ログイン: `/admin/login`
+
+管理画面と変更系APIは `EXAM_TRAINER_ADMIN_TOKEN` で保護する。未設定時は管理操作を
+fail closedで拒否する。ログイン後はHTTP-only・SameSite=strictのセッションCookieを使う。
+HTTPSで公開するときは `EXAM_TRAINER_SECURE_COOKIES=true` も設定する。
+
 シラバスは1行1項目で貼り付ける。ドットの番号が階層になる。
 
 ```
@@ -211,4 +221,6 @@ EXAM_TRAINER_FAST_MODEL     # 素材の選別など軽い処理（既定 gemma4:
 EXAM_TRAINER_EMBED_MODEL    # 重複判定の埋め込み（既定 nomic-embed-text）
 SEARXNG_API_URL             # 素材収集。未設定なら生成は使えない
 OLLAMA_API_URL              # 既定 http://localhost:11434
+EXAM_TRAINER_ADMIN_TOKEN     # 管理画面・変更APIの認証トークン（必須）
+EXAM_TRAINER_SECURE_COOKIES  # HTTPS公開時は true
 ```

@@ -8,10 +8,12 @@ something and the result it produces.
 from __future__ import annotations
 
 import logging
+import re
+import secrets
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
@@ -40,6 +42,54 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 # Cache-busts /static on every restart, same trick as writing.
 STATIC_VERSION = str(int(BASE_DIR.stat().st_mtime))
+
+ADMIN_COOKIE = "exam_trainer_admin"
+
+
+def _is_admin(request: Request) -> bool:
+    candidate = request.cookies.get(ADMIN_COOKIE, "")
+    return bool(settings.admin_token) and secrets.compare_digest(candidate, settings.admin_token)
+
+
+@app.middleware("http")
+async def protect_admin(request: Request, call_next):
+    path = request.url.path
+    if path in {"/admin/login", "/api/admin/session"}:
+        return await call_next(request)
+    admin_page = path == "/admin" or path.startswith("/admin/")
+    public_api = (
+        request.method == "GET" and re.fullmatch(r"/api/exams/\d+/next", path)
+    ) or (
+        request.method == "POST" and re.fullmatch(r"/api/questions/\d+/answer", path)
+    ) or (
+        request.method == "POST"
+        and re.fullmatch(r"/api/affiliate-resources/\d+/impression", path)
+    )
+    protected_api = path.startswith("/api/") and not public_api
+    if (admin_page or protected_api) and not _is_admin(request):
+        if protected_api:
+            return JSONResponse({"detail": "管理者認証が必要です"}, status_code=401)
+        destination = path + (("?" + request.url.query) if request.url.query else "")
+        return RedirectResponse("/admin/login?next=" + destination, status_code=303)
+    return await call_next(request)
+
+
+class AdminLoginIn(BaseModel):
+    token: str
+    next: str = "/admin"
+
+
+@app.post("/api/admin/session")
+def admin_login(payload: AdminLoginIn) -> Response:
+    if not settings.admin_token:
+        raise HTTPException(status_code=503, detail="管理トークンが未設定です")
+    if not secrets.compare_digest(payload.token, settings.admin_token):
+        raise HTTPException(status_code=401, detail="管理トークンが違います")
+    destination = payload.next if payload.next.startswith("/admin") else "/admin"
+    response = JSONResponse({"ok": True, "next": destination})
+    response.set_cookie(ADMIN_COOKIE, settings.admin_token, httponly=True,
+                        samesite="strict", secure=settings.secure_cookies)
+    return response
 
 
 @app.get("/health")
@@ -104,7 +154,14 @@ def weakness(request: Request, exam_id: int | None = None) -> HTMLResponse:
     )
 
 
-@app.get("/bank", response_class=HTMLResponse)
+@app.get("/admin/login", response_class=HTMLResponse)
+def admin_login_page(request: Request, next: str = "/admin") -> HTMLResponse:
+    return templates.TemplateResponse(request, "admin_login.html", {
+        "request": request, "next": next, "static_version": STATIC_VERSION,
+    })
+
+
+@app.get("/admin/bank", response_class=HTMLResponse)
 def bank_page(
     request: Request,
     exam_id: int | None = None,
@@ -127,10 +184,11 @@ def bank_page(
         # Set when arriving from a weakness-tree branch that has no questions,
         # so the dialog is already open on the node that sent you here.
         open_generate=bool(generate) and bool(node),
+        admin_view=True,
     )
 
 
-@app.get("/settings", response_class=HTMLResponse)
+@app.get("/admin/settings", response_class=HTMLResponse)
 def settings_page(request: Request, exam_id: int | None = None) -> HTMLResponse:
     from . import affiliate
 
@@ -141,7 +199,23 @@ def settings_page(request: Request, exam_id: int | None = None) -> HTMLResponse:
         for node in syllabus
     )
     return _page(request, "settings.html", exam_id, syllabus=syllabus, outline=outline,
-                 affiliate_resources=affiliate.list_for_exam(exam["id"]) if exam else [])
+                 affiliate_resources=affiliate.list_for_exam(exam["id"]) if exam else [],
+                 admin_view=True)
+
+
+@app.get("/admin")
+def admin_index() -> RedirectResponse:
+    return RedirectResponse("/admin/bank", status_code=303)
+
+
+@app.get("/bank")
+def legacy_bank() -> RedirectResponse:
+    return RedirectResponse("/admin/bank", status_code=303)
+
+
+@app.get("/settings")
+def legacy_settings() -> RedirectResponse:
+    return RedirectResponse("/admin/settings", status_code=303)
 
 
 # --- API -----------------------------------------------------------------

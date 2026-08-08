@@ -51,6 +51,8 @@ class Settings(BaseModel):
     searxng_url: str = ""
     # How many questions a single session serves before it stops asking.
     session_size: int = 20
+    admin_token: str = ""
+    secure_cookies: bool = False
 
     @property
     def db_path(self) -> Path:
@@ -69,6 +71,8 @@ def load() -> Settings:
         embed_model=_env("EXAM_TRAINER_EMBED_MODEL", "nomic-embed-text"),
         searxng_url=_env("SEARXNG_API_URL", ""),
         session_size=_int("EXAM_TRAINER_SESSION_SIZE", 20),
+        admin_token=_env("EXAM_TRAINER_ADMIN_TOKEN", ""),
+        secure_cookies=_env("EXAM_TRAINER_SECURE_COOKIES", "").lower() in {"1", "true", "yes"},
     )
 
 

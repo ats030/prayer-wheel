@@ -14,8 +14,11 @@
     <div class="nav-links" aria-label="メインナビゲーション">
       <a href="/{% if exam %}?exam_id={{ exam.id }}{% endif %}">解く</a>
       <a href="/weakness{% if exam %}?exam_id={{ exam.id }}{% endif %}">弱点</a>
-      <a href="/bank{% if exam %}?exam_id={{ exam.id }}{% endif %}">問題バンク</a>
-      <a href="/settings{% if exam %}?exam_id={{ exam.id }}{% endif %}">試験の設定</a>
+      {% if admin_view %}
+      <a href="/admin/bank{% if exam %}?exam_id={{ exam.id }}{% endif %}">問題バンク</a>
+      <a href="/admin/settings{% if exam %}?exam_id={{ exam.id }}{% endif %}">試験の設定</a>
+      <a href="/">公開ページ</a>
+      {% endif %}
     </div>
     <span class="spacer"></span>
     {% if exams | length > 1 %}

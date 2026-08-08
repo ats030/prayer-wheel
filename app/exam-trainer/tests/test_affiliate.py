@@ -10,8 +10,12 @@ def fresh_db(tmp_path):
 
 @pytest.fixture
 def client():
-    from exam_trainer.app import app
-    return TestClient(app)
+    from exam_trainer.app import ADMIN_COOKIE, app
+    from exam_trainer.config import settings
+    settings.admin_token = "test-admin-token"
+    test_client = TestClient(app)
+    test_client.cookies.set(ADMIN_COOKIE, settings.admin_token)
+    return test_client
 
 def _setup():
     exam_id = bank.create_exam("Affiliate test")

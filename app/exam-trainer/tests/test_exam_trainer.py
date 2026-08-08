@@ -23,9 +23,13 @@ def fresh_db(tmp_path):
 
 @pytest.fixture
 def client():
-    from exam_trainer.app import app
+    from exam_trainer.app import ADMIN_COOKIE, app
+    from exam_trainer.config import settings
 
-    return TestClient(app)
+    settings.admin_token = "test-admin-token"
+    test_client = TestClient(app)
+    test_client.cookies.set(ADMIN_COOKIE, settings.admin_token)
+    return test_client
 
 
 def _exam_with_question(status: str = "verified") -> tuple[int, int]:
@@ -233,10 +237,10 @@ def test_only_the_latest_answer_counts_toward_accuracy():
 # --- HTTP ----------------------------------------------------------------
 
 def test_pages_render_without_an_exam(client):
-    for path in ("/", "/weakness", "/bank", "/settings"):
+    for path in ("/", "/weakness", "/admin/bank", "/admin/settings"):
         response = client.get(path)
         assert response.status_code == 200, path
-        assert "試験の設定" in response.text
+        assert "exam-trainer" in response.text
 
 
 def test_health_reports_the_database(client, monkeypatch):
@@ -696,7 +700,7 @@ def test_generation_dialog_opens_with_no_node_selected(client):
         {"path": "1", "title": "人工知能とは"},
         {"path": "2", "title": "機械学習の具体的手法"},
     ])
-    html = client.get(f"/bank?exam_id={exam_id}").text
+    html = client.get(f"/admin/bank?exam_id={exam_id}").text
     dialog = html[html.index('id="genNode"'):]
     dialog = dialog[:dialog.index("</select>")]
     assert '<option value="" selected>選んでください</option>' in dialog
@@ -707,7 +711,7 @@ def test_generation_dialog_keeps_an_explicit_node_filter(client):
     """範囲を絞って見ている最中は、その項目を引き継ぐ（既定ではなく明示の操作）。"""
     exam_id = bank.create_exam("G検定")
     bank.set_syllabus(exam_id, [{"path": "1", "title": "人工知能とは"}, {"path": "2", "title": "機械学習"}])
-    html = client.get(f"/bank?exam_id={exam_id}&node=2").text
+    html = client.get(f"/admin/bank?exam_id={exam_id}&node=2").text
     dialog = html[html.index('id="genNode"'):]
     dialog = dialog[:dialog.index("</select>")]
     assert '<option value="2" selected>' in dialog
@@ -785,14 +789,14 @@ def test_empty_branches_link_to_generation_not_to_studying(client):
     bank.answer(question_id, 0)
     html = client.get(f"/weakness?exam_id={exam_id}").text
     assert f"/?exam_id={exam_id}&node=1" in html, "問題のある枝は解きに行ける"
-    assert f"/bank?exam_id={exam_id}&node=2&generate=1" in html, "空の枝は生成へ送る"
+    assert "/admin/bank" not in html, "公開画面に管理導線を出さない"
     assert f"/?exam_id={exam_id}&node=2" not in html
 
 
 def test_arriving_from_a_weakness_branch_opens_the_dialog_on_that_node(client):
     exam_id = bank.create_exam("G検定")
     bank.set_syllabus(exam_id, [{"path": "1", "title": "A"}, {"path": "2.1", "title": "B"}])
-    html = client.get(f"/bank?exam_id={exam_id}&node=2.1&generate=1").text
+    html = client.get(f"/admin/bank?exam_id={exam_id}&node=2.1&generate=1").text
     assert 'data-open-generate="1"' in html
     dialog = html[html.index('id="genNode"'):]
     assert '<option value="2.1" selected>' in dialog[:dialog.index("</select>")]
@@ -801,7 +805,7 @@ def test_arriving_from_a_weakness_branch_opens_the_dialog_on_that_node(client):
 def test_generate_flag_without_a_node_does_not_open_the_dialog(client):
     exam_id = bank.create_exam("G検定")
     bank.set_syllabus(exam_id, [{"path": "1", "title": "A"}])
-    html = client.get(f"/bank?exam_id={exam_id}&generate=1").text
+    html = client.get(f"/admin/bank?exam_id={exam_id}&generate=1").text
     assert "data-open-generate" not in html, "項目が無いまま開いても選ぶものがない"
 
 

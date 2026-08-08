@@ -12,7 +12,7 @@
     addExam.disabled = true;
     try {
       const data = await postJSON('/api/exams', { name });
-      window.location.href = `/settings?exam_id=${data.id}`;
+      window.location.href = `/admin/settings?exam_id=${data.id}`;
     } catch (err) {
       toast(err.message);
       addExam.disabled = false;
@@ -30,7 +30,7 @@
     btn.disabled = true;
     try {
       await postJSON(`/api/exams/${btn.dataset.deleteExam}/delete`);
-      window.location.href = '/settings';
+      window.location.href = '/admin/settings';
     } catch (err) {
       toast(err.message);
       btn.disabled = false;

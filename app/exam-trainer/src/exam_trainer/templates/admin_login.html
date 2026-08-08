@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>管理者ログイン — exam-trainer</title>
+  <link rel="stylesheet" href="/static/linear.css?v={{ static_version }}">
+</head>
+<body>
+  <main class="login-shell">
+    <section class="card login-card">
+      <div class="badge">管理用</div>
+      <h1>exam-trainer</h1>
+      <p class="muted">問題・教材・試験設定を変更するには管理トークンを入力してください。</p>
+      <div class="field"><label for="adminToken">管理トークン</label>
+        <input id="adminToken" type="password" autocomplete="current-password" autofocus>
+      </div>
+      <p id="loginStatus" class="muted" role="status"></p>
+      <button class="btn btn-primary" id="loginButton">管理画面を開く</button>
+      <a class="btn btn-ghost" href="/">公開ページへ戻る</a>
+    </section>
+  </main>
+  <script>
+    const button = document.getElementById('loginButton');
+    async function login() {
+      button.disabled = true;
+      const response = await fetch('/api/admin/session', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({token: document.getElementById('adminToken').value, next: {{ next | tojson }}})
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        document.getElementById('loginStatus').textContent = data.detail || 'ログインできませんでした';
+        button.disabled = false; return;
+      }
+      window.location.href = data.next;
+    }
+    button.addEventListener('click', login);
+    document.getElementById('adminToken').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') login();
+    });
+  </script>
+</body>
+</html>

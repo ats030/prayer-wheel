@@ -21,13 +21,12 @@
 
   {% if not exam %}
   <div class="card empty-state">
-    まだ試験がありません。<a href="/settings">試験の設定</a>で追加してください。
+    現在、公開中の試験はありません。
   </div>
   {% elif not question %}
   <div class="card empty-state" id="emptyState">
     {% if status_counts.get('verified', 0) == 0 %}
       出題できる問題がありません。問題は検証を通ったものだけが出題されます
-      （<a href="/bank?exam_id={{ exam.id }}">問題バンク</a>で状態を確認できます）。
     {% else %}
       いまは復習の期限が来ている問題がありません。時間をおくか、出題範囲を変えてください。
     {% endif %}

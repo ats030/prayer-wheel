@@ -10,11 +10,11 @@
 
   {% if not exam %}
   <div class="card empty-state">
-    まだ試験がありません。<a href="/settings">試験の設定</a>で追加してください。
+    現在、公開中の試験はありません。
   </div>
   {% elif not stats %}
   <div class="card empty-state">
-    シラバスが未登録です。<a href="/settings?exam_id={{ exam.id }}">試験の設定</a>で項目を登録すると、
+    この試験は現在準備中です。項目が公開されると、
     ここに項目ごとの正答率が出ます。
   </div>
   {% else %}
@@ -46,7 +46,6 @@
         {% if item.questions %}
         <a class="btn btn-secondary btn-xs" href="/?exam_id={{ exam.id }}&node={{ item.path }}">解く</a>
         {% else %}
-        <a class="btn btn-secondary btn-xs" href="/bank?exam_id={{ exam.id }}&node={{ item.path }}&generate=1">問題を作る</a>
         {% endif %}
       </div>
       {% endfor %}

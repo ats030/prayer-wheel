@@ -29,27 +29,27 @@
 
   {% if not exam %}
   <div class="card empty-state">
-    まだ試験がありません。<a href="/settings">試験の設定</a>で追加してください。
+    まだ試験がありません。<a href="/admin/settings">試験の設定</a>で追加してください。
   </div>
   {% else %}
   <div class="tabs" style="margin-bottom:16px;">
-    <a class="tab {% if not status %}active{% endif %}" href="/bank?exam_id={{ exam.id }}">すべて</a>
-    <a class="tab {% if status == 'verified' %}active{% endif %}" href="/bank?exam_id={{ exam.id }}&status=verified">
+    <a class="tab {% if not status %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}">すべて</a>
+    <a class="tab {% if status == 'verified' %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}&status=verified">
       出題可 <span class="badge">{{ status_counts.get('verified', 0) }}</span>
     </a>
-    <a class="tab {% if status == 'held' %}active{% endif %}" href="/bank?exam_id={{ exam.id }}&status=held">
+    <a class="tab {% if status == 'held' %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}&status=held">
       要確認 <span class="badge">{{ status_counts.get('held', 0) }}</span>
     </a>
-    <a class="tab {% if status == 'draft' %}active{% endif %}" href="/bank?exam_id={{ exam.id }}&status=draft">
+    <a class="tab {% if status == 'draft' %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}&status=draft">
       未検証 <span class="badge">{{ status_counts.get('draft', 0) }}</span>
     </a>
-    <a class="tab {% if status == 'rejected' %}active{% endif %}" href="/bank?exam_id={{ exam.id }}&status=rejected">
+    <a class="tab {% if status == 'rejected' %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}&status=rejected">
       破棄 <span class="badge">{{ status_counts.get('rejected', 0) }}</span>
     </a>
   </div>
 
   <div class="card">
-    <form class="filter-row" method="get" action="/bank">
+    <form class="filter-row" method="get" action="/admin/bank">
       <input type="hidden" name="exam_id" value="{{ exam.id }}">
       <input type="hidden" name="status" value="{{ status }}">
       <select name="node">
