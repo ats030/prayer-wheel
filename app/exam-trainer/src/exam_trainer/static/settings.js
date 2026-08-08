@@ -55,4 +55,35 @@
       save.disabled = false;
     }
   });
+
+  document.getElementById('saveAffiliate').addEventListener('click', async (event) => {
+    const btn = event.currentTarget;
+    const status = document.getElementById('affiliateStatus');
+    btn.disabled = true;
+    try {
+      await postJSON('/api/exams/' + EXAM_ID + '/affiliate-resources', {
+        node_path: document.getElementById('affiliateNode').value,
+        title: document.getElementById('affiliateTitle').value,
+        url: document.getElementById('affiliateUrl').value,
+        reason: document.getElementById('affiliateReason').value,
+      });
+      window.location.reload();
+    } catch (err) {
+      status.textContent = err.message;
+      btn.disabled = false;
+    }
+  });
+
+  page.addEventListener('click', async (event) => {
+    const btn = event.target.closest('button[data-affiliate-active]');
+    if (!btn) return;
+    btn.disabled = true;
+    try {
+      await postJSON('/api/affiliate-resources/' + btn.dataset.affiliateActive + '/active',
+        { active: btn.dataset.nextActive === '1' });
+      window.location.reload();
+    } catch (err) {
+      toast(err.message); btn.disabled = false;
+    }
+  });
 })();

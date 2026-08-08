@@ -35,12 +35,31 @@
     verdict: document.getElementById('verdict'),
     explanation: document.getElementById('explanation'),
     evidence: document.getElementById('evidence'),
+    affiliate: document.getElementById('affiliateCard'),
+    affiliateTitle: document.getElementById('affiliateTitle'),
+    affiliateReason: document.getElementById('affiliateReason'),
+    affiliateLink: document.getElementById('affiliateLink'),
     schedule: document.getElementById('scheduleNote'),
     next: document.getElementById('nextBtn'),
     unsureRow: document.getElementById('unsureRow'),
     unsureBtn: document.getElementById('unsureBtn'),
     hint: document.getElementById('cardHint'),
   };
+
+  document.getElementById('hideAffiliate').addEventListener('click', () => {
+    localStorage.setItem('exam-trainer-hide-affiliate', '1');
+    el.affiliate.hidden = true;
+  });
+
+  function showAffiliate(resource) {
+    el.affiliate.hidden = true;
+    if (!resource || localStorage.getItem('exam-trainer-hide-affiliate') === '1') return;
+    el.affiliateTitle.textContent = resource.title;
+    el.affiliateReason.textContent = resource.reason || 'この範囲を体系的に確認できる教材です。';
+    el.affiliateLink.href = '/affiliate-resources/' + resource.id + '/click?question_id=' + questionId;
+    el.affiliate.hidden = false;
+    fetch('/api/affiliate-resources/' + resource.id + '/impression', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question_id: questionId }) }).catch(() => {});
+  }
 
   function setChoicesEnabled(enabled) {
     el.choices.querySelectorAll('.choice').forEach((btn) => { btn.disabled = !enabled; });
@@ -89,6 +108,7 @@
         el.evidence.appendChild(a);
       });
     }
+    showAffiliate(data.affiliate_resource);
     const days = data.interval === 1 ? '1日後' : `${data.interval}日後`;
     el.schedule.textContent = `次の復習は${days}`;
     el.result.hidden = false;
@@ -142,6 +162,7 @@
     el.result.hidden = true;
     el.evidence.hidden = true;
     el.evidence.replaceChildren();
+    el.affiliate.hidden = true;
     el.unsureRow.hidden = false;
     unsure = false;
     el.unsureBtn.textContent = '自信がない';

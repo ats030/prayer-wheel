@@ -11,7 +11,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
@@ -132,13 +132,16 @@ def bank_page(
 
 @app.get("/settings", response_class=HTMLResponse)
 def settings_page(request: Request, exam_id: int | None = None) -> HTMLResponse:
+    from . import affiliate
+
     exam = _current_exam(exam_id)
     syllabus = bank.list_syllabus(exam["id"]) if exam else []
     outline = "\n".join(
         f"{node['path']} {node['title']}" + (f" | {node['keywords']}" if node["keywords"] else "")
         for node in syllabus
     )
-    return _page(request, "settings.html", exam_id, syllabus=syllabus, outline=outline)
+    return _page(request, "settings.html", exam_id, syllabus=syllabus, outline=outline,
+                 affiliate_resources=affiliate.list_for_exam(exam["id"]) if exam else [])
 
 
 # --- API -----------------------------------------------------------------
@@ -238,11 +241,69 @@ class AnswerIn(BaseModel):
 
 @app.post("/api/questions/{question_id}/answer")
 def answer(question_id: int, payload: AnswerIn) -> JSONResponse:
+    from . import affiliate
+
     try:
         result = bank.answer(question_id, payload.chosen, payload.elapsed_ms, payload.unsure)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    question = bank.get_question(question_id)
+    result["affiliate_resource"] = (
+        affiliate.for_node(question["exam_id"], question["node_path"]) if question else None
+    )
     return JSONResponse(result)
+
+
+class AffiliateResourceIn(BaseModel):
+    node_path: str
+    title: str
+    url: str
+    reason: str = ""
+
+
+@app.post("/api/exams/{exam_id}/affiliate-resources")
+def save_affiliate_resource(exam_id: int, payload: AffiliateResourceIn) -> JSONResponse:
+    from . import affiliate
+    try:
+        resource = affiliate.upsert(exam_id, payload.node_path, payload.title, payload.url, payload.reason)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return JSONResponse(resource)
+
+
+class AffiliateActiveIn(BaseModel):
+    active: bool
+
+
+@app.post("/api/affiliate-resources/{resource_id}/active")
+def set_affiliate_resource_active(resource_id: int, payload: AffiliateActiveIn) -> dict:
+    from . import affiliate
+    affiliate.set_active(resource_id, payload.active)
+    return {"ok": True}
+
+
+class AffiliateEventIn(BaseModel):
+    question_id: int | None = None
+
+
+@app.post("/api/affiliate-resources/{resource_id}/impression")
+def record_affiliate_impression(resource_id: int, payload: AffiliateEventIn) -> dict:
+    from . import affiliate
+    try:
+        affiliate.record(resource_id, payload.question_id, "impression")
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"ok": True}
+
+
+@app.get("/affiliate-resources/{resource_id}/click")
+def affiliate_click(resource_id: int, question_id: int | None = None) -> RedirectResponse:
+    from . import affiliate
+    try:
+        target = affiliate.click_target(resource_id, question_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return RedirectResponse(target, status_code=303)
 
 
 class GenerateIn(BaseModel):

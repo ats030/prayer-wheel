@@ -220,6 +220,11 @@ input[type="text"]:focus, textarea:focus, select:focus {
 .explanation { background: var(--surface-2); border-radius: var(--r-md); padding: 14px 16px; font-size: 14px; line-height: 1.7; color: var(--ink-muted); }
 .evidence { border-left: 3px solid var(--hairline-strong); padding-left: 14px; margin-top: 14px; font-size: 13px; color: var(--ink-subtle); }
 .evidence a { display: block; margin-top: 6px; font-size: 12px; overflow-wrap: anywhere; }
+.affiliate-card { margin-top: 16px; padding: 14px 16px; border: 1px solid var(--hairline); border-radius: var(--r-md); }
+.affiliate-label { margin-bottom: 8px; color: var(--ink-subtle); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+.affiliate-card p { margin: 6px 0 12px; color: var(--ink-muted); font-size: 13px; line-height: 1.6; }
+.affiliate-card .affiliate-disclosure { margin: 10px 0 0; font-size: 11px; color: var(--ink-subtle); }
+.affiliate-site-disclosure { max-width: 1120px; margin: 32px auto 16px; padding: 0 24px; color: var(--ink-subtle); font-size: 11px; }
 .study-actions { display: flex; gap: 10px; align-items: center; margin-top: 20px; }
 
 /* --- weakness tree --- */

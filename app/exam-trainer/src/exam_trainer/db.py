@@ -101,7 +101,23 @@ CREATE INDEX IF NOT EXISTS idx_card_due ON card (due_at);
 """
 
 # Each entry runs once, in order, guarded by PRAGMA user_version. Append only.
-_MIGRATIONS: list[str] = []
+_MIGRATIONS: list[str] = [
+    """
+    CREATE TABLE affiliate_resource (
+        id INTEGER PRIMARY KEY, exam_id INTEGER NOT NULL REFERENCES exam(id) ON DELETE CASCADE,
+        node_path TEXT NOT NULL, title TEXT NOT NULL, url TEXT NOT NULL, reason TEXT NOT NULL DEFAULT '',
+        active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+        UNIQUE (exam_id, node_path)
+    );
+    CREATE INDEX idx_affiliate_resource_lookup ON affiliate_resource (exam_id, node_path, active);
+    CREATE TABLE affiliate_event (
+        id INTEGER PRIMARY KEY, resource_id INTEGER NOT NULL REFERENCES affiliate_resource(id) ON DELETE CASCADE,
+        question_id INTEGER REFERENCES question(id) ON DELETE SET NULL,
+        event_type TEXT NOT NULL CHECK (event_type IN ('impression', 'click')), occurred_at TEXT NOT NULL
+    );
+    CREATE INDEX idx_affiliate_event_resource ON affiliate_event (resource_id, event_type, occurred_at);
+    """,
+]
 
 
 def _connect() -> sqlite3.Connection:
