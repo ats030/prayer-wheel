@@ -206,3 +206,13 @@ def test_ollama_outage_keeps_saved_local_model(monkeypatch):
     catalog, incompatible = config_store.model_catalog("saved-vision:9b")
     assert catalog["local"][0]["id"] == "saved-vision:9b"
     assert incompatible == []
+
+
+def test_gemini_credentials_are_write_only(tmp_path, monkeypatch):
+    monkeypatch.setattr(config_store, "SETTINGS_PATH", tmp_path / "settings.json")
+    result = config_store.save(provider="gemini", models={"gemini": "gemini-3.6-flash"}, api_keys={"gemini": "gemini-secret"}, delete_keys=[])
+    assert result["provider"] == "gemini"
+    assert result["models"]["gemini"] == "gemini-3.6-flash"
+    assert result["api_key_configured"]["gemini"] is True
+    assert "gemini-secret" not in str(result)
+    assert config_store.load()["api_keys"]["gemini"] == "gemini-secret"

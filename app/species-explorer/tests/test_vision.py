@@ -276,3 +276,23 @@ def test_provider_error_does_not_expose_response_body():
         error = vision._provider_error("OpenAI", exc)
     assert "provider-secret-body" not in str(error)
     assert "APIキーを確認" in str(error)
+
+
+def test_gemini_uses_generate_content_vision_contract(monkeypatch):
+    seen = {}
+
+    def fake_post(url, **kwargs):
+        seen.update(url=url, **kwargs)
+        return FakeResponse({"candidates": [{"content": {"parts": [{
+            "text": '{"category":"植物","summary":"葉","candidates":[]}',
+        }]}}]})
+
+    monkeypatch.setattr(vision.httpx, "post", fake_post)
+    result = vision.identify_gemini([b"one", b"two"], "secret-gemini", "gemini-3.6-flash")
+    assert result["provider"] == "gemini"
+    assert seen["url"].endswith("/models/gemini-3.6-flash:generateContent")
+    assert seen["headers"]["x-goog-api-key"] == "secret-gemini"
+    parts = seen["json"]["contents"][0]["parts"]
+    assert [part["inline_data"]["data"] for part in parts[:2]] == ["b25l", "dHdv"]
+    assert parts[2]["text"]
+    assert seen["json"]["generationConfig"]["responseMimeType"] == "application/json"

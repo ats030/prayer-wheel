@@ -20,6 +20,7 @@ OPENAI_MODEL = os.getenv("SPECIES_OPENAI_MODEL", "gpt-5.6-luna")
 OPENAI_URL = os.getenv("SPECIES_OPENAI_URL", "https://api.openai.com/v1/responses")
 ANTHROPIC_MODEL = os.getenv("SPECIES_ANTHROPIC_MODEL", "claude-sonnet-5")
 ANTHROPIC_URL = os.getenv("SPECIES_ANTHROPIC_URL", "https://api.anthropic.com/v1/messages")
+GEMINI_URL = os.getenv("SPECIES_GEMINI_URL", "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent")
 PLANTNET_URL = "https://my-api.plantnet.org/v2/identify/all"
 INATURALIST_URL = "https://api.inaturalist.org/v1/taxa/autocomplete"
 INATURALIST_USER_AGENT = "SpeciesExplorer/1.0 (https://github.com/ats030/ubuntu-server-app)"
@@ -433,3 +434,34 @@ def identify_anthropic(image_bytes: bytes | list[bytes], api_key: str, model: st
     except (httpx.HTTPError, KeyError, ValueError) as exc:
         raise VisionError("Anthropic APIに接続できませんでした") from exc
     return normalize(_extract_json(content), model=model, provider="anthropic")
+
+
+def _gemini_output_text(data: dict[str, Any]) -> str:
+    candidates = data.get("candidates") or []
+    if not candidates or not isinstance(candidates[0], dict):
+        raise VisionError("Geminiの応答を読み取れませんでした")
+    content = candidates[0].get("content") or {}
+    texts = [str(part.get("text") or "") for part in content.get("parts") or [] if isinstance(part, dict) and part.get("text")]
+    if not texts:
+        raise VisionError("Geminiの応答を読み取れませんでした")
+    return "\n".join(texts)
+
+
+def identify_gemini(image_bytes: bytes | list[bytes], api_key: str, model: str, *, location: str = "", observed_date: str = "", size: str = "") -> dict[str, Any]:
+    images = _image_list(image_bytes)
+    payload = {
+        "contents": [{"role": "user", "parts": [
+            *[{"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(image).decode("ascii")}} for image in images],
+            {"text": identification_prompt(location, observed_date, size)},
+        ]}],
+        "generationConfig": {"temperature": 0.1, "maxOutputTokens": 1200, "responseMimeType": "application/json"},
+    }
+    try:
+        response = httpx.post(GEMINI_URL.format(model=model), json=payload, headers={"x-goog-api-key": api_key, "content-type": "application/json"}, timeout=180)
+        response.raise_for_status()
+        content = _gemini_output_text(response.json())
+    except httpx.HTTPStatusError as exc:
+        raise _provider_error("Gemini", exc) from exc
+    except (httpx.HTTPError, KeyError, ValueError) as exc:
+        raise VisionError("Gemini APIに接続できませんでした") from exc
+    return normalize(_extract_json(content), model=model, provider="gemini")

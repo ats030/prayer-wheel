@@ -106,7 +106,7 @@ async def amazon_product(q: str = "") -> JSONResponse:
 
 @app.get("/health")
 def health() -> dict[str, object]:
-    return {"ok": True, "model": vision.MODEL, "local_processing": True, "providers": ["local", "openai", "anthropic"]}
+    return {"ok": True, "model": vision.MODEL, "local_processing": True, "providers": ["local", "openai", "anthropic", "gemini"]}
 
 
 @app.post("/identify")
@@ -138,6 +138,8 @@ async def identify(
             result = await run_in_threadpool(vision.identify_openai, prepared, api_key, model, **context)
         elif provider == "anthropic":
             result = await run_in_threadpool(vision.identify_anthropic, prepared, api_key, model, **context)
+        elif provider == "gemini":
+            result = await run_in_threadpool(vision.identify_gemini, prepared, api_key, model, **context)
         else:
             result = await run_in_threadpool(vision.identify, prepared, model, **context)
         if use_plantnet:

@@ -31,6 +31,7 @@ is always presented as a candidate that the user should compare with the subject
 - Optional specialist services remain hidden until configured and require an explicit per-request photo-sharing choice.
 - Settings are reachable from the header and use a dedicated page with a clear
   return path. API keys are write-only in the UI; configured state and allowed model choices remain visible.
+- External-provider copy states where photographs are sent; Gemini also distinguishes unpaid data-improvement handling from paid-service handling.
 
 ## Responsive behavior
 

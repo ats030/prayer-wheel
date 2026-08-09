@@ -31,11 +31,17 @@ MODELS = {
         {"id": "claude-sonnet-5", "label": "Claude Sonnet 5（バランス）"},
         {"id": "claude-opus-5", "label": "Claude Opus 5（高性能）"},
     ],
+    "gemini": [
+        {"id": "gemini-3.6-flash", "label": "Gemini 3.6 Flash（推奨）"},
+        {"id": "gemini-3.5-flash", "label": "Gemini 3.5 Flash（高性能）"},
+        {"id": "gemini-3.5-flash-lite", "label": "Gemini 3.5 Flash-Lite（低コスト）"},
+    ],
 }
 DEFAULT_MODELS = {
     "local": "gemma4:12b",
     "openai": "gpt-5.6-luna",
     "anthropic": "claude-sonnet-5",
+    "gemini": "gemini-3.6-flash",
 }
 _AFFILIATE_LOCK = threading.Lock()
 
@@ -117,7 +123,7 @@ def load() -> dict[str, Any]:
             data["models"][provider] = model
         elif model in {item["id"] for item in MODELS.get(provider, [])}:
             data["models"][provider] = model
-    for provider in ("openai", "anthropic", "plantnet", "amazon_creators_id", "amazon_creators_secret"):
+    for provider in ("openai", "anthropic", "gemini", "plantnet", "amazon_creators_id", "amazon_creators_secret"):
         key = (saved.get("api_keys") or {}).get(provider)
         if isinstance(key, str) and key:
             data["api_keys"][provider] = key
@@ -144,7 +150,7 @@ def public(data: dict[str, Any] | None = None) -> dict[str, Any]:
         "affiliate": {"title": data["affiliate"]["title"], "url": data["affiliate"]["url"], "enabled": bool(data["affiliate"]["enabled"] and data["affiliate"]["url"]), "metrics": data["affiliate_metrics"], "partner_tag": data["affiliate"].get("partner_tag", ""), "product_enabled": bool(data["affiliate"].get("product_enabled") and data["affiliate"].get("partner_tag") and data["api_keys"].get("amazon_creators_id") and data["api_keys"].get("amazon_creators_secret")), "creators_api_configured": bool(data["api_keys"].get("amazon_creators_id") and data["api_keys"].get("amazon_creators_secret"))},
         "api_key_configured": {
             provider: bool(data["api_keys"].get(provider))
-            for provider in ("openai", "anthropic", "plantnet")
+            for provider in ("openai", "anthropic", "gemini", "plantnet")
         },
     }
 
@@ -203,9 +209,9 @@ def save(
             raise SettingsError("モデルを選び直してください")
         current["models"][name] = model
     for name in delete_keys:
-        if name in {"openai", "anthropic", "plantnet", "amazon_creators_id", "amazon_creators_secret"}:
+        if name in {"openai", "anthropic", "gemini", "plantnet", "amazon_creators_id", "amazon_creators_secret"}:
             current["api_keys"].pop(name, None)
-    for name in ("openai", "anthropic", "plantnet", "amazon_creators_id", "amazon_creators_secret"):
+    for name in ("openai", "anthropic", "gemini", "plantnet", "amazon_creators_id", "amazon_creators_secret"):
         key = api_keys.get(name)
         if isinstance(key, str) and key.strip():
             current["api_keys"][name] = key.strip()

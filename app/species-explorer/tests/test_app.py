@@ -46,9 +46,11 @@ def test_settings_page_enables_all_providers():
     assert 'href="/"' in response.text
     assert "OpenAI API" in response.text
     assert "Anthropic API" in response.text
+    assert "Google Gemini API" in response.text
     assert "準備中" not in response.text
     assert 'value="openai"' in response.text
     assert 'value="anthropic"' in response.text
+    assert 'value="gemini"' in response.text
     assert 'id="settingsForm"' in response.text
     assert "gpt-5.6-sol" not in response.text
 
@@ -249,3 +251,22 @@ def test_settings_api_saves_model_without_returning_key():
     assert response.json()["models"]["openai"] == "gpt-5.6-terra"
     assert response.json()["api_key_configured"]["openai"] is True
     assert "write-only-secret" not in response.text
+
+
+def test_gemini_provider_dispatches_without_exposing_key(monkeypatch):
+    source = io.BytesIO()
+    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    seen = {}
+
+    def fake_identify(image_bytes, api_key, model, **context):
+        seen.update(images=image_bytes, api_key=api_key, model=model, context=context)
+        return {"category": "植物", "summary": "", "candidates": [], "provider": "gemini"}
+
+    monkeypatch.setattr(main.vision, "identify_gemini", fake_identify)
+    monkeypatch.setattr(main.config_store, "load", lambda: {"provider": "gemini", "models": {"gemini": "gemini-3.6-flash"}, "api_keys": {"gemini": "temporary-gemini-secret"}})
+    response = client.post("/identify", files={"file": ("photo.jpg", source.getvalue(), "image/jpeg")})
+    assert response.status_code == 200
+    assert response.json()["provider"] == "gemini"
+    assert seen["api_key"] == "temporary-gemini-secret"
+    assert seen["model"] == "gemini-3.6-flash"
+    assert len(seen["images"]) == 1
