@@ -19,7 +19,7 @@ is always presented as a candidate that the user should compare with the subject
 
 - The main screen uses a Workbench flow: capture, preview, then full-width results. Camera and library inputs are the primary actions and have 44px touch targets.
 - Optional capture context and advanced identification controls stay in closed disclosures until requested. After an image is selected, the capture target compresses so the preview and identify action become the visual priority.
-- Safety guidance is one flat warning region rather than nested cards; related products form one shelf after all candidates instead of repeating per candidate.
+- Safety guidance is one flat warning region rather than nested cards; related products form one non-sticky shelf after all candidates instead of repeating per candidate; repeated identifications rotate the candidate used for the product query.
 - The chosen image is previewed before identification.
 - Identification shows an expected wait and disables duplicate submission.
 - Empty, loading, result, and error states do not shift the main capture controls.
@@ -28,7 +28,7 @@ is always presented as a candidate that the user should compare with the subject
 - Specialist plant candidates retain their Pl@ntNet source, and exact VLM agreement is labeled as two independent paths.
 - If every candidate is rejected, the result asks for additional identifying photos instead of filling the gap with a guess.
 - Affiliate product-search templates expand the verified candidate name plus identification category into {query}. When configured, Amazon Creators API may replace that fallback with up to four returned product cards containing an image, title, and detail-page URL; each link is labeled as advertising and never influences generation or ranking.
-- Users can hide the ad locally and restore it from Settings; only aggregate impressions and clicks are stored.
+- When affiliate advertising is enabled, it remains visible; only aggregate impressions and clicks are stored.
 - Images are processed in memory, EXIF metadata is stripped, and nothing is saved.
 - Geolocation is requested only after an explicit button press, kept in browser memory for the current page, reduced to an accuracy label in the result, and never added to identification requests or storage.
 - The app never grants collection or edibility. It lists unresolved owner, protected-area, ordinance, and protected-species checks and links to authoritative Japanese guidance.
