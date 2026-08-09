@@ -221,6 +221,7 @@ def test_taxonomy_does_not_present_foreign_preferred_name_as_japanese(monkeypatc
     result = vision.apply_evidence_gate({
         "provider": "local", "candidates": [{
             "common_name_ja": "生成和名", "scientific_name": "Taraxacum officinale", "confidence": 70,
+            "traits": ["特徴1", "特徴2"], "distinguishing_features": ["識別点"], "contradictions": [],
         }],
     })
     assert result["candidates"][0]["common_name_ja"] == "和名未登録"
@@ -263,22 +264,52 @@ def test_evidence_gate_rejects_unverified_vlm_candidate(monkeypatch):
     assert result["strict_mode"] is True
 
 
-def test_evidence_gate_keeps_exact_taxon_but_marks_image_match_unverified(monkeypatch):
+def test_evidence_gate_keeps_candidate_with_observations_and_discriminator(monkeypatch):
     monkeypatch.setattr(vision, "_lookup_taxon", lambda _name: [{
         "id": 47126, "name": "Taraxacum officinale", "preferred_common_name": "セイヨウタンポポ",
     }])
     result = vision.apply_evidence_gate({
         "provider": "local", "summary": "generated", "candidates": [{
             "common_name_ja": "誤った和名", "scientific_name": "Taraxacum officinale",
-            "confidence": 92, "traits": ["生成された特徴"], "uncertainty": "",
+            "confidence": 92, "traits": ["鋸歯のある葉", "中空の花茎"],
+            "distinguishing_features": ["花茎に葉がない"], "contradictions": [],
+            "uncertainty": "総苞片を確認する",
         }],
     })
     candidate = result["candidates"][0]
     assert candidate["common_name_ja"] == "セイヨウタンポポ"
     assert candidate["evidence_status"] == "taxonomy_only"
-    assert candidate["confidence"] == 40
-    assert candidate["traits"] == []
-    assert "写真との一致は未検証" in candidate["uncertainty"]
+    assert candidate["confidence"] == 60
+    assert candidate["evidence_strength"] == "中"
+    assert candidate["traits"] == ["鋸歯のある葉", "中空の花茎"]
+
+
+def test_evidence_gate_rejects_candidate_without_discriminator(monkeypatch):
+    monkeypatch.setattr(vision, "_lookup_taxon", lambda _name: [{
+        "id": 1, "name": "Known species", "preferred_common_name": "既知種",
+    }])
+    result = vision.apply_evidence_gate({
+        "provider": "local", "candidates": [{
+            "scientific_name": "Known species", "confidence": 80,
+            "traits": ["特徴1", "特徴2"], "distinguishing_features": [],
+            "contradictions": [],
+        }],
+    })
+    assert result["candidates"] == []
+
+
+def test_evidence_gate_rejects_candidate_with_contradiction(monkeypatch):
+    monkeypatch.setattr(vision, "_lookup_taxon", lambda _name: [{
+        "id": 1, "name": "Known species", "preferred_common_name": "既知種",
+    }])
+    result = vision.apply_evidence_gate({
+        "provider": "local", "candidates": [{
+            "scientific_name": "Known species", "confidence": 80,
+            "traits": ["特徴1", "特徴2"], "distinguishing_features": ["識別点"],
+            "contradictions": ["典型形態と異なる"],
+        }],
+    })
+    assert result["candidates"] == []
 
 
 def test_evidence_gate_rejects_vlm_candidate_when_taxonomy_is_unavailable(monkeypatch):

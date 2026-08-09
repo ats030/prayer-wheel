@@ -42,6 +42,8 @@ PROMPT = """あなたは野外観察を補助する生物識別アシスタン�
       "scientific_name": "学名または空文字",
       "confidence": 0から100の整数,
       "traits": ["写真で確認できる特徴を最大3件"],
+      "distinguishing_features": ["類似種と区別する写真上の特徴を最大2件"],
+      "contradictions": ["候補と矛盾する写真上の特徴を最大2件"],
       "sex": "オス" | "メス" | "判別不能" | "対象外",
       "sex_evidence": ["写真で直接確認できる種特異的な雌雄差を最大2件"],
       "uncertainty": "似た種との区別に必要な追加観察"
@@ -51,6 +53,8 @@ PROMPT = """あなたは野外観察を補助する生物識別アシスタン�
 規則:
 - 候補は可能性が高い順に最大3件。種まで判断できなければ属・科レベルに留める。
 - traitsは候補名から一般論を作らず、添付写真で実際に確認でき、その候補を支持する特徴だけを書く。
+- distinguishing_featuresは類似種にも共通する一般的特徴ではなく、候補を区別する写真上の決め手だけを書く。決め手が写っていなければ空配列にする。
+- contradictionsには候補の典型形態と一致しない写真上の特徴を書く。重大な矛盾が1つでもあれば、その候補を返さない。
 - confidenceは写真と明示された撮影情報だけからの識別確度。種を区別する決め手が見えない場合は60以下にする。
 - categoryが動物の場合だけ雌雄を検討する。オス・メスを返すには、その候補種で知られる性的二型と一致し、写真で直接見える形態的根拠をsex_evidenceに1件以上書く。
 - 大きさだけ、行動、撮影場所、一般的な色の印象、角度で変わる特徴から雌雄を決めない。幼体、季節・繁殖状態が不明、雌雄同形、識別部位が見えない場合は判別不能にする。
@@ -85,11 +89,13 @@ GEMINI_RESPONSE_SCHEMA = {
                     "scientific_name": {"type": "string", "description": "確信できる分類階級の学名。不明なら空文字"},
                     "confidence": {"type": "integer", "minimum": 0, "maximum": 100},
                     "traits": {"type": "array", "maxItems": 3, "items": {"type": "string"}, "description": "写真で直接確認でき、候補を支持する識別特徴"},
+                    "distinguishing_features": {"type": "array", "maxItems": 2, "items": {"type": "string"}, "description": "類似種との区別に使える写真上の決め手"},
+                    "contradictions": {"type": "array", "maxItems": 2, "items": {"type": "string"}, "description": "候補と矛盾する写真上の特徴。なければ空配列"},
                     "sex": {"type": "string", "enum": ["オス", "メス", "判別不能", "対象外"], "description": "写真だけからの雌雄推定。動物で判断材料がなければ判別不能"},
                     "sex_evidence": {"type": "array", "maxItems": 2, "items": {"type": "string"}, "description": "写真で直接見える種特異的な性的二型の根拠"},
                     "uncertainty": {"type": "string", "description": "最有力の類似候補との区別に不足している観察"},
                 },
-                "required": ["common_name_ja", "scientific_name", "confidence", "traits", "sex", "sex_evidence", "uncertainty"],
+                "required": ["common_name_ja", "scientific_name", "confidence", "traits", "distinguishing_features", "contradictions", "sex", "sex_evidence", "uncertainty"],
             },
         },
     },
@@ -202,6 +208,8 @@ def normalize(data: dict[str, Any], *, model: str = MODEL, provider: str = "loca
         except (TypeError, ValueError):
             confidence = 0
         traits = [str(v).strip() for v in (item.get("traits") or []) if str(v).strip()][:3]
+        distinguishing = [str(v).strip() for v in (item.get("distinguishing_features") or []) if str(v).strip()][:2]
+        contradictions = [str(v).strip() for v in (item.get("contradictions") or []) if str(v).strip()][:2]
         sex_evidence = [str(v).strip() for v in (item.get("sex_evidence") or []) if str(v).strip()][:2]
         sex = str(item.get("sex") or "判別不能")
         if category != "動物":
@@ -213,6 +221,8 @@ def normalize(data: dict[str, Any], *, model: str = MODEL, provider: str = "loca
             "scientific_name": str(item.get("scientific_name") or "").strip(),
             "confidence": confidence,
             "traits": traits,
+            "distinguishing_features": distinguishing,
+            "contradictions": contradictions,
             "sex": sex,
             "sex_evidence": sex_evidence,
             "uncertainty": str(item.get("uncertainty") or "").strip(),
@@ -374,17 +384,22 @@ def apply_evidence_gate(result: dict[str, Any]) -> dict[str, Any]:
     for candidate in checked.get("candidates") or []:
         if candidate.get("taxonomy_status") != "verified":
             continue
+        observations = candidate.get("traits") or []
+        distinguishing = candidate.get("distinguishing_features") or []
+        contradictions = candidate.get("contradictions") or []
+        if len(observations) < 2 or not distinguishing or contradictions:
+            continue
         candidate["evidence_status"] = "taxonomy_only"
-        candidate["confidence"] = min(candidate.get("confidence", 0), 40)
-        candidate["traits"] = []
-        candidate["uncertainty"] = "学名の実在だけを確認しました。写真との一致は未検証です。"
+        candidate["evidence_strength"] = "中"
+        candidate["confidence"] = min(candidate.get("confidence", 0), 60)
+        candidate["uncertainty"] = candidate.get("uncertainty") or "写真上の決め手はAI抽出のため、参考資料との照合が必要です。"
         accepted.append(candidate)
     rejected = len(candidates) - len(accepted)
     checked["candidates"] = accepted
     checked["strict_mode"] = True
     checked["rejected_candidates"] = rejected
     if accepted:
-        checked["summary"] = "候補名は分類データで確認済みですが、写真との一致は未検証です。"
+        checked["summary"] = "写真上の複数の特徴と識別点を満たし、候補名を分類データで確認しました。写真との一致はAI推定です。"
     else:
         checked["summary"] = "検証できる候補がありません。追加写真で識別点を確認してください。"
     return checked

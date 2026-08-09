@@ -17,6 +17,8 @@ is always presented as a candidate that the user should compare with the subject
 
 ## Interaction
 
+識別候補は schema-first で観察点・類似種との識別点・矛盾を分離する。通常のVLM候補は、観察点2件以上、識別点1件以上、矛盾なし、学名の完全一致をすべて満たす場合だけ表示する。モデルの自己申告スコアは60%を上限とし、条件不足では候補なしへフォールバックする。画面上の観察点はAI抽出で未検証と明示する。
+
 - The main screen uses a Workbench flow: capture, preview, then full-width results. Camera and library inputs are the primary actions and have 44px touch targets.
 - Optional capture context and advanced identification controls stay in closed disclosures until requested. After an image is selected, the capture target compresses so the preview and identify action become the visual priority.
 - Safety guidance is one flat warning region rather than nested cards; related products form one non-sticky shelf after all candidates instead of repeating per candidate; repeated identifications rotate the candidate used for the product query.
@@ -24,7 +26,7 @@ is always presented as a candidate that the user should compare with the subject
 - Identification shows an expected wait and disables duplicate submission.
 - Empty, loading, result, and error states do not shift the main capture controls.
 - Strict mode automatically checks VLM scientific names against iNaturalist and hides non-exact matches.
-- Taxonomy-only candidates state that the photo match is unverified; generated common names, traits, and probability are not presented as facts.
+- VLM candidates label photo observations as unverified AI extraction, cap the displayed score, and separate observations from discriminating features.
 - Specialist plant candidates retain their Pl@ntNet source, and exact VLM agreement is labeled as two independent paths.
 - If every candidate is rejected, the result asks for additional identifying photos instead of filling the gap with a guess.
 - Affiliate product-search templates expand the verified candidate name plus identification category into {query}. When configured, Amazon Creators API may replace that fallback with up to four returned product cards containing an image, title, and detail-page URL; each link is labeled as advertising and never influences generation or ranking.
