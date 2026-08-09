@@ -31,6 +31,8 @@ is always presented as a candidate that the user should compare with the subject
 - When affiliate advertising is enabled, it remains visible; only aggregate impressions and clicks are stored.
 - Images are processed in memory, EXIF metadata is stripped, and nothing is saved.
 - Before stripping EXIF, the local server may propose its capture date and GPS rounded to four decimals. The disclosure opens so users can review or edit these values before they are sent as identification context.
+- Identification history is owned by the browser: at most 50 records, result fields, reviewed context, rounded coordinates, and a maximum-320px JPEG thumbnail are stored in IndexedDB. There is no history API or server-side history file.
+- Location history never loads a third-party map automatically. A per-record action loads an OpenStreetMap embed with visible attribution and an explicit warning that the rounded coordinate leaves the browser.
 - Geolocation is requested only after an explicit button press, kept in browser memory for the current page, reduced to an accuracy label in the result, and never added to identification requests or storage.
 - The app never grants collection or edibility. It lists unresolved owner, protected-area, ordinance, and protected-species checks and links to authoritative Japanese guidance.
 - Optional specialist services remain hidden until configured and require an explicit per-request photo-sharing choice.

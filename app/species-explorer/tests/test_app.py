@@ -38,6 +38,13 @@ def test_index_has_camera_capture():
 def test_index_links_to_settings():
     response = client.get("/")
     assert 'href="/settings"' in response.text
+    assert 'id="historyPanel"' in response.text
+    assert 'indexedDB.open("species-history",1)' in response.text
+    assert 'slice(50)' in response.text
+    assert 'gps.latitude.toFixed(4)' in response.text
+    assert 'id="clearHistory"' in response.text
+    assert 'OpenStreetMap contributors' in response.text
+    assert all("history" not in route.path for route in main.app.routes if route.path.startswith("/api/"))
 
 
 def test_settings_page_enables_all_providers():
