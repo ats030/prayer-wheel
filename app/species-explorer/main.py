@@ -68,6 +68,7 @@ async def identify(
     observed_date: str = Form(default=""),
     size: str = Form(default=""),
     verify_names: bool = Form(default=False),
+    use_plantnet: bool = Form(default=False),
 ) -> JSONResponse:
     settings = config_store.load()
     provider = settings["provider"]
@@ -90,6 +91,21 @@ async def identify(
             result = await run_in_threadpool(vision.identify_anthropic, prepared, api_key, model, **context)
         else:
             result = await run_in_threadpool(vision.identify, prepared, model, **context)
+        if use_plantnet:
+            plantnet_key = settings["api_keys"].get("plantnet", "")
+            if not plantnet_key:
+                result["plantnet_status"] = "not_configured"
+            elif result.get("category") != "植物":
+                result["plantnet_status"] = "not_plant"
+            else:
+                try:
+                    specialist = await run_in_threadpool(
+                        vision.identify_plantnet, prepared, plantnet_key
+                    )
+                    result = vision.merge_plant_results(result, specialist)
+                except vision.VisionError as plantnet_error:
+                    result["plantnet_status"] = "unavailable"
+                    result["plantnet_message"] = str(plantnet_error)
         if verify_names:
             result = await run_in_threadpool(vision.verify_taxonomy, result)
     except vision.VisionError as exc:

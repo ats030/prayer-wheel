@@ -20,6 +20,7 @@ OPENAI_MODEL = os.getenv("SPECIES_OPENAI_MODEL", "gpt-5.6-luna")
 OPENAI_URL = os.getenv("SPECIES_OPENAI_URL", "https://api.openai.com/v1/responses")
 ANTHROPIC_MODEL = os.getenv("SPECIES_ANTHROPIC_MODEL", "claude-sonnet-5")
 ANTHROPIC_URL = os.getenv("SPECIES_ANTHROPIC_URL", "https://api.anthropic.com/v1/messages")
+PLANTNET_URL = "https://my-api.plantnet.org/v2/identify/all"
 INATURALIST_URL = "https://api.inaturalist.org/v1/taxa/autocomplete"
 INATURALIST_USER_AGENT = "SpeciesExplorer/1.0 (https://github.com/ats030/ubuntu-server-app)"
 _TAXONOMY_LOCK = threading.Lock()
@@ -140,6 +141,79 @@ def normalize(data: dict[str, Any], *, model: str = MODEL, provider: str = "loca
         "image_saved": False,
     }
 
+
+
+
+def identify_plantnet(image_bytes: bytes | list[bytes], api_key: str) -> dict[str, Any]:
+    images = _image_list(image_bytes)
+    files = [("images", (f"image-{index}.jpg", image, "image/jpeg")) for index, image in enumerate(images)]
+    try:
+        response = httpx.post(
+            PLANTNET_URL,
+            params={"api-key": api_key, "lang": "ja", "nb-results": 3},
+            files=files,
+            timeout=90,
+        )
+        response.raise_for_status()
+        data = response.json()
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code in {401, 403}:
+            raise VisionError("PlのAPIキーを確認してください") from exc
+        if exc.response.status_code == 429:
+            raise VisionError("Plの利用上限に達しました") from exc
+        raise VisionError("Plで植物を識別できませんでした") from exc
+    except (httpx.HTTPError, ValueError, AttributeError) as exc:
+        raise VisionError("Plに接続できませんでした") from exc
+    candidates = []
+    for item in (data.get("results") or [])[:3]:
+        if not isinstance(item, dict) or not isinstance(item.get("species"), dict):
+            continue
+        species = item["species"]
+        scientific = str(species.get("scientificNameWithoutAuthor") or "").strip()
+        common_names = [str(name).strip() for name in (species.get("commonNames") or []) if str(name).strip()]
+        try:
+            confidence = max(0, min(100, round(float(item.get("score", 0)) * 100)))
+        except (TypeError, ValueError):
+            confidence = 0
+        if not scientific:
+            continue
+        candidates.append({
+            "common_name_ja": common_names[0] if common_names else scientific,
+            "scientific_name": scientific,
+            "confidence": confidence,
+            "traits": ["Pl植物画像識別による候補"],
+            "uncertainty": "写真で見える区別点を候補間で確認してください",
+            "source": "plantnet",
+        })
+    return {
+        "category": "植物",
+        "summary": "植物専用画像識別の候補です。",
+        "candidates": candidates,
+        "model": str(data.get("version") or "Pl"),
+        "provider": "plantnet",
+        "image_saved": False,
+        "remaining_requests": data.get("remainingIdentificationRequests"),
+    }
+
+
+def merge_plant_results(vlm: dict[str, Any], specialist: dict[str, Any]) -> dict[str, Any]:
+    if not specialist.get("candidates"):
+        vlm["plantnet_status"] = "no_match"
+        return vlm
+    vlm_by_name = {str(candidate.get("scientific_name") or "").casefold(): candidate for candidate in vlm.get("candidates") or []}
+    for candidate in specialist["candidates"]:
+        match = vlm_by_name.get(str(candidate.get("scientific_name") or "").casefold())
+        candidate["agreement"] = "matched" if match else "specialist_only"
+        if match:
+            observed = [trait for trait in match.get("traits") or [] if trait]
+            candidate["traits"] = observed[:2] + candidate["traits"][:1]
+    return {
+        **specialist,
+        "summary": vlm.get("summary") or specialist["summary"],
+        "plantnet_used": True,
+        "vlm_model": vlm.get("model"),
+        "vlm_provider": vlm.get("provider"),
+    }
 
 
 def _lookup_taxon(name: str) -> list[dict[str, Any]] | None:

@@ -121,6 +121,58 @@ def test_openai_uses_responses_vision_contract(monkeypatch):
     assert content[1]["type"] == "input_text"
 
 
+
+def test_plantnet_uses_multiple_images_and_parses_candidates(monkeypatch):
+    seen = {}
+
+    def fake_post(url, **kwargs):
+        seen.update(url=url, **kwargs)
+        return FakeResponse({
+            "version": "test-model",
+            "remainingIdentificationRequests": 499,
+            "results": [{
+                "score": 0.91,
+                "species": {
+                    "scientificNameWithoutAuthor": "Taraxacum officinale",
+                    "commonNames": ["セイヨウタンポポ"],
+                },
+            }],
+        })
+
+    monkeypatch.setattr(vision.httpx, "post", fake_post)
+    result = vision.identify_plantnet([b"one", b"two"], "plant-secret")
+
+    assert seen["url"] == vision.PLANTNET_URL
+    assert seen["params"]["api-key"] == "plant-secret"
+    assert len(seen["files"]) == 2
+    assert result["candidates"][0]["scientific_name"] == "Taraxacum officinale"
+    assert result["candidates"][0]["confidence"] == 91
+    assert result["remaining_requests"] == 499
+
+
+def test_merge_plant_results_preserves_observed_traits():
+    vlm = {
+        "summary": "黄色い頭花", "model": "vision", "provider": "local",
+        "candidates": [{
+            "scientific_name": "Taraxacum officinale",
+            "traits": ["黄色い頭花", "鋸歯のある葉"],
+        }],
+    }
+    specialist = {
+        "summary": "specialist", "model": "plant", "provider": "plantnet",
+        "candidates": [{
+            "scientific_name": "Taraxacum officinale",
+            "traits": ["Pl植物画像識別による候補"],
+        }],
+    }
+
+    result = vision.merge_plant_results(vlm, specialist)
+
+    assert result["candidates"][0]["agreement"] == "matched"
+    assert result["candidates"][0]["traits"][:2] == ["黄色い頭花", "鋸歯のある葉"]
+    assert result["plantnet_used"] is True
+
+
 def test_anthropic_uses_messages_vision_contract(monkeypatch):
     seen = {}
 

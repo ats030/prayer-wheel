@@ -1,0 +1,19 @@
+tool: Pl@ntNet API
+plan_or_version: identification API v2, free or commercial plan
+reviewed_at: 2026-08-09
+decision: conditional
+price:
+  condition: Free up to 500 identification requests per day; commercial use beyond that requires a paid agreement.
+  source: https://my.plantnet.org/terms_of_use
+commercial_use:
+  allowed: conditional
+  source: https://my.plantnet.org/terms_of_use
+restrictions:
+  - Requires a user-owned API key and account.
+  - Free use is limited to 500 identification requests per day; commercial use beyond that is paid.
+  - Free use may require Pl@ntNet acknowledgement and logo under its terms.
+  - Submit only photos the user explicitly agrees to send; images are processed in volatile memory according to the terms.
+  - Do not expose or return the API key.
+adoption:
+  rationale: Optional plant-only comparison experiment; existing VLM remains the fallback.
+  release_condition: Keep explicit opt-in off by default, write-only BYOK storage, attribution, quota handling, and fallback.

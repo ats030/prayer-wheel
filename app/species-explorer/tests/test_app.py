@@ -115,6 +115,67 @@ def test_identify_accepts_three_images_and_context(monkeypatch):
 
 
 
+
+
+def test_plantnet_opt_in_merges_specialist_result(monkeypatch):
+    source = io.BytesIO()
+    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    monkeypatch.setattr(main.config_store, "load", lambda: {
+        "provider": "local",
+        "models": {"local": "gemma4:31b"},
+        "api_keys": {"plantnet": "plant-secret"},
+    })
+    monkeypatch.setattr(main.vision, "identify", lambda *args, **kwargs: {
+        "category": "植物", "summary": "黄色い花",
+        "candidates": [{"scientific_name": "Taraxacum officinale", "traits": ["黄色い花"]}],
+        "model": "gemma4:31b", "provider": "local",
+    })
+    monkeypatch.setattr(main.vision, "identify_plantnet", lambda images, key: {
+        "category": "植物", "summary": "専用候補",
+        "candidates": [{
+            "common_name_ja": "セイヨウタンポポ",
+            "scientific_name": "Taraxacum officinale",
+            "confidence": 90, "traits": ["専用候補"],
+        }],
+        "model": "plantnet-test", "provider": "plantnet",
+    })
+
+    response = client.post("/identify", files={
+        "file": ("photo.jpg", source.getvalue(), "image/jpeg")
+    }, data={"use_plantnet": "true"})
+
+    assert response.status_code == 200
+    assert response.json()["provider"] == "plantnet"
+    assert response.json()["plantnet_used"] is True
+    assert response.json()["candidates"][0]["agreement"] == "matched"
+
+
+def test_plantnet_failure_falls_back_to_vlm_result(monkeypatch):
+    source = io.BytesIO()
+    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    monkeypatch.setattr(main.config_store, "load", lambda: {
+        "provider": "local",
+        "models": {"local": "gemma4:31b"},
+        "api_keys": {"plantnet": "plant-secret"},
+    })
+    monkeypatch.setattr(main.vision, "identify", lambda *args, **kwargs: {
+        "category": "植物", "summary": "葉", "candidates": [],
+        "model": "gemma4:31b", "provider": "local",
+    })
+    monkeypatch.setattr(
+        main.vision, "identify_plantnet",
+        lambda *args, **kwargs: (_ for _ in ()).throw(main.vision.VisionError("利用できません")),
+    )
+
+    response = client.post("/identify", files={
+        "file": ("photo.jpg", source.getvalue(), "image/jpeg")
+    }, data={"use_plantnet": "true"})
+
+    assert response.status_code == 200
+    assert response.json()["provider"] == "local"
+    assert response.json()["plantnet_status"] == "unavailable"
+
+
 def test_identify_runs_taxonomy_check_only_when_opted_in(monkeypatch):
     source = io.BytesIO()
     Image.new("RGB", (2, 2), "green").save(source, "JPEG")

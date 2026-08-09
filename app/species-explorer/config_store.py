@@ -114,7 +114,7 @@ def load() -> dict[str, Any]:
             data["models"][provider] = model
         elif model in {item["id"] for item in MODELS.get(provider, [])}:
             data["models"][provider] = model
-    for provider in ("openai", "anthropic"):
+    for provider in ("openai", "anthropic", "plantnet"):
         key = (saved.get("api_keys") or {}).get(provider)
         if isinstance(key, str) and key:
             data["api_keys"][provider] = key
@@ -131,7 +131,7 @@ def public(data: dict[str, Any] | None = None) -> dict[str, Any]:
         "incompatible_local_models": incompatible,
         "api_key_configured": {
             provider: bool(data["api_keys"].get(provider))
-            for provider in ("openai", "anthropic")
+            for provider in ("openai", "anthropic", "plantnet")
         },
     }
 
@@ -153,9 +153,9 @@ def save(
             raise SettingsError("モデルを選び直してください")
         current["models"][name] = model
     for name in delete_keys:
-        if name in {"openai", "anthropic"}:
+        if name in {"openai", "anthropic", "plantnet"}:
             current["api_keys"].pop(name, None)
-    for name in ("openai", "anthropic"):
+    for name in ("openai", "anthropic", "plantnet"):
         key = api_keys.get(name)
         if isinstance(key, str) and key.strip():
             current["api_keys"][name] = key.strip()

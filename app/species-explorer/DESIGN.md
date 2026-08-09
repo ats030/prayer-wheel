@@ -23,6 +23,7 @@ is always presented as a candidate that the user should compare with the subject
 - Empty, loading, result, and error states do not shift the main capture controls.
 - Candidate cards expose visible traits, uncertainty, and source-search links.
 - Images are processed in memory, EXIF metadata is stripped, and nothing is saved.
+- Optional specialist services remain hidden until configured and require an explicit per-request photo-sharing choice.
 - Settings are reachable from the header and use a dedicated page with a clear
   return path. API keys are write-only in the UI; configured state and allowed model choices remain visible.
 

@@ -26,6 +26,21 @@ def test_settings_save_is_private_and_public_response_hides_key(tmp_path, monkey
     assert config_store.load()["api_keys"]["openai"] == "secret-value"
 
 
+
+def test_plantnet_key_is_private_and_independent(tmp_path, monkeypatch):
+    path = tmp_path / "settings.json"
+    monkeypatch.setattr(config_store, "SETTINGS_PATH", path)
+
+    result = config_store.save(
+        provider="local", models={}, api_keys={"plantnet": "plant-secret"}, delete_keys=[]
+    )
+
+    assert result["api_key_configured"]["plantnet"] is True
+    assert "plant-secret" not in str(result)
+    assert config_store.load()["api_keys"]["plantnet"] == "plant-secret"
+    assert stat.S_IMODE(path.stat().st_mode) == 0o600
+
+
 def test_settings_rejects_unknown_model(tmp_path, monkeypatch):
     monkeypatch.setattr(config_store, "SETTINGS_PATH", tmp_path / "settings.json")
     try:
