@@ -77,14 +77,14 @@ def test_affiliate_settings_and_metrics_are_persistent(tmp_path, monkeypatch):
     monkeypatch.setattr(config_store, "SETTINGS_PATH", tmp_path / "settings.json")
     result = config_store.save(
         provider="local", models={}, api_keys={}, delete_keys=[],
-        affiliate={"title": "身近な植物図鑑", "url": "https://www.amazon.co.jp/s?i=stripbooks&k={query}&tag=test-22", "enabled": True},
+        affiliate={"title": "身近な植物図鑑", "url": "https://www.amazon.co.jp/s?k={query}&tag=test-22", "enabled": True},
     )
     assert result["affiliate"]["enabled"] is True
-    assert result["affiliate"]["url"] == "https://www.amazon.co.jp/s?i=stripbooks&k={query}&tag=test-22"
+    assert result["affiliate"]["url"] == "https://www.amazon.co.jp/s?k={query}&tag=test-22"
     config_store.record_affiliate("impressions")
     config_store.record_affiliate("clicks")
     assert config_store.public()["affiliate"]["metrics"] == {"impressions": 1, "clicks": 1}
-    assert config_store.affiliate_target("タンポポ") == "https://www.amazon.co.jp/s?i=stripbooks&k=%E3%82%BF%E3%83%B3%E3%83%9D%E3%83%9D+%E5%9B%B3%E9%91%91+%E6%9C%AC&tag=test-22"
+    assert config_store.affiliate_target("タンポポ") == "https://www.amazon.co.jp/s?k=%E3%82%BF%E3%83%B3%E3%83%9D%E3%83%9D&tag=test-22"
 
 
 def test_affiliate_rejects_non_https_url(tmp_path, monkeypatch):
@@ -116,7 +116,7 @@ def test_creators_api_credentials_are_write_only(tmp_path, monkeypatch):
     result = config_store.save(provider="local", models={}, delete_keys=[], api_keys={
         "amazon_creators_id": "credential-id", "amazon_creators_secret": "creator-secret",
     }, affiliate={
-        "title": "関連書籍", "url": "https://www.amazon.co.jp/s?i=stripbooks&k={query}&tag=test-22",
+        "title": "関連商品", "url": "https://www.amazon.co.jp/s?k={query}&tag=test-22",
         "enabled": True, "partner_tag": "test-22", "product_enabled": True,
     })
     assert result["affiliate"]["product_enabled"] is True
@@ -216,3 +216,12 @@ def test_gemini_credentials_are_write_only(tmp_path, monkeypatch):
     assert result["api_key_configured"]["gemini"] is True
     assert "gemini-secret" not in str(result)
     assert config_store.load()["api_keys"]["gemini"] == "gemini-secret"
+
+
+def test_legacy_books_search_url_is_migrated_to_all_categories(tmp_path, monkeypatch):
+    path = tmp_path / "settings.json"
+    monkeypatch.setattr(config_store, "SETTINGS_PATH", path)
+    path.write_text('{"affiliate":{"title":"関連商品","url":"https://www.amazon.co.jp/s?i=stripbooks\u0026k={query}\u0026tag=test-22","enabled":true}}', encoding="utf-8")
+    loaded = config_store.load()
+    assert loaded["affiliate"]["url"] == "https://www.amazon.co.jp/s?k={query}" + chr(38) + "tag=test-22"
+    assert "図鑑" not in config_store.affiliate_target("タンポポ")

@@ -1,5 +1,5 @@
 reviewed_at: 2026-08-09
-intended_use: "写真識別Webアプリの判別結果後に、手動登録した検索リンクまたはAmazon Creators APIが返す図鑑の商品ページを広告として表示"
+intended_use: "写真識別Webアプリの判別結果後に、手動登録した全商品検索リンクまたはAmazon Creators APIが返す関連商品のページを広告として表示"
 candidates:
   - name: Amazon Associates Japan
     cost: "参加費の記載なし。紹介料率はカテゴリ等により変動。"
@@ -12,7 +12,7 @@ candidates:
     sources:
       - https://affiliate.amazon.co.jp/help/operating/agreement/
       - https://affiliate.amazon.co.jp/help/operating/policies/
-    note: "Amazon書籍検索用の正式な特別リンクだけを使用し、{query}へ検証済み候補名をURLエンコードして挿入。Species Explorerを掲載媒体として承認済みであることを公開前に確認する。"
+    note: "Amazon全商品検索用の正式な特別リンクだけを使用し、{query}へ検証済み候補名と識別カテゴリをURLエンコードして挿入。Species Explorerを掲載媒体として承認済みであることを公開前に確認する。"
   - name: Amazon Creators API
     cost: "API単体の料金は公式文書に記載されていないが、Amazonアソシエイトの参加・審査条件を満たす必要がある。"
     commercial_use: conditional
@@ -26,4 +26,4 @@ candidates:
       - https://affiliate-program.amazon.com/creatorsapi/docs/
       - https://affiliate-program.amazon.com/creatorsapi/docs/en-us/onboarding/register-for-creators-api
       - https://affiliate-program.amazon.com/creatorsapi/docs/en-us/paapiv5-deprecation
-    note: "廃止済みのPA-API 5.0ではなくCreators APIを採用。日本向けOAuthエンドポイントとSearchItemsを使い、Booksから候補ごとに1件だけ取得する。"
+    note: "廃止済みのPA-API 5.0ではなくCreators APIを採用。日本向けOAuthエンドポイントとSearchItemsを使い、Allカテゴリから候補ごとに1件だけ取得する。"

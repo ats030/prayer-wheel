@@ -1,4 +1,4 @@
-"""Minimal Amazon Creators API client for one related book."""
+"""Minimal Amazon Creators API client for one related product."""
 from __future__ import annotations
 
 import threading
@@ -49,13 +49,13 @@ def _value(container: Any, *keys: str) -> str:
         current = current.get("displayValue") or current.get("value")
     return str(current or "").strip()
 
-def search_book(query: str, credential_id: str, secret: str, partner_tag: str) -> dict[str, str] | None:
+def search_product(query: str, credential_id: str, secret: str, partner_tag: str) -> dict[str, str] | None:
     term = " ".join(str(query).split())[:80]
     if not term:
         return None
     token = _token(credential_id, secret)
     try:
-        response = httpx.post(SEARCH_URL, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "x-marketplace": MARKETPLACE}, json={"marketplace": MARKETPLACE, "partnerTag": partner_tag, "searchIndex": "Books", "keywords": f"{term} 図鑑", "itemCount": 1, "resources": ["itemInfo.title", "images.primary.medium"]}, timeout=20)
+        response = httpx.post(SEARCH_URL, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "x-marketplace": MARKETPLACE}, json={"marketplace": MARKETPLACE, "partnerTag": partner_tag, "searchIndex": "All", "keywords": term, "itemCount": 1, "resources": ["itemInfo.title", "images.primary.medium"]}, timeout=20)
         response.raise_for_status()
         data = response.json()
     except (httpx.HTTPError, ValueError, AttributeError) as exc:

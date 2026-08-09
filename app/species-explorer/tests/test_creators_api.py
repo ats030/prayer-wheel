@@ -16,7 +16,7 @@ class FakeResponse:
     def raise_for_status(self):
         return None
 
-def test_search_book_uses_japan_books_and_vended_product_url(monkeypatch):
+def test_search_product_uses_japan_all_categories_and_vended_product_url(monkeypatch):
     creators_api._TOKEN_CACHE.clear()
     calls = []
     def fake_post(url, **kwargs):
@@ -29,15 +29,15 @@ def test_search_book_uses_japan_books_and_vended_product_url(monkeypatch):
             "images": {"primary": {"medium": {"url": "https://images.example/book.jpg"}}},
         }]}})
     monkeypatch.setattr(creators_api.httpx, "post", fake_post)
-    product = creators_api.search_book("タンポポ", "credential", "secret", "test-22")
+    product = creators_api.search_product("タンポポ", "credential", "secret", "test-22")
     assert product["title"] == "身近な植物図鑑"
     assert product["url"].startswith("https://www.amazon.co.jp/dp/")
     request = calls[1][1]
     assert request["headers"]["Authorization"] == "Bearer token-secret"
     assert request["headers"]["x-marketplace"] == "www.amazon.co.jp"
-    assert request["json"]["searchIndex"] == "Books"
+    assert request["json"]["searchIndex"] == "All"
     assert request["json"]["itemCount"] == 1
-    assert request["json"]["keywords"] == "タンポポ 図鑑"
+    assert request["json"]["keywords"] == "タンポポ"
 
 def test_access_token_is_reused_until_expiry(monkeypatch):
     creators_api._TOKEN_CACHE.clear()
@@ -49,8 +49,8 @@ def test_access_token_is_reused_until_expiry(monkeypatch):
             return FakeResponse({"access_token": "cached-token", "expires_in": 3600})
         return FakeResponse({"searchResult": {"items": []}})
     monkeypatch.setattr(creators_api.httpx, "post", fake_post)
-    creators_api.search_book("鳥", "credential", "secret", "test-22")
-    creators_api.search_book("花", "credential", "secret", "test-22")
+    creators_api.search_product("鳥", "credential", "secret", "test-22")
+    creators_api.search_product("花", "credential", "secret", "test-22")
     assert token_calls == 1
 
 def test_non_amazon_product_url_is_rejected(monkeypatch):
@@ -59,4 +59,4 @@ def test_non_amazon_product_url_is_rejected(monkeypatch):
     monkeypatch.setattr(creators_api.httpx, "post", lambda *args, **kwargs: FakeResponse({
         "searchResult": {"items": [{"detailPageURL": "https://evil.example/product", "itemInfo": {"title": {"displayValue": "fake"}}}]}
     }))
-    assert creators_api.search_book("花", "id", "secret", "tag") is None
+    assert creators_api.search_product("花", "id", "secret", "tag") is None

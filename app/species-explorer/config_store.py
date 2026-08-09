@@ -130,6 +130,7 @@ def load() -> dict[str, Any]:
     affiliate = saved.get("affiliate") or {}
     if isinstance(affiliate, dict):
         url = str(affiliate.get("url") or "").strip()
+        url = url.replace("i=stripbooks\x26", "").replace("\x26i=stripbooks", "")
         title = str(affiliate.get("title") or "").strip()[:120]
         if urlparse(url).scheme == "https" and urlparse(url).netloc:
             data["affiliate"] = {"title": title, "url": url, "enabled": bool(affiliate.get("enabled")), "partner_tag": str(affiliate.get("partner_tag") or "").strip()[:80], "product_enabled": bool(affiliate.get("product_enabled"))}
@@ -174,7 +175,7 @@ def affiliate_target(query: str = "") -> str:
     term = " ".join(str(query).split())[:80]
     if not term:
         raise LookupError("検索語がありません")
-    return template.replace("{query}", quote_plus(term + " 図鑑 本"))
+    return template.replace("{query}", quote_plus(term))
 
 
 def _write(current: dict[str, Any]) -> None:

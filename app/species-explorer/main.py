@@ -96,7 +96,7 @@ async def amazon_product(q: str = "") -> JSONResponse:
     if not affiliate.get("product_enabled"):
         raise HTTPException(status_code=404, detail="商品APIが設定されていません")
     try:
-        product = await run_in_threadpool(creators_api.search_book, q, keys.get("amazon_creators_id", ""), keys.get("amazon_creators_secret", ""), affiliate.get("partner_tag", ""))
+        product = await run_in_threadpool(creators_api.search_product, q, keys.get("amazon_creators_id", ""), keys.get("amazon_creators_secret", ""), affiliate.get("partner_tag", ""))
     except creators_api.CreatorsAPIError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     if not product:

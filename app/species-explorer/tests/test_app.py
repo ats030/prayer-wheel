@@ -52,6 +52,7 @@ def test_settings_page_enables_all_providers():
     assert 'value="anthropic"' in response.text
     assert 'value="gemini"' in response.text
     assert 'id="settingsForm"' in response.text
+    assert "affiliateProductLink(c,data.category)" in client.get("/").text
     assert 'id="reset-affiliate-visibility"' in response.text
     assert "広告の非表示を解除" in response.text
     assert "gpt-5.6-sol" not in response.text
@@ -60,13 +61,13 @@ def test_settings_page_enables_all_providers():
 def test_affiliate_click_redirects_and_records_metrics():
     main.config_store.save(
         provider="local", models={}, api_keys={}, delete_keys=[],
-        affiliate={"title": "野鳥図鑑", "url": "https://www.amazon.co.jp/s?i=stripbooks&k={query}&tag=test-22", "enabled": True},
+        affiliate={"title": "関連商品", "url": "https://www.amazon.co.jp/s?k={query}&tag=test-22", "enabled": True},
     )
     impression = client.post("/api/affiliate/impression")
     click = client.get("/affiliate/click?q=タンポポ", follow_redirects=False)
     assert impression.status_code == 200
     assert click.status_code == 302
-    assert "%E3%82%BF%E3%83%B3%E3%83%9D%E3%83%9D+%E5%9B%B3%E9%91%91" in click.headers["location"]
+    assert "%E3%82%BF%E3%83%B3%E3%83%9D%E3%83%9D" in click.headers["location"]
     assert main.config_store.public()["affiliate"]["metrics"] == {"impressions": 1, "clicks": 1}
 
 
@@ -84,7 +85,7 @@ def test_amazon_product_endpoint_uses_verified_query(monkeypatch):
     def fake_search(query, credential, secret, partner_tag):
         seen.update(query=query, credential=credential, secret=secret, partner_tag=partner_tag)
         return {"title": "タンポポ図鑑", "url": "https://www.amazon.co.jp/dp/B000000001?tag=test-22", "image": ""}
-    monkeypatch.setattr(main.creators_api, "search_book", fake_search)
+    monkeypatch.setattr(main.creators_api, "search_product", fake_search)
     response = client.get("/api/amazon/product?q=タンポポ")
     assert response.status_code == 200
     assert response.json()["title"] == "タンポポ図鑑"
