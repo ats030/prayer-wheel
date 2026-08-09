@@ -150,7 +150,7 @@ def test_plantnet_uses_multiple_images_and_parses_candidates(monkeypatch):
     assert result["remaining_requests"] == 499
 
 
-def test_merge_plant_results_preserves_observed_traits():
+def test_merge_plant_results_does_not_promote_vlm_traits_as_facts():
     vlm = {
         "summary": "黄色い頭花", "model": "vision", "provider": "local",
         "candidates": [{
@@ -162,15 +162,67 @@ def test_merge_plant_results_preserves_observed_traits():
         "summary": "specialist", "model": "plant", "provider": "plantnet",
         "candidates": [{
             "scientific_name": "Taraxacum officinale",
-            "traits": ["Pl植物画像識別による候補"],
+            "traits": ["Pl@ntNet植物画像識別による候補"],
         }],
     }
 
     result = vision.merge_plant_results(vlm, specialist)
 
     assert result["candidates"][0]["agreement"] == "matched"
-    assert result["candidates"][0]["traits"][:2] == ["黄色い頭花", "鋸歯のある葉"]
+    assert result["candidates"][0]["traits"] == ["Pl@ntNet植物画像識別による候補"]
+    assert result["summary"] == "specialist"
     assert result["plantnet_used"] is True
+
+
+def test_evidence_gate_rejects_unverified_vlm_candidate(monkeypatch):
+    monkeypatch.setattr(vision, "_lookup_taxon", lambda _name: [])
+    result = vision.apply_evidence_gate({
+        "provider": "local", "summary": "generated", "candidates": [{
+            "common_name_ja": "架空種", "scientific_name": "Inventus species",
+            "confidence": 92, "traits": ["生成された特徴"], "uncertainty": "",
+        }],
+    })
+    assert result["candidates"] == []
+    assert result["rejected_candidates"] == 1
+    assert result["strict_mode"] is True
+
+
+def test_evidence_gate_keeps_exact_taxon_but_marks_image_match_unverified(monkeypatch):
+    monkeypatch.setattr(vision, "_lookup_taxon", lambda _name: [{
+        "id": 47126, "name": "Taraxacum officinale", "preferred_common_name": "セイヨウタンポポ",
+    }])
+    result = vision.apply_evidence_gate({
+        "provider": "local", "summary": "generated", "candidates": [{
+            "common_name_ja": "誤った和名", "scientific_name": "Taraxacum officinale",
+            "confidence": 92, "traits": ["生成された特徴"], "uncertainty": "",
+        }],
+    })
+    candidate = result["candidates"][0]
+    assert candidate["common_name_ja"] == "セイヨウタンポポ"
+    assert candidate["evidence_status"] == "taxonomy_only"
+    assert candidate["confidence"] == 40
+    assert candidate["traits"] == []
+    assert "写真との一致は未検証" in candidate["uncertainty"]
+
+
+def test_evidence_gate_rejects_vlm_candidate_when_taxonomy_is_unavailable(monkeypatch):
+    monkeypatch.setattr(vision, "_lookup_taxon", lambda _name: None)
+    result = vision.apply_evidence_gate({
+        "provider": "anthropic", "summary": "", "candidates": [{
+            "common_name_ja": "候補", "scientific_name": "Known species", "confidence": 70,
+        }],
+    })
+    assert result["candidates"] == []
+
+
+def test_evidence_gate_marks_independent_plantnet_agreement():
+    result = vision.apply_evidence_gate({
+        "provider": "plantnet", "summary": "specialist", "candidates": [
+            {"scientific_name": "A", "agreement": "matched"},
+            {"scientific_name": "B", "agreement": "specialist_only"},
+        ],
+    })
+    assert [c["evidence_status"] for c in result["candidates"]] == ["corroborated", "specialist_only"]
 
 
 def test_anthropic_uses_messages_vision_contract(monkeypatch):

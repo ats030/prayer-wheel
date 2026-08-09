@@ -158,12 +158,12 @@ def identify_plantnet(image_bytes: bytes | list[bytes], api_key: str) -> dict[st
         data = response.json()
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code in {401, 403}:
-            raise VisionError("PlのAPIキーを確認してください") from exc
+            raise VisionError("Pl@ntNetのAPIキーを確認してください") from exc
         if exc.response.status_code == 429:
-            raise VisionError("Plの利用上限に達しました") from exc
-        raise VisionError("Plで植物を識別できませんでした") from exc
+            raise VisionError("Pl@ntNetの利用上限に達しました") from exc
+        raise VisionError("Pl@ntNetで植物を識別できませんでした") from exc
     except (httpx.HTTPError, ValueError, AttributeError) as exc:
-        raise VisionError("Plに接続できませんでした") from exc
+        raise VisionError("Pl@ntNetに接続できませんでした") from exc
     candidates = []
     for item in (data.get("results") or [])[:3]:
         if not isinstance(item, dict) or not isinstance(item.get("species"), dict):
@@ -181,7 +181,7 @@ def identify_plantnet(image_bytes: bytes | list[bytes], api_key: str) -> dict[st
             "common_name_ja": common_names[0] if common_names else scientific,
             "scientific_name": scientific,
             "confidence": confidence,
-            "traits": ["Pl植物画像識別による候補"],
+            "traits": ["Pl@ntNet植物画像識別による候補"],
             "uncertainty": "写真で見える区別点を候補間で確認してください",
             "source": "plantnet",
         })
@@ -189,7 +189,7 @@ def identify_plantnet(image_bytes: bytes | list[bytes], api_key: str) -> dict[st
         "category": "植物",
         "summary": "植物専用画像識別の候補です。",
         "candidates": candidates,
-        "model": str(data.get("version") or "Pl"),
+        "model": str(data.get("version") or "Pl@ntNet"),
         "provider": "plantnet",
         "image_saved": False,
         "remaining_requests": data.get("remainingIdentificationRequests"),
@@ -204,12 +204,10 @@ def merge_plant_results(vlm: dict[str, Any], specialist: dict[str, Any]) -> dict
     for candidate in specialist["candidates"]:
         match = vlm_by_name.get(str(candidate.get("scientific_name") or "").casefold())
         candidate["agreement"] = "matched" if match else "specialist_only"
-        if match:
-            observed = [trait for trait in match.get("traits") or [] if trait]
-            candidate["traits"] = observed[:2] + candidate["traits"][:1]
+        # Agreement is recorded, but free-form VLM traits are not promoted as facts.
     return {
         **specialist,
-        "summary": vlm.get("summary") or specialist["summary"],
+        "summary": specialist["summary"],
         "plantnet_used": True,
         "vlm_model": vlm.get("model"),
         "vlm_provider": vlm.get("provider"),
@@ -256,6 +254,8 @@ def verify_taxonomy(result: dict[str, Any]) -> dict[str, Any]:
         match = next((taxon for taxon in taxa if str(taxon.get("name") or "").casefold() == scientific_name.casefold()), None)
         if match:
             candidate["taxonomy_status"] = "verified"
+            candidate["scientific_name"] = str(match.get("name") or scientific_name)
+            candidate["common_name_ja"] = str(match.get("preferred_common_name") or candidate["scientific_name"])
             taxon_id = match.get("id")
             candidate["taxonomy_url"] = f"https://www.inaturalist.org/taxa/{taxon_id}" if taxon_id else ""
         else:
@@ -263,6 +263,40 @@ def verify_taxonomy(result: dict[str, Any]) -> dict[str, Any]:
             candidate["confidence"] = min(candidate.get("confidence", 0), 40)
     result["taxonomy_checked"] = True
     return result
+
+
+def apply_evidence_gate(result: dict[str, Any]) -> dict[str, Any]:
+    """Keep only candidates with an inspectable independent evidence source."""
+    candidates = result.get("candidates") or []
+    if result.get("provider") == "plantnet":
+        for candidate in candidates:
+            if candidate.get("agreement") == "matched":
+                candidate["evidence_status"] = "corroborated"
+            else:
+                candidate["evidence_status"] = "specialist_only"
+        result["strict_mode"] = True
+        result["rejected_candidates"] = 0
+        return result
+    checked = verify_taxonomy(result)
+    accepted = []
+    for candidate in checked.get("candidates") or []:
+        if candidate.get("taxonomy_status") != "verified":
+            continue
+        candidate["evidence_status"] = "taxonomy_only"
+        candidate["confidence"] = min(candidate.get("confidence", 0), 40)
+        candidate["traits"] = []
+        candidate["uncertainty"] = "学名の実在だけを確認しました。写真との一致は未検証です。"
+        accepted.append(candidate)
+    rejected = len(candidates) - len(accepted)
+    checked["candidates"] = accepted
+    checked["strict_mode"] = True
+    checked["rejected_candidates"] = rejected
+    if accepted:
+        checked["summary"] = "候補名は分類データで確認済みですが、写真との一致は未検証です。"
+    else:
+        checked["summary"] = "検証できる候補がありません。追加写真で識別点を確認してください。"
+    return checked
+
 
 
 def identify(image_bytes: bytes | list[bytes], model: str = MODEL, *, location: str = "", observed_date: str = "", size: str = "") -> dict[str, Any]:

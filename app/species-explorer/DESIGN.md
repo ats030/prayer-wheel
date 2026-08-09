@@ -21,7 +21,10 @@ is always presented as a candidate that the user should compare with the subject
 - The chosen image is previewed before identification.
 - Identification shows an expected wait and disables duplicate submission.
 - Empty, loading, result, and error states do not shift the main capture controls.
-- Candidate cards expose visible traits, uncertainty, and source-search links.
+- Strict mode automatically checks VLM scientific names against iNaturalist and hides non-exact matches.
+- Taxonomy-only candidates state that the photo match is unverified; generated common names, traits, and probability are not presented as facts.
+- Specialist plant candidates retain their Pl@ntNet source, and exact VLM agreement is labeled as two independent paths.
+- If every candidate is rejected, the result asks for additional identifying photos instead of filling the gap with a guess.
 - Images are processed in memory, EXIF metadata is stripped, and nothing is saved.
 - Optional specialist services remain hidden until configured and require an explicit per-request photo-sharing choice.
 - Settings are reachable from the header and use a dedicated page with a clear

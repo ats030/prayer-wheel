@@ -106,8 +106,7 @@ async def identify(
                 except vision.VisionError as plantnet_error:
                     result["plantnet_status"] = "unavailable"
                     result["plantnet_message"] = str(plantnet_error)
-        if verify_names:
-            result = await run_in_threadpool(vision.verify_taxonomy, result)
+        result = await run_in_threadpool(vision.apply_evidence_gate, result)
     except vision.VisionError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return JSONResponse(result)
