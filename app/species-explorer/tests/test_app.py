@@ -56,13 +56,13 @@ def test_settings_page_enables_all_providers():
 def test_affiliate_click_redirects_and_records_metrics():
     main.config_store.save(
         provider="local", models={}, api_keys={}, delete_keys=[],
-        affiliate={"title": "野鳥図鑑", "url": "https://amzn.asia/example", "enabled": True},
+        affiliate={"title": "野鳥図鑑", "url": "https://www.amazon.co.jp/s?k={query}&tag=test-22", "enabled": True},
     )
     impression = client.post("/api/affiliate/impression")
-    click = client.get("/affiliate/click", follow_redirects=False)
+    click = client.get("/affiliate/click?q=タンポポ", follow_redirects=False)
     assert impression.status_code == 200
     assert click.status_code == 302
-    assert click.headers["location"] == "https://amzn.asia/example"
+    assert "%E3%82%BF%E3%83%B3%E3%83%9D%E3%83%9D+%E5%9B%B3%E9%91%91" in click.headers["location"]
     assert main.config_store.public()["affiliate"]["metrics"] == {"impressions": 1, "clicks": 1}
 
 

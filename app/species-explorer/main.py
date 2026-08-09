@@ -60,7 +60,9 @@ def save_settings(update: SettingsUpdate) -> dict[str, object]:
 @app.post("/api/affiliate/impression")
 def affiliate_impression() -> dict[str, bool]:
     try:
-        config_store.affiliate_target()
+        settings = config_store.load()
+        if not settings["affiliate"]["enabled"]:
+            raise LookupError("広告が設定されていません")
         config_store.record_affiliate("impressions")
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -68,9 +70,9 @@ def affiliate_impression() -> dict[str, bool]:
 
 
 @app.get("/affiliate/click")
-def affiliate_click() -> RedirectResponse:
+def affiliate_click(q: str = "") -> RedirectResponse:
     try:
-        target = config_store.affiliate_target()
+        target = config_store.affiliate_target(q)
         config_store.record_affiliate("clicks")
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

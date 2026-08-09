@@ -8,7 +8,7 @@ import tempfile
 import threading
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import quote_plus, urlparse
 
 import httpx
 
@@ -158,11 +158,17 @@ def record_affiliate(event: str) -> None:
         _write(current)
 
 
-def affiliate_target() -> str:
+def affiliate_target(query: str = "") -> str:
     current = load()
     if not current["affiliate"]["enabled"] or not current["affiliate"]["url"]:
         raise LookupError("広告が設定されていません")
-    return current["affiliate"]["url"]
+    template = current["affiliate"]["url"]
+    if "{query}" not in template:
+        raise LookupError("検索用アフィリエイトリンクが設定されていません")
+    term = " ".join(str(query).split())[:80]
+    if not term:
+        raise LookupError("検索語がありません")
+    return template.replace("{query}", quote_plus(term + " 図鑑"))
 
 
 def _write(current: dict[str, Any]) -> None:
@@ -215,6 +221,8 @@ def save(
             raise SettingsError("アフィリエイトURLは https:// で入力してください")
         if enabled and (not title or not url):
             raise SettingsError("広告名とアフィリエイトURLを入力してください")
+        if enabled and "{query}" not in url:
+            raise SettingsError("検索用URLには {query} を含めてください")
         current["affiliate"] = {"title": title, "url": url, "enabled": enabled}
     _write(current)
     return public(current)

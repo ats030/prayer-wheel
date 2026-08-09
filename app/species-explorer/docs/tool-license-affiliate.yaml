@@ -12,4 +12,4 @@ candidates:
     sources:
       - https://affiliate.amazon.co.jp/help/operating/agreement/
       - https://affiliate.amazon.co.jp/help/operating/policies/
-    note: "手動登録した正式な特別リンクだけを使用。Species Explorerを掲載媒体として承認済みであることを公開前に確認する。"
+    note: "Amazon書籍検索用の正式な特別リンクだけを使用し、{query}へ検証済み候補名をURLエンコードして挿入。Species Explorerを掲載媒体として承認済みであることを公開前に確認する。"
