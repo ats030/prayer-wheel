@@ -56,6 +56,10 @@ def test_index_links_to_settings():
     assert "確証がない理由" in response.text
     assert "雌雄推定の根拠" in response.text
     assert "使用モデル：" in response.text
+    assert "historyAffiliateLink(entry)" in response.text
+    assert 'rel="sponsored noopener noreferrer"' in response.text
+    assert "広告 · Amazonで" in response.text
+    assert "if(!affiliate?.enabled)return" in response.text
     assert 'OpenStreetMap contributors' in response.text
     assert "雌雄推定" in response.text
     assert "Animal Diversity Web" in response.text
@@ -79,6 +83,7 @@ def test_settings_page_enables_all_providers():
     assert 'value="gemini"' in response.text
     assert 'id="settingsForm"' in response.text
     assert "rotatingAffiliateLink(data.candidates,data.category)" in client.get("/").text
+    assert "loadAmazonProducts()" in client.get("/").text
     assert "position:fixed" not in client.get("/").text
     assert "position:sticky" not in client.get("/").text
     assert 'id="reset-affiliate-visibility"' not in response.text
