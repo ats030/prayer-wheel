@@ -54,6 +54,12 @@ def test_settings_page_enables_all_providers():
     assert 'id="settingsForm"' in response.text
     assert "affiliateProductLink(c,data.category)" in client.get("/").text
     assert 'id="reset-affiliate-visibility"' in response.text
+    index = client.get("/").text
+    assert 'id="gpsButton"' in index
+    assert "採取可否：確認が必要" in index
+    assert "食用可否：このアプリでは判定しません" in index
+    assert 'fd.append("latitude"' not in index
+    assert 'fd.append("longitude"' not in index
     assert "広告の非表示を解除" in response.text
     assert "gpt-5.6-sol" not in response.text
 
