@@ -168,7 +168,7 @@ def affiliate_target(query: str = "") -> str:
     term = " ".join(str(query).split())[:80]
     if not term:
         raise LookupError("検索語がありません")
-    return template.replace("{query}", quote_plus(term + " 図鑑"))
+    return template.replace("{query}", quote_plus(term + " 図鑑 本"))
 
 
 def _write(current: dict[str, Any]) -> None:

@@ -77,14 +77,14 @@ def test_affiliate_settings_and_metrics_are_persistent(tmp_path, monkeypatch):
     monkeypatch.setattr(config_store, "SETTINGS_PATH", tmp_path / "settings.json")
     result = config_store.save(
         provider="local", models={}, api_keys={}, delete_keys=[],
-        affiliate={"title": "身近な植物図鑑", "url": "https://www.amazon.co.jp/s?k={query}&tag=test-22", "enabled": True},
+        affiliate={"title": "身近な植物図鑑", "url": "https://www.amazon.co.jp/s?i=stripbooks&k={query}&tag=test-22", "enabled": True},
     )
     assert result["affiliate"]["enabled"] is True
-    assert result["affiliate"]["url"] == "https://www.amazon.co.jp/s?k={query}&tag=test-22"
+    assert result["affiliate"]["url"] == "https://www.amazon.co.jp/s?i=stripbooks&k={query}&tag=test-22"
     config_store.record_affiliate("impressions")
     config_store.record_affiliate("clicks")
     assert config_store.public()["affiliate"]["metrics"] == {"impressions": 1, "clicks": 1}
-    assert config_store.affiliate_target("タンポポ") == "https://www.amazon.co.jp/s?k=%E3%82%BF%E3%83%B3%E3%83%9D%E3%83%9D+%E5%9B%B3%E9%91%91&tag=test-22"
+    assert config_store.affiliate_target("タンポポ") == "https://www.amazon.co.jp/s?i=stripbooks&k=%E3%82%BF%E3%83%B3%E3%83%9D%E3%83%9D+%E5%9B%B3%E9%91%91+%E6%9C%AC&tag=test-22"
 
 
 def test_affiliate_rejects_non_https_url(tmp_path, monkeypatch):
