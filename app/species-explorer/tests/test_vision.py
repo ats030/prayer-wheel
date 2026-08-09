@@ -43,6 +43,47 @@ def test_identification_prompt_includes_supplied_context():
 
 
 
+def test_taxonomy_verification_accepts_exact_scientific_name(monkeypatch):
+    monkeypatch.setattr(vision, "_lookup_taxon", lambda name: [{"id": 123, "name": name}])
+    result = vision.normalize({"category": "植物", "candidates": [{
+        "common_name_ja": "タンポポ",
+        "scientific_name": "Taraxacum officinale",
+        "confidence": 82,
+    }]})
+
+    verified = vision.verify_taxonomy(result)
+
+    assert verified["candidates"][0]["taxonomy_status"] == "verified"
+    assert verified["candidates"][0]["taxonomy_url"].endswith("/123")
+    assert verified["candidates"][0]["confidence"] == 82
+
+
+def test_taxonomy_outage_keeps_candidate_and_confidence(monkeypatch):
+    monkeypatch.setattr(vision, "_lookup_taxon", lambda name: None)
+    result = vision.normalize({"category": "動物", "candidates": [{
+        "common_name_ja": "候補", "scientific_name": "Known species", "confidence": 73
+    }]})
+
+    verified = vision.verify_taxonomy(result)
+
+    assert verified["candidates"][0]["taxonomy_status"] == "unavailable"
+    assert verified["candidates"][0]["confidence"] == 73
+
+
+def test_taxonomy_verification_caps_unverified_name(monkeypatch):
+    monkeypatch.setattr(vision, "_lookup_taxon", lambda name: [])
+    result = vision.normalize({"category": "動物", "candidates": [{
+        "common_name_ja": "架空種",
+        "scientific_name": "Fictitious species",
+        "confidence": 91,
+    }]})
+
+    verified = vision.verify_taxonomy(result)
+
+    assert verified["candidates"][0]["taxonomy_status"] == "unverified"
+    assert verified["candidates"][0]["confidence"] == 40
+
+
 class FakeResponse:
     def __init__(self, data, status_code=200):
         self._data = data

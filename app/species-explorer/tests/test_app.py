@@ -115,6 +115,29 @@ def test_identify_accepts_three_images_and_context(monkeypatch):
 
 
 
+def test_identify_runs_taxonomy_check_only_when_opted_in(monkeypatch):
+    source = io.BytesIO()
+    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    monkeypatch.setattr(main.vision, "identify", lambda *args, **kwargs: {
+        "category": "植物", "summary": "", "candidates": []
+    })
+    seen = {}
+
+    def fake_verify(result):
+        seen["called"] = True
+        result["taxonomy_checked"] = True
+        return result
+
+    monkeypatch.setattr(main.vision, "verify_taxonomy", fake_verify)
+    response = client.post("/identify", files={
+        "file": ("photo.jpg", source.getvalue(), "image/jpeg")
+    }, data={"verify_names": "true"})
+
+    assert response.status_code == 200
+    assert response.json()["taxonomy_checked"] is True
+    assert seen["called"] is True
+
+
 
 def test_settings_api_saves_model_without_returning_key():
     response = client.post("/api/settings", json={

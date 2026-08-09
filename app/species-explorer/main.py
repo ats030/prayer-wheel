@@ -67,6 +67,7 @@ async def identify(
     location: str = Form(default=""),
     observed_date: str = Form(default=""),
     size: str = Form(default=""),
+    verify_names: bool = Form(default=False),
 ) -> JSONResponse:
     settings = config_store.load()
     provider = settings["provider"]
@@ -89,6 +90,8 @@ async def identify(
             result = await run_in_threadpool(vision.identify_anthropic, prepared, api_key, model, **context)
         else:
             result = await run_in_threadpool(vision.identify, prepared, model, **context)
+        if verify_names:
+            result = await run_in_threadpool(vision.verify_taxonomy, result)
     except vision.VisionError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return JSONResponse(result)

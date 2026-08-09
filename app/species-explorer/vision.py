@@ -7,6 +7,8 @@ import io
 import json
 import os
 import re
+import threading
+import time
 from typing import Any
 
 import httpx
@@ -18,6 +20,11 @@ OPENAI_MODEL = os.getenv("SPECIES_OPENAI_MODEL", "gpt-5.6-luna")
 OPENAI_URL = os.getenv("SPECIES_OPENAI_URL", "https://api.openai.com/v1/responses")
 ANTHROPIC_MODEL = os.getenv("SPECIES_ANTHROPIC_MODEL", "claude-sonnet-5")
 ANTHROPIC_URL = os.getenv("SPECIES_ANTHROPIC_URL", "https://api.anthropic.com/v1/messages")
+INATURALIST_URL = "https://api.inaturalist.org/v1/taxa/autocomplete"
+INATURALIST_USER_AGENT = "SpeciesExplorer/1.0 (https://github.com/ats030/ubuntu-server-app)"
+_TAXONOMY_LOCK = threading.Lock()
+_LAST_TAXONOMY_REQUEST = 0.0
+_TAXONOMY_CACHE: dict[str, list[dict[str, Any]]] = {}
 MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 MAX_EDGE = 1600
 
@@ -132,6 +139,56 @@ def normalize(data: dict[str, Any], *, model: str = MODEL, provider: str = "loca
         "provider": provider,
         "image_saved": False,
     }
+
+
+
+def _lookup_taxon(name: str) -> list[dict[str, Any]] | None:
+    global _LAST_TAXONOMY_REQUEST
+    if name in _TAXONOMY_CACHE:
+        return _TAXONOMY_CACHE[name]
+    try:
+        with _TAXONOMY_LOCK:
+            delay = 1.0 - (time.monotonic() - _LAST_TAXONOMY_REQUEST)
+            if delay > 0:
+                time.sleep(delay)
+            response = httpx.get(
+                INATURALIST_URL,
+                params={"q": name, "per_page": 5, "locale": "ja"},
+                headers={"User-Agent": INATURALIST_USER_AGENT},
+                timeout=5,
+            )
+            _LAST_TAXONOMY_REQUEST = time.monotonic()
+        response.raise_for_status()
+        results = response.json().get("results") or []
+        parsed = results if isinstance(results, list) else []
+        _TAXONOMY_CACHE[name] = parsed
+        return parsed
+    except (httpx.HTTPError, ValueError, AttributeError):
+        return None
+
+
+def verify_taxonomy(result: dict[str, Any]) -> dict[str, Any]:
+    """Verify model-derived scientific names without sending photos or location."""
+    for candidate in result.get("candidates") or []:
+        scientific_name = str(candidate.get("scientific_name") or "").strip()[:160]
+        if not scientific_name:
+            candidate["taxonomy_status"] = "unverified"
+            candidate["confidence"] = min(candidate.get("confidence", 0), 50)
+            continue
+        taxa = _lookup_taxon(scientific_name)
+        if taxa is None:
+            candidate["taxonomy_status"] = "unavailable"
+            continue
+        match = next((taxon for taxon in taxa if str(taxon.get("name") or "").casefold() == scientific_name.casefold()), None)
+        if match:
+            candidate["taxonomy_status"] = "verified"
+            taxon_id = match.get("id")
+            candidate["taxonomy_url"] = f"https://www.inaturalist.org/taxa/{taxon_id}" if taxon_id else ""
+        else:
+            candidate["taxonomy_status"] = "unverified"
+            candidate["confidence"] = min(candidate.get("confidence", 0), 40)
+    result["taxonomy_checked"] = True
+    return result
 
 
 def identify(image_bytes: bytes | list[bytes], model: str = MODEL, *, location: str = "", observed_date: str = "", size: str = "") -> dict[str, Any]:

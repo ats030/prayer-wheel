@@ -1,7 +1,7 @@
 tool: iNaturalist API
 plan_or_version: public read-only API v1
 reviewed_at: 2026-08-09
-decision: review_required
+decision: conditional
 price:
   condition: Public read-only access has no documented usage fee; rate limits apply.
   source: https://www.inaturalist.org/pages/developers
@@ -15,5 +15,5 @@ restrictions:
   - Observation content and media have per-item licenses; do not copy them without checking attribution and commercial-use terms.
   - Sending user-entered location to the hosted API requires explicit disclosure and consent.
 adoption:
-  rationale: Deferred; multi-photo and optional context improve the input without adding another external disclosure path.
-  release_condition: Add only with an explicit opt-in, rate limiting, User-Agent, minimal location precision, and a testable taxonomy-validation contract.
+  rationale: Optional taxonomy-name validation; only model-derived scientific names are sent, never photos or user-entered location.
+  release_condition: Keep explicit opt-in, 1 request/second throttling, User-Agent, caching, and graceful fallback.
