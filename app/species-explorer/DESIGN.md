@@ -17,7 +17,9 @@ is always presented as a candidate that the user should compare with the subject
 
 ## Interaction
 
-- Camera and library inputs are the primary actions and have 44px touch targets.
+- The main screen uses a Workbench flow: capture, preview, then full-width results. Camera and library inputs are the primary actions and have 44px touch targets.
+- Optional capture context and advanced identification controls stay in closed disclosures until requested. After an image is selected, the capture target compresses so the preview and identify action become the visual priority.
+- Safety guidance is one flat warning region rather than nested cards; related products form one shelf after all candidates instead of repeating per candidate.
 - The chosen image is previewed before identification.
 - Identification shows an expected wait and disables duplicate submission.
 - Empty, loading, result, and error states do not shift the main capture controls.
@@ -38,6 +40,6 @@ is always presented as a candidate that the user should compare with the subject
 
 ## Responsive behavior
 
-- One column below 760px; preview and results share two columns above it.
+- One column below 760px; capture and preview share the Workbench columns above it, with results spanning both columns.
 - Content never requires horizontal scrolling.
 - Focus indicators remain visible and motion respects reduced-motion settings.

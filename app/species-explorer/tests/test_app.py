@@ -52,7 +52,7 @@ def test_settings_page_enables_all_providers():
     assert 'value="anthropic"' in response.text
     assert 'value="gemini"' in response.text
     assert 'id="settingsForm"' in response.text
-    assert "affiliateProductLink(c,data.category)" in client.get("/").text
+    assert "affiliateProductLink(data.candidates[0],data.category)" in client.get("/").text
     assert 'id="reset-affiliate-visibility"' in response.text
     index = client.get("/").text
     assert 'id="gpsButton"' in index
