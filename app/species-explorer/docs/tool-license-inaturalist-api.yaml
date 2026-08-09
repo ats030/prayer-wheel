@@ -1,0 +1,19 @@
+tool: iNaturalist API
+plan_or_version: public read-only API v1
+reviewed_at: 2026-08-09
+decision: review_required
+price:
+  condition: Public read-only access has no documented usage fee; rate limits apply.
+  source: https://www.inaturalist.org/pages/developers
+commercial_use:
+  allowed: conditional
+  source: https://www.inaturalist.org/pages/terms
+restrictions:
+  - Keep requests near 1 per second and below about 10000 per day.
+  - Send a custom User-Agent and do not scrape or bulk-download through the API.
+  - iNaturalist data must not be used to train commercial AI systems.
+  - Observation content and media have per-item licenses; do not copy them without checking attribution and commercial-use terms.
+  - Sending user-entered location to the hosted API requires explicit disclosure and consent.
+adoption:
+  rationale: Deferred; multi-photo and optional context improve the input without adding another external disclosure path.
+  release_condition: Add only with an explicit opt-in, rate limiting, User-Agent, minimal location precision, and a testable taxonomy-validation contract.

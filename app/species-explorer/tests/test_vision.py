@@ -34,6 +34,15 @@ def test_extract_json_accepts_fenced_output():
     assert vision._extract_json('```json\n{"category":"不明"}\n```')["category"] == "不明"
 
 
+def test_identification_prompt_includes_supplied_context():
+    prompt = vision.identification_prompt("東京都", "2026-08-09", "約5cm")
+    assert "撮影地域: 東京都" in prompt
+    assert "撮影日: 2026-08-09" in prompt
+    assert "大きさ: 約5cm" in prompt
+    assert "撮影地域: 東京都 不明" in vision.identification_prompt("東京都\n不明")
+
+
+
 class FakeResponse:
     def __init__(self, data, status_code=200):
         self._data = data

@@ -68,7 +68,9 @@ def test_openai_provider_dispatches_without_persisting_key(monkeypatch):
     Image.new("RGB", (2, 2), "green").save(source, "JPEG")
     seen = {}
 
-    def fake_identify(image_bytes, api_key, model):
+    def fake_identify(image_bytes, api_key, model, **context):
+        seen["images"] = image_bytes
+        seen["context"] = context
         seen["model"] = model
         seen["api_key"] = api_key
         return {"category": "植物", "summary": "", "candidates": [], "provider": "openai"}
@@ -83,6 +85,34 @@ def test_openai_provider_dispatches_without_persisting_key(monkeypatch):
     assert response.json()["provider"] == "openai"
     assert seen["api_key"] == "temporary-secret"
     assert seen["model"] == "gpt-5.6-terra"
+    assert len(seen["images"]) == 1
+
+
+def test_identify_accepts_three_images_and_context(monkeypatch):
+    source = io.BytesIO()
+    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    seen = {}
+
+    def fake_identify(images, model, **context):
+        seen.update(images=images, model=model, context=context)
+        return {"category": "植物", "summary": "", "candidates": []}
+
+    monkeypatch.setattr(main.vision, "identify", fake_identify)
+    photos = [("files", (f"photo-{index}.jpg", source.getvalue(), "image/jpeg")) for index in range(3)]
+    response = client.post("/identify", files=photos, data={
+        "location": "東京都 高尾山",
+        "observed_date": "2026-08-09",
+        "size": "約5cm",
+    })
+
+    assert response.status_code == 200
+    assert len(seen["images"]) == 3
+    assert seen["context"] == {
+        "location": "東京都 高尾山",
+        "observed_date": "2026-08-09",
+        "size": "約5cm",
+    }
+
 
 
 

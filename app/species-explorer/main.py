@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.concurrency import run_in_threadpool
@@ -61,24 +61,34 @@ def health() -> dict[str, object]:
 
 
 @app.post("/identify")
-async def identify(file: UploadFile = File(...)) -> JSONResponse:
+async def identify(
+    files: list[UploadFile] = File(default=[]),
+    file: UploadFile | None = File(default=None),
+    location: str = Form(default=""),
+    observed_date: str = Form(default=""),
+    size: str = Form(default=""),
+) -> JSONResponse:
     settings = config_store.load()
     provider = settings["provider"]
     model = settings["models"][provider]
     api_key = settings["api_keys"].get(provider, "")
     if provider != "local" and not api_key:
         raise HTTPException(status_code=400, detail="設定画面でAPIキーを登録してください")
-    if file.content_type and not file.content_type.startswith("image/"):
+    uploads = [*files, *([file] if file else [])]
+    if not uploads or len(uploads) > 3:
+        raise HTTPException(status_code=400, detail="写真は1〜3枚選んでください")
+    if any(upload.content_type and not upload.content_type.startswith("image/") for upload in uploads):
         raise HTTPException(status_code=415, detail="画像ファイルを選んでください")
-    raw = await file.read(vision.MAX_UPLOAD_BYTES + 1)
+    raw_images = [await upload.read(vision.MAX_UPLOAD_BYTES + 1) for upload in uploads]
     try:
-        prepared = await run_in_threadpool(vision.prepare_image, raw)
+        prepared = [await run_in_threadpool(vision.prepare_image, raw) for raw in raw_images]
+        context = {"location": location, "observed_date": observed_date, "size": size}
         if provider == "openai":
-            result = await run_in_threadpool(vision.identify_openai, prepared, api_key, model)
+            result = await run_in_threadpool(vision.identify_openai, prepared, api_key, model, **context)
         elif provider == "anthropic":
-            result = await run_in_threadpool(vision.identify_anthropic, prepared, api_key, model)
+            result = await run_in_threadpool(vision.identify_anthropic, prepared, api_key, model, **context)
         else:
-            result = await run_in_threadpool(vision.identify, prepared, model)
+            result = await run_in_threadpool(vision.identify, prepared, model, **context)
     except vision.VisionError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return JSONResponse(result)
