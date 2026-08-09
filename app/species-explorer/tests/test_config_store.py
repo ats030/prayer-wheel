@@ -86,12 +86,49 @@ def test_ollama_catalog_only_enables_vision_models(monkeypatch):
             },
         ]}),
     )
+    monkeypatch.setattr(
+        config_store.httpx,
+        "post",
+        lambda *args, **kwargs: FakeResponse({
+            "capabilities": (
+                ["completion", "vision"]
+                if kwargs["json"]["model"] == "vision-model:latest"
+                else ["completion"]
+            )
+        }),
+    )
     catalog, incompatible = config_store.model_catalog()
     assert catalog["local"] == [{
         "id": "vision-model:latest",
         "label": "vision-model:latest · 7B",
     }]
     assert incompatible == ["text-model:latest"]
+
+
+def test_ollama_show_recovers_vision_capability_missing_from_tags(monkeypatch):
+    monkeypatch.setattr(
+        config_store.httpx,
+        "get",
+        lambda *args, **kwargs: FakeResponse({"models": [{
+            "name": "derived-vision:26b",
+            "capabilities": ["completion", "tools"],
+        }]}),
+    )
+    monkeypatch.setattr(
+        config_store.httpx,
+        "post",
+        lambda *args, **kwargs: FakeResponse({
+            "capabilities": ["completion", "vision", "tools"]
+        }),
+    )
+
+    catalog, incompatible = config_store.model_catalog()
+
+    assert catalog["local"] == [{
+        "id": "derived-vision:26b",
+        "label": "derived-vision:26b",
+    }]
+    assert incompatible == []
 
 
 def test_ollama_outage_keeps_saved_local_model(monkeypatch):

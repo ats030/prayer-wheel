@@ -65,14 +65,19 @@ def ollama_models() -> tuple[list[dict[str, str]], list[str]]:
             continue
         capabilities = item.get("capabilities")
         if not isinstance(capabilities, list):
-            try:
-                details = httpx.post(
-                    f"{OLLAMA_URL}/api/show", json={"model": name}, timeout=3
-                )
-                details.raise_for_status()
-                capabilities = details.json().get("capabilities") or []
-            except (httpx.HTTPError, ValueError, AttributeError):
-                capabilities = []
+            capabilities = []
+        try:
+            details = httpx.post(
+                f"{OLLAMA_URL}/api/show",
+                json={"model": name, "verbose": False},
+                timeout=3,
+            )
+            details.raise_for_status()
+            detailed_capabilities = details.json().get("capabilities")
+            if isinstance(detailed_capabilities, list):
+                capabilities = detailed_capabilities
+        except (httpx.HTTPError, ValueError, AttributeError):
+            pass
         if "vision" in capabilities:
             parameter_size = str(
                 (item.get("details") or {}).get("parameter_size") or ""
