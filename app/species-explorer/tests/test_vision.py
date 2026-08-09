@@ -284,7 +284,7 @@ def test_evidence_gate_keeps_candidate_with_observations_and_discriminator(monke
     assert candidate["traits"] == ["鋸歯のある葉", "中空の花茎"]
 
 
-def test_evidence_gate_rejects_candidate_without_discriminator(monkeypatch):
+def test_evidence_gate_marks_candidate_without_discriminator_uncertain(monkeypatch):
     monkeypatch.setattr(vision, "_lookup_taxon", lambda _name: [{
         "id": 1, "name": "Known species", "preferred_common_name": "既知種",
     }])
@@ -295,10 +295,13 @@ def test_evidence_gate_rejects_candidate_without_discriminator(monkeypatch):
             "contradictions": [],
         }],
     })
-    assert result["candidates"] == []
+    candidate = result["candidates"][0]
+    assert candidate["evidence_status"] == "uncertain"
+    assert candidate["confidence"] == 30
+    assert candidate["evidence_gaps"] == ["類似種と区別する決め手が未確認"]
 
 
-def test_evidence_gate_rejects_candidate_with_contradiction(monkeypatch):
+def test_evidence_gate_marks_candidate_with_contradiction_uncertain(monkeypatch):
     monkeypatch.setattr(vision, "_lookup_taxon", lambda _name: [{
         "id": 1, "name": "Known species", "preferred_common_name": "既知種",
     }])
@@ -309,7 +312,10 @@ def test_evidence_gate_rejects_candidate_with_contradiction(monkeypatch):
             "contradictions": ["典型形態と異なる"],
         }],
     })
-    assert result["candidates"] == []
+    candidate = result["candidates"][0]
+    assert candidate["evidence_status"] == "uncertain"
+    assert candidate["confidence"] == 20
+    assert "候補と矛盾する特徴あり" in candidate["evidence_gaps"]
 
 
 def test_evidence_gate_rejects_vlm_candidate_when_taxonomy_is_unavailable(monkeypatch):

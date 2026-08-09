@@ -17,7 +17,7 @@ is always presented as a candidate that the user should compare with the subject
 
 ## Interaction
 
-識別候補は schema-first で観察点・類似種との識別点・矛盾を分離する。通常のVLM候補は、観察点2件以上、識別点1件以上、矛盾なし、学名の完全一致をすべて満たす場合だけ表示する。モデルの自己申告スコアは60%を上限とし、条件不足では候補なしへフォールバックする。画面上の観察点はAI抽出で未検証と明示する。
+識別候補は schema-first で観察点・類似種との識別点・矛盾を分離する。学名の完全一致だけを表示の必須条件とし、写真上の証拠が不足する候補は「確証なし」と不足理由を表示する。自己申告スコアは証拠ありで60%、証拠不足で30%、矛盾ありで20%を上限とする。画面上の観察点はAI抽出で未検証と明示する。
 
 - The main screen uses a Workbench flow: capture, preview, then full-width results. Camera and library inputs are the primary actions and have 44px touch targets.
 - Optional capture context and advanced identification controls stay in closed disclosures until requested. After an image is selected, the capture target compresses so the preview and identify action become the visual priority.

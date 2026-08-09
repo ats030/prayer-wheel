@@ -54,7 +54,7 @@ PROMPT = """あなたは野外観察を補助する生物識別アシスタン�
 - 候補は可能性が高い順に最大3件。種まで判断できなければ属・科レベルに留める。
 - traitsは候補名から一般論を作らず、添付写真で実際に確認でき、その候補を支持する特徴だけを書く。
 - distinguishing_featuresは類似種にも共通する一般的特徴ではなく、候補を区別する写真上の決め手だけを書く。決め手が写っていなければ空配列にする。
-- contradictionsには候補の典型形態と一致しない写真上の特徴を書く。重大な矛盾が1つでもあれば、その候補を返さない。
+- contradictionsには候補の典型形態と一致しない写真上の特徴を書く。矛盾があっても可能性が残る候補は省略せず、確証のない候補として返す。
 - confidenceは写真と明示された撮影情報だけからの識別確度。種を区別する決め手が見えない場合は60以下にする。
 - categoryが動物の場合だけ雌雄を検討する。オス・メスを返すには、その候補種で知られる性的二型と一致し、写真で直接見える形態的根拠をsex_evidenceに1件以上書く。
 - 大きさだけ、行動、撮影場所、一般的な色の印象、角度で変わる特徴から雌雄を決めない。幼体、季節・繁殖状態が不明、雌雄同形、識別部位が見えない場合は判別不能にする。
@@ -68,7 +68,7 @@ GEMINI_REVIEW = """
 Geminiでは、回答を確定する前に次の順で内部検討してください。検討過程は出力せず、最終JSONだけを返してください。
 1. 種名を考える前に、各写真から輪郭、体・葉・花の構造、色、模様、付着・生育状態、大きさの手掛かりを列挙する。同じ特徴を複数写真で重複加点しない。
 2. 観察特徴に合う候補と主要な類似種を比較し、それぞれに必要な識別点を確認する。
-3. 写真と矛盾する特徴がある候補は棄却する。見えていない特徴を、見えたものとして補わない。
+3. 写真と矛盾する特徴はcontradictionsに記録する。可能性が残る候補は棄却せず、見えていない特徴を見えたものとして補わない。
 4. 種を分ける識別点が写っていなければ属・科レベルに留める。生物または識別形質が不鮮明なら不明・候補なしにする。
 5. confidenceが80以上になるのは、写真で確認できる独立した識別特徴が2つ以上あり、主要な類似種との矛盾がない場合だけ。決め手が不足する候補は60以下にする。
 6. 動物の雌雄は候補種に固有の性的二型と、写真で見える部位を照合する。根拠が種・成長段階・季節状態に依存して確定できなければ判別不能にする。
@@ -387,19 +387,34 @@ def apply_evidence_gate(result: dict[str, Any]) -> dict[str, Any]:
         observations = candidate.get("traits") or []
         distinguishing = candidate.get("distinguishing_features") or []
         contradictions = candidate.get("contradictions") or []
-        if len(observations) < 2 or not distinguishing or contradictions:
-            continue
-        candidate["evidence_status"] = "taxonomy_only"
-        candidate["evidence_strength"] = "中"
-        candidate["confidence"] = min(candidate.get("confidence", 0), 60)
-        candidate["uncertainty"] = candidate.get("uncertainty") or "写真上の決め手はAI抽出のため、参考資料との照合が必要です。"
+        missing = []
+        if len(observations) < 2:
+            missing.append("写真で確認できる特徴が不足")
+        if not distinguishing:
+            missing.append("類似種と区別する決め手が未確認")
+        if contradictions:
+            missing.append("候補と矛盾する特徴あり")
+        if missing:
+            candidate["evidence_status"] = "uncertain"
+            candidate["evidence_strength"] = "低"
+            candidate["confidence"] = min(candidate.get("confidence", 0), 20 if contradictions else 30)
+            candidate["evidence_gaps"] = missing
+            candidate["uncertainty"] = candidate.get("uncertainty") or "識別部位が見える追加写真で確認してください。"
+        else:
+            candidate["evidence_status"] = "taxonomy_only"
+            candidate["evidence_strength"] = "中"
+            candidate["confidence"] = min(candidate.get("confidence", 0), 60)
+            candidate["evidence_gaps"] = []
+            candidate["uncertainty"] = candidate.get("uncertainty") or "写真上の決め手はAI抽出のため、参考資料との照合が必要です。"
         accepted.append(candidate)
     rejected = len(candidates) - len(accepted)
     checked["candidates"] = accepted
     checked["strict_mode"] = True
     checked["rejected_candidates"] = rejected
-    if accepted:
-        checked["summary"] = "写真上の複数の特徴と識別点を満たし、候補名を分類データで確認しました。写真との一致はAI推定です。"
+    if accepted and any(candidate.get("evidence_status") == "taxonomy_only" for candidate in accepted):
+        checked["summary"] = "写真上の特徴を候補名と照合しました。証拠不足の候補は「確証なし」として区別しています。"
+    elif accepted:
+        checked["summary"] = "候補名は分類データに存在しますが、写真だけでは確証を得られませんでした。"
     else:
         checked["summary"] = "検証できる候補がありません。追加写真で識別点を確認してください。"
     return checked
