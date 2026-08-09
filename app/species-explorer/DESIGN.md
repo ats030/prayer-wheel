@@ -23,6 +23,8 @@ is always presented as a candidate that the user should compare with the subject
 - Empty, loading, result, and error states do not shift the main capture controls.
 - Candidate cards expose visible traits, uncertainty, and source-search links.
 - Images are processed in memory, EXIF metadata is stripped, and nothing is saved.
+- Settings are reachable from the header and use a dedicated page with a clear
+  return path. Unavailable providers are visibly disabled rather than selectable.
 
 ## Responsive behavior
 

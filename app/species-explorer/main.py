@@ -18,6 +18,11 @@ def index() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
 
 
+@app.get("/settings", include_in_schema=False)
+def settings() -> FileResponse:
+    return FileResponse(STATIC_DIR / "settings.html")
+
+
 @app.get("/favicon.svg", include_in_schema=False)
 def favicon() -> FileResponse:
     return FileResponse(STATIC_DIR / "favicon.svg", media_type="image/svg+xml")

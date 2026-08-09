@@ -25,3 +25,17 @@ def test_index_has_camera_capture():
     response = client.get("/")
     assert response.status_code == 200
     assert 'capture="environment"' in response.text
+
+
+def test_index_links_to_settings():
+    response = client.get("/")
+    assert 'href="/settings"' in response.text
+
+
+def test_settings_page_links_back_and_marks_unavailable_providers():
+    response = client.get("/settings")
+    assert response.status_code == 200
+    assert 'href="/"' in response.text
+    assert "OpenAI API" in response.text
+    assert "Anthropic API" in response.text
+    assert response.text.count("準備中") == 2
