@@ -8,7 +8,7 @@ cd /home/ats030
 uv run uvicorn --app-dir /home/ats030/app/species-explorer main:app --host 0.0.0.0 --port 8523
 ```
 
-計算資源、APIキー、使用モデルは画面上部の「設定」から変更できます。APIキーは `~/.config/species-explorer/settings.json` に権限 `0600` で保存し、画面には再表示しません。
+計算資源、APIキー、使用モデルは画面上部の「設定」から変更できます。ローカルモデルはOllamaにインストール済みで画像入力に対応するものを自動表示します。APIキーは `~/.config/species-explorer/settings.json` に権限 `0600` で保存し、画面には再表示しません。
 
 ```bash
 uv run --with pytest pytest -q

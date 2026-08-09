@@ -56,3 +56,49 @@ def test_settings_can_delete_key(tmp_path, monkeypatch):
         delete_keys=["openai"],
     )
     assert result["api_key_configured"]["openai"] is False
+
+
+class FakeResponse:
+    def __init__(self, data):
+        self.data = data
+
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        return self.data
+
+
+def test_ollama_catalog_only_enables_vision_models(monkeypatch):
+    monkeypatch.setattr(
+        config_store.httpx,
+        "get",
+        lambda *args, **kwargs: FakeResponse({"models": [
+            {
+                "name": "vision-model:latest",
+                "capabilities": ["completion", "vision"],
+                "details": {"parameter_size": "7B"},
+            },
+            {
+                "name": "text-model:latest",
+                "capabilities": ["completion"],
+                "details": {"parameter_size": "8B"},
+            },
+        ]}),
+    )
+    catalog, incompatible = config_store.model_catalog()
+    assert catalog["local"] == [{
+        "id": "vision-model:latest",
+        "label": "vision-model:latest · 7B",
+    }]
+    assert incompatible == ["text-model:latest"]
+
+
+def test_ollama_outage_keeps_saved_local_model(monkeypatch):
+    def unavailable(*args, **kwargs):
+        raise config_store.httpx.ConnectError("offline")
+
+    monkeypatch.setattr(config_store.httpx, "get", unavailable)
+    catalog, incompatible = config_store.model_catalog("saved-vision:9b")
+    assert catalog["local"][0]["id"] == "saved-vision:9b"
+    assert incompatible == []
