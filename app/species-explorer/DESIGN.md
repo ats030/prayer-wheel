@@ -24,7 +24,7 @@ is always presented as a candidate that the user should compare with the subject
 - Candidate cards expose visible traits, uncertainty, and source-search links.
 - Images are processed in memory, EXIF metadata is stripped, and nothing is saved.
 - Settings are reachable from the header and use a dedicated page with a clear
-  return path. Unavailable providers are visibly disabled rather than selectable.
+  return path. API keys are write-only in the UI; configured state and allowed model choices remain visible.
 
 ## Responsive behavior
 

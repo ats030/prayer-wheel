@@ -115,9 +115,9 @@ def normalize(data: dict[str, Any], *, model: str = MODEL, provider: str = "loca
     }
 
 
-def identify(image_bytes: bytes) -> dict[str, Any]:
+def identify(image_bytes: bytes, model: str = MODEL) -> dict[str, Any]:
     payload = {
-        "model": MODEL,
+        "model": model,
         "messages": [{
             "role": "user",
             "content": PROMPT,
@@ -136,7 +136,7 @@ def identify(image_bytes: bytes) -> dict[str, Any]:
         raise VisionError(f"ローカルAIがエラーを返しました（{exc.response.status_code}）") from exc
     except (httpx.HTTPError, KeyError, ValueError) as exc:
         raise VisionError("ローカルAIに接続できませんでした") from exc
-    return normalize(_extract_json(content))
+    return normalize(_extract_json(content), model=model)
 
 
 def _provider_error(provider: str, exc: httpx.HTTPStatusError) -> VisionError:
@@ -163,10 +163,10 @@ def _openai_output_text(data: dict[str, Any]) -> str:
     return "\n".join(texts)
 
 
-def identify_openai(image_bytes: bytes, api_key: str) -> dict[str, Any]:
+def identify_openai(image_bytes: bytes, api_key: str, model: str = OPENAI_MODEL) -> dict[str, Any]:
     image_data = base64.b64encode(image_bytes).decode("ascii")
     payload = {
-        "model": OPENAI_MODEL,
+        "model": model,
         "input": [{
             "role": "user",
             "content": [
@@ -189,7 +189,7 @@ def identify_openai(image_bytes: bytes, api_key: str) -> dict[str, Any]:
         raise _provider_error("OpenAI", exc) from exc
     except (httpx.HTTPError, KeyError, ValueError) as exc:
         raise VisionError("OpenAI APIに接続できませんでした") from exc
-    return normalize(_extract_json(content), model=OPENAI_MODEL, provider="openai")
+    return normalize(_extract_json(content), model=model, provider="openai")
 
 
 def _anthropic_output_text(data: dict[str, Any]) -> str:
@@ -203,9 +203,9 @@ def _anthropic_output_text(data: dict[str, Any]) -> str:
     return "\n".join(texts)
 
 
-def identify_anthropic(image_bytes: bytes, api_key: str) -> dict[str, Any]:
+def identify_anthropic(image_bytes: bytes, api_key: str, model: str = ANTHROPIC_MODEL) -> dict[str, Any]:
     payload = {
-        "model": ANTHROPIC_MODEL,
+        "model": model,
         "max_tokens": 1200,
         "messages": [{
             "role": "user",
@@ -239,4 +239,4 @@ def identify_anthropic(image_bytes: bytes, api_key: str) -> dict[str, Any]:
         raise _provider_error("Anthropic", exc) from exc
     except (httpx.HTTPError, KeyError, ValueError) as exc:
         raise VisionError("Anthropic APIに接続できませんでした") from exc
-    return normalize(_extract_json(content), model=ANTHROPIC_MODEL, provider="anthropic")
+    return normalize(_extract_json(content), model=model, provider="anthropic")
