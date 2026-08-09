@@ -43,6 +43,11 @@ def test_index_links_to_settings():
     assert 'slice(50)' in response.text
     assert 'gps.latitude.toFixed(4)' in response.text
     assert 'id="clearHistory"' in response.text
+    assert 'id="historyLightbox"' in response.text
+    assert 'class="history-image-button"' in response.text
+    assert 'showHistoryImage' in response.text
+    assert 'historyImageUrls.forEach(URL.revokeObjectURL)' in response.text
+    assert '960/Math.max(bitmap.width,bitmap.height)' in response.text
     assert 'OpenStreetMap contributors' in response.text
     assert "雌雄推定" in response.text
     assert "Animal Diversity Web" in response.text
