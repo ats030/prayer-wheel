@@ -146,8 +146,32 @@ def test_plantnet_uses_multiple_images_and_parses_candidates(monkeypatch):
     assert seen["params"]["api-key"] == "plant-secret"
     assert len(seen["files"]) == 2
     assert result["candidates"][0]["scientific_name"] == "Taraxacum officinale"
+    assert result["candidates"][0]["common_name_ja"] == "セイヨウタンポポ"
     assert result["candidates"][0]["confidence"] == 91
     assert result["remaining_requests"] == 499
+
+
+def test_plantnet_does_not_present_foreign_common_name_as_japanese(monkeypatch):
+    monkeypatch.setattr(vision.httpx, "post", lambda *args, **kwargs: FakeResponse({
+        "results": [{"score": 0.8, "species": {
+            "scientificNameWithoutAuthor": "Taraxacum officinale",
+            "commonNames": ["Common dandelion"],
+        }}],
+    }))
+    result = vision.identify_plantnet(b"image", "key")
+    assert result["candidates"][0]["common_name_ja"] == "和名未登録"
+
+
+def test_taxonomy_does_not_present_foreign_preferred_name_as_japanese(monkeypatch):
+    monkeypatch.setattr(vision, "_lookup_taxon", lambda _name: [{
+        "id": 1, "name": "Taraxacum officinale", "preferred_common_name": "Common dandelion",
+    }])
+    result = vision.apply_evidence_gate({
+        "provider": "local", "candidates": [{
+            "common_name_ja": "生成和名", "scientific_name": "Taraxacum officinale", "confidence": 70,
+        }],
+    })
+    assert result["candidates"][0]["common_name_ja"] == "和名未登録"
 
 
 def test_merge_plant_results_does_not_promote_vlm_traits_as_facts():

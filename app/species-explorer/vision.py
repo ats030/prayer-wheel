@@ -26,6 +26,7 @@ INATURALIST_USER_AGENT = "SpeciesExplorer/1.0 (https://github.com/ats030/ubuntu-
 _TAXONOMY_LOCK = threading.Lock()
 _LAST_TAXONOMY_REQUEST = 0.0
 _TAXONOMY_CACHE: dict[str, list[dict[str, Any]]] = {}
+_JAPANESE_NAME_RE = re.compile(r"[ぁ-んァ-ヶ一-龯々]")
 MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 MAX_EDGE = 1600
 
@@ -144,6 +145,11 @@ def normalize(data: dict[str, Any], *, model: str = MODEL, provider: str = "loca
 
 
 
+def _japanese_common_name(value: Any) -> str:
+    name = str(value or "").strip()
+    return name if _JAPANESE_NAME_RE.search(name) else "和名未登録"
+
+
 def identify_plantnet(image_bytes: bytes | list[bytes], api_key: str) -> dict[str, Any]:
     images = _image_list(image_bytes)
     files = [("images", (f"image-{index}.jpg", image, "image/jpeg")) for index, image in enumerate(images)]
@@ -178,7 +184,7 @@ def identify_plantnet(image_bytes: bytes | list[bytes], api_key: str) -> dict[st
         if not scientific:
             continue
         candidates.append({
-            "common_name_ja": common_names[0] if common_names else scientific,
+            "common_name_ja": next((_japanese_common_name(name) for name in common_names if _japanese_common_name(name) != "和名未登録"), "和名未登録"),
             "scientific_name": scientific,
             "confidence": confidence,
             "traits": ["Pl@ntNet植物画像識別による候補"],
@@ -255,7 +261,7 @@ def verify_taxonomy(result: dict[str, Any]) -> dict[str, Any]:
         if match:
             candidate["taxonomy_status"] = "verified"
             candidate["scientific_name"] = str(match.get("name") or scientific_name)
-            candidate["common_name_ja"] = str(match.get("preferred_common_name") or candidate["scientific_name"])
+            candidate["common_name_ja"] = _japanese_common_name(match.get("preferred_common_name"))
             taxon_id = match.get("id")
             candidate["taxonomy_url"] = f"https://www.inaturalist.org/taxa/{taxon_id}" if taxon_id else ""
         else:
@@ -270,6 +276,7 @@ def apply_evidence_gate(result: dict[str, Any]) -> dict[str, Any]:
     candidates = result.get("candidates") or []
     if result.get("provider") == "plantnet":
         for candidate in candidates:
+            candidate["common_name_ja"] = _japanese_common_name(candidate.get("common_name_ja"))
             if candidate.get("agreement") == "matched":
                 candidate["evidence_status"] = "corroborated"
             else:
