@@ -52,6 +52,8 @@ def test_settings_page_enables_all_providers():
     assert 'value="anthropic"' in response.text
     assert 'value="gemini"' in response.text
     assert 'id="settingsForm"' in response.text
+    assert 'id="reset-affiliate-visibility"' in response.text
+    assert "広告の非表示を解除" in response.text
     assert "gpt-5.6-sol" not in response.text
 
 

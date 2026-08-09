@@ -26,7 +26,7 @@ is always presented as a candidate that the user should compare with the subject
 - Specialist plant candidates retain their Pl@ntNet source, and exact VLM agreement is labeled as two independent paths.
 - If every candidate is rejected, the result asks for additional identifying photos instead of filling the gap with a guess.
 - Affiliate search-link templates expand only the verified candidate name into {query}. When configured, Amazon Creators API may replace that fallback with its returned product title and detail-page URL; each link is labeled as advertising and never influences generation or ranking.
-- Users can hide the ad locally; only aggregate impressions and clicks are stored.
+- Users can hide the ad locally and restore it from Settings; only aggregate impressions and clicks are stored.
 - Images are processed in memory, EXIF metadata is stripped, and nothing is saved.
 - Optional specialist services remain hidden until configured and require an explicit per-request photo-sharing choice.
 - Settings are reachable from the header and use a dedicated page with a clear
