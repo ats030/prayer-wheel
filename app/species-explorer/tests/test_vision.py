@@ -18,6 +18,23 @@ def test_prepare_image_reencodes_and_resizes():
     assert not image.getexif()
 
 
+def test_extract_exif_context_reads_capture_date():
+    source = io.BytesIO()
+    exif = Image.Exif()
+    exif[36867] = "2025:04:03 12:34:56"
+    Image.new("RGB", (2, 2), "green").save(source, "JPEG", exif=exif)
+
+    assert vision.extract_exif_context(source.getvalue()) == {
+        "observed_date": "2025-04-03",
+    }
+
+
+def test_gps_coordinate_converts_and_applies_direction():
+    assert vision._gps_coordinate((35, 30, 0), "N") == 35.5
+    assert vision._gps_coordinate((139, 45, 0), b"W") == -139.75
+    assert vision._gps_coordinate(None, "N") is None
+
+
 def test_normalize_limits_candidates_and_confidence():
     data = {"category": "植物", "summary": "葉が写っています", "candidates": [
         {"common_name_ja": f"候補{i}", "confidence": 120, "traits": ["葉", "花", "茎", "余分"]}

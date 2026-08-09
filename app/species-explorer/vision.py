@@ -115,6 +115,36 @@ class VisionError(RuntimeError):
     pass
 
 
+def extract_exif_context(raw: bytes) -> dict[str, Any]:
+    """Read only capture date and GPS before the image is re-encoded."""
+    try:
+        exif = Image.open(io.BytesIO(raw)).getexif()
+        captured = exif.get(36867) or exif.get(36868) or exif.get(306)
+        observed_date = ""
+        if captured and re.match(r"^\d{4}:\d{2}:\d{2}", str(captured)):
+            observed_date = str(captured)[:10].replace(":", "-")
+        gps_ifd = exif.get_ifd(34853)
+        latitude = _gps_coordinate(gps_ifd.get(2), gps_ifd.get(1))
+        longitude = _gps_coordinate(gps_ifd.get(4), gps_ifd.get(3))
+    except Exception:
+        return {}
+    result: dict[str, Any] = {}
+    if observed_date:
+        result["observed_date"] = observed_date
+    if latitude is not None and longitude is not None:
+        result.update(latitude=round(latitude, 4), longitude=round(longitude, 4))
+        result["location"] = f"緯度 {result['latitude']:.4f}, 経度 {result['longitude']:.4f}"
+    return result
+
+
+def _gps_coordinate(parts: Any, ref: Any) -> float | None:
+    if not parts or len(parts) != 3:
+        return None
+    value = float(parts[0]) + float(parts[1]) / 60 + float(parts[2]) / 3600
+    direction = ref.decode(errors="ignore") if isinstance(ref, bytes) else str(ref or "")
+    return -value if direction.upper() in {"S", "W"} else value
+
+
 def prepare_image(raw: bytes) -> bytes:
     if not raw:
         raise VisionError("画像が空です")

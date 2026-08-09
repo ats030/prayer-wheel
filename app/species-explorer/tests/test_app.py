@@ -166,6 +166,43 @@ def test_identify_accepts_three_images_and_context(monkeypatch):
     }
 
 
+def test_photo_metadata_reads_exif_before_identification():
+    source = io.BytesIO()
+    exif = Image.Exif()
+    exif[36867] = "2024:11:12 08:09:10"
+    Image.new("RGB", (2, 2), "green").save(source, "JPEG", exif=exif)
+
+    response = client.post(
+        "/api/photo-metadata",
+        files={"files": ("photo.jpg", source.getvalue(), "image/jpeg")},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"observed_date": "2024-11-12"}
+
+
+def test_identify_uses_exif_date_when_form_date_is_empty(monkeypatch):
+    source = io.BytesIO()
+    exif = Image.Exif()
+    exif[36867] = "2024:11:12 08:09:10"
+    Image.new("RGB", (2, 2), "green").save(source, "JPEG", exif=exif)
+    seen = {}
+
+    def fake_identify(images, model, **context):
+        seen.update(context)
+        return {"category": "植物", "summary": "", "candidates": []}
+
+    monkeypatch.setattr(main.vision, "identify", fake_identify)
+    response = client.post(
+        "/identify",
+        files={"files": ("photo.jpg", source.getvalue(), "image/jpeg")},
+    )
+
+    assert response.status_code == 200
+    assert seen["observed_date"] == "2024-11-12"
+    assert response.json()["photo_metadata"]["observed_date"] == "2024-11-12"
+
+
 
 
 

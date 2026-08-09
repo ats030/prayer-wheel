@@ -109,6 +109,23 @@ def health() -> dict[str, object]:
     return {"ok": True, "model": vision.MODEL, "local_processing": True, "providers": ["local", "openai", "anthropic", "gemini"]}
 
 
+@app.post("/api/photo-metadata")
+async def photo_metadata(files: list[UploadFile] = File(default=[])) -> dict[str, object]:
+    if not files or len(files) > 3:
+        raise HTTPException(status_code=400, detail="写真は1〜3枚選んでください")
+    metadata: dict[str, object] = {}
+    for upload in files:
+        if upload.content_type and not upload.content_type.startswith("image/"):
+            raise HTTPException(status_code=415, detail="画像ファイルを選んでください")
+        raw = await upload.read(vision.MAX_UPLOAD_BYTES + 1)
+        if len(raw) > vision.MAX_UPLOAD_BYTES:
+            raise HTTPException(status_code=413, detail="画像は1枚15MB以下にしてください")
+        extracted = await run_in_threadpool(vision.extract_exif_context, raw)
+        for key, value in extracted.items():
+            metadata.setdefault(key, value)
+    return metadata
+
+
 @app.post("/identify")
 async def identify(
     files: list[UploadFile] = File(default=[]),
@@ -132,8 +149,17 @@ async def identify(
         raise HTTPException(status_code=415, detail="画像ファイルを選んでください")
     raw_images = [await upload.read(vision.MAX_UPLOAD_BYTES + 1) for upload in uploads]
     try:
+        photo_metadata: dict[str, object] = {}
+        for raw in raw_images:
+            candidate_metadata = await run_in_threadpool(vision.extract_exif_context, raw)
+            for key, value in candidate_metadata.items():
+                photo_metadata.setdefault(key, value)
         prepared = [await run_in_threadpool(vision.prepare_image, raw) for raw in raw_images]
-        context = {"location": location, "observed_date": observed_date, "size": size}
+        context = {
+            "location": location or str(photo_metadata.get("location", "")),
+            "observed_date": observed_date or str(photo_metadata.get("observed_date", "")),
+            "size": size,
+        }
         if provider == "openai":
             result = await run_in_threadpool(vision.identify_openai, prepared, api_key, model, **context)
         elif provider == "anthropic":
@@ -158,6 +184,7 @@ async def identify(
                     result["plantnet_status"] = "unavailable"
                     result["plantnet_message"] = str(plantnet_error)
         result = await run_in_threadpool(vision.apply_evidence_gate, result)
+        result["photo_metadata"] = photo_metadata
     except vision.VisionError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return JSONResponse(result)
