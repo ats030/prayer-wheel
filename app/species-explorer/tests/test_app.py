@@ -71,6 +71,26 @@ def test_affiliate_is_absent_until_configured():
     assert client.get("/affiliate/click", follow_redirects=False).status_code == 404
 
 
+def test_amazon_product_endpoint_uses_verified_query(monkeypatch):
+    monkeypatch.setattr(main.config_store, "load", lambda: {
+        "affiliate": {"product_enabled": True, "partner_tag": "test-22"},
+        "api_keys": {"amazon_creators_id": "credential", "amazon_creators_secret": "secret"},
+    })
+    seen = {}
+    def fake_search(query, credential, secret, partner_tag):
+        seen.update(query=query, credential=credential, secret=secret, partner_tag=partner_tag)
+        return {"title": "タンポポ図鑑", "url": "https://www.amazon.co.jp/dp/B000000001?tag=test-22", "image": ""}
+    monkeypatch.setattr(main.creators_api, "search_book", fake_search)
+    response = client.get("/api/amazon/product?q=タンポポ")
+    assert response.status_code == 200
+    assert response.json()["title"] == "タンポポ図鑑"
+    assert seen == {"query": "タンポポ", "credential": "credential", "secret": "secret", "partner_tag": "test-22"}
+
+
+def test_amazon_product_endpoint_is_disabled_without_configuration():
+    assert client.get("/api/amazon/product?q=タンポポ").status_code == 404
+
+
 def test_external_provider_requires_api_key(monkeypatch):
     monkeypatch.setattr(main.config_store, "load", lambda: {"provider": "openai", "models": {"openai": "gpt-5.6-luna"}, "api_keys": {}})
     response = client.post(

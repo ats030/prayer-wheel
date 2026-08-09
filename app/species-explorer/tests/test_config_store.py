@@ -111,6 +111,20 @@ def test_affiliate_requires_query_placeholder(tmp_path, monkeypatch):
         raise AssertionError("fixed affiliate URL was accepted")
 
 
+def test_creators_api_credentials_are_write_only(tmp_path, monkeypatch):
+    monkeypatch.setattr(config_store, "SETTINGS_PATH", tmp_path / "settings.json")
+    result = config_store.save(provider="local", models={}, delete_keys=[], api_keys={
+        "amazon_creators_id": "credential-id", "amazon_creators_secret": "creator-secret",
+    }, affiliate={
+        "title": "関連書籍", "url": "https://www.amazon.co.jp/s?i=stripbooks&k={query}&tag=test-22",
+        "enabled": True, "partner_tag": "test-22", "product_enabled": True,
+    })
+    assert result["affiliate"]["product_enabled"] is True
+    assert result["affiliate"]["creators_api_configured"] is True
+    assert "creator-secret" not in str(result)
+    assert config_store.load()["api_keys"]["amazon_creators_secret"] == "creator-secret"
+
+
 class FakeResponse:
     def __init__(self, data):
         self.data = data

@@ -45,7 +45,7 @@ class SettingsError(ValueError):
 
 
 def _defaults() -> dict[str, Any]:
-    return {"provider": "local", "models": dict(DEFAULT_MODELS), "api_keys": {}, "affiliate": {"title": "", "url": "", "enabled": False}, "affiliate_metrics": {"impressions": 0, "clicks": 0}}
+    return {"provider": "local", "models": dict(DEFAULT_MODELS), "api_keys": {}, "affiliate": {"title": "", "url": "", "enabled": False, "partner_tag": "", "product_enabled": False}, "affiliate_metrics": {"impressions": 0, "clicks": 0}}
 
 
 def ollama_models() -> tuple[list[dict[str, str]], list[str]]:
@@ -117,7 +117,7 @@ def load() -> dict[str, Any]:
             data["models"][provider] = model
         elif model in {item["id"] for item in MODELS.get(provider, [])}:
             data["models"][provider] = model
-    for provider in ("openai", "anthropic", "plantnet"):
+    for provider in ("openai", "anthropic", "plantnet", "amazon_creators_id", "amazon_creators_secret"):
         key = (saved.get("api_keys") or {}).get(provider)
         if isinstance(key, str) and key:
             data["api_keys"][provider] = key
@@ -126,7 +126,7 @@ def load() -> dict[str, Any]:
         url = str(affiliate.get("url") or "").strip()
         title = str(affiliate.get("title") or "").strip()[:120]
         if urlparse(url).scheme == "https" and urlparse(url).netloc:
-            data["affiliate"] = {"title": title, "url": url, "enabled": bool(affiliate.get("enabled"))}
+            data["affiliate"] = {"title": title, "url": url, "enabled": bool(affiliate.get("enabled")), "partner_tag": str(affiliate.get("partner_tag") or "").strip()[:80], "product_enabled": bool(affiliate.get("product_enabled"))}
     metrics = saved.get("affiliate_metrics") or {}
     if isinstance(metrics, dict):
         data["affiliate_metrics"] = {"impressions": max(0, int(metrics.get("impressions", 0))), "clicks": max(0, int(metrics.get("clicks", 0)))}
@@ -141,7 +141,7 @@ def public(data: dict[str, Any] | None = None) -> dict[str, Any]:
         "models": data["models"],
         "available_models": catalog,
         "incompatible_local_models": incompatible,
-        "affiliate": {"title": data["affiliate"]["title"], "url": data["affiliate"]["url"], "enabled": bool(data["affiliate"]["enabled"] and data["affiliate"]["url"]), "metrics": data["affiliate_metrics"]},
+        "affiliate": {"title": data["affiliate"]["title"], "url": data["affiliate"]["url"], "enabled": bool(data["affiliate"]["enabled"] and data["affiliate"]["url"]), "metrics": data["affiliate_metrics"], "partner_tag": data["affiliate"].get("partner_tag", ""), "product_enabled": bool(data["affiliate"].get("product_enabled") and data["affiliate"].get("partner_tag") and data["api_keys"].get("amazon_creators_id") and data["api_keys"].get("amazon_creators_secret")), "creators_api_configured": bool(data["api_keys"].get("amazon_creators_id") and data["api_keys"].get("amazon_creators_secret"))},
         "api_key_configured": {
             provider: bool(data["api_keys"].get(provider))
             for provider in ("openai", "anthropic", "plantnet")
@@ -203,9 +203,9 @@ def save(
             raise SettingsError("モデルを選び直してください")
         current["models"][name] = model
     for name in delete_keys:
-        if name in {"openai", "anthropic", "plantnet"}:
+        if name in {"openai", "anthropic", "plantnet", "amazon_creators_id", "amazon_creators_secret"}:
             current["api_keys"].pop(name, None)
-    for name in ("openai", "anthropic", "plantnet"):
+    for name in ("openai", "anthropic", "plantnet", "amazon_creators_id", "amazon_creators_secret"):
         key = api_keys.get(name)
         if isinstance(key, str) and key.strip():
             current["api_keys"][name] = key.strip()
@@ -216,13 +216,17 @@ def save(
         title = str(affiliate.get("title") or "").strip()[:120]
         url = str(affiliate.get("url") or "").strip()
         enabled = bool(affiliate.get("enabled"))
+        partner_tag = str(affiliate.get("partner_tag") or "").strip()[:80]
+        product_enabled = bool(affiliate.get("product_enabled"))
         parsed = urlparse(url)
         if url and (parsed.scheme != "https" or not parsed.netloc):
             raise SettingsError("アフィリエイトURLは https:// で入力してください")
         if enabled and (not title or not url):
             raise SettingsError("広告名とアフィリエイトURLを入力してください")
+        if product_enabled and (not partner_tag or not current["api_keys"].get("amazon_creators_id") or not current["api_keys"].get("amazon_creators_secret")):
+            raise SettingsError("Creators APIのCredential ID・Secret・Partner Tagを登録してください")
         if enabled and "{query}" not in url:
             raise SettingsError("検索用URLには {query} を含めてください")
-        current["affiliate"] = {"title": title, "url": url, "enabled": enabled}
+        current["affiliate"] = {"title": title, "url": url, "enabled": enabled, "partner_tag": partner_tag, "product_enabled": product_enabled}
     _write(current)
     return public(current)

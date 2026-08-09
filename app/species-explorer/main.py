@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from starlette.concurrency import run_in_threadpool
 
 import config_store
+import creators_api
 import vision
 
 class SettingsUpdate(BaseModel):
@@ -77,6 +78,30 @@ def affiliate_click(q: str = "") -> RedirectResponse:
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     return RedirectResponse(target, status_code=302)
+
+
+@app.post("/api/affiliate/click")
+def affiliate_click_event() -> dict[str, bool]:
+    if not config_store.load()["affiliate"]["enabled"]:
+        raise HTTPException(status_code=404, detail="広告が設定されていません")
+    config_store.record_affiliate("clicks")
+    return {"ok": True}
+
+
+@app.get("/api/amazon/product")
+async def amazon_product(q: str = "") -> JSONResponse:
+    settings = config_store.load()
+    affiliate = settings["affiliate"]
+    keys = settings["api_keys"]
+    if not affiliate.get("product_enabled"):
+        raise HTTPException(status_code=404, detail="商品APIが設定されていません")
+    try:
+        product = await run_in_threadpool(creators_api.search_book, q, keys.get("amazon_creators_id", ""), keys.get("amazon_creators_secret", ""), affiliate.get("partner_tag", ""))
+    except creators_api.CreatorsAPIError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    if not product:
+        raise HTTPException(status_code=404, detail="関連商品が見つかりません")
+    return JSONResponse(product)
 
 
 @app.get("/health")
