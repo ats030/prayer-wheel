@@ -44,6 +44,32 @@ def test_normalize_limits_candidates_and_confidence():
     assert len(result["candidates"]) == 3
     assert result["candidates"][0]["confidence"] == 100
     assert result["candidates"][0]["traits"] == ["葉", "花", "茎"]
+    assert result["candidates"][0]["sex"] == "対象外"
+
+
+def test_animal_sex_requires_visible_evidence():
+    result = vision.normalize({"category": "動物", "candidates": [
+        {"common_name_ja": "候補A", "sex": "オス", "sex_evidence": ["種特異的な角の形"]},
+        {"common_name_ja": "候補B", "sex": "メス", "sex_evidence": []},
+        {"common_name_ja": "候補C", "sex": "不明な値", "sex_evidence": ["色"]},
+    ]})
+
+    assert result["candidates"][0]["sex"] == "オス"
+    assert result["candidates"][0]["sex_evidence"] == ["種特異的な角の形"]
+    assert result["candidates"][1]["sex"] == "判別不能"
+    assert result["candidates"][1]["sex_evidence"] == []
+    assert result["candidates"][2]["sex"] == "判別不能"
+
+
+def test_taxonomy_verification_records_animal_group(monkeypatch):
+    monkeypatch.setattr(vision, "_lookup_taxon", lambda name: [{
+        "id": 10, "name": name, "iconic_taxon_name": "Aves",
+    }])
+    result = vision.normalize({"category": "動物", "candidates": [{
+        "common_name_ja": "鳥", "scientific_name": "Passer montanus",
+    }]})
+
+    assert vision.verify_taxonomy(result)["candidates"][0]["animal_group"] == "Aves"
     assert result["image_saved"] is False
 
 

@@ -42,6 +42,8 @@ PROMPT = """あなたは野外観察を補助する生物識別アシスタン�
       "scientific_name": "学名または空文字",
       "confidence": 0から100の整数,
       "traits": ["写真で確認できる特徴を最大3件"],
+      "sex": "オス" | "メス" | "判別不能" | "対象外",
+      "sex_evidence": ["写真で直接確認できる種特異的な雌雄差を最大2件"],
       "uncertainty": "似た種との区別に必要な追加観察"
     }
   ]
@@ -50,6 +52,9 @@ PROMPT = """あなたは野外観察を補助する生物識別アシスタン�
 - 候補は可能性が高い順に最大3件。種まで判断できなければ属・科レベルに留める。
 - traitsは候補名から一般論を作らず、添付写真で実際に確認でき、その候補を支持する特徴だけを書く。
 - confidenceは写真と明示された撮影情報だけからの識別確度。種を区別する決め手が見えない場合は60以下にする。
+- categoryが動物の場合だけ雌雄を検討する。オス・メスを返すには、その候補種で知られる性的二型と一致し、写真で直接見える形態的根拠をsex_evidenceに1件以上書く。
+- 大きさだけ、行動、撮影場所、一般的な色の印象、角度で変わる特徴から雌雄を決めない。幼体、季節・繁殖状態が不明、雌雄同形、識別部位が見えない場合は判別不能にする。
+- 植物または不明ではsexを対象外、sex_evidenceを空配列にする。
 - 写真に生物が見えない、または判定材料が足りなければ category を不明、candidatesを空配列にする。
 - 食用、毒性、安全性、治療について断定しない。
 - 位置、季節、撮影者の説明など、与えられていない情報を作らない。
@@ -62,6 +67,7 @@ Geminiでは、回答を確定する前に次の順で内部検討してくだ�
 3. 写真と矛盾する特徴がある候補は棄却する。見えていない特徴を、見えたものとして補わない。
 4. 種を分ける識別点が写っていなければ属・科レベルに留める。生物または識別形質が不鮮明なら不明・候補なしにする。
 5. confidenceが80以上になるのは、写真で確認できる独立した識別特徴が2つ以上あり、主要な類似種との矛盾がない場合だけ。決め手が不足する候補は60以下にする。
+6. 動物の雌雄は候補種に固有の性的二型と、写真で見える部位を照合する。根拠が種・成長段階・季節状態に依存して確定できなければ判別不能にする。
 撮影地域・日付・大きさは補助情報であり、写真上の矛盾を覆してはいけません。
 """
 
@@ -79,9 +85,11 @@ GEMINI_RESPONSE_SCHEMA = {
                     "scientific_name": {"type": "string", "description": "確信できる分類階級の学名。不明なら空文字"},
                     "confidence": {"type": "integer", "minimum": 0, "maximum": 100},
                     "traits": {"type": "array", "maxItems": 3, "items": {"type": "string"}, "description": "写真で直接確認でき、候補を支持する識別特徴"},
+                    "sex": {"type": "string", "enum": ["オス", "メス", "判別不能", "対象外"], "description": "写真だけからの雌雄推定。動物で判断材料がなければ判別不能"},
+                    "sex_evidence": {"type": "array", "maxItems": 2, "items": {"type": "string"}, "description": "写真で直接見える種特異的な性的二型の根拠"},
                     "uncertainty": {"type": "string", "description": "最有力の類似候補との区別に不足している観察"},
                 },
-                "required": ["common_name_ja", "scientific_name", "confidence", "traits", "uncertainty"],
+                "required": ["common_name_ja", "scientific_name", "confidence", "traits", "sex", "sex_evidence", "uncertainty"],
             },
         },
     },
@@ -194,11 +202,19 @@ def normalize(data: dict[str, Any], *, model: str = MODEL, provider: str = "loca
         except (TypeError, ValueError):
             confidence = 0
         traits = [str(v).strip() for v in (item.get("traits") or []) if str(v).strip()][:3]
+        sex_evidence = [str(v).strip() for v in (item.get("sex_evidence") or []) if str(v).strip()][:2]
+        sex = str(item.get("sex") or "判別不能")
+        if category != "動物":
+            sex, sex_evidence = "対象外", []
+        elif sex not in {"オス", "メス"} or not sex_evidence:
+            sex, sex_evidence = "判別不能", []
         candidates.append({
             "common_name_ja": name,
             "scientific_name": str(item.get("scientific_name") or "").strip(),
             "confidence": confidence,
             "traits": traits,
+            "sex": sex,
+            "sex_evidence": sex_evidence,
             "uncertainty": str(item.get("uncertainty") or "").strip(),
         })
     return {
@@ -330,6 +346,7 @@ def verify_taxonomy(result: dict[str, Any]) -> dict[str, Any]:
             candidate["taxonomy_status"] = "verified"
             candidate["scientific_name"] = str(match.get("name") or scientific_name)
             candidate["common_name_ja"] = _japanese_common_name(match.get("preferred_common_name"))
+            candidate["animal_group"] = str(match.get("iconic_taxon_name") or "")
             taxon_id = match.get("id")
             candidate["taxonomy_url"] = f"https://www.inaturalist.org/taxa/{taxon_id}" if taxon_id else ""
         else:

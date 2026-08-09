@@ -44,6 +44,12 @@ def test_index_links_to_settings():
     assert 'gps.latitude.toFixed(4)' in response.text
     assert 'id="clearHistory"' in response.text
     assert 'OpenStreetMap contributors' in response.text
+    assert "雌雄推定" in response.text
+    assert "Animal Diversity Web" in response.text
+    assert "Cornell All About Birds" in response.text
+    assert "FishBase" in response.text
+    assert "AmphibiaWeb" in response.text
+    assert "Reptile Database" in response.text
     assert all("history" not in route.path for route in main.app.routes if route.path.startswith("/api/"))
 
 

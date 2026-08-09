@@ -40,6 +40,8 @@ is always presented as a candidate that the user should compare with the subject
   return path. API keys are write-only in the UI; configured state and allowed model choices remain visible.
 - External-provider copy states where photographs are sent; Gemini also distinguishes unpaid data-improvement handling from paid-service handling.
 - Gemini identification performs a bounded observe, compare-lookalikes, reject-contradictions pass before schema-constrained output; high thinking is preferred for accuracy, while the independent taxonomy gate still treats the photo match as unverified.
+- Animal candidates include a sex estimate only when at least one directly visible, species-specific sexual-dimorphism feature is supplied. Otherwise the UI says undetermined; plants are out of scope. The estimate remains explicitly model-derived and requires comparison with a taxon-appropriate external reference.
+- Animal reference links are routed by iNaturalist's verified iconic taxon: ADW for mammals, Cornell for birds, FishBase for fishes, AmphibiaWeb for amphibians, Reptile Database for reptiles, and GBIF otherwise. These sites are linked for human review only; their content is not scraped or treated as automatic proof.
 
 ## Responsive behavior
 
