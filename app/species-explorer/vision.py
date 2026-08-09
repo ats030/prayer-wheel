@@ -14,6 +14,10 @@ from PIL import Image, ImageOps
 
 MODEL = os.getenv("SPECIES_MODEL", "gemma4:12b")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434").rstrip("/")
+OPENAI_MODEL = os.getenv("SPECIES_OPENAI_MODEL", "gpt-5.6-luna")
+OPENAI_URL = os.getenv("SPECIES_OPENAI_URL", "https://api.openai.com/v1/responses")
+ANTHROPIC_MODEL = os.getenv("SPECIES_ANTHROPIC_MODEL", "claude-sonnet-5")
+ANTHROPIC_URL = os.getenv("SPECIES_ANTHROPIC_URL", "https://api.anthropic.com/v1/messages")
 MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 MAX_EDGE = 1600
 
@@ -80,7 +84,7 @@ def _extract_json(text: str) -> dict[str, Any]:
     return data
 
 
-def normalize(data: dict[str, Any]) -> dict[str, Any]:
+def normalize(data: dict[str, Any], *, model: str = MODEL, provider: str = "local") -> dict[str, Any]:
     category = data.get("category") if data.get("category") in {"植物", "動物", "不明"} else "不明"
     candidates = []
     for item in (data.get("candidates") or [])[:3]:
@@ -105,7 +109,8 @@ def normalize(data: dict[str, Any]) -> dict[str, Any]:
         "category": category,
         "summary": str(data.get("summary") or "").strip(),
         "candidates": candidates,
-        "model": MODEL,
+        "model": model,
+        "provider": provider,
         "image_saved": False,
     }
 
@@ -132,3 +137,106 @@ def identify(image_bytes: bytes) -> dict[str, Any]:
     except (httpx.HTTPError, KeyError, ValueError) as exc:
         raise VisionError("ローカルAIに接続できませんでした") from exc
     return normalize(_extract_json(content))
+
+
+def _provider_error(provider: str, exc: httpx.HTTPStatusError) -> VisionError:
+    status = exc.response.status_code
+    if status in {401, 403}:
+        return VisionError(f"{provider}のAPIキーを確認してください")
+    if status == 429:
+        return VisionError(f"{provider}の利用上限またはレート制限に達しました")
+    return VisionError(f"{provider} APIで識別できませんでした（{status}）")
+
+
+def _openai_output_text(data: dict[str, Any]) -> str:
+    if isinstance(data.get("output_text"), str):
+        return data["output_text"]
+    texts = []
+    for output in data.get("output") or []:
+        if not isinstance(output, dict):
+            continue
+        for content in output.get("content") or []:
+            if isinstance(content, dict) and content.get("type") == "output_text":
+                texts.append(str(content.get("text") or ""))
+    if not texts:
+        raise VisionError("OpenAIの応答を読み取れませんでした")
+    return "\n".join(texts)
+
+
+def identify_openai(image_bytes: bytes, api_key: str) -> dict[str, Any]:
+    image_data = base64.b64encode(image_bytes).decode("ascii")
+    payload = {
+        "model": OPENAI_MODEL,
+        "input": [{
+            "role": "user",
+            "content": [
+                {"type": "input_image", "image_url": f"data:image/jpeg;base64,{image_data}"},
+                {"type": "input_text", "text": PROMPT},
+            ],
+        }],
+        "reasoning": {"effort": "low"},
+    }
+    try:
+        response = httpx.post(
+            OPENAI_URL,
+            json=payload,
+            headers={"Authorization": f"Bearer {api_key}"},
+            timeout=180,
+        )
+        response.raise_for_status()
+        content = _openai_output_text(response.json())
+    except httpx.HTTPStatusError as exc:
+        raise _provider_error("OpenAI", exc) from exc
+    except (httpx.HTTPError, KeyError, ValueError) as exc:
+        raise VisionError("OpenAI APIに接続できませんでした") from exc
+    return normalize(_extract_json(content), model=OPENAI_MODEL, provider="openai")
+
+
+def _anthropic_output_text(data: dict[str, Any]) -> str:
+    texts = [
+        str(item.get("text") or "")
+        for item in data.get("content") or []
+        if isinstance(item, dict) and item.get("type") == "text"
+    ]
+    if not texts:
+        raise VisionError("Anthropicの応答を読み取れませんでした")
+    return "\n".join(texts)
+
+
+def identify_anthropic(image_bytes: bytes, api_key: str) -> dict[str, Any]:
+    payload = {
+        "model": ANTHROPIC_MODEL,
+        "max_tokens": 1200,
+        "messages": [{
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/jpeg",
+                        "data": base64.b64encode(image_bytes).decode("ascii"),
+                    },
+                },
+                {"type": "text", "text": PROMPT},
+            ],
+        }],
+    }
+    try:
+        response = httpx.post(
+            ANTHROPIC_URL,
+            json=payload,
+            headers={
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            timeout=180,
+        )
+        response.raise_for_status()
+        content = _anthropic_output_text(response.json())
+    except httpx.HTTPStatusError as exc:
+        raise _provider_error("Anthropic", exc) from exc
+    except (httpx.HTTPError, KeyError, ValueError) as exc:
+        raise VisionError("Anthropic APIに接続できませんでした") from exc
+    return normalize(_extract_json(content), model=ANTHROPIC_MODEL, provider="anthropic")

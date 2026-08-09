@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.concurrency import run_in_threadpool
 
@@ -30,17 +30,30 @@ def favicon() -> FileResponse:
 
 @app.get("/health")
 def health() -> dict[str, object]:
-    return {"ok": True, "model": vision.MODEL, "local_processing": True}
+    return {"ok": True, "model": vision.MODEL, "local_processing": True, "providers": ["local", "openai", "anthropic"]}
 
 
 @app.post("/identify")
-async def identify(file: UploadFile = File(...)) -> JSONResponse:
+async def identify(
+    file: UploadFile = File(...),
+    provider: str = Form("local"),
+    api_key: str | None = Form(None),
+) -> JSONResponse:
+    if provider not in {"local", "openai", "anthropic"}:
+        raise HTTPException(status_code=400, detail="計算資源を選び直してください")
+    if provider != "local" and not (api_key or "").strip():
+        raise HTTPException(status_code=400, detail="APIキーを入力してください")
     if file.content_type and not file.content_type.startswith("image/"):
         raise HTTPException(status_code=415, detail="画像ファイルを選んでください")
     raw = await file.read(vision.MAX_UPLOAD_BYTES + 1)
     try:
         prepared = await run_in_threadpool(vision.prepare_image, raw)
-        result = await run_in_threadpool(vision.identify, prepared)
+        if provider == "openai":
+            result = await run_in_threadpool(vision.identify_openai, prepared, api_key.strip())
+        elif provider == "anthropic":
+            result = await run_in_threadpool(vision.identify_anthropic, prepared, api_key.strip())
+        else:
+            result = await run_in_threadpool(vision.identify, prepared)
     except vision.VisionError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return JSONResponse(result)
