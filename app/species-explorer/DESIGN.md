@@ -25,7 +25,7 @@ is always presented as a candidate that the user should compare with the subject
 - Taxonomy-only candidates state that the photo match is unverified; generated common names, traits, and probability are not presented as facts.
 - Specialist plant candidates retain their Pl@ntNet source, and exact VLM agreement is labeled as two independent paths.
 - If every candidate is rejected, the result asks for additional identifying photos instead of filling the gap with a guess.
-- Affiliate product-search templates expand the verified candidate name plus identification category into {query}. When configured, Amazon Creators API may replace that fallback with its returned product title and detail-page URL; each link is labeled as advertising and never influences generation or ranking.
+- Affiliate product-search templates expand the verified candidate name plus identification category into {query}. When configured, Amazon Creators API may replace that fallback with up to four returned product cards containing an image, title, and detail-page URL; each link is labeled as advertising and never influences generation or ranking.
 - Users can hide the ad locally and restore it from Settings; only aggregate impressions and clicks are stored.
 - Images are processed in memory, EXIF metadata is stripped, and nothing is saved.
 - Optional specialist services remain hidden until configured and require an explicit per-request photo-sharing choice.

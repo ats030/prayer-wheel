@@ -88,20 +88,20 @@ def affiliate_click_event() -> dict[str, bool]:
     return {"ok": True}
 
 
-@app.get("/api/amazon/product")
-async def amazon_product(q: str = "") -> JSONResponse:
+@app.get("/api/amazon/products")
+async def amazon_products(q: str = "") -> JSONResponse:
     settings = config_store.load()
     affiliate = settings["affiliate"]
     keys = settings["api_keys"]
     if not affiliate.get("product_enabled"):
         raise HTTPException(status_code=404, detail="商品APIが設定されていません")
     try:
-        product = await run_in_threadpool(creators_api.search_product, q, keys.get("amazon_creators_id", ""), keys.get("amazon_creators_secret", ""), affiliate.get("partner_tag", ""))
+        products = await run_in_threadpool(creators_api.search_products, q, keys.get("amazon_creators_id", ""), keys.get("amazon_creators_secret", ""), affiliate.get("partner_tag", ""), 4)
     except creators_api.CreatorsAPIError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
-    if not product:
+    if not products:
         raise HTTPException(status_code=404, detail="関連商品が見つかりません")
-    return JSONResponse(product)
+    return JSONResponse({"products": products})
 
 
 @app.get("/health")

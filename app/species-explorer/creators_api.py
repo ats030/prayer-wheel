@@ -1,4 +1,4 @@
-"""Minimal Amazon Creators API client for one related product."""
+"""Minimal Amazon Creators API client for related products."""
 from __future__ import annotations
 
 import threading
@@ -49,26 +49,39 @@ def _value(container: Any, *keys: str) -> str:
         current = current.get("displayValue") or current.get("value")
     return str(current or "").strip()
 
-def search_product(query: str, credential_id: str, secret: str, partner_tag: str) -> dict[str, str] | None:
+def search_products(query: str, credential_id: str, secret: str, partner_tag: str, limit: int = 4) -> list[dict[str, str]]:
     term = " ".join(str(query).split())[:80]
     if not term:
-        return None
+        return []
+    item_count = min(10, max(1, int(limit)))
     token = _token(credential_id, secret)
     try:
-        response = httpx.post(SEARCH_URL, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "x-marketplace": MARKETPLACE}, json={"marketplace": MARKETPLACE, "partnerTag": partner_tag, "searchIndex": "All", "keywords": term, "itemCount": 1, "resources": ["itemInfo.title", "images.primary.medium"]}, timeout=20)
+        response = httpx.post(SEARCH_URL, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "x-marketplace": MARKETPLACE}, json={"marketplace": MARKETPLACE, "partnerTag": partner_tag, "searchIndex": "All", "keywords": term, "itemCount": item_count, "resources": ["itemInfo.title", "images.primary.medium"]}, timeout=20)
         response.raise_for_status()
         data = response.json()
     except (httpx.HTTPError, ValueError, AttributeError) as exc:
         raise CreatorsAPIError("Amazonの商品情報を取得できませんでした") from exc
     result = data.get("searchResult") or data.get("SearchResult") or {}
     items = result.get("items") or result.get("Items") or []
-    if not isinstance(items, list) or not items or not isinstance(items[0], dict):
-        return None
-    item = items[0]
-    url = _value(item, "detailPageURL") or _value(item, "DetailPageURL")
-    title = _value(item, "itemInfo", "title") or _value(item, "ItemInfo", "Title")
-    image = _value(item, "images", "primary", "medium", "url") or _value(item, "Images", "Primary", "Medium", "URL")
-    parsed = urlparse(url)
-    if parsed.scheme != "https" or not parsed.hostname or not (parsed.hostname == "amazon.co.jp" or parsed.hostname.endswith(".amazon.co.jp")) or not title:
-        return None
-    return {"title": title[:240], "url": url, "image": image}
+    if not isinstance(items, list):
+        return []
+    products = []
+    for item in items[:item_count]:
+        if not isinstance(item, dict):
+            continue
+        url = _value(item, "detailPageURL") or _value(item, "DetailPageURL")
+        title = _value(item, "itemInfo", "title") or _value(item, "ItemInfo", "Title")
+        image = _value(item, "images", "primary", "medium", "url") or _value(item, "Images", "Primary", "Medium", "URL")
+        parsed = urlparse(url)
+        image_parsed = urlparse(image)
+        valid_url = parsed.scheme == "https" and parsed.hostname and (parsed.hostname == "amazon.co.jp" or parsed.hostname.endswith(".amazon.co.jp"))
+        valid_image = image_parsed.scheme == "https" and bool(image_parsed.hostname)
+        if valid_url and valid_image and title:
+            products.append({"title": title[:240], "url": url, "image": image})
+    return products
+
+
+def search_product(query: str, credential_id: str, secret: str, partner_tag: str) -> dict[str, str] | None:
+    """Backward-compatible single-result helper."""
+    products = search_products(query, credential_id, secret, partner_tag, limit=1)
+    return products[0] if products else None
