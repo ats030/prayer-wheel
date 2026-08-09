@@ -32,6 +32,7 @@ is always presented as a candidate that the user should compare with the subject
 - Settings are reachable from the header and use a dedicated page with a clear
   return path. API keys are write-only in the UI; configured state and allowed model choices remain visible.
 - External-provider copy states where photographs are sent; Gemini also distinguishes unpaid data-improvement handling from paid-service handling.
+- Gemini identification performs a bounded observe, compare-lookalikes, reject-contradictions pass before schema-constrained output; high thinking is preferred for accuracy, while the independent taxonomy gate still treats the photo match as unverified.
 
 ## Responsive behavior
 

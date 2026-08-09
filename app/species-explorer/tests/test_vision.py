@@ -42,6 +42,15 @@ def test_identification_prompt_includes_supplied_context():
     assert "撮影地域: 東京都 不明" in vision.identification_prompt("東京都\n不明")
 
 
+def test_gemini_prompt_requires_observation_comparison_and_abstention():
+    prompt = vision.gemini_identification_prompt()
+    assert "種名を考える前" in prompt
+    assert "主要な類似種" in prompt
+    assert "候補は棄却" in prompt
+    assert "属・科レベル" in prompt
+    assert "候補なし" in prompt
+
+
 
 def test_taxonomy_verification_accepts_exact_scientific_name(monkeypatch):
     monkeypatch.setattr(vision, "_lookup_taxon", lambda name: [{"id": 123, "name": name}])
@@ -296,3 +305,7 @@ def test_gemini_uses_generate_content_vision_contract(monkeypatch):
     assert [part["inline_data"]["data"] for part in parts[:2]] == ["b25l", "dHdv"]
     assert parts[2]["text"]
     assert seen["json"]["generationConfig"]["responseMimeType"] == "application/json"
+    config = seen["json"]["generationConfig"]
+    assert config["thinkingConfig"] == {"thinkingLevel": "high"}
+    assert config["responseSchema"]["properties"]["candidates"]["maxItems"] == 3
+    assert config["responseSchema"]["properties"]["category"]["enum"] == ["植物", "動物", "不明"]
