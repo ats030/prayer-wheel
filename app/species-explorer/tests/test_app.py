@@ -48,6 +48,14 @@ def test_index_links_to_settings():
     assert 'showHistoryImage' in response.text
     assert 'historyImageUrls.forEach(URL.revokeObjectURL)' in response.text
     assert '960/Math.max(bitmap.width,bitmap.height)' in response.text
+    assert 'model:data.model||""' in response.text
+    assert 'resultMeta:{strictMode:' in response.text
+    assert 'historyCandidateHtml' in response.text
+    assert "写真上の観察点" in response.text
+    assert "類似種との識別点" in response.text
+    assert "確証がない理由" in response.text
+    assert "雌雄推定の根拠" in response.text
+    assert "使用モデル：" in response.text
     assert 'OpenStreetMap contributors' in response.text
     assert "雌雄推定" in response.text
     assert "Animal Diversity Web" in response.text
