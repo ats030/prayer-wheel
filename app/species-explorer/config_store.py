@@ -5,8 +5,10 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import threading
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 
@@ -35,6 +37,7 @@ DEFAULT_MODELS = {
     "openai": "gpt-5.6-luna",
     "anthropic": "claude-sonnet-5",
 }
+_AFFILIATE_LOCK = threading.Lock()
 
 
 class SettingsError(ValueError):
@@ -42,7 +45,7 @@ class SettingsError(ValueError):
 
 
 def _defaults() -> dict[str, Any]:
-    return {"provider": "local", "models": dict(DEFAULT_MODELS), "api_keys": {}}
+    return {"provider": "local", "models": dict(DEFAULT_MODELS), "api_keys": {}, "affiliate": {"title": "", "url": "", "enabled": False}, "affiliate_metrics": {"impressions": 0, "clicks": 0}}
 
 
 def ollama_models() -> tuple[list[dict[str, str]], list[str]]:
@@ -118,6 +121,15 @@ def load() -> dict[str, Any]:
         key = (saved.get("api_keys") or {}).get(provider)
         if isinstance(key, str) and key:
             data["api_keys"][provider] = key
+    affiliate = saved.get("affiliate") or {}
+    if isinstance(affiliate, dict):
+        url = str(affiliate.get("url") or "").strip()
+        title = str(affiliate.get("title") or "").strip()[:120]
+        if urlparse(url).scheme == "https" and urlparse(url).netloc:
+            data["affiliate"] = {"title": title, "url": url, "enabled": bool(affiliate.get("enabled"))}
+    metrics = saved.get("affiliate_metrics") or {}
+    if isinstance(metrics, dict):
+        data["affiliate_metrics"] = {"impressions": max(0, int(metrics.get("impressions", 0))), "clicks": max(0, int(metrics.get("clicks", 0)))}
     return data
 
 
@@ -129,11 +141,42 @@ def public(data: dict[str, Any] | None = None) -> dict[str, Any]:
         "models": data["models"],
         "available_models": catalog,
         "incompatible_local_models": incompatible,
+        "affiliate": {"title": data["affiliate"]["title"], "url": data["affiliate"]["url"], "enabled": bool(data["affiliate"]["enabled"] and data["affiliate"]["url"]), "metrics": data["affiliate_metrics"]},
         "api_key_configured": {
             provider: bool(data["api_keys"].get(provider))
             for provider in ("openai", "anthropic", "plantnet")
         },
     }
+
+
+def record_affiliate(event: str) -> None:
+    if event not in {"impressions", "clicks"}:
+        raise ValueError("unknown affiliate event")
+    with _AFFILIATE_LOCK:
+        current = load()
+        current["affiliate_metrics"][event] += 1
+        _write(current)
+
+
+def affiliate_target() -> str:
+    current = load()
+    if not current["affiliate"]["enabled"] or not current["affiliate"]["url"]:
+        raise LookupError("広告が設定されていません")
+    return current["affiliate"]["url"]
+
+
+def _write(current: dict[str, Any]) -> None:
+    SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    SETTINGS_PATH.parent.chmod(0o700)
+    fd, temporary = tempfile.mkstemp(prefix=".settings-", dir=SETTINGS_PATH.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(current, handle, ensure_ascii=False)
+        os.chmod(temporary, 0o600)
+        os.replace(temporary, SETTINGS_PATH)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def save(
@@ -142,6 +185,7 @@ def save(
     models: dict[str, str],
     api_keys: dict[str, str | None],
     delete_keys: list[str],
+    affiliate: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if provider not in MODELS:
         raise SettingsError("計算資源を選び直してください")
@@ -162,16 +206,15 @@ def save(
     if provider != "local" and not current["api_keys"].get(provider):
         raise SettingsError("選択したAPIのキーを登録してください")
     current["provider"] = provider
-
-    SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    SETTINGS_PATH.parent.chmod(0o700)
-    fd, temporary = tempfile.mkstemp(prefix=".settings-", dir=SETTINGS_PATH.parent)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            json.dump(current, handle, ensure_ascii=False)
-        os.chmod(temporary, 0o600)
-        os.replace(temporary, SETTINGS_PATH)
-    finally:
-        if os.path.exists(temporary):
-            os.unlink(temporary)
+    if affiliate is not None:
+        title = str(affiliate.get("title") or "").strip()[:120]
+        url = str(affiliate.get("url") or "").strip()
+        enabled = bool(affiliate.get("enabled"))
+        parsed = urlparse(url)
+        if url and (parsed.scheme != "https" or not parsed.netloc):
+            raise SettingsError("アフィリエイトURLは https:// で入力してください")
+        if enabled and (not title or not url):
+            raise SettingsError("広告名とアフィリエイトURLを入力してください")
+        current["affiliate"] = {"title": title, "url": url, "enabled": enabled}
+    _write(current)
     return public(current)

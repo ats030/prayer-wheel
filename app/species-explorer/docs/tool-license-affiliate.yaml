@@ -1,0 +1,15 @@
+reviewed_at: 2026-08-09
+intended_use: "写真識別Webアプリの判別結果後に、手動登録した図鑑の広告リンクを表示"
+candidates:
+  - name: Amazon Associates Japan
+    cost: "参加費の記載なし。紹介料率はカテゴリ等により変動。"
+    commercial_use: conditional
+    decision: conditional
+    conditions:
+      - "登録・承認されたWebサイトで所定の特別リンクを使用する"
+      - "サイト上に規約指定のアソシエイト参加表示を目立つように掲載する"
+      - "有料検索広告、自動リダイレクト、未承認アプリなどの禁止事項を守る"
+    sources:
+      - https://affiliate.amazon.co.jp/help/operating/agreement/
+      - https://affiliate.amazon.co.jp/help/operating/policies/
+    note: "手動登録した正式な特別リンクだけを使用。Species Explorerを掲載媒体として承認済みであることを公開前に確認する。"

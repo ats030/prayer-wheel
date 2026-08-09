@@ -5,7 +5,7 @@ from pathlib import Path
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from starlette.concurrency import run_in_threadpool
 
 import config_store
@@ -16,6 +16,7 @@ class SettingsUpdate(BaseModel):
     models: dict[str, str] = Field(default_factory=dict)
     api_keys: dict[str, str | None] = Field(default_factory=dict)
     delete_keys: list[str] = Field(default_factory=list)
+    affiliate: dict[str, object] = Field(default_factory=dict)
 
 
 app = FastAPI(title="Species Explorer")
@@ -50,9 +51,30 @@ def save_settings(update: SettingsUpdate) -> dict[str, object]:
             models=update.models,
             api_keys=update.api_keys,
             delete_keys=update.delete_keys,
+            affiliate=update.affiliate,
         )
     except config_store.SettingsError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/api/affiliate/impression")
+def affiliate_impression() -> dict[str, bool]:
+    try:
+        config_store.affiliate_target()
+        config_store.record_affiliate("impressions")
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"ok": True}
+
+
+@app.get("/affiliate/click")
+def affiliate_click() -> RedirectResponse:
+    try:
+        target = config_store.affiliate_target()
+        config_store.record_affiliate("clicks")
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return RedirectResponse(target, status_code=302)
 
 
 @app.get("/health")

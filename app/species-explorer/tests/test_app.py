@@ -53,6 +53,24 @@ def test_settings_page_enables_all_providers():
     assert "gpt-5.6-sol" not in response.text
 
 
+def test_affiliate_click_redirects_and_records_metrics():
+    main.config_store.save(
+        provider="local", models={}, api_keys={}, delete_keys=[],
+        affiliate={"title": "野鳥図鑑", "url": "https://amzn.asia/example", "enabled": True},
+    )
+    impression = client.post("/api/affiliate/impression")
+    click = client.get("/affiliate/click", follow_redirects=False)
+    assert impression.status_code == 200
+    assert click.status_code == 302
+    assert click.headers["location"] == "https://amzn.asia/example"
+    assert main.config_store.public()["affiliate"]["metrics"] == {"impressions": 1, "clicks": 1}
+
+
+def test_affiliate_is_absent_until_configured():
+    assert client.post("/api/affiliate/impression").status_code == 404
+    assert client.get("/affiliate/click", follow_redirects=False).status_code == 404
+
+
 def test_external_provider_requires_api_key(monkeypatch):
     monkeypatch.setattr(main.config_store, "load", lambda: {"provider": "openai", "models": {"openai": "gpt-5.6-luna"}, "api_keys": {}})
     response = client.post(

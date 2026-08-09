@@ -25,6 +25,8 @@ is always presented as a candidate that the user should compare with the subject
 - Taxonomy-only candidates state that the photo match is unverified; generated common names, traits, and probability are not presented as facts.
 - Specialist plant candidates retain their Pl@ntNet source, and exact VLM agreement is labeled as two independent paths.
 - If every candidate is rejected, the result asks for additional identifying photos instead of filling the gap with a guess.
+- Affiliate links are manually configured, labeled as advertising, rendered after identification results, and never influence candidate generation or ranking.
+- Users can hide the ad locally; only aggregate impressions and clicks are stored.
 - Images are processed in memory, EXIF metadata is stripped, and nothing is saved.
 - Optional specialist services remain hidden until configured and require an explicit per-request photo-sharing choice.
 - Settings are reachable from the header and use a dedicated page with a clear

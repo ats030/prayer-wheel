@@ -73,6 +73,32 @@ def test_settings_can_delete_key(tmp_path, monkeypatch):
     assert result["api_key_configured"]["openai"] is False
 
 
+def test_affiliate_settings_and_metrics_are_persistent(tmp_path, monkeypatch):
+    monkeypatch.setattr(config_store, "SETTINGS_PATH", tmp_path / "settings.json")
+    result = config_store.save(
+        provider="local", models={}, api_keys={}, delete_keys=[],
+        affiliate={"title": "身近な植物図鑑", "url": "https://amzn.asia/example", "enabled": True},
+    )
+    assert result["affiliate"]["enabled"] is True
+    assert result["affiliate"]["url"] == "https://amzn.asia/example"
+    config_store.record_affiliate("impressions")
+    config_store.record_affiliate("clicks")
+    assert config_store.public()["affiliate"]["metrics"] == {"impressions": 1, "clicks": 1}
+    assert config_store.affiliate_target() == "https://amzn.asia/example"
+
+
+def test_affiliate_rejects_non_https_url(tmp_path, monkeypatch):
+    monkeypatch.setattr(config_store, "SETTINGS_PATH", tmp_path / "settings.json")
+    try:
+        config_store.save(provider="local", models={}, api_keys={}, delete_keys=[], affiliate={
+            "title": "図鑑", "url": "javascript:alert(1)", "enabled": True,
+        })
+    except config_store.SettingsError as exc:
+        assert "https" in str(exc)
+    else:
+        raise AssertionError("unsafe affiliate URL was accepted")
+
+
 class FakeResponse:
     def __init__(self, data):
         self.data = data
