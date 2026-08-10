@@ -2,18 +2,35 @@
 
 ## Direction
 
-Species Explorer is a phone-first field tool. It follows the stack's compact,
-Linear-inspired dark UI while using the photograph and identification candidates
-as the visual focus. It must feel careful rather than authoritative: model output
-is always presented as a candidate that the user should compare with the subject.
+Species Explorer is a phone-first field tool for all ages. It keeps the stack's
+compact layout discipline but reads as daylight fieldwork rather than a console:
+a light canvas, one green accent, and the photograph and identification
+candidates as the visual focus. It must feel careful rather than authoritative:
+model output is always presented as a candidate that the user should compare
+with the subject.
+
+## Audience
+
+- No age restriction. Copy targets a reader around upper primary school:
+  everyday words instead of jargon ("似ている生きもの" not "識別候補",
+  "決め手が足りない理由" not "確証がない理由"), no furigana, no baby talk.
+- Terms and privacy state the all-ages position explicitly and place the
+  API-key contract and the cost with the account holder, not the child.
+- Nothing about the safety position softens for the younger reader; it gets
+  louder. Plain-language warnings replace clinical ones.
 
 ## Visual system
 
-- Near-black canvas, charcoal panels, hairline borders, and one lavender accent.
+- Near-white canvas with a faint green cast, white panels, hairline borders,
+  and one green accent. `prefers-color-scheme: dark` swaps the same token names
+  to a dark-green-tinted set; no page defines a color only inside the dark
+  block, and `color-scheme: light dark` is declared on every page.
+- Filled controls use `--on-accent` so the accent keeps contrast in both themes.
 - System sans typography, 4px spacing grid, 8px controls, and 12px cards.
-- No decorative gradients, oversized headings, or unrelated imagery.
+- No decorative gradients, oversized headings, or unrelated imagery. The one
+  ornament is the ⚠ mark on the safety card.
 - Confidence is expressed with plain text and a restrained meter, never a green
-  "correct" state.
+  "correct" state — the accent is the app's own color, not a verdict.
 
 ## Interaction
 
@@ -22,6 +39,7 @@ is always presented as a candidate that the user should compare with the subject
 - The main screen uses a Workbench flow: capture, preview, then full-width results. Camera and library inputs are the primary actions and have 44px touch targets.
 - Optional capture context and advanced identification controls stay in closed disclosures until requested. After an image is selected, the capture target compresses so the preview and identify action become the visual priority.
 - Safety guidance is one flat warning region rather than nested cards; related products form one non-sticky shelf after all candidates instead of repeating per candidate; repeated identifications rotate the candidate used for the product query.
+- The safety region opens with a lead sentence addressed to the whole audience, then splits into three equal questions the app refuses to answer or cannot answer alone: 食べられるか, さわってよいか, 持ち帰ってよいか. Touch safety is stated because rash-causing plants and stinging animals are not separable from a photograph.
 - The chosen image is previewed before identification.
 - Identification shows an expected wait and disables duplicate submission.
 - Empty, loading, result, and error states do not shift the main capture controls.

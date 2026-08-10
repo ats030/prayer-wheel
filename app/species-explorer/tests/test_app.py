@@ -40,7 +40,7 @@ def test_index_has_additional_shooting_guide_for_uncertain_results():
     assert response.status_code == 200
     assert "function shootingGuide(data)" in response.text
     assert '["taxonomy_only","uncertain"]' in response.text
-    assert "追加撮影ガイド" in response.text
+    assert "もう1枚撮ると、はっきりします" in response.text
     assert "candidate.evidence_gaps" in response.text
     assert ".slice(0,5)" in response.text
     assert 'id="addPhotos"' in response.text
@@ -62,20 +62,20 @@ def test_index_links_to_settings():
     assert 'model:data.model||""' in response.text
     assert 'resultMeta:{strictMode:' in response.text
     assert 'historyCandidateHtml' in response.text
-    assert "写真上の観察点" in response.text
-    assert "類似種との識別点" in response.text
-    assert "確証がない理由" in response.text
-    assert "雌雄推定の根拠" in response.text
-    assert "使用モデル：" in response.text
-    assert 'return "種候補"' in response.text
-    assert 'return "属候補"' in response.text
-    assert 'return "科候補"' in response.text
+    assert "写真から見つけた特徴" in response.text
+    assert "似ている種との見分け方" in response.text
+    assert "決め手が足りない理由" in response.text
+    assert 'historyList("そう考えた理由",c.sex_evidence)' in response.text
+    assert "使ったAI：" in response.text
+    assert 'return "種の候補"' in response.text
+    assert 'return "属（近いなかま）の候補"' in response.text
+    assert 'return "科（大きなグループ）の候補"' in response.text
     assert "historyAffiliateLink(entry)" in response.text
     assert 'rel="sponsored noopener noreferrer"' in response.text
     assert "広告 · Amazonで" in response.text
     assert "if(!affiliate?.enabled)return" in response.text
     assert 'OpenStreetMap contributors' in response.text
-    assert "雌雄推定" in response.text
+    assert "オス・メスの推測" in response.text
     assert "Animal Diversity Web" in response.text
     assert "Cornell All About Birds" in response.text
     assert "FishBase" in response.text
@@ -113,10 +113,10 @@ def test_settings_page_enables_all_providers():
     assert "requestCurrentLocation(true)" in index
     assert 'gps?.source!=="exif"' in index
     assert 'source:"current"' in index
-    assert "画像選択時に現在地を取得します" in index
-    assert "識別AIへは送らず" in index
-    assert "採取可否：確認が必要" in index
-    assert "食用可否：このアプリでは判定しません" in index
+    assert "写真を選ぶと現在地を取得します" in index
+    assert "AIへは送らず" in index
+    assert "持ち帰ってよいか：確認が必要" in index
+    assert "食べられるか：判定しません" in index
     assert 'fd.append("latitude"' not in index
     assert 'fd.append("longitude"' not in index
     assert "species-hide-affiliate" not in response.text
@@ -535,3 +535,40 @@ def test_private_mode_keeps_operator_affiliate_configuration(monkeypatch):
         affiliate={"title": "関連商品", "url": "https://www.amazon.co.jp/s?k={query}&tag=test-22", "enabled": True},
     )
     assert client.get("/api/settings").json()["affiliate"]["enabled"] is True
+
+
+def test_all_pages_use_light_first_theme_with_dark_fallback():
+    for path in ["/", "/settings", "/history", "/privacy", "/terms"]:
+        page = client.get(path).text
+        assert "color-scheme:light dark" in page, path
+        assert "@media(prefers-color-scheme:dark)" in page, path
+        assert "color-scheme:dark;" not in page, path
+        assert "#010102" not in page, path
+        assert 'content="#f4faf2" media="(prefers-color-scheme: light)"' in page, path
+
+
+def test_index_states_all_ages_and_layered_safety_warnings():
+    index = client.get("/").text
+    assert "どなたでも使えます" in index
+    assert "年齢を問わず使えますが、小学生以下のお子さんは大人といっしょに使ってください。" in index
+    assert "食べられるか：判定しません" in index
+    assert "さわってよいか：判定しません" in index
+    assert "持ち帰ってよいか：確認が必要" in index
+    assert "小さなお子さんが使うときは、大人といっしょに読んでください" in index
+
+
+def test_terms_and_privacy_cover_all_ages_use():
+    terms = client.get("/terms").text
+    assert "対象年齢と保護者の方へ" in terms
+    assert "年齢制限はなく、どなたでもご利用いただけます" in terms
+    assert "契約者ご本人（成年）が行ってください" in terms
+    privacy = client.get("/privacy").text
+    assert "お子さまの利用" in privacy
+    assert "年齢制限を設けていません" in privacy
+
+
+def test_settings_warns_that_api_keys_are_for_the_account_holder():
+    settings = client.get("/settings").text
+    assert "大人の方へ" in settings
+    assert "設定は契約者ご本人が行ってください" in settings
+    assert "アプリの利用に年齢制限はありません。" in settings
