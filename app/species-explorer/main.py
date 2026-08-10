@@ -34,6 +34,10 @@ def index() -> FileResponse:
 def settings() -> FileResponse:
     return FileResponse(STATIC_DIR / "settings.html")
 
+@app.get("/history", include_in_schema=False)
+def history() -> FileResponse:
+    return FileResponse(STATIC_DIR / "history.html")
+
 
 @app.get("/favicon.svg", include_in_schema=False)
 def favicon() -> FileResponse:

@@ -20,7 +20,7 @@
   <style>.history-facts{display:grid;gap:6px;margin:8px 0 12px;padding:10px;border-left:2px solid var(--rule);background:var(--surface)}.history-facts p{margin:0}.history-candidate{margin:10px 0}.history-candidate ul{margin:3px 0 7px}.history-evidence-label{color:var(--muted);font-size:11px}</style>
 </head>
 <body><main class="app">
-  <header class="top"><div><h1>Species Explorer</h1><div class="subtitle">写真から植物・動物の候補を調べる</div></div><div class="top-actions"><div class="local" id="providerStatus">端末内サーバーで処理・写真は保存しません</div><button class="settings-link" id="historyToggle" type="button" aria-expanded="false">履歴</button><a class="settings-link" id="settingsLink" href="/settings" aria-label="設定を開く">設定</a></div></header>
+  <header class="top"><div><h1>Species Explorer</h1><div class="subtitle">写真から植物・動物の候補を調べる</div></div><div class="top-actions"><div class="local" id="providerStatus">端末内サーバーで処理・写真は保存しません</div><a class="settings-link" href="/history">履歴</a><button id="historyToggle" type="button" hidden></button><a class="settings-link" id="settingsLink" href="/settings" aria-label="設定を開く">設定</a></div></header>
   <div class="grid">
     <section class="panel capture-panel"><div class="section-heading"><span>01</span><h2>写真を選ぶ</h2></div>
       <label class="capture" id="drop"><div><strong id="captureTitle">写真をここにドロップ</strong><span>同じ個体を最大3枚（1枚15MBまで）</span></div><input id="library" type="file" accept="image/*" multiple></label>
