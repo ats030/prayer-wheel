@@ -215,7 +215,7 @@ def test_plantnet_does_not_present_foreign_common_name_as_japanese(monkeypatch):
         }}],
     }))
     result = vision.identify_plantnet(b"image", "key")
-    assert result["candidates"][0]["common_name_ja"] == "和名未登録"
+    assert result["candidates"][0]["common_name_ja"] == vision.NO_JAPANESE_NAME
 
 
 def test_taxonomy_does_not_present_foreign_preferred_name_as_japanese(monkeypatch):
@@ -228,7 +228,7 @@ def test_taxonomy_does_not_present_foreign_preferred_name_as_japanese(monkeypatc
             "traits": ["特徴1", "特徴2"], "distinguishing_features": ["識別点"], "contradictions": [],
         }],
     })
-    assert result["candidates"][0]["common_name_ja"] == "和名未登録"
+    assert result["candidates"][0]["common_name_ja"] == vision.NO_JAPANESE_NAME
 
 
 def test_merge_plant_results_does_not_promote_vlm_traits_as_facts():

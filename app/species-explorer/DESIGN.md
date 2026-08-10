@@ -64,7 +64,9 @@ with the subject.
 - Images are processed in memory, EXIF metadata is stripped, and nothing is saved.
 - Before stripping EXIF, the local server may propose its capture date and GPS rounded to four decimals. The disclosure opens so users can review or edit these values before they are sent as identification context.
 - Identification history is owned by the browser: at most 50 records, result fields, reviewed context, rounded coordinates, and a maximum-320px JPEG thumbnail are stored in IndexedDB. There is no history API or server-side history file.
-- Location history never loads a third-party map automatically. A per-record action loads an OpenStreetMap embed with visible attribution and an explicit warning that the rounded coordinate leaves the browser.
+- The capture screen writes history; `/history` is the only screen that reads it. The capture screen keeps no second, hidden copy of the list — a panel nobody can open is a place for failures to go unseen, so a failed write surfaces in the same status line the identification uses.
+- Location history never loads a third-party map automatically, on any screen. `/history` shows the privacy note and a button; only the press loads Leaflet and requests OpenStreetMap tiles, with visible attribution and an explicit warning that the rounded coordinate leaves the browser. With no located record the button is disabled and says so.
+- Leaflet is vendored under `static/vendor/` rather than pulled from a CDN, so opening the history page cannot hand a visitor's address to a third party the privacy policy never named. Its BSD-2-Clause license text ships alongside it.
 - Geolocation is requested only after an explicit button press, kept in browser memory for the current page, reduced to an accuracy label in the result, and never added to identification requests or storage.
 - The app never grants collection or edibility. It lists unresolved owner, protected-area, ordinance, and protected-species checks and links to authoritative Japanese guidance.
 - Optional specialist services remain hidden until configured and require an explicit per-request photo-sharing choice.

@@ -46,42 +46,60 @@ def test_index_has_additional_shooting_guide_for_uncertain_results():
     assert 'id="addPhotos"' in response.text
 
 
-def test_index_links_to_settings():
+def test_index_saves_history_but_does_not_render_it():
+    """記録の作成はトップが担い、閲覧は /history だけが担う。"""
     response = client.get("/")
     assert 'href="/settings"' in response.text
-    assert 'id="historyPanel"' in response.text
+    assert 'href="/history"' in response.text
     assert 'indexedDB.open("species-history",1)' in response.text
     assert 'slice(50)' in response.text
     assert 'gps.latitude.toFixed(4)' in response.text
-    assert 'id="clearHistory"' in response.text
-    assert 'id="historyLightbox"' in response.text
-    assert 'class="history-image-button"' in response.text
-    assert 'showHistoryImage' in response.text
-    assert 'historyImageUrls.forEach(URL.revokeObjectURL)' in response.text
     assert '960/Math.max(bitmap.width,bitmap.height)' in response.text
     assert 'model:data.model||""' in response.text
     assert 'resultMeta:{strictMode:' in response.text
-    assert 'historyCandidateHtml' in response.text
+    # 表示専用の重複実装を持たないこと（隠れたまま到達できない実装を再び作らない）
+    for gone in ["historyPanel", "historyToggle", "renderHistoryList", "historyLightbox",
+                 "historyCandidateHtml", "historyAffiliateLink", "historyMessage"]:
+        assert gone not in response.text, gone
+    # 保存に失敗したら、隠れた要素ではなく利用者が見ている場所へ出す
+    assert 'saveHistory(data).catch(error=>showStatus(' in response.text
+    assert "この端末の記録には保存できませんでした" in response.text
+    assert all("history" not in route.path for route in main.app.routes if route.path.startswith("/api/"))
+
+
+def test_index_result_view_keeps_its_own_labels():
+    response = client.get("/")
     assert "写真から見つけた特徴" in response.text
     assert "似ている種との見分け方" in response.text
     assert "決め手が足りない理由" in response.text
-    assert 'historyList("そう考えた理由",c.sex_evidence)' in response.text
-    assert "使ったAI：" in response.text
     assert 'return "種の候補"' in response.text
     assert 'return "属（近いなかま）の候補"' in response.text
     assert 'return "科（大きなグループ）の候補"' in response.text
-    assert "historyAffiliateLink(entry)" in response.text
     assert 'rel="sponsored noopener noreferrer"' in response.text
     assert "広告 · Amazonで" in response.text
-    assert "if(!affiliate?.enabled)return" in response.text
-    assert 'OpenStreetMap contributors' in response.text
     assert "オス・メスの推測" in response.text
-    assert "Animal Diversity Web" in response.text
-    assert "Cornell All About Birds" in response.text
-    assert "FishBase" in response.text
-    assert "AmphibiaWeb" in response.text
-    assert "Reptile Database" in response.text
-    assert all("history" not in route.path for route in main.app.routes if route.path.startswith("/api/"))
+    for selector in [".sex-result{", ".sex-evidence{", ".animal-references{"]:
+        assert selector in response.text, selector
+    for site in ["Animal Diversity Web", "Cornell All About Birds", "FishBase",
+                 "AmphibiaWeb", "Reptile Database"]:
+        assert site in response.text, site
+
+
+def test_history_page_renders_saved_records():
+    page = client.get("/history").text
+    assert 'id="clearHistory"' not in page
+    assert 'id="clear"' in page
+    assert "fullCandidate" in page
+    assert "写真から見つけた特徴（AI抽出・未確認）" in page
+    assert "似ている種との見分け方" in page
+    assert "決め手が足りない理由" in page
+    assert 'evidence("そう考えた理由",c.sex_evidence)' in page
+    assert "使ったAI：" in page
+    assert 'return "種の候補"' not in page  # /history は自前のラベル表を持つ
+    assert "属（近いなかま）の候補" in page
+    assert "historyAffiliateLink" not in page
+    assert "広告 · Amazonで" in page
+    assert 'OpenStreetMap contributors' in page
 
 
 def test_settings_page_enables_all_providers():
@@ -594,3 +612,21 @@ def test_theme_script_loads_before_the_page_body():
         tag_start = page.index('<script src="/theme.js">')
         assert tag_start < page.index("<body"), path
         assert "<style" not in page[:tag_start], path
+
+
+def test_history_map_is_never_loaded_without_an_explicit_press():
+    """位置を含む地図タイルは、利用者が押すまで第三者へ要求しない。"""
+    page = client.get("/history").text
+    assert "unpkg.com" not in page
+    assert '"/vendor/leaflet/leaflet.js"' in page
+    assert '"/vendor/leaflet/leaflet.css"' in page
+    assert 'id="showMap"' in page
+    assert '$("showMap").onclick=showMap' in page
+    # 描画は押下ハンドラの中だけ。読み込み時の render() からは呼ばない
+    assert "map(entries);$(\"clear\")" not in page
+    assert "map(mapEntries)" in page
+    assert "「地図を表示」を押したときだけ" in page
+    for path in ["/vendor/leaflet/leaflet.js", "/vendor/leaflet/leaflet.css",
+                 "/vendor/leaflet/images/marker-icon.png", "/vendor/leaflet/LICENSE"]:
+        assert client.get(path).status_code == 200, path
+    assert "BSD 2-Clause" in client.get("/vendor/leaflet/LICENSE").text

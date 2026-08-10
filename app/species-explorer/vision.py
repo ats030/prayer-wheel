@@ -24,6 +24,8 @@ GEMINI_URL = os.getenv("SPECIES_GEMINI_URL", "https://generativelanguage.googlea
 PLANTNET_URL = "https://my-api.plantnet.org/v2/identify/all"
 INATURALIST_URL = "https://api.inaturalist.org/v1/taxa/autocomplete"
 INATURALIST_USER_AGENT = "SpeciesExplorer/1.0 (https://github.com/ats030/ubuntu-server-app)"
+# 画面に出る文字列。旧値 "和名未登録" は端末内履歴に残るため、UI側は両方を同義に扱う
+NO_JAPANESE_NAME = "日本語名なし"
 _TAXONOMY_LOCK = threading.Lock()
 _LAST_TAXONOMY_REQUEST = 0.0
 _TAXONOMY_CACHE: dict[str, list[dict[str, Any]]] = {}
@@ -87,7 +89,7 @@ GEMINI_RESPONSE_SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "common_name_ja": {"type": "string", "description": "候補の標準的な和名。なければ和名未登録"},
+                    "common_name_ja": {"type": "string", "description": "候補の標準的な和名。なければ日本語名なし"},
                     "scientific_name": {"type": "string", "description": "確信できる分類階級の学名。不明なら空文字"},
                     "confidence": {"type": "integer", "minimum": 0, "maximum": 100},
                     "traits": {"type": "array", "maxItems": 3, "items": {"type": "string"}, "description": "写真で直接確認でき、候補を支持する識別特徴"},
@@ -243,7 +245,7 @@ def normalize(data: dict[str, Any], *, model: str = MODEL, provider: str = "loca
 
 def _japanese_common_name(value: Any) -> str:
     name = str(value or "").strip()
-    return name if _JAPANESE_NAME_RE.search(name) else "和名未登録"
+    return name if _JAPANESE_NAME_RE.search(name) else NO_JAPANESE_NAME
 
 
 def identify_plantnet(image_bytes: bytes | list[bytes], api_key: str) -> dict[str, Any]:
@@ -280,7 +282,7 @@ def identify_plantnet(image_bytes: bytes | list[bytes], api_key: str) -> dict[st
         if not scientific:
             continue
         candidates.append({
-            "common_name_ja": next((_japanese_common_name(name) for name in common_names if _japanese_common_name(name) != "和名未登録"), "和名未登録"),
+            "common_name_ja": next((_japanese_common_name(name) for name in common_names if _japanese_common_name(name) != NO_JAPANESE_NAME), NO_JAPANESE_NAME),
             "scientific_name": scientific,
             "confidence": confidence,
             "traits": ["Pl@ntNet植物画像識別による候補"],

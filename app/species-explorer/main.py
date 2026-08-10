@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.staticfiles import StaticFiles
 
 import config_store
 import creators_api
@@ -94,6 +95,11 @@ def favicon() -> FileResponse:
 @app.get("/theme.js", include_in_schema=False)
 def theme_script() -> FileResponse:
     return FileResponse(STATIC_DIR / "theme.js", media_type="text/javascript")
+
+
+# Leaflet は同梱して配信する。CDN から読むと、地図を見た利用者のIPが第三者へ渡り、
+# プライバシーポリシーの送信先一覧と実態がずれる (BSD-2-Clause, vendor/leaflet/LICENSE)
+app.mount("/vendor", StaticFiles(directory=STATIC_DIR / "vendor"), name="vendor")
 
 
 @app.get("/api/settings")
