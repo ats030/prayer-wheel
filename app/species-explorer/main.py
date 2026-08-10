@@ -75,6 +75,16 @@ def history() -> FileResponse:
     return FileResponse(STATIC_DIR / "history.html")
 
 
+@app.get("/privacy", include_in_schema=False)
+def privacy() -> FileResponse:
+    return FileResponse(STATIC_DIR / "privacy.html")
+
+
+@app.get("/terms", include_in_schema=False)
+def terms() -> FileResponse:
+    return FileResponse(STATIC_DIR / "terms.html")
+
+
 @app.get("/favicon.svg", include_in_schema=False)
 def favicon() -> FileResponse:
     return FileResponse(STATIC_DIR / "favicon.svg", media_type="image/svg+xml")

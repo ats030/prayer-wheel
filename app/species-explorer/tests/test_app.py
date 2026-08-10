@@ -483,3 +483,24 @@ def test_rate_limit_returns_retry_after():
     assert caught.value.status_code == 429
     assert caught.value.headers == {"Retry-After": "30"}
     main._RATE_BUCKETS.clear()
+
+
+def test_legal_pages_disclose_data_handling_and_contact():
+    privacy = client.get("/privacy")
+    terms = client.get("/terms")
+    assert privacy.status_code == 200
+    assert terms.status_code == 200
+    assert "APIキーはブラウザのsessionStorage" in privacy.text
+    assert "OpenAI、Anthropic、Google GeminiまたはPl@ntNet" in privacy.text
+    assert "Tailscale Funnel" in privacy.text
+    assert "問い合わせ窓口は公開開始前" in privacy.text
+    assert "食用・毒性・採取許可" in terms.text
+    assert "外部AIの利用料金" in terms.text
+
+
+def test_every_user_page_links_to_legal_pages():
+    for path in ("/", "/settings", "/history"):
+        page = client.get(path)
+        assert page.status_code == 200
+        assert 'href="/privacy"' in page.text
+        assert 'href="/terms"' in page.text

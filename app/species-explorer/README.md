@@ -61,3 +61,15 @@ uv run uvicorn main:app --host 127.0.0.1 --port 8524
 - 判定はIPごとに1分6回、メタデータ読取は1分20回
 - APIキーはレスポンス、サーバー設定、判定履歴へ含めない
 - Hostヘッダー、フレーム埋込み、MIME sniffing、カメラ・位置情報権限を制限
+
+Tailscale Funnelでの公開と停止:
+
+```bash
+tailscale funnel --bg 8523
+tailscale funnel status
+tailscale funnel reset
+```
+
+初回はTailscale管理画面でFunnelの所有者承認が必要です。`reset` はこの端末の
+Funnel設定を削除するロールバック操作です。公開前にプライバシーポリシーの
+問い合わせ窓口が実在し、外部から到達できることを確認してください。

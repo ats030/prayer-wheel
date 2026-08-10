@@ -34,7 +34,7 @@
     <div class="actions"><button class="button primary" id="save-button" type="submit">変更を保存</button><a class="button" href="/">キャンセル</a></div><p class="message" id="message" aria-live="polite"></p>
   </form>
   <section class="section" aria-labelledby="security-heading"><div class="section-head"><h2 id="security-heading">保存と安全性</h2></div><div class="panel"><ul class="security"><li>APIキーは所有者だけが読めるサーバー設定へ保存し、画面には再表示しません。</li><li>認証のない一般公開には対応していません。Tailscale内で使用してください。</li><li>写真はEXIF位置情報を除去し、保存しません。</li></ul></div></section>
-</main><script>
+<nav aria-label="法務情報" style="display:flex;gap:14px;margin-top:22px;font-size:12px"><a href="/privacy" style="color:var(--color-muted)">プライバシー</a><a href="/terms" style="color:var(--color-muted)">利用規約</a></nav></main><script>
 const $=id=>document.getElementById(id);let current=null;const deleteKeys=new Set();
 const providerLabels={local:"ローカルLLM",openai:"OpenAI API",anthropic:"Anthropic API",gemini:"Google Gemini API"};
 const esc=value=>String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
