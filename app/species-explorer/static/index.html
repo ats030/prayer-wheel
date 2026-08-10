@@ -100,4 +100,28 @@ $("historyToggle").onclick=async()=>{const panel=$("historyPanel");const opening
 $("clearHistory").onclick=()=>{if(confirm("このブラウザの判定履歴をすべて削除しますか？"))removeAllHistory()}
 identify.onclick=async()=>{if(!selected.length)return;identify.disabled=true;showStatus(providerName+"が観察しています。しばらくお待ちください。",false,true);$('results').className='placeholder';$('results').textContent='写真の形・色・模様を確認中…';const fd=new FormData();selected.forEach(file=>fd.append("files",file));fd.append("location",$("location").value);fd.append("observed_date",$("observedDate").value);fd.append("size",$("size").value);fd.append("use_plantnet",document.getElementById("usePlantnet").checked);try{const r=await fetch('/identify',{method:'POST',body:fd});const data=await r.json();if(!r.ok)throw new Error(data.detail||'識別できませんでした');render(data);saveHistory(data).then(()=>{if(!$("historyPanel").classList.contains("hidden"))renderHistoryList()}).catch(error=>{$("historyMessage").textContent="判定は完了しましたが、端末内履歴へ保存できませんでした。 "+error.message});showStatus('候補を表示しました。実物と照合してください。')}catch(e){$('results').innerHTML='<div class="placeholder">識別結果を取得できませんでした。</div>';showStatus(e.message,true)}finally{identify.disabled=false}};
 loadSettings();
+</script>
+<script>
+const renderIdentification=render;
+function shootingGuide(data){
+  const uncertain=(data.candidates||[]).filter(candidate=>["taxonomy_only","uncertain"].includes(candidate.evidence_status));
+  if(!uncertain.length)return "";
+  const points=[];
+  uncertain.forEach(candidate=>{
+    const name=candidate.common_name_ja||candidate.scientific_name||"候補";
+    if(candidate.uncertainty)points.push(name+"："+candidate.uncertainty);
+    (candidate.evidence_gaps||[]).forEach(gap=>points.push(name+"："+gap));
+  });
+  const unique=[...new Set(points)].slice(0,5);
+  if(!unique.length)unique.push("個体全体が分かる写真","識別部位を正面と裏側から接写した写真","定規や硬貨と並べた大きさが分かる写真");
+  return '<aside class="candidate shooting-guide" id="shootingGuide"><div class="name">追加撮影ガイド</div><div class="uncertainty">確証を高めるには、次の点が写る写真を追加してください。</div><ul>'+unique.map(point=>'<li>'+esc(point)+'</li>').join("")+'</ul><button class="btn" id="addPhotos" type="button">写真を追加する</button></aside>';
+}
+render=function(data){
+  renderIdentification(data);
+  const guide=shootingGuide(data);
+  if(!guide)return;
+  const summary=$("results").querySelector(".summary");
+  if(summary)summary.insertAdjacentHTML("afterend",guide);
+  $("addPhotos").onclick=()=>$("library").click();
+};
 </script></body></html>

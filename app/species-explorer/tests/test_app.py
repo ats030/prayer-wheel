@@ -35,6 +35,17 @@ def test_index_has_camera_capture():
     assert 'capture="environment"' in response.text
 
 
+def test_index_has_additional_shooting_guide_for_uncertain_results():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "function shootingGuide(data)" in response.text
+    assert '["taxonomy_only","uncertain"]' in response.text
+    assert "追加撮影ガイド" in response.text
+    assert "candidate.evidence_gaps" in response.text
+    assert ".slice(0,5)" in response.text
+    assert 'id="addPhotos"' in response.text
+
+
 def test_index_links_to_settings():
     response = client.get("/")
     assert 'href="/settings"' in response.text
