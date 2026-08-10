@@ -381,3 +381,105 @@ def test_gemini_provider_dispatches_without_exposing_key(monkeypatch):
     assert seen["api_key"] == "temporary-gemini-secret"
     assert seen["model"] == "gemini-3.6-flash"
     assert len(seen["images"]) == 1
+
+
+def test_security_headers_are_applied():
+    response = client.get("/")
+    assert response.headers["x-content-type-options"] == "nosniff"
+    assert response.headers["x-frame-options"] == "DENY"
+    assert response.headers["permissions-policy"] == "camera=(self), geolocation=(self)"
+
+
+def test_public_mode_hides_server_secrets_and_blocks_settings_write(monkeypatch):
+    monkeypatch.setattr(main, "PUBLIC_MODE", True)
+    response = client.get("/api/settings")
+    assert response.status_code == 200
+    assert response.json()["public_mode"] is True
+    assert response.json()["local_llm"] == {"url": ""}
+    assert not any(response.json()["api_key_configured"].values())
+
+    write = client.post("/api/settings", json={
+        "provider": "local", "models": {}, "api_keys": {}, "delete_keys": [],
+    })
+    assert write.status_code == 403
+
+
+def test_public_mode_uses_request_key_without_persisting_it(monkeypatch):
+    source = io.BytesIO()
+    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    seen = {}
+    settings = {
+        "provider": "local",
+        "models": {"local": "gemma4:12b", "gemini": "gemini-3.6-flash"},
+        "local_llm": {"url": "http://operator-ollama:11434"},
+        "api_keys": {},
+    }
+    monkeypatch.setattr(main, "PUBLIC_MODE", True)
+    monkeypatch.setattr(main.config_store, "load", lambda: settings)
+    monkeypatch.setattr(main.config_store, "model_catalog", lambda *args: ({
+        "local": [{"id": "gemma4:12b"}],
+        "openai": [], "anthropic": [],
+        "gemini": [{"id": "gemini-3.6-flash"}],
+    }, []))
+
+    def fake_identify(images, api_key, model, **context):
+        seen.update(api_key=api_key, model=model)
+        return {"category": "植物", "summary": "", "candidates": [], "provider": "gemini"}
+
+    monkeypatch.setattr(main.vision, "identify_gemini", fake_identify)
+    response = client.post("/identify", files={
+        "file": ("photo.jpg", source.getvalue(), "image/jpeg")
+    }, data={
+        "request_provider": "gemini",
+        "request_model": "gemini-3.6-flash",
+        "request_api_key": "browser-session-secret",
+    })
+    assert response.status_code == 200
+    assert seen == {"api_key": "browser-session-secret", "model": "gemini-3.6-flash"}
+    assert "browser-session-secret" not in response.text
+    assert settings["api_keys"] == {}
+
+
+def test_public_mode_rejects_unknown_model(monkeypatch):
+    monkeypatch.setattr(main, "PUBLIC_MODE", True)
+    monkeypatch.setattr(main, "PUBLIC_LOCAL_ENABLED", True)
+    monkeypatch.setattr(main.config_store, "model_catalog", lambda *args: ({
+        "local": [{"id": "gemma4:12b"}], "openai": [], "anthropic": [], "gemini": [],
+    }, []))
+    response = client.post("/identify", data={
+        "request_provider": "local", "request_model": "attacker-model",
+    })
+    assert response.status_code == 400
+    assert response.json()["detail"] == "モデルを選び直してください"
+
+
+def test_public_settings_ui_keeps_keys_in_tab_session():
+    page = client.get("/settings").text
+    index = client.get("/").text
+    assert "function setupPublicSettings(data)" in page
+    assert 'sessionStorage.setItem("species-key-"+name' in page
+    assert "APIキーはこのブラウザタブだけに保存" in page
+    assert 'fd.append("request_api_key"' in index
+    assert 'fd.append("request_model"' in index
+
+
+def test_public_mode_disables_operator_local_llm_by_default(monkeypatch):
+    monkeypatch.setattr(main, "PUBLIC_MODE", True)
+    monkeypatch.setattr(main, "PUBLIC_LOCAL_ENABLED", False)
+    response = client.get("/api/settings")
+    assert response.json()["provider"] == "gemini"
+    assert response.json()["available_models"]["local"] == []
+
+
+def test_rate_limit_returns_retry_after():
+    main._RATE_BUCKETS.clear()
+    request = type("FakeRequest", (), {
+        "client": type("FakeClient", (), {"host": "rate-test"})()
+    })()
+    main._rate_limit(request, "test", 2, 30)
+    main._rate_limit(request, "test", 2, 30)
+    with pytest.raises(main.HTTPException) as caught:
+        main._rate_limit(request, "test", 2, 30)
+    assert caught.value.status_code == 429
+    assert caught.value.headers == {"Retry-After": "30"}
+    main._RATE_BUCKETS.clear()

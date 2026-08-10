@@ -40,6 +40,11 @@ is always presented as a candidate that the user should compare with the subject
 - Optional specialist services remain hidden until configured and require an explicit per-request photo-sharing choice.
 - Settings are reachable from the header and use a dedicated page with a clear
   return path. API keys are write-only in the UI; configured state and allowed model choices remain visible.
+- Public mode keeps each visitor's provider and model choice in localStorage,
+  but API keys only in sessionStorage. Keys are submitted with an identification
+  request and are never written to server settings or browser history.
+- Public mode makes operator settings read-only, rejects arbitrary Ollama URLs,
+  and disables operator-funded local inference unless explicitly enabled.
 - External-provider copy states where photographs are sent; Gemini also distinguishes unpaid data-improvement handling from paid-service handling.
 - Gemini identification performs a bounded observe, compare-lookalikes, reject-contradictions pass before schema-constrained output; high thinking is preferred for accuracy, while the independent taxonomy gate still treats the photo match as unverified.
 - Animal candidates include a sex estimate only when at least one directly visible, species-specific sexual-dimorphism feature is supplied. Otherwise the UI says undetermined; plants are out of scope. The estimate remains explicitly model-derived and requires comparison with a taxon-appropriate external reference.

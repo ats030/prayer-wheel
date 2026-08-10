@@ -23,3 +23,41 @@ uv run --with pytest pytest -q
 ```
 
 識別結果は観察の補助であり、食用・毒性・安全性の判断には使用できません。
+
+## 一般公開モード
+
+一般公開では、利用者のAPIキーをサーバー設定へ保存しません。キーはブラウザの
+`sessionStorage` にだけ保持され、判定リクエスト時にHTTPS経由で送信されます。
+タブを閉じると消えます。プロバイダーとモデルの選択だけは `localStorage` に残ります。
+
+```bash
+SPECIES_PUBLIC_MODE=1
+SPECIES_ALLOWED_HOSTS=species.example.com
+SPECIES_PUBLIC_LOCAL=0
+```
+
+- `SPECIES_PUBLIC_MODE=1`: 共有設定の更新を403で拒否し、BYOK公開モードを有効化
+- `SPECIES_ALLOWED_HOSTS`: 公開ドメインをカンマ区切りで指定
+- `SPECIES_PUBLIC_LOCAL=1`: 運営者のローカルLLMを公開する場合だけ明示的に有効化
+
+公開時はTLS対応のリバースプロキシを前段に置き、8523番ポートをインターネットへ
+直接公開しないでください。プロキシ側でもリクエストサイズ制限とレート制限を設定し、
+`/health` 以外をHTTPSへ強制します。アプリ内のIPレート制限は単一プロセス向けの初期防御であり、
+複数ワーカー・複数台構成では共有レートリミッターへ置き換える必要があります。
+
+公開前確認:
+
+```bash
+SPECIES_PUBLIC_MODE=1 \
+SPECIES_ALLOWED_HOSTS=127.0.0.1,localhost \
+uv run uvicorn main:app --host 127.0.0.1 --port 8524
+```
+
+公開モードの安全境界:
+
+- `POST /api/settings` は無効
+- 任意のOllama URLは受け付けない
+- 外部AIのモデルはサーバーの許可リストからのみ選択
+- 判定はIPごとに1分6回、メタデータ読取は1分20回
+- APIキーはレスポンス、サーバー設定、判定履歴へ含めない
+- Hostヘッダー、フレーム埋込み、MIME sniffing、カメラ・位置情報権限を制限

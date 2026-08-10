@@ -1,12 +1,17 @@
 """species-explorer: photograph-based local species identification (port 8523)."""
 
+from collections import defaultdict, deque
 from pathlib import Path
+import os
+import threading
+import time
 
 import uvicorn
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from starlette.concurrency import run_in_threadpool
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 import config_store
 import creators_api
@@ -23,6 +28,37 @@ class SettingsUpdate(BaseModel):
 
 app = FastAPI(title="Species Explorer")
 STATIC_DIR = Path(__file__).parent / "static"
+PUBLIC_MODE = os.getenv("SPECIES_PUBLIC_MODE", "").lower() in {"1", "true", "yes"}
+PUBLIC_LOCAL_ENABLED = os.getenv("SPECIES_PUBLIC_LOCAL", "").lower() in {"1", "true", "yes"}
+ALLOWED_HOSTS = [host.strip() for host in os.getenv("SPECIES_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
+if PUBLIC_MODE:
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
+_RATE_BUCKETS: dict[tuple[str, str], deque[float]] = defaultdict(deque)
+_RATE_LOCK = threading.Lock()
+
+
+def _rate_limit(request: Request, scope: str, limit: int, window: int = 60) -> None:
+    client = request.client.host if request.client else "unknown"
+    now = time.monotonic()
+    key = (client, scope)
+    with _RATE_LOCK:
+        bucket = _RATE_BUCKETS[key]
+        while bucket and bucket[0] <= now - window:
+            bucket.popleft()
+        if len(bucket) >= limit:
+            raise HTTPException(status_code=429, detail="しばらく待ってから再試行してください", headers={"Retry-After": str(window)})
+        bucket.append(now)
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(self), geolocation=(self)"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    return response
 
 
 @app.get("/", include_in_schema=False)
@@ -46,11 +82,24 @@ def favicon() -> FileResponse:
 
 @app.get("/api/settings")
 def get_settings() -> dict[str, object]:
-    return config_store.public()
+    result = config_store.public()
+    result["public_mode"] = PUBLIC_MODE
+    if PUBLIC_MODE:
+        result["local_llm"] = {"url": ""}
+        result["api_key_configured"] = {
+            provider: False for provider in ("openai", "anthropic", "gemini", "plantnet")
+        }
+        if not PUBLIC_LOCAL_ENABLED:
+            result["available_models"]["local"] = []
+            if result["provider"] == "local":
+                result["provider"] = "gemini"
+    return result
 
 
 @app.post("/api/settings")
 def save_settings(update: SettingsUpdate) -> dict[str, object]:
+    if PUBLIC_MODE:
+        raise HTTPException(status_code=403, detail="公開版ではサーバー設定を変更できません")
     try:
         return config_store.save(
             provider=update.provider,
@@ -116,7 +165,9 @@ def health() -> dict[str, object]:
 
 
 @app.post("/api/photo-metadata")
-async def photo_metadata(files: list[UploadFile] = File(default=[])) -> dict[str, object]:
+async def photo_metadata(request: Request, files: list[UploadFile] = File(default=[])) -> dict[str, object]:
+    if PUBLIC_MODE:
+        _rate_limit(request, "metadata", 20)
     if not files or len(files) > 3:
         raise HTTPException(status_code=400, detail="写真は1〜3枚選んでください")
     metadata: dict[str, object] = {}
@@ -126,6 +177,10 @@ async def photo_metadata(files: list[UploadFile] = File(default=[])) -> dict[str
         raw = await upload.read(vision.MAX_UPLOAD_BYTES + 1)
         if len(raw) > vision.MAX_UPLOAD_BYTES:
             raise HTTPException(status_code=413, detail="画像は1枚15MB以下にしてください")
+        try:
+            await run_in_threadpool(vision.prepare_image, raw)
+        except vision.VisionError as exc:
+            raise HTTPException(status_code=415, detail=str(exc)) from exc
         extracted = await run_in_threadpool(vision.extract_exif_context, raw)
         for key, value in extracted.items():
             metadata.setdefault(key, value)
@@ -134,6 +189,7 @@ async def photo_metadata(files: list[UploadFile] = File(default=[])) -> dict[str
 
 @app.post("/identify")
 async def identify(
+    request: Request,
     files: list[UploadFile] = File(default=[]),
     file: UploadFile | None = File(default=None),
     location: str = Form(default=""),
@@ -141,11 +197,33 @@ async def identify(
     size: str = Form(default=""),
     verify_names: bool = Form(default=False),
     use_plantnet: bool = Form(default=False),
+    request_provider: str = Form(default=""),
+    request_model: str = Form(default=""),
+    request_api_key: str = Form(default=""),
+    request_plantnet_key: str = Form(default=""),
 ) -> JSONResponse:
+    if PUBLIC_MODE:
+        _rate_limit(request, "identify", 6)
     settings = config_store.load()
-    provider = settings["provider"]
-    model = settings["models"][provider]
-    api_key = settings["api_keys"].get(provider, "")
+    provider = request_provider if PUBLIC_MODE else settings["provider"]
+    if provider not in config_store.MODELS:
+        raise HTTPException(status_code=400, detail="計算資源を選び直してください")
+    if PUBLIC_MODE and provider == "local" and not PUBLIC_LOCAL_ENABLED:
+        raise HTTPException(status_code=403, detail="公開版のローカルLLMは現在利用できません")
+    if PUBLIC_MODE:
+        model = request_model
+        catalog, _ = config_store.model_catalog(
+            settings["models"]["local"],
+            (settings.get("local_llm") or {}).get("url", vision.OLLAMA_URL),
+        )
+        if model not in {item["id"] for item in catalog[provider]}:
+            raise HTTPException(status_code=400, detail="モデルを選び直してください")
+        api_key = request_api_key.strip()
+        if len(api_key) > 512:
+            raise HTTPException(status_code=400, detail="APIキーを確認してください")
+    else:
+        model = settings["models"][provider]
+        api_key = settings["api_keys"].get(provider, "")
     if provider != "local" and not api_key:
         raise HTTPException(status_code=400, detail="設定画面でAPIキーを登録してください")
     uploads = [*files, *([file] if file else [])]
@@ -179,7 +257,7 @@ async def identify(
                 **context
             )
         if use_plantnet:
-            plantnet_key = settings["api_keys"].get("plantnet", "")
+            plantnet_key = request_plantnet_key.strip() if PUBLIC_MODE else settings["api_keys"].get("plantnet", "")
             if not plantnet_key:
                 result["plantnet_status"] = "not_configured"
             elif result.get("category") != "植物":
