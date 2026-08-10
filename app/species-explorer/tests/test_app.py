@@ -199,6 +199,7 @@ def test_identify_accepts_three_images_and_context(monkeypatch):
     assert response.status_code == 200
     assert len(seen["images"]) == 3
     assert seen["context"] == {
+        "ollama_url": "http://localhost:11434",
         "location": "東京都 高尾山",
         "observed_date": "2026-08-09",
         "size": "約5cm",
@@ -339,6 +340,13 @@ def test_settings_api_saves_model_without_returning_key():
     assert response.json()["models"]["openai"] == "gpt-5.6-terra"
     assert response.json()["api_key_configured"]["openai"] is True
     assert "write-only-secret" not in response.text
+
+
+def test_settings_page_allows_custom_local_llm_url():
+    response = client.get("/settings")
+    assert response.status_code == 200
+    assert 'id="local-llm-url"' in response.text
+    assert 'local_llm:{url:' in response.text
 
 
 def test_gemini_provider_dispatches_without_exposing_key(monkeypatch):

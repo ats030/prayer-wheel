@@ -424,7 +424,7 @@ def apply_evidence_gate(result: dict[str, Any]) -> dict[str, Any]:
 
 
 
-def identify(image_bytes: bytes | list[bytes], model: str = MODEL, *, location: str = "", observed_date: str = "", size: str = "") -> dict[str, Any]:
+def identify(image_bytes: bytes | list[bytes], model: str = MODEL, *, ollama_url: str = OLLAMA_URL, location: str = "", observed_date: str = "", size: str = "") -> dict[str, Any]:
     images = _image_list(image_bytes)
     payload = {
         "model": model,
@@ -439,7 +439,7 @@ def identify(image_bytes: bytes | list[bytes], model: str = MODEL, *, location: 
         "options": {"temperature": 0.1, "num_predict": 1200},
     }
     try:
-        response = httpx.post(f"{OLLAMA_URL}/api/chat", json=payload, timeout=180)
+        response = httpx.post(f"{ollama_url.rstrip('/')}/api/chat", json=payload, timeout=180)
         response.raise_for_status()
         content = response.json()["message"]["content"]
     except httpx.HTTPStatusError as exc:

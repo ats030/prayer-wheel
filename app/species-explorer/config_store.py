@@ -51,13 +51,22 @@ class SettingsError(ValueError):
 
 
 def _defaults() -> dict[str, Any]:
-    return {"provider": "local", "models": dict(DEFAULT_MODELS), "api_keys": {}, "affiliate": {"title": "", "url": "", "enabled": False, "partner_tag": "", "product_enabled": False}, "affiliate_metrics": {"impressions": 0, "clicks": 0}}
+    return {"provider": "local", "models": dict(DEFAULT_MODELS), "local_llm": {"url": OLLAMA_URL}, "api_keys": {}, "affiliate": {"title": "", "url": "", "enabled": False, "partner_tag": "", "product_enabled": False}, "affiliate_metrics": {"impressions": 0, "clicks": 0}}
 
 
-def ollama_models() -> tuple[list[dict[str, str]], list[str]]:
+def _local_llm_url(value: object) -> str:
+    url = str(value or "").strip().rstrip("/")
+    parsed = urlparse(url)
+    if (parsed.scheme not in {"http", "https"} or not parsed.hostname or
+            parsed.username or parsed.password or parsed.query or parsed.fragment):
+        raise SettingsError("ローカルLLMのURLは http:// または https:// の接続先を入力してください")
+    return url
+
+
+def ollama_models(ollama_url: str = OLLAMA_URL) -> tuple[list[dict[str, str]], list[str]]:
     """Return installed vision models and names that cannot accept images."""
     try:
-        response = httpx.get(f"{OLLAMA_URL}/api/tags", timeout=3)
+        response = httpx.get(f"{ollama_url}/api/tags", timeout=3)
         response.raise_for_status()
         installed = response.json().get("models") or []
     except (httpx.HTTPError, ValueError, AttributeError):
@@ -77,7 +86,7 @@ def ollama_models() -> tuple[list[dict[str, str]], list[str]]:
             capabilities = []
         try:
             details = httpx.post(
-                f"{OLLAMA_URL}/api/show",
+                f"{ollama_url}/api/show",
                 json={"model": name, "verbose": False},
                 timeout=3,
             )
@@ -100,8 +109,9 @@ def ollama_models() -> tuple[list[dict[str, str]], list[str]]:
 
 def model_catalog(
     current_local: str | None = None,
+    ollama_url: str = OLLAMA_URL,
 ) -> tuple[dict[str, list[dict[str, str]]], list[str]]:
-    local, incompatible = ollama_models()
+    local, incompatible = ollama_models(ollama_url)
     if not local:
         fallback = current_local or DEFAULT_MODELS["local"]
         local = [{"id": fallback, "label": f"{fallback}（保存済み）"}]
@@ -118,6 +128,12 @@ def load() -> dict[str, Any]:
         return data
     if saved.get("provider") in MODELS:
         data["provider"] = saved["provider"]
+    local_llm = saved.get("local_llm") or {}
+    if isinstance(local_llm, dict):
+        try:
+            data["local_llm"]["url"] = _local_llm_url(local_llm.get("url"))
+        except SettingsError:
+            pass
     for provider, model in (saved.get("models") or {}).items():
         if provider == "local" and isinstance(model, str) and model:
             data["models"][provider] = model
@@ -142,10 +158,11 @@ def load() -> dict[str, Any]:
 
 def public(data: dict[str, Any] | None = None) -> dict[str, Any]:
     data = data or load()
-    catalog, incompatible = model_catalog(data["models"]["local"])
+    catalog, incompatible = model_catalog(data["models"]["local"], data["local_llm"]["url"])
     return {
         "provider": data["provider"],
         "models": data["models"],
+        "local_llm": data["local_llm"],
         "available_models": catalog,
         "incompatible_local_models": incompatible,
         "affiliate": {"title": data["affiliate"]["title"], "url": data["affiliate"]["url"], "enabled": bool(data["affiliate"]["enabled"] and data["affiliate"]["url"]), "metrics": data["affiliate_metrics"], "partner_tag": data["affiliate"].get("partner_tag", ""), "product_enabled": bool(data["affiliate"].get("product_enabled") and data["affiliate"].get("partner_tag") and data["api_keys"].get("amazon_creators_id") and data["api_keys"].get("amazon_creators_secret")), "creators_api_configured": bool(data["api_keys"].get("amazon_creators_id") and data["api_keys"].get("amazon_creators_secret"))},
@@ -198,17 +215,22 @@ def save(
     models: dict[str, str],
     api_keys: dict[str, str | None],
     delete_keys: list[str],
+    local_llm: dict[str, Any] | None = None,
     affiliate: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if provider not in MODELS:
         raise SettingsError("計算資源を選び直してください")
     current = load()
-    catalog, _ = model_catalog(current["models"]["local"])
+    if local_llm is not None:
+        current["local_llm"]["url"] = _local_llm_url(local_llm.get("url"))
+    catalog, _ = model_catalog(current["models"]["local"], current["local_llm"]["url"])
     for name in MODELS:
         model = models.get(name, current["models"][name])
-        if model not in {item["id"] for item in catalog[name]}:
+        if name == "local" and (not isinstance(model, str) or not model.strip() or len(model) > 200):
+            raise SettingsError("ローカルモデル名を入力してください")
+        if name != "local" and model not in {item["id"] for item in catalog[name]}:
             raise SettingsError("モデルを選び直してください")
-        current["models"][name] = model
+        current["models"][name] = model.strip() if name == "local" else model
     for name in delete_keys:
         if name in {"openai", "anthropic", "gemini", "plantnet", "amazon_creators_id", "amazon_creators_secret"}:
             current["api_keys"].pop(name, None)

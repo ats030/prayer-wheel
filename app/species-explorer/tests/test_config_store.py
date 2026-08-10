@@ -208,6 +208,42 @@ def test_ollama_outage_keeps_saved_local_model(monkeypatch):
     assert incompatible == []
 
 
+def test_local_llm_url_is_saved_and_used_for_catalog(tmp_path, monkeypatch):
+    path = tmp_path / "settings.json"
+    monkeypatch.setattr(config_store, "SETTINGS_PATH", path)
+    seen = []
+
+    def fake_models(url):
+        seen.append(url)
+        return ([{"id": "custom-vision:7b", "label": "custom-vision:7b"}], [])
+
+    monkeypatch.setattr(config_store, "ollama_models", fake_models)
+    result = config_store.save(
+        provider="local",
+        models={"local": "custom-vision:7b"},
+        local_llm={"url": "http://192.168.1.20:11434/"},
+        api_keys={},
+        delete_keys=[],
+    )
+
+    assert result["local_llm"]["url"] == "http://192.168.1.20:11434"
+    assert config_store.load()["local_llm"]["url"] == "http://192.168.1.20:11434"
+    assert seen == ["http://192.168.1.20:11434", "http://192.168.1.20:11434"]
+
+
+def test_local_llm_url_rejects_credentials(tmp_path, monkeypatch):
+    monkeypatch.setattr(config_store, "SETTINGS_PATH", tmp_path / "settings.json")
+    try:
+        config_store.save(
+            provider="local", models={}, api_keys={}, delete_keys=[],
+            local_llm={"url": "http://user:secret@localhost:11434"},
+        )
+    except config_store.SettingsError as exc:
+        assert "URL" in str(exc)
+    else:
+        raise AssertionError("URL containing credentials was accepted")
+
+
 def test_gemini_credentials_are_write_only(tmp_path, monkeypatch):
     monkeypatch.setattr(config_store, "SETTINGS_PATH", tmp_path / "settings.json")
     result = config_store.save(provider="gemini", models={"gemini": "gemini-3.6-flash"}, api_keys={"gemini": "gemini-secret"}, delete_keys=[])

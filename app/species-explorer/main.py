@@ -15,6 +15,7 @@ import vision
 class SettingsUpdate(BaseModel):
     provider: str
     models: dict[str, str] = Field(default_factory=dict)
+    local_llm: dict[str, object] | None = None
     api_keys: dict[str, str | None] = Field(default_factory=dict)
     delete_keys: list[str] = Field(default_factory=list)
     affiliate: dict[str, object] = Field(default_factory=dict)
@@ -50,6 +51,7 @@ def save_settings(update: SettingsUpdate) -> dict[str, object]:
         return config_store.save(
             provider=update.provider,
             models=update.models,
+            local_llm=update.local_llm,
             api_keys=update.api_keys,
             delete_keys=update.delete_keys,
             affiliate=update.affiliate,
@@ -167,7 +169,11 @@ async def identify(
         elif provider == "gemini":
             result = await run_in_threadpool(vision.identify_gemini, prepared, api_key, model, **context)
         else:
-            result = await run_in_threadpool(vision.identify, prepared, model, **context)
+            result = await run_in_threadpool(
+                vision.identify, prepared, model,
+                ollama_url=(settings.get("local_llm") or {}).get("url", vision.OLLAMA_URL),
+                **context
+            )
         if use_plantnet:
             plantnet_key = settings["api_keys"].get("plantnet", "")
             if not plantnet_key:
