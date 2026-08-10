@@ -34,11 +34,15 @@ uv run --with pytest pytest -q
 SPECIES_PUBLIC_MODE=1
 SPECIES_ALLOWED_HOSTS=species.example.com
 SPECIES_PUBLIC_LOCAL=0
+SPECIES_PUBLIC_AFFILIATE=0
 ```
 
 - `SPECIES_PUBLIC_MODE=1`: 共有設定の更新を403で拒否し、BYOK公開モードを有効化
 - `SPECIES_ALLOWED_HOSTS`: 公開ドメインをカンマ区切りで指定
 - `SPECIES_PUBLIC_LOCAL=1`: 運営者のローカルLLMを公開する場合だけ明示的に有効化
+- `SPECIES_PUBLIC_AFFILIATE=1`: 商用利用可能な公開基盤へ移行後、広告を再有効化する場合だけ指定
+
+無料のTailscale Personalプランで公開するベータ版は非商用とし、広告・商品API・計測を強制的に無効化します。
 
 公開時はTLS対応のリバースプロキシを前段に置き、8523番ポートをインターネットへ
 直接公開しないでください。プロキシ側でもリクエストサイズ制限とレート制限を設定し、

@@ -504,3 +504,26 @@ def test_every_user_page_links_to_legal_pages():
         assert page.status_code == 200
         assert 'href="/privacy"' in page.text
         assert 'href="/terms"' in page.text
+
+
+def test_public_beta_forces_affiliate_features_off(monkeypatch):
+    monkeypatch.setattr(main, "PUBLIC_MODE", True)
+    monkeypatch.setattr(main, "PUBLIC_AFFILIATE_ENABLED", False)
+    settings = client.get("/api/settings").json()
+    assert settings["affiliate"]["enabled"] is False
+    assert settings["affiliate"]["url"] == ""
+    assert settings["affiliate"]["product_enabled"] is False
+    assert settings["affiliate"]["creators_api_configured"] is False
+    assert client.post("/api/affiliate/impression").status_code == 404
+    assert client.post("/api/affiliate/click").status_code == 404
+    assert client.get("/affiliate/click?q=test", follow_redirects=False).status_code == 404
+    assert client.get("/api/amazon/products?q=test").status_code == 404
+
+
+def test_private_mode_keeps_operator_affiliate_configuration(monkeypatch):
+    monkeypatch.setattr(main, "PUBLIC_MODE", False)
+    main.config_store.save(
+        provider="local", models={}, api_keys={}, delete_keys=[],
+        affiliate={"title": "関連商品", "url": "https://www.amazon.co.jp/s?k={query}&tag=test-22", "enabled": True},
+    )
+    assert client.get("/api/settings").json()["affiliate"]["enabled"] is True

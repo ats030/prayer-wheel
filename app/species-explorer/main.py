@@ -30,6 +30,7 @@ app = FastAPI(title="Species Explorer")
 STATIC_DIR = Path(__file__).parent / "static"
 PUBLIC_MODE = os.getenv("SPECIES_PUBLIC_MODE", "").lower() in {"1", "true", "yes"}
 PUBLIC_LOCAL_ENABLED = os.getenv("SPECIES_PUBLIC_LOCAL", "").lower() in {"1", "true", "yes"}
+PUBLIC_AFFILIATE_ENABLED = os.getenv("SPECIES_PUBLIC_AFFILIATE", "").lower() in {"1", "true", "yes"}
 ALLOWED_HOSTS = [host.strip() for host in os.getenv("SPECIES_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
 if PUBLIC_MODE:
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
@@ -99,6 +100,13 @@ def get_settings() -> dict[str, object]:
         result["api_key_configured"] = {
             provider: False for provider in ("openai", "anthropic", "gemini", "plantnet")
         }
+        if not PUBLIC_AFFILIATE_ENABLED:
+            result["affiliate"] = {
+                "title": "", "url": "", "enabled": False,
+                "metrics": {"impressions": 0, "clicks": 0},
+                "partner_tag": "", "product_enabled": False,
+                "creators_api_configured": False,
+            }
         if not PUBLIC_LOCAL_ENABLED:
             result["available_models"]["local"] = []
             if result["provider"] == "local":
@@ -125,6 +133,8 @@ def save_settings(update: SettingsUpdate) -> dict[str, object]:
 
 @app.post("/api/affiliate/impression")
 def affiliate_impression() -> dict[str, bool]:
+    if PUBLIC_MODE and not PUBLIC_AFFILIATE_ENABLED:
+        raise HTTPException(status_code=404, detail="公開ベータ版では広告を表示しません")
     try:
         settings = config_store.load()
         if not settings["affiliate"]["enabled"]:
@@ -137,6 +147,8 @@ def affiliate_impression() -> dict[str, bool]:
 
 @app.get("/affiliate/click")
 def affiliate_click(q: str = "") -> RedirectResponse:
+    if PUBLIC_MODE and not PUBLIC_AFFILIATE_ENABLED:
+        raise HTTPException(status_code=404, detail="公開ベータ版では広告を表示しません")
     try:
         target = config_store.affiliate_target(q)
         config_store.record_affiliate("clicks")
@@ -147,6 +159,8 @@ def affiliate_click(q: str = "") -> RedirectResponse:
 
 @app.post("/api/affiliate/click")
 def affiliate_click_event() -> dict[str, bool]:
+    if PUBLIC_MODE and not PUBLIC_AFFILIATE_ENABLED:
+        raise HTTPException(status_code=404, detail="公開ベータ版では広告を表示しません")
     if not config_store.load()["affiliate"]["enabled"]:
         raise HTTPException(status_code=404, detail="広告が設定されていません")
     config_store.record_affiliate("clicks")
@@ -155,6 +169,8 @@ def affiliate_click_event() -> dict[str, bool]:
 
 @app.get("/api/amazon/products")
 async def amazon_products(q: str = "") -> JSONResponse:
+    if PUBLIC_MODE and not PUBLIC_AFFILIATE_ENABLED:
+        raise HTTPException(status_code=404, detail="公開ベータ版では広告を表示しません")
     settings = config_store.load()
     affiliate = settings["affiliate"]
     keys = settings["api_keys"]
