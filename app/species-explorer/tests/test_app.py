@@ -493,7 +493,8 @@ def test_legal_pages_disclose_data_handling_and_contact():
     assert "APIキーはブラウザのsessionStorage" in privacy.text
     assert "OpenAI、Anthropic、Google GeminiまたはPl@ntNet" in privacy.text
     assert "Tailscale Funnel" in privacy.text
-    assert "問い合わせ窓口は公開開始前" in privacy.text
+    assert "https://lit.link/ats030_main" in privacy.text
+    assert "運営者プロフィール" in privacy.text
     assert "食用・毒性・採取許可" in terms.text
     assert "外部AIの利用料金" in terms.text
 
