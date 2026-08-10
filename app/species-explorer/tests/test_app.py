@@ -92,6 +92,11 @@ def test_settings_page_enables_all_providers():
     assert 'id="reset-affiliate-visibility"' not in response.text
     index = client.get("/").text
     assert 'id="gpsButton"' in index
+    assert "requestCurrentLocation(true)" in index
+    assert 'gps?.source!=="exif"' in index
+    assert 'source:"current"' in index
+    assert "画像選択時に現在地を取得します" in index
+    assert "識別AIへは送らず" in index
     assert "採取可否：確認が必要" in index
     assert "食用可否：このアプリでは判定しません" in index
     assert 'fd.append("latitude"' not in index
