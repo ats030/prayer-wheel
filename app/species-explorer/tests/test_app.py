@@ -96,6 +96,13 @@ def test_settings_page_enables_all_providers():
     assert 'value="anthropic"' in response.text
     assert 'value="gemini"' in response.text
     assert 'id="settingsForm"' in response.text
+    assert "Ollama公式ガイド" in response.text
+    assert "https://platform.openai.com/api-keys" in response.text
+    assert "https://console.anthropic.com/settings/keys" in response.text
+    assert "https://aistudio.google.com/app/apikey" in response.text
+    assert "https://my.plantnet.org/" in response.text
+    assert "ChatGPTの月額契約とは別" in response.text
+    assert "Claudeの月額契約とは別" in response.text
     assert "rotatingAffiliateLink(data.candidates,data.category)" in client.get("/").text
     assert "loadAmazonProducts()" in client.get("/").text
     assert "position:fixed" not in client.get("/").text
