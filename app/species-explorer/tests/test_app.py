@@ -572,3 +572,25 @@ def test_settings_warns_that_api_keys_are_for_the_account_holder():
     assert "大人の方へ" in settings
     assert "設定は契約者ご本人が行ってください" in settings
     assert "アプリの利用に年齢制限はありません。" in settings
+
+
+def test_theme_toggle_is_available_on_every_page():
+    assert client.get("/theme.js").status_code == 200
+    script = client.get("/theme.js").text
+    assert 'localStorage.getItem("species-theme")' in script or 'var KEY = "species-theme"' in script
+    assert 'root.removeAttribute("data-theme")' in script
+    assert 'root.setAttribute("data-theme", mode)' in script
+    for path in ["/", "/settings", "/history", "/privacy", "/terms"]:
+        page = client.get(path).text
+        assert '<script src="/theme.js"></script>' in page, path
+        assert 'id="themeToggle"' in page, path
+        assert ':root[data-theme="dark"]' in page, path
+        assert '@media(prefers-color-scheme:dark){:root:not([data-theme="light"])' in page, path
+
+
+def test_theme_script_loads_before_the_page_body():
+    for path in ["/", "/settings", "/history", "/privacy", "/terms"]:
+        page = client.get(path).text
+        tag_start = page.index('<script src="/theme.js">')
+        assert tag_start < page.index("<body"), path
+        assert "<style" not in page[:tag_start], path

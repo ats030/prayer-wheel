@@ -91,6 +91,11 @@ def favicon() -> FileResponse:
     return FileResponse(STATIC_DIR / "favicon.svg", media_type="image/svg+xml")
 
 
+@app.get("/theme.js", include_in_schema=False)
+def theme_script() -> FileResponse:
+    return FileResponse(STATIC_DIR / "theme.js", media_type="text/javascript")
+
+
 @app.get("/api/settings")
 def get_settings() -> dict[str, object]:
     result = config_store.public()

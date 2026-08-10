@@ -25,6 +25,18 @@ with the subject.
   and one green accent. `prefers-color-scheme: dark` swaps the same token names
   to a dark-green-tinted set; no page defines a color only inside the dark
   block, and `color-scheme: light dark` is declared on every page.
+- The reader can override the device setting. `theme.js` runs synchronously in
+  `<head>` — before any style — and stamps `data-theme="light"|"dark"` on the
+  root from `localStorage`, so a chosen theme never flashes the other one. Dark
+  tokens are therefore declared twice per page: inside
+  `@media(prefers-color-scheme:dark){:root:not([data-theme="light"])}` and again
+  in `:root[data-theme="dark"]`, so an explicit choice wins in both directions.
+  The toggle cycles 自動 → ライト → ダーク; 自動 clears the stored key and hands
+  control back to the device. It also swaps the `theme-color` meta, because the
+  media-based ones follow the OS and would otherwise contradict the choice.
+- The toggle sits with the other header actions on every page and keeps its
+  44px target. Below 390px only its icon remains — the label is the first thing
+  to fold, never the button.
 - Filled controls use `--on-accent` so the accent keeps contrast in both themes.
 - System sans typography, 4px spacing grid, 8px controls, and 12px cards.
 - No decorative gradients, oversized headings, or unrelated imagery. The one
