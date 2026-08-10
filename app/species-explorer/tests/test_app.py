@@ -347,6 +347,10 @@ def test_settings_page_allows_custom_local_llm_url():
     assert response.status_code == 200
     assert 'id="local-llm-url"' in response.text
     assert 'local_llm:{url:' in response.text
+    assert 'id="active-provider"' in response.text
+    assert response.text.count('<details class="panel"') == 2
+    assert 'id="save-button"' in response.text
+    assert 'class="message" id="message" aria-live="polite"' in response.text
 
 
 def test_gemini_provider_dispatches_without_exposing_key(monkeypatch):
