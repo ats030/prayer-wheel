@@ -92,11 +92,14 @@ def test_gemini_prompt_requires_observation_comparison_and_abstention():
     assert "候補は棄却" in prompt
     assert "属・科レベル" in prompt
     assert "候補なし" in prompt
+    assert "異なる種候補を最大3件" in prompt
+    assert "confidenceを30以下" in prompt
+    assert "種候補を合理的に絞れない場合だけ" in prompt
 
 
 
 def test_taxonomy_verification_accepts_exact_scientific_name(monkeypatch):
-    monkeypatch.setattr(vision, "_lookup_taxon", lambda name: [{"id": 123, "name": name}])
+    monkeypatch.setattr(vision, "_lookup_taxon", lambda name: [{"id": 123, "name": name, "rank": "species"}])
     result = vision.normalize({"category": "植物", "candidates": [{
         "common_name_ja": "タンポポ",
         "scientific_name": "Taraxacum officinale",
@@ -107,6 +110,7 @@ def test_taxonomy_verification_accepts_exact_scientific_name(monkeypatch):
 
     assert verified["candidates"][0]["taxonomy_status"] == "verified"
     assert verified["candidates"][0]["taxonomy_url"].endswith("/123")
+    assert verified["candidates"][0]["taxon_rank"] == "species"
     assert verified["candidates"][0]["confidence"] == 82
 
 

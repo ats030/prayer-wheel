@@ -56,6 +56,9 @@ def test_index_links_to_settings():
     assert "確証がない理由" in response.text
     assert "雌雄推定の根拠" in response.text
     assert "使用モデル：" in response.text
+    assert 'return "種候補"' in response.text
+    assert 'return "属候補"' in response.text
+    assert 'return "科候補"' in response.text
     assert "historyAffiliateLink(entry)" in response.text
     assert 'rel="sponsored noopener noreferrer"' in response.text
     assert "広告 · Amazonで" in response.text
