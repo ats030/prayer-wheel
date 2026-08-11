@@ -1024,3 +1024,39 @@ def test_subtitle_states_one_thing():
     assert '<div class="subtitle">写真から植物・動物の名前を調べる</div>' in page
     assert "どなたでも使えます" not in page
     assert ".subtitle span" not in client.get("/assets/index.css").text
+
+
+def test_record_ads_are_loaded_only_when_a_record_is_opened():
+    """一覧を出すだけで全記録ぶんの商品APIを呼ばない。50件×候補3で150回になる。"""
+    history = client.get("/assets/history.js").text
+    assert 'detail.addEventListener("toggle",load)' in history
+    assert "if(shell.dataset.loaded)return" in history      # 開き直しで再取得しない
+    assert "if(detail.open)loadProducts(record,shell)" in history
+
+
+def test_record_ads_show_several_products_with_pictures():
+    history = client.get("/assets/history.js").text
+    assert "function productCard(p)" in history
+    assert 'class="product-image"' in history and 'class="product-grid"' in history
+    assert 'rel="sponsored noopener noreferrer"' in history
+    assert '広告 · ' in history                              # 広告と明示する
+    css = client.get("/assets/history.css").text
+    assert ".product-grid{" in css and ".product-card{" in css
+
+
+def test_record_ads_vary_between_openings():
+    """毎回同じ品が並ばないよう、切り口と商品の並びをランダムにする。"""
+    history = client.get("/assets/history.js").text
+    assert "function shuffle(items)" in history
+    assert "function productQueries(record)" in history
+    assert "shuffle(angles).slice(0,3)" in history          # 切り口の順をランダムに
+    assert "shuffle(data.products)" in history              # 返った商品もシャッフル
+    for angle in ['name+" 図鑑"', 'category+" 図鑑"', 'category+" 観察 ルーペ"']:
+        assert angle in history, angle
+    # どの切り口でも出なければ検索リンクへ落とす
+    assert "product-fallback" in history
+
+
+def test_product_images_are_allowed_by_the_policy():
+    policy = client.get("/history").headers["content-security-policy"]
+    assert "https://*.media-amazon.com" in policy

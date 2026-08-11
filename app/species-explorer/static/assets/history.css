@@ -8,3 +8,14 @@
 .legal-nav{display:flex;gap:14px;margin-top:22px;font-size:12px}.legal-nav a{color:var(--muted)}
 .candidate .links{margin:4px 0 2px}.candidate .links a{color:var(--accent);font-size:12px;text-decoration:none}
 .candidate .links{display:flex;flex-wrap:wrap;gap:12px;margin:5px 0 6px}.candidate .links a{color:var(--accent);font-size:12px;text-decoration:none}.badge.verified{border-color:var(--accent);color:var(--accent)}.candidate .meter{height:3px;margin:6px 0 4px;background:var(--line)}.candidate .meter span{display:block;height:100%;background:var(--accent)}
+
+/* 記録の商品カード。撮影画面と同じ見え方にそろえる */
+.product-shell{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.affiliate-label{color:var(--muted);font-size:11px;margin-bottom:6px}
+.product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.product-card{display:flex;min-width:0;overflow:hidden;flex-direction:column;border:1px solid var(--line);border-radius:9px;background:var(--raised);color:var(--text)!important;text-decoration:none}
+.product-card:hover{border-color:var(--accent)}
+.product-image{width:100%;aspect-ratio:1;object-fit:contain;background:#fff}
+.product-title{display:-webkit-box;min-height:58px;padding:8px;overflow:hidden;font-size:11px;line-height:1.35;-webkit-box-orient:vertical;-webkit-line-clamp:3}
+.product-fallback{display:inline-block;color:var(--accent);font-size:12px;text-decoration:none}
+@media(max-width:520px){.product-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:5px}.product-card{flex:0 0 148px;scroll-snap-align:start}}
