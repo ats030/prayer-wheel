@@ -13,7 +13,8 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 import main
 
 
-client = TestClient(main.app)
+# Host 検証を両モードで効かせているので、実際に許可されるホスト名で叩く
+client = TestClient(main.app, base_url="http://localhost")
 
 
 def page_source(path):
@@ -748,3 +749,25 @@ def test_privacy_policy_matches_where_deletion_actually_lives():
     settings = page_source("/settings")
     assert "すべて削除" not in settings  # 削除は /history だけが持つ
     assert "すべて削除" in page_source("/history")
+
+
+def test_host_header_is_validated_in_both_modes():
+    """設定を書き換えられる運営者用こそ Host 検証が要る。"""
+    assert any(m.cls is main.TrustedHostMiddleware for m in main.app.user_middleware)
+    assert client.get("/health", headers={"host": "evil.example.com"}).status_code == 400
+    assert client.get("/health").status_code == 200
+
+
+def test_admin_instance_can_save_settings_and_public_one_cannot():
+    payload = {"provider": "local", "models": {}, "local_llm": {"url": "http://127.0.0.1:11434"},
+               "api_keys": {}, "delete_keys": [], "affiliate": {}}
+    assert client.post("/api/settings", json=payload).status_code == 200
+    assert main.PUBLIC_MODE is False
+    try:
+        os.environ["SPECIES_PUBLIC_MODE"] = "1"
+        public = importlib.reload(main)
+        opened = TestClient(public.app, base_url="http://localhost")
+        assert opened.post("/api/settings", json=payload).status_code == 403
+    finally:
+        os.environ.pop("SPECIES_PUBLIC_MODE", None)
+        importlib.reload(main)

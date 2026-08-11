@@ -11,9 +11,21 @@
 設定画面でAmazon全商品検索用の特別リンクテンプレートを登録すると、識別候補の和名と識別カテゴリから関連商品を全カテゴリで検索する広告リンクを表示できます。Amazon Creators APIのCredential ID、Secret、Partner Tagも登録すると、巡回選択された候補に商品が見つかった場合はAPIが返した商品を画像付きカードで最大4件表示し、見つからない場合やAPI障害時は検索リンクへ戻します。認証情報は画面へ再表示しません。広告は識別候補・順位に影響せず、広告設定が有効な場合は結果ページに常時表示します。
 判定履歴の詳細にも、最有力候補から生成したAmazon関連商品検索の広告リンクを1件表示します。履歴を開くだけで多数の商品APIリクエストを発生させないため、履歴内は検索リンクのみとし、写真付き複数商品カードは通常の判定結果で表示します。
 
+2つのプロセスを別の役割で動かします。設定ファイルは共有するため、運営者用での
+変更は公開版にも効きます。
+
+| | ポート | 待受 | モード | 役割 |
+|---|---|---|---|---|
+| 運営者用 `species-explorer.service` | 8523 | `0.0.0.0` (Tailscale・LAN) | 非公開 | 設定の保存、動作確認 |
+| 公開版 `species-explorer-public.service` | 8524 | `127.0.0.1` のみ | 公開 | Tailscale Funnel の向け先 |
+
+Funnel は 8524 へ向けます。8523 は認証がなく設定を書き換えられるので、
+Funnel やポート開放の対象にしないでください。
+
 ```bash
-cd /home/ats030
-uv run uvicorn --app-dir /home/ats030/app/species-explorer main:app --host 0.0.0.0 --port 8523
+systemctl --user restart species-explorer species-explorer-public
+/home/ats030/app/species-explorer.sh          # 運営者用を手で起動する場合
+/home/ats030/app/species-explorer-public.sh   # 公開版を手で起動する場合
 ```
 
 計算資源、APIキー、使用モデルは画面上部の「設定」から変更できます。ローカルLLMではOllama URLを入力でき、その接続先にインストール済みで画像入力に対応するモデルを自動表示します。別端末のOllamaを使う場合は、Ollama側でこのサーバーからの接続を許可してください。接続先とAPIキーは `~/.config/species-explorer/settings.json` に権限 `0600` で保存し、APIキーは画面へ再表示しません。
@@ -53,8 +65,9 @@ SPECIES_PUBLIC_AFFILIATE=0
 
 無料のTailscale Personalプランで公開するベータ版は非商用とし、広告・商品API・計測を強制的に無効化します。
 
-公開時はTLS対応のリバースプロキシを前段に置き、8523番ポートをインターネットへ
-直接公開しないでください。プロキシ側でもリクエストサイズ制限とレート制限を設定し、
+公開はTailscale Funnel (TLS終端) 経由で8524番ポートへ流します。8523番ポートは
+運営者用でインターネットへ出しません。自前のリバースプロキシを使う場合も同様に、
+公開側だけを前段へつなぎます。プロキシ側でもリクエストサイズ制限とレート制限を設定し、
 `/health` 以外をHTTPSへ強制します。アプリ内のIPレート制限は単一プロセス向けの初期防御であり、
 複数ワーカー・複数台構成では共有レートリミッターへ置き換える必要があります。
 
@@ -84,7 +97,7 @@ uv run uvicorn main:app --host 127.0.0.1 --port 8524
 Tailscale Funnelでの公開と停止:
 
 ```bash
-tailscale funnel --bg 8523
+tailscale funnel --bg 8524   # 公開版へ向ける。8523 (運営者用) を指定しないこと
 tailscale funnel status
 tailscale funnel reset
 ```

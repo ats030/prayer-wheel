@@ -10,7 +10,7 @@
   <script src="/theme.js"></script><link rel="stylesheet" href="/assets/index.css"><script src="/assets/index.js" defer></script>
 </head>
 <body><main class="app">
-  <header class="top"><div><h1>Species Explorer</h1><div class="subtitle">写真から植物・動物の名前を調べる · どなたでも使えます</div></div><div class="top-actions"><div class="local" id="providerStatus">設定を読み込んでいます…</div><button class="settings-link theme-toggle" id="themeToggle" type="button"><span class="theme-icon" aria-hidden="true">◐</span><span class="theme-label">自動</span></button><a class="settings-link" href="/history">記録</a><a class="settings-link" id="settingsLink" href="/settings" aria-label="設定を開く">設定</a></div></header>
+  <header class="top"><div><h1>Species Explorer</h1><div class="subtitle">写真から植物・動物の名前を調べる · どなたでも使えます</div><div class="admin-flag hidden" id="adminFlag">運営者用の画面です。ここでの設定変更は公開版にも反映されます。</div></div><div class="top-actions"><div class="local" id="providerStatus">設定を読み込んでいます…</div><button class="settings-link theme-toggle" id="themeToggle" type="button"><span class="theme-icon" aria-hidden="true">◐</span><span class="theme-label">自動</span></button><a class="settings-link" href="/history">記録</a><a class="settings-link" id="settingsLink" href="/settings" aria-label="設定を開く">設定</a></div></header>
   <div class="grid">
     <section class="panel capture-panel"><div class="section-heading"><span>01</span><h2>写真を選ぶ</h2></div>
       <label class="capture" id="drop"><div><strong id="captureTitle">写真をここにドロップ</strong><span>同じ1匹・1株を3枚まで。1枚15MB以下</span></div><input id="library" type="file" accept="image/*" multiple></label>

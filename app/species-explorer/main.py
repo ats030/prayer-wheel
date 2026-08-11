@@ -1,4 +1,9 @@
-"""species-explorer: photograph-based local species identification (port 8523)."""
+"""species-explorer: photograph-based local species identification.
+
+同じアプリを2つの役割で動かす。8523 は運営者用 (非公開モード・設定の保存が可能)、
+8524 は公開版 (BYOK・設定は読み取り専用) で Tailscale Funnel の向け先。
+設定ファイルは共有するため、運営者用での変更は公開版にも反映される。
+"""
 
 from collections import defaultdict, deque
 from pathlib import Path
@@ -40,8 +45,9 @@ STATIC_DIR = Path(__file__).parent / "static"
 PUBLIC_LOCAL_ENABLED = os.getenv("SPECIES_PUBLIC_LOCAL", "").lower() in {"1", "true", "yes"}
 PUBLIC_AFFILIATE_ENABLED = os.getenv("SPECIES_PUBLIC_AFFILIATE", "").lower() in {"1", "true", "yes"}
 ALLOWED_HOSTS = [host.strip() for host in os.getenv("SPECIES_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
-if PUBLIC_MODE:
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
+# 運営者用 (非公開モード) こそ設定を書き換えられるので、Host の検証は両モードで効かせる。
+# 以前は公開モードだけに付けていたため、運営者用が素通しだった。
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 _RATE_BUCKETS: dict[tuple[str, str], deque[float]] = defaultdict(deque)
 _RATE_LOCK = threading.Lock()
 

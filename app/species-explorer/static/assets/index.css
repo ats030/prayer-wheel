@@ -9,3 +9,4 @@
     .sex-result{margin:10px 0;padding:10px 12px;border-left:2px solid var(--accent);background:var(--surface)}.sex-result strong{display:block}.sex-result p{margin:3px 0;color:var(--muted);font-size:12px}.sex-evidence{margin:5px 0 0}.animal-references{display:flex;flex-wrap:wrap;gap:10px;margin-top:9px}.animal-references span{flex-basis:100%;color:var(--muted);font-size:11px}.animal-references a{color:var(--accent-hover);font-size:12px;text-decoration:none}
   
 .legal-nav{display:flex;gap:14px;margin-top:18px;font-size:12px}.legal-nav a{color:var(--muted)}
+.admin-flag{display:inline-block;margin-top:6px;padding:3px 9px;border:1px solid var(--danger);border-radius:999px;color:var(--danger);font-size:11px;font-weight:700}
