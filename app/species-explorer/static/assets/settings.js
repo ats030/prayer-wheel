@@ -12,7 +12,8 @@ function setupPublicSettings(data){
   const localAvailable=Boolean(data.available_models.local.length);
   const localRadio=document.querySelector("[name=provider][value=local]");
   localRadio.disabled=!localAvailable;
-  if(!localAvailable)localRadio.closest(".provider").querySelector(".help").textContent="公開版では運営者が無効にしています。";
+  // 選べない選択肢を灰色で並べても、利用者には決められることが増えない。行ごと畳む
+  if(!localAvailable)localRadio.closest(".provider").classList.add("hidden");
   const chosen={
     provider:stored.provider||data.provider,
     models:{...data.models,...(stored.models||{})}
@@ -33,11 +34,15 @@ function setupPublicSettings(data){
   document.querySelectorAll('[data-delete]').forEach(button=>{
     if(button.dataset.delete.startsWith("amazon_"))button.disabled=true;
   });
+  // 広告の設定は運営者のもの。公開版の利用者が触る項目ではないので丸ごと畳む
   for(const id of ["affiliate-title","affiliate-url","affiliate-enabled","affiliate-partner-tag","affiliate-product-enabled","key-amazon_creators_id","key-amazon_creators_secret"]){
     $(id).disabled=true;
   }
+  $("affiliate-panel").classList.add("hidden");
+  // 保存先はこの端末。サーバーへ書くわけではないので、ボタンもそう名乗る
+  $("save-button").textContent="この端末に保存";
   const security=document.querySelector(".security");
-  security.innerHTML="<li>APIキーはこのブラウザタブだけに保存し、タブを閉じると消えます。</li><li>キーは判定時だけ暗号化通信で送信し、サーバー設定や記録には保存しません。</li><li>Ollamaと広告は運営者が管理し、利用者から接続先を変更できません。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li>";
+  security.innerHTML="<li>APIキーはこのブラウザタブだけに保存し、タブを閉じると消えます。</li><li>キーは判定時だけ暗号化通信で送信し、サーバー設定や記録には保存しません。</li><li>この画面にない項目 (Ollamaの接続先、広告) は運営者が管理していて、利用者からは変えられません。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li>";
   $("settingsForm").onsubmit=event=>{
     event.preventDefault();
     const selectedProvider=document.querySelector("[name=provider]:checked")?.value;

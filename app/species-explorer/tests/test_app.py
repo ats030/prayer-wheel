@@ -806,3 +806,29 @@ def test_settings_screen_names_each_thing_once():
     # 公開版が別ポートで動いている今、「一般公開に対応していない」は事実と食い違う
     assert "認証のない一般公開には対応していません" not in page
     assert "この画面にはパスワードがありません" in page
+
+
+def test_public_settings_hides_what_the_visitor_cannot_change():
+    """選べない項目を灰色で並べても、決められることは増えない。"""
+    script = client.get("/assets/settings.js").text
+    # Ollama が公開されていなければ、行ごと畳む（disabled のまま見せない）
+    assert 'localRadio.closest(".provider").classList.add("hidden")' in script
+    # 広告は運営者の設定。公開版の利用者が触る項目ではない
+    assert '$("affiliate-panel").classList.add("hidden")' in script
+    assert 'id="affiliate-panel"' in client.get("/settings").text
+    # 保存先はこの端末であって、サーバーではない
+    assert '$("save-button").textContent="この端末に保存"' in script
+    # 消した項目を、あるかのように説明しない
+    assert "Ollamaと広告は運営者が管理し" not in script
+    assert "この画面にない項目" in script
+    assert ".hidden{display:none!important}" in client.get("/assets/settings.css").text
+
+
+def test_operator_settings_keep_every_control():
+    """運営者用は据え置き。畳むのは公開版だけ。"""
+    page = client.get("/settings").text
+    assert main.PUBLIC_MODE is False
+    for control in ['value="local"', 'id="local-llm-url"', 'id="affiliate-panel"',
+                    'id="affiliate-url"', 'id="key-amazon_creators_id"']:
+        assert control in page, control
+    assert ">変更を保存<" in page
