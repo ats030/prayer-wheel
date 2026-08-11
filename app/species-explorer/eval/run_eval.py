@@ -124,9 +124,10 @@ def main() -> int:
     parser.add_argument("--limit", type=int, default=0, help="先頭N件だけ試す")
     parser.add_argument("--no-family", action="store_true", help="科の照合を省いて速く回す")
     parser.add_argument("--sleep", type=float, default=0.0, help="1件ごとの待ち時間 (秒)")
+    parser.add_argument("--dataset", default=str(MANIFEST), help="評価に使うマニフェスト")
     args = parser.parse_args()
 
-    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    manifest = json.loads(Path(args.dataset).read_text(encoding="utf-8"))
     entries = manifest["entries"][: args.limit or None]
     settings = config_store.load()
     model = args.model or settings["models"][args.provider]

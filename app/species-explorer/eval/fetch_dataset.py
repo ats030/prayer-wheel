@@ -110,13 +110,17 @@ def download(client: httpx.Client, entries: list[dict]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--per-group", type=int, default=6, help="分類群ごとの枚数")
+    parser.add_argument("--groups", nargs="*", default=list(GROUPS), choices=list(GROUPS),
+                        help="取得する分類群。既定は全部")
+    parser.add_argument("--output", default=str(MANIFEST), help="マニフェストの書き出し先")
     parser.add_argument("--place-id", type=int, default=JAPAN_PLACE_ID,
                         help="iNaturalist の場所ID。既定は日本 (6737)。0 で全世界")
     args = parser.parse_args()
 
     entries: list[dict] = []
     with httpx.Client(headers={"User-Agent": USER_AGENT}) as client:
-        for group, iconic in GROUPS.items():
+        for group in args.groups:
+            iconic = GROUPS[group]
             results = search(client, iconic, args.per_group, args.place_id)
             picked = pick(results, group, args.per_group)
             print(f"{group:14} 候補 {len(results):3}件 → 採用 {len(picked)}件")
@@ -127,14 +131,15 @@ def main() -> int:
     non_cc0 = [e for e in entries if e["license_code"] != "cc0"]
     assert not non_cc0, f"CC0 以外が混入: {non_cc0}"
 
-    MANIFEST.write_text(json.dumps({
+    pathlib_output = Path(args.output)
+    pathlib_output.write_text(json.dumps({
         "source": "iNaturalist API v1 (quality_grade=research, photo_license=cc0)",
         "attribution": ATTRIBUTION.format(date=time.strftime("%Y-%m-%d")),
         "license_note": "全画像 CC0。画像は ~/cache/species-eval/images に置き、リポジトリへは含めない。",
         "place_id": args.place_id,
         "entries": entries,
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"\n合計 {len(entries)}件 → {MANIFEST}")
+    print(f"\n合計 {len(entries)}件 → {pathlib_output}")
     return 0
 
 
