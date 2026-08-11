@@ -36,7 +36,10 @@ def identify_all(
     if use_plantnet:
         if not plantnet_key:
             result["plantnet_status"] = "not_configured"
-        elif result.get("category") != "植物":
+        # VLM が「不明」を返した写真こそ専門識別の出番なので、動物と判定したときだけ外す。
+        # 測定では植物の Top-1 が 0% → 45% になり、精度の大半を専門識別が担っていた。
+        # 自信を持てなかった写真で呼ばないのは、利用者が併用を選んだ意図に反する。
+        elif result.get("category") == "動物":
             result["plantnet_status"] = "not_plant"
         else:
             try:
