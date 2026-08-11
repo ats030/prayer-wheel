@@ -110,3 +110,104 @@ function backupFileName() {
   const stamp = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"), String(now.getDate()).padStart(2, "0")].join("-");
   return `ikimono-note-${stamp}.json`;
 }
+
+
+/* ── 既定の保存先 ─────────────────────────────────────────
+ * 選んだファイルへの参照 (FileSystemFileHandle) を持っておき、記録が変わるたびに
+ * 書き直す。参照は IndexedDB に入れられるので、次に開いたときも同じ場所へ書ける。
+ *
+ * 記録の本体 (species-history) とは別のDBに置く。既存DBのバージョンを上げると、
+ * すでに記録を持っている利用者の移行を伴うため。
+ *
+ * 読み込みは「混ぜる」動作にしてある。片方の端末で消した記録は、もう片方には
+ * 残る。消したことを伝える印を持たない限り、削除は行き渡らない。
+ * 消えるより残るほうが害が小さいので、こちらを既定にする。
+ */
+
+const HANDLE_DB = "species-backup";
+const HANDLE_KEY = "default-target";
+
+function handleDb() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(HANDLE_DB, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("handles")) db.createObjectStore("handles");
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function backupSupported() {
+  return typeof window.showSaveFilePicker === "function";
+}
+
+async function rememberTarget(handle) {
+  const db = await handleDb();
+  const transaction = db.transaction("handles", "readwrite");
+  transaction.objectStore("handles").put(handle, HANDLE_KEY);
+  await backupTransaction(transaction);
+  db.close();
+}
+
+async function storedTarget() {
+  if (!backupSupported()) return null;
+  try {
+    const db = await handleDb();
+    const transaction = db.transaction("handles", "readonly");
+    const handle = await backupRequest(transaction.objectStore("handles").get(HANDLE_KEY));
+    await backupTransaction(transaction);
+    db.close();
+    return handle || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+async function forgetTarget() {
+  const db = await handleDb();
+  const transaction = db.transaction("handles", "readwrite");
+  transaction.objectStore("handles").delete(HANDLE_KEY);
+  await backupTransaction(transaction);
+  db.close();
+}
+
+/* 権限は再訪のたびに確認が要る。granted でなければ、利用者の操作なしには要求できない */
+async function targetPermission(handle, {ask = false} = {}) {
+  if (!handle?.queryPermission) return "granted";
+  const options = {mode: "readwrite"};
+  let state = await handle.queryPermission(options);
+  if (state !== "granted" && ask) state = await handle.requestPermission(options);
+  return state;
+}
+
+async function writeBackupTo(handle) {
+  const payload = await buildBackup();
+  const writable = await handle.createWritable();
+  await writable.write(new Blob([JSON.stringify(payload)], {type: "application/json"}));
+  await writable.close();
+  return payload.records.length;
+}
+
+async function readBackupFrom(handle) {
+  const file = await handle.getFile();
+  return await restoreBackup(JSON.parse(await file.text()));
+}
+
+/* 記録が変わるたびに呼ばれる。まとめて1回だけ書くよう少し待つ */
+let backupTimer = null;
+function scheduleAutoBackup() {
+  if (!backupSupported()) return;
+  clearTimeout(backupTimer);
+  backupTimer = setTimeout(async () => {
+    try {
+      const handle = await storedTarget();
+      if (!handle) return;
+      if (await targetPermission(handle) !== "granted") return;  // 次に画面を開いたとき許可を促す
+      await writeBackupTo(handle);
+    } catch (error) {
+      console.error("記録を保存先へ書けませんでした", error);
+    }
+  }, 1500);
+}

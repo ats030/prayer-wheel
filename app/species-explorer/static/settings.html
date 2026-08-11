@@ -32,9 +32,16 @@
     <div class="panel">
       <p class="help">調べた記録 (写真を含む) と、使うAIの設定を1つのファイルにまとめます。クラウドの同期フォルダへ保存すれば、別の端末でも読み込めます。<strong>ファイルはこの端末から直接保存され、運営者のサーバーには送られません。</strong></p>
       <p class="help">APIキーは含めません。ファイルが人手に渡っても、料金が発生する鍵まで渡さないためです。別の端末では入れ直してください。</p>
+      <div class="status-strip" id="target-strip" hidden><span>いつもの保存先</span><strong id="target-name">未設定</strong></div>
+      <div class="actions" id="target-actions" hidden>
+        <button class="button" id="choose-target" type="button">保存先を決める</button>
+        <button class="button" id="load-target" type="button">保存先から読み込む</button>
+        <button class="button" id="clear-target" type="button">解除</button>
+      </div>
+      <p class="help" id="target-help" hidden>保存先を決めると、記録が増えたり消えたりするたび、この端末から自動で書き直します。読み込みは既存の記録と混ぜます。片方の端末で消した記録は、もう片方には残ります。</p>
       <div class="actions">
-        <button class="button" id="export-backup" type="button">書き出す</button>
-        <button class="button" id="import-backup" type="button">読み込む</button>
+        <button class="button" id="export-backup" type="button">ファイルへ書き出す</button>
+        <button class="button" id="import-backup" type="button">ファイルから読み込む</button>
       </div>
       <input id="import-file" type="file" accept="application/json,.json" hidden>
       <p class="message" id="backup-message" aria-live="polite"></p>

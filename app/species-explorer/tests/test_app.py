@@ -1149,3 +1149,53 @@ def test_restore_does_not_wipe_what_is_already_there():
     assert ".clear()" not in backup                  # 既存の記録を消さない
     assert 'transaction.objectStore("entries").put(entry)' in backup
     assert 'payload.format !== BACKUP_FORMAT' in backup   # 別物を読ませない
+
+
+def test_default_target_is_offered_only_where_it_works():
+    """showSaveFilePicker が無いブラウザに、押せない操作を並べない。"""
+    settings_html = client.get("/settings").text
+    for control in ["target-strip", "target-actions", "target-help", "choose-target", "load-target", "clear-target"]:
+        assert f'id="{control}"' in settings_html, control
+    assert 'id="target-actions" hidden' in settings_html      # 既定は隠しておく
+    script = client.get("/assets/settings.js").text
+    assert "if(!backupSupported())return;" in script          # 対応時だけ出す
+    # hidden 属性が .actions{display:flex} に負けないこと
+    assert "[hidden]{display:none!important}" in client.get("/assets/settings.css").text
+
+
+def test_records_are_written_back_whenever_they_change():
+    backup = client.get("/assets/backup.js").text
+    assert "function scheduleAutoBackup()" in backup
+    assert "clearTimeout(backupTimer)" in backup               # まとめて1回だけ書く
+    # 記録が変わる箇所すべてから呼ぶ
+    assert "scheduleAutoBackup()" in client.get("/assets/index.js").text
+    history = client.get("/assets/history.js").text
+    assert history.count("scheduleAutoBackup()") >= 2          # 削除と再判定
+    for page in ["/", "/history", "/settings"]:
+        assert '<script src="/assets/backup.js" defer></script>' in client.get(page).text, page
+
+
+def test_target_handle_lives_outside_the_records_database():
+    """記録のDBのバージョンを上げると、すでに記録を持つ利用者の移行が要る。"""
+    backup = client.get("/assets/backup.js").text
+    assert 'const HANDLE_DB = "species-backup"' in backup
+    assert 'indexedDB.open("species-history", 1)' in backup    # 記録側は据え置き
+    # 権限は毎回確認し、利用者の操作なしに要求しない
+    assert "queryPermission" in backup and "requestPermission" in backup
+    assert "{ask = false}" in backup
+
+
+def test_every_script_actually_parses():
+    """文字列検査だけでは構文エラーを見逃す。実際に壊れた JS を配って
+    撮影画面が動かなくなったことがあるため、パースまで確かめる。"""
+    import shutil
+    import subprocess
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node が無いため構文チェックを省略")
+    root = Path(__file__).parents[1] / "static"
+    scripts = sorted(root.glob("assets/*.js")) + [root / "theme.js"]
+    assert len(scripts) >= 5
+    for script in scripts:
+        result = subprocess.run([node, "--check", str(script)], capture_output=True, text=True)
+        assert result.returncode == 0, f"{script.name}: {result.stderr[:300]}"

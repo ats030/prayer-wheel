@@ -11,3 +11,4 @@
   
 .legal-nav{display:flex;gap:14px;margin-top:22px;font-size:12px}.legal-nav a{color:var(--color-muted)}.field.spaced{margin-top:11px}details.panel.stacked{margin-top:8px}
 .hidden{display:none!important}
+[hidden]{display:none!important}
