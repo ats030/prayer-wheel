@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import ipaddress
 import socket
-from urllib.parse import urlparse
+from urllib.parse import unquote, urljoin, urlparse
+from xml.etree import ElementTree
 
 import httpx
 
@@ -96,3 +97,51 @@ def get(folder: str, user: str, password: str) -> bytes:
     if len(response.content) > MAX_BYTES:
         raise RelayError("ファイルが大きすぎます")
     return response.content
+
+
+PROPFIND_BODY = """<?xml version="1.0" encoding="utf-8"?>
+<d:propfind xmlns:d="DAV:"><d:prop><d:resourcetype/><d:displayname/></d:prop></d:propfind>"""
+
+
+def list_folders(folder: str, user: str, password: str) -> list[dict[str, str]]:
+    """1階層ぶんのフォルダを返す。URLを手で組み立てずに選べるようにするため。"""
+    target = validate(folder)
+    if not target.endswith("/"):
+        target += "/"
+    try:
+        with _client() as client:
+            response = client.request("PROPFIND", target, auth=(user, password),
+                                      headers={"Depth": "1", "Content-Type": "application/xml"},
+                                      content=PROPFIND_BODY.encode("utf-8"))
+    except httpx.HTTPError as exc:
+        raise RelayError("接続先へ届きませんでした") from exc
+    if response.status_code in (401, 403):
+        raise RelayError("利用者名またはパスワードを確認してください")
+    if response.status_code == 404:
+        raise RelayError("そのフォルダは見つかりませんでした")
+    if response.status_code >= 400:
+        raise RelayError(f"フォルダを読み取れませんでした（{response.status_code}）")
+
+    try:
+        tree = ElementTree.fromstring(response.content)
+    except ElementTree.ParseError as exc:
+        raise RelayError("接続先の応答を読み取れませんでした。WebDAV のURLか確認してください") from exc
+
+    ns = {"d": "DAV:"}
+    here = urlparse(target).path
+    folders = []
+    for entry in tree.findall("d:response", ns):
+        href_node = entry.find("d:href", ns)
+        if href_node is None or not href_node.text:
+            continue
+        href = href_node.text
+        path = urlparse(href).path
+        if unquote(path.rstrip("/")) == unquote(here.rstrip("/")):
+            continue  # 自分自身
+        if entry.find(".//d:resourcetype/d:collection", ns) is None:
+            continue  # ファイルは出さない
+        name = unquote(path.rstrip("/").rsplit("/", 1)[-1])
+        if name:
+            folders.append({"name": name, "url": urljoin(target, href if href.startswith("http") else path)})
+    folders.sort(key=lambda item: item["name"])
+    return folders

@@ -286,6 +286,17 @@ async def storage_get(request: Request, payload: StorageRequest) -> JSONResponse
     return JSONResponse({"body": body.decode("utf-8", errors="replace")})
 
 
+@app.post("/api/storage/list")
+async def storage_list(request: Request, payload: StorageRequest) -> JSONResponse:
+    """フォルダの中身を1階層だけ返す。利用者にURLを組み立てさせないため。"""
+    _rate_limit(request, "storage", 30)
+    try:
+        folders = await run_in_threadpool(webdav_relay.list_folders, payload.url, payload.user, payload.password)
+    except webdav_relay.RelayError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return JSONResponse({"folders": folders})
+
+
 @app.get("/health")
 def health() -> dict[str, object]:
     return {"ok": True, "model": vision.MODEL, "local_processing": True, "providers": ["local", "openai", "anthropic", "gemini"]}

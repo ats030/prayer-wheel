@@ -1246,10 +1246,14 @@ def test_cloud_storage_is_offered_with_its_trade_off_stated():
     """ブラウザから外部ストレージへ直接つなぐ経路は CORS と CSP で塞がっている。
     サーバーが中継する以上、経路上を通ることを画面に書く。"""
     page = client.get("/settings").text
-    assert 'id="cloud-panel"' in page and "クラウドストレージ (WebDAV)" in page
-    for field in ["cloud-url", "cloud-user", "cloud-password", "cloud-save", "cloud-load", "cloud-forget"]:
+    assert 'id="cloud-panel"' in page and "クラウドに保存する" in page
+    for field in ["cloud-service", "cloud-user", "cloud-password", "cloud-connect",
+                  "cloud-folders", "cloud-pick", "cloud-save", "cloud-load", "cloud-forget"]:
         assert f'id="{field}"' in page, field
-    assert "サーバーを経由して中継します" in page
+    # URL の手入力を求めない
+    assert 'id="cloud-url"' not in page
+    assert "つないでフォルダを見る" in page
+    assert "サーバーを経由します" in page
     assert "サーバーには残しません" in page
     backup = client.get("/assets/backup.js").text
     assert '"/api/storage/put"' in backup and '"/api/storage/get"' in backup
@@ -1282,6 +1286,29 @@ def test_target_is_a_folder_not_a_file():
     script = client.get("/assets/settings.js").text
     assert 'window.showDirectoryPicker({mode:"readwrite"})' in script
     page = client.get("/settings").text
-    assert "保存先フォルダを決める" in page
-    assert "フォルダのURL" in page
-    assert "この中の ikimono-note.json に読み書きします" in page
+    assert "保存先フォルダを決める" in page      # ローカル側
+    # クラウド側は一覧から選ぶので、URLを打たせない
+    assert "つないでフォルダを見る" in page
+    assert 'id="cloud-pick"' in page
+
+
+def test_cloud_setup_does_not_require_typing_a_url():
+    """URLの手打ちはとっつきにくい。サービスを選び、つないで、一覧から選ぶ。"""
+    backup = client.get("/assets/backup.js").text
+    assert "const CLOUD_SERVICES" in backup
+    for service in ["pcloud", "nextcloud", "other"]:
+        assert f"{service}:" in backup, service
+    assert '"https://webdav.pcloud.com/"' in backup          # pCloud は入口が固定
+    assert "/remote.php/dav/files/" in backup                 # Nextcloud の作法
+    assert "async function listCloudFolders(target)" in backup
+    script = client.get("/assets/settings.js").text
+    assert "async function browseCloud(url)" in script
+    assert 'button.onclick=()=>browseCloud(folder.url)' in script   # 階層を辿れる
+    assert '$("cloud-up").disabled=new URL(url).pathname==="/"' in script
+
+
+def test_folder_listing_hides_files_and_self():
+    relay = (Path(__file__).parents[1] / "webdav_relay.py").read_text()
+    assert 'entry.find(".//d:resourcetype/d:collection", ns) is None' in relay   # ファイルを出さない
+    assert "continue  # 自分自身" in relay
+    assert 'headers={"Depth": "1"' in relay                   # 1階層だけ

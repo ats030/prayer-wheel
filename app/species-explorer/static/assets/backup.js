@@ -273,3 +273,19 @@ async function loadFromCloud(target) {
   const data = await relay("/api/storage/get", target);
   return await restoreBackup(JSON.parse(data.body));
 }
+
+
+/* サービスごとの入口。URLを手で組み立てさせないための対応表 */
+const CLOUD_SERVICES = {
+  pcloud: {label: "pCloud", root: () => "https://webdav.pcloud.com/", needsHost: false},
+  nextcloud: {label: "Nextcloud", needsHost: true,
+    root: (host, user) => "https://" + String(host).replace(/^https?:\/\//, "").replace(/\/+$/, "") +
+                          "/remote.php/dav/files/" + encodeURIComponent(user) + "/"},
+  other: {label: "その他 (WebDAV)", needsHost: true,
+    root: (host) => { const h = String(host).replace(/^https?:\/\//, "").replace(/\/+$/, ""); return "https://" + h + "/"; }},
+};
+
+async function listCloudFolders(target) {
+  const data = await relay("/api/storage/list", target);
+  return Array.isArray(data.folders) ? data.folders : [];
+}
