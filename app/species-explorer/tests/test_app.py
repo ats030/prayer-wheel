@@ -981,3 +981,31 @@ def test_link_builders_are_shared_by_both_screens():
         body = client.get(script).text
         assert "function sourceUrl" not in body, script
         assert "function animalReference(" not in body, script
+
+
+APP_NAME = "生きものノート"
+
+
+def test_every_page_carries_the_app_name():
+    for path, title in [("/", APP_NAME), ("/settings", f"設定 · {APP_NAME}"),
+                        ("/history", f"調べた記録 · {APP_NAME}"),
+                        ("/privacy", f"プライバシーポリシー · {APP_NAME}"),
+                        ("/terms", f"利用規約 · {APP_NAME}")]:
+        page = client.get(path).text
+        assert f"<title>{title}</title>" in page, path
+        assert "Species Explorer" not in page, path
+    # 法務文書と広告開示は正式名称で書く
+    assert f"本ポリシーは、{APP_NAME}（以下「本サービス」）" in client.get("/privacy").text
+    assert f"運営者：{APP_NAME} 運営者" in client.get("/terms").text
+    assert f"Amazonのアソシエイトとして、{APP_NAME}は適格販売" in client.get("/").text
+
+
+def test_internal_identifiers_are_left_alone():
+    """表示名だけを変える。記録の保存先まで変えると既存の記録が読めなくなる。"""
+    index = client.get("/assets/index.js").text
+    assert 'indexedDB.open("species-history",1)' in index
+    assert "species-public-settings" in index
+    assert "species-key-" in index
+    assert "species-theme" in client.get("/theme.js").text
+    for path in ["/assets/index.js", "/assets/history.js", "/assets/settings.js"]:
+        assert client.get(path).status_code == 200

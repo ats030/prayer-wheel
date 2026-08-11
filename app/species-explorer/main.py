@@ -37,7 +37,7 @@ PUBLIC_MODE = os.getenv("SPECIES_PUBLIC_MODE", "").lower() in {"1", "true", "yes
 # 一般公開では API ドキュメントを閉じる。Swagger UI は CDN から読み込むため CSP に
 # 阻まれて白紙になるうえ、公開の入口に晒す必要がない
 app = FastAPI(
-    title="Species Explorer",
+    title="生きものノート",
     docs_url=None if PUBLIC_MODE else "/docs",
     redoc_url=None if PUBLIC_MODE else "/redoc",
     openapi_url=None if PUBLIC_MODE else "/openapi.json",
