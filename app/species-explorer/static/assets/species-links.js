@@ -33,3 +33,28 @@ function wikipediaUrl(candidate) {
   if (!term) return "";
   return "https://" + (japanese ? "ja" : "en") + ".wikipedia.org/w/index.php?search=" + encodeURIComponent(term);
 }
+
+/* 図鑑を検索 (一般の検索エンジン) */
+function sourceUrl(name) {
+  return "https://www.google.com/search?q=" + encodeURIComponent(name + " 生物 図鑑");
+}
+
+/* 分類群ごとの参考資料。iNaturalist が返した iconic taxon で振り分ける。
+   これらは人が読んで確かめるための外部サイトで、内容を取り込むことはしない */
+function animalReference(candidate, category) {
+  if (category !== "動物") return null;
+  const scientific = String(candidate?.scientific_name || "").trim();
+  if (!scientific) return null;
+  const q = encodeURIComponent(scientific);
+  const parts = scientific.split(/\s+/);
+  const group = candidate?.animal_group;
+  if (group === "Mammalia") return {label: "Animal Diversity Web", url: "https://animaldiversity.org/search/?q=" + q};
+  if (group === "Aves") return {label: "Cornell All About Birds", url: "https://www.allaboutbirds.org/guide/search?q=" + q};
+  if (group === "Actinopterygii" || group === "Chondrichthyes")
+    return {label: "FishBase", url: "https://www.fishbase.se/summary/" + encodeURIComponent(scientific.replaceAll(" ", "-")) + ".html"};
+  if (group === "Amphibia" && parts.length > 1)
+    return {label: "AmphibiaWeb", url: "https://amphibiaweb.org/cgi/amphib_query?where-genus=" + encodeURIComponent(parts[0]) + "&where-species=" + encodeURIComponent(parts[1])};
+  if (group === "Reptilia" && parts.length > 1)
+    return {label: "Reptile Database", url: "https://reptile-database.reptarium.cz/advanced_search?genus=" + encodeURIComponent(parts[0]) + "&species=" + encodeURIComponent(parts[1]) + "&submit=Search"};
+  return {label: "GBIF", url: "https://www.gbif.org/species/search?q=" + q};
+}

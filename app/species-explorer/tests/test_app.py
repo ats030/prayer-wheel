@@ -953,3 +953,31 @@ def test_record_links_do_not_depend_on_the_later_enrich_pass():
     # 失敗を握りつぶさない（簡易表示のまま残ることに気づけるように）
     assert "enrich().catch(()=>{})" not in history
     assert "記録の詳細を組み立てられませんでした" in history
+
+
+def test_records_show_everything_they_store():
+    """保存しているのに見せていない項目があった。記録から辿れるようにする。"""
+    history = client.get("/assets/history.js").text
+    # 撮影画面と同じ参照先
+    for link in ["sourceUrl(name)", "wikipediaUrl(c)", "c.taxonomy_url", "animalReference(c,category)"]:
+        assert link in history, link
+    # 保存済みだが未表示だったもの
+    assert "taxonomyBadge(c)" in history and "図鑑にある名前です" in history
+    assert "証拠の強さ" in history          # evidence_strength
+    assert "分類：" in history               # category
+    assert "まちがい防止" in history         # resultMeta.strictMode
+    assert "Pl@ntNet recognition API" in history  # plantnetUsed のときの帰属
+    assert "confidenceMeter(c)" in history
+    # 幅は style 属性ではなく CSSOM (CSP: style-src 'self')
+    assert "bar.style.width=bar.dataset.width" in history
+    assert 'style="width:' not in history
+
+
+def test_link_builders_are_shared_by_both_screens():
+    shared = client.get("/assets/species-links.js").text
+    assert "function sourceUrl(name)" in shared
+    assert "function animalReference(candidate, category)" in shared
+    for script in ["/assets/index.js", "/assets/history.js"]:
+        body = client.get(script).text
+        assert "function sourceUrl" not in body, script
+        assert "function animalReference(" not in body, script

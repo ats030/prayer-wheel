@@ -7,3 +7,4 @@
 .affiliate{display:inline-flex;margin-top:9px;color:var(--accent);font-size:12px}
 .legal-nav{display:flex;gap:14px;margin-top:22px;font-size:12px}.legal-nav a{color:var(--muted)}
 .candidate .links{margin:4px 0 2px}.candidate .links a{color:var(--accent);font-size:12px;text-decoration:none}
+.candidate .links{display:flex;flex-wrap:wrap;gap:12px;margin:5px 0 6px}.candidate .links a{color:var(--accent);font-size:12px;text-decoration:none}.badge.verified{border-color:var(--accent);color:var(--accent)}.candidate .meter{height:3px;margin:6px 0 4px;background:var(--line)}.candidate .meter span{display:block;height:100%;background:var(--accent)}
