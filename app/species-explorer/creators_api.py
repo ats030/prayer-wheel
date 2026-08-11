@@ -49,14 +49,19 @@ def _value(container: Any, *keys: str) -> str:
         current = current.get("displayValue") or current.get("value")
     return str(current or "").strip()
 
-def search_products(query: str, credential_id: str, secret: str, partner_tag: str, limit: int = 4) -> list[dict[str, str]]:
+# Amazon の検索インデックス。"All" は総花的な結果になりやすく、種名で引いても
+# 一般向けの図鑑が上位を占める。書籍に絞ると、その種を扱った本へ寄せられる。
+SEARCH_INDEXES = {"All", "Books"}
+
+
+def search_products(query: str, credential_id: str, secret: str, partner_tag: str, limit: int = 4, search_index: str = "All") -> list[dict[str, str]]:
     term = " ".join(str(query).split())[:80]
     if not term:
         return []
     item_count = min(10, max(1, int(limit)))
     token = _token(credential_id, secret)
     try:
-        response = httpx.post(SEARCH_URL, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "x-marketplace": MARKETPLACE}, json={"marketplace": MARKETPLACE, "partnerTag": partner_tag, "searchIndex": "All", "keywords": term, "itemCount": item_count, "resources": ["itemInfo.title", "images.primary.medium"]}, timeout=20)
+        response = httpx.post(SEARCH_URL, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "x-marketplace": MARKETPLACE}, json={"marketplace": MARKETPLACE, "partnerTag": partner_tag, "searchIndex": (search_index if search_index in SEARCH_INDEXES else "All"), "keywords": term, "itemCount": item_count, "resources": ["itemInfo.title", "images.primary.medium"]}, timeout=20)
         response.raise_for_status()
         data = response.json()
     except (httpx.HTTPError, ValueError, AttributeError) as exc:

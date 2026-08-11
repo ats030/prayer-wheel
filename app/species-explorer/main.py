@@ -238,7 +238,7 @@ def affiliate_click_event() -> dict[str, bool]:
 
 
 @app.get("/api/amazon/products")
-async def amazon_products(q: str = "") -> JSONResponse:
+async def amazon_products(q: str = "", index: str = "All") -> JSONResponse:
     if PUBLIC_MODE and not PUBLIC_AFFILIATE_ENABLED:
         raise HTTPException(status_code=404, detail="公開ベータ版では広告を表示しません")
     settings = config_store.load()
@@ -247,7 +247,7 @@ async def amazon_products(q: str = "") -> JSONResponse:
     if not affiliate.get("product_enabled"):
         raise HTTPException(status_code=404, detail="商品APIが設定されていません")
     try:
-        products = await run_in_threadpool(creators_api.search_products, q, keys.get("amazon_creators_id", ""), keys.get("amazon_creators_secret", ""), affiliate.get("partner_tag", ""), 4)
+        products = await run_in_threadpool(creators_api.search_products, q, keys.get("amazon_creators_id", ""), keys.get("amazon_creators_secret", ""), affiliate.get("partner_tag", ""), 4, index)
     except creators_api.CreatorsAPIError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     if not products:

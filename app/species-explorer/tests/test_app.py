@@ -187,14 +187,19 @@ def test_amazon_products_endpoint_uses_verified_query(monkeypatch):
         "api_keys": {"amazon_creators_id": "credential", "amazon_creators_secret": "secret"},
     })
     seen = {}
-    def fake_search(query, credential, secret, partner_tag, limit):
-        seen.update(query=query, credential=credential, secret=secret, partner_tag=partner_tag, limit=limit)
+    def fake_search(query, credential, secret, partner_tag, limit, search_index="All"):
+        seen.update(query=query, credential=credential, secret=secret, partner_tag=partner_tag,
+                    limit=limit, search_index=search_index)
         return [{"title": "タンポポ図鑑", "url": "https://www.amazon.co.jp/dp/B000000001?tag=test-22", "image": "https://images.example/item.jpg"}]
     monkeypatch.setattr(main.creators_api, "search_products", fake_search)
     response = client.get("/api/amazon/products?q=タンポポ")
     assert response.status_code == 200
     assert response.json()["products"][0]["title"] == "タンポポ図鑑"
-    assert seen == {"query": "タンポポ", "credential": "credential", "secret": "secret", "partner_tag": "test-22", "limit": 4}
+    assert seen == {"query": "タンポポ", "credential": "credential", "secret": "secret",
+                    "partner_tag": "test-22", "limit": 4, "search_index": "All"}
+    # 書籍に絞れる。種名で引くと一般向けの図鑑が上位を占めるため
+    client.get("/api/amazon/products?q=タンポポ&index=Books")
+    assert seen["search_index"] == "Books"
 
 
 def test_amazon_product_endpoint_is_disabled_without_configuration():
@@ -1044,17 +1049,35 @@ def test_record_ads_show_several_products_with_pictures():
     assert ".product-grid{" in css and ".product-card{" in css
 
 
-def test_record_ads_vary_between_openings():
-    """毎回同じ品が並ばないよう、切り口と商品の並びをランダムにする。"""
+def test_record_ads_prefer_the_species_over_generic_field_guides():
+    """「分類+図鑑」は必ずヒットするので、先に置くとどの記録でも同じ図鑑が並ぶ。"""
     history = client.get("/assets/history.js").text
-    assert "function shuffle(items)" in history
     assert "function productQueries(record)" in history
-    assert "shuffle(angles).slice(0,3)" in history          # 切り口の順をランダムに
-    assert "shuffle(data.products)" in history              # 返った商品もシャッフル
-    for angle in ['name+" 図鑑"', 'category+" 図鑑"', 'category+" 観察 ルーペ"']:
-        assert angle in history, angle
-    # どの切り口でも出なければ検索リンクへ落とす
-    assert "product-fallback" in history
+    assert "shuffle(specific).slice(0,3)" in history        # 種名の切り口を先に、順はランダム
+    assert 'specific.push({q:name,index:"Books"})' in history   # その種を扱った本
+    assert '{q:category+" 図鑑",index:"Books",generic:true}' in history
+    # 一般書は枠を埋める保険。多くても2件までにして種固有の品を押しのけない
+    assert 'shuffle(found.generic).slice(0,2)' in history
+    assert "product-fallback" in history                    # 全滅なら検索リンクへ
+
+
+def test_record_ads_keep_food_away_from_the_safety_warning():
+    """「食べられるかは判定しません」の隣に食品を並べない。誤同定のとき危険な後押しになる。"""
+    history = client.get("/assets/history.js").text
+    assert "function looksEdible(title)" in history
+    assert "EDIBLE_WORDS" in history
+    for word in ["茶", "食用", "乾燥", "サプリ", "おやつ"]:
+        assert f'"{word}"' in history, word
+    assert "looksEdible(product.title)" in history
+    # 種名だけで引くと食品が上位に来るため、用途を添える
+    assert 'specific.push({q:name,index:"All"})' not in history
+    assert 'name+" 観察"' in history
+
+
+def test_record_ads_drop_duplicates_by_title_too():
+    """同じ品が別URLで返ることがある。"""
+    history = client.get("/assets/history.js").text
+    assert "seen.has(product.url)||seen.has(key)" in history
 
 
 def test_product_images_are_allowed_by_the_policy():
