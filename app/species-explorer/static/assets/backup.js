@@ -140,7 +140,7 @@ function handleDb() {
 }
 
 function backupSupported() {
-  return typeof window.showSaveFilePicker === "function";
+  return typeof window.showDirectoryPicker === "function";
 }
 
 /* 使えないときは理由を返す。黙って消えると、機能が無いのか壊れたのか分からない */
@@ -189,16 +189,31 @@ async function targetPermission(handle, {ask = false} = {}) {
   return state;
 }
 
+const BACKUP_FILE_NAME = "ikimono-note.json";
+
+/* フォルダを選んでもらい、その中のファイルを扱う。以前の版でファイルを直接
+   選んでいた利用者もいるので、どちらの参照でも動くようにする */
+async function fileInTarget(handle, {create = false} = {}) {
+  if (handle?.kind === "directory") return await handle.getFileHandle(BACKUP_FILE_NAME, {create});
+  return handle;
+}
+
+function targetLabel(handle) {
+  return handle?.kind === "directory" ? handle.name + "/" + BACKUP_FILE_NAME : handle?.name || "";
+}
+
 async function writeBackupTo(handle) {
   const payload = await buildBackup();
-  const writable = await handle.createWritable();
+  const file = await fileInTarget(handle, {create: true});
+  const writable = await file.createWritable();
   await writable.write(new Blob([JSON.stringify(payload)], {type: "application/json"}));
   await writable.close();
   return payload.records.length;
 }
 
 async function readBackupFrom(handle) {
-  const file = await handle.getFile();
+  const target = await fileInTarget(handle);
+  const file = await target.getFile();
   return await restoreBackup(JSON.parse(await file.text()));
 }
 

@@ -17,6 +17,9 @@ import httpx
 
 MAX_BYTES = 25 * 1024 * 1024
 TIMEOUT = 60
+# 利用者にはフォルダだけ決めてもらい、ファイル名はアプリが持つ。
+# 名前を任意にすると、うっかり別の用途のファイルを上書きしうる。
+FILE_NAME = "ikimono-note.json"
 
 
 class RelayError(RuntimeError):
@@ -36,6 +39,14 @@ def _reject_internal(host: str) -> None:
             raise RelayError("この接続先は指定できません（内部ネットワーク）")
 
 
+def file_url(folder: str) -> str:
+    """フォルダのURLに、アプリが決めたファイル名を足す。"""
+    base = validate(folder)
+    if base.endswith("/" + FILE_NAME):
+        return base                      # すでにファイルまで指定されている場合はそのまま
+    return base.rstrip("/") + "/" + FILE_NAME
+
+
 def validate(url: str) -> str:
     parsed = urlparse((url or "").strip())
     if parsed.scheme != "https":
@@ -53,10 +64,10 @@ def _client() -> httpx.Client:
     return httpx.Client(timeout=TIMEOUT, follow_redirects=False)
 
 
-def put(url: str, user: str, password: str, body: bytes) -> None:
+def put(folder: str, user: str, password: str, body: bytes) -> None:
     if len(body) > MAX_BYTES:
         raise RelayError("記録が大きすぎます")
-    target = validate(url)
+    target = file_url(folder)
     try:
         with _client() as client:
             response = client.put(target, content=body, auth=(user, password),
@@ -69,8 +80,8 @@ def put(url: str, user: str, password: str, body: bytes) -> None:
         raise RelayError(f"接続先が保存を拒否しました（{response.status_code}）")
 
 
-def get(url: str, user: str, password: str) -> bytes:
-    target = validate(url)
+def get(folder: str, user: str, password: str) -> bytes:
+    target = file_url(folder)
     try:
         with _client() as client:
             response = client.get(target, auth=(user, password))

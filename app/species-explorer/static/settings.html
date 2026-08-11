@@ -35,7 +35,7 @@
       <p class="help">APIキーは含めません。ファイルが人手に渡っても、料金が発生する鍵まで渡さないためです。別の端末では入れ直してください。</p>
       <details class="panel stacked" id="cloud-panel"><summary><span><span class="detail-title">クラウドストレージ (WebDAV)</span><span class="detail-copy">pCloud・Nextcloud など。どの端末からでも同じ場所に置けます</span></span></summary><div class="detail-body fields">
         <span class="help">接続先とパスワードは、このブラウザだけに保存します。保存や読み込みのたびに本サービスのサーバーを経由して中継します（<strong>サーバーには残しません</strong>）。ブラウザから外部へ直接つなぐ経路が塞がれているためです。</span>
-        <div class="field"><label for="cloud-url">ファイルのURL</label><input id="cloud-url" type="url" placeholder="https://webdav.pcloud.com/ikimono-note.json"></div>
+        <div class="field"><label for="cloud-url">フォルダのURL</label><input id="cloud-url" type="url" placeholder="https://webdav.pcloud.com/生きものノート/"><span class="configured">この中の ikimono-note.json に読み書きします</span></div>
         <div class="field"><label for="cloud-user">利用者名</label><input id="cloud-user" autocomplete="username"></div>
         <div class="field"><label for="cloud-password">パスワード</label><input id="cloud-password" type="password" autocomplete="current-password"></div>
         <div class="actions"><button class="button" id="cloud-save" type="button">クラウドへ保存</button><button class="button" id="cloud-load" type="button">クラウドから読み込む</button><button class="button" id="cloud-forget" type="button">接続先を消す</button></div>
@@ -43,11 +43,11 @@
       </div></details>
       <div class="status-strip" id="target-strip" hidden><span>いつもの保存先</span><strong id="target-name">未設定</strong></div>
       <div class="actions" id="target-actions" hidden>
-        <button class="button" id="choose-target" type="button">保存先を決める</button>
+        <button class="button" id="choose-target" type="button">保存先フォルダを決める</button>
         <button class="button" id="load-target" type="button">保存先から読み込む</button>
         <button class="button" id="clear-target" type="button">解除</button>
       </div>
-      <p class="help" id="target-help" hidden>保存先を決めると、記録が増えたり消えたりするたび、この端末から自動で書き直します。読み込みは既存の記録と混ぜます。片方の端末で消した記録は、もう片方には残ります。</p>
+      <p class="help" id="target-help" hidden>フォルダを決めると、その中の ikimono-note.json へ、記録が増えたり消えたりするたび、この端末から自動で書き直します。読み込みは既存の記録と混ぜます。片方の端末で消した記録は、もう片方には残ります。</p>
       <div class="actions">
         <button class="button" id="export-backup" type="button">ファイルへ書き出す</button>
         <button class="button" id="import-backup" type="button">ファイルから読み込む</button>

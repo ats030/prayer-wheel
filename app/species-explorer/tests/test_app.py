@@ -1270,3 +1270,18 @@ def test_relay_does_not_store_credentials():
     relay = main_py[main_py.index("async def storage_put"):main_py.index("@app.get(\"/health\")")]
     assert "config_store.save" not in relay
     assert "open(" not in relay
+
+
+def test_target_is_a_folder_not_a_file():
+    """利用者が決めるのはフォルダまで。ファイル名はアプリが持ち、別用途のファイルを
+    上書きしないようにする。"""
+    backup = client.get("/assets/backup.js").text
+    assert 'const BACKUP_FILE_NAME = "ikimono-note.json"' in backup
+    assert 'handle?.kind === "directory"' in backup          # 旧来のファイル参照も読める
+    assert "showDirectoryPicker" in backup                    # 対応判定もフォルダ基準
+    script = client.get("/assets/settings.js").text
+    assert 'window.showDirectoryPicker({mode:"readwrite"})' in script
+    page = client.get("/settings").text
+    assert "保存先フォルダを決める" in page
+    assert "フォルダのURL" in page
+    assert "この中の ikimono-note.json に読み書きします" in page

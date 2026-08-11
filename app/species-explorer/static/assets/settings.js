@@ -109,17 +109,16 @@ async function refreshTarget(){
   if(!handle){strip.hidden=true;$("clear-target").disabled=true;$("load-target").disabled=true;return}
   strip.hidden=false;$("clear-target").disabled=false;$("load-target").disabled=false;
   const state=await targetPermission(handle);
-  $("target-name").textContent=handle.name+(state==="granted"?"":"（次に書くとき許可を求めます）");
+  $("target-name").textContent=targetLabel(handle)+(state==="granted"?"":"（次に書くとき許可を求めます）");
 }
 $("choose-target").onclick=async()=>{
   try{
-    const handle=await window.showSaveFilePicker({suggestedName:backupFileName(),
-      types:[{description:"生きものノートの記録",accept:{"application/json":[".json"]}}]});
+    const handle=await window.showDirectoryPicker({mode:"readwrite"});
     if(await targetPermission(handle,{ask:true})!=="granted"){backupMessage("書き込みが許可されませんでした。","error");return}
     await rememberTarget(handle);
     const count=await writeBackupTo(handle);
     await refreshTarget();
-    backupMessage(`保存先を決めました。記録 ${count}件を書き出しました。`,"success");
+    backupMessage(`保存先フォルダを決めました。記録 ${count}件を書き出しました。`,"success");
   }catch(error){if(error?.name!=="AbortError")backupMessage("保存先を決められませんでした。"+error.message,"error")}
 };
 $("load-target").onclick=async()=>{

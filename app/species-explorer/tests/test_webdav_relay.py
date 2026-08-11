@@ -50,18 +50,31 @@ def test_relay_passes_credentials_and_reports_failures(monkeypatch):
     monkeypatch.setattr(webdav_relay, "_reject_internal", lambda host: None)
     monkeypatch.setattr(webdav_relay, "_client", lambda: FakeClient())
 
-    webdav_relay.put("https://dav.example/note.json", "user", "pass", b"{}")
+    webdav_relay.put("https://dav.example/notes/", "user", "pass", b"{}")
     assert seen["auth"] == ("user", "pass")
-    assert seen["url"] == "https://dav.example/note.json"
+    assert seen["url"] == "https://dav.example/notes/" + webdav_relay.FILE_NAME
 
-    assert webdav_relay.get("https://dav.example/note.json", "user", "pass") == b'{"ok":1}'
+    assert webdav_relay.get("https://dav.example/notes/", "user", "pass") == b'{"ok":1}'
 
     seen["status"] = 401
     with pytest.raises(webdav_relay.RelayError) as error:
-        webdav_relay.get("https://dav.example/note.json", "user", "bad")
+        webdav_relay.get("https://dav.example/notes/", "user", "bad")
     assert "パスワード" in str(error.value)
 
 
 def test_relay_caps_the_size():
     with pytest.raises(webdav_relay.RelayError):
-        webdav_relay.put("https://dav.example/f.json", "u", "p", b"x" * (webdav_relay.MAX_BYTES + 1))
+        webdav_relay.put("https://dav.example/notes/", "u", "p", b"x" * (webdav_relay.MAX_BYTES + 1))
+
+
+@pytest.mark.parametrize("folder,expected", [
+    ("https://dav.example/notes/", "https://dav.example/notes/ikimono-note.json"),
+    ("https://dav.example/notes", "https://dav.example/notes/ikimono-note.json"),
+    ("https://dav.example/", "https://dav.example/ikimono-note.json"),
+    # すでにファイルまで指定されていれば二重に足さない
+    ("https://dav.example/notes/ikimono-note.json", "https://dav.example/notes/ikimono-note.json"),
+])
+def test_folder_gets_the_app_owned_file_name(folder, expected, monkeypatch):
+    """利用者はフォルダだけ決める。名前を任意にすると別用途のファイルを上書きしうる。"""
+    monkeypatch.setattr(webdav_relay, "_reject_internal", lambda host: None)
+    assert webdav_relay.file_url(folder) == expected
