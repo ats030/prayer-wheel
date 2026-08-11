@@ -42,6 +42,33 @@ def test_health_is_local():
     assert response.json()["local_processing"] is True
 
 
+def usable_photo(size: tuple[int, int] = (600, 450)) -> bytes:
+    """質のふるいを通る写真。一色だと輪郭が無く、ぼけていると見なされる。"""
+    image = Image.new("RGB", size, "green")
+    pixels = image.load()
+    for y in range(size[1]):
+        for x in range(size[0]):
+            if (x // 7 + y // 7) % 2:
+                pixels[x, y] = (210, 190, 90)
+    return _encode(image)
+
+
+def _patterned(size: tuple[int, int] = (600, 450)):
+    image = Image.new("RGB", size, "green")
+    pixels = image.load()
+    for y in range(size[1]):
+        for x in range(size[0]):
+            if (x // 7 + y // 7) % 2:
+                pixels[x, y] = (210, 190, 90)
+    return image
+
+
+def _encode(image, **kwargs) -> bytes:
+    buffer = io.BytesIO()
+    image.save(buffer, "JPEG", **kwargs)
+    return buffer.getvalue()
+
+
 def test_rejects_non_image():
     response = client.post("/identify", files={"file": ("note.txt", b"hello", "text/plain")})
     assert response.status_code == 415
@@ -218,7 +245,7 @@ def test_external_provider_requires_api_key(monkeypatch):
 
 def test_openai_provider_dispatches_without_persisting_key(monkeypatch):
     source = io.BytesIO()
-    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    source.write(usable_photo())
     seen = {}
 
     def fake_identify(image_bytes, api_key, model, **context):
@@ -243,7 +270,7 @@ def test_openai_provider_dispatches_without_persisting_key(monkeypatch):
 
 def test_identify_accepts_three_images_and_context(monkeypatch):
     source = io.BytesIO()
-    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    source.write(usable_photo())
     seen = {}
 
     def fake_identify(images, model, **context):
@@ -272,7 +299,7 @@ def test_photo_metadata_reads_exif_before_identification():
     source = io.BytesIO()
     exif = Image.Exif()
     exif[36867] = "2024:11:12 08:09:10"
-    Image.new("RGB", (2, 2), "green").save(source, "JPEG", exif=exif)
+    source.write(_encode(_patterned(), exif=exif))
 
     response = client.post(
         "/api/photo-metadata",
@@ -287,7 +314,7 @@ def test_identify_uses_exif_date_when_form_date_is_empty(monkeypatch):
     source = io.BytesIO()
     exif = Image.Exif()
     exif[36867] = "2024:11:12 08:09:10"
-    Image.new("RGB", (2, 2), "green").save(source, "JPEG", exif=exif)
+    source.write(_encode(_patterned(), exif=exif))
     seen = {}
 
     def fake_identify(images, model, **context):
@@ -310,7 +337,7 @@ def test_identify_uses_exif_date_when_form_date_is_empty(monkeypatch):
 
 def test_plantnet_opt_in_merges_specialist_result(monkeypatch):
     source = io.BytesIO()
-    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    source.write(usable_photo())
     monkeypatch.setattr(main.config_store, "load", lambda: {
         "provider": "local",
         "models": {"local": "gemma4:31b"},
@@ -343,7 +370,7 @@ def test_plantnet_opt_in_merges_specialist_result(monkeypatch):
 
 def test_plantnet_failure_falls_back_to_vlm_result(monkeypatch):
     source = io.BytesIO()
-    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    source.write(usable_photo())
     monkeypatch.setattr(main.config_store, "load", lambda: {
         "provider": "local",
         "models": {"local": "gemma4:31b"},
@@ -369,7 +396,7 @@ def test_plantnet_failure_falls_back_to_vlm_result(monkeypatch):
 
 def test_identify_always_runs_strict_evidence_gate(monkeypatch):
     source = io.BytesIO()
-    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    source.write(usable_photo())
     monkeypatch.setattr(main.vision, "identify", lambda *args, **kwargs: {
         "category": "植物", "summary": "", "candidates": []
     })
@@ -420,7 +447,7 @@ def test_settings_page_allows_custom_local_llm_url():
 
 def test_gemini_provider_dispatches_without_exposing_key(monkeypatch):
     source = io.BytesIO()
-    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    source.write(usable_photo())
     seen = {}
 
     def fake_identify(image_bytes, api_key, model, **context):
@@ -460,7 +487,7 @@ def test_public_mode_hides_server_secrets_and_blocks_settings_write(monkeypatch)
 
 def test_public_mode_uses_request_key_without_persisting_it(monkeypatch):
     source = io.BytesIO()
-    Image.new("RGB", (2, 2), "green").save(source, "JPEG")
+    source.write(usable_photo())
     seen = {}
     settings = {
         "provider": "local",

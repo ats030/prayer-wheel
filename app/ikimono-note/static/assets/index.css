@@ -13,3 +13,4 @@
 .source-credit{margin:14px 0 0;color:var(--muted);font-size:12px}.source-credit a{color:var(--accent-hover)}
 
 @media(max-width:360px){.top{gap:8px}.settings-link{padding:0 8px}.theme-toggle{padding:0 9px}}
+.photo-notes{margin:0 0 12px;padding:10px 13px;border:1px solid var(--color-line);border-left:3px solid var(--color-accent);border-radius:var(--radius-control);background:var(--color-raised);font-size:.92rem}.photo-notes strong{display:block;margin-bottom:4px}.photo-notes ul{margin:0;padding-left:1.2em}

@@ -23,6 +23,7 @@ from starlette.staticfiles import StaticFiles
 
 import auth
 import config_store
+import image_quality
 import creators_api
 import pipeline
 import vision
@@ -488,6 +489,16 @@ async def identify(
             candidate_metadata = await run_in_threadpool(vision.extract_exif_context, raw)
             for key, value in candidate_metadata.items():
                 photo_metadata.setdefault(key, value)
+        # 質を見てから送る。暗すぎる・小さすぎる写真をAIへ送っても、返るのは
+        # 自信のない推測かもっともらしい誤りで、利用者の枠を使うだけになる。
+        quality = [await run_in_threadpool(image_quality.judge, raw) for raw in raw_images]
+        unusable = [q for q in quality if not q["ok"]]
+        if unusable:
+            raise HTTPException(status_code=422, detail={
+                "message": "この写真では調べられません。",
+                "problems": [p for q in unusable for p in q["problems"] if p["level"] == image_quality.BLOCK],
+            })
+
         prepared = [await run_in_threadpool(vision.prepare_image, raw) for raw in raw_images]
         context = {
             "location": location or str(photo_metadata.get("location", "")),
@@ -503,6 +514,8 @@ async def identify(
             **context,
         )
         result["photo_metadata"] = photo_metadata
+        # 弾くほどではない注意は、結果と一緒に返す。次に撮るときの助けになる
+        result["photo_notes"] = [problem for q in quality for problem in q["problems"]]
     except vision.VisionError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return JSONResponse(result)
