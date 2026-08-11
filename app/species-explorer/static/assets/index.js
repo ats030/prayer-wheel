@@ -8,16 +8,8 @@ $('libraryBtn').onclick=()=> $('library').click();$('cameraBtn').onclick=()=> $(
 ['dragenter','dragover'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove('drag')}));drop.addEventListener("drop",e=>setFiles(e.dataTransfer.files));
 function requestCurrentLocation(automatic=false){if(!navigator.geolocation){$("gpsStatus").textContent="このブラウザでは現在地を取得できません。位置情報なしでも使えます。";return}$("gpsButton").disabled=true;$("gpsStatus").textContent=automatic?"写真を選んだので、現在地を確認しています…":"現在地を確認しなおしています…";navigator.geolocation.getCurrentPosition(position=>{if(gps?.source!=="exif"){gps={latitude:position.coords.latitude,longitude:position.coords.longitude,accuracy:position.coords.accuracy,source:"current"};$("gpsStatus").textContent=`現在地を取得しました（誤差 約${Math.round(gps.accuracy)}m）。AIへは送らず、調べたあとにおおまかな位置にしてこの端末の記録だけに保存します。`}$("gpsButton").disabled=false},error=>{if(gps?.source!=="exif")$("gpsStatus").textContent=error.code===1?"位置情報が許可されませんでした。位置情報なしでも使えます。":"現在地を取得できませんでした。位置情報なしでも使えます。";$("gpsButton").disabled=false},{enableHighAccuracy:true,timeout:10000,maximumAge:0})}
 $("gpsButton").onclick=()=>requestCurrentLocation(false);
-function noJapaneseName(name){return name==="日本語名なし"||name==="和名未登録"}
 function esc(v){const d=document.createElement('div');d.textContent=v??'';return d.innerHTML}function sourceUrl(name){return 'https://www.google.com/search?q='+encodeURIComponent(name+' 生物 図鑑')}
-function wikipediaUrl(c){
-  /* 和名があれば日本語版、無ければ学名で英語版へ。生物の学名記事は英語版のほうが揃っている。
-     検索URLにしておけば、記事があればそこへ直行し、無ければ検索結果が出る */
-  const japanese=noJapaneseName(c.common_name_ja)?"":String(c.common_name_ja||"").trim();
-  const term=japanese||String(c.scientific_name||"").trim();
-  if(!term)return "";
-  return "https://"+(japanese?"ja":"en")+".wikipedia.org/w/index.php?search="+encodeURIComponent(term);
-}
+
 function agreementBadge(c){if(c.evidence_status==="corroborated")return "<span class=\"taxonomy verified\">2つの方法で同じ結果</span>";if(c.evidence_status==="specialist_only")return "<span class=\"taxonomy\">植物専用の識別だけ</span>";if(c.evidence_status==="taxonomy_only")return "<span class=\"taxonomy\">学名は確認できました</span>";if(c.evidence_status==="uncertain")return "<span class=\"taxonomy\">決め手なし · 学名は確認できました</span>";return ""}
 function meterBar(c){/* 幅は style 属性ではなく CSSOM で入れる (CSP: style-src 'self') */return "</div><div class=\"meter\"><span data-width=\""+Number(c.confidence||0)+"\"></span></div>"}
 function applyMeters(){document.querySelectorAll(".meter span[data-width]").forEach(bar=>{bar.style.width=Math.max(0,Math.min(100,Number(bar.dataset.width)||0))+"%"})}

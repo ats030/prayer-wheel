@@ -876,18 +876,40 @@ def test_saving_still_works_after_reordering(tmp_path):
     assert saved.json()["api_key_configured"]["gemini"] is True
 
 
-def test_candidates_link_to_wikipedia_in_the_right_language():
-    script = client.get("/assets/index.js").text
-    assert "function wikipediaUrl(c)" in script
-    # 和名があれば日本語版、無ければ学名で英語版
-    assert 'noJapaneseName(c.common_name_ja)?"":String(c.common_name_ja||"").trim()' in script
-    assert '"https://"+(japanese?"ja":"en")+".wikipedia.org/w/index.php?search="' in script
+def test_wikipedia_rule_lives_in_one_place():
+    """言語の出し分けを画面ごとに書くと、片方だけ直してずれる。"""
+    shared = client.get("/assets/species-links.js").text
+    assert "function wikipediaUrl(candidate)" in shared
+    assert '"https://" + (japanese ? "ja" : "en") + ".wikipedia.org/w/index.php?search="' in shared
     # 記事の有無を問い合わせず検索URLにする（無ければ検索結果が出るので壊れない）
-    assert "/w/index.php?search=" in script
-    # 名前が無いときはリンク自体を出さない
-    assert 'if(!term)return ""' in script
-    assert '>Wikipedia ↗</a>' in script
-    assert 'wikipediaUrl(c)?' in script
-    # 外部リンクは既存の参照リンクと同じ扱いにする
-    wiki_link = script[script.index("wikipediaUrl(c)?"):script.index(">Wikipedia ↗")]
-    assert 'target="_blank"' in wiki_link and 'rel="noopener noreferrer"' in wiki_link
+    assert 'if (!term) return ""' in shared
+    # 旧値の互換もここ1か所で持つ
+    assert 'name === "日本語名なし" || name === "和名未登録"' in shared
+    for page, script in [("/", "/assets/index.js"), ("/history", "/assets/history.js")]:
+        html = client.get(page).text
+        assert '<script src="/assets/species-links.js" defer></script>' in html, page
+        # 共通ファイルを先に読む（defer は記述順に走る）
+        assert html.index("species-links.js") < html.index(script), page
+        body = client.get(script).text
+        assert "function wikipediaUrl" not in body, script  # 各画面で再定義しない
+        assert "function noJapaneseName" not in body, script
+
+
+def test_both_screens_offer_the_wikipedia_link():
+    for script in ["/assets/index.js", "/assets/history.js"]:
+        body = client.get(script).text
+        assert ">Wikipedia ↗</a>" in body, script
+        assert "wikipediaUrl(c)" in body, script
+        link = body[body.index("wikipediaUrl(c)"):body.index(">Wikipedia ↗")]
+        assert 'target="_blank"' in link and 'rel="noopener noreferrer"' in link, script
+    assert ".candidate .links a{" in client.get("/assets/history.css").text
+
+
+def test_old_records_are_shown_with_the_current_wording():
+    """端末内の記録には旧値が残る。読む人には、いまの表記で見せる。"""
+    shared = client.get("/assets/species-links.js").text
+    assert "function commonNameLabel(candidate)" in shared
+    assert 'if (noJapaneseName(candidate?.common_name_ja)) return "日本語名なし"' in shared
+    history = client.get("/assets/history.js").text
+    assert "esc(commonNameLabel(c))" in history
+    assert 'esc(c.common_name_ja||"候補")' not in history  # 旧値をそのまま出さない

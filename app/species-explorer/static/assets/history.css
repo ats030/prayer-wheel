@@ -6,3 +6,4 @@
 .facts{display:grid;gap:5px;margin:10px 0;padding:10px;border-left:2px solid var(--accent);background:var(--raised)}.candidate{margin:12px 0}.label{margin-top:7px;color:var(--muted);font-size:11px}.candidate ul{margin:3px 0;padding-left:20px}.badge{display:inline-block;margin:3px 5px 0 0;padding:1px 6px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:11px}
 .affiliate{display:inline-flex;margin-top:9px;color:var(--accent);font-size:12px}
 .legal-nav{display:flex;gap:14px;margin-top:22px;font-size:12px}.legal-nav a{color:var(--muted)}
+.candidate .links{margin:4px 0 2px}.candidate .links a{color:var(--accent);font-size:12px;text-decoration:none}
