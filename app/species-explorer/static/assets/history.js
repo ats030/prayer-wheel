@@ -37,9 +37,11 @@ function productQueries(record){
   /* 種名を先に試し、汎用の図鑑は最後の逃げ道にする。
      「分類+図鑑」は必ずヒットするので、先に置くとどの記録でも同じ図鑑が並ぶ。
      Books に絞る切り口を混ぜると、その種を扱った本へ寄る */
-  const named=(record.candidates||[]).map(displayName).filter(Boolean);
-  const name=named.length?named[Math.floor(Math.random()*named.length)]:"";
-  const scientific=(record.candidates||[]).map(c=>c?.scientific_name).find(Boolean)||"";
+  /* 広告は第一候補にひもづける。候補ごとに商品が変わると、どの候補の話なのか
+     読み手に分からない */
+  const top=(record.candidates||[])[0];
+  const name=top?displayName(top):"";
+  const scientific=String(top?.scientific_name||"").trim();
   const category=record.category||"";
   const grow=category==="動物"?"飼育":category==="菌類"?"きのこ 栽培":"育て方";
   const specific=[];
@@ -89,7 +91,9 @@ async function loadProducts(record,shell){
     shell.querySelectorAll(".product-card").forEach(link=>link.onclick=()=>fetch("/api/affiliate/click",{method:"POST",keepalive:true}).catch(()=>{}));
     return;
   }
-  const fallback=(record.candidates||[]).map(displayName).find(Boolean);
+  /* window.name を拾わないよう、記録から取り直す */
+  const topCandidate=(record.candidates||[])[0];
+  const fallback=topCandidate?displayName(topCandidate):"";
   if(fallback)shell.innerHTML='<a class="product-fallback" href="/affiliate/click?q='+encodeURIComponent(fallback+" "+(record.category||""))+'" target="_blank" rel="sponsored noopener noreferrer">広告 · Amazonで'+esc(fallback)+'の関連商品を探す ↗</a>';
 }
 async function reidentify(record,button,message){

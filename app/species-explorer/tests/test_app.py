@@ -142,7 +142,7 @@ def test_settings_page_enables_all_providers():
     assert "https://my.plantnet.org/" in response.text
     assert "ChatGPTの月額契約とは別" in response.text
     assert "Claudeの月額契約とは別" in response.text
-    assert "rotatingAffiliateLink(data.candidates,data.category)" in page_source("/")
+    assert "topCandidateAffiliateLink(data.candidates,data.category)" in page_source("/")
     assert "loadAmazonProducts()" in page_source("/")
     assert "position:fixed" not in page_source("/")
     assert "position:sticky" not in page_source("/")
@@ -1104,3 +1104,17 @@ def test_records_can_be_examined_again():
     assert "thumbnail:source.thumbnail" in history
     assert "coordinates:source.coordinates" in history
     assert ".slice(50)" in history   # 上限50件は撮影画面と同じ
+
+
+def test_adverts_follow_the_first_candidate():
+    """候補を巡回させると、確からしさの低い2番目3番目で商品を引く。
+    どの候補の広告なのかも読み手に分からない。"""
+    index = client.get("/assets/index.js").text
+    assert "function topCandidateAffiliateLink(candidates,category)" in index
+    assert "affiliateCursor" not in index
+    assert "candidates[0]" in index
+    history = client.get("/assets/history.js").text
+    assert "const top=(record.candidates||[])[0]" in history
+    assert "Math.floor(Math.random()*named.length)" not in history  # ランダム選択をやめた
+    # フォールバックも第一候補から取る（window.name を拾わない）
+    assert "const topCandidate=(record.candidates||[])[0]" in history

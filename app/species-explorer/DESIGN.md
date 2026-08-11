@@ -66,7 +66,7 @@ with the subject.
 
 - The main screen uses a Workbench flow: capture, preview, then full-width results. Camera and library inputs are the primary actions and have 44px touch targets.
 - Optional capture context and advanced identification controls stay in closed disclosures until requested. After an image is selected, the capture target compresses so the preview and identify action become the visual priority.
-- Safety guidance is one flat warning region rather than nested cards; related products form one non-sticky shelf after all candidates instead of repeating per candidate; repeated identifications rotate the candidate used for the product query.
+- Safety guidance is one flat warning region rather than nested cards; related products form one non-sticky shelf after all candidates instead of repeating per candidate; the product query always follows the first candidate. Rotating through candidates made the advert drift onto the second or third guess, and the reader could not tell which candidate the products belonged to.
 - The safety region opens with a lead sentence addressed to the whole audience, then splits into three equal questions the app refuses to answer or cannot answer alone: 食べられるか, さわってよいか, 持ち帰ってよいか. Touch safety is stated because rash-causing plants and stinging animals are not separable from a photograph.
 - The chosen image is previewed before identification.
 - Identification shows an expected wait and disables duplicate submission.
