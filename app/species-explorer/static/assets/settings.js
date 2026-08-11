@@ -140,9 +140,9 @@ refreshTarget();
 /* クラウド。URLは組み立てず、つないでフォルダを選んでもらう */
 let cloudCursor = "";
 function cloudCreds(){return {user:$("cloud-user").value.trim(),password:$("cloud-password").value}}
-function cloudRoot(){
+function cloudRoots(){
   const service=CLOUD_SERVICES[$("cloud-service").value];
-  return service.root($("cloud-host").value.trim(),$("cloud-user").value.trim());
+  return service.roots($("cloud-host").value.trim(),$("cloud-user").value.trim());
 }
 function showCloudState(){
   const target=cloudTarget();
@@ -178,7 +178,16 @@ async function browseCloud(url){
 $("cloud-connect").onclick=async()=>{
   const creds=cloudCreds();
   if(!creds.user||!creds.password){backupMessage("利用者名とパスワードを入れてください。","error");return}
-  await browseCloud(cloudRoot());
+  const button=$("cloud-connect");button.disabled=true;backupMessage("つないでいます…");
+  try{
+    /* pCloud は地域ごとに入口が違う。当たった方をそのまま使う */
+    const found=await connectCloud(cloudRoots(),creds);
+    await browseCloud(found.url);
+  }catch(error){
+    const hint=$("cloud-service").value==="pcloud"
+      ? "2段階認証を使っている場合は、pCloudの設定でWebDAV用のパスワードをご確認ください。" : "";
+    backupMessage("つなげませんでした。"+error.message+(hint?" "+hint:""),"error");
+  }finally{button.disabled=false}
 };
 $("cloud-up").onclick=()=>{
   const url=new URL(cloudCursor);

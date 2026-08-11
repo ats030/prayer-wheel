@@ -1312,3 +1312,16 @@ def test_folder_listing_hides_files_and_self():
     assert 'entry.find(".//d:resourcetype/d:collection", ns) is None' in relay   # ファイルを出さない
     assert "continue  # 自分自身" in relay
     assert 'headers={"Depth": "1"' in relay                   # 1階層だけ
+
+
+def test_pcloud_tries_both_regions():
+    """pCloud はアカウントの地域で入口が分かれる (webdav / ewebdav)。取り違えると
+    401 が返り「パスワードが違う」ようにしか見えないので、利用者に選ばせず両方試す。"""
+    backup = client.get("/assets/backup.js").text
+    assert '"https://webdav.pcloud.com/"' in backup
+    assert '"https://ewebdav.pcloud.com/"' in backup
+    assert "async function connectCloud(candidates, creds)" in backup
+    script = client.get("/assets/settings.js").text
+    assert "await connectCloud(cloudRoots(),creds)" in script
+    # 2段階認証という別の原因もあるので、失敗時に触れる
+    assert "WebDAV用のパスワード" in script

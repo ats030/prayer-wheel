@@ -277,13 +277,30 @@ async function loadFromCloud(target) {
 
 /* サービスごとの入口。URLを手で組み立てさせないための対応表 */
 const CLOUD_SERVICES = {
-  pcloud: {label: "pCloud", root: () => "https://webdav.pcloud.com/", needsHost: false},
+  /* pCloud はアカウントの地域でエンドポイントが分かれる (米国 / EU)。
+     取り違えると 401 が返り「パスワードが違う」ようにしか見えないので、
+     利用者に選ばせず両方を順に試す。 */
+  pcloud: {label: "pCloud", needsHost: false,
+    roots: () => ["https://webdav.pcloud.com/", "https://ewebdav.pcloud.com/"]},
   nextcloud: {label: "Nextcloud", needsHost: true,
-    root: (host, user) => "https://" + String(host).replace(/^https?:\/\//, "").replace(/\/+$/, "") +
-                          "/remote.php/dav/files/" + encodeURIComponent(user) + "/"},
+    roots: (host, user) => ["https://" + String(host).replace(/^https?:\/\//, "").replace(/\/+$/, "") +
+                            "/remote.php/dav/files/" + encodeURIComponent(user) + "/"]},
   other: {label: "その他 (WebDAV)", needsHost: true,
-    root: (host) => { const h = String(host).replace(/^https?:\/\//, "").replace(/\/+$/, ""); return "https://" + h + "/"; }},
+    roots: (host) => ["https://" + String(host).replace(/^https?:\/\//, "").replace(/\/+$/, "") + "/"]},
 };
+
+/* 候補を順に試し、最初に開けたものを使う。全部だめなら最後の理由を返す */
+async function connectCloud(candidates, creds) {
+  let last = null;
+  for (const url of candidates) {
+    try {
+      return {url, folders: await listCloudFolders({url, ...creds})};
+    } catch (error) {
+      last = error;
+    }
+  }
+  throw last || new Error("つなげませんでした");
+}
 
 async function listCloudFolders(target) {
   const data = await relay("/api/storage/list", target);
