@@ -1125,23 +1125,6 @@ def test_adverts_follow_the_first_candidate():
     assert "const topCandidate=(record.candidates||[])[0]" in history
 
 
-def test_backup_keeps_the_data_on_the_visitor_side():
-    """保存先は利用者が選ぶ。運営者のサーバーへは送らない。"""
-    backup = client.get("/assets/backup.js").text
-    assert 'BACKUP_FORMAT = "ikimono-note/1"' in backup
-    # ファイルへの書き出し・読み込みと「いつもの保存先」はサーバーを通らない
-    for offline in ["buildBackup", "restoreBackup", "writeBackupTo", "readBackupFrom"]:
-        body = backup[backup.index(f"function {offline}"):]
-        body = body[:body.index("\n}")]
-        assert "/api/" not in body, offline
-    # APIキーは持ち出さない（ファイルが漏れたら課金される鍵がそのまま渡る）
-    assert "species-key" not in backup
-    assert "APIキーは含めません" in backup
-    settings = client.get("/settings").text
-    assert 'id="export-backup"' in settings and 'id="import-backup"' in settings
-    assert "運営者は内容を知りません" in settings
-
-
 def test_backup_carries_photos_without_tripping_the_policy():
     """data: URL への fetch は connect-src 'self' に弾かれる。自前でデコードする。"""
     backup = client.get("/assets/backup.js").text
@@ -1159,18 +1142,6 @@ def test_restore_does_not_wipe_what_is_already_there():
     assert 'payload.format !== BACKUP_FORMAT' in backup   # 別物を読ませない
 
 
-def test_default_target_is_offered_only_where_it_works():
-    """showSaveFilePicker が無いブラウザに、押せない操作を並べない。"""
-    settings_html = client.get("/settings").text
-    for control in ["target-strip", "target-actions", "target-help", "choose-target", "load-target", "clear-target"]:
-        assert f'id="{control}"' in settings_html, control
-    assert 'id="target-actions" hidden' in settings_html      # 既定は隠しておく
-    script = client.get("/assets/settings.js").text
-    assert "if(!backupSupported())" in script                 # 対応時だけ操作を出す
-    # hidden 属性が .actions{display:flex} に負けないこと
-    assert "[hidden]{display:none!important}" in client.get("/assets/settings.css").text
-
-
 def test_records_are_written_back_whenever_they_change():
     backup = client.get("/assets/backup.js").text
     assert "function scheduleAutoBackup()" in backup
@@ -1181,16 +1152,6 @@ def test_records_are_written_back_whenever_they_change():
     assert history.count("scheduleAutoBackup()") >= 2          # 削除と再判定
     for page in ["/", "/history", "/settings"]:
         assert '<script src="/assets/backup.js" defer></script>' in client.get(page).text, page
-
-
-def test_target_handle_lives_outside_the_records_database():
-    """記録のDBのバージョンを上げると、すでに記録を持つ利用者の移行が要る。"""
-    backup = client.get("/assets/backup.js").text
-    assert 'const HANDLE_DB = "species-backup"' in backup
-    assert 'indexedDB.open("species-history", 1)' in backup    # 記録側は据え置き
-    # 権限は毎回確認し、利用者の操作なしに要求しない
-    assert "queryPermission" in backup and "requestPermission" in backup
-    assert "{ask = false}" in backup
 
 
 def test_every_script_actually_parses():
@@ -1230,116 +1191,6 @@ def test_pages_load_every_script_they_depend_on():
                 assert func in available, f"{path}: {func} を呼ぶが定義が読み込まれていない"
 
 
-def test_unavailable_target_explains_itself():
-    """File System Access API は HTTPS を要求する。http:// で開くと機能が消えるが、
-    黙って隠すと「無いのか壊れたのか」が分からない。"""
-    backup = client.get("/assets/backup.js").text
-    assert "function backupUnavailableReason()" in backup
-    assert "window.isSecureContext" in backup
-    assert "暗号化されていない接続" in backup
-    assert "書き出し・読み込みはこのままお使いいただけます" in backup   # 代わりの手段を示す
-    script = client.get("/assets/settings.js").text
-    assert 'textContent=backupUnavailableReason()' in script
-
-
-def test_cloud_storage_is_offered_with_its_trade_off_stated():
-    """ブラウザから外部ストレージへ直接つなぐ経路は CORS と CSP で塞がっている。
-    サーバーが中継する以上、経路上を通ることを画面に書く。"""
-    page = client.get("/settings").text
-    assert 'id="storage-kind"' in page and 'data-storage="webdav"' in page
-    for field in ["cloud-service", "cloud-user", "cloud-password", "cloud-connect",
-                  "cloud-folders", "cloud-pick", "cloud-save", "cloud-load", "cloud-forget"]:
-        assert f'id="{field}"' in page, field
-    # URL の手入力を求めない
-    assert 'id="cloud-url"' not in page
-    assert "つないでフォルダを見る" in page
-    assert "サーバーを経由します" in page
-    assert "サーバーには残しません" in page
-    backup = client.get("/assets/backup.js").text
-    assert '"/api/storage/put"' in backup and '"/api/storage/get"' in backup
-    assert 'const CLOUD_KEY = "species-cloud-target"' in backup   # 接続先はブラウザに置く
-
-
-def test_relay_endpoints_reject_internal_targets():
-    for url in ["http://example.com/f.json", "https://127.0.0.1/f.json",
-                "https://169.254.169.254/latest/meta-data"]:
-        response = client.post("/api/storage/put", json={"url": url, "user": "a", "password": "b", "body": "{}"})
-        assert response.status_code == 400, url
-    # 中継は連打できないようにしておく
-    assert '_rate_limit(request, "storage", 30)' in (Path(__file__).parents[1] / "main.py").read_text()
-
-
-def test_relay_does_not_store_credentials():
-    main_py = (Path(__file__).parents[1] / "main.py").read_text()
-    relay = main_py[main_py.index("async def storage_put"):main_py.index("@app.get(\"/health\")")]
-    assert "config_store.save" not in relay
-    assert "open(" not in relay
-
-
-def test_target_is_a_folder_not_a_file():
-    """利用者が決めるのはフォルダまで。ファイル名はアプリが持ち、別用途のファイルを
-    上書きしないようにする。"""
-    backup = client.get("/assets/backup.js").text
-    assert 'const BACKUP_FILE_NAME = "ikimono-note.json"' in backup
-    assert 'handle?.kind === "directory"' in backup          # 旧来のファイル参照も読める
-    assert "showDirectoryPicker" in backup                    # 対応判定もフォルダ基準
-    script = client.get("/assets/settings.js").text
-    assert 'window.showDirectoryPicker({mode:"readwrite"})' in script
-    page = client.get("/settings").text
-    assert "フォルダを決める" in page      # ローカル側
-    # クラウド側は一覧から選ぶので、URLを打たせない
-    assert "つないでフォルダを見る" in page
-    assert 'id="cloud-pick"' in page
-
-
-def test_cloud_setup_does_not_require_typing_a_url():
-    """URLの手打ちはとっつきにくい。サービスを選び、つないで、一覧から選ぶ。"""
-    backup = client.get("/assets/backup.js").text
-    assert "const CLOUD_SERVICES" in backup
-    for service in ["pcloud", "nextcloud", "other"]:
-        assert f"{service}:" in backup, service
-    assert '"https://webdav.pcloud.com/"' in backup          # pCloud は入口が固定
-    assert "/remote.php/dav/files/" in backup                 # Nextcloud の作法
-    assert "async function listCloudFolders(target)" in backup
-    script = client.get("/assets/settings.js").text
-    assert "async function browseCloud(url)" in script
-    assert 'button.onclick=()=>browseCloud(folder.url)' in script   # 階層を辿れる
-    assert '$("cloud-up").disabled=new URL(url).pathname==="/"' in script
-
-
-def test_folder_listing_hides_files_and_self():
-    relay = (Path(__file__).parents[1] / "webdav_relay.py").read_text()
-    assert 'entry.find(".//d:resourcetype/d:collection", ns) is None' in relay   # ファイルを出さない
-    assert "continue  # 自分自身" in relay
-    assert 'headers={"Depth": "1"' in relay                   # 1階層だけ
-
-
-def test_pcloud_tries_both_regions():
-    """pCloud はアカウントの地域で入口が分かれる (webdav / ewebdav)。取り違えると
-    401 が返り「パスワードが違う」ようにしか見えないので、利用者に選ばせず両方試す。"""
-    backup = client.get("/assets/backup.js").text
-    assert '"https://webdav.pcloud.com/"' in backup
-    assert '"https://ewebdav.pcloud.com/"' in backup
-    assert "async function connectCloud(candidates, creds)" in backup
-    script = client.get("/assets/settings.js").text
-    assert "await connectCloud(cloudRoots(),creds)" in script
-    # 2段階認証は「WebDAV用パスワード」ではなくメール承認が要る (pCloud の仕様)
-    assert "New login attempt. Is this you?" in script
-    assert "WebDAV用のパスワード" not in script
-
-
-def test_denied_webdav_logs_the_reason_for_the_operator():
-    """断られた理由は接続先しか知らない。画面には出さず journal に残す。"""
-    relay = (Path(__file__).parents[1] / "webdav_relay.py").read_text()
-    assert "def _log_denial(target: str, response: httpx.Response)" in relay
-    assert "WWW-Authenticate" in relay
-    assert relay.count("_log_denial(target, response)") >= 3   # put/get/list すべて
-    # 画面向けの文言に接続先の内部情報を混ぜない（https:// の指示は利用者向けなので可）
-    for message in re.findall(r'RelayError\("([^"]+)"\)', relay):
-        for internal in ["WWW-Authenticate", "Basic realm", "body="]:
-            assert internal not in message, message
-
-
 def test_google_drive_talks_to_google_directly():
     """Drive は WebDAV を提供しないので OAuth と Drive API を使う。通信はブラウザから
     Google へ直接行き、サーバーを経由しない（写真もトークンも運営者を通らない）。"""
@@ -1376,25 +1227,6 @@ def test_drive_says_so_when_the_operator_has_not_set_it_up():
     assert "google_client_id" in settings          # 公開情報。秘密鍵は使わない
     script = client.get("/assets/settings.js").text
     assert "SPECIES_GOOGLE_CLIENT_ID" in script    # 何をすれば使えるか伝える
-
-
-def test_one_storage_choice_at_a_time():
-    """保存先を4つ並列に並べると、何を選べばよいか分からない。ひとつ選ばせ、
-    選んだものの詳細だけを見せる。"""
-    page = client.get("/settings").text
-    assert 'id="storage-kind"' in page
-    for kind in ["none", "drive", "webdav", "folder"]:
-        assert f'value="{kind}"' in page, kind
-        if kind != "none":
-            assert f'data-storage="{kind}"' in page, kind
-    assert page.count('class="storage-body"') == 3
-    script = client.get("/assets/settings.js").text
-    assert "function showStorageKind()" in script
-    assert "body.hidden=body.dataset.storage!==kind" in script
-    # 設定済みのものがあれば、それを選んだ状態で開く
-    assert "if(cloudTarget())saved=" in script and "driveFileId()" in script
-    # 選ばれるまで、その保存先の初期化を走らせない
-    assert 'if(kind==="drive")refreshDrive()' in script
 
 
 def test_sessions_cannot_be_forged():
@@ -1477,3 +1309,51 @@ def test_privacy_matches_what_we_actually_keep():
     assert "パスワードは受け取らず、保存もしません" in page
     assert "退会する" in page                        # 消せることを書く
     assert "保護者の方の同意" in page                # 全年齢向けなので必要
+
+
+def test_records_go_to_drive_and_nowhere_else():
+    """保存先はひとつ。ログインに Google アカウントを使う以上、全員が持っている
+    置き場はドライブで、選ばせる理由がない。"""
+    page = client.get("/settings").text
+    assert "記録の保存" in page and 'id="drive-connect"' in page
+    for gone in ["storage-kind", "cloud-service", "cloud-connect", "choose-target",
+                 "export-backup", "import-backup"]:
+        assert gone not in page, gone
+
+
+def test_the_relay_is_gone():
+    """中継は SSRF の入口だった。使わなくなったので、口ごと閉じる。"""
+    assert not (Path(__file__).parents[1] / "webdav_relay.py").exists()
+    source = (Path(__file__).parents[1] / "main.py").read_text()
+    assert "webdav_relay" not in source and "/api/storage/" not in source
+    for path in ["/api/storage/put", "/api/storage/get", "/api/storage/list"]:
+        assert client.post(path, json={"url": "https://example.com/"}).status_code == 404, path
+
+
+def test_records_are_written_back_without_asking_every_time():
+    """記録するたび許可を求められては使い物にならない。二度目からは黙って取り直す。"""
+    drive = client.get("/assets/gdrive.js").text
+    assert "async function ensureDriveToken(clientId)" in drive
+    assert 'requestAccessToken(silent ? {prompt: "none"} : {prompt: ""})' in drive
+    assert "async function autoSaveToDrive()" in drive
+    # 取れなければ黙って諦める。記録は端末の中に残る
+    body = drive.split("async function ensureDriveToken(clientId) {")[1].split("\n}")[0]
+    assert body.count("return null;") == 2      # つないでいないとき、取れなかったとき
+    backup = client.get("/assets/backup.js").text
+    assert "if (typeof autoSaveToDrive === \"function\") autoSaveToDrive();" in backup
+    # トークンは保存しない。覚えるのは「一度つないだ」という事実だけ
+    assert "species-drive-linked" in drive
+    assert "localStorage" not in drive.split("let driveToken")[1].split("const DRIVE_LINKED")[0]
+
+
+def test_settings_page_touches_only_elements_that_exist():
+    """要素が消えたのに参照が残ると、load() が途中で止まって画面が育たない。
+    実際に運営者用の設定画面が、モデルの選択肢を描かないまま出ていた。"""
+    html = (Path(__file__).parents[1] / "static" / "settings.html").read_text()
+    script = (Path(__file__).parents[1] / "static" / "assets" / "settings.js").read_text()
+    ids = set(re.findall(r'id="([^"]+)"', html))
+    used = set(re.findall(r'\$\("([^"]+)"\)', script))
+    # 無い要素に触るなら、必ず存在を確かめてから
+    for name in sorted(used - ids):
+        guarded = re.search(rf'const \w+=\$\("{re.escape(name)}"\);\s*\n\s*if\(\w+\)', script)
+        assert guarded, f'{name} は settings.html に無く、存在確認もしていない'

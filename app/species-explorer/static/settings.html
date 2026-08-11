@@ -39,53 +39,13 @@
   </section>
 
   <section class="section" aria-labelledby="backup-heading">
-    <div class="section-head"><h2 id="backup-heading">記録の置き場</h2><p>ひとつ選んでください</p></div>
+    <div class="section-head"><h2 id="backup-heading">記録の保存</h2><p>Google ドライブに置きます</p></div>
     <div class="panel">
-      <p class="help">調べた記録（写真を含む）と、使うAIの設定をまとめて保存します。<strong>APIキーは含めません。</strong>保存先はご自身で選び、運営者は内容を知りません。</p>
-      <div class="field"><label for="storage-kind">保存先</label><select id="storage-kind">
-        <option value="none">この端末だけ（持ち出さない）</option>
-        <option value="drive">Google ドライブ</option>
-        <option value="webdav">クラウド (pCloud・Nextcloud など)</option>
-        <option value="folder">この端末のフォルダ</option>
-      </select></div>
-
-      <div class="storage-body" data-storage="drive" hidden>
-        <p class="help">記録はブラウザから Google へ直接送られ、<strong>本サービスのサーバーを通りません</strong>。このアプリが作った ikimono-note.json だけを読み書きします。</p>
-        <p class="help" id="drive-unavailable" hidden></p>
-        <div class="actions" id="drive-actions" hidden><button class="button primary" id="drive-connect" type="button">Googleドライブにつなぐ</button><button class="button" id="drive-save" type="button" hidden>いま保存</button><button class="button" id="drive-load" type="button" hidden>読み込む</button></div>
-        <span class="configured" id="drive-state"></span>
-      </div>
-
-      <div class="storage-body" data-storage="webdav" hidden>
-        <p class="help">つないだあと、保存するフォルダを一覧から選べます。接続先とパスワードはこのブラウザだけに保存し、やり取りのたびに本サービスのサーバーを経由します（<strong>サーバーには残しません</strong>）。</p>
-        <div class="field"><label for="cloud-service">サービス</label><select id="cloud-service">
-          <option value="pcloud">pCloud</option>
-          <option value="nextcloud">Nextcloud</option>
-          <option value="other">その他 (WebDAV)</option>
-        </select></div>
-        <div class="field" id="cloud-host-field" hidden><label for="cloud-host">サーバーのアドレス</label><input id="cloud-host" placeholder="cloud.example.com"></div>
-        <div class="field"><label for="cloud-user">利用者名（メールアドレス）</label><input id="cloud-user" autocomplete="username"></div>
-        <div class="field"><label for="cloud-password">パスワード</label><input id="cloud-password" type="password" autocomplete="current-password"></div>
-        <div class="actions"><button class="button primary" id="cloud-connect" type="button">つないでフォルダを見る</button></div>
-        <div id="cloud-browser" hidden>
-          <div class="status-strip"><span>いまの場所</span><strong id="cloud-path">/</strong></div>
-          <div class="actions"><button class="button" id="cloud-up" type="button">上へ</button><button class="button primary" id="cloud-pick" type="button">ここに保存する</button></div>
-          <ul class="folder-list" id="cloud-folders"></ul>
-        </div>
-        <div class="actions" id="cloud-linked" hidden><button class="button" id="cloud-save" type="button">いま保存</button><button class="button" id="cloud-load" type="button">読み込む</button><button class="button" id="cloud-forget" type="button">接続を解除</button></div>
-        <span class="configured" id="cloud-state"></span>
-      </div>
-
-      <div class="storage-body" data-storage="folder" hidden>
-        <p class="help" id="target-help">フォルダを決めると、その中の ikimono-note.json へ、記録が増えたり消えたりするたび自動で書き直します。クラウドの同期フォルダを選べば、別の端末からも読めます。</p>
-        <div class="status-strip" id="target-strip" hidden><span>いまの保存先</span><strong id="target-name">未設定</strong></div>
-        <div class="actions" id="target-actions" hidden><button class="button primary" id="choose-target" type="button">フォルダを決める</button><button class="button" id="load-target" type="button">読み込む</button><button class="button" id="clear-target" type="button">解除</button></div>
-      </div>
-
-      <details class="panel stacked"><summary><span><span class="detail-title">ファイルでやりとりする</span><span class="detail-copy">保存先を決めずに、1回だけ書き出す・読み込む</span></span></summary><div class="detail-body">
-        <div class="actions"><button class="button" id="export-backup" type="button">ファイルへ書き出す</button><button class="button" id="import-backup" type="button">ファイルから読み込む</button></div>
-        <input id="import-file" type="file" accept="application/json,.json" hidden>
-      </div></details>
+      <p class="help">調べた記録（写真を含む）と、使うAIの設定を、ご自身の Google ドライブへ保存します。記録が増えたり消えたりするたび、自動で書き直します。<strong>APIキーは含めません。</strong></p>
+      <p class="help">やり取りはブラウザから Google へ直接行き、<strong>本サービスのサーバーを通りません</strong>。このアプリが作った ikimono-note.json だけを読み書きし、ドライブの他のファイルは見えません。</p>
+      <p class="help" id="drive-unavailable" hidden></p>
+      <div class="status-strip" id="drive-strip" hidden><span>状態</span><strong id="drive-state">未接続</strong></div>
+      <div class="actions" id="drive-actions" hidden><button class="button primary" id="drive-connect" type="button">ドライブにつなぐ</button><button class="button" id="drive-save" type="button" hidden>いま保存</button><button class="button" id="drive-load" type="button" hidden>読み込む</button><button class="button" id="drive-forget" type="button" hidden>接続を解除</button></div>
       <p class="message" id="backup-message" aria-live="polite"></p>
     </div>
   </section>

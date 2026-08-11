@@ -14,6 +14,7 @@ const DRIVE_KEY = "species-drive-file";   // 作ったファイルのIDを覚え
 
 let driveToken = null;      // メモリだけに置く。保存すると盗まれたとき困る
 let driveTokenClient = null;
+const DRIVE_LINKED = "species-drive-linked";   // 一度つないだかどうか。トークンそのものではない
 
 function driveConfigured(clientId) {
   return Boolean(clientId);
@@ -35,7 +36,7 @@ function loadGoogleIdentity() {
   });
 }
 
-async function driveSignIn(clientId) {
+async function driveSignIn(clientId, {silent = false} = {}) {
   await loadGoogleIdentity();
   return new Promise((resolve, reject) => {
     driveTokenClient = google.accounts.oauth2.initTokenClient({
@@ -44,11 +45,13 @@ async function driveSignIn(clientId) {
       callback: (response) => {
         if (response.error) { reject(new Error(response.error_description || response.error)); return; }
         driveToken = response.access_token;
+        rememberDriveLink(true);
         resolve(driveToken);
       },
       error_callback: (error) => reject(new Error(error?.message || "Google の許可を得られませんでした")),
     });
-    driveTokenClient.requestAccessToken({prompt: ""});
+    // 初回は画面を出す。二度目からは、出さずに取れるなら出さない
+    driveTokenClient.requestAccessToken(silent ? {prompt: "none"} : {prompt: ""});
   });
 }
 
@@ -56,8 +59,49 @@ function driveSignedIn() {
   return Boolean(driveToken);
 }
 
+function driveLinked() {
+  try { return localStorage.getItem(DRIVE_LINKED) === "1"; } catch (error) { return false; }
+}
+
+function rememberDriveLink(linked) {
+  try { linked ? localStorage.setItem(DRIVE_LINKED, "1") : localStorage.removeItem(DRIVE_LINKED); }
+  catch (error) { /* 覚えられなくても、その場では使える */ }
+}
+
+/* 一度つないだ相手なら、画面を出さずに取り直せることが多い。取れなければ諦める。
+   自動保存のたびに許可を求めると、記録するたび画面が出て使い物にならない */
+async function ensureDriveToken(clientId) {
+  if (driveToken) return driveToken;
+  if (!clientId || !driveLinked()) return null;
+  try {
+    return await driveSignIn(clientId, {silent: true});
+  } catch (error) {
+    return null;
+  }
+}
+
+/* 記録が変わったあとに呼ばれる。つながっていなければ黙って何もしない */
+async function autoSaveToDrive() {
+  try {
+    const settings = await fetch("/api/settings").then(r => r.ok ? r.json() : null);
+    const token = await ensureDriveToken(settings?.google_client_id || "");
+    if (!token) return false;
+    await saveToDrive();
+    return true;
+  } catch (error) {
+    console.error("ドライブへ書けませんでした", error);
+    return false;
+  }
+}
+
 function driveFileId() {
   try { return localStorage.getItem(DRIVE_KEY) || ""; } catch (error) { return ""; }
+}
+
+function forgetDrive() {
+  driveToken = null;
+  rememberDriveLink(false);
+  rememberDriveFile("");
 }
 
 function rememberDriveFile(id) {

@@ -26,7 +26,6 @@ import config_store
 import creators_api
 import pipeline
 import vision
-import webdav_relay
 
 class SettingsUpdate(BaseModel):
     provider: str
@@ -367,45 +366,47 @@ async def amazon_products(q: str = "", index: str = "All") -> JSONResponse:
     return JSONResponse({"products": products})
 
 
-class StorageRequest(BaseModel):
-    url: str
-    user: str = ""
-    password: str = ""
-    body: str | None = None
-
-
-# 利用者のクラウドストレージへの中継。認証情報は毎回受け取り、保存も記録もしない。
-# 中継そのものが SSRF の入口になるため、webdav_relay 側で接続先を検証している。
-@app.post("/api/storage/put")
-async def storage_put(request: Request, payload: StorageRequest) -> dict[str, bool]:
-    _rate_limit(request, "storage", 30)
+@app.get("/affiliate/click")
+def affiliate_click(q: str = "") -> RedirectResponse:
+    if PUBLIC_MODE and not PUBLIC_AFFILIATE_ENABLED:
+        raise HTTPException(status_code=404, detail="公開ベータ版では広告を表示しません")
     try:
-        await run_in_threadpool(webdav_relay.put, payload.url, payload.user, payload.password,
-                                (payload.body or "").encode("utf-8"))
-    except webdav_relay.RelayError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        target = config_store.affiliate_target(q)
+        config_store.record_affiliate("clicks")
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return RedirectResponse(target, status_code=302)
+
+
+@app.post("/api/affiliate/click")
+def affiliate_click_event() -> dict[str, bool]:
+    if PUBLIC_MODE and not PUBLIC_AFFILIATE_ENABLED:
+        raise HTTPException(status_code=404, detail="公開ベータ版では広告を表示しません")
+    if not config_store.load()["affiliate"]["enabled"]:
+        raise HTTPException(status_code=404, detail="広告が設定されていません")
+    config_store.record_affiliate("clicks")
     return {"ok": True}
 
 
-@app.post("/api/storage/get")
-async def storage_get(request: Request, payload: StorageRequest) -> JSONResponse:
-    _rate_limit(request, "storage", 30)
+@app.get("/api/amazon/products")
+async def amazon_products(q: str = "", index: str = "All") -> JSONResponse:
+    if PUBLIC_MODE and not PUBLIC_AFFILIATE_ENABLED:
+        raise HTTPException(status_code=404, detail="公開ベータ版では広告を表示しません")
+    settings = config_store.load()
+    affiliate = settings["affiliate"]
+    keys = settings["api_keys"]
+    if not affiliate.get("product_enabled"):
+        raise HTTPException(status_code=404, detail="商品APIが設定されていません")
     try:
-        body = await run_in_threadpool(webdav_relay.get, payload.url, payload.user, payload.password)
-    except webdav_relay.RelayError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    return JSONResponse({"body": body.decode("utf-8", errors="replace")})
+        products = await run_in_threadpool(creators_api.search_products, q, keys.get("amazon_creators_id", ""), keys.get("amazon_creators_secret", ""), affiliate.get("partner_tag", ""), 4, index)
+    except creators_api.CreatorsAPIError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    if not products:
+        raise HTTPException(status_code=404, detail="関連商品が見つかりません")
+    return JSONResponse({"products": products})
 
 
-@app.post("/api/storage/list")
-async def storage_list(request: Request, payload: StorageRequest) -> JSONResponse:
-    """フォルダの中身を1階層だけ返す。利用者にURLを組み立てさせないため。"""
-    _rate_limit(request, "storage", 30)
-    try:
-        folders = await run_in_threadpool(webdav_relay.list_folders, payload.url, payload.user, payload.password)
-    except webdav_relay.RelayError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    return JSONResponse({"folders": folders})
+# 利用者のクラウドストレージへの中継。認証情報は毎回受け取り、保存も記録もしない。
 
 
 @app.get("/health")

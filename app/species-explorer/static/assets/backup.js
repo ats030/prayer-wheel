@@ -1,7 +1,8 @@
-/* 設定と記録の持ち出し。保存先は利用者が選ぶ。
+/* 記録の組み立てと復元。
  *
- * 運営者のサーバーへは何も送らない。プライバシーポリシーの「サーバーへ保存しません」を
- * 維持したまま、端末を移っても記録が残るようにするのが目的。
+ * 置き場は Google ドライブひとつ。ログインに Google アカウントを使う以上、
+ * 全員が持っている保存先はここで、選ばせる理由がない。以前は WebDAV・端末内の
+ * フォルダ・ファイル書き出しも並べていたが、ボタンが7個並ぶ画面になっていた。
  *
  * APIキーは含めない。ファイルが漏れたとき、そのまま課金されるキーが渡ってしまう。
  */
@@ -83,7 +84,11 @@ async function buildBackup() {
   };
 }
 
-/* 読み込んだ内容を戻す。既存の記録は消さず、同じidは新しいほうを残す */
+/* 読み込んだ内容を戻す。既存の記録は消さず、同じidは新しいほうを残す。
+ *
+ * 「混ぜる」動作にしてある。片方の端末で消した記録は、もう片方には残る。
+ * 消したことを伝える印を持たない限り、削除は行き渡らない。消えるより残るほうが
+ * 害が小さいので、こちらを既定にする。 */
 async function restoreBackup(payload) {
   if (!payload || payload.format !== BACKUP_FORMAT) throw new Error("この生きものノートの書き出しファイルではありません");
   const records = Array.isArray(payload.records) ? payload.records : [];
@@ -105,204 +110,12 @@ async function restoreBackup(payload) {
   return restored;
 }
 
-function backupFileName() {
-  const now = new Date();
-  const stamp = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"), String(now.getDate()).padStart(2, "0")].join("-");
-  return `ikimono-note-${stamp}.json`;
-}
-
-
-/* ── 既定の保存先 ─────────────────────────────────────────
- * 選んだファイルへの参照 (FileSystemFileHandle) を持っておき、記録が変わるたびに
- * 書き直す。参照は IndexedDB に入れられるので、次に開いたときも同じ場所へ書ける。
- *
- * 記録の本体 (species-history) とは別のDBに置く。既存DBのバージョンを上げると、
- * すでに記録を持っている利用者の移行を伴うため。
- *
- * 読み込みは「混ぜる」動作にしてある。片方の端末で消した記録は、もう片方には
- * 残る。消したことを伝える印を持たない限り、削除は行き渡らない。
- * 消えるより残るほうが害が小さいので、こちらを既定にする。
- */
-
-const HANDLE_DB = "species-backup";
-const HANDLE_KEY = "default-target";
-
-function handleDb() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(HANDLE_DB, 1);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains("handles")) db.createObjectStore("handles");
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-function backupSupported() {
-  return typeof window.showDirectoryPicker === "function";
-}
-
-/* 使えないときは理由を返す。黙って消えると、機能が無いのか壊れたのか分からない */
-function backupUnavailableReason() {
-  if (backupSupported()) return "";
-  if (!window.isSecureContext) return "この画面は暗号化されていない接続 (http://) のため、保存先を決められません。https:// で開くと使えます。";
-  return "このブラウザは保存先の指定に対応していません。Chrome か Edge でお試しください。書き出し・読み込みはこのままお使いいただけます。";
-}
-
-async function rememberTarget(handle) {
-  const db = await handleDb();
-  const transaction = db.transaction("handles", "readwrite");
-  transaction.objectStore("handles").put(handle, HANDLE_KEY);
-  await backupTransaction(transaction);
-  db.close();
-}
-
-async function storedTarget() {
-  if (!backupSupported()) return null;
-  try {
-    const db = await handleDb();
-    const transaction = db.transaction("handles", "readonly");
-    const handle = await backupRequest(transaction.objectStore("handles").get(HANDLE_KEY));
-    await backupTransaction(transaction);
-    db.close();
-    return handle || null;
-  } catch (error) {
-    return null;
-  }
-}
-
-async function forgetTarget() {
-  const db = await handleDb();
-  const transaction = db.transaction("handles", "readwrite");
-  transaction.objectStore("handles").delete(HANDLE_KEY);
-  await backupTransaction(transaction);
-  db.close();
-}
-
-/* 権限は再訪のたびに確認が要る。granted でなければ、利用者の操作なしには要求できない */
-async function targetPermission(handle, {ask = false} = {}) {
-  if (!handle?.queryPermission) return "granted";
-  const options = {mode: "readwrite"};
-  let state = await handle.queryPermission(options);
-  if (state !== "granted" && ask) state = await handle.requestPermission(options);
-  return state;
-}
-
-const BACKUP_FILE_NAME = "ikimono-note.json";
-
-/* フォルダを選んでもらい、その中のファイルを扱う。以前の版でファイルを直接
-   選んでいた利用者もいるので、どちらの参照でも動くようにする */
-async function fileInTarget(handle, {create = false} = {}) {
-  if (handle?.kind === "directory") return await handle.getFileHandle(BACKUP_FILE_NAME, {create});
-  return handle;
-}
-
-function targetLabel(handle) {
-  return handle?.kind === "directory" ? handle.name + "/" + BACKUP_FILE_NAME : handle?.name || "";
-}
-
-async function writeBackupTo(handle) {
-  const payload = await buildBackup();
-  const file = await fileInTarget(handle, {create: true});
-  const writable = await file.createWritable();
-  await writable.write(new Blob([JSON.stringify(payload)], {type: "application/json"}));
-  await writable.close();
-  return payload.records.length;
-}
-
-async function readBackupFrom(handle) {
-  const target = await fileInTarget(handle);
-  const file = await target.getFile();
-  return await restoreBackup(JSON.parse(await file.text()));
-}
-
-/* 記録が変わるたびに呼ばれる。まとめて1回だけ書くよう少し待つ */
+/* 記録が増減するたびに呼ばれる。まとめて1回だけ書くよう少し待つ。
+   ドライブにつながっていないときは何もしない (記録は端末の中に残る) */
 let backupTimer = null;
 function scheduleAutoBackup() {
-  if (!backupSupported()) return;
   clearTimeout(backupTimer);
-  backupTimer = setTimeout(async () => {
-    try {
-      const handle = await storedTarget();
-      if (!handle) return;
-      if (await targetPermission(handle) !== "granted") return;  // 次に画面を開いたとき許可を促す
-      await writeBackupTo(handle);
-    } catch (error) {
-      console.error("記録を保存先へ書けませんでした", error);
-    }
+  backupTimer = setTimeout(() => {
+    if (typeof autoSaveToDrive === "function") autoSaveToDrive();
   }, 1500);
-}
-
-
-/* ── 利用者のクラウドストレージ (WebDAV) ──────────────────
- * 接続先はこのブラウザだけに置く。中継はサーバーを通るが、サーバーは保存しない。
- */
-const CLOUD_KEY = "species-cloud-target";
-
-function cloudTarget() {
-  try { return JSON.parse(localStorage.getItem(CLOUD_KEY) || "null"); } catch (error) { return null; }
-}
-
-function rememberCloud(target) {
-  try { localStorage.setItem(CLOUD_KEY, JSON.stringify(target)); } catch (error) { /* 保存できなくてもその場では使える */ }
-}
-
-function forgetCloud() {
-  try { localStorage.removeItem(CLOUD_KEY); } catch (error) { /* 何もしない */ }
-}
-
-async function relay(path, target, body) {
-  const response = await fetch(path, {
-    method: "POST",
-    headers: {"content-type": "application/json"},
-    body: JSON.stringify({url: target.url, user: target.user || "", password: target.password || "", body}),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.detail || "クラウドとやり取りできませんでした");
-  return data;
-}
-
-async function saveToCloud(target) {
-  const payload = await buildBackup();
-  await relay("/api/storage/put", target, JSON.stringify(payload));
-  return payload.records.length;
-}
-
-async function loadFromCloud(target) {
-  const data = await relay("/api/storage/get", target);
-  return await restoreBackup(JSON.parse(data.body));
-}
-
-
-/* サービスごとの入口。URLを手で組み立てさせないための対応表 */
-const CLOUD_SERVICES = {
-  /* pCloud はアカウントの地域でエンドポイントが分かれる (米国 / EU)。
-     取り違えると 401 が返り「パスワードが違う」ようにしか見えないので、
-     利用者に選ばせず両方を順に試す。 */
-  pcloud: {label: "pCloud", needsHost: false,
-    roots: () => ["https://webdav.pcloud.com/", "https://ewebdav.pcloud.com/"]},
-  nextcloud: {label: "Nextcloud", needsHost: true,
-    roots: (host, user) => ["https://" + String(host).replace(/^https?:\/\//, "").replace(/\/+$/, "") +
-                            "/remote.php/dav/files/" + encodeURIComponent(user) + "/"]},
-  other: {label: "その他 (WebDAV)", needsHost: true,
-    roots: (host) => ["https://" + String(host).replace(/^https?:\/\//, "").replace(/\/+$/, "") + "/"]},
-};
-
-/* 候補を順に試し、最初に開けたものを使う。全部だめなら最後の理由を返す */
-async function connectCloud(candidates, creds) {
-  let last = null;
-  for (const url of candidates) {
-    try {
-      return {url, folders: await listCloudFolders({url, ...creds})};
-    } catch (error) {
-      last = error;
-    }
-  }
-  throw last || new Error("つなげませんでした");
-}
-
-async function listCloudFolders(target) {
-  const data = await relay("/api/storage/list", target);
-  return Array.isArray(data.folders) ? data.folders : [];
 }

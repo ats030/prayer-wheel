@@ -68,11 +68,13 @@ def run(base: str, do_identify: bool) -> None:
         for name in ["readApiKey", "keepingKeys", "buildBackup", "displayName", "providerLabel"]:
             check(f"設定画面で {name} が使える", page.evaluate(f"() => typeof {name}") == "function")
 
-        # 保存先の選択が効くか
-        page.select_option("#storage-kind", "webdav"); page.wait_for_timeout(400)
-        shown = [b.get_attribute("data-storage") for b in page.locator(".storage-body").all() if not b.is_hidden()]
-        check("保存先を選ぶと詳細が出る", shown == ["webdav"], str(shown))
-        page.select_option("#storage-kind", "none"); page.wait_for_timeout(300)
+        # 記録の保存 (ドライブ) の導線が出ているか
+        page.wait_for_timeout(800)
+        check("設定画面がエラーを出していない",
+              not page.locator("#message").inner_text().strip() if page.locator("#message").count() else True,
+              page.locator("#message").inner_text()[:60] if page.locator("#message").count() else "")
+        check("モデルの選択肢が描けている", page.locator("select[id^=model-]").count() >= 3)
+        check("ドライブの導線が出る", page.locator("#drive-connect").count() == 1)
 
         # テーマの切り替え
         page.goto(base + "/"); page.wait_for_load_state("networkidle")
