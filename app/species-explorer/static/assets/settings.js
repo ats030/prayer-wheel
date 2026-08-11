@@ -102,7 +102,7 @@ $("import-file").onchange=async event=>{
 
 /* いつもの保存先。対応ブラウザだけに出す */
 async function refreshTarget(){
-  if(!backupSupported())return;
+  if(!backupSupported()){$("target-help").hidden=false;$("target-help").textContent=backupUnavailableReason();return}
   $("target-actions").hidden=false;$("target-help").hidden=false;
   const handle=await storedTarget();
   const strip=$("target-strip");

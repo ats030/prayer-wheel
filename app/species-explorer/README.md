@@ -26,6 +26,16 @@
 Funnel は 8524 へ向けます。8523 は認証がなく設定を書き換えられるので、
 Funnel やポート開放の対象にしないでください。
 
+運営者用は Tailscale 内限定の HTTPS も張ってあります。
+
+```bash
+tailscale serve --bg --https=8443 8523   # tailnet only。Funnel ではない
+tailscale serve --https=8443 off         # やめるとき
+```
+
+`https://ubuntu-server-app.tailf74832.ts.net:8443/` で開きます。File System Access API
+(記録のいつもの保存先) は secure context を要求するため、http://…:8523 では使えません。
+
 ```bash
 systemctl --user restart species-explorer species-explorer-public
 /home/ats030/app/species-explorer.sh          # 運営者用を手で起動する場合

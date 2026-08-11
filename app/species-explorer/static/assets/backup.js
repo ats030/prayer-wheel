@@ -143,6 +143,13 @@ function backupSupported() {
   return typeof window.showSaveFilePicker === "function";
 }
 
+/* 使えないときは理由を返す。黙って消えると、機能が無いのか壊れたのか分からない */
+function backupUnavailableReason() {
+  if (backupSupported()) return "";
+  if (!window.isSecureContext) return "この画面は暗号化されていない接続 (http://) のため、保存先を決められません。https:// で開くと使えます。";
+  return "このブラウザは保存先の指定に対応していません。Chrome か Edge でお試しください。書き出し・読み込みはこのままお使いいただけます。";
+}
+
 async function rememberTarget(handle) {
   const db = await handleDb();
   const transaction = db.transaction("handles", "readwrite");

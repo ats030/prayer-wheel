@@ -1161,7 +1161,7 @@ def test_default_target_is_offered_only_where_it_works():
         assert f'id="{control}"' in settings_html, control
     assert 'id="target-actions" hidden' in settings_html      # 既定は隠しておく
     script = client.get("/assets/settings.js").text
-    assert "if(!backupSupported())return;" in script          # 対応時だけ出す
+    assert "if(!backupSupported())" in script                 # 対応時だけ操作を出す
     # hidden 属性が .actions{display:flex} に負けないこと
     assert "[hidden]{display:none!important}" in client.get("/assets/settings.css").text
 
@@ -1223,3 +1223,15 @@ def test_pages_load_every_script_they_depend_on():
         for func in shared:
             if re.search(rf"\b{func}\s*\(", body):
                 assert func in available, f"{path}: {func} を呼ぶが定義が読み込まれていない"
+
+
+def test_unavailable_target_explains_itself():
+    """File System Access API は HTTPS を要求する。http:// で開くと機能が消えるが、
+    黙って隠すと「無いのか壊れたのか」が分からない。"""
+    backup = client.get("/assets/backup.js").text
+    assert "function backupUnavailableReason()" in backup
+    assert "window.isSecureContext" in backup
+    assert "暗号化されていない接続" in backup
+    assert "書き出し・読み込みはこのままお使いいただけます" in backup   # 代わりの手段を示す
+    script = client.get("/assets/settings.js").text
+    assert 'textContent=backupUnavailableReason()' in script
