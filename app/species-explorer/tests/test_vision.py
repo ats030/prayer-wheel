@@ -401,7 +401,8 @@ def test_gemini_reserves_output_budget_beyond_thinking_tokens():
     assert vision.GEMINI_MAX_OUTPUT_TOKENS >= 4096
 
 
-def test_gemini_reports_truncation_instead_of_a_generic_failure(monkeypatch):
+def test_gemini_truncation_tells_the_user_plainly_and_the_operator_precisely(monkeypatch, capsys):
+    """利用者には次の行動を、運営者には原因を。混ぜると誰の役にも立たない。"""
     def fake_post(url, **kwargs):
         return FakeResponse({
             "candidates": [{"finishReason": "MAX_TOKENS",
@@ -412,9 +413,15 @@ def test_gemini_reports_truncation_instead_of_a_generic_failure(monkeypatch):
     monkeypatch.setattr(vision.httpx, "post", fake_post)
     with pytest.raises(vision.VisionError) as error:
         vision.identify_gemini([b"one"], "secret", "gemini-3.6-flash")
+
     message = str(error.value)
-    assert "出力上限で途切れました" in message
-    assert "1535" in message  # 思考に使われた量が分かる
+    assert "少し待ってから" in message
+    # 画面に環境変数名や内部の数値を出さない
+    assert "SPECIES_" not in message and "maxOutputTokens" not in message and "1535" not in message
+
+    logged = capsys.readouterr().out
+    assert "SPECIES_GEMINI_MAX_OUTPUT_TOKENS" in logged
+    assert "1535" in logged
 
 
 def test_gemini_output_budget_is_sent_in_the_request(monkeypatch):

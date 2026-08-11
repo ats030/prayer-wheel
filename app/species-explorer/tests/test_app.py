@@ -771,3 +771,36 @@ def test_admin_instance_can_save_settings_and_public_one_cannot():
     finally:
         os.environ.pop("SPECIES_PUBLIC_MODE", None)
         importlib.reload(main)
+
+
+def test_user_facing_messages_use_the_same_words_as_the_screens():
+    """エラー文だけ別の語彙になっていると、同じものが別物に見える。"""
+    sources = {name: (Path(__file__).parents[1] / name).read_text(encoding="utf-8")
+               for name in ["main.py", "vision.py", "config_store.py", "pipeline.py"]}
+    for name, text in sources.items():
+        messages = re.findall(r'(?:detail=|VisionError\(|SettingsError\()\s*f?["\']([^"\']{4,})["\']', text)
+        joined = "\n".join(messages)
+        assert "ローカルLLM" not in joined, name          # 画面は「ローカルAI」
+        assert "計算資源" not in joined, name              # 画面は「使うAI」
+        assert "画像ファイル" not in joined, name          # 画面は「写真」
+        assert "画像は" not in joined, name
+
+
+def test_operator_only_details_stay_out_of_user_messages():
+    """環境変数名や内部の数値を画面に出さない。利用者には手の打ちようがない。"""
+    text = (Path(__file__).parents[1] / "vision.py").read_text(encoding="utf-8")
+    messages = re.findall(r'VisionError\(\s*f?["\']([^"\']{4,})["\']', text)
+    for message in messages:
+        assert "SPECIES_" not in message, message
+        assert "maxOutputTokens" not in message, message
+        assert "finishReason" not in message or "{" in message, message
+
+
+def test_settings_screen_names_each_thing_once():
+    page = client.get("/settings").text
+    assert "識別に使うAI" not in page      # 「使うAIを選ぶ」に統一
+    assert "使うAIを選ぶ" in page
+    assert "識別結果に関連商品" not in page  # 結果の呼び名は画面全体で揃える
+    # 公開版が別ポートで動いている今、「一般公開に対応していない」は事実と食い違う
+    assert "認証のない一般公開には対応していません" not in page
+    assert "この画面にはパスワードがありません" in page

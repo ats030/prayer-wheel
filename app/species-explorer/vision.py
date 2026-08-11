@@ -170,15 +170,15 @@ def _gps_coordinate(parts: Any, ref: Any) -> float | None:
 
 def prepare_image(raw: bytes) -> bytes:
     if not raw:
-        raise VisionError("画像が空です")
+        raise VisionError("写真を読み取れませんでした")
     if len(raw) > MAX_UPLOAD_BYTES:
-        raise VisionError("画像は15MB以下にしてください")
+        raise VisionError("写真は1枚15MB以下にしてください")
     try:
         image = Image.open(io.BytesIO(raw))
         image = ImageOps.exif_transpose(image)
         image.load()
     except Exception as exc:
-        raise VisionError("対応している画像を選んでください") from exc
+        raise VisionError("対応している形式の写真を選んでください") from exc
     if image.mode != "RGB":
         image = image.convert("RGB")
     if max(image.size) > MAX_EDGE:
@@ -199,7 +199,7 @@ def _extract_json(text: str) -> dict[str, Any]:
     except json.JSONDecodeError as exc:
         raise VisionError("AIの応答を読み取れませんでした") from exc
     if not isinstance(data, dict):
-        raise VisionError("AIの応答形式が不正です")
+        raise VisionError("AIの答えを読み取れませんでした")
     return data
 
 
@@ -569,10 +569,14 @@ def _gemini_output_text(data: dict[str, Any]) -> str:
     finish_reason = str(candidates[0].get("finishReason") or "")
     if finish_reason == "MAX_TOKENS":
         thoughts = int((data.get("usageMetadata") or {}).get("thoughtsTokenCount") or 0)
-        raise VisionError(
-            f"Geminiの応答が出力上限で途切れました（思考に{thoughts}トークン使用）。"
-            "GEMINI_MAX_OUTPUT_TOKENS を増やすか、思考の深さを下げてください。"
+        # 環境変数名や対処法は運営者にしか意味がないので、画面ではなく journal へ出す
+        print(
+            f"[species-explorer] Gemini の応答が maxOutputTokens={GEMINI_MAX_OUTPUT_TOKENS} で"
+            f"途切れました (思考 {thoughts} トークン)。SPECIES_GEMINI_MAX_OUTPUT_TOKENS を増やすか"
+            " SPECIES_GEMINI_THINKING_LEVEL を下げてください。",
+            flush=True,
         )
+        raise VisionError("Geminiが答えを返しきれませんでした。少し待ってからもう一度お試しください。")
     content = candidates[0].get("content") or {}
     texts = [str(part.get("text") or "") for part in content.get("parts") or [] if isinstance(part, dict) and part.get("text")]
     if not texts:

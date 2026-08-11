@@ -21,6 +21,14 @@ with the subject.
   Photo EXIF is 写真の情報, never 記録, because 記録 already means the
   on-device history. Settings and the legal pages may keep 識別 for precision,
   but when they quote a control they quote its actual label.
+- The same vocabulary binds server error messages. A `detail=` string that says
+  画像 or 計算資源 while the screen says 写真 and 使うAI makes one thing look like
+  two. Tests assert the banned words never appear in `detail=` / `VisionError()`.
+- Split the audience in failures. The user gets what to do next ("少し待ってから
+  もう一度お試しください"); the operator gets the cause, in the journal — env var
+  names, token counts, `finishReason`. Putting the operator's half on screen
+  hands a public visitor a variable they cannot set; putting the user's half
+  only on screen leaves the operator guessing. Both halves, separate channels.
 - Terms and privacy state the all-ages position explicitly and place the
   API-key contract and the cost with the account holder, not the child.
 - Nothing about the safety position softens for the younger reader; it gets

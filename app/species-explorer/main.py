@@ -244,10 +244,10 @@ async def photo_metadata(request: Request, files: list[UploadFile] = File(defaul
     metadata: dict[str, object] = {}
     for upload in files:
         if upload.content_type and not upload.content_type.startswith("image/"):
-            raise HTTPException(status_code=415, detail="画像ファイルを選んでください")
+            raise HTTPException(status_code=415, detail="写真を選んでください")
         raw = await upload.read(vision.MAX_UPLOAD_BYTES + 1)
         if len(raw) > vision.MAX_UPLOAD_BYTES:
-            raise HTTPException(status_code=413, detail="画像は1枚15MB以下にしてください")
+            raise HTTPException(status_code=413, detail="写真は1枚15MB以下にしてください")
         try:
             await run_in_threadpool(vision.prepare_image, raw)
         except vision.VisionError as exc:
@@ -278,9 +278,9 @@ async def identify(
     settings = config_store.load()
     provider = request_provider if PUBLIC_MODE else settings["provider"]
     if provider not in config_store.MODELS:
-        raise HTTPException(status_code=400, detail="計算資源を選び直してください")
+        raise HTTPException(status_code=400, detail="使うAIを選び直してください")
     if PUBLIC_MODE and provider == "local" and not PUBLIC_LOCAL_ENABLED:
-        raise HTTPException(status_code=403, detail="公開版のローカルLLMは現在利用できません")
+        raise HTTPException(status_code=403, detail="公開版ではローカルAIを使えません")
     if PUBLIC_MODE:
         model = request_model
         catalog, _ = config_store.model_catalog(
@@ -301,7 +301,7 @@ async def identify(
     if not uploads or len(uploads) > 3:
         raise HTTPException(status_code=400, detail="写真は1〜3枚選んでください")
     if any(upload.content_type and not upload.content_type.startswith("image/") for upload in uploads):
-        raise HTTPException(status_code=415, detail="画像ファイルを選んでください")
+        raise HTTPException(status_code=415, detail="写真を選んでください")
     raw_images = [await upload.read(vision.MAX_UPLOAD_BYTES + 1) for upload in uploads]
     try:
         photo_metadata: dict[str, object] = {}

@@ -59,7 +59,7 @@ def _local_llm_url(value: object) -> str:
     parsed = urlparse(url)
     if (parsed.scheme not in {"http", "https"} or not parsed.hostname or
             parsed.username or parsed.password or parsed.query or parsed.fragment):
-        raise SettingsError("ローカルLLMのURLは http:// または https:// の接続先を入力してください")
+        raise SettingsError("ローカルAIのURLは http:// または https:// の接続先を入力してください")
     return url
 
 
@@ -219,7 +219,7 @@ def save(
     affiliate: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if provider not in MODELS:
-        raise SettingsError("計算資源を選び直してください")
+        raise SettingsError("使うAIを選び直してください")
     current = load()
     if local_llm is not None:
         current["local_llm"]["url"] = _local_llm_url(local_llm.get("url"))
@@ -227,7 +227,7 @@ def save(
     for name in MODELS:
         model = models.get(name, current["models"][name])
         if name == "local" and (not isinstance(model, str) or not model.strip() or len(model) > 200):
-            raise SettingsError("ローカルモデル名を入力してください")
+            raise SettingsError("ローカルAIのモデル名を入力してください")
         if name != "local" and model not in {item["id"] for item in catalog[name]}:
             raise SettingsError("モデルを選び直してください")
         current["models"][name] = model.strip() if name == "local" else model
