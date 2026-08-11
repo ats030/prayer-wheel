@@ -1,8 +1,8 @@
-# 生きものノート (species-explorer) Design Guide
+# 生きものノート (ikimono-note) Design Guide
 
 ## Direction
 
-生きものノート (internally species-explorer) is a phone-first field tool for all ages. It keeps the stack's
+生きものノート (internally ikimono-note) is a phone-first field tool for all ages. It keeps the stack's
 compact layout discipline but reads as daylight fieldwork rather than a console:
 a light canvas, one green accent, and the photograph and identification
 candidates as the visual focus. It must feel careful rather than authoritative:

@@ -14,8 +14,8 @@ import httpx
 
 SETTINGS_PATH = Path(
     os.getenv(
-        "SPECIES_SETTINGS_PATH",
-        str(Path.home() / ".config" / "species-explorer" / "settings.json"),
+        "IKIMONO_SETTINGS_PATH",
+        str(Path.home() / ".config" / "ikimono-note" / "settings.json"),
     )
 )
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434").rstrip("/")

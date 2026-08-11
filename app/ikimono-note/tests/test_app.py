@@ -719,7 +719,7 @@ def test_api_docs_follow_the_public_mode_switch():
     assert client.get("/docs").status_code == 200
     public = importlib.reload(main)
     try:
-        os.environ["SPECIES_PUBLIC_MODE"] = "1"
+        os.environ["IKIMONO_PUBLIC_MODE"] = "1"
         public = importlib.reload(main)
         assert public.PUBLIC_MODE is True
         assert public.app.docs_url is None and public.app.redoc_url is None
@@ -729,7 +729,7 @@ def test_api_docs_follow_the_public_mode_switch():
         assert opened.get("/openapi.json").status_code == 404
         assert opened.get("/").status_code == 200
     finally:
-        os.environ.pop("SPECIES_PUBLIC_MODE", None)
+        os.environ.pop("IKIMONO_PUBLIC_MODE", None)
         importlib.reload(main)
 
 
@@ -777,12 +777,12 @@ def test_admin_instance_can_save_settings_and_public_one_cannot():
     assert client.post("/api/settings", json=payload).status_code == 200
     assert main.PUBLIC_MODE is False
     try:
-        os.environ["SPECIES_PUBLIC_MODE"] = "1"
+        os.environ["IKIMONO_PUBLIC_MODE"] = "1"
         public = importlib.reload(main)
         opened = TestClient(public.app, base_url="http://localhost")
         assert opened.post("/api/settings", json=payload).status_code == 403
     finally:
-        os.environ.pop("SPECIES_PUBLIC_MODE", None)
+        os.environ.pop("IKIMONO_PUBLIC_MODE", None)
         importlib.reload(main)
 
 
@@ -1226,7 +1226,7 @@ def test_drive_says_so_when_the_operator_has_not_set_it_up():
     settings = client.get("/api/settings").json()
     assert "google_client_id" in settings          # 公開情報。秘密鍵は使わない
     script = client.get("/assets/settings.js").text
-    assert "SPECIES_GOOGLE_CLIENT_ID" in script    # 何をすれば使えるか伝える
+    assert "IKIMONO_GOOGLE_CLIENT_ID" in script    # 何をすれば使えるか伝える
 
 
 def test_sessions_cannot_be_forged():

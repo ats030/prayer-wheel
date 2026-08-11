@@ -97,7 +97,7 @@ async function refreshDrive(){
   const clientId=settings?.google_client_id||"";
   if(!driveConfigured(clientId)){
     $("drive-unavailable").hidden=false;
-    $("drive-unavailable").textContent="この生きものノートでは Google ドライブへの保存が設定されていません。運営者が SPECIES_GOOGLE_CLIENT_ID を設定すると使えます。";
+    $("drive-unavailable").textContent="この生きものノートでは Google ドライブへの保存が設定されていません。運営者が IKIMONO_GOOGLE_CLIENT_ID を設定すると使えます。";
     return;
   }
   $("drive-strip").hidden=false;$("drive-actions").hidden=false;

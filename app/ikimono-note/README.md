@@ -1,6 +1,6 @@
-# 生きものノート (species-explorer)
+# 生きものノート (ikimono-note)
 
-表示名は「生きものノート」。URL・ディレクトリ名・端末内の記録キー (`species-history` など) は `species-explorer` のまま据え置く。
+表示名は「生きものノート」。URL・ディレクトリ名・端末内の記録キー (`species-history` など) は `ikimono-note` のまま据え置く。
 変えると既存の端末内の記録が読めなくなるため。
 
 種の決め手が不足する場合も、写真・地域・季節から合理的に絞れる同属種を最大3件まで「確証なし」の種候補として示します。候補学名は分類データで実在確認し、合理的な種候補を作れない場合だけ属・科候補へフォールバックします。結果と履歴には「種候補・属候補・科候補」の分類階級を表示します。
@@ -32,7 +32,7 @@ Google ドライブは WebDAV を提供していないため、OAuth と Drive A
 使いません。
 
 ```bash
-SPECIES_GOOGLE_CLIENT_ID=xxxxx.apps.googleusercontent.com
+IKIMONO_GOOGLE_CLIENT_ID=xxxxx.apps.googleusercontent.com
 ```
 
 承認済みの JavaScript 生成元には、実際に開くURLをすべて登録します。
@@ -52,8 +52,8 @@ SPECIES_GOOGLE_CLIENT_ID=xxxxx.apps.googleusercontent.com
 
 | | ポート | 待受 | モード | 役割 |
 |---|---|---|---|---|
-| 運営者用 `species-explorer.service` | 8523 | `0.0.0.0` (Tailscale・LAN) | 非公開 | 設定の保存、動作確認 |
-| 公開版 `species-explorer-public.service` | 8524 | `127.0.0.1` のみ | 公開 | Tailscale Funnel の向け先 |
+| 運営者用 `ikimono-note.service` | 8523 | `0.0.0.0` (Tailscale・LAN) | 非公開 | 設定の保存、動作確認 |
+| 公開版 `ikimono-note-public.service` | 8524 | `127.0.0.1` のみ | 公開 | Tailscale Funnel の向け先 |
 
 Funnel は 8524 へ向けます。8523 は認証がなく設定を書き換えられるので、
 Funnel やポート開放の対象にしないでください。
@@ -68,12 +68,12 @@ tailscale serve --https=8443 off         # やめるとき
 `https://ubuntu-server-app.tailf74832.ts.net:8443/` で開きます。
 
 ```bash
-systemctl --user restart species-explorer species-explorer-public
-/home/ats030/app/species-explorer.sh          # 運営者用を手で起動する場合
-/home/ats030/app/species-explorer-public.sh   # 公開版を手で起動する場合
+systemctl --user restart ikimono-note ikimono-note-public
+/home/ats030/app/ikimono-note.sh          # 運営者用を手で起動する場合
+/home/ats030/app/ikimono-note-public.sh   # 公開版を手で起動する場合
 ```
 
-使うAI、APIキー、モデルは画面上部の「設定」から変更できます。OllamaではURLを入力でき、その接続先にインストール済みで画像入力に対応するモデルを自動表示します。別端末のOllamaを使う場合は、Ollama側でこのサーバーからの接続を許可してください。接続先とAPIキーは `~/.config/species-explorer/settings.json` に権限 `0600` で保存し、APIキーは画面へ再表示しません。
+使うAI、APIキー、モデルは画面上部の「設定」から変更できます。OllamaではURLを入力でき、その接続先にインストール済みで画像入力に対応するモデルを自動表示します。別端末のOllamaを使う場合は、Ollama側でこのサーバーからの接続を許可してください。接続先とAPIキーは `~/.config/ikimono-note/settings.json` に権限 `0600` で保存し、APIキーは画面へ再表示しません。
 
 ```bash
 uv run --with pytest pytest -q                                    # 169件
@@ -98,10 +98,10 @@ pytest は速いものの、文字列を検査しているだけなので画面�
 預かるものは増えません。設定画面の「退会する」で削除できます。
 
 ```bash
-SPECIES_GOOGLE_CLIENT_ID=xxxxx.apps.googleusercontent.com
-SPECIES_GOOGLE_CLIENT_SECRET=xxxxx          # ログインに必要 (ドライブ連携では不要)
-SPECIES_PUBLIC_ORIGIN=https://ubuntu-server-app.tailf74832.ts.net
-SPECIES_SESSION_SECRET=<64桁の16進>          # 省略時は起動ごとに変わる (再起動で全員ログアウト)
+IKIMONO_GOOGLE_CLIENT_ID=xxxxx.apps.googleusercontent.com
+IKIMONO_GOOGLE_CLIENT_SECRET=xxxxx          # ログインに必要 (ドライブ連携では不要)
+IKIMONO_PUBLIC_ORIGIN=https://ubuntu-server-app.tailf74832.ts.net
+IKIMONO_SESSION_SECRET=<64桁の16進>          # 省略時は起動ごとに変わる (再起動で全員ログアウト)
 ```
 
 Google Cloud Console の「承認済みのリダイレクト URI」に
@@ -112,7 +112,7 @@ JavaScript 生成元」とは別の欄です)。
 含めて誰も入れないアプリになるためです。運営者用 (8523) は tailnet の中だけなので、
 こちらでも求めません。二重にすると、設定の不備で自分が締め出されます。
 
-利用者の情報は `~/data/species-explorer/users.db` (0600) に置きます。消えると
+利用者の情報は `~/data/ikimono-note/users.db` (0600) に置きます。消えると
 戻らないため `backup-data.timer` の対象です。
 
 ## 一般公開モード
@@ -131,16 +131,16 @@ APIキーの登録と料金負担は契約者本人が行う旨を設定画面�
 タブを閉じると消えます。プロバイダーとモデルの選択だけは `localStorage` に残ります。
 
 ```bash
-SPECIES_PUBLIC_MODE=1
-SPECIES_ALLOWED_HOSTS=species.example.com
-SPECIES_PUBLIC_LOCAL=0
-SPECIES_PUBLIC_AFFILIATE=0
+IKIMONO_PUBLIC_MODE=1
+IKIMONO_ALLOWED_HOSTS=species.example.com
+IKIMONO_PUBLIC_LOCAL=0
+IKIMONO_PUBLIC_AFFILIATE=0
 ```
 
-- `SPECIES_PUBLIC_MODE=1`: 共有設定の更新を403で拒否し、BYOK公開モードを有効化
-- `SPECIES_ALLOWED_HOSTS`: 公開ドメインをカンマ区切りで指定
-- `SPECIES_PUBLIC_LOCAL=1`: 運営者のOllamaを公開する場合だけ明示的に有効化
-- `SPECIES_PUBLIC_AFFILIATE=1`: 商用利用可能な公開基盤へ移行後、広告を再有効化する場合だけ指定
+- `IKIMONO_PUBLIC_MODE=1`: 共有設定の更新を403で拒否し、BYOK公開モードを有効化
+- `IKIMONO_ALLOWED_HOSTS`: 公開ドメインをカンマ区切りで指定
+- `IKIMONO_PUBLIC_LOCAL=1`: 運営者のOllamaを公開する場合だけ明示的に有効化
+- `IKIMONO_PUBLIC_AFFILIATE=1`: 商用利用可能な公開基盤へ移行後、広告を再有効化する場合だけ指定
 
 無料のTailscale Personalプランで公開するベータ版は非商用とし、広告・商品API・計測を強制的に無効化します。
 
@@ -153,8 +153,8 @@ SPECIES_PUBLIC_AFFILIATE=0
 公開前確認:
 
 ```bash
-SPECIES_PUBLIC_MODE=1 \
-SPECIES_ALLOWED_HOSTS=127.0.0.1,localhost \
+IKIMONO_PUBLIC_MODE=1 \
+IKIMONO_ALLOWED_HOSTS=127.0.0.1,localhost \
 uv run uvicorn main:app --host 127.0.0.1 --port 8524
 ```
 

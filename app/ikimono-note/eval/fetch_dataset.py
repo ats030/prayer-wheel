@@ -18,7 +18,7 @@ import httpx
 
 API = "https://api.inaturalist.org/v1/observations"
 JAPAN_PLACE_ID = 6737
-USER_AGENT = "SpeciesExplorer-eval/1.0 (https://github.com/ats030/ubuntu-server-app)"
+USER_AGENT = "IkimonoNote-eval/1.0 (https://github.com/ats030/ubuntu-server-app)"
 CACHE_DIR = Path.home() / "cache" / "species-eval" / "images"
 MANIFEST = Path(__file__).parent / "dataset.json"
 ATTRIBUTION = (

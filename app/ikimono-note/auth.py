@@ -31,18 +31,18 @@ GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs"
 GOOGLE_ISSUERS = {"https://accounts.google.com", "accounts.google.com"}
 
-CLIENT_ID = os.getenv("SPECIES_GOOGLE_CLIENT_ID", "").strip()
-CLIENT_SECRET = os.getenv("SPECIES_GOOGLE_CLIENT_SECRET", "").strip()
+CLIENT_ID = os.getenv("IKIMONO_GOOGLE_CLIENT_ID", "").strip()
+CLIENT_SECRET = os.getenv("IKIMONO_GOOGLE_CLIENT_SECRET", "").strip()
 # 公開URL。リダイレクト先の組み立てに使う (Google 側の登録と一致している必要がある)
-PUBLIC_ORIGIN = os.getenv("SPECIES_PUBLIC_ORIGIN", "").strip().rstrip("/")
+PUBLIC_ORIGIN = os.getenv("IKIMONO_PUBLIC_ORIGIN", "").strip().rstrip("/")
 
 # 消えるとログイン中の全員がログアウトするだけなので、無ければその場で作る。
 # 固定したい場合は環境変数で渡す。
-SESSION_SECRET = os.getenv("SPECIES_SESSION_SECRET", "").strip() or secrets.token_hex(32)
+SESSION_SECRET = os.getenv("IKIMONO_SESSION_SECRET", "").strip() or secrets.token_hex(32)
 SESSION_COOKIE = "ikimono_session"
 SESSION_DAYS = 30
 
-DB_PATH = Path(os.getenv("SPECIES_USER_DB", str(Path.home() / "data" / "species-explorer" / "users.db")))
+DB_PATH = Path(os.getenv("IKIMONO_USER_DB", str(Path.home() / "data" / "ikimono-note" / "users.db")))
 
 
 def configured() -> bool:
@@ -51,11 +51,11 @@ def configured() -> bool:
 
 def unavailable_reason() -> str:
     if not CLIENT_ID:
-        return "SPECIES_GOOGLE_CLIENT_ID が未設定です"
+        return "IKIMONO_GOOGLE_CLIENT_ID が未設定です"
     if not CLIENT_SECRET:
-        return "SPECIES_GOOGLE_CLIENT_SECRET が未設定です"
+        return "IKIMONO_GOOGLE_CLIENT_SECRET が未設定です"
     if not PUBLIC_ORIGIN:
-        return "SPECIES_PUBLIC_ORIGIN が未設定です"
+        return "IKIMONO_PUBLIC_ORIGIN が未設定です"
     return ""
 
 

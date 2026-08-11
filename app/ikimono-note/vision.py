@@ -14,23 +14,23 @@ from typing import Any
 import httpx
 from PIL import Image, ImageOps
 
-MODEL = os.getenv("SPECIES_MODEL", "gemma4:12b")
+MODEL = os.getenv("IKIMONO_MODEL", "gemma4:12b")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434").rstrip("/")
-OPENAI_MODEL = os.getenv("SPECIES_OPENAI_MODEL", "gpt-5.6-luna")
-OPENAI_URL = os.getenv("SPECIES_OPENAI_URL", "https://api.openai.com/v1/responses")
-ANTHROPIC_MODEL = os.getenv("SPECIES_ANTHROPIC_MODEL", "claude-sonnet-5")
-ANTHROPIC_URL = os.getenv("SPECIES_ANTHROPIC_URL", "https://api.anthropic.com/v1/messages")
-GEMINI_URL = os.getenv("SPECIES_GEMINI_URL", "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent")
+OPENAI_MODEL = os.getenv("IKIMONO_OPENAI_MODEL", "gpt-5.6-luna")
+OPENAI_URL = os.getenv("IKIMONO_OPENAI_URL", "https://api.openai.com/v1/responses")
+ANTHROPIC_MODEL = os.getenv("IKIMONO_ANTHROPIC_MODEL", "claude-sonnet-5")
+ANTHROPIC_URL = os.getenv("IKIMONO_ANTHROPIC_URL", "https://api.anthropic.com/v1/messages")
+GEMINI_URL = os.getenv("IKIMONO_GEMINI_URL", "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent")
 # thinkingLevel を上げると思考トークンが maxOutputTokens に含まれて出力枠を圧迫する。
 # 思考量は写真ごとに大きく変わる。実測では易しい写真で約1500、難しい写真で7860まで
 # 伸び、8192でも打ち切られた。モデルの出力上限 (65536) までは取れるので、
 # 思考が伸びても本文が残る余裕を持たせる。長い応答を要求するわけではなく、
 # あくまで上限なので、使わなければ課金もされない。
-GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv("SPECIES_GEMINI_MAX_OUTPUT_TOKENS", "32768"))
-GEMINI_THINKING_LEVEL = os.getenv("SPECIES_GEMINI_THINKING_LEVEL", "high")
+GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv("IKIMONO_GEMINI_MAX_OUTPUT_TOKENS", "32768"))
+GEMINI_THINKING_LEVEL = os.getenv("IKIMONO_GEMINI_THINKING_LEVEL", "high")
 PLANTNET_URL = "https://my-api.plantnet.org/v2/identify/all"
 INATURALIST_URL = "https://api.inaturalist.org/v1/taxa/autocomplete"
-INATURALIST_USER_AGENT = "SpeciesExplorer/1.0 (https://github.com/ats030/ubuntu-server-app)"
+INATURALIST_USER_AGENT = "IkimonoNote/1.0 (https://github.com/ats030/ubuntu-server-app)"
 # 画面に出る文字列。旧値 "和名未登録" は端末内履歴に残るため、UI側は両方を同義に扱う
 NO_JAPANESE_NAME = "日本語名なし"
 _TAXONOMY_LOCK = threading.Lock()
@@ -574,9 +574,9 @@ def _gemini_output_text(data: dict[str, Any]) -> str:
         thoughts = int((data.get("usageMetadata") or {}).get("thoughtsTokenCount") or 0)
         # 環境変数名や対処法は運営者にしか意味がないので、画面ではなく journal へ出す
         print(
-            f"[species-explorer] Gemini の応答が maxOutputTokens={GEMINI_MAX_OUTPUT_TOKENS} で"
-            f"途切れました (思考 {thoughts} トークン)。SPECIES_GEMINI_MAX_OUTPUT_TOKENS を増やすか"
-            " SPECIES_GEMINI_THINKING_LEVEL を下げてください。",
+            f"[ikimono-note] Gemini の応答が maxOutputTokens={GEMINI_MAX_OUTPUT_TOKENS} で"
+            f"途切れました (思考 {thoughts} トークン)。IKIMONO_GEMINI_MAX_OUTPUT_TOKENS を増やすか"
+            " IKIMONO_GEMINI_THINKING_LEVEL を下げてください。",
             flush=True,
         )
         raise VisionError("Geminiが答えを返しきれませんでした。少し待ってからもう一度お試しください。")

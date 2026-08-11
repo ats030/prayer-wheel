@@ -423,7 +423,7 @@ def test_gemini_truncation_tells_the_user_plainly_and_the_operator_precisely(mon
     assert "SPECIES_" not in message and "maxOutputTokens" not in message and "1535" not in message
 
     logged = capsys.readouterr().out
-    assert "SPECIES_GEMINI_MAX_OUTPUT_TOKENS" in logged
+    assert "IKIMONO_GEMINI_MAX_OUTPUT_TOKENS" in logged
     assert "1535" in logged
 
 

@@ -1,4 +1,4 @@
-"""species-explorer: photograph-based local species identification.
+"""ikimono-note: photograph-based local species identification.
 
 同じアプリを2つの役割で動かす。8523 は運営者用 (非公開モード・設定の保存が可能)、
 8524 は公開版 (BYOK・設定は読み取り専用) で Tailscale Funnel の向け先。
@@ -36,7 +36,7 @@ class SettingsUpdate(BaseModel):
     affiliate: dict[str, object] = Field(default_factory=dict)
 
 
-PUBLIC_MODE = os.getenv("SPECIES_PUBLIC_MODE", "").lower() in {"1", "true", "yes"}
+PUBLIC_MODE = os.getenv("IKIMONO_PUBLIC_MODE", "").lower() in {"1", "true", "yes"}
 # 一般公開では API ドキュメントを閉じる。Swagger UI は CDN から読み込むため CSP に
 # 阻まれて白紙になるうえ、公開の入口に晒す必要がない
 app = FastAPI(
@@ -46,11 +46,11 @@ app = FastAPI(
     openapi_url=None if PUBLIC_MODE else "/openapi.json",
 )
 STATIC_DIR = Path(__file__).parent / "static"
-PUBLIC_LOCAL_ENABLED = os.getenv("SPECIES_PUBLIC_LOCAL", "").lower() in {"1", "true", "yes"}
-PUBLIC_AFFILIATE_ENABLED = os.getenv("SPECIES_PUBLIC_AFFILIATE", "").lower() in {"1", "true", "yes"}
+PUBLIC_LOCAL_ENABLED = os.getenv("IKIMONO_PUBLIC_LOCAL", "").lower() in {"1", "true", "yes"}
+PUBLIC_AFFILIATE_ENABLED = os.getenv("IKIMONO_PUBLIC_AFFILIATE", "").lower() in {"1", "true", "yes"}
 # Google Drive 連携のクライアントID。公開情報なので画面へ渡してよい (秘密鍵は使わない)
-GOOGLE_CLIENT_ID = os.getenv("SPECIES_GOOGLE_CLIENT_ID", "").strip()
-ALLOWED_HOSTS = [host.strip() for host in os.getenv("SPECIES_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
+GOOGLE_CLIENT_ID = os.getenv("IKIMONO_GOOGLE_CLIENT_ID", "").strip()
+ALLOWED_HOSTS = [host.strip() for host in os.getenv("IKIMONO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
 # 運営者用 (非公開モード) こそ設定を書き換えられるので、Host の検証は両モードで効かせる。
 # 以前は公開モードだけに付けていたため、運営者用が素通しだった。
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
