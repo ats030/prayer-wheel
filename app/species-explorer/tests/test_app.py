@@ -874,3 +874,20 @@ def test_saving_still_works_after_reordering(tmp_path):
     assert saved.status_code == 200, saved.text
     assert saved.json()["provider"] == "gemini"
     assert saved.json()["api_key_configured"]["gemini"] is True
+
+
+def test_candidates_link_to_wikipedia_in_the_right_language():
+    script = client.get("/assets/index.js").text
+    assert "function wikipediaUrl(c)" in script
+    # 和名があれば日本語版、無ければ学名で英語版
+    assert 'noJapaneseName(c.common_name_ja)?"":String(c.common_name_ja||"").trim()' in script
+    assert '"https://"+(japanese?"ja":"en")+".wikipedia.org/w/index.php?search="' in script
+    # 記事の有無を問い合わせず検索URLにする（無ければ検索結果が出るので壊れない）
+    assert "/w/index.php?search=" in script
+    # 名前が無いときはリンク自体を出さない
+    assert 'if(!term)return ""' in script
+    assert '>Wikipedia ↗</a>' in script
+    assert 'wikipediaUrl(c)?' in script
+    # 外部リンクは既存の参照リンクと同じ扱いにする
+    wiki_link = script[script.index("wikipediaUrl(c)?"):script.index(">Wikipedia ↗")]
+    assert 'target="_blank"' in wiki_link and 'rel="noopener noreferrer"' in wiki_link
