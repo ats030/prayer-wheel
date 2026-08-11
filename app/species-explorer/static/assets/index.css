@@ -12,7 +12,4 @@
 .admin-flag{display:inline-block;margin-top:6px;padding:3px 9px;border:1px solid var(--danger);border-radius:999px;color:var(--danger);font-size:11px;font-weight:700}
 .source-credit{margin:14px 0 0;color:var(--muted);font-size:12px}.source-credit a{color:var(--accent-hover)}
 
-/* 副題は2つの句。狭い画面では行を分け、中黒が行頭に落ちないようにする */
-.subtitle span+span::before{content:" · "}
-@media(max-width:480px){.subtitle span{display:block}.subtitle span+span::before{content:none}}
-@media(max-width:360px){.top{gap:8px}.settings-link{padding:0 8px}.theme-toggle{padding:0 9px}/* 全年齢向けであることは規約と結果下の注意書きにも書いてある。   狭い画面では主機能の説明を優先する */.subtitle span+span{display:none}}
+@media(max-width:360px){.top{gap:8px}.settings-link{padding:0 8px}.theme-toggle{padding:0 9px}}

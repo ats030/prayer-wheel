@@ -589,7 +589,6 @@ def test_all_pages_use_light_first_theme_with_dark_fallback():
 
 def test_index_states_all_ages_and_layered_safety_warnings():
     index = page_source("/")
-    assert "どなたでも使えます" in index
     assert "年齢を問わず使えますが、小学生以下のお子さんは大人といっしょに使ってください。" in index
     assert "食べられるか：判定しません" in index
     assert "さわってよいか：判定しません" in index
@@ -1019,11 +1018,9 @@ def test_app_name_never_breaks_across_lines():
     assert "clamp(20px,3vw,30px)" in css
 
 
-def test_subtitle_splits_by_phrase_not_mid_sentence():
-    """折り返しで中黒が行頭に落ちないよう、句ごとに要素を分ける。"""
+def test_subtitle_states_one_thing():
+    """副題は機能の説明だけ。全年齢向けであることは規約と結果下の注意書きが担う。"""
     page = client.get("/").text
-    assert '<div class="subtitle"><span>写真から植物・動物の名前を調べる</span><span>どなたでも使えます</span></div>' in page
-    css = client.get("/assets/index.css").text
-    assert '.subtitle span+span::before{content:" · "}' in css
-    assert ".subtitle span{display:block}" in css        # 480px 以下は行を分ける
-    assert ".subtitle span+span{display:none}" in css    # 360px 以下は後半を畳む
+    assert '<div class="subtitle">写真から植物・動物の名前を調べる</div>' in page
+    assert "どなたでも使えます" not in page
+    assert ".subtitle span" not in client.get("/assets/index.css").text
