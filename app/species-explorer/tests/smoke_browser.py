@@ -14,13 +14,16 @@ from __future__ import annotations
 
 import argparse
 import glob
+import os
 import json
 import sys
 
 from playwright.sync_api import sync_playwright
 
-ADMIN = "https://ubuntu-server-app.tailf74832.ts.net:8443"
-PUBLIC = "https://ubuntu-server-app.tailf74832.ts.net"
+# 公開の経路は変わりうる (Tailscale Funnel は .ts.net しか使えず、独自ドメインへ
+# 移るときに丸ごと差し替わる)。環境変数で上書きできるようにしておく。
+ADMIN = os.getenv("SPECIES_ADMIN_ORIGIN", "https://ubuntu-server-app.tailf74832.ts.net:8443")
+PUBLIC = os.getenv("SPECIES_PUBLIC_ORIGIN", "https://ubuntu-server-app.tailf74832.ts.net")
 SAMPLE = {
     "category": "植物", "summary": "キク科の草本と考えられます。", "plantnet_used": False,
     "candidates": [{
