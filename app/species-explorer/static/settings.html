@@ -33,6 +33,14 @@
     <div class="panel">
       <p class="help">調べた記録 (写真を含む) と、使うAIの設定を1つのファイルにまとめます。クラウドの同期フォルダへ保存すれば、別の端末でも読み込めます。<strong>ファイルはこの端末から直接保存され、運営者のサーバーには送られません。</strong></p>
       <p class="help">APIキーは含めません。ファイルが人手に渡っても、料金が発生する鍵まで渡さないためです。別の端末では入れ直してください。</p>
+      <details class="panel stacked" id="cloud-panel"><summary><span><span class="detail-title">クラウドストレージ (WebDAV)</span><span class="detail-copy">pCloud・Nextcloud など。どの端末からでも同じ場所に置けます</span></span></summary><div class="detail-body fields">
+        <span class="help">接続先とパスワードは、このブラウザだけに保存します。保存や読み込みのたびに本サービスのサーバーを経由して中継します（<strong>サーバーには残しません</strong>）。ブラウザから外部へ直接つなぐ経路が塞がれているためです。</span>
+        <div class="field"><label for="cloud-url">ファイルのURL</label><input id="cloud-url" type="url" placeholder="https://webdav.pcloud.com/ikimono-note.json"></div>
+        <div class="field"><label for="cloud-user">利用者名</label><input id="cloud-user" autocomplete="username"></div>
+        <div class="field"><label for="cloud-password">パスワード</label><input id="cloud-password" type="password" autocomplete="current-password"></div>
+        <div class="actions"><button class="button" id="cloud-save" type="button">クラウドへ保存</button><button class="button" id="cloud-load" type="button">クラウドから読み込む</button><button class="button" id="cloud-forget" type="button">接続先を消す</button></div>
+        <span class="configured" id="cloud-state"></span>
+      </div></details>
       <div class="status-strip" id="target-strip" hidden><span>いつもの保存先</span><strong id="target-name">未設定</strong></div>
       <div class="actions" id="target-actions" hidden>
         <button class="button" id="choose-target" type="button">保存先を決める</button>

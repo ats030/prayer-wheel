@@ -137,3 +137,40 @@ $("clear-target").onclick=async()=>{
   backupMessage("保存先を解除しました。記録はこの端末に残ります。","success");
 };
 refreshTarget();
+
+/* クラウドストレージ。接続先はこのブラウザに置き、中継はサーバーを通る */
+function cloudFields(){return {url:$("cloud-url").value.trim(),user:$("cloud-user").value.trim(),password:$("cloud-password").value}}
+function showCloudState(){
+  const target=cloudTarget();
+  $("cloud-state").textContent=target?("接続先を登録済み: "+target.url):"未登録";
+  $("cloud-forget").disabled=!target;
+  if(target){$("cloud-url").value=target.url;$("cloud-user").value=target.user||"";$("cloud-password").value=target.password||""}
+}
+$("cloud-save").onclick=async()=>{
+  const button=$("cloud-save");const target=cloudFields();
+  if(!target.url){backupMessage("ファイルのURLを入れてください。","error");return}
+  button.disabled=true;backupMessage("クラウドへ保存しています…");
+  try{
+    const count=await saveToCloud(target);
+    rememberCloud(target);showCloudState();
+    backupMessage(`記録 ${count}件をクラウドへ保存しました。`,"success");
+  }catch(error){backupMessage("保存できませんでした。"+error.message,"error")}
+  finally{button.disabled=false}
+};
+$("cloud-load").onclick=async()=>{
+  const button=$("cloud-load");const target=cloudFields();
+  if(!target.url){backupMessage("ファイルのURLを入れてください。","error");return}
+  button.disabled=true;backupMessage("クラウドから読み込んでいます…");
+  try{
+    const restored=await loadFromCloud(target);
+    rememberCloud(target);showCloudState();
+    backupMessage(`記録 ${restored}件を読み込みました。`,"success");
+  }catch(error){backupMessage("読み込めませんでした。"+error.message,"error")}
+  finally{button.disabled=false}
+};
+$("cloud-forget").onclick=()=>{
+  forgetCloud();
+  for(const id of ["cloud-url","cloud-user","cloud-password"])$(id).value="";
+  showCloudState();backupMessage("接続先を消しました。","success");
+};
+showCloudState();

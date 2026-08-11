@@ -23,6 +23,7 @@ import config_store
 import creators_api
 import pipeline
 import vision
+import webdav_relay
 
 class SettingsUpdate(BaseModel):
     provider: str
@@ -253,6 +254,36 @@ async def amazon_products(q: str = "", index: str = "All") -> JSONResponse:
     if not products:
         raise HTTPException(status_code=404, detail="関連商品が見つかりません")
     return JSONResponse({"products": products})
+
+
+class StorageRequest(BaseModel):
+    url: str
+    user: str = ""
+    password: str = ""
+    body: str | None = None
+
+
+# 利用者のクラウドストレージへの中継。認証情報は毎回受け取り、保存も記録もしない。
+# 中継そのものが SSRF の入口になるため、webdav_relay 側で接続先を検証している。
+@app.post("/api/storage/put")
+async def storage_put(request: Request, payload: StorageRequest) -> dict[str, bool]:
+    _rate_limit(request, "storage", 30)
+    try:
+        await run_in_threadpool(webdav_relay.put, payload.url, payload.user, payload.password,
+                                (payload.body or "").encode("utf-8"))
+    except webdav_relay.RelayError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True}
+
+
+@app.post("/api/storage/get")
+async def storage_get(request: Request, payload: StorageRequest) -> JSONResponse:
+    _rate_limit(request, "storage", 30)
+    try:
+        body = await run_in_threadpool(webdav_relay.get, payload.url, payload.user, payload.password)
+    except webdav_relay.RelayError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return JSONResponse({"body": body.decode("utf-8", errors="replace")})
 
 
 @app.get("/health")

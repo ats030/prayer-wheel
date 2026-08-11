@@ -411,7 +411,9 @@ def test_settings_page_allows_custom_local_llm_url():
     assert 'id="local-llm-url"' in source
     assert 'local_llm:{url:' in source
     assert 'id="active-provider"' in source
-    assert source.count('<details class="panel') == 2
+    # 任意機能の2つ（Pl@ntNet と広告）。持ち出しのクラウド設定も同じ見た目だが別物
+    assert 'id="affiliate-panel"' in source and "Pl@ntNet 植物専用の識別" in source
+    assert source.count('<details class="panel') >= 2
     assert 'id="save-button"' in source
     assert 'class="message" id="message" aria-live="polite"' in source
 
@@ -1127,8 +1129,11 @@ def test_backup_keeps_the_data_on_the_visitor_side():
     """保存先は利用者が選ぶ。運営者のサーバーへは送らない。"""
     backup = client.get("/assets/backup.js").text
     assert 'BACKUP_FORMAT = "ikimono-note/1"' in backup
-    # 書き出し・読み込みにサーバーは関与しない
-    assert "/api/" not in backup
+    # ファイルへの書き出し・読み込みと「いつもの保存先」はサーバーを通らない
+    for offline in ["buildBackup", "restoreBackup", "writeBackupTo", "readBackupFrom"]:
+        body = backup[backup.index(f"function {offline}"):]
+        body = body[:body.index("\n}")]
+        assert "/api/" not in body, offline
     # APIキーは持ち出さない（ファイルが漏れたら課金される鍵がそのまま渡る）
     assert "species-key" not in backup
     assert "APIキーは含めません" in backup
@@ -1235,3 +1240,33 @@ def test_unavailable_target_explains_itself():
     assert "書き出し・読み込みはこのままお使いいただけます" in backup   # 代わりの手段を示す
     script = client.get("/assets/settings.js").text
     assert 'textContent=backupUnavailableReason()' in script
+
+
+def test_cloud_storage_is_offered_with_its_trade_off_stated():
+    """ブラウザから外部ストレージへ直接つなぐ経路は CORS と CSP で塞がっている。
+    サーバーが中継する以上、経路上を通ることを画面に書く。"""
+    page = client.get("/settings").text
+    assert 'id="cloud-panel"' in page and "クラウドストレージ (WebDAV)" in page
+    for field in ["cloud-url", "cloud-user", "cloud-password", "cloud-save", "cloud-load", "cloud-forget"]:
+        assert f'id="{field}"' in page, field
+    assert "サーバーを経由して中継します" in page
+    assert "サーバーには残しません" in page
+    backup = client.get("/assets/backup.js").text
+    assert '"/api/storage/put"' in backup and '"/api/storage/get"' in backup
+    assert 'const CLOUD_KEY = "species-cloud-target"' in backup   # 接続先はブラウザに置く
+
+
+def test_relay_endpoints_reject_internal_targets():
+    for url in ["http://example.com/f.json", "https://127.0.0.1/f.json",
+                "https://169.254.169.254/latest/meta-data"]:
+        response = client.post("/api/storage/put", json={"url": url, "user": "a", "password": "b", "body": "{}"})
+        assert response.status_code == 400, url
+    # 中継は連打できないようにしておく
+    assert '_rate_limit(request, "storage", 30)' in (Path(__file__).parents[1] / "main.py").read_text()
+
+
+def test_relay_does_not_store_credentials():
+    main_py = (Path(__file__).parents[1] / "main.py").read_text()
+    relay = main_py[main_py.index("async def storage_put"):main_py.index("@app.get(\"/health\")")]
+    assert "config_store.save" not in relay
+    assert "open(" not in relay

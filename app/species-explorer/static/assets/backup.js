@@ -218,3 +218,43 @@ function scheduleAutoBackup() {
     }
   }, 1500);
 }
+
+
+/* ── 利用者のクラウドストレージ (WebDAV) ──────────────────
+ * 接続先はこのブラウザだけに置く。中継はサーバーを通るが、サーバーは保存しない。
+ */
+const CLOUD_KEY = "species-cloud-target";
+
+function cloudTarget() {
+  try { return JSON.parse(localStorage.getItem(CLOUD_KEY) || "null"); } catch (error) { return null; }
+}
+
+function rememberCloud(target) {
+  try { localStorage.setItem(CLOUD_KEY, JSON.stringify(target)); } catch (error) { /* 保存できなくてもその場では使える */ }
+}
+
+function forgetCloud() {
+  try { localStorage.removeItem(CLOUD_KEY); } catch (error) { /* 何もしない */ }
+}
+
+async function relay(path, target, body) {
+  const response = await fetch(path, {
+    method: "POST",
+    headers: {"content-type": "application/json"},
+    body: JSON.stringify({url: target.url, user: target.user || "", password: target.password || "", body}),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.detail || "クラウドとやり取りできませんでした");
+  return data;
+}
+
+async function saveToCloud(target) {
+  const payload = await buildBackup();
+  await relay("/api/storage/put", target, JSON.stringify(payload));
+  return payload.records.length;
+}
+
+async function loadFromCloud(target) {
+  const data = await relay("/api/storage/get", target);
+  return await restoreBackup(JSON.parse(data.body));
+}
