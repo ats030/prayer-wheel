@@ -397,8 +397,10 @@ def test_gemini_uses_generate_content_vision_contract(monkeypatch):
 
 
 def test_gemini_reserves_output_budget_beyond_thinking_tokens():
-    """思考トークンは maxOutputTokens に含まれる。1600 では JSON が切れて全件失敗した。"""
-    assert vision.GEMINI_MAX_OUTPUT_TOKENS >= 4096
+    """思考トークンは maxOutputTokens に含まれる。1600 では全件、8192 でも難しい写真で
+    打ち切られた (実測の思考 7860)。本文が残る余裕を持たせる。"""
+    assert vision.GEMINI_MAX_OUTPUT_TOKENS >= 16384
+    assert vision.GEMINI_MAX_OUTPUT_TOKENS <= 65536  # モデルの出力上限
 
 
 def test_gemini_truncation_tells_the_user_plainly_and_the_operator_precisely(monkeypatch, capsys):

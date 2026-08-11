@@ -931,3 +931,15 @@ def test_assets_still_answer_304_so_no_cache_stays_cheap():
     etag = first.headers["etag"]
     again = client.get("/assets/species-links.js", headers={"If-None-Match": etag})
     assert again.status_code == 304
+
+
+def test_record_links_do_not_depend_on_the_later_enrich_pass():
+    """記録は簡易表示を先に出し、あとから詳細へ差し替える。差し替えが失敗しても
+    リンクが消えないよう、最初の描画にも入れておく。"""
+    history = client.get("/assets/history.js").text
+    simple = history[history.index("(e.candidates||[]).map"):]
+    simple = simple[:simple.index('.join("")')]
+    assert "candidateLinks(c)" in simple
+    # 失敗を握りつぶさない（簡易表示のまま残ることに気づけるように）
+    assert "enrich().catch(()=>{})" not in history
+    assert "記録の詳細を組み立てられませんでした" in history

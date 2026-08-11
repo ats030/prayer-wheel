@@ -22,9 +22,11 @@ ANTHROPIC_MODEL = os.getenv("SPECIES_ANTHROPIC_MODEL", "claude-sonnet-5")
 ANTHROPIC_URL = os.getenv("SPECIES_ANTHROPIC_URL", "https://api.anthropic.com/v1/messages")
 GEMINI_URL = os.getenv("SPECIES_GEMINI_URL", "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent")
 # thinkingLevel を上げると思考トークンが maxOutputTokens に含まれて出力枠を圧迫する。
-# 実測 (gemini-3.6-flash, 写真1枚) では思考だけで約1500トークン使い、1600では JSON が
-# 途中で切れて全件失敗していた。出力ぶんを別に確保できる値にする。
-GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv("SPECIES_GEMINI_MAX_OUTPUT_TOKENS", "8192"))
+# 思考量は写真ごとに大きく変わる。実測では易しい写真で約1500、難しい写真で7860まで
+# 伸び、8192でも打ち切られた。モデルの出力上限 (65536) までは取れるので、
+# 思考が伸びても本文が残る余裕を持たせる。長い応答を要求するわけではなく、
+# あくまで上限なので、使わなければ課金もされない。
+GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv("SPECIES_GEMINI_MAX_OUTPUT_TOKENS", "32768"))
 GEMINI_THINKING_LEVEL = os.getenv("SPECIES_GEMINI_THINKING_LEVEL", "high")
 PLANTNET_URL = "https://my-api.plantnet.org/v2/identify/all"
 INATURALIST_URL = "https://api.inaturalist.org/v1/taxa/autocomplete"
