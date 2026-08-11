@@ -721,3 +721,30 @@ def test_api_docs_follow_the_public_mode_switch():
     finally:
         os.environ.pop("SPECIES_PUBLIC_MODE", None)
         importlib.reload(main)
+
+
+def test_capture_and_history_screens_use_one_word_per_concept():
+    """同じものを別の名前で呼ばない。画面をまたいだ言い換えは利用者を迷わせる。"""
+    for path in ["/", "/history"]:
+        source = page_source(path)
+        visible = source.replace('href="/history"', "")
+        for banned, instead in [("履歴", "記録"), ("精度", "誤差"),
+                                ("図鑑データベース", "図鑑データ"), ("ローカルLLM", "ローカルAI")]:
+            assert banned not in visible, (path, banned, instead)
+    # 設定のラジオとトップのステータス表示が、同じ提供元を同じ名前で呼ぶ
+    assert "ローカルAI" in page_source("/settings")
+    assert 'local:"ローカルAI"' in client.get("/assets/settings.js").text
+    assert 'local:"ローカルAI"' in client.get("/assets/index.js").text
+    # 設定が引用するチェックボックスのラベルは、実際のラベルと一致する
+    label = "植物専用の識別もいっしょに使う"
+    assert label in client.get("/").text
+    assert label in client.get("/settings").text
+
+
+def test_privacy_policy_matches_where_deletion_actually_lives():
+    privacy = client.get("/privacy").text
+    assert "設定画面・履歴画面から利用者が削除できます" not in privacy
+    assert "「調べた記録」の画面から、1件ずつ、またはすべてを利用者が削除できます" in privacy
+    settings = page_source("/settings")
+    assert "すべて削除" not in settings  # 削除は /history だけが持つ
+    assert "すべて削除" in page_source("/history")
