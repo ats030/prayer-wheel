@@ -450,9 +450,9 @@ def identify(image_bytes: bytes | list[bytes], model: str = MODEL, *, ollama_url
         response.raise_for_status()
         content = response.json()["message"]["content"]
     except httpx.HTTPStatusError as exc:
-        raise VisionError(f"ローカルAIがエラーを返しました（{exc.response.status_code}）") from exc
+        raise VisionError(f"Ollamaがエラーを返しました（{exc.response.status_code}）") from exc
     except (httpx.HTTPError, KeyError, ValueError) as exc:
-        raise VisionError("ローカルAIに接続できませんでした") from exc
+        raise VisionError("Ollamaに接続できませんでした") from exc
     return normalize(_extract_json(content), model=model)
 
 

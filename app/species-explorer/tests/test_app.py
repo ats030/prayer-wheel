@@ -730,12 +730,13 @@ def test_capture_and_history_screens_use_one_word_per_concept():
         source = page_source(path)
         visible = source.replace('href="/history"', "")
         for banned, instead in [("履歴", "記録"), ("精度", "誤差"),
-                                ("図鑑データベース", "図鑑データ"), ("ローカルLLM", "ローカルAI")]:
+                                ("図鑑データベース", "図鑑データ"), ("ローカルLLM", "Ollama"),
+                                ("ローカルAI", "Ollama")]:
             assert banned not in visible, (path, banned, instead)
     # 設定のラジオとトップのステータス表示が、同じ提供元を同じ名前で呼ぶ
-    assert "ローカルAI" in page_source("/settings")
-    assert 'local:"ローカルAI"' in client.get("/assets/settings.js").text
-    assert 'local:"ローカルAI"' in client.get("/assets/index.js").text
+    assert "Ollama" in page_source("/settings")
+    assert 'local:"Ollama"' in client.get("/assets/settings.js").text
+    assert 'local:"Ollama"' in client.get("/assets/index.js").text
     # 設定が引用するチェックボックスのラベルは、実際のラベルと一致する
     label = "植物専用の識別もいっしょに使う"
     assert label in client.get("/").text
@@ -780,7 +781,8 @@ def test_user_facing_messages_use_the_same_words_as_the_screens():
     for name, text in sources.items():
         messages = re.findall(r'(?:detail=|VisionError\(|SettingsError\()\s*f?["\']([^"\']{4,})["\']', text)
         joined = "\n".join(messages)
-        assert "ローカルLLM" not in joined, name          # 画面は「ローカルAI」
+        assert "ローカルLLM" not in joined, name          # 実体を名指しして「Ollama」
+        assert "ローカルAI" not in joined, name
         assert "計算資源" not in joined, name              # 画面は「使うAI」
         assert "画像ファイル" not in joined, name          # 画面は「写真」
         assert "画像は" not in joined, name

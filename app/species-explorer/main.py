@@ -280,7 +280,7 @@ async def identify(
     if provider not in config_store.MODELS:
         raise HTTPException(status_code=400, detail="使うAIを選び直してください")
     if PUBLIC_MODE and provider == "local" and not PUBLIC_LOCAL_ENABLED:
-        raise HTTPException(status_code=403, detail="公開版ではローカルAIを使えません")
+        raise HTTPException(status_code=403, detail="公開版ではOllamaを使えません")
     if PUBLIC_MODE:
         model = request_model
         catalog, _ = config_store.model_catalog(

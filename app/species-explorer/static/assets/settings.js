@@ -1,5 +1,5 @@
 const $=id=>document.getElementById(id);let current=null;const deleteKeys=new Set();
-const providerLabels={local:"ローカルAI",openai:"OpenAI API",anthropic:"Anthropic API",gemini:"Google Gemini API"};
+const providerLabels={local:"Ollama",openai:"OpenAI API",anthropic:"Anthropic API",gemini:"Google Gemini API"};
 const esc=value=>String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 function show(text,state=""){$("message").textContent=text;$("message").className="message"+(state?" "+state:"")}
 function render(data){current=data;document.querySelector('[name=provider][value="'+data.provider+'"]').checked=true;$("active-provider").textContent=providerLabels[data.provider]+" · "+data.models[data.provider];$("local-llm-url").value=data.local_llm.url;$("local-model-options").innerHTML=data.available_models.local.map(item=>'<option value="'+esc(item.id)+'">'+esc(item.label)+'</option>').join("");$("model-local").value=data.models.local;for(const provider of ["openai","anthropic","gemini"]){const select=$("model-"+provider);select.innerHTML=data.available_models[provider].map(item=>'<option value="'+esc(item.id)+'">'+esc(item.label)+'</option>').join("");select.value=data.models[provider]}const incompatible=data.incompatible_local_models||[];$("local-model-note").textContent=incompatible.length?"画像非対応: "+incompatible.join("、"):"画像対応モデル（名前の直接入力も可能）";for(const provider of ["openai","anthropic","gemini","plantnet"]){$("configured-"+provider).textContent=data.api_key_configured[provider]?"登録済み（変更時だけ入力）":"未登録"}$("affiliate-title").value=data.affiliate.title||"";$("affiliate-url").value=data.affiliate.url||"";$("affiliate-enabled").checked=Boolean(data.affiliate.enabled);$("affiliate-partner-tag").value=data.affiliate.partner_tag||"";$("affiliate-product-enabled").checked=Boolean(data.affiliate.product_enabled);$("configured-amazon-creators").textContent=data.affiliate.creators_api_configured?"認証情報を登録済み":"認証情報は未登録";$("affiliate-metrics").textContent="表示 "+data.affiliate.metrics.impressions+" · クリック "+data.affiliate.metrics.clicks}
@@ -37,7 +37,7 @@ function setupPublicSettings(data){
     $(id).disabled=true;
   }
   const security=document.querySelector(".security");
-  security.innerHTML="<li>APIキーはこのブラウザタブだけに保存し、タブを閉じると消えます。</li><li>キーは判定時だけ暗号化通信で送信し、サーバー設定や記録には保存しません。</li><li>ローカルAIと広告は運営者が管理し、利用者から接続先を変更できません。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li>";
+  security.innerHTML="<li>APIキーはこのブラウザタブだけに保存し、タブを閉じると消えます。</li><li>キーは判定時だけ暗号化通信で送信し、サーバー設定や記録には保存しません。</li><li>Ollamaと広告は運営者が管理し、利用者から接続先を変更できません。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li>";
   $("settingsForm").onsubmit=event=>{
     event.preventDefault();
     const selectedProvider=document.querySelector("[name=provider]:checked")?.value;

@@ -16,8 +16,9 @@ with the subject.
   "決め手が足りない理由" not "確証がない理由"), no furigana, no baby talk.
 - One word per concept, across every screen. The capture and history screens say
   調べる (not 識別/判定), 記録 (not 履歴), 誤差 (not 精度), 図鑑データ (not
-  図鑑データベース), and ローカルAI (not ローカルLLM — the status line and the
-  settings radio must not disagree about what the same provider is called).
+  図鑑データベース), and Ollama — the actual name of the thing, not ローカルLLM or
+  ローカルAI. A vague label hides where the photo goes; "Ollama" says it, and the
+  status line and the settings radio then agree with each other and with reality.
   Photo EXIF is 写真の情報, never 記録, because 記録 already means the
   on-device history. Settings and the legal pages may keep 識別 for precision,
   but when they quote a control they quote its actual label.

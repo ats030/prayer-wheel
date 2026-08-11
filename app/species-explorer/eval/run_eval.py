@@ -6,7 +6,7 @@
   uv run --with httpx --with pillow python eval/run_eval.py --label local-baseline
   uv run ... python eval/run_eval.py --use-plantnet --label local-plantnet
 
-既定はローカルLLM。外部APIは無料枠の日次上限を公開版と食い合うので、必要なときだけ
+既定はOllama。外部APIは無料枠の日次上限を公開版と食い合うので、必要なときだけ
 --provider gemini のように明示する。
 
 結果は eval/results/<label>.json と、比較用の要約表を標準出力へ出す。
@@ -119,7 +119,7 @@ def summarize(rows: list[dict], label: str, seconds: list[float]) -> dict[str, o
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    # 検証はローカルLLMを既定にする。外部APIは無料枠の日次上限があり、評価を回すたびに
+    # 検証はOllamaを既定にする。外部APIは無料枠の日次上限があり、評価を回すたびに
     # 公開版の利用者ぶんの枠を削ってしまう。比較で外部が要るときだけ --provider で切り替える。
     parser.add_argument("--provider", default="local", choices=["local", "openai", "anthropic", "gemini"])
     parser.add_argument("--model", default="", help="未指定なら設定中のモデル")

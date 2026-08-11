@@ -59,7 +59,7 @@ def _local_llm_url(value: object) -> str:
     parsed = urlparse(url)
     if (parsed.scheme not in {"http", "https"} or not parsed.hostname or
             parsed.username or parsed.password or parsed.query or parsed.fragment):
-        raise SettingsError("ローカルAIのURLは http:// または https:// の接続先を入力してください")
+        raise SettingsError("OllamaのURLは http:// または https:// の接続先を入力してください")
     return url
 
 
@@ -227,7 +227,7 @@ def save(
     for name in MODELS:
         model = models.get(name, current["models"][name])
         if name == "local" and (not isinstance(model, str) or not model.strip() or len(model) > 200):
-            raise SettingsError("ローカルAIのモデル名を入力してください")
+            raise SettingsError("Ollamaのモデル名を入力してください")
         if name != "local" and model not in {item["id"] for item in catalog[name]}:
             raise SettingsError("モデルを選び直してください")
         current["models"][name] = model.strip() if name == "local" else model

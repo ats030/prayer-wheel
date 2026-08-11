@@ -28,7 +28,7 @@ systemctl --user restart species-explorer species-explorer-public
 /home/ats030/app/species-explorer-public.sh   # 公開版を手で起動する場合
 ```
 
-計算資源、APIキー、使用モデルは画面上部の「設定」から変更できます。ローカルLLMではOllama URLを入力でき、その接続先にインストール済みで画像入力に対応するモデルを自動表示します。別端末のOllamaを使う場合は、Ollama側でこのサーバーからの接続を許可してください。接続先とAPIキーは `~/.config/species-explorer/settings.json` に権限 `0600` で保存し、APIキーは画面へ再表示しません。
+使うAI、APIキー、モデルは画面上部の「設定」から変更できます。OllamaではURLを入力でき、その接続先にインストール済みで画像入力に対応するモデルを自動表示します。別端末のOllamaを使う場合は、Ollama側でこのサーバーからの接続を許可してください。接続先とAPIキーは `~/.config/species-explorer/settings.json` に権限 `0600` で保存し、APIキーは画面へ再表示しません。
 
 ```bash
 uv run --with pytest pytest -q
@@ -60,7 +60,7 @@ SPECIES_PUBLIC_AFFILIATE=0
 
 - `SPECIES_PUBLIC_MODE=1`: 共有設定の更新を403で拒否し、BYOK公開モードを有効化
 - `SPECIES_ALLOWED_HOSTS`: 公開ドメインをカンマ区切りで指定
-- `SPECIES_PUBLIC_LOCAL=1`: 運営者のローカルLLMを公開する場合だけ明示的に有効化
+- `SPECIES_PUBLIC_LOCAL=1`: 運営者のOllamaを公開する場合だけ明示的に有効化
 - `SPECIES_PUBLIC_AFFILIATE=1`: 商用利用可能な公開基盤へ移行後、広告を再有効化する場合だけ指定
 
 無料のTailscale Personalプランで公開するベータ版は非商用とし、広告・商品API・計測を強制的に無効化します。
