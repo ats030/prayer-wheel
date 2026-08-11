@@ -202,7 +202,11 @@ def main() -> int:
     RESULTS_DIR.mkdir(exist_ok=True)
     output.write_text(json.dumps({
         "summary": summary,
+        # 何で測ったかを残さないと、条件の違う結果どうしを後から比べてしまう。
+        # thinkingLevel を記録しておらず、既存の結果が high だったのか medium
+        # だったのかファイルから確かめられなくなった
         "config": {"provider": args.provider, "model": model, "use_plantnet": args.use_plantnet,
+                   "thinking_level": vision.GEMINI_THINKING_LEVEL if args.provider == "gemini" else None,
                    "dataset": manifest["source"], "measured_at": time.strftime("%Y-%m-%d %H:%M")},
         "rows": rows,
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
