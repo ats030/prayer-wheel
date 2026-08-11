@@ -1338,3 +1338,41 @@ def test_denied_webdav_logs_the_reason_for_the_operator():
     for message in re.findall(r'RelayError\("([^"]+)"\)', relay):
         for internal in ["WWW-Authenticate", "Basic realm", "body="]:
             assert internal not in message, message
+
+
+def test_google_drive_talks_to_google_directly():
+    """Drive は WebDAV を提供しないので OAuth と Drive API を使う。通信はブラウザから
+    Google へ直接行き、サーバーを経由しない（写真もトークンも運営者を通らない）。"""
+    drive = client.get("/assets/gdrive.js").text
+    assert "https://www.googleapis.com/auth/drive.file" in drive   # 自分が作ったファイルだけ
+    assert "auth/drive'" not in drive and '"drive"' not in drive    # 全体アクセスは求めない
+    assert "/api/storage/" not in drive                             # 中継しない
+    assert "let driveToken = null" in drive
+    assert "localStorage.setItem(DRIVE_KEY" not in drive.split("function rememberDriveFile")[0]
+    # トークンは保存しない（盗まれたときの被害を残さない）
+    assert "localStorage" not in drive.split("let driveToken")[1].split("function driveFileId")[0]
+
+
+def test_google_script_is_loaded_only_when_used():
+    drive = client.get("/assets/gdrive.js").text
+    assert "function loadGoogleIdentity()" in drive
+    assert 'script.src = "https://accounts.google.com/gsi/client"' in drive
+    page = client.get("/settings").text
+    assert "accounts.google.com" not in page      # 最初から読み込まない
+
+
+def test_policy_allows_google_but_nothing_arbitrary():
+    policy = client.get("/settings").headers["content-security-policy"]
+    assert "script-src 'self' https://accounts.google.com" in policy
+    assert "https://www.googleapis.com" in policy
+    assert "frame-src https://accounts.google.com" in policy
+    # 任意ホストを開けたわけではない
+    assert "*" not in policy.split("connect-src")[1].split(";")[0]
+    assert "'unsafe-inline'" not in policy
+
+
+def test_drive_says_so_when_the_operator_has_not_set_it_up():
+    settings = client.get("/api/settings").json()
+    assert "google_client_id" in settings          # 公開情報。秘密鍵は使わない
+    script = client.get("/assets/settings.js").text
+    assert "SPECIES_GOOGLE_CLIENT_ID" in script    # 何をすれば使えるか伝える

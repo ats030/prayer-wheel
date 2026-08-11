@@ -46,6 +46,8 @@ app = FastAPI(
 STATIC_DIR = Path(__file__).parent / "static"
 PUBLIC_LOCAL_ENABLED = os.getenv("SPECIES_PUBLIC_LOCAL", "").lower() in {"1", "true", "yes"}
 PUBLIC_AFFILIATE_ENABLED = os.getenv("SPECIES_PUBLIC_AFFILIATE", "").lower() in {"1", "true", "yes"}
+# Google Drive 連携のクライアントID。公開情報なので画面へ渡してよい (秘密鍵は使わない)
+GOOGLE_CLIENT_ID = os.getenv("SPECIES_GOOGLE_CLIENT_ID", "").strip()
 ALLOWED_HOSTS = [host.strip() for host in os.getenv("SPECIES_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
 # 運営者用 (非公開モード) こそ設定を書き換えられるので、Host の検証は両モードで効かせる。
 # 以前は公開モードだけに付けていたため、運営者用が素通しだった。
@@ -73,12 +75,12 @@ CONTENT_SECURITY_POLICY = "; ".join([
     "default-src 'self'",
     "base-uri 'none'",
     "object-src 'none'",
-    "frame-src 'none'",
+    "frame-src https://accounts.google.com",
     "frame-ancestors 'none'",
     "form-action 'self'",
-    "script-src 'self'",
+    "script-src 'self' https://accounts.google.com",
     "style-src 'self'",
-    "connect-src 'self'",
+    "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com",
     "img-src 'self' blob: https://tile.openstreetmap.org https://*.media-amazon.com https://*.ssl-images-amazon.com",
 ])
 
@@ -166,6 +168,7 @@ app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets"
 def get_settings() -> dict[str, object]:
     result = config_store.public()
     result["public_mode"] = PUBLIC_MODE
+    result["google_client_id"] = GOOGLE_CLIENT_ID
     if PUBLIC_MODE:
         result["local_llm"] = {"url": ""}
         result["api_key_configured"] = {

@@ -227,3 +227,41 @@ $("cloud-forget").onclick=()=>{
   showCloudState();backupMessage("接続を解除しました。","success");
 };
 showCloudState();
+
+/* Google ドライブ。運営者がクライアントIDを設定していないと使えない */
+async function refreshDrive(){
+  const settings=await fetch("/api/settings").then(r=>r.ok?r.json():null).catch(()=>null);
+  const clientId=settings?.google_client_id||"";
+  if(!driveConfigured(clientId)){
+    $("drive-unavailable").hidden=false;
+    $("drive-unavailable").textContent="この生きものノートでは Google ドライブ連携が設定されていません。運営者が SPECIES_GOOGLE_CLIENT_ID を設定すると使えます。";
+    return;
+  }
+  $("drive-actions").hidden=false;
+  $("drive-state").textContent=driveSignedIn()?"つながっています":"未接続";
+  $("drive-save").hidden=!driveSignedIn();
+  $("drive-load").hidden=!driveSignedIn();
+  $("drive-connect").onclick=async()=>{
+    const button=$("drive-connect");button.disabled=true;backupMessage("Google の許可を求めています…");
+    try{
+      await driveSignIn(clientId);
+      $("drive-state").textContent="つながっています";
+      $("drive-save").hidden=false;$("drive-load").hidden=false;
+      backupMessage("Google ドライブにつながりました。","success");
+    }catch(error){backupMessage("つなげませんでした。"+error.message,"error")}
+    finally{button.disabled=false}
+  };
+  $("drive-save").onclick=async()=>{
+    $("drive-save").disabled=true;backupMessage("ドライブへ保存しています…");
+    try{backupMessage(`記録 ${await saveToDrive()}件をドライブへ保存しました。`,"success")}
+    catch(error){backupMessage("保存できませんでした。"+error.message,"error")}
+    finally{$("drive-save").disabled=false}
+  };
+  $("drive-load").onclick=async()=>{
+    $("drive-load").disabled=true;backupMessage("ドライブから読み込んでいます…");
+    try{backupMessage(`記録 ${await loadFromDrive()}件を読み込みました。`,"success")}
+    catch(error){backupMessage("読み込めませんでした。"+error.message,"error")}
+    finally{$("drive-load").disabled=false}
+  };
+}
+refreshDrive();

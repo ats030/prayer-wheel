@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#121a14" media="(prefers-color-scheme: dark)">
   <title>設定 · 生きものノート</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <script src="/theme.js"></script><link rel="stylesheet" href="/assets/mode.css"><link rel="stylesheet" href="/assets/settings.css"><script src="/assets/species-links.js" defer></script><script src="/assets/backup.js" defer></script><script src="/assets/settings.js" defer></script>
+  <script src="/theme.js"></script><link rel="stylesheet" href="/assets/mode.css"><link rel="stylesheet" href="/assets/settings.css"><script src="/assets/species-links.js" defer></script><script src="/assets/backup.js" defer></script><script src="/assets/gdrive.js" defer></script><script src="/assets/settings.js" defer></script>
 </head>
 <body><main class="app">
   <header class="top"><div><div class="eyebrow">生きものノート</div><h1>設定</h1></div><div class="top-actions"><button class="back theme-toggle" id="themeToggle" type="button"><span class="theme-icon" aria-hidden="true">◐</span><span class="theme-label">自動</span></button><a class="back" href="/">撮影へ戻る</a></div></header>
@@ -33,6 +33,12 @@
     <div class="panel">
       <p class="help">調べた記録 (写真を含む) と、使うAIの設定を1つのファイルにまとめます。クラウドの同期フォルダへ保存すれば、別の端末でも読み込めます。<strong>ファイルはこの端末から直接保存され、運営者のサーバーには送られません。</strong></p>
       <p class="help">APIキーは含めません。ファイルが人手に渡っても、料金が発生する鍵まで渡さないためです。別の端末では入れ直してください。</p>
+      <details class="panel stacked" id="drive-panel"><summary><span><span class="detail-title">Google ドライブに保存する</span><span class="detail-copy">いちばん手軽です。Googleアカウントで許可するだけ</span></span></summary><div class="detail-body fields">
+        <span class="help">記録はブラウザから Google へ直接送られ、<strong>本サービスのサーバーを通りません</strong>。このアプリが作った ikimono-note.json だけを読み書きし、ドライブの他のファイルは見えません。</span>
+        <p class="help" id="drive-unavailable" hidden></p>
+        <div class="actions" id="drive-actions" hidden><button class="button primary" id="drive-connect" type="button">Googleドライブにつなぐ</button><button class="button" id="drive-save" type="button" hidden>ドライブへ保存</button><button class="button" id="drive-load" type="button" hidden>ドライブから読み込む</button></div>
+        <span class="configured" id="drive-state"></span>
+      </div></details>
       <details class="panel stacked" id="cloud-panel"><summary><span><span class="detail-title">クラウドに保存する</span><span class="detail-copy">pCloud・Nextcloud など。どの端末からでも同じ場所に置けます</span></span></summary><div class="detail-body fields">
         <span class="help">つないだあと、保存するフォルダを一覧から選べます。接続先とパスワードはこのブラウザだけに保存し、やり取りのたびに本サービスのサーバーを経由します（<strong>サーバーには残しません</strong>）。ブラウザから外部へ直接つなぐ経路が塞がれているためです。</span>
         <div class="field"><label for="cloud-service">サービス</label><select id="cloud-service">
