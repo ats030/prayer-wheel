@@ -27,9 +27,16 @@ class SettingsUpdate(BaseModel):
     affiliate: dict[str, object] = Field(default_factory=dict)
 
 
-app = FastAPI(title="Species Explorer")
-STATIC_DIR = Path(__file__).parent / "static"
 PUBLIC_MODE = os.getenv("SPECIES_PUBLIC_MODE", "").lower() in {"1", "true", "yes"}
+# 一般公開では API ドキュメントを閉じる。Swagger UI は CDN から読み込むため CSP に
+# 阻まれて白紙になるうえ、公開の入口に晒す必要がない
+app = FastAPI(
+    title="Species Explorer",
+    docs_url=None if PUBLIC_MODE else "/docs",
+    redoc_url=None if PUBLIC_MODE else "/redoc",
+    openapi_url=None if PUBLIC_MODE else "/openapi.json",
+)
+STATIC_DIR = Path(__file__).parent / "static"
 PUBLIC_LOCAL_ENABLED = os.getenv("SPECIES_PUBLIC_LOCAL", "").lower() in {"1", "true", "yes"}
 PUBLIC_AFFILIATE_ENABLED = os.getenv("SPECIES_PUBLIC_AFFILIATE", "").lower() in {"1", "true", "yes"}
 ALLOWED_HOSTS = [host.strip() for host in os.getenv("SPECIES_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
@@ -52,6 +59,22 @@ def _rate_limit(request: Request, scope: str, limit: int, window: int = 60) -> N
         bucket.append(now)
 
 
+# 'unsafe-inline' を置かずに済むよう、CSS/JS はすべて /assets と /theme.js から配る。
+# 外部を許すのは、利用者が押して初めて出る地図タイルと、広告の商品画像だけ。
+CONTENT_SECURITY_POLICY = "; ".join([
+    "default-src 'self'",
+    "base-uri 'none'",
+    "object-src 'none'",
+    "frame-src 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "script-src 'self'",
+    "style-src 'self'",
+    "connect-src 'self'",
+    "img-src 'self' blob: https://tile.openstreetmap.org https://*.media-amazon.com https://*.ssl-images-amazon.com",
+])
+
+
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -60,6 +83,7 @@ async def security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(self), geolocation=(self)"
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Content-Security-Policy"] = CONTENT_SECURITY_POLICY
     return response
 
 
@@ -100,6 +124,9 @@ def theme_script() -> FileResponse:
 # Leaflet は同梱して配信する。CDN から読むと、地図を見た利用者のIPが第三者へ渡り、
 # プライバシーポリシーの送信先一覧と実態がずれる (BSD-2-Clause, vendor/leaflet/LICENSE)
 app.mount("/vendor", StaticFiles(directory=STATIC_DIR / "vendor"), name="vendor")
+# ページのCSS/JSは外部ファイルに置く。インラインのままだと CSP に 'unsafe-inline' が
+# 必要になり、BYOKでブラウザにAPIキーを預けるこのアプリでは守りとして弱すぎる
+app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
 
 
 @app.get("/api/settings")

@@ -1,3 +1,6 @@
+import importlib
+import os
+import re
 import io
 import sys
 from pathlib import Path
@@ -11,6 +14,20 @@ import main
 
 
 client = TestClient(main.app)
+
+
+def page_source(path):
+    """HTML と、そのページが読み込む CSS/JS を連結して返す。
+
+    CSP のために資産を外部ファイルへ出したので、実装の中身を見たい検証は
+    HTML 単体ではなく「そのページを構成する一式」を対象にする。
+    """
+    html = client.get(path).text
+    parts = [html]
+    for asset in re.findall(r'(?:href|src)="(/assets/[^"]+|/theme\.js)"', html):
+        parts.append(client.get(asset).text)
+    return "\n".join(parts)
+
 
 
 @pytest.fixture(autouse=True)
@@ -37,56 +54,59 @@ def test_index_has_camera_capture():
 
 def test_index_has_additional_shooting_guide_for_uncertain_results():
     response = client.get("/")
+    source = page_source("/")
     assert response.status_code == 200
-    assert "function shootingGuide(data)" in response.text
-    assert '["taxonomy_only","uncertain"]' in response.text
-    assert "もう1枚撮ると、はっきりします" in response.text
-    assert "candidate.evidence_gaps" in response.text
-    assert ".slice(0,5)" in response.text
-    assert 'id="addPhotos"' in response.text
+    assert "function shootingGuide(data)" in source
+    assert '["taxonomy_only","uncertain"]' in source
+    assert "もう1枚撮ると、はっきりします" in source
+    assert "candidate.evidence_gaps" in source
+    assert ".slice(0,5)" in source
+    assert 'id="addPhotos"' in source
 
 
 def test_index_saves_history_but_does_not_render_it():
     """記録の作成はトップが担い、閲覧は /history だけが担う。"""
     response = client.get("/")
-    assert 'href="/settings"' in response.text
-    assert 'href="/history"' in response.text
-    assert 'indexedDB.open("species-history",1)' in response.text
-    assert 'slice(50)' in response.text
-    assert 'gps.latitude.toFixed(4)' in response.text
-    assert '960/Math.max(bitmap.width,bitmap.height)' in response.text
-    assert 'model:data.model||""' in response.text
-    assert 'resultMeta:{strictMode:' in response.text
+    source = page_source("/")
+    assert 'href="/settings"' in source
+    assert 'href="/history"' in source
+    assert 'indexedDB.open("species-history",1)' in source
+    assert 'slice(50)' in source
+    assert 'gps.latitude.toFixed(4)' in source
+    assert '960/Math.max(bitmap.width,bitmap.height)' in source
+    assert 'model:data.model||""' in source
+    assert 'resultMeta:{strictMode:' in source
     # 表示専用の重複実装を持たないこと（隠れたまま到達できない実装を再び作らない）
     for gone in ["historyPanel", "historyToggle", "renderHistoryList", "historyLightbox",
                  "historyCandidateHtml", "historyAffiliateLink", "historyMessage"]:
-        assert gone not in response.text, gone
+        assert gone not in source, gone
     # 保存に失敗したら、隠れた要素ではなく利用者が見ている場所へ出す
-    assert 'saveHistory(data).catch(error=>showStatus(' in response.text
-    assert "この端末の記録には保存できませんでした" in response.text
+    assert 'saveHistory(data).catch(error=>showStatus(' in source
+    assert "この端末の記録には保存できませんでした" in source
     assert all("history" not in route.path for route in main.app.routes if route.path.startswith("/api/"))
 
 
 def test_index_result_view_keeps_its_own_labels():
     response = client.get("/")
-    assert "写真から見つけた特徴" in response.text
-    assert "似ている種との見分け方" in response.text
-    assert "決め手が足りない理由" in response.text
-    assert 'return "種の候補"' in response.text
-    assert 'return "属（近いなかま）の候補"' in response.text
-    assert 'return "科（大きなグループ）の候補"' in response.text
-    assert 'rel="sponsored noopener noreferrer"' in response.text
-    assert "広告 · Amazonで" in response.text
-    assert "オス・メスの推測" in response.text
+    source = page_source("/")
+    assert "写真から見つけた特徴" in source
+    assert "似ている種との見分け方" in source
+    assert "決め手が足りない理由" in source
+    assert 'return "種の候補"' in source
+    assert 'return "属（近いなかま）の候補"' in source
+    assert 'return "科（大きなグループ）の候補"' in source
+    assert 'rel="sponsored noopener noreferrer"' in source
+    assert "広告 · Amazonで" in source
+    assert "オス・メスの推測" in source
     for selector in [".sex-result{", ".sex-evidence{", ".animal-references{"]:
-        assert selector in response.text, selector
+        assert selector in source, selector
     for site in ["Animal Diversity Web", "Cornell All About Birds", "FishBase",
                  "AmphibiaWeb", "Reptile Database"]:
-        assert site in response.text, site
+        assert site in source, site
 
 
 def test_history_page_renders_saved_records():
-    page = client.get("/history").text
+    page = page_source("/history")
     assert 'id="clearHistory"' not in page
     assert 'id="clear"' in page
     assert "fullCandidate" in page
@@ -121,12 +141,12 @@ def test_settings_page_enables_all_providers():
     assert "https://my.plantnet.org/" in response.text
     assert "ChatGPTの月額契約とは別" in response.text
     assert "Claudeの月額契約とは別" in response.text
-    assert "rotatingAffiliateLink(data.candidates,data.category)" in client.get("/").text
-    assert "loadAmazonProducts()" in client.get("/").text
-    assert "position:fixed" not in client.get("/").text
-    assert "position:sticky" not in client.get("/").text
+    assert "rotatingAffiliateLink(data.candidates,data.category)" in page_source("/")
+    assert "loadAmazonProducts()" in page_source("/")
+    assert "position:fixed" not in page_source("/")
+    assert "position:sticky" not in page_source("/")
     assert 'id="reset-affiliate-visibility"' not in response.text
-    index = client.get("/").text
+    index = page_source("/")
     assert 'id="gpsButton"' in index
     assert "requestCurrentLocation(true)" in index
     assert 'gps?.source!=="exif"' in index
@@ -380,13 +400,14 @@ def test_settings_api_saves_model_without_returning_key():
 
 def test_settings_page_allows_custom_local_llm_url():
     response = client.get("/settings")
+    source = page_source("/settings")
     assert response.status_code == 200
-    assert 'id="local-llm-url"' in response.text
-    assert 'local_llm:{url:' in response.text
-    assert 'id="active-provider"' in response.text
-    assert response.text.count('<details class="panel"') == 2
-    assert 'id="save-button"' in response.text
-    assert 'class="message" id="message" aria-live="polite"' in response.text
+    assert 'id="local-llm-url"' in source
+    assert 'local_llm:{url:' in source
+    assert 'id="active-provider"' in source
+    assert source.count('<details class="panel') == 2
+    assert 'id="save-button"' in source
+    assert 'class="message" id="message" aria-live="polite"' in source
 
 
 def test_gemini_provider_dispatches_without_exposing_key(monkeypatch):
@@ -479,8 +500,8 @@ def test_public_mode_rejects_unknown_model(monkeypatch):
 
 
 def test_public_settings_ui_keeps_keys_in_tab_session():
-    page = client.get("/settings").text
-    index = client.get("/").text
+    page = page_source("/settings")
+    index = page_source("/")
     assert "function setupPublicSettings(data)" in page
     assert 'sessionStorage.setItem("species-key-"+name' in page
     assert "APIキーはこのブラウザタブだけに保存" in page
@@ -557,7 +578,7 @@ def test_private_mode_keeps_operator_affiliate_configuration(monkeypatch):
 
 def test_all_pages_use_light_first_theme_with_dark_fallback():
     for path in ["/", "/settings", "/history", "/privacy", "/terms"]:
-        page = client.get(path).text
+        page = page_source(path)
         assert "color-scheme:light dark" in page, path
         assert "@media(prefers-color-scheme:dark)" in page, path
         assert "color-scheme:dark;" not in page, path
@@ -566,7 +587,7 @@ def test_all_pages_use_light_first_theme_with_dark_fallback():
 
 
 def test_index_states_all_ages_and_layered_safety_warnings():
-    index = client.get("/").text
+    index = page_source("/")
     assert "どなたでも使えます" in index
     assert "年齢を問わず使えますが、小学生以下のお子さんは大人といっしょに使ってください。" in index
     assert "食べられるか：判定しません" in index
@@ -576,17 +597,17 @@ def test_index_states_all_ages_and_layered_safety_warnings():
 
 
 def test_terms_and_privacy_cover_all_ages_use():
-    terms = client.get("/terms").text
+    terms = page_source("/terms")
     assert "対象年齢と保護者の方へ" in terms
     assert "年齢制限はなく、どなたでもご利用いただけます" in terms
     assert "契約者ご本人（成年）が行ってください" in terms
-    privacy = client.get("/privacy").text
+    privacy = page_source("/privacy")
     assert "お子さまの利用" in privacy
     assert "年齢制限を設けていません" in privacy
 
 
 def test_settings_warns_that_api_keys_are_for_the_account_holder():
-    settings = client.get("/settings").text
+    settings = page_source("/settings")
     assert "大人の方へ" in settings
     assert "設定は契約者ご本人が行ってください" in settings
     assert "アプリの利用に年齢制限はありません。" in settings
@@ -599,7 +620,7 @@ def test_theme_toggle_is_available_on_every_page():
     assert 'root.removeAttribute("data-theme")' in script
     assert 'root.setAttribute("data-theme", mode)' in script
     for path in ["/", "/settings", "/history", "/privacy", "/terms"]:
-        page = client.get(path).text
+        page = page_source(path)
         assert '<script src="/theme.js"></script>' in page, path
         assert 'id="themeToggle"' in page, path
         assert ':root[data-theme="dark"]' in page, path
@@ -608,7 +629,7 @@ def test_theme_toggle_is_available_on_every_page():
 
 def test_theme_script_loads_before_the_page_body():
     for path in ["/", "/settings", "/history", "/privacy", "/terms"]:
-        page = client.get(path).text
+        page = page_source(path)
         tag_start = page.index('<script src="/theme.js">')
         assert tag_start < page.index("<body"), path
         assert "<style" not in page[:tag_start], path
@@ -616,7 +637,7 @@ def test_theme_script_loads_before_the_page_body():
 
 def test_history_map_is_never_loaded_without_an_explicit_press():
     """位置を含む地図タイルは、利用者が押すまで第三者へ要求しない。"""
-    page = client.get("/history").text
+    page = page_source("/history")
     assert "unpkg.com" not in page
     assert '"/vendor/leaflet/leaflet.js"' in page
     assert '"/vendor/leaflet/leaflet.css"' in page
@@ -630,3 +651,73 @@ def test_history_map_is_never_loaded_without_an_explicit_press():
                  "/vendor/leaflet/images/marker-icon.png", "/vendor/leaflet/LICENSE"]:
         assert client.get(path).status_code == 200, path
     assert "BSD 2-Clause" in client.get("/vendor/leaflet/LICENSE").text
+
+
+PAGES = ["/", "/settings", "/history", "/privacy", "/terms"]
+
+
+def test_csp_is_sent_without_unsafe_keywords():
+    for path in PAGES:
+        policy = client.get(path).headers["content-security-policy"]
+        assert "unsafe-inline" not in policy, path
+        assert "unsafe-eval" not in policy, path
+        for directive in ["default-src 'self'", "script-src 'self'", "style-src 'self'",
+                          "connect-src 'self'", "object-src 'none'", "frame-ancestors 'none'",
+                          "base-uri 'none'"]:
+            assert directive in policy, (path, directive)
+    # 押して初めて出る地図タイルと広告画像だけを外部に許す
+    policy = client.get("/").headers["content-security-policy"]
+    assert "img-src 'self' blob: https://tile.openstreetmap.org" in policy
+    assert "https://*.media-amazon.com" in policy
+
+
+def test_pages_carry_no_inline_style_or_script():
+    """CSP から 'unsafe-inline' を外せる状態を保つ。"""
+    for path in PAGES:
+        page = client.get(path).text
+        assert "<style" not in page, path
+        assert 'style="' not in page, path
+        assert re.search(r"<script(?![^>]*\ssrc=)", page) is None, path
+        for handler in ["onclick=", "onload=", "onerror=", "onsubmit="]:
+            assert handler not in page, (path, handler)
+
+
+def test_page_assets_are_served_locally():
+    for name in ["index.css", "index.js", "settings.css", "settings.js",
+                 "history.css", "history.js", "privacy.css", "terms.css"]:
+        response = client.get(f"/assets/{name}")
+        assert response.status_code == 200, name
+    assert client.get("/theme.js").status_code == 200
+    for path in PAGES:
+        page = page_source(path)
+        assert "cdn." not in page, path
+        assert "unpkg" not in page, path
+
+
+def test_confidence_meter_avoids_inline_style():
+    """幅は style 属性ではなく CSSOM で入れる。属性に戻すと CSP に弾かれる。"""
+    index = client.get("/assets/index.js").text
+    assert 'data-width=' in index
+    assert "bar.style.width=" in index
+    assert "applyMeters();" in index
+    assert 'style=\\"width:' not in index
+
+
+def test_api_docs_follow_the_public_mode_switch():
+    """公開時は閉じる。CSP下では Swagger UI が CDN を読めず白紙になるため。"""
+    assert main.PUBLIC_MODE is False
+    assert client.get("/docs").status_code == 200
+    public = importlib.reload(main)
+    try:
+        os.environ["SPECIES_PUBLIC_MODE"] = "1"
+        public = importlib.reload(main)
+        assert public.PUBLIC_MODE is True
+        assert public.app.docs_url is None and public.app.redoc_url is None
+        assert public.app.openapi_url is None
+        opened = TestClient(public.app, headers={"host": "localhost"})
+        assert opened.get("/docs").status_code == 404
+        assert opened.get("/openapi.json").status_code == 404
+        assert opened.get("/").status_code == 200
+    finally:
+        os.environ.pop("SPECIES_PUBLIC_MODE", None)
+        importlib.reload(main)

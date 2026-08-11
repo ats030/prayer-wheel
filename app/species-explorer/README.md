@@ -74,6 +74,12 @@ uv run uvicorn main:app --host 127.0.0.1 --port 8524
 - 判定はIPごとに1分6回、メタデータ読取は1分20回
 - APIキーはレスポンス、サーバー設定、判定履歴へ含めない
 - Hostヘッダー、フレーム埋込み、MIME sniffing、カメラ・位置情報権限を制限
+- `/docs`・`/redoc`・`/openapi.json` を閉じる
+- Content-Security-Policy を `'unsafe-inline'` なしで適用。CSSとJSは
+  `/assets` と `/theme.js` からのみ読み、外部に許すのは利用者が押して初めて出る
+  地図タイル (`tile.openstreetmap.org`) と広告の商品画像 (Amazon) だけ。
+  ページにインライン `<style>`／`<script>`／`style` 属性を足すとCSPに弾かれる
+  （テストで検出する）
 
 Tailscale Funnelでの公開と停止:
 
