@@ -23,10 +23,12 @@ OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434").rstrip("/")
 # Ollama は完全に無料、Gemini は無料枠あり、OpenAI と Anthropic は従量課金のみ。
 MODELS = {
     "local": [{"id": "gemma4:12b", "label": "gemma4:12b（ローカル）"}],
+    # 無料枠は同じ Gemini でもモデルごとに大きく違う。実測で 3.6 Flash は1日20回しか
+    # 通らず、30枚の評価すら回らなかった。Flash-Lite は30枚を完走している。
     "gemini": [
-        {"id": "gemini-3.6-flash", "label": "Gemini 3.6 Flash（推奨）"},
-        {"id": "gemini-3.5-flash", "label": "Gemini 3.5 Flash（高性能）"},
-        {"id": "gemini-3.5-flash-lite", "label": "Gemini 3.5 Flash-Lite（低コスト）"},
+        {"id": "gemini-3.5-flash-lite", "label": "Gemini 3.5 Flash-Lite（推奨・無料枠が広い）"},
+        {"id": "gemini-3.6-flash", "label": "Gemini 3.6 Flash（無料枠は1日20回）"},
+        {"id": "gemini-3.5-flash", "label": "Gemini 3.5 Flash"},
     ],
     "openai": [
         {"id": "gpt-5.6-luna", "label": "GPT-5.6 Luna（低コスト）"},
@@ -41,7 +43,7 @@ MODELS = {
 }
 DEFAULT_MODELS = {
     "local": "gemma4:12b",
-    "gemini": "gemini-3.6-flash",
+    "gemini": "gemini-3.5-flash-lite",
     "openai": "gpt-5.6-luna",
     "anthropic": "claude-sonnet-5",
 }

@@ -2,283 +2,89 @@
   "summary": {
     "label": "gemini-3.6-flash",
     "count": 30,
-    "errors": 20,
-    "top1_percent": 10.0,
-    "top3_percent": 20.0,
-    "genus_percent": 50.0,
-    "family_or_above_percent": 100.0,
+    "errors": 30,
+    "top1_percent": 0.0,
+    "top3_percent": 0.0,
+    "genus_percent": 0.0,
+    "family_or_above_percent": 0.0,
     "rejected_percent": 0.0,
-    "median_seconds": 21.9,
-    "mean_confidence_when_answered": 46.5,
-    "top1_percent_when_answered": 10.0
+    "median_seconds": null,
+    "mean_confidence_when_answered": null,
+    "top1_percent_when_answered": null
   },
   "config": {
     "provider": "gemini",
     "model": "gemini-3.6-flash",
     "use_plantnet": false,
     "dataset": "iNaturalist API v1 (quality_grade=research, photo_license=cc0)",
-    "measured_at": "2026-08-11 10:18"
+    "measured_at": "2026-08-11 18:33"
   },
   "rows": [
     {
       "photo_id": 344654543,
-      "group": "植物",
       "truth": "Dumortiera hirsuta",
-      "truth_ja": "ケゼニゴケ",
-      "predicted": [
-        "Conocephalum salebrosum",
-        "Conocephalum conicum"
-      ],
-      "predicted_ja": [
-        "タカオジャゴケ",
-        "日本語名なし"
-      ],
-      "category": "植物",
-      "rejected": false,
-      "top1": false,
-      "top3": false,
-      "genus": false,
-      "family_or_above": true,
-      "confidence_top1": 30,
-      "evidence_status_top1": "uncertain",
-      "plantnet_status": "",
-      "plantnet_used": false
+      "group": "植物",
+      "error": "VisionError: Geminiの利用上限またはレート制限に達しました"
     },
     {
       "photo_id": 536404899,
-      "group": "植物",
       "truth": "Calanthe mannii",
-      "truth_ja": "サクラジマエビネ",
-      "predicted": [
-        "Liparis kumokiri",
-        "Liparis krameri",
-        "Liparis makinoana"
-      ],
-      "predicted_ja": [
-        "クモキリソウ",
-        "ジガバチソウ",
-        "スズムシソウ"
-      ],
-      "category": "植物",
-      "rejected": false,
-      "top1": false,
-      "top3": false,
-      "genus": false,
-      "family_or_above": true,
-      "confidence_top1": 55,
-      "evidence_status_top1": "taxonomy_only",
-      "plantnet_status": "",
-      "plantnet_used": false
+      "group": "植物",
+      "error": "skipped: 日次上限"
     },
     {
       "photo_id": 124479108,
-      "group": "植物",
       "truth": "Elodea densa",
-      "truth_ja": "オオカナダモ",
-      "predicted": [
-        "Hydrocharis dubia",
-        "Elodea nuttallii"
-      ],
-      "predicted_ja": [
-        "トチカガミ",
-        "コカナダモ"
-      ],
-      "category": "植物",
-      "rejected": false,
-      "top1": false,
-      "top3": false,
-      "genus": true,
-      "family_or_above": true,
-      "confidence_top1": 20,
-      "evidence_status_top1": "uncertain",
-      "plantnet_status": "",
-      "plantnet_used": false
+      "group": "植物",
+      "error": "skipped: 日次上限"
     },
     {
       "photo_id": 348431422,
-      "group": "植物",
       "truth": "Lespedeza kagoshimensis",
-      "truth_ja": "",
-      "predicted": [
-        "Lespedeza cyrtobotrya",
-        "Lespedeza bicolor",
-        "Lespedeza homoloba"
-      ],
-      "predicted_ja": [
-        "マルバハギ",
-        "ヤマハギ",
-        "ツクシハギ"
-      ],
-      "category": "植物",
-      "rejected": false,
-      "top1": false,
-      "top3": false,
-      "genus": true,
-      "family_or_above": true,
-      "confidence_top1": 60,
-      "evidence_status_top1": "taxonomy_only",
-      "plantnet_status": "",
-      "plantnet_used": false
+      "group": "植物",
+      "error": "skipped: 日次上限"
     },
     {
       "photo_id": 107134799,
-      "group": "植物",
       "truth": "Thrixspermum japonicum",
-      "truth_ja": "カヤラン",
-      "predicted": [
-        "Gastrochilus japonicus",
-        "Gastrochilus matsuran",
-        "Gastrochilus toramanus"
-      ],
-      "predicted_ja": [
-        "カシノキラン",
-        "日本語名なし",
-        "モミラン"
-      ],
-      "category": "植物",
-      "rejected": false,
-      "top1": false,
-      "top3": false,
-      "genus": false,
-      "family_or_above": true,
-      "confidence_top1": 60,
-      "evidence_status_top1": "taxonomy_only",
-      "plantnet_status": "",
-      "plantnet_used": false
+      "group": "植物",
+      "error": "skipped: 日次上限"
     },
     {
       "photo_id": 543289462,
-      "group": "植物",
       "truth": "Chara braunii",
-      "truth_ja": "シャジクモ",
-      "predicted": [
-        "Nitella flexilis",
-        "Nitella gracilis",
-        "Ceratophyllum demersum"
-      ],
-      "predicted_ja": [
-        "ヒメフラスコモ",
-        "キヌイトフラスコモ",
-        "マツモ"
-      ],
-      "category": "植物",
-      "rejected": false,
-      "top1": false,
-      "top3": false,
-      "genus": false,
-      "family_or_above": true,
-      "confidence_top1": 30,
-      "evidence_status_top1": "uncertain",
-      "plantnet_status": "",
-      "plantnet_used": false
+      "group": "植物",
+      "error": "skipped: 日次上限"
     },
     {
       "photo_id": 596867238,
-      "group": "昆虫",
       "truth": "Paraparatrechina sakurae",
-      "truth_ja": "サクラアリ",
-      "predicted": [
-        "Nylanderia flavipes",
-        "Lasius flavus",
-        "Crematogaster osakensis"
-      ],
-      "predicted_ja": [
-        "アメイロアリ",
-        "キイロケアリ",
-        "キイロシリアゲアリ"
-      ],
-      "category": "動物",
-      "rejected": false,
-      "top1": false,
-      "top3": false,
-      "genus": false,
-      "family_or_above": true,
-      "confidence_top1": 30,
-      "evidence_status_top1": "uncertain",
-      "plantnet_status": "",
-      "plantnet_used": false
+      "group": "昆虫",
+      "error": "skipped: 日次上限"
     },
     {
       "photo_id": 114039337,
-      "group": "昆虫",
       "truth": "Brahmaea japonica",
-      "truth_ja": "イボタガ",
-      "predicted": [
-        "Brahmaea japonica",
-        "Brahmaea wallichii",
-        "Brahmaea"
-      ],
-      "predicted_ja": [
-        "イボタガ",
-        "タイワンイボタガ",
-        "イボタガ属"
-      ],
-      "category": "動物",
-      "rejected": false,
-      "top1": true,
-      "top3": true,
-      "genus": true,
-      "family_or_above": true,
-      "confidence_top1": 60,
-      "evidence_status_top1": "taxonomy_only",
-      "plantnet_status": "",
-      "plantnet_used": false
+      "group": "昆虫",
+      "error": "skipped: 日次上限"
     },
     {
       "photo_id": 127649238,
-      "group": "昆虫",
       "truth": "Cosmia restituta",
-      "truth_ja": "シラホシキリガ",
-      "predicted": [
-        "Cosmia pyralina",
-        "Cosmia moderata",
-        "Cosmia restituta"
-      ],
-      "predicted_ja": [
-        "ナシキリガ",
-        "キシタキリガ",
-        "シラホシキリガ"
-      ],
-      "category": "動物",
-      "rejected": false,
-      "top1": false,
-      "top3": true,
-      "genus": true,
-      "family_or_above": true,
-      "confidence_top1": 60,
-      "evidence_status_top1": "taxonomy_only",
-      "plantnet_status": "",
-      "plantnet_used": false
+      "group": "昆虫",
+      "error": "skipped: 日次上限"
     },
     {
       "photo_id": 118167215,
-      "group": "昆虫",
       "truth": "Euconocephalus varius",
-      "truth_ja": "クビキリギス",
-      "predicted": [
-        "Euconocephalus nasutus",
-        "Ruspolia lineosa"
-      ],
-      "predicted_ja": [
-        "オガサワラクビキリギス",
-        "クサキリ"
-      ],
-      "category": "動物",
-      "rejected": false,
-      "top1": false,
-      "top3": false,
-      "genus": true,
-      "family_or_above": true,
-      "confidence_top1": 60,
-      "evidence_status_top1": "taxonomy_only",
-      "plantnet_status": "",
-      "plantnet_used": false
+      "group": "昆虫",
+      "error": "skipped: 日次上限"
     },
     {
       "photo_id": 118894236,
       "truth": "Ippa conspersa",
       "group": "昆虫",
-      "error": "VisionError: Geminiの利用上限またはレート制限に達しました"
+      "error": "skipped: 日次上限"
     },
     {
       "photo_id": 127678541,
@@ -394,5 +200,6 @@
       "group": "は虫類・両生類",
       "error": "skipped: 日次上限"
     }
-  ]
+  ],
+  "note": "30件すべて 429。無料枠は GenerateRequestsPerDayPerProjectPerModel-FreeTier = 1日20リクエストで、30枚の評価が回らない。精度以前に既定にできない。"
 }

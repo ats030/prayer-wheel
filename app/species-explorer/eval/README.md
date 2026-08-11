@@ -92,3 +92,13 @@ uv run --with httpx --with pillow python eval/run_eval.py --use-plantnet --label
 | Gemini 3.6 Flash | 30% | 40% | 90% | 18.1s |
 
 Gemini 側は無料枠の日次上限で10枚までしか回せていない。傾向以上の主張はできない。
+
+## Gemini の無料枠はモデルごとに違う
+
+`gemini-3.6-flash` は1日20リクエストしか通らない (2026-08-11 実測、429 の
+`GenerateRequestsPerDayPerProjectPerModel-FreeTier` に `quotaValue: 20`)。30枚の
+評価が完走できず、公開版の既定にはできない。`gemini-3.5-flash-lite` は30枚を
+完走している (Top-1 36.7%)。
+
+同じ10枚で比べたときの精度に差は出ていないため、無料枠の広さで Flash-Lite を
+既定にした。枠は予告なく変わるので、既定を変える前にこの数字を測り直すこと。
