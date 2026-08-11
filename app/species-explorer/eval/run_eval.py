@@ -85,6 +85,10 @@ def score_one(entry: dict, result: dict, family_check: bool) -> dict[str, object
         "family_or_above": family_hit,
         "confidence_top1": (candidates[0].get("confidence") if candidates else None),
         "evidence_status_top1": (candidates[0].get("evidence_status") if candidates else None),
+        # 併用の効果を読むには、実際に専門識別が走ったかが要る。
+        # VLM が「植物」と判定しなければ Pl@ntNet は呼ばれない (pipeline.identify_all)
+        "plantnet_status": result.get("plantnet_status", "used" if result.get("plantnet_used") else ""),
+        "plantnet_used": bool(result.get("plantnet_used")),
     }
 
 
