@@ -91,6 +91,15 @@ async def security_headers(request: Request, call_next):
     response.headers["Permissions-Policy"] = "camera=(self), geolocation=(self)"
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
     response.headers["Content-Security-Policy"] = CONTENT_SECURITY_POLICY
+    # Cache-Control が無いと、ブラウザは Last-Modified から新鮮期間を推測して
+    # 再検証せずに古い CSS/JS を使い続ける。HTML が古いと、新しく足したスクリプトの
+    # <script> タグごと存在しないことになり、変更がまるごと反映されない。
+    # ETag は付いているので no-cache でも 304 で済む。
+    if request.url.path.startswith("/vendor/"):
+        # 同梱ライブラリはバージョン固定で中身が変わらない
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    else:
+        response.headers.setdefault("Cache-Control", "no-cache")
     return response
 
 

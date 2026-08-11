@@ -913,3 +913,21 @@ def test_old_records_are_shown_with_the_current_wording():
     history = client.get("/assets/history.js").text
     assert "esc(commonNameLabel(c))" in history
     assert 'esc(c.common_name_ja||"候補")' not in history  # 旧値をそのまま出さない
+
+
+def test_pages_and_assets_are_revalidated_not_guessed():
+    """Cache-Control が無いと、ブラウザが Last-Modified から新鮮期間を推測して
+    再検証せずに古い CSS/JS を使う。HTML が古いと新しい <script> タグごと消える。"""
+    for path in ["/", "/settings", "/history", "/privacy", "/terms",
+                 "/assets/index.js", "/assets/species-links.js", "/assets/index.css", "/theme.js"]:
+        assert client.get(path).headers.get("cache-control") == "no-cache", path
+    # 同梱ライブラリはバージョン固定なので長期キャッシュしてよい
+    vendor = client.get("/vendor/leaflet/leaflet.js").headers.get("cache-control")
+    assert "immutable" in vendor and "max-age=31536000" in vendor
+
+
+def test_assets_still_answer_304_so_no_cache_stays_cheap():
+    first = client.get("/assets/species-links.js")
+    etag = first.headers["etag"]
+    again = client.get("/assets/species-links.js", headers={"If-None-Match": etag})
+    assert again.status_code == 304
