@@ -54,3 +54,42 @@ function setupPublicSettings(data){
     show("この端末の設定を保存しました。APIキーはタブを閉じると消えます。","success");
   };
 }
+
+/* 記録と設定の持ち出し。保存先は利用者が選び、運営者のサーバーは経由しない */
+function backupMessage(text, state){const el=$("backup-message");el.textContent=text;el.className="message"+(state?" "+state:"")}
+$("export-backup").onclick=async()=>{
+  const button=$("export-backup");
+  button.disabled=true;backupMessage("まとめています…");
+  try{
+    const payload=await buildBackup();
+    const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});
+    /* 対応していれば保存先を選ばせる。同期フォルダを選べば別端末から読める */
+    if(window.showSaveFilePicker){
+      const handle=await window.showSaveFilePicker({suggestedName:backupFileName(),
+        types:[{description:"生きものノートの記録",accept:{"application/json":[".json"]}}]});
+      const writable=await handle.createWritable();
+      await writable.write(blob);await writable.close();
+    }else{
+      const url=URL.createObjectURL(blob);
+      const link=document.createElement("a");link.href=url;link.download=backupFileName();link.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }
+    backupMessage(`記録 ${payload.records.length}件を書き出しました。`,"success");
+  }catch(error){
+    if(error?.name==="AbortError"){backupMessage("");}
+    else backupMessage("書き出せませんでした。"+error.message,"error");
+  }finally{button.disabled=false}
+};
+$("import-backup").onclick=()=>$("import-file").click();
+$("import-file").onchange=async event=>{
+  const file=event.target.files?.[0];
+  event.target.value="";
+  if(!file)return;
+  backupMessage("読み込んでいます…");
+  try{
+    const restored=await restoreBackup(JSON.parse(await file.text()));
+    backupMessage(`記録 ${restored}件を読み込みました。「記録」の画面で確認できます。`,"success");
+  }catch(error){
+    backupMessage("読み込めませんでした。"+error.message,"error");
+  }
+};

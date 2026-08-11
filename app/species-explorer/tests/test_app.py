@@ -1118,3 +1118,34 @@ def test_adverts_follow_the_first_candidate():
     assert "Math.floor(Math.random()*named.length)" not in history  # ランダム選択をやめた
     # フォールバックも第一候補から取る（window.name を拾わない）
     assert "const topCandidate=(record.candidates||[])[0]" in history
+
+
+def test_backup_keeps_the_data_on_the_visitor_side():
+    """保存先は利用者が選ぶ。運営者のサーバーへは送らない。"""
+    backup = client.get("/assets/backup.js").text
+    assert 'BACKUP_FORMAT = "ikimono-note/1"' in backup
+    # 書き出し・読み込みにサーバーは関与しない
+    assert "/api/" not in backup
+    # APIキーは持ち出さない（ファイルが漏れたら課金される鍵がそのまま渡る）
+    assert "species-key" not in backup
+    assert "APIキーは含めません" in backup
+    settings = client.get("/settings").text
+    assert 'id="export-backup"' in settings and 'id="import-backup"' in settings
+    assert "運営者のサーバーには送られません" in settings
+
+
+def test_backup_carries_photos_without_tripping_the_policy():
+    """data: URL への fetch は connect-src 'self' に弾かれる。自前でデコードする。"""
+    backup = client.get("/assets/backup.js").text
+    assert "readAsDataURL" in backup                 # 写真を1ファイルへ収める
+    assert "fetch(value)" not in backup              # CSP に触れる書き方をしない
+    assert "atob(value.slice(comma + 1))" in backup
+    policy = client.get("/settings").headers["content-security-policy"]
+    assert "connect-src 'self'" in policy            # 緩めていないこと
+
+
+def test_restore_does_not_wipe_what_is_already_there():
+    backup = client.get("/assets/backup.js").text
+    assert ".clear()" not in backup                  # 既存の記録を消さない
+    assert 'transaction.objectStore("entries").put(entry)' in backup
+    assert 'payload.format !== BACKUP_FORMAT' in backup   # 別物を読ませない
