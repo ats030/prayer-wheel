@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#121a14" media="(prefers-color-scheme: dark)">
   <title>設定 · 生きものノート</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <script src="/theme.js"></script><link rel="stylesheet" href="/assets/mode.css"><link rel="stylesheet" href="/assets/settings.css"><script src="/assets/backup.js" defer></script><script src="/assets/settings.js" defer></script>
+  <script src="/theme.js"></script><link rel="stylesheet" href="/assets/mode.css"><link rel="stylesheet" href="/assets/settings.css"><script src="/assets/species-links.js" defer></script><script src="/assets/backup.js" defer></script><script src="/assets/settings.js" defer></script>
 </head>
 <body><main class="app">
   <header class="top"><div><div class="eyebrow">生きものノート</div><h1>設定</h1></div><div class="top-actions"><button class="back theme-toggle" id="themeToggle" type="button"><span class="theme-icon" aria-hidden="true">◐</span><span class="theme-label">自動</span></button><a class="back" href="/">撮影へ戻る</a></div></header>
@@ -27,6 +27,7 @@
     </section>
     <div class="actions"><button class="button primary" id="save-button" type="submit"><span data-only="operator">変更を保存</span><span data-only="public">この端末に保存</span></button><a class="button" href="/">キャンセル</a></div><p class="message" id="message" aria-live="polite"></p>
   </form>
+  <section class="section" data-only="public"><div class="panel"><label class="check"><input id="keep-keys" type="checkbox" checked><span>この端末にAPIキーを残す（次に開くとき入力しなくて済みます）。共用の端末では外してください。外すとタブを閉じたときに消えます。</span></label></div></section>
   <section class="section" aria-labelledby="backup-heading">
     <div class="section-head"><h2 id="backup-heading">記録の持ち出し</h2><p>保存先はご自身で選びます</p></div>
     <div class="panel">
@@ -47,5 +48,5 @@
       <p class="message" id="backup-message" aria-live="polite"></p>
     </div>
   </section>
-  <section class="section" aria-labelledby="security-heading"><div class="section-head"><h2 id="security-heading">保存と安全性</h2></div><div class="panel"><ul class="security" data-only="operator"><li>APIキーは所有者だけが読めるサーバー設定へ保存し、画面には再表示しません。</li><li>この画面にはパスワードがありません。Tailscale内と自宅LANからだけ開けるようにしています。一般公開には公開版 (別ポート) を使ってください。</li><li>写真はEXIF位置情報を除去し、保存しません。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li></ul><ul class="security" data-only="public"><li>APIキーはこのブラウザタブだけに保存し、タブを閉じると消えます。</li><li>キーは判定時だけ暗号化通信で送信し、サーバー設定や記録には保存しません。</li><li>この画面にない項目 (Ollamaの接続先、広告) は運営者が管理していて、利用者からは変えられません。</li><li>写真はEXIF位置情報を除去し、保存しません。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li></ul></div></section>
+  <section class="section" aria-labelledby="security-heading"><div class="section-head"><h2 id="security-heading">保存と安全性</h2></div><div class="panel"><ul class="security" data-only="operator"><li>APIキーは所有者だけが読めるサーバー設定へ保存し、画面には再表示しません。</li><li>この画面にはパスワードがありません。Tailscale内と自宅LANからだけ開けるようにしています。一般公開には公開版 (別ポート) を使ってください。</li><li>写真はEXIF位置情報を除去し、保存しません。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li></ul><ul class="security" data-only="public"><li>APIキーはこのブラウザの中だけに保存します。上の設定で、この端末に残すか、タブを閉じたら消すかを選べます。</li><li>キーは判定時だけ暗号化通信で送信し、サーバー設定や記録には保存しません。</li><li>この画面にない項目 (Ollamaの接続先、広告) は運営者が管理していて、利用者からは変えられません。</li><li>写真はEXIF位置情報を除去し、保存しません。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li></ul></div></section>
 <nav aria-label="法務情報" class="legal-nav"><a href="/privacy">プライバシー</a><a href="/terms">利用規約</a></nav></main></body></html>

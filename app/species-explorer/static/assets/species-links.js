@@ -65,3 +65,43 @@ const PROVIDER_LABELS = {local: "Ollama", openai: "OpenAI", anthropic: "Anthropi
 function providerLabel(value) {
   return PROVIDER_LABELS[value] || String(value || "");
 }
+
+/* APIキーの置き場。既定は「この端末に残す」(localStorage) で、タブを閉じても消えない。
+   共用端末では残したくないので、その場かぎり (sessionStorage) に切り替えられる。
+   どちらに置いても、キーはサーバーへ保存されず、判定のときだけ送られる。 */
+const KEEP_KEYS_FLAG = "species-keep-keys";
+
+function keepingKeys() {
+  try { return localStorage.getItem(KEEP_KEYS_FLAG) !== "0"; } catch (error) { return false; }
+}
+
+function setKeepingKeys(keep) {
+  try {
+    localStorage.setItem(KEEP_KEYS_FLAG, keep ? "1" : "0");
+    if (!keep) {
+      /* 残さない設定にしたら、すでに端末へ書いたぶんはその場かぎりへ移す */
+      for (const name of ["openai", "anthropic", "gemini", "plantnet"]) {
+        const stored = localStorage.getItem("species-key-" + name);
+        if (stored) { sessionStorage.setItem("species-key-" + name, stored); localStorage.removeItem("species-key-" + name); }
+      }
+    }
+  } catch (error) { /* 保存できない環境ではその場かぎりのまま */ }
+}
+
+function readApiKey(name) {
+  try { return localStorage.getItem("species-key-" + name) || sessionStorage.getItem("species-key-" + name) || ""; }
+  catch (error) { return ""; }
+}
+
+function writeApiKey(name, value) {
+  try {
+    const store = keepingKeys() ? localStorage : sessionStorage;
+    store.setItem("species-key-" + name, value);
+    (keepingKeys() ? sessionStorage : localStorage).removeItem("species-key-" + name);
+  } catch (error) { /* 保存できなくても、その回の判定には使える */ }
+}
+
+function clearApiKey(name) {
+  try { localStorage.removeItem("species-key-" + name); sessionStorage.removeItem("species-key-" + name); }
+  catch (error) { /* 何もしない */ }
+}

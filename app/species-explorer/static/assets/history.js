@@ -115,8 +115,8 @@ async function reidentify(record,button,message){
       const provider=saved.provider||settings.provider;
       fd.append("request_provider",provider);
       fd.append("request_model",saved.models?.[provider]||settings.models?.[provider]||"");
-      fd.append("request_api_key",sessionStorage.getItem("species-key-"+provider)||"");
-      fd.append("request_plantnet_key",sessionStorage.getItem("species-key-plantnet")||"");
+      fd.append("request_api_key",readApiKey(provider));
+      fd.append("request_plantnet_key",readApiKey("plantnet"));
     }
     const response=await fetch("/identify",{method:"POST",body:fd});
     const data=await response.json();

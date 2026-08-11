@@ -8,6 +8,12 @@ document.querySelectorAll("[data-delete]").forEach(button=>button.onclick=()=>{c
 $("settingsForm").onsubmit=async event=>{event.preventDefault();const provider=document.querySelector("[name=provider]:checked")?.value;if(!provider)return;const payload={provider,models:{},local_llm:{url:$("local-llm-url").value.trim()},api_keys:{},delete_keys:[...deleteKeys],affiliate:{title:$("affiliate-title").value.trim(),url:$("affiliate-url").value.trim(),enabled:$("affiliate-enabled").checked,partner_tag:$("affiliate-partner-tag").value.trim(),product_enabled:$("affiliate-product-enabled").checked}};for(const name of ["local","openai","anthropic","gemini"])payload.models[name]=$("model-"+name).value;for(const name of ["openai","anthropic","gemini","plantnet","amazon_creators_id","amazon_creators_secret"]){const key=$("key-"+name).value.trim();if(key)payload.api_keys[name]=key}const save=$("save-button");save.disabled=true;save.textContent="保存中…";show("設定を確認しています…");try{const response=await fetch("/api/settings",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});const data=await response.json();if(!response.ok)throw new Error(data.detail||"保存できませんでした");deleteKeys.clear();document.querySelectorAll('input[type="password"]').forEach(input=>input.value="");render(data);show("設定を保存しました。","success")}catch(error){show(error.message,"error")}finally{save.disabled=false;save.textContent="変更を保存"}};
 load();
 function setupPublicSettings(data){
+  const keep=$("keep-keys");
+  if(keep){keep.checked=keepingKeys();keep.onchange=()=>{setKeepingKeys(keep.checked);
+    for(const name of ["openai","anthropic","gemini","plantnet"])
+      $("configured-"+name).textContent=readApiKey(name)?(keepingKeys()?"この端末に登録済み":"このタブに登録済み"):"未登録";
+    show(keep.checked?"APIキーをこの端末に残します。":"APIキーはタブを閉じると消えます。","success")}}
+
   const stored=JSON.parse(localStorage.getItem("species-public-settings")||"{}");
   const localAvailable=Boolean(data.available_models.local.length);
   const localRadio=document.querySelector("[name=provider][value=local]");
@@ -27,7 +33,7 @@ function setupPublicSettings(data){
   $("local-llm-url").disabled=true;
   $("local-llm-url").placeholder="公開版では運営者が管理します";
   for(const name of ["openai","anthropic","gemini","plantnet"]){
-    $("configured-"+name).textContent=sessionStorage.getItem("species-key-"+name)?"このタブに登録済み":"未登録";
+    $("configured-"+name).textContent=readApiKey(name)?(keepingKeys()?"この端末に登録済み":"このタブに登録済み"):"未登録";
   }
   document.querySelectorAll('[data-delete]').forEach(button=>{
     if(button.dataset.delete.startsWith("amazon_"))button.disabled=true;
@@ -44,10 +50,10 @@ function setupPublicSettings(data){
     localStorage.setItem("species-public-settings",JSON.stringify({provider:selectedProvider,models}));
     for(const name of ["openai","anthropic","gemini","plantnet"]){
       const input=$("key-"+name);
-      if(deleteKeys.has(name))sessionStorage.removeItem("species-key-"+name);
-      else if(input.value.trim())sessionStorage.setItem("species-key-"+name,input.value.trim());
+      if(deleteKeys.has(name))clearApiKey(name);
+      else if(input.value.trim())writeApiKey(name,input.value.trim());
       input.value="";
-      $("configured-"+name).textContent=sessionStorage.getItem("species-key-"+name)?"このタブに登録済み":"未登録";
+      $("configured-"+name).textContent=readApiKey(name)?(keepingKeys()?"この端末に登録済み":"このタブに登録済み"):"未登録";
     }
     deleteKeys.clear();
     $("active-provider").textContent=providerLabels[selectedProvider]+" · "+models[selectedProvider];

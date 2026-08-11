@@ -509,8 +509,11 @@ def test_public_settings_ui_keeps_keys_in_tab_session():
     page = page_source("/settings")
     index = page_source("/")
     assert "function setupPublicSettings(data)" in page
-    assert 'sessionStorage.setItem("species-key-"+name' in page
-    assert "APIキーはこのブラウザタブだけに保存" in page
+    assert 'writeApiKey(name,input.value.trim())' in page
+    # キーの置き場は利用者が選ぶ。既定はこの端末に残す
+    assert "APIキーはこのブラウザの中だけに保存します" in page
+    assert 'id="keep-keys"' in page
+    assert "keepingKeys()" in page
     assert 'fd.append("request_api_key"' in index
     assert 'fd.append("request_model"' in index
 
@@ -542,7 +545,7 @@ def test_legal_pages_disclose_data_handling_and_contact():
     terms = client.get("/terms")
     assert privacy.status_code == 200
     assert terms.status_code == 200
-    assert "APIキーはブラウザのsessionStorage" in privacy.text
+    assert "APIキーはブラウザ内（localStorage または sessionStorage）に保持し" in privacy.text
     assert "OpenAI、Anthropic、Google GeminiまたはPl@ntNet" in privacy.text
     assert "Tailscale Funnel" in privacy.text
     assert "https://lit.link/ats030_main" in privacy.text
@@ -838,7 +841,7 @@ def test_both_wordings_ship_in_one_page():
     assert "変更を保存" in page and "この端末に保存" in page
     assert ">大人の方へ<" in page and ">運営者用<" in page
     assert "APIキーは所有者だけが読めるサーバー設定へ保存し" in page  # 運営者向け
-    assert "APIキーはこのブラウザタブだけに保存し" in page            # 公開版向け
+    assert "APIキーはこのブラウザの中だけに保存します" in page            # 公開版向け
 
 
 def test_operator_settings_keep_every_control():
@@ -1012,7 +1015,7 @@ def test_internal_identifiers_are_left_alone():
     index = client.get("/assets/index.js").text
     assert 'indexedDB.open("species-history",1)' in index
     assert "species-public-settings" in index
-    assert "species-key-" in index
+    assert "species-key-" in client.get("/assets/species-links.js").text
     assert "species-theme" in client.get("/theme.js").text
     for path in ["/assets/index.js", "/assets/history.js", "/assets/settings.js"]:
         assert client.get(path).status_code == 200
@@ -1199,3 +1202,24 @@ def test_every_script_actually_parses():
     for script in scripts:
         result = subprocess.run([node, "--check", str(script)], capture_output=True, text=True)
         assert result.returncode == 0, f"{script.name}: {result.stderr[:300]}"
+
+
+def test_pages_load_every_script_they_depend_on():
+    """settings.html が species-links.js を読み忘れ、APIキーを保存できていなかった。
+    参照している関数が、そのページで読まれる範囲に定義されているか確かめる。"""
+    provided = {}
+    for name in ["species-links.js", "backup.js", "index.js", "history.js", "settings.js"]:
+        body = client.get(f"/assets/{name}").text
+        provided[name] = set(re.findall(r"function\s+([A-Za-z_$][\w$]*)\s*\(", body))
+    provided["theme.js"] = set(re.findall(r"function\s+([A-Za-z_$][\w$]*)\s*\(", client.get("/theme.js").text))
+
+    shared = ["readApiKey", "writeApiKey", "clearApiKey", "keepingKeys", "displayName",
+              "wikipediaUrl", "providerLabel", "scheduleAutoBackup"]
+    for path, own in [("/", "index.js"), ("/history", "history.js"), ("/settings", "settings.js")]:
+        html = client.get(path).text
+        loaded = set(re.findall(r'src="/assets/([a-z-]+\.js)"', html))
+        available = set().union(*[provided[name] for name in loaded if name in provided])
+        body = client.get(f"/assets/{own}").text
+        for func in shared:
+            if re.search(rf"\b{func}\s*\(", body):
+                assert func in available, f"{path}: {func} を呼ぶが定義が読み込まれていない"
