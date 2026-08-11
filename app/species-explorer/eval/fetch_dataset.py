@@ -1,0 +1,142 @@
+"""iNaturalist の research-grade 観察から CC0 写真を集め、正解付き評価セットを作る。
+
+ライセンス判断は ~/ai-workflow/tool-license-registry.yaml に記録済み (conditional)。
+条件は「CC0 だけを使う」こと。photo_license=cc0 で絞るだけでなく、レスポンスの
+license_code を1枚ずつ再検証し、cc0 以外は保存しない。
+
+画像は再取得できるので ~/cache に置き、リポジトリにはマニフェストだけを残す。
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import time
+from pathlib import Path
+
+import httpx
+
+API = "https://api.inaturalist.org/v1/observations"
+JAPAN_PLACE_ID = 6737
+USER_AGENT = "SpeciesExplorer-eval/1.0 (https://github.com/ats030/ubuntu-server-app)"
+CACHE_DIR = Path.home() / "cache" / "species-eval" / "images"
+MANIFEST = Path(__file__).parent / "dataset.json"
+ATTRIBUTION = (
+    "iNaturalist Licensed Observation Images was accessed on {date} "
+    "from https://registry.opendata.aws/inaturalist-open-data."
+)
+
+# 評価対象の分類群。アプリが扱う植物・動物を widely に散らす。
+# iconic_taxa は iNaturalist の大分類。
+GROUPS = {
+    "植物": "Plantae",
+    "昆虫": "Insecta",
+    "鳥": "Aves",
+    "菌類": "Fungi",
+    "は虫類・両生類": "Reptilia,Amphibia",
+}
+
+
+def search(client: httpx.Client, iconic: str, per_group: int, place_id: int | None) -> list[dict]:
+    """1グループぶんの観察を取る。取りこぼしを見越して多めに引く。"""
+    params = {
+        "quality_grade": "research",
+        "photo_license": "cc0",
+        "iconic_taxa": iconic,
+        "rank": "species",
+        "per_page": min(per_group * 4, 200),
+        "order_by": "votes",
+        "photos": "true",
+        # 和名を返させる。アプリの表示も和名が主なので、評価の正解も和名で持つ
+        "locale": "ja",
+        "preferred_place_id": JAPAN_PLACE_ID,
+    }
+    if place_id:
+        params["place_id"] = place_id
+    response = client.get(API, params=params, timeout=30)
+    response.raise_for_status()
+    return response.json()["results"]
+
+
+def pick(results: list[dict], group: str, want: int) -> list[dict]:
+    chosen: list[dict] = []
+    seen_taxa: set[int] = set()
+    for observation in results:
+        taxon = observation.get("taxon") or {}
+        photos = observation.get("photos") or []
+        if not photos or taxon.get("rank") != "species":
+            continue
+        # 同じ種ばかりにならないよう、1種1枚に限る
+        if taxon["id"] in seen_taxa:
+            continue
+        photo = photos[0]
+        # 条件の再検証。ここを緩めるとライセンス判断の前提が崩れる
+        if photo.get("license_code") != "cc0":
+            continue
+        seen_taxa.add(taxon["id"])
+        chosen.append({
+            "group": group,
+            "observation_id": observation["id"],
+            "photo_id": photo["id"],
+            "photo_url": photo["url"].replace("/square.", "/medium."),
+            "license_code": photo["license_code"],
+            "attribution": photo.get("attribution", ""),
+            "truth": {
+                "taxon_id": taxon["id"],
+                "name": taxon["name"],
+                "rank": taxon["rank"],
+                "common_name_ja": taxon.get("preferred_common_name") or "",
+                "ancestry": taxon.get("ancestry", ""),
+            },
+        })
+        if len(chosen) >= want:
+            break
+    return chosen
+
+
+def download(client: httpx.Client, entries: list[dict]) -> None:
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    for entry in entries:
+        target = CACHE_DIR / f"{entry['photo_id']}.jpg"
+        entry["file"] = str(target)
+        if target.exists():
+            continue
+        response = client.get(entry["photo_url"], timeout=60)
+        response.raise_for_status()
+        target.write_bytes(response.content)
+        time.sleep(1)  # 推奨 60 req/分より十分低く保つ
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--per-group", type=int, default=6, help="分類群ごとの枚数")
+    parser.add_argument("--place-id", type=int, default=JAPAN_PLACE_ID,
+                        help="iNaturalist の場所ID。既定は日本 (6737)。0 で全世界")
+    args = parser.parse_args()
+
+    entries: list[dict] = []
+    with httpx.Client(headers={"User-Agent": USER_AGENT}) as client:
+        for group, iconic in GROUPS.items():
+            results = search(client, iconic, args.per_group, args.place_id)
+            picked = pick(results, group, args.per_group)
+            print(f"{group:14} 候補 {len(results):3}件 → 採用 {len(picked)}件")
+            entries.extend(picked)
+            time.sleep(1)
+        download(client, entries)
+
+    non_cc0 = [e for e in entries if e["license_code"] != "cc0"]
+    assert not non_cc0, f"CC0 以外が混入: {non_cc0}"
+
+    MANIFEST.write_text(json.dumps({
+        "source": "iNaturalist API v1 (quality_grade=research, photo_license=cc0)",
+        "attribution": ATTRIBUTION.format(date=time.strftime("%Y-%m-%d")),
+        "license_note": "全画像 CC0。画像は ~/cache/species-eval/images に置き、リポジトリへは含めない。",
+        "place_id": args.place_id,
+        "entries": entries,
+    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"\n合計 {len(entries)}件 → {MANIFEST}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -2,6 +2,7 @@ import io
 import sys
 from pathlib import Path
 
+import pytest
 import httpx
 from PIL import Image
 
@@ -393,3 +394,40 @@ def test_gemini_uses_generate_content_vision_contract(monkeypatch):
     assert config["thinkingConfig"] == {"thinkingLevel": "high"}
     assert config["responseSchema"]["properties"]["candidates"]["maxItems"] == 3
     assert config["responseSchema"]["properties"]["category"]["enum"] == ["植物", "動物", "不明"]
+
+
+def test_gemini_reserves_output_budget_beyond_thinking_tokens():
+    """思考トークンは maxOutputTokens に含まれる。1600 では JSON が切れて全件失敗した。"""
+    assert vision.GEMINI_MAX_OUTPUT_TOKENS >= 4096
+
+
+def test_gemini_reports_truncation_instead_of_a_generic_failure(monkeypatch):
+    def fake_post(url, **kwargs):
+        return FakeResponse({
+            "candidates": [{"finishReason": "MAX_TOKENS",
+                            "content": {"parts": [{"text": '{"category":"植'}]}}],
+            "usageMetadata": {"thoughtsTokenCount": 1535},
+        })
+
+    monkeypatch.setattr(vision.httpx, "post", fake_post)
+    with pytest.raises(vision.VisionError) as error:
+        vision.identify_gemini([b"one"], "secret", "gemini-3.6-flash")
+    message = str(error.value)
+    assert "出力上限で途切れました" in message
+    assert "1535" in message  # 思考に使われた量が分かる
+
+
+def test_gemini_output_budget_is_sent_in_the_request(monkeypatch):
+    seen = {}
+
+    def fake_post(url, **kwargs):
+        seen.update(kwargs)
+        return FakeResponse({"candidates": [{"content": {"parts": [{
+            "text": '{"category":"植物","summary":"葉","candidates":[]}',
+        }]}}]})
+
+    monkeypatch.setattr(vision.httpx, "post", fake_post)
+    vision.identify_gemini([b"one"], "secret", "gemini-3.6-flash")
+    config = seen["json"]["generationConfig"]
+    assert config["maxOutputTokens"] == vision.GEMINI_MAX_OUTPUT_TOKENS
+    assert config["thinkingConfig"]["thinkingLevel"] == vision.GEMINI_THINKING_LEVEL

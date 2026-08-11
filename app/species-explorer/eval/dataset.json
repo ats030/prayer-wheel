@@ -1,0 +1,488 @@
+{
+  "source": "iNaturalist API v1 (quality_grade=research, photo_license=cc0)",
+  "attribution": "iNaturalist Licensed Observation Images was accessed on 2026-08-11 from https://registry.opendata.aws/inaturalist-open-data.",
+  "license_note": "全画像 CC0。画像は ~/cache/species-eval/images に置き、リポジトリへは含めない。",
+  "place_id": 6737,
+  "entries": [
+    {
+      "group": "植物",
+      "observation_id": 195851808,
+      "photo_id": 344654543,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/344654543/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 162151,
+        "name": "Dumortiera hirsuta",
+        "rank": "species",
+        "common_name_ja": "ケゼニゴケ",
+        "ancestry": "48460/47126/64615/152080/1458852/152699/157186/157165"
+      },
+      "file": "/home/ats030/cache/species-eval/images/344654543.jpg"
+    },
+    {
+      "group": "植物",
+      "observation_id": 297825910,
+      "photo_id": 536404899,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/536404899/medium.jpg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 1299617,
+        "name": "Calanthe mannii",
+        "rank": "species",
+        "common_name_ja": "サクラジマエビネ",
+        "ancestry": "48460/47126/211194/47125/47163/47218/47217/738346/790381/83467/1603410/1644713"
+      },
+      "file": "/home/ats030/cache/species-eval/images/536404899.jpg"
+    },
+    {
+      "group": "植物",
+      "observation_id": 76092674,
+      "photo_id": 124479108,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/124479108/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 1555600,
+        "name": "Elodea densa",
+        "rank": "species",
+        "common_name_ja": "オオカナダモ",
+        "ancestry": "48460/47126/211194/47125/47163/48073/50361/57624"
+      },
+      "file": "/home/ats030/cache/species-eval/images/124479108.jpg"
+    },
+    {
+      "group": "植物",
+      "observation_id": 197782364,
+      "photo_id": 348431422,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/348431422/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 1528301,
+        "name": "Lespedeza kagoshimensis",
+        "rank": "species",
+        "common_name_ja": "",
+        "ancestry": "48460/47126/211194/47125/47124/47123/47122/507502/550521/972790/119139"
+      },
+      "file": "/home/ats030/cache/species-eval/images/348431422.jpg"
+    },
+    {
+      "group": "植物",
+      "observation_id": 66455699,
+      "photo_id": 107134799,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/107134799/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 471215,
+        "name": "Thrixspermum japonicum",
+        "rank": "species",
+        "common_name_ja": "カヤラン",
+        "ancestry": "48460/47126/211194/47125/47163/47218/47217/738347/738357/542123/140357/1437962"
+      },
+      "file": "/home/ats030/cache/species-eval/images/107134799.jpg"
+    },
+    {
+      "group": "植物",
+      "observation_id": 301491345,
+      "photo_id": 543289462,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/543289462/medium.jpg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 486275,
+        "name": "Chara braunii",
+        "rank": "species",
+        "common_name_ja": "シャジクモ",
+        "ancestry": "48460/47126/311313/151788/152725/153166/180685"
+      },
+      "file": "/home/ats030/cache/species-eval/images/543289462.jpg"
+    },
+    {
+      "group": "昆虫",
+      "observation_id": 329291028,
+      "photo_id": 596867238,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/596867238/medium.jpg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 625873,
+        "name": "Paraparatrechina sakurae",
+        "rank": "species",
+        "common_name_ja": "サクラアリ",
+        "ancestry": "48460/1/47120/372739/47158/184884/47201/124417/326777/1269340/47336/244834/637569/485001"
+      },
+      "file": "/home/ats030/cache/species-eval/images/596867238.jpg"
+    },
+    {
+      "group": "昆虫",
+      "observation_id": 70182648,
+      "photo_id": 114039337,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/114039337/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 355826,
+        "name": "Brahmaea japonica",
+        "rank": "species",
+        "common_name_ja": "イボタガ",
+        "ancestry": "48460/1/47120/372739/47158/184884/47157/47214/179915/179911"
+      },
+      "file": "/home/ats030/cache/species-eval/images/114039337.jpg"
+    },
+    {
+      "group": "昆虫",
+      "observation_id": 78029010,
+      "photo_id": 127649238,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/127649238/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 733987,
+        "name": "Cosmia restituta",
+        "rank": "species",
+        "common_name_ja": "シラホシキリガ",
+        "ancestry": "48460/1/47120/372739/47158/184884/47157/47607/48670/122224/82030/320218/55661"
+      },
+      "file": "/home/ats030/cache/species-eval/images/127649238.jpg"
+    },
+    {
+      "group": "昆虫",
+      "observation_id": 72474158,
+      "photo_id": 118167215,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/118167215/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 348607,
+        "name": "Euconocephalus varius",
+        "rank": "species",
+        "common_name_ja": "クビキリギス",
+        "ancestry": "48460/1/47120/372739/47158/184884/47651/132694/488701/48125/48124/203979/516239/346106"
+      },
+      "file": "/home/ats030/cache/species-eval/images/118167215.jpg"
+    },
+    {
+      "group": "昆虫",
+      "observation_id": 72876717,
+      "photo_id": 118894236,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/118894236/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 925777,
+        "name": "Ippa conspersa",
+        "rank": "species",
+        "common_name_ja": "マダラマルハヒロズコガ",
+        "ancestry": "48460/1/47120/372739/47158/184884/47157/61414/124262/504130/925778"
+      },
+      "file": "/home/ats030/cache/species-eval/images/118894236.jpg"
+    },
+    {
+      "group": "昆虫",
+      "observation_id": 78066574,
+      "photo_id": 127678541,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/127678541/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 1239237,
+        "name": "Chasminodes nigrilinea",
+        "rank": "species",
+        "common_name_ja": "ヒロオビクロギンガ",
+        "ancestry": "48460/1/47120/372739/47158/184884/47157/47607/48670/122224/82030/320218/244108"
+      },
+      "file": "/home/ats030/cache/species-eval/images/127678541.jpg"
+    },
+    {
+      "group": "鳥",
+      "observation_id": 319895172,
+      "photo_id": 578310480,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/578310480/medium.jpg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 5304,
+        "name": "Haliaeetus pelagicus",
+        "rank": "species",
+        "common_name_ja": "オオワシ",
+        "ancestry": "48460/1/2/355675/3/71261/5067/1542783/5303"
+      },
+      "file": "/home/ats030/cache/species-eval/images/578310480.jpg"
+    },
+    {
+      "group": "鳥",
+      "observation_id": 237587197,
+      "photo_id": 422858525,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/422858525/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 1446088,
+        "name": "Phasianus versicolor",
+        "rank": "species",
+        "common_name_ja": "キジ",
+        "ancestry": "48460/1/2/355675/3/573/574/980"
+      },
+      "file": "/home/ats030/cache/species-eval/images/422858525.jpg"
+    },
+    {
+      "group": "鳥",
+      "observation_id": 203676317,
+      "photo_id": 359893507,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/359893507/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 145087,
+        "name": "Turdus eunomus",
+        "rank": "species",
+        "common_name_ja": "ツグミ",
+        "ancestry": "48460/1/2/355675/3/7251/15977/12705"
+      },
+      "file": "/home/ats030/cache/species-eval/images/359893507.jpg"
+    },
+    {
+      "group": "鳥",
+      "observation_id": 355074268,
+      "photo_id": 647681640,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/647681640/medium.jpg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 4237,
+        "name": "Tachybaptus ruficollis",
+        "rank": "species",
+        "common_name_ja": "カイツブリ",
+        "ancestry": "48460/1/2/355675/3/67563/4203/4236"
+      },
+      "file": "/home/ats030/cache/species-eval/images/647681640.jpg"
+    },
+    {
+      "group": "鳥",
+      "observation_id": 145821144,
+      "photo_id": 250557494,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/250557494/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 2927,
+        "name": "Streptopelia orientalis",
+        "rank": "species",
+        "common_name_ja": "キジバト",
+        "ancestry": "48460/1/2/355675/3/2708/2715/2926"
+      },
+      "file": "/home/ats030/cache/species-eval/images/250557494.jpg"
+    },
+    {
+      "group": "鳥",
+      "observation_id": 197872655,
+      "photo_id": 348620245,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/348620245/medium.jpg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 7278,
+        "name": "Aegithalos caudatus",
+        "rank": "species",
+        "common_name_ja": "エナガ",
+        "ancestry": "48460/1/2/355675/3/7251/7264/7275"
+      },
+      "file": "/home/ats030/cache/species-eval/images/348620245.jpg"
+    },
+    {
+      "group": "菌類",
+      "observation_id": 76692098,
+      "photo_id": 125430392,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/125430392/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 53885,
+        "name": "Clavaria fragilis",
+        "rank": "species",
+        "common_name_ja": "シロソウメンタケ",
+        "ancestry": "48460/47170/47169/492000/50814/1094814/47167/1128526/49461/53886"
+      },
+      "file": "/home/ats030/cache/species-eval/images/125430392.jpg"
+    },
+    {
+      "group": "菌類",
+      "observation_id": 70186400,
+      "photo_id": 114045922,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/114045922/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 1204389,
+        "name": "Puccinia paederiae",
+        "rank": "species",
+        "common_name_ja": "",
+        "ancestry": "48460/47170/47169/416490/69967/69968/1151342/84768/84769"
+      },
+      "file": "/home/ats030/cache/species-eval/images/114045922.jpg"
+    },
+    {
+      "group": "菌類",
+      "observation_id": 76682594,
+      "photo_id": 125414822,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/125414822/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 1426765,
+        "name": "Dacrymyces spathularia",
+        "rank": "species",
+        "common_name_ja": "ツノマタタケ",
+        "ancestry": "48460/47170/47169/492000/53277/53278/53279/53280"
+      },
+      "file": "/home/ats030/cache/species-eval/images/125414822.jpg"
+    },
+    {
+      "group": "菌類",
+      "observation_id": 252795409,
+      "photo_id": 452572674,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/452572674/medium.jpg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 328233,
+        "name": "Pleurotus djamor",
+        "rank": "species",
+        "common_name_ja": "トキイロヒラタケ",
+        "ancestry": "48460/47170/47169/492000/50814/1094814/47167/905657/48495/48496/1352662"
+      },
+      "file": "/home/ats030/cache/species-eval/images/452572674.jpg"
+    },
+    {
+      "group": "菌類",
+      "observation_id": 314319600,
+      "photo_id": 567715739,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/567715739/medium.jpg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 382511,
+        "name": "Gymnopilus dilepis",
+        "rank": "species",
+        "common_name_ja": "ムラサキチャツムタケ",
+        "ancestry": "48460/47170/47169/492000/50814/1094814/47167/785517/416512/83198/1601571"
+      },
+      "file": "/home/ats030/cache/species-eval/images/567715739.jpg"
+    },
+    {
+      "group": "菌類",
+      "observation_id": 77643671,
+      "photo_id": 126915569,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/126915569/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 1239246,
+        "name": "Calvatia nipponica",
+        "rank": "species",
+        "common_name_ja": "オニフスベ",
+        "ancestry": "48460/47170/47169/492000/50814/1094814/47167/785517/48445/57693/1649462"
+      },
+      "file": "/home/ats030/cache/species-eval/images/126915569.jpg"
+    },
+    {
+      "group": "は虫類・両生類",
+      "observation_id": 73837141,
+      "photo_id": 120600104,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/120600104/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 101316,
+        "name": "Gekko japonicus",
+        "rank": "species",
+        "common_name_ja": "ニホンヤモリ",
+        "ancestry": "48460/1/2/355675/26036/26172/85552/371057/33177/34591/1676757"
+      },
+      "file": "/home/ats030/cache/species-eval/images/120600104.jpg"
+    },
+    {
+      "group": "は虫類・両生類",
+      "observation_id": 50338520,
+      "photo_id": 79930442,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/79930442/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 68340,
+        "name": "Elaphe quadrivirgata",
+        "rank": "species",
+        "common_name_ja": "シマヘビ",
+        "ancestry": "48460/1/2/355675/26036/26172/85553/26504/797520/30207"
+      },
+      "file": "/home/ats030/cache/species-eval/images/79930442.jpg"
+    },
+    {
+      "group": "は虫類・両生類",
+      "observation_id": 18672191,
+      "photo_id": 28584765,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/28584765/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 797750,
+        "name": "Ptyas semicarinata",
+        "rank": "species",
+        "common_name_ja": "リュウキュウアオヘビ",
+        "ancestry": "48460/1/2/355675/26036/26172/85553/26504/797520/28865"
+      },
+      "file": "/home/ats030/cache/species-eval/images/28584765.jpg"
+    },
+    {
+      "group": "は虫類・両生類",
+      "observation_id": 374827336,
+      "photo_id": 685160022,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/685160022/medium.jpg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 797638,
+        "name": "Diploderma swinhonis",
+        "rank": "species",
+        "common_name_ja": "スウィンホーキノボリトカゲ",
+        "ancestry": "48460/1/2/355675/26036/26172/85552/1563907/1567778/31096/797575/797582"
+      },
+      "file": "/home/ats030/cache/species-eval/images/685160022.jpg"
+    },
+    {
+      "group": "は虫類・両生類",
+      "observation_id": 71123421,
+      "photo_id": 115743320,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/115743320/medium.jpeg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 68348,
+        "name": "Takydromus tachydromoides",
+        "rank": "species",
+        "common_name_ja": "ニホンカナヘビ",
+        "ancestry": "48460/1/2/355675/26036/26172/85552/1567777/35360/1118992/35480"
+      },
+      "file": "/home/ats030/cache/species-eval/images/115743320.jpg"
+    },
+    {
+      "group": "は虫類・両生類",
+      "observation_id": 128217356,
+      "photo_id": 217767675,
+      "photo_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/217767675/medium.jpg",
+      "license_code": "cc0",
+      "attribution": "no rights reserved",
+      "truth": {
+        "taxon_id": 28829,
+        "name": "Rhabdophis tigrinus",
+        "rank": "species",
+        "common_name_ja": "ヤマカガシ",
+        "ancestry": "48460/1/2/355675/26036/26172/85553/26504/532896/28826"
+      },
+      "file": "/home/ats030/cache/species-eval/images/217767675.jpg"
+    }
+  ]
+}

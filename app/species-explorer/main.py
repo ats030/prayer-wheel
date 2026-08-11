@@ -21,6 +21,7 @@ from starlette.staticfiles import StaticFiles
 
 import config_store
 import creators_api
+import pipeline
 import vision
 
 class SettingsUpdate(BaseModel):
@@ -314,34 +315,14 @@ async def identify(
             "observed_date": observed_date or str(photo_metadata.get("observed_date", "")),
             "size": size,
         }
-        if provider == "openai":
-            result = await run_in_threadpool(vision.identify_openai, prepared, api_key, model, **context)
-        elif provider == "anthropic":
-            result = await run_in_threadpool(vision.identify_anthropic, prepared, api_key, model, **context)
-        elif provider == "gemini":
-            result = await run_in_threadpool(vision.identify_gemini, prepared, api_key, model, **context)
-        else:
-            result = await run_in_threadpool(
-                vision.identify, prepared, model,
-                ollama_url=(settings.get("local_llm") or {}).get("url", vision.OLLAMA_URL),
-                **context
-            )
-        if use_plantnet:
-            plantnet_key = request_plantnet_key.strip() if PUBLIC_MODE else settings["api_keys"].get("plantnet", "")
-            if not plantnet_key:
-                result["plantnet_status"] = "not_configured"
-            elif result.get("category") != "植物":
-                result["plantnet_status"] = "not_plant"
-            else:
-                try:
-                    specialist = await run_in_threadpool(
-                        vision.identify_plantnet, prepared, plantnet_key
-                    )
-                    result = vision.merge_plant_results(result, specialist)
-                except vision.VisionError as plantnet_error:
-                    result["plantnet_status"] = "unavailable"
-                    result["plantnet_message"] = str(plantnet_error)
-        result = await run_in_threadpool(vision.apply_evidence_gate, result)
+        plantnet_key = (request_plantnet_key.strip() if PUBLIC_MODE else settings["api_keys"].get("plantnet", "")) if use_plantnet else ""
+        result = await run_in_threadpool(
+            pipeline.identify_all, prepared,
+            provider=provider, model=model, api_key=api_key,
+            ollama_url=(settings.get("local_llm") or {}).get("url", vision.OLLAMA_URL),
+            use_plantnet=use_plantnet, plantnet_key=plantnet_key,
+            **context,
+        )
         result["photo_metadata"] = photo_metadata
     except vision.VisionError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc

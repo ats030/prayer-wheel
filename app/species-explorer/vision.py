@@ -21,6 +21,11 @@ OPENAI_URL = os.getenv("SPECIES_OPENAI_URL", "https://api.openai.com/v1/response
 ANTHROPIC_MODEL = os.getenv("SPECIES_ANTHROPIC_MODEL", "claude-sonnet-5")
 ANTHROPIC_URL = os.getenv("SPECIES_ANTHROPIC_URL", "https://api.anthropic.com/v1/messages")
 GEMINI_URL = os.getenv("SPECIES_GEMINI_URL", "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent")
+# thinkingLevel を上げると思考トークンが maxOutputTokens に含まれて出力枠を圧迫する。
+# 実測 (gemini-3.6-flash, 写真1枚) では思考だけで約1500トークン使い、1600では JSON が
+# 途中で切れて全件失敗していた。出力ぶんを別に確保できる値にする。
+GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv("SPECIES_GEMINI_MAX_OUTPUT_TOKENS", "8192"))
+GEMINI_THINKING_LEVEL = os.getenv("SPECIES_GEMINI_THINKING_LEVEL", "high")
 PLANTNET_URL = "https://my-api.plantnet.org/v2/identify/all"
 INATURALIST_URL = "https://api.inaturalist.org/v1/taxa/autocomplete"
 INATURALIST_USER_AGENT = "SpeciesExplorer/1.0 (https://github.com/ats030/ubuntu-server-app)"
@@ -559,10 +564,19 @@ def _gemini_output_text(data: dict[str, Any]) -> str:
     candidates = data.get("candidates") or []
     if not candidates or not isinstance(candidates[0], dict):
         raise VisionError("Geminiの応答を読み取れませんでした")
+    # thinkingLevel を上げると思考トークンが maxOutputTokens を食い、JSONが途中で切れる。
+    # 「読み取れませんでした」で片付けると原因に辿り着けないので、切り分けて伝える。
+    finish_reason = str(candidates[0].get("finishReason") or "")
+    if finish_reason == "MAX_TOKENS":
+        thoughts = int((data.get("usageMetadata") or {}).get("thoughtsTokenCount") or 0)
+        raise VisionError(
+            f"Geminiの応答が出力上限で途切れました（思考に{thoughts}トークン使用）。"
+            "GEMINI_MAX_OUTPUT_TOKENS を増やすか、思考の深さを下げてください。"
+        )
     content = candidates[0].get("content") or {}
     texts = [str(part.get("text") or "") for part in content.get("parts") or [] if isinstance(part, dict) and part.get("text")]
     if not texts:
-        raise VisionError("Geminiの応答を読み取れませんでした")
+        raise VisionError(f"Geminiの応答を読み取れませんでした（finishReason={finish_reason or '不明'}）")
     return "\n".join(texts)
 
 
@@ -575,10 +589,10 @@ def identify_gemini(image_bytes: bytes | list[bytes], api_key: str, model: str, 
         ]}],
         "generationConfig": {
             "temperature": 0.1,
-            "maxOutputTokens": 1600,
+            "maxOutputTokens": GEMINI_MAX_OUTPUT_TOKENS,
             "responseMimeType": "application/json",
             "responseSchema": GEMINI_RESPONSE_SCHEMA,
-            "thinkingConfig": {"thinkingLevel": "high"},
+            "thinkingConfig": {"thinkingLevel": GEMINI_THINKING_LEVEL},
         },
     }
     try:

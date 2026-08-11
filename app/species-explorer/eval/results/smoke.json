@@ -1,0 +1,94 @@
+{
+  "summary": {
+    "label": "smoke",
+    "count": 3,
+    "errors": 0,
+    "top1_percent": 0.0,
+    "top3_percent": 0.0,
+    "genus_percent": 0.0,
+    "family_or_above_percent": 100.0,
+    "rejected_percent": 0.0,
+    "median_seconds": 18.2,
+    "mean_confidence_when_answered": 45.0,
+    "top1_percent_when_answered": 0.0
+  },
+  "config": {
+    "provider": "gemini",
+    "model": "gemini-3.6-flash",
+    "use_plantnet": false,
+    "dataset": "iNaturalist API v1 (quality_grade=research, photo_license=cc0)",
+    "measured_at": "2026-08-11 02:25"
+  },
+  "rows": [
+    {
+      "photo_id": 344654543,
+      "group": "植物",
+      "truth": "Dumortiera hirsuta",
+      "truth_ja": "ケゼニゴケ",
+      "predicted": [
+        "Reboulia hemisphaerica",
+        "Marchantia polymorpha",
+        "Wiesnerella denudata"
+      ],
+      "predicted_ja": [
+        "日本語名なし",
+        "ゼニゴケ",
+        "アズマゼニゴケ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain"
+    },
+    {
+      "photo_id": 536404899,
+      "group": "植物",
+      "truth": "Calanthe mannii",
+      "truth_ja": "サクラジマエビネ",
+      "predicted": [
+        "Liparis kumokiri",
+        "Liparis krameri",
+        "Oreorchis patens"
+      ],
+      "predicted_ja": [
+        "クモキリソウ",
+        "ジガバチソウ",
+        "コケイラン"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 50,
+      "evidence_status_top1": "taxonomy_only"
+    },
+    {
+      "photo_id": 124479108,
+      "group": "植物",
+      "truth": "Elodea densa",
+      "truth_ja": "オオカナダモ",
+      "predicted": [
+        "Ottelia alismoides",
+        "Hydrocharis dubia"
+      ],
+      "predicted_ja": [
+        "ミズオオバコ",
+        "トチカガミ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 55,
+      "evidence_status_top1": "taxonomy_only"
+    }
+  ]
+}
