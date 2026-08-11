@@ -135,7 +135,6 @@ $("clear-target").onclick=async()=>{
   await forgetTarget();await refreshTarget();
   backupMessage("保存先を解除しました。記録はこの端末に残ります。","success");
 };
-refreshTarget();
 
 /* クラウド。URLは組み立てず、つないでフォルダを選んでもらう */
 let cloudCursor = "";
@@ -226,7 +225,6 @@ $("cloud-forget").onclick=()=>{
   forgetCloud();$("cloud-password").value="";$("cloud-browser").hidden=true;
   showCloudState();backupMessage("接続を解除しました。","success");
 };
-showCloudState();
 
 /* Google ドライブ。運営者がクライアントIDを設定していないと使えない */
 async function refreshDrive(){
@@ -264,4 +262,26 @@ async function refreshDrive(){
     finally{$("drive-load").disabled=false}
   };
 }
-refreshDrive();
+
+/* 保存先はひとつだけ選ぶ。選んだものの詳細だけを見せて、迷わせない */
+const STORAGE_KIND_KEY = "species-storage-kind";
+function showStorageKind(){
+  const kind=$("storage-kind").value;
+  document.querySelectorAll(".storage-body").forEach(body=>{body.hidden=body.dataset.storage!==kind});
+  try{localStorage.setItem(STORAGE_KIND_KEY,kind)}catch(error){/* 覚えられなくても選択は効く */}
+  if(kind==="drive")refreshDrive();
+  if(kind==="folder")refreshTarget();
+  if(kind==="webdav")showCloudState();
+}
+$("storage-kind").onchange=showStorageKind;
+(function initStorageKind(){
+  let saved="none";
+  try{saved=localStorage.getItem(STORAGE_KIND_KEY)||"none"}catch(error){}
+  /* すでに設定済みのものがあれば、それを選んだ状態で開く */
+  if(saved==="none"){
+    if(cloudTarget())saved="webdav";
+    else if(driveFileId())saved="drive";
+  }
+  $("storage-kind").value=saved;
+  showStorageKind();
+})();

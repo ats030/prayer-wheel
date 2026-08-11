@@ -1139,7 +1139,7 @@ def test_backup_keeps_the_data_on_the_visitor_side():
     assert "APIキーは含めません" in backup
     settings = client.get("/settings").text
     assert 'id="export-backup"' in settings and 'id="import-backup"' in settings
-    assert "運営者のサーバーには送られません" in settings
+    assert "運営者は内容を知りません" in settings
 
 
 def test_backup_carries_photos_without_tripping_the_policy():
@@ -1246,7 +1246,7 @@ def test_cloud_storage_is_offered_with_its_trade_off_stated():
     """ブラウザから外部ストレージへ直接つなぐ経路は CORS と CSP で塞がっている。
     サーバーが中継する以上、経路上を通ることを画面に書く。"""
     page = client.get("/settings").text
-    assert 'id="cloud-panel"' in page and "クラウドに保存する" in page
+    assert 'id="storage-kind"' in page and 'data-storage="webdav"' in page
     for field in ["cloud-service", "cloud-user", "cloud-password", "cloud-connect",
                   "cloud-folders", "cloud-pick", "cloud-save", "cloud-load", "cloud-forget"]:
         assert f'id="{field}"' in page, field
@@ -1286,7 +1286,7 @@ def test_target_is_a_folder_not_a_file():
     script = client.get("/assets/settings.js").text
     assert 'window.showDirectoryPicker({mode:"readwrite"})' in script
     page = client.get("/settings").text
-    assert "保存先フォルダを決める" in page      # ローカル側
+    assert "フォルダを決める" in page      # ローカル側
     # クラウド側は一覧から選ぶので、URLを打たせない
     assert "つないでフォルダを見る" in page
     assert 'id="cloud-pick"' in page
@@ -1376,3 +1376,22 @@ def test_drive_says_so_when_the_operator_has_not_set_it_up():
     assert "google_client_id" in settings          # 公開情報。秘密鍵は使わない
     script = client.get("/assets/settings.js").text
     assert "SPECIES_GOOGLE_CLIENT_ID" in script    # 何をすれば使えるか伝える
+
+
+def test_one_storage_choice_at_a_time():
+    """保存先を4つ並列に並べると、何を選べばよいか分からない。ひとつ選ばせ、
+    選んだものの詳細だけを見せる。"""
+    page = client.get("/settings").text
+    assert 'id="storage-kind"' in page
+    for kind in ["none", "drive", "webdav", "folder"]:
+        assert f'value="{kind}"' in page, kind
+        if kind != "none":
+            assert f'data-storage="{kind}"' in page, kind
+    assert page.count('class="storage-body"') == 3
+    script = client.get("/assets/settings.js").text
+    assert "function showStorageKind()" in script
+    assert "body.hidden=body.dataset.storage!==kind" in script
+    # 設定済みのものがあれば、それを選んだ状態で開く
+    assert "if(cloudTarget())saved=" in script and "driveFileId()" in script
+    # 選ばれるまで、その保存先の初期化を走らせない
+    assert 'if(kind==="drive")refreshDrive()' in script
