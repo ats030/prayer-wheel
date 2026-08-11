@@ -14,7 +14,7 @@ import time
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.staticfiles import StaticFiles
@@ -103,28 +103,44 @@ async def security_headers(request: Request, call_next):
     return response
 
 
+def _page(name: str) -> HTMLResponse:
+    """モードを body に埋めて返す。
+
+    運営者用と公開版は同じHTMLを使い、差は data-only 属性で宣言する。JS で後から
+    書き換えると、どこが違うのかコードを追わないと分からず、確定するまで一瞬
+    反対側が見える。サーバーが最初から決めておけばその両方が起きない。
+    """
+    html = (STATIC_DIR / name).read_text(encoding="utf-8")
+    mode = "public" if PUBLIC_MODE else "operator"
+    # 公開版で Ollama を出すかは PUBLIC_LOCAL の設定次第。モードとは別の軸
+    show_local = "0" if (PUBLIC_MODE and not PUBLIC_LOCAL_ENABLED) else "1"
+    html = html.replace("<body", f'<body data-app-mode="{mode}" data-show-local="{show_local}"', 1)
+    return HTMLResponse(html)
+
+
 @app.get("/", include_in_schema=False)
-def index() -> FileResponse:
-    return FileResponse(STATIC_DIR / "index.html")
+def index() -> HTMLResponse:
+    return _page("index.html")
 
 
 @app.get("/settings", include_in_schema=False)
-def settings() -> FileResponse:
-    return FileResponse(STATIC_DIR / "settings.html")
+def settings() -> HTMLResponse:
+    return _page("settings.html")
+
 
 @app.get("/history", include_in_schema=False)
-def history() -> FileResponse:
-    return FileResponse(STATIC_DIR / "history.html")
+def history() -> HTMLResponse:
+    return _page("history.html")
 
 
 @app.get("/privacy", include_in_schema=False)
-def privacy() -> FileResponse:
-    return FileResponse(STATIC_DIR / "privacy.html")
+def privacy() -> HTMLResponse:
+    return _page("privacy.html")
 
 
 @app.get("/terms", include_in_schema=False)
-def terms() -> FileResponse:
-    return FileResponse(STATIC_DIR / "terms.html")
+def terms() -> HTMLResponse:
+    return _page("terms.html")
 
 
 @app.get("/favicon.svg", include_in_schema=False)

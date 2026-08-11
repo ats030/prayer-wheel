@@ -808,20 +808,30 @@ def test_settings_screen_names_each_thing_once():
     assert "この画面にはパスワードがありません" in page
 
 
-def test_public_settings_hides_what_the_visitor_cannot_change():
-    """選べない項目を灰色で並べても、決められることは増えない。"""
+def test_screen_differences_are_declared_not_patched_in():
+    """運営者用と公開版の差は HTML の data-only で宣言し、body のモードで出し分ける。
+    JS で後から隠すと、どこが違うのかコードを追わないと分からない。"""
+    page = client.get("/settings").text
+    assert 'data-app-mode="operator"' in page  # テストは非公開モードで動く
+    assert 'data-show-local="1"' in page
+    for declared in ['data-only="operator"', 'data-only="public"', 'data-only="local"']:
+        assert declared in page, declared
+    rules = client.get("/assets/mode.css").text
+    assert 'body[data-app-mode="public"] [data-only="operator"]' in rules
+    assert 'body[data-show-local="0"] [data-only="local"]' in rules
+    # 表示の出し入れを JS に残さない
     script = client.get("/assets/settings.js").text
-    # Ollama が公開されていなければ、行ごと畳む（disabled のまま見せない）
-    assert 'localRadio.closest(".provider").classList.add("hidden")' in script
-    # 広告は運営者の設定。公開版の利用者が触る項目ではない
-    assert '$("affiliate-panel").classList.add("hidden")' in script
-    assert 'id="affiliate-panel"' in client.get("/settings").text
-    # 保存先はこの端末であって、サーバーではない
-    assert '$("save-button").textContent="この端末に保存"' in script
-    # 消した項目を、あるかのように説明しない
-    assert "Ollamaと広告は運営者が管理し" not in script
-    assert "この画面にない項目" in script
-    assert ".hidden{display:none!important}" in client.get("/assets/settings.css").text
+    for gone in ['classList.add("hidden")', "security.innerHTML", '$("save-button").textContent']:
+        assert gone not in script, gone
+
+
+def test_both_wordings_ship_in_one_page():
+    """同じHTMLに両方の文言を置き、モードで選ぶ。片方だけ直してずれるのを防ぐ。"""
+    page = client.get("/settings").text
+    assert "変更を保存" in page and "この端末に保存" in page
+    assert ">大人の方へ<" in page and ">運営者用<" in page
+    assert "APIキーは所有者だけが読めるサーバー設定へ保存し" in page  # 運営者向け
+    assert "APIキーはこのブラウザタブだけに保存し" in page            # 公開版向け
 
 
 def test_operator_settings_keep_every_control():
@@ -858,7 +868,7 @@ def test_providers_are_ordered_by_what_costs_nothing_first():
     page = client.get("/settings").text
     assert re.findall(r'name="provider" value="([a-z]+)"', page) == ["local", "gemini", "openai", "anthropic"]
     # 並べ替えでマークアップを壊していないこと
-    assert page.count('<label class="provider">') == 4
+    assert page.count('<label class="provider') == 4
     assert page.count("<label") == page.count("</label>")
     assert page.count("<span") == page.count("</span>")
     for control in ["model-local", "model-gemini", "model-openai", "model-anthropic",

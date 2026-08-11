@@ -1,0 +1,5 @@
+/* 運営者用と公開版の画面差。要素側で data-only を宣言し、body のモードで出し分ける。
+   JS で後から隠すと、どこが違うのかコードを追わないと分からない。 */
+body[data-app-mode="public"] [data-only="operator"],
+body[data-app-mode="operator"] [data-only="public"],
+body[data-show-local="0"] [data-only="local"] { display: none !important; }
