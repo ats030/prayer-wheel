@@ -1,0 +1,168 @@
+{
+  "summary": {
+    "label": "fungi-local-plantnet",
+    "count": 6,
+    "errors": 0,
+    "top1_percent": 0.0,
+    "top3_percent": 0.0,
+    "genus_percent": 0.0,
+    "family_or_above_percent": 83.3,
+    "rejected_percent": 16.7,
+    "median_seconds": 37.0,
+    "mean_confidence_when_answered": 7.8,
+    "top1_percent_when_answered": 0.0
+  },
+  "config": {
+    "provider": "local",
+    "model": "gemma4:31b",
+    "use_plantnet": true,
+    "dataset": "iNaturalist API v1 (quality_grade=research, photo_license=cc0)",
+    "measured_at": "2026-08-11 10:20"
+  },
+  "rows": [
+    {
+      "photo_id": 125430392,
+      "group": "菌類",
+      "truth": "Clavaria fragilis",
+      "truth_ja": "シロソウメンタケ",
+      "predicted": [
+        "Pachysandra procumbens",
+        "Lathraea clandestina",
+        "Oldenburgia grandis"
+      ],
+      "predicted_ja": [
+        "日本語名なし",
+        "日本語名なし",
+        "日本語名なし"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 2,
+      "evidence_status_top1": "specialist_only",
+      "plantnet_status": "used",
+      "plantnet_used": true
+    },
+    {
+      "photo_id": 114045922,
+      "group": "菌類",
+      "truth": "Puccinia paederiae",
+      "truth_ja": "",
+      "predicted": [
+        "Viola riviniana",
+        "Solanum tuberosum",
+        "Silene dioica"
+      ],
+      "predicted_ja": [
+        "日本語名なし",
+        "ジャガイモ",
+        "レッドキャンピオン"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 2,
+      "evidence_status_top1": "specialist_only",
+      "plantnet_status": "used",
+      "plantnet_used": true
+    },
+    {
+      "photo_id": 125414822,
+      "group": "菌類",
+      "truth": "Dacrymyces spathularia",
+      "truth_ja": "ツノマタタケ",
+      "predicted": [
+        "Tagetes erecta",
+        "Rorippa amphibia",
+        "Asclepias tuberosa"
+      ],
+      "predicted_ja": [
+        "センジュギク",
+        "サケバミミイヌガラシ",
+        "ヤナギトウワタ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 3,
+      "evidence_status_top1": "specialist_only",
+      "plantnet_status": "used",
+      "plantnet_used": true
+    },
+    {
+      "photo_id": 452572674,
+      "group": "菌類",
+      "truth": "Pleurotus djamor",
+      "truth_ja": "トキイロヒラタケ",
+      "predicted": [
+        "Lathraea squamaria",
+        "Betula alleghaniensis",
+        "Brownea macrophylla"
+      ],
+      "predicted_ja": [
+        "日本語名なし",
+        "キハダカンバ",
+        "日本語名なし"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 2,
+      "evidence_status_top1": "specialist_only",
+      "plantnet_status": "used",
+      "plantnet_used": true
+    },
+    {
+      "photo_id": 567715739,
+      "group": "菌類",
+      "truth": "Gymnopilus dilepis",
+      "truth_ja": "ムラサキチャツムタケ",
+      "predicted": [],
+      "predicted_ja": [],
+      "category": "植物",
+      "rejected": true,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": false,
+      "confidence_top1": null,
+      "evidence_status_top1": null,
+      "plantnet_status": "unavailable",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 126915569,
+      "group": "菌類",
+      "truth": "Calvatia nipponica",
+      "truth_ja": "オニフスベ",
+      "predicted": [
+        "Colocasia esculenta"
+      ],
+      "predicted_ja": [
+        "サトイモ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "unavailable",
+      "plantnet_used": false
+    }
+  ]
+}

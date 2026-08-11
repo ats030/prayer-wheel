@@ -393,7 +393,8 @@ def test_gemini_uses_generate_content_vision_contract(monkeypatch):
     config = seen["json"]["generationConfig"]
     assert config["thinkingConfig"] == {"thinkingLevel": "high"}
     assert config["responseSchema"]["properties"]["candidates"]["maxItems"] == 3
-    assert config["responseSchema"]["properties"]["category"]["enum"] == ["植物", "動物", "不明"]
+    # 菌類は植物ではない。区別できないと Pl@ntNet (植物専用) へ送られてしまう
+    assert config["responseSchema"]["properties"]["category"]["enum"] == ["植物", "動物", "菌類", "不明"]
 
 
 def test_gemini_reserves_output_budget_beyond_thinking_tokens():

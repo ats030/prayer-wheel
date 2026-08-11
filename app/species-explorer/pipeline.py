@@ -36,10 +36,10 @@ def identify_all(
     if use_plantnet:
         if not plantnet_key:
             result["plantnet_status"] = "not_configured"
-        # VLM が「不明」を返した写真こそ専門識別の出番なので、動物と判定したときだけ外す。
-        # 測定では植物の Top-1 が 0% → 45% になり、精度の大半を専門識別が担っていた。
-        # 自信を持てなかった写真で呼ばないのは、利用者が併用を選んだ意図に反する。
-        elif result.get("category") == "動物":
+        # 植物と判定したときだけ呼ぶ。Pl@ntNet の結果は VLM の候補を置き換えるので、
+        # 植物でない写真に投げると丸ごと誤答になる。実測では菌類6枚がすべて植物名に
+        # すり替わった (シロソウメンタケ → Pachysandra procumbens など)。
+        elif result.get("category") != "植物":
             result["plantnet_status"] = "not_plant"
         else:
             try:

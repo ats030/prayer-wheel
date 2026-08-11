@@ -1,0 +1,152 @@
+{
+  "summary": {
+    "label": "fungi-local-only",
+    "count": 6,
+    "errors": 0,
+    "top1_percent": 16.7,
+    "top3_percent": 16.7,
+    "genus_percent": 16.7,
+    "family_or_above_percent": 66.7,
+    "rejected_percent": 33.3,
+    "median_seconds": 40.1,
+    "mean_confidence_when_answered": 30.0,
+    "top1_percent_when_answered": 25.0
+  },
+  "config": {
+    "provider": "local",
+    "model": "gemma4:31b",
+    "use_plantnet": false,
+    "dataset": "iNaturalist API v1 (quality_grade=research, photo_license=cc0)",
+    "measured_at": "2026-08-11 10:16"
+  },
+  "rows": [
+    {
+      "photo_id": 125430392,
+      "group": "菌類",
+      "truth": "Clavaria fragilis",
+      "truth_ja": "シロソウメンタケ",
+      "predicted": [
+        "Clavaria fragilis"
+      ],
+      "predicted_ja": [
+        "シロソウメンタケ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 114045922,
+      "group": "菌類",
+      "truth": "Puccinia paederiae",
+      "truth_ja": "",
+      "predicted": [],
+      "predicted_ja": [],
+      "category": "植物",
+      "rejected": true,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": false,
+      "confidence_top1": null,
+      "evidence_status_top1": null,
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 125414822,
+      "group": "菌類",
+      "truth": "Dacrymyces spathularia",
+      "truth_ja": "ツノマタタケ",
+      "predicted": [
+        "Clavaria",
+        "Pezizales"
+      ],
+      "predicted_ja": [
+        "シロソウメンタケ属",
+        "チャワンタケ目"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 452572674,
+      "group": "菌類",
+      "truth": "Pleurotus djamor",
+      "truth_ja": "トキイロヒラタケ",
+      "predicted": [
+        "Laetiporus sulphureus"
+      ],
+      "predicted_ja": [
+        "マスタケ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 567715739,
+      "group": "菌類",
+      "truth": "Gymnopilus dilepis",
+      "truth_ja": "ムラサキチャツムタケ",
+      "predicted": [],
+      "predicted_ja": [],
+      "category": "植物",
+      "rejected": true,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": false,
+      "confidence_top1": null,
+      "evidence_status_top1": null,
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 126915569,
+      "group": "菌類",
+      "truth": "Calvatia nipponica",
+      "truth_ja": "オニフスベ",
+      "predicted": [
+        "Solanum tuberosum",
+        "Colocasia esculenta"
+      ],
+      "predicted_ja": [
+        "ジャガイモ",
+        "サトイモ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    }
+  ]
+}

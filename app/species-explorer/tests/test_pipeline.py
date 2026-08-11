@@ -13,21 +13,25 @@ def fake_vlm(category):
                                     "model": "test", "provider": "local"}
 
 
-def test_specialist_runs_when_the_model_could_not_decide(monkeypatch):
-    """「不明」は専門識別を外す理由にならない。判断できなかった写真こそ使う。"""
-    called = {}
-
-    def fake_plantnet(images, key):
-        called["hit"] = True
-        return {"category": "植物", "summary": "s", "candidates": [],
-                "model": "plantnet", "provider": "plantnet"}
-
-    monkeypatch.setattr(vision, "identify", fake_vlm("不明"))
-    monkeypatch.setattr(vision, "identify_plantnet", fake_plantnet)
+def test_specialist_is_skipped_for_fungi(monkeypatch):
+    """菌類を植物専用サービスへ送ると候補が丸ごとすり替わる。実測で
+    シロソウメンタケが Pachysandra procumbens になり Top-1 が 17%→0% に落ちた。"""
+    monkeypatch.setattr(vision, "identify", fake_vlm("菌類"))
+    monkeypatch.setattr(vision, "identify_plantnet",
+                        lambda *a, **k: pytest.fail("菌類を植物専用サービスへ送ってはいけない"))
     result = pipeline.identify_all([b"x"], provider="local", model="m",
                                    use_plantnet=True, plantnet_key="key")
-    assert called.get("hit") is True
-    assert result.get("plantnet_status") != "not_plant"
+    assert result["plantnet_status"] == "not_plant"
+
+
+def test_specialist_is_skipped_when_undecided(monkeypatch):
+    """「不明」でも呼ばない。中身が菌類やそれ以外である可能性を排除できない。"""
+    monkeypatch.setattr(vision, "identify", fake_vlm("不明"))
+    monkeypatch.setattr(vision, "identify_plantnet",
+                        lambda *a, **k: pytest.fail("植物と判定していない写真を送らない"))
+    result = pipeline.identify_all([b"x"], provider="local", model="m",
+                                   use_plantnet=True, plantnet_key="key")
+    assert result["plantnet_status"] == "not_plant"
 
 
 def test_specialist_is_skipped_for_animals(monkeypatch):

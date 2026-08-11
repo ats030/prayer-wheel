@@ -43,7 +43,7 @@ MAX_EDGE = 1600
 PROMPT = """あなたは野外観察を補助する生物識別アシスタントです。添付された同一個体の写真を横断して、主要な植物または動物を観察してください。
 次のJSONだけを返してください。
 {
-  "category": "植物" | "動物" | "不明",
+  "category": "植物" | "動物" | "菌類" | "不明",
   "summary": "写真から確実に観察できることを1文で",
   "candidates": [
     {
@@ -70,6 +70,7 @@ PROMPT = """あなたは野外観察を補助する生物識別アシスタン�
 - categoryが動物の場合だけ雌雄を検討する。オス・メスを返すには、その候補種で知られる性的二型と一致し、写真で直接見える形態的根拠をsex_evidenceに1件以上書く。
 - 大きさだけ、行動、撮影場所、一般的な色の印象、角度で変わる特徴から雌雄を決めない。幼体、季節・繁殖状態が不明、雌雄同形、識別部位が見えない場合は判別不能にする。
 - 植物または不明ではsexを対象外、sex_evidenceを空配列にする。
+- キノコ、カビ、地衣類、さび病菌などの菌類は植物ではない。category を菌類にする。
 - 写真に生物が見えない、または判定材料が足りなければ category を不明、candidatesを空配列にする。
 - 食用、毒性、安全性、治療について断定しない。
 - 位置、季節、撮影者の説明など、与えられていない情報を作らない。
@@ -89,7 +90,7 @@ Geminiでは、回答を確定する前に次の順で内部検討してくだ�
 GEMINI_RESPONSE_SCHEMA = {
     "type": "object",
     "properties": {
-        "category": {"type": "string", "enum": ["植物", "動物", "不明"]},
+        "category": {"type": "string", "enum": ["植物", "動物", "菌類", "不明"]},
         "summary": {"type": "string", "description": "写真から直接確認できる観察だけを記した1文"},
         "candidates": {
             "type": "array", "maxItems": 3,
@@ -206,7 +207,7 @@ def _extract_json(text: str) -> dict[str, Any]:
 
 
 def normalize(data: dict[str, Any], *, model: str = MODEL, provider: str = "local") -> dict[str, Any]:
-    category = data.get("category") if data.get("category") in {"植物", "動物", "不明"} else "不明"
+    category = data.get("category") if data.get("category") in {"植物", "動物", "菌類", "不明"} else "不明"
     candidates = []
     for item in (data.get("candidates") or [])[:3]:
         if not isinstance(item, dict):
