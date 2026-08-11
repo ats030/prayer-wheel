@@ -185,7 +185,10 @@ $("cloud-connect").onclick=async()=>{
     await browseCloud(found.url);
   }catch(error){
     const hint=$("cloud-service").value==="pcloud"
-      ? "2段階認証を使っている場合は、pCloudの設定でWebDAV用のパスワードをご確認ください。" : "";
+      ? "pCloud で2段階認証を使っている場合、初回だけメールでの承認が要ります。"
+        +"「New login attempt. Is this you?」という件名のメールを開き、"
+        +"「Yes, it\'s me.」を押してから、もう一度お試しください。"
+        +"Google や Apple のアカウントでログインしている場合は、pCloud 側でパスワードを設定してください。" : "";
     backupMessage("つなげませんでした。"+error.message+(hint?" "+hint:""),"error");
   }finally{button.disabled=false}
 };

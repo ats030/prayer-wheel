@@ -60,6 +60,15 @@ def validate(url: str) -> str:
     return parsed.geturl()
 
 
+def _log_denial(target: str, response: httpx.Response) -> None:
+    """断られた理由は接続先しか知らない。画面には出さず journal に残す。"""
+    host = urlparse(target).hostname or "?"
+    challenge = response.headers.get("WWW-Authenticate", "")
+    body = response.text[:200].replace("\n", " ")
+    print(f"[species-explorer] WebDAV {host} が {response.status_code} を返しました. "
+          f"WWW-Authenticate={challenge!r} body={body!r}", flush=True)
+
+
 def _client() -> httpx.Client:
     # リダイレクトを追うと、検証を通った先から内部へ飛ばされうる
     return httpx.Client(timeout=TIMEOUT, follow_redirects=False)
@@ -76,6 +85,7 @@ def put(folder: str, user: str, password: str, body: bytes) -> None:
     except httpx.HTTPError as exc:
         raise RelayError("接続先へ届きませんでした") from exc
     if response.status_code in (401, 403):
+        _log_denial(target, response)
         raise RelayError("接続先の利用者名またはパスワードを確認してください")
     if response.status_code >= 400:
         raise RelayError(f"接続先が保存を拒否しました（{response.status_code}）")
@@ -89,6 +99,7 @@ def get(folder: str, user: str, password: str) -> bytes:
     except httpx.HTTPError as exc:
         raise RelayError("接続先へ届きませんでした") from exc
     if response.status_code in (401, 403):
+        _log_denial(target, response)
         raise RelayError("接続先の利用者名またはパスワードを確認してください")
     if response.status_code == 404:
         raise RelayError("接続先にファイルがありません")
@@ -116,6 +127,7 @@ def list_folders(folder: str, user: str, password: str) -> list[dict[str, str]]:
     except httpx.HTTPError as exc:
         raise RelayError("接続先へ届きませんでした") from exc
     if response.status_code in (401, 403):
+        _log_denial(target, response)
         raise RelayError("利用者名またはパスワードを確認してください")
     if response.status_code == 404:
         raise RelayError("そのフォルダは見つかりませんでした")

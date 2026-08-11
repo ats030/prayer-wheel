@@ -1323,5 +1323,18 @@ def test_pcloud_tries_both_regions():
     assert "async function connectCloud(candidates, creds)" in backup
     script = client.get("/assets/settings.js").text
     assert "await connectCloud(cloudRoots(),creds)" in script
-    # 2段階認証という別の原因もあるので、失敗時に触れる
-    assert "WebDAV用のパスワード" in script
+    # 2段階認証は「WebDAV用パスワード」ではなくメール承認が要る (pCloud の仕様)
+    assert "New login attempt. Is this you?" in script
+    assert "WebDAV用のパスワード" not in script
+
+
+def test_denied_webdav_logs_the_reason_for_the_operator():
+    """断られた理由は接続先しか知らない。画面には出さず journal に残す。"""
+    relay = (Path(__file__).parents[1] / "webdav_relay.py").read_text()
+    assert "def _log_denial(target: str, response: httpx.Response)" in relay
+    assert "WWW-Authenticate" in relay
+    assert relay.count("_log_denial(target, response)") >= 3   # put/get/list すべて
+    # 画面向けの文言に接続先の内部情報を混ぜない（https:// の指示は利用者向けなので可）
+    for message in re.findall(r'RelayError\("([^"]+)"\)', relay):
+        for internal in ["WWW-Authenticate", "Basic realm", "body="]:
+            assert internal not in message, message
