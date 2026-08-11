@@ -11,6 +11,8 @@ import os
 import threading
 import time
 
+import secrets
+
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
@@ -19,6 +21,7 @@ from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.staticfiles import StaticFiles
 
+import auth
 import config_store
 import creators_api
 import pipeline
@@ -144,6 +147,111 @@ def privacy() -> HTMLResponse:
 @app.get("/terms", include_in_schema=False)
 def terms() -> HTMLResponse:
     return _page("terms.html")
+
+
+# ── ログイン ────────────────────────────────────────────
+# 公開版では必須。サーバーが持つのは識別子とメールアドレスだけで、写真も記録も
+# 設定もAPIキーも利用者の側に残る。ログインしても預かるものは増えない。
+
+LOGIN_FLOW_COOKIE = "ikimono_login"
+
+# ログインしていなくても通す道。ログイン自体と、読んでから決めるための文書、
+# それに画面を組み立てる部品。ここを絞りすぎるとログイン画面が裸になる。
+OPEN_PATHS = {"/login", "/auth/google", "/auth/callback", "/api/me", "/privacy", "/terms",
+              "/favicon.svg", "/theme.js", "/healthz"}
+OPEN_PREFIXES = ("/assets/", "/vendor/", "/static/")
+
+
+@app.middleware("http")
+async def require_login(request: Request, call_next):
+    """公開版では、ログインしていない人を入口へ戻す。
+
+    ログインが設定されていないときは通す。設定を入れる前に必須にすると、運営者を
+    含めて誰も入れないアプリになる。運営者用 (8523) は tailnet の中だけなので、
+    ここでは求めない。二重にすると、設定の不備で自分が締め出される。
+    """
+    path = request.url.path
+    if (not PUBLIC_MODE or not auth.configured()
+            or path in OPEN_PATHS or path.startswith(OPEN_PREFIXES)):
+        return await call_next(request)
+    if auth.read_session(request.cookies.get(auth.SESSION_COOKIE)):
+        return await call_next(request)
+    if path.startswith("/api/"):
+        return JSONResponse({"detail": "ログインしてください"}, status_code=401)
+    return RedirectResponse("/login", status_code=303)
+
+
+def await_free(function, *args):
+    """同期のまま呼ぶ。ここは待ち時間が短く、別スレッドへ逃がす利点がない。"""
+    return function(*args)
+
+
+@app.get("/login", include_in_schema=False)
+def login_page() -> HTMLResponse:
+    return _page("login.html")
+
+
+@app.get("/auth/google", include_in_schema=False)
+def auth_google(request: Request) -> RedirectResponse:
+    if not auth.configured():
+        raise HTTPException(status_code=503, detail="ログインはまだ使えません")
+    _rate_limit(request, "login", 10)
+    url, flow = auth.start_login()
+    response = RedirectResponse(url, status_code=303)
+    # 始めた本人だけが終えられるようにする。署名付きで、10分で切れる
+    response.set_cookie(LOGIN_FLOW_COOKIE, auth.sign_session({**flow, "exp": int(time.time()) + 600}),
+                        max_age=600, httponly=True, secure=True, samesite="lax", path="/auth")
+    return response
+
+
+@app.get("/auth/callback", include_in_schema=False)
+def auth_callback(request: Request, code: str = "", state: str = "", error: str = "") -> RedirectResponse:
+    if error or not code:
+        return RedirectResponse("/login?failed=1", status_code=303)
+    flow = auth.read_session(request.cookies.get(LOGIN_FLOW_COOKIE))
+    # state が合わなければ、この画面を開かせたのは本人ではない
+    if not flow or not state or not secrets.compare_digest(flow.get("state", ""), state):
+        return RedirectResponse("/login?failed=1", status_code=303)
+    try:
+        user = await_free(auth.finish_login, code, flow["verifier"], flow["nonce"])
+    except auth.AuthError:
+        return RedirectResponse("/login?failed=1", status_code=303)
+    response = RedirectResponse("/settings", status_code=303)
+    response.set_cookie(auth.SESSION_COOKIE, auth.session_for(user),
+                        max_age=auth.SESSION_DAYS * 86400, httponly=True, secure=True, samesite="lax", path="/")
+    response.delete_cookie(LOGIN_FLOW_COOKIE, path="/auth")
+    return response
+
+
+@app.post("/auth/logout", include_in_schema=False)
+def auth_logout() -> JSONResponse:
+    response = JSONResponse({"ok": True})
+    response.delete_cookie(auth.SESSION_COOKIE, path="/")
+    return response
+
+
+@app.get("/api/me")
+def api_me(request: Request) -> JSONResponse:
+    """ログイン状態。使えるかどうかも合わせて返し、画面が理由を出せるようにする。"""
+    session = auth.read_session(request.cookies.get(auth.SESSION_COOKIE))
+    return JSONResponse({
+        "available": auth.configured(),
+        "reason": auth.unavailable_reason(),
+        "signed_in": bool(session),
+        "email": session.get("email") if session else None,
+    })
+
+
+@app.post("/api/me/delete")
+def api_me_delete(request: Request) -> JSONResponse:
+    """退会。持っているものが少ないので、消すのも一度で終わる。"""
+    session = auth.read_session(request.cookies.get(auth.SESSION_COOKIE))
+    if not session:
+        raise HTTPException(status_code=401, detail="ログインしていません")
+    auth.delete_user(session["sub"])
+    response = JSONResponse({"ok": True})
+    response.delete_cookie(auth.SESSION_COOKIE, path="/")
+    return response
 
 
 @app.get("/favicon.svg", include_in_schema=False)

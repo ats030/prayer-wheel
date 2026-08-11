@@ -285,3 +285,21 @@ $("storage-kind").onchange=showStorageKind;
   $("storage-kind").value=saved;
   showStorageKind();
 })();
+
+/* アカウント。ログインしているときだけ出す */
+(async function showAccount(){
+  const me=await fetch("/api/me").then(r=>r.ok?r.json():null).catch(()=>null);
+  if(!me?.signed_in)return;
+  $("account-section").hidden=false;
+  $("account-email").textContent=me.email||"-";
+  $("account-logout").onclick=async()=>{
+    await fetch("/auth/logout",{method:"POST"}).catch(()=>{});
+    location.href="/login";
+  };
+  $("account-delete").onclick=async()=>{
+    if(!confirm("退会すると、預けているメールアドレスと識別子を削除します。この端末に残っている記録は消えません。よろしいですか？"))return;
+    const response=await fetch("/api/me/delete",{method:"POST"}).catch(()=>null);
+    if(response?.ok){location.href="/login"}
+    else{$("account-message").className="message error";$("account-message").textContent="退会できませんでした。"}
+  };
+})();

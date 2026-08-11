@@ -1395,3 +1395,85 @@ def test_one_storage_choice_at_a_time():
     assert "if(cloudTarget())saved=" in script and "driveFileId()" in script
     # 選ばれるまで、その保存先の初期化を走らせない
     assert 'if(kind==="drive")refreshDrive()' in script
+
+
+def test_sessions_cannot_be_forged():
+    """署名付きクッキーなので、中身を書き換えたら通らない。"""
+    import auth
+    user = {"subject": "sub-1", "email": "a@example.com"}
+    cookie = auth.session_for(user)
+    assert auth.read_session(cookie)["sub"] == "sub-1"
+    body, _, signature = cookie.partition(".")
+    assert auth.read_session(body + ".x" + signature[1:]) is None       # 署名を差し替える
+    forged = auth.sign_session({"sub": "someone-else", "exp": 9999999999})
+    assert auth.read_session(forged.split(".")[0] + "." + signature) is None
+    # 期限切れは通さない
+    assert auth.read_session(auth.sign_session({"sub": "sub-1", "exp": 1})) is None
+    assert auth.read_session(None) is None and auth.read_session("garbage") is None
+
+
+def test_id_token_must_match_this_app():
+    """Google から直に受け取る応答でも、宛先と nonce は確かめる。"""
+    import auth, base64, json, time
+
+    def token(**claims):
+        body = {"iss": "https://accounts.google.com", "aud": auth.CLIENT_ID or "cid",
+                "nonce": "n1", "exp": time.time() + 600, "email": "a@example.com", "sub": "s1"}
+        body.update(claims)
+        raw = base64.urlsafe_b64encode(json.dumps(body).encode()).decode().rstrip("=")
+        return "x." + raw + ".y"
+
+    original = auth.CLIENT_ID
+    auth.CLIENT_ID = "cid"
+    try:
+        assert auth._claims_from_id_token(token(), "n1")["sub"] == "s1"
+        for bad, why in [({"aud": "another-app"}, "別アプリ宛"), ({"nonce": "n2"}, "nonce 不一致"),
+                         ({"iss": "https://evil.example"}, "発行者違い"), ({"exp": 1}, "期限切れ"),
+                         ({"email": ""}, "メールなし")]:
+            try:
+                auth._claims_from_id_token(token(**bad), "n1")
+                raise AssertionError(f"{why} を通してしまった")
+            except auth.AuthError:
+                pass
+    finally:
+        auth.CLIENT_ID = original
+
+
+def test_login_is_not_demanded_before_it_is_configured():
+    """設定を入れる前に必須にすると、運営者も含めて誰も入れなくなる。"""
+    source = (Path(__file__).parents[1] / "main.py").read_text()
+    assert "if (not PUBLIC_MODE or not auth.configured()" in source
+    # 読んでから決めるための文書と、画面の部品は開けておく
+    for path in ["/login", "/privacy", "/terms", "/api/me"]:
+        assert f'"{path}"' in source.split("OPEN_PATHS")[1].split("\n\n")[0], path
+    assert '"/assets/"' in source.split("OPEN_PREFIXES")[1].split("\n")[0]
+
+
+def test_the_server_stores_only_an_identifier_and_an_email():
+    """ログインしても預かるものが増えないことを、表の定義で確かめる。"""
+    source = (Path(__file__).parents[1] / "auth.py").read_text()
+    columns = source.split("CREATE TABLE IF NOT EXISTS users (")[1].split(")\"\"\"")[0]
+    for allowed in ["subject", "email", "created_at", "last_seen_at", "plan"]:
+        assert allowed in columns, allowed
+    for never in ["photo", "image", "api_key", "record", "history", "password", "token"]:
+        assert never not in columns.lower(), never
+    # パスワードを持たない以上、ハッシュ処理も要らない
+    assert "bcrypt" not in source and "password" not in source.lower().replace("passwords are not", "")
+    assert "def delete_user" in source          # 退会できる
+
+
+def test_login_page_states_what_is_kept():
+    page = client.get("/login").text
+    assert "パスワードは本サービスでは預かりません" in page
+    assert "アカウントの識別子とメールアドレスだけ" in page
+    assert "/privacy" in page and "/terms" in page
+
+
+def test_privacy_matches_what_we_actually_keep():
+    """書いていないものを取らない。ログインを入れた以上、記載も直す。"""
+    page = client.get("/privacy").text
+    assert "利用者登録を求めず" not in page          # ログイン必須にしたので、この約束は撤回した
+    assert "メールアドレスと、Googleが発行する識別子" in page
+    assert "パスワードは受け取らず、保存もしません" in page
+    assert "退会する" in page                        # 消せることを書く
+    assert "保護者の方の同意" in page                # 全年齢向けなので必要

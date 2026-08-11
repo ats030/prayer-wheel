@@ -28,6 +28,16 @@
     <div class="actions"><button class="button primary" id="save-button" type="submit"><span data-only="operator">変更を保存</span><span data-only="public">この端末に保存</span></button><a class="button" href="/">キャンセル</a></div><p class="message" id="message" aria-live="polite"></p>
   </form>
   <section class="section" data-only="public"><div class="panel"><label class="check"><input id="keep-keys" type="checkbox" checked><span>この端末にAPIキーを残す（次に開くとき入力しなくて済みます）。共用の端末では外してください。外すとタブを閉じたときに消えます。</span></label></div></section>
+  <section class="section" id="account-section" hidden aria-labelledby="account-heading">
+    <div class="section-head"><h2 id="account-heading">アカウント</h2></div>
+    <div class="panel">
+      <div class="status-strip"><span>ログイン中</span><strong id="account-email">-</strong></div>
+      <p class="help">本サービスが預かっているのは、この<strong>メールアドレスとアカウントの識別子だけ</strong>です。写真・記録・APIキーは預かっていません。</p>
+      <div class="actions"><button class="button" id="account-logout" type="button">ログアウト</button><button class="button" id="account-delete" type="button">退会する</button></div>
+      <p class="message" id="account-message" aria-live="polite"></p>
+    </div>
+  </section>
+
   <section class="section" aria-labelledby="backup-heading">
     <div class="section-head"><h2 id="backup-heading">記録の置き場</h2><p>ひとつ選んでください</p></div>
     <div class="panel">

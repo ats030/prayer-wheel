@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ログイン｜生きものノート</title>
+  <link rel="icon" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/login.css">
+  <link rel="stylesheet" href="/assets/mode.css">
+  <script src="/theme.js"></script>
+</head>
+<body>
+<main class="wrap narrow">
+  <header class="page-head">
+    <h1 class="app-title">生きものノート</h1>
+    <p class="lead">写真から生きものを調べます</p>
+  </header>
+
+  <section class="panel stacked">
+    <h2>ログインしてはじめる</h2>
+    <p class="help">Google アカウントでログインします。<strong>パスワードは本サービスでは預かりません。</strong></p>
+
+    <div class="actions">
+      <a class="button primary" id="google-login" href="/auth/google">Google でログイン</a>
+    </div>
+
+    <p class="message" id="login-message" aria-live="polite" hidden></p>
+
+    <h3>ログインしても、預かるものは増えません</h3>
+    <ul class="notes">
+      <li>本サービスが保存するのは<strong>アカウントの識別子とメールアドレスだけ</strong>です。</li>
+      <li>写真は保存しません。調べるあいだメモリ上で扱い、外部AIへ送る前に位置情報などを取り除きます。</li>
+      <li>調べた記録はこの端末の中に残ります。保存先を決めた場合は、その保存先にだけ届きます。</li>
+      <li>APIキーはこのブラウザの中だけに置き、調べるときに送るだけです。</li>
+      <li>いつでも退会できます。設定画面から、預けた情報をまとめて削除できます。</li>
+    </ul>
+
+    <p class="help"><a href="/privacy">プライバシーポリシー</a>／<a href="/terms">利用規約</a></p>
+  </section>
+</main>
+<script src="/assets/login.js" defer></script>
+</body>
+</html>
