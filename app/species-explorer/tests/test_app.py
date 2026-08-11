@@ -1009,3 +1009,21 @@ def test_internal_identifiers_are_left_alone():
     assert "species-theme" in client.get("/theme.js").text
     for path in ["/assets/index.js", "/assets/history.js", "/assets/settings.js"]:
         assert client.get(path).status_code == 200
+
+
+def test_app_name_never_breaks_across_lines():
+    """日本語の見出しは任意の位置で折れる。名前が2行に割れると読めない。"""
+    css = client.get("/assets/index.css").text
+    assert "white-space:nowrap" in css[css.index("h1{"):css.index("h1{") + 200]
+    # 狭い画面でも収まるよう下限を下げてある
+    assert "clamp(20px,3vw,30px)" in css
+
+
+def test_subtitle_splits_by_phrase_not_mid_sentence():
+    """折り返しで中黒が行頭に落ちないよう、句ごとに要素を分ける。"""
+    page = client.get("/").text
+    assert '<div class="subtitle"><span>写真から植物・動物の名前を調べる</span><span>どなたでも使えます</span></div>' in page
+    css = client.get("/assets/index.css").text
+    assert '.subtitle span+span::before{content:" · "}' in css
+    assert ".subtitle span{display:block}" in css        # 480px 以下は行を分ける
+    assert ".subtitle span+span{display:none}" in css    # 360px 以下は後半を畳む
