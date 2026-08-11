@@ -849,3 +849,28 @@ def test_privacy_policy_discloses_free_tier_training_use():
     assert "製品改善や機械学習に利用" in privacy
     assert "担当者が内容を確認する場合があります" in privacy
     assert "Pl@ntNet は送信された写真をデータベースへ保存せず" in privacy
+
+
+def test_providers_are_ordered_by_what_costs_nothing_first():
+    """Ollama は無料、Gemini は無料枠あり、残りは従量課金。試せる順に並べる。"""
+    assert list(main.config_store.MODELS) == ["local", "gemini", "openai", "anthropic"]
+    assert list(main.config_store.DEFAULT_MODELS) == ["local", "gemini", "openai", "anthropic"]
+    page = client.get("/settings").text
+    assert re.findall(r'name="provider" value="([a-z]+)"', page) == ["local", "gemini", "openai", "anthropic"]
+    # 並べ替えでマークアップを壊していないこと
+    assert page.count('<label class="provider">') == 4
+    assert page.count("<label") == page.count("</label>")
+    assert page.count("<span") == page.count("</span>")
+    for control in ["model-local", "model-gemini", "model-openai", "model-anthropic",
+                    "key-gemini", "key-openai", "key-anthropic", "local-llm-url"]:
+        assert f'id="{control}"' in page, control
+
+
+def test_saving_still_works_after_reordering(tmp_path):
+    payload = {"provider": "gemini", "models": {"gemini": "gemini-3.6-flash"},
+               "local_llm": {"url": "http://127.0.0.1:11434"},
+               "api_keys": {"gemini": "test-key"}, "delete_keys": [], "affiliate": {}}
+    saved = client.post("/api/settings", json=payload)
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["provider"] == "gemini"
+    assert saved.json()["api_key_configured"]["gemini"] is True

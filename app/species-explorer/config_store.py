@@ -19,8 +19,15 @@ SETTINGS_PATH = Path(
     )
 )
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434").rstrip("/")
+# 無料で試せる順に並べる。画面の選択肢もこの順で出る。
+# Ollama は完全に無料、Gemini は無料枠あり、OpenAI と Anthropic は従量課金のみ。
 MODELS = {
     "local": [{"id": "gemma4:12b", "label": "gemma4:12b（ローカル）"}],
+    "gemini": [
+        {"id": "gemini-3.6-flash", "label": "Gemini 3.6 Flash（推奨）"},
+        {"id": "gemini-3.5-flash", "label": "Gemini 3.5 Flash（高性能）"},
+        {"id": "gemini-3.5-flash-lite", "label": "Gemini 3.5 Flash-Lite（低コスト）"},
+    ],
     "openai": [
         {"id": "gpt-5.6-luna", "label": "GPT-5.6 Luna（低コスト）"},
         {"id": "gpt-5.6-terra", "label": "GPT-5.6 Terra（バランス）"},
@@ -31,17 +38,12 @@ MODELS = {
         {"id": "claude-sonnet-5", "label": "Claude Sonnet 5（バランス）"},
         {"id": "claude-opus-5", "label": "Claude Opus 5（高性能）"},
     ],
-    "gemini": [
-        {"id": "gemini-3.6-flash", "label": "Gemini 3.6 Flash（推奨）"},
-        {"id": "gemini-3.5-flash", "label": "Gemini 3.5 Flash（高性能）"},
-        {"id": "gemini-3.5-flash-lite", "label": "Gemini 3.5 Flash-Lite（低コスト）"},
-    ],
 }
 DEFAULT_MODELS = {
     "local": "gemma4:12b",
+    "gemini": "gemini-3.6-flash",
     "openai": "gpt-5.6-luna",
     "anthropic": "claude-sonnet-5",
-    "gemini": "gemini-3.6-flash",
 }
 _AFFILIATE_LOCK = threading.Lock()
 
