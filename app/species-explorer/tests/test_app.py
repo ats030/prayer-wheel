@@ -740,7 +740,10 @@ def test_capture_and_history_screens_use_one_word_per_concept():
     # 設定のラジオとトップのステータス表示が、同じ提供元を同じ名前で呼ぶ
     assert "Ollama" in page_source("/settings")
     assert 'local:"Ollama"' in client.get("/assets/settings.js").text
-    assert 'local:"Ollama"' in client.get("/assets/index.js").text
+    # 撮影画面と記録は共通の呼び名を使う（記録に "local" のような内部IDを出さない）
+    assert 'local: "Ollama"' in client.get("/assets/species-links.js").text
+    for script in ["/assets/index.js", "/assets/history.js"]:
+        assert "providerLabel(" in client.get(script).text, script
     # 設定が引用するチェックボックスのラベルは、実際のラベルと一致する
     label = "植物専用の識別もいっしょに使う"
     assert label in client.get("/").text
@@ -1083,3 +1086,21 @@ def test_record_ads_drop_duplicates_by_title_too():
 def test_product_images_are_allowed_by_the_policy():
     policy = client.get("/history").headers["content-security-policy"]
     assert "https://*.media-amazon.com" in policy
+
+
+def test_records_can_be_examined_again():
+    """元の写真は残っていないので、保存済みの縮小画像を送り直す。"""
+    history = client.get("/assets/history.js").text
+    assert "async function reidentify(record,button,message)" in history
+    assert 'fd.append("files",record.thumbnail,"photo.jpg")' in history
+    assert 'e.thumbnail?\'<button class="btn again"' in history   # 写真が無い記録には出さない
+    assert "調べ直しています…" in history
+    # 公開版は BYOK。撮影画面と同じ形でキーとモデルを渡す
+    for field in ["request_provider", "request_model", "request_api_key", "request_plantnet_key"]:
+        assert field in history, field
+    # 元の記録は消さず、新しい記録として足す（前後を見くらべられる）
+    assert "async function saveRerun(source,data)" in history
+    assert "rerunOf:source.id" in history
+    assert "thumbnail:source.thumbnail" in history
+    assert "coordinates:source.coordinates" in history
+    assert ".slice(50)" in history   # 上限50件は撮影画面と同じ

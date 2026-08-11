@@ -58,3 +58,10 @@ function animalReference(candidate, category) {
     return {label: "Reptile Database", url: "https://reptile-database.reptarium.cz/advanced_search?genus=" + encodeURIComponent(parts[0]) + "&species=" + encodeURIComponent(parts[1]) + "&submit=Search"};
   return {label: "GBIF", url: "https://www.gbif.org/species/search?q=" + q};
 }
+
+/* 提供元の呼び名。設定画面は正式名 (OpenAI API) を出すが、記録とステータス表示は
+   短い形で揃える。記録に "local" のような内部IDが出ないようにするのが目的 */
+const PROVIDER_LABELS = {local: "Ollama", openai: "OpenAI", anthropic: "Anthropic", gemini: "Gemini"};
+function providerLabel(value) {
+  return PROVIDER_LABELS[value] || String(value || "");
+}
