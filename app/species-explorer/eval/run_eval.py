@@ -3,8 +3,11 @@
 本番と同じ経路 (pipeline.identify_all) を通す。評価だけ別の手順を組むと、
 測った数字がアプリの実際の挙動と一致しなくなる。
 
-  uv run --with httpx --with pillow python eval/run_eval.py --provider gemini --label 新パイプライン
-  uv run ... python eval/run_eval.py --provider gemini --use-plantnet --label Pl@ntNet併用
+  uv run --with httpx --with pillow python eval/run_eval.py --label local-baseline
+  uv run ... python eval/run_eval.py --use-plantnet --label local-plantnet
+
+既定はローカルLLM。外部APIは無料枠の日次上限を公開版と食い合うので、必要なときだけ
+--provider gemini のように明示する。
 
 結果は eval/results/<label>.json と、比較用の要約表を標準出力へ出す。
 """
@@ -112,12 +115,15 @@ def summarize(rows: list[dict], label: str, seconds: list[float]) -> dict[str, o
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--provider", default="gemini", choices=["local", "openai", "anthropic", "gemini"])
+    # 検証はローカルLLMを既定にする。外部APIは無料枠の日次上限があり、評価を回すたびに
+    # 公開版の利用者ぶんの枠を削ってしまう。比較で外部が要るときだけ --provider で切り替える。
+    parser.add_argument("--provider", default="local", choices=["local", "openai", "anthropic", "gemini"])
     parser.add_argument("--model", default="", help="未指定なら設定中のモデル")
     parser.add_argument("--use-plantnet", action="store_true")
     parser.add_argument("--label", default="", help="結果ファイル名。未指定なら provider から作る")
     parser.add_argument("--limit", type=int, default=0, help="先頭N件だけ試す")
     parser.add_argument("--no-family", action="store_true", help="科の照合を省いて速く回す")
+    parser.add_argument("--sleep", type=float, default=0.0, help="1件ごとの待ち時間 (秒)")
     args = parser.parse_args()
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
@@ -135,10 +141,27 @@ def main() -> int:
         print("Pl@ntNet のAPIキーが未登録です", file=sys.stderr)
         return 1
 
+    # 無料枠の日次上限に当たっても捨てずに済むよう、成功ぶんは引き継ぐ
+    output = RESULTS_DIR / f"{label.replace('/', '_')}.json"
+    done: dict[int, dict] = {}
+    if output.exists():
+        previous = json.loads(output.read_text(encoding="utf-8"))
+        done = {r["photo_id"]: r for r in previous.get("rows", []) if "error" not in r}
+        if done:
+            print(f"（前回の成功 {len(done)}件を引き継ぎます）")
+
     print(f"■ {label} / {len(entries)}件")
     rows: list[dict] = []
     seconds: list[float] = []
+    quota_exhausted = False
     for index, entry in enumerate(entries, 1):
+        if entry["photo_id"] in done:
+            rows.append(done[entry["photo_id"]])
+            continue
+        if quota_exhausted:
+            rows.append({"photo_id": entry["photo_id"], "truth": entry["truth"]["name"],
+                         "group": entry["group"], "error": "skipped: 日次上限"})
+            continue
         raw = Path(entry["file"]).read_bytes()
         prepared = [vision.prepare_image(raw)]
         started = time.monotonic()
@@ -148,9 +171,13 @@ def main() -> int:
                 use_plantnet=args.use_plantnet, plantnet_key=plantnet_key,
             )
         except Exception as error:  # 1枚の失敗で全体を止めない
+            message = str(error)
+            # 日次上限は待っても回復しない。残りを空回しせず、次回に回す
+            if "上限" in message or "レート" in message:
+                quota_exhausted = True
             rows.append({"photo_id": entry["photo_id"], "truth": entry["truth"]["name"],
-                         "group": entry["group"], "error": f"{type(error).__name__}: {error}"})
-            print(f"  {index:3}/{len(entries)} {entry['truth']['name']:30} ERROR {error}")
+                         "group": entry["group"], "error": f"{type(error).__name__}: {message}"})
+            print(f"  {index:3}/{len(entries)} {entry['truth']['name']:30} ERROR {message}")
             continue
         elapsed = time.monotonic() - started
         seconds.append(elapsed)
@@ -159,10 +186,11 @@ def main() -> int:
         mark = "○" if row["top1"] else ("△" if row["top3"] or row["genus"] else "×")
         got = row["predicted"][0] if row["predicted"] else "(棄却)"
         print(f"  {index:3}/{len(entries)} {mark} {entry['truth']['name']:30} → {got:30} {elapsed:4.1f}s")
+        if args.sleep:
+            time.sleep(args.sleep)
 
     summary = summarize(rows, label, seconds)
     RESULTS_DIR.mkdir(exist_ok=True)
-    output = RESULTS_DIR / f"{label.replace('/', '_')}.json"
     output.write_text(json.dumps({
         "summary": summary,
         "config": {"provider": args.provider, "model": model, "use_plantnet": args.use_plantnet,
