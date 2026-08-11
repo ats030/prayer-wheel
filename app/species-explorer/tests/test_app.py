@@ -832,3 +832,20 @@ def test_operator_settings_keep_every_control():
                     'id="affiliate-url"', 'id="key-amazon_creators_id"']:
         assert control in page, control
     assert ">変更を保存<" in page
+
+
+def test_plantnet_results_carry_the_required_credit():
+    """Pl@ntNet の無料枠は recognition API の明示を求めている。"""
+    script = client.get("/assets/index.js").text
+    assert "Pl@ntNet recognition API" in script
+    assert "plantnetCreditHtml(data)" in script
+    assert "if(!data.plantnet_used)return" in script  # 使ったときだけ出す
+    assert ".source-credit{" in client.get("/assets/index.css").text
+
+
+def test_privacy_policy_discloses_free_tier_training_use():
+    """無料枠は送信内容が学習に使われうる。設定画面だけでなく法的文書にも書く。"""
+    privacy = client.get("/privacy").text
+    assert "製品改善や機械学習に利用" in privacy
+    assert "担当者が内容を確認する場合があります" in privacy
+    assert "Pl@ntNet は送信された写真をデータベースへ保存せず" in privacy
