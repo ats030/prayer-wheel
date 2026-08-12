@@ -21,3 +21,11 @@
 .provider:not(:has(input:checked)) .configured{display:none}
 .provider{cursor:pointer}
 .provider:not(:has(input:checked)):hover{border-color:var(--color-accent-soft)}
+/* 何を設定しなければ使えないのかが、見出しから分かるようにする */
+.need{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;vertical-align:middle;border:1px solid var(--color-line)}
+.need.required{background:var(--color-accent);border-color:var(--color-accent);color:var(--color-on-accent)}
+.need.optional{background:transparent;color:var(--color-muted)}
+.status-strip strong.not-ready{color:var(--color-accent)}
+/* 「未登録」は、必須のものが欠けている合図。ほかの補助文と同じ灰色では気づけない */
+.configured{color:var(--color-muted);font-size:12px}
+.configured:not(:empty)[data-missing="1"]{color:var(--color-accent);font-weight:600}

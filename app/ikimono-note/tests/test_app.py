@@ -1598,3 +1598,18 @@ def test_the_operator_screen_does_not_reach_the_drive():
     guard = backup.split("function scheduleAutoBackup() {")[1].split("clearTimeout")[0]
     assert 'document.body.dataset.appMode !== "public"' in guard
     assert "return;" in guard
+
+
+def test_you_can_tell_what_must_be_set():
+    """何を設定しなければ使えないのかが、見出しから分かるようにする。"""
+    page = client.get("/settings").text
+    assert '使うAIを選ぶ <span class="need required">必須</span>' in page
+    assert page.count('class="need optional">任意</span>') == 2   # 追加で使えるもの / 記録の保存
+    assert "設定しなくても調べられます" in page
+    assert "設定しないと、記録はこの端末の中だけに残ります" in page
+    # 「未登録」は必須が欠けている合図。ほかの補助文と同じ灰色では気づけない
+    script = client.get("/assets/settings.js").text
+    assert "APIキーが未登録です" in script
+    assert 'el.dataset.missing=has?"0":"1"' in script
+    css = client.get("/assets/settings.css").text
+    assert '.configured:not(:empty)[data-missing="1"]' in css
