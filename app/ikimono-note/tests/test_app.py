@@ -760,6 +760,18 @@ def test_page_assets_are_served_locally():
         assert "unpkg" not in page, path
 
 
+def test_no_route_is_defined_twice():
+    """同じ経路を二度定義しない。後ろの定義は到達せず、直したつもりが効かない。
+
+    /affiliate/click, /api/affiliate/click, /api/amazon/products が丸ごと二重に
+    書かれていた。中身が同じうちは無害だが、片方だけ直した日に静かに裏切る。
+    """
+    from collections import Counter
+    seen = Counter((route.path, tuple(sorted(getattr(route, "methods", None) or [])))
+                   for route in main.app.routes)
+    assert [key for key, count in seen.items() if count > 1] == []
+
+
 def test_protected_species_states_the_fact_without_granting_collection():
     """種の保存法の指定は事実だけを出す。規制の中身は指定の種類で違い、要約すると外す。"""
     source = page_source("/")

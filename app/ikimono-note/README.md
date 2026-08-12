@@ -64,6 +64,8 @@ IKIMONO_GOOGLE_CLIENT_ID=xxxxx.apps.googleusercontent.com
 候補の学名が種の保存法の規制対象と完全一致した場合だけ、「種の保存法の国内希少野生動植物種です」と事実を表示し、環境省の一覧へ誘導します。リスト (国内希少野生動植物種458件 + 緊急指定種3件) は `data/protected_species.json` として同梱し、実行時に env.go.jp を叩きません。規制の内容は指定の種類で違う (特定第二種は販売・頒布目的の捕獲等だけが規制) ため、法律の中身は要約せず、指定の種類だけを添えます。一致しなかった候補には何も表示しません。無印は「指定なし」ではなく、亜種で指定されている種は種名では当たらず、都道府県の条例は独自に指定しているためです。更新は `uv run --with openpyxl python data/build_protected_species.py` で作り直します。座標から採取規制を判定しない理由は `docs/tool-license-collection-regulation-data.yaml` にあります。
 動物候補では、写真に種特異的な性的二型の根拠が見える場合だけオス・メスを推定し、それ以外は「判別不能」と表示します。分類群に応じてAnimal Diversity Web、Cornell All About Birds、FishBase、AmphibiaWeb、Reptile Database、GBIFのいずれかへ照合リンクを表示します。外部サイトの内容は自動取得しません。
 設定画面でAmazon全商品検索用の特別リンクテンプレートを登録すると、識別候補の和名と識別カテゴリから関連商品を全カテゴリで検索する広告リンクを表示できます。Amazon Creators APIのCredential ID、Secret、Partner Tagも登録すると、第一候補に商品が見つかった場合はAPIが返した商品を画像付きカードで最大4件表示し、見つからない場合やAPI障害時は検索リンクへ戻します。認証情報は画面へ再表示しません。広告は識別候補・順位に影響せず、広告設定が有効な場合は結果ページに常時表示します。
+
+商品APIは Amazon 側の口座の状態で止まります。実際に `403 AssociateNotEligible`（適格販売が足りない。2025年11月以降は直近30日で10件必要）で止まっており、認証情報を入れ直しても直りません。条件を満たすと2日ほどで自動的に戻ります。止まっている間、画面は検索リンクのフォールバックへ静かに戻り、**断られた理由と運営者がとれる手は journal にだけ出します**（`journalctl --user -u ikimono-note -g Amazon商品API`）。設定画面の「認証情報を登録済み」は登録の有無を示すだけで、Amazon が受け付けているかは示しません。
 判定履歴の詳細にも写真付きの商品カードを最大4件表示します。「調べた内容を見る」を開いたときに初めて商品APIを呼ぶため、一覧を表示するだけでは1件もリクエストしません。検索はその種に固有の切り口 (候補名の書籍 / 候補名+観察 / 候補名+育て方・飼育 / 学名の書籍) を毎回ランダムな順で試し、集まった商品を合成します。「分類+図鑑」のような一般書は必ずヒットして枠を占めるため、最後の保険として最大2件までに制限します。同一題名の重複は除き、食用を連想させる語 (茶・食用・乾燥・サプリなど) を含む商品は除外します。安全カードで「食べられるかは判定しません」と表示している以上、誤同定のときに食品広告が後押しになってはいけないためです。語による除外なので完全ではありません。
 
 2つのプロセスを別の役割で動かします。設定ファイルは共有するため、運営者用での
@@ -103,7 +105,7 @@ systemctl --user restart ikimono-note ikimono-note-public
 使うAI、APIキー、モデルは画面上部の「設定」から変更できます。OllamaではURLを入力でき、その接続先にインストール済みで画像入力に対応するモデルを自動表示します。別端末のOllamaを使う場合は、Ollama側でこのサーバーからの接続を許可してください。接続先とAPIキーは `~/.config/ikimono-note/settings.json` に権限 `0600` で保存し、APIキーは画面へ再表示しません。
 
 ```bash
-uv run --with pytest pytest -q                                    # 198件
+uv run --with pytest pytest -q                                    # 203件
 uv run --with playwright python tests/smoke_browser.py            # 実ブラウザで主要導線
 uv run --with playwright python tests/smoke_browser.py --identify # 識別まで通す
 ```

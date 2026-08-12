@@ -53,6 +53,36 @@ def _value(container: Any, *keys: str) -> str:
 # 一般向けの図鑑が上位を占める。書籍に絞ると、その種を扱った本へ寄せられる。
 SEARCH_INDEXES = {"All", "Books"}
 
+# 断られた理由ごとの、運営者がとれる手。画面には出さない (利用者は設定できない)
+REFUSAL_HINTS = {
+    "AssociateNotEligible":
+        "アソシエイトの適格条件を満たしていません。商品APIは直近30日の適格販売が一定数"
+        " (2025年11月以降は10件) 必要で、満たすと2日ほどで自動的に戻ります。"
+        " 認証情報の問題ではないので、入れ直しても直りません。",
+    "InvalidPartnerTag": "パートナータグがこのマーケットプレイスで有効ではありません。設定画面の値を確認してください。",
+    "TooManyRequests": "呼び出しが多すぎます。時間をおいてください。",
+}
+
+
+def _log_refusal(response: Any) -> None:
+    """Amazon が断った理由を journal へ出す。
+
+    断られると画面は検索リンクのフォールバックへ静かに戻る。利用者にはそれでよいが、
+    運営者に何も残らないと「設定したのに画像が出ない」から先へ進めない。実際に
+    AssociateNotEligible を掴むのに、手で API を叩く必要があった。
+    """
+    reason = detail = ""
+    try:
+        body = response.json()
+        reason = str(body.get("reason") or body.get("type") or "")
+        detail = str(body.get("message") or "")
+    except (ValueError, AttributeError):
+        detail = str(getattr(response, "text", ""))[:200]
+    hint = REFUSAL_HINTS.get(reason, "")
+    print(f"[ikimono-note] Amazon商品APIが {getattr(response, 'status_code', '?')} を返しました"
+          f" ({reason or '理由の記載なし'}): {detail}" + (f" — {hint}" if hint else ""),
+          flush=True)
+
 
 def search_products(query: str, credential_id: str, secret: str, partner_tag: str, limit: int = 4, search_index: str = "All") -> list[dict[str, str]]:
     term = " ".join(str(query).split())[:80]
@@ -64,7 +94,11 @@ def search_products(query: str, credential_id: str, secret: str, partner_tag: st
         response = httpx.post(SEARCH_URL, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "x-marketplace": MARKETPLACE}, json={"marketplace": MARKETPLACE, "partnerTag": partner_tag, "searchIndex": (search_index if search_index in SEARCH_INDEXES else "All"), "keywords": term, "itemCount": item_count, "resources": ["itemInfo.title", "images.primary.medium"]}, timeout=20)
         response.raise_for_status()
         data = response.json()
+    except httpx.HTTPStatusError as exc:
+        _log_refusal(exc.response)
+        raise CreatorsAPIError("Amazonの商品情報を取得できませんでした") from exc
     except (httpx.HTTPError, ValueError, AttributeError) as exc:
+        print(f"[ikimono-note] Amazon商品APIへ届きませんでした: {exc!r}", flush=True)
         raise CreatorsAPIError("Amazonの商品情報を取得できませんでした") from exc
     result = data.get("searchResult") or data.get("SearchResult") or {}
     items = result.get("items") or result.get("Items") or []
