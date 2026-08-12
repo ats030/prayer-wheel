@@ -92,6 +92,33 @@ def score_one(entry: dict, result: dict, family_check: bool) -> dict[str, object
     }
 
 
+def entry_location(entry: dict, args) -> str:
+    """1件ごとの撮影地域。指定が無ければ --location をそのまま使う。"""
+    if args.location_from_geo:
+        parts = []
+        if entry.get("elevation") is not None:
+            parts.append(f"標高{entry['elevation']:.0f}m")
+        if entry.get("surroundings"):
+            parts.append("周辺は" + "・".join(entry["surroundings"]))
+        if parts:
+            return "日本、" + "、".join(parts)
+    if args.location_from_coordinates and entry.get("latitude") is not None:
+        return f"緯度 {entry['latitude']:.4f}, 経度 {entry['longitude']:.4f}"
+    if args.location_from_place and entry.get("place_guess"):
+        return entry["place_guess"]
+    return args.location
+
+
+def entry_date(entry: dict, args) -> str:
+    """1件ごとの撮影日。時刻まで渡すかどうかで形が変わる。"""
+    if args.time_from_dataset and entry.get("observed_time"):
+        stamp = entry["observed_time"]           # 2025-05-29T17:24:00+09:00
+        return stamp[:10] + " " + stamp[11:16]   # → 2025-05-29 17:24
+    if (args.date_from_dataset or args.time_from_dataset) and entry.get("observed_on"):
+        return entry["observed_on"]
+    return ""
+
+
 def summarize(rows: list[dict], label: str, seconds: list[float]) -> dict[str, object]:
     n = len(rows)
     scored = [r for r in rows if "error" not in r]
@@ -133,6 +160,20 @@ def main() -> int:
     # 実際の利用では撮影地域を入れる人が多いのに、評価では空のまま測っていた。
     # 日本固有種を近縁の別種と取り違える例が目立つので、効くかどうかを測れるようにする
     parser.add_argument("--location", default="", help="撮影地域として渡す (例: 日本)")
+    # 「日本」では広すぎて絞れなかった。沖縄と北海道では出る種が違う。
+    # アプリは EXIF の座標を「緯度 35.2900, 経度 139.5800」の形で渡すので、同じ形にする
+    parser.add_argument("--location-from-coordinates", action="store_true",
+                        help="観察地点の座標を撮影地域として渡す (アプリが EXIF から作る形式)")
+    parser.add_argument("--location-from-place", action="store_true",
+                        help="観察地点の地名を撮影地域として渡す")
+    # アプリは EXIF の撮影日時から日付だけを取り出し、時刻を捨てている。
+    # 夜行性か昼行性かは、ガとチョウのような相手を分ける手がかりになる
+    # 緯度経度そのものは VLM にとってただの数字で、分布の知識と結びつきにくい。
+    # 「標高1200mの森林」に直せば、種を絞る手がかりになる
+    parser.add_argument("--location-from-geo", action="store_true",
+                        help="標高と周辺の土地利用を撮影地域として渡す")
+    parser.add_argument("--date-from-dataset", action="store_true", help="観察日を撮影日として渡す")
+    parser.add_argument("--time-from-dataset", action="store_true", help="観察日時 (時刻まで) を渡す")
     args = parser.parse_args()
 
     manifest = json.loads(Path(args.dataset).read_text(encoding="utf-8"))
@@ -181,7 +222,8 @@ def main() -> int:
             result = pipeline.identify_all(
                 prepared, provider=args.provider, model=model, api_key=api_key,
                 use_plantnet=args.use_plantnet, plantnet_key=plantnet_key,
-                location=args.location,
+                location=entry_location(entry, args),
+                observed_date=entry_date(entry, args),
             )
         except Exception as error:  # 1枚の失敗で全体を止めない
             message = str(error)
@@ -211,7 +253,11 @@ def main() -> int:
         # だったのかファイルから確かめられなくなった
         "config": {"provider": args.provider, "model": model, "use_plantnet": args.use_plantnet,
                    "thinking_level": vision.GEMINI_THINKING_LEVEL if args.provider == "gemini" else None,
-                   "location": args.location,
+                   "location": ("標高と土地利用" if args.location_from_geo else
+                                "座標" if args.location_from_coordinates else
+                                "地名" if args.location_from_place else args.location),
+                   "date": ("日時" if args.time_from_dataset else
+                            "日付" if args.date_from_dataset else ""),
                    "dataset": manifest["source"], "measured_at": time.strftime("%Y-%m-%d %H:%M")},
         "rows": rows,
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

@@ -18,7 +18,19 @@
         "common_name_ja": "ケゼニゴケ",
         "ancestry": "48460/47126/64615/152080/1458852/152699/157186/157165"
       },
-      "file": "/home/ats030/cache/species-eval/images/344654543.jpg"
+      "file": "/home/ats030/cache/species-eval/images/344654543.jpg",
+      "geoprivacy": "",
+      "place_guess": "Shinjuku, Zushi, Kanagawa 249-0007, Japan",
+      "longitude": 139.5652,
+      "latitude": 35.2941,
+      "observed_on": "2023-12-27",
+      "observed_time": "2023-12-27T08:50:00+09:00",
+      "elevation": 30.0,
+      "surroundings": [
+        "海岸",
+        "公園",
+        "砂浜"
+      ]
     },
     {
       "group": "植物",
@@ -34,7 +46,15 @@
         "common_name_ja": "サクラジマエビネ",
         "ancestry": "48460/47126/211194/47125/47163/47218/47217/738346/790381/83467/1603410/1644713"
       },
-      "file": "/home/ats030/cache/species-eval/images/536404899.jpg"
+      "file": "/home/ats030/cache/species-eval/images/536404899.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Kagoshima, JP",
+      "longitude": 129.673,
+      "latitude": 31.6508,
+      "observed_on": "2025-05-29",
+      "observed_time": "2025-05-29T17:24:00+09:00",
+      "elevation": 279.6,
+      "surroundings": []
     },
     {
       "group": "植物",
@@ -50,7 +70,17 @@
         "common_name_ja": "オオカナダモ",
         "ancestry": "48460/47126/211194/47125/47163/48073/50361/57624"
       },
-      "file": "/home/ats030/cache/species-eval/images/124479108.jpg"
+      "file": "/home/ats030/cache/species-eval/images/124479108.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒783-0093 高知県南国市物部  高知大学物部キャンパス",
+      "longitude": 133.677,
+      "latitude": 33.5531,
+      "observed_on": "2015-06-19",
+      "observed_time": "2015-06-19T17:56:00+09:00",
+      "elevation": 7.6,
+      "surroundings": [
+        "農地"
+      ]
     },
     {
       "group": "植物",
@@ -66,7 +96,15 @@
         "common_name_ja": "",
         "ancestry": "48460/47126/211194/47125/47124/47123/47122/507502/550521/972790/119139"
       },
-      "file": "/home/ats030/cache/species-eval/images/348431422.jpg"
+      "file": "/home/ats030/cache/species-eval/images/348431422.jpg",
+      "geoprivacy": "",
+      "place_guess": "Kashimacho Imuta, Satsumasendai, Kagoshima 896-1301, Japan",
+      "longitude": 129.7903,
+      "latitude": 31.7587,
+      "observed_on": "2023-10-06",
+      "observed_time": "2023-10-06T16:58:00+09:00",
+      "elevation": 3.0,
+      "surroundings": []
     },
     {
       "group": "植物",
@@ -82,7 +120,15 @@
         "common_name_ja": "カヤラン",
         "ancestry": "48460/47126/211194/47125/47163/47218/47217/738347/738357/542123/140357/1437962"
       },
-      "file": "/home/ats030/cache/species-eval/images/107134799.jpg"
+      "file": "/home/ats030/cache/species-eval/images/107134799.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒444-2604 愛知県豊田市上八木町",
+      "longitude": 137.3791,
+      "latitude": 35.16,
+      "observed_on": "2020-05-03",
+      "observed_time": "2020-05-03T13:52:00+00:00",
+      "elevation": 472.6,
+      "surroundings": []
     },
     {
       "group": "植物",
@@ -98,7 +144,15 @@
         "common_name_ja": "シャジクモ",
         "ancestry": "48460/47126/311313/151788/152725/153166/180685"
       },
-      "file": "/home/ats030/cache/species-eval/images/543289462.jpg"
+      "file": "/home/ats030/cache/species-eval/images/543289462.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Saitama, JP",
+      "longitude": 139.5018,
+      "latitude": 35.9853,
+      "observed_on": "2025-07-27",
+      "observed_time": "2025-07-27T10:09:00+09:00",
+      "elevation": 11.1,
+      "surroundings": []
     },
     {
       "group": "植物",
@@ -114,7 +168,19 @@
         "common_name_ja": "シュンラン",
         "ancestry": "48460/47126/211194/47125/47163/47218/47217/738347/606169/790367/128976/1644819/886000"
       },
-      "file": "/home/ats030/cache/species-eval/images/32718778.jpg"
+      "file": "/home/ats030/cache/species-eval/images/32718778.jpg",
+      "geoprivacy": "",
+      "place_guess": "Unnamed Road, 寺山町 緑区 横浜市 神奈川県 226-0013 日本",
+      "longitude": 139.5359,
+      "latitude": 35.5035,
+      "observed_on": "2019-03-12",
+      "observed_time": "2019-03-12T11:43:49+09:00",
+      "elevation": 36.6,
+      "surroundings": [
+        "庭園",
+        "湿地",
+        "水辺"
+      ]
     },
     {
       "group": "植物",
@@ -130,7 +196,15 @@
         "common_name_ja": "ヒメジャゴケ",
         "ancestry": "48460/47126/64615/152080/1458852/152699/56402/1620312"
       },
-      "file": "/home/ats030/cache/species-eval/images/344650850.jpg"
+      "file": "/home/ats030/cache/species-eval/images/344650850.jpg",
+      "geoprivacy": "",
+      "place_guess": "Fujimi, Chiyoda City, Tokyo 102-0071, Japan",
+      "longitude": 139.744,
+      "latitude": 35.6962,
+      "observed_on": "2023-12-26",
+      "observed_time": "2023-12-26T07:42:00+09:00",
+      "elevation": 27.6,
+      "surroundings": []
     },
     {
       "group": "植物",
@@ -146,7 +220,17 @@
         "common_name_ja": "シンジュガヤ",
         "ancestry": "48460/47126/211194/47125/47163/47162/47161/873509/924291/141080"
       },
-      "file": "/home/ats030/cache/species-eval/images/600880897.jpg"
+      "file": "/home/ats030/cache/species-eval/images/600880897.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Shimokoshikicho Katanoura, Satsumasendai, Kagoshima, Japan",
+      "longitude": 129.6803,
+      "latitude": 31.6669,
+      "observed_on": "2025-10-19",
+      "observed_time": "2025-10-19T16:05:00+09:00",
+      "elevation": 103.9,
+      "surroundings": [
+        "海岸"
+      ]
     },
     {
       "group": "植物",
@@ -162,7 +246,18 @@
         "common_name_ja": "オニノヤガラ",
         "ancestry": "48460/47126/211194/47125/47163/47218/47217/738346/738355/790408/140645"
       },
-      "file": "/home/ats030/cache/species-eval/images/512681579.jpg"
+      "file": "/home/ats030/cache/species-eval/images/512681579.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Goten-yama 1-Chōme, Musashino, Tokyo, JP",
+      "longitude": 139.5744,
+      "latitude": 35.7008,
+      "observed_on": "2025-05-30",
+      "observed_time": "2025-05-30T11:05:34+09:00",
+      "elevation": 55.8,
+      "surroundings": [
+        "森林",
+        "水辺"
+      ]
     },
     {
       "group": "植物",
@@ -178,7 +273,15 @@
         "common_name_ja": "ホソバテンナンショウ",
         "ancestry": "48460/47126/211194/47125/47163/48073/48536/467650/937792/50311"
       },
-      "file": "/home/ats030/cache/species-eval/images/268069892.jpg"
+      "file": "/home/ats030/cache/species-eval/images/268069892.jpg",
+      "geoprivacy": "",
+      "place_guess": "Oyama, Isehara, Kanagawa 259-1107, Japan",
+      "longitude": 139.2359,
+      "latitude": 35.4363,
+      "observed_on": "2018-05-25",
+      "observed_time": "2018-05-25T11:00:00+09:00",
+      "elevation": 811.8,
+      "surroundings": []
     },
     {
       "group": "植物",
@@ -194,7 +297,15 @@
         "common_name_ja": "アリドオシ(広義)",
         "ancestry": "48460/47126/211194/47125/47124/47363/47693/788064/788074/461022"
       },
-      "file": "/home/ats030/cache/species-eval/images/281245032.jpg"
+      "file": "/home/ats030/cache/species-eval/images/281245032.jpg",
+      "geoprivacy": "",
+      "place_guess": "Shimokoshikicho Nagahama, Satsumasendai, Kagoshima 896-1411, Japan",
+      "longitude": 129.7358,
+      "latitude": 31.7207,
+      "observed_on": "2023-04-08",
+      "observed_time": "2023-04-08T17:13:00+09:00",
+      "elevation": 545.2,
+      "surroundings": []
     },
     {
       "group": "植物",
@@ -210,7 +321,15 @@
         "common_name_ja": "イズハハコ",
         "ancestry": "48460/47126/211194/47125/47124/47605/47604/632790/461542/1347651/925939"
       },
-      "file": "/home/ats030/cache/species-eval/images/387222584.jpg"
+      "file": "/home/ats030/cache/species-eval/images/387222584.jpg",
+      "geoprivacy": "",
+      "place_guess": "Satochosato, Satsumasendai, Kagoshima 896-1101, Japan",
+      "longitude": 129.9221,
+      "latitude": 31.8244,
+      "observed_on": "2024-04-03",
+      "observed_time": "2024-04-03T17:22:00+09:00",
+      "elevation": 183.6,
+      "surroundings": []
     },
     {
       "group": "植物",
@@ -226,7 +345,18 @@
         "common_name_ja": "イタチハギ",
         "ancestry": "48460/47126/211194/47125/47124/47123/47122/507502/737817/57357"
       },
-      "file": "/home/ats030/cache/species-eval/images/426677984.jpg"
+      "file": "/home/ats030/cache/species-eval/images/426677984.jpg",
+      "geoprivacy": "",
+      "place_guess": "Satochosato, Satsumasendai, Kagoshima 896-1101, Japan",
+      "longitude": 129.8947,
+      "latitude": 31.845,
+      "observed_on": "2024-05-17",
+      "observed_time": "2024-05-17T19:16:00+09:00",
+      "elevation": 18.2,
+      "surroundings": [
+        "水辺",
+        "森林"
+      ]
     },
     {
       "group": "植物",
@@ -242,7 +372,15 @@
         "common_name_ja": "ナンカクラン",
         "ancestry": "48460/47126/211194/47623/47622/47621/764772/180575"
       },
-      "file": "/home/ats030/cache/species-eval/images/449847700.jpg"
+      "file": "/home/ats030/cache/species-eval/images/449847700.jpg",
+      "geoprivacy": "",
+      "place_guess": "Kamikoshikicho Nakano, Satsumasendai, Kagoshima 896-1202, Japan",
+      "longitude": 129.8862,
+      "latitude": 31.8279,
+      "observed_on": "2024-08-31",
+      "observed_time": "2024-08-31T16:15:00+09:00",
+      "elevation": 185.7,
+      "surroundings": []
     },
     {
       "group": "植物",
@@ -258,7 +396,19 @@
         "common_name_ja": "ハンゲショウ",
         "ancestry": "48460/47126/211194/47125/47124/60244/60246/60743"
       },
-      "file": "/home/ats030/cache/species-eval/images/139154408.jpg"
+      "file": "/home/ats030/cache/species-eval/images/139154408.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒226-0013 神奈川県横浜市緑区寺山町４０８",
+      "longitude": 139.5336,
+      "latitude": 35.503,
+      "observed_on": "2021-06-27",
+      "observed_time": "2021-06-27T10:51:28+09:00",
+      "elevation": 38.4,
+      "surroundings": [
+        "庭園",
+        "湿地",
+        "草地"
+      ]
     },
     {
       "group": "植物",
@@ -274,7 +424,15 @@
         "common_name_ja": "アカガシ",
         "ancestry": "48460/47126/211194/47125/47124/47853/47852/47851/861028/861030"
       },
-      "file": "/home/ats030/cache/species-eval/images/469996838.jpg"
+      "file": "/home/ats030/cache/species-eval/images/469996838.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Shimokoshikicho Nagahama, Satsumasendai, Kagoshima 896-1411, Japan",
+      "longitude": 129.7341,
+      "latitude": 31.7196,
+      "observed_on": "2024-10-16",
+      "observed_time": "2024-10-16T17:04:00+09:00",
+      "elevation": 533.0,
+      "surroundings": []
     },
     {
       "group": "植物",
@@ -290,7 +448,19 @@
         "common_name_ja": "カジカエデ",
         "ancestry": "48460/47126/211194/47125/47124/47729/58321/47727/1466285"
       },
-      "file": "/home/ats030/cache/species-eval/images/120243883.jpg"
+      "file": "/home/ats030/cache/species-eval/images/120243883.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Honcho, Nikko, Tochigi, JP",
+      "longitude": 139.5912,
+      "latitude": 36.7534,
+      "observed_on": "2019-04-23",
+      "observed_time": "2019-04-23T09:28:59+02:00",
+      "elevation": 637.7,
+      "surroundings": [
+        "庭園",
+        "公園",
+        "水辺"
+      ]
     },
     {
       "group": "植物",
@@ -306,7 +476,18 @@
         "common_name_ja": "フルノコゴケ",
         "ancestry": "48460/47126/64615/67852/967120/67853/155595/1570128/155592"
       },
-      "file": "/home/ats030/cache/species-eval/images/344746446.jpg"
+      "file": "/home/ats030/cache/species-eval/images/344746446.jpg",
+      "geoprivacy": "",
+      "place_guess": "Kona, Izunokuni, Shizuoka 410-2201, Japan",
+      "longitude": 138.9366,
+      "latitude": 35.0339,
+      "observed_on": "2024-01-01",
+      "observed_time": "2024-01-01T11:06:00+09:00",
+      "elevation": 17.9,
+      "surroundings": [
+        "農地",
+        "森林"
+      ]
     },
     {
       "group": "植物",
@@ -322,7 +503,15 @@
         "common_name_ja": "タニイヌワラビ",
         "ancestry": "48460/47126/211194/121943/764796/47754/1224540/332930/52670/1613135"
       },
-      "file": "/home/ats030/cache/species-eval/images/414253580.jpg"
+      "file": "/home/ats030/cache/species-eval/images/414253580.jpg",
+      "geoprivacy": "",
+      "place_guess": "Shimokoshikicho Nagahama, Satsumasendai, Kagoshima 896-1411, Japan",
+      "longitude": 129.7365,
+      "latitude": 31.7222,
+      "observed_on": "2024-05-07",
+      "observed_time": "2024-05-07T17:10:00+09:00",
+      "elevation": 482.1,
+      "surroundings": []
     },
     {
       "group": "昆虫",
@@ -338,7 +527,19 @@
         "common_name_ja": "サクラアリ",
         "ancestry": "48460/1/47120/372739/47158/184884/47201/124417/326777/1269340/47336/244834/637569/485001"
       },
-      "file": "/home/ats030/cache/species-eval/images/596867238.jpg"
+      "file": "/home/ats030/cache/species-eval/images/596867238.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、神奈川県横浜市金沢区",
+      "longitude": 139.6124,
+      "latitude": 35.3358,
+      "observed_on": "2025-11-24",
+      "observed_time": "2025-11-24T16:13:00+09:00",
+      "elevation": 20.1,
+      "surroundings": [
+        "住宅地",
+        "公園",
+        "森林"
+      ]
     },
     {
       "group": "昆虫",
@@ -354,7 +555,15 @@
         "common_name_ja": "イボタガ",
         "ancestry": "48460/1/47120/372739/47158/184884/47157/47214/179915/179911"
       },
-      "file": "/home/ats030/cache/species-eval/images/114039337.jpg"
+      "file": "/home/ats030/cache/species-eval/images/114039337.jpg",
+      "geoprivacy": "",
+      "place_guess": "高知県香美市物部町久保影、西熊渓谷",
+      "longitude": 133.9732,
+      "latitude": 33.8018,
+      "observed_on": "2015-05-02",
+      "observed_time": "2015-05-02T20:02:00+00:00",
+      "elevation": 934.3,
+      "surroundings": []
     },
     {
       "group": "昆虫",
@@ -370,7 +579,15 @@
         "common_name_ja": "シラホシキリガ",
         "ancestry": "48460/1/47120/372739/47158/184884/47157/47607/48670/122224/82030/320218/55661"
       },
-      "file": "/home/ats030/cache/species-eval/images/127649238.jpg"
+      "file": "/home/ats030/cache/species-eval/images/127649238.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒781-4531 高知県香美市物部町久保和久保",
+      "longitude": 133.9691,
+      "latitude": 33.7882,
+      "observed_on": "2015-07-11",
+      "observed_time": "2015-07-11T20:08:00+09:00",
+      "elevation": 633.3,
+      "surroundings": []
     },
     {
       "group": "昆虫",
@@ -386,7 +603,15 @@
         "common_name_ja": "クビキリギス",
         "ancestry": "48460/1/47120/372739/47158/184884/47651/132694/488701/48125/48124/203979/516239/346106"
       },
-      "file": "/home/ats030/cache/species-eval/images/118167215.jpg"
+      "file": "/home/ats030/cache/species-eval/images/118167215.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒783-0093 高知県南国市物部",
+      "longitude": 133.6795,
+      "latitude": 33.5545,
+      "observed_on": "2014-10-21",
+      "observed_time": "2014-10-21T12:02:00+09:00",
+      "elevation": 8.9,
+      "surroundings": []
     },
     {
       "group": "昆虫",
@@ -402,7 +627,17 @@
         "common_name_ja": "マダラマルハヒロズコガ",
         "ancestry": "48460/1/47120/372739/47158/184884/47157/61414/124262/504130/925778"
       },
-      "file": "/home/ats030/cache/species-eval/images/118894236.jpg"
+      "file": "/home/ats030/cache/species-eval/images/118894236.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒783-0093 高知県南国市物部 高知大学物部キャンパス",
+      "longitude": 133.6791,
+      "latitude": 33.5525,
+      "observed_on": "2014-12-10",
+      "observed_time": "2014-12-10T15:41:00+09:00",
+      "elevation": 8.4,
+      "surroundings": [
+        "農地"
+      ]
     },
     {
       "group": "昆虫",
@@ -418,7 +653,15 @@
         "common_name_ja": "ヒロオビクロギンガ",
         "ancestry": "48460/1/47120/372739/47158/184884/47157/47607/48670/122224/82030/320218/244108"
       },
-      "file": "/home/ats030/cache/species-eval/images/127678541.jpg"
+      "file": "/home/ats030/cache/species-eval/images/127678541.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒781-4531 高知県香美市物部町久保和久保",
+      "longitude": 133.9691,
+      "latitude": 33.7882,
+      "observed_on": "2015-07-11",
+      "observed_time": "2015-07-11T20:59:00+09:00",
+      "elevation": 633.3,
+      "surroundings": []
     },
     {
       "group": "昆虫",
@@ -434,7 +677,18 @@
         "common_name_ja": "チョウセンカマキリ",
         "ancestry": "48460/1/47120/372739/47158/184884/48112/1097011/1097013/1097016/48111/1096984/1097067/1097119/71035"
       },
-      "file": "/home/ats030/cache/species-eval/images/430232461.jpg"
+      "file": "/home/ats030/cache/species-eval/images/430232461.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Saitama, JP",
+      "longitude": 139.4191,
+      "latitude": 35.8834,
+      "observed_on": "2024-09-13",
+      "observed_time": "2024-09-13T09:13:00+09:00",
+      "elevation": 38.5,
+      "surroundings": [
+        "農地",
+        "森林"
+      ]
     },
     {
       "group": "昆虫",
@@ -450,7 +704,15 @@
         "common_name_ja": "マエモンカマキリ",
         "ancestry": "48460/1/47120/372739/47158/184884/48112/1097011/1097013/1097016/48111/1096984/1097067/1097119/71035"
       },
-      "file": "/home/ats030/cache/species-eval/images/416914969.jpg"
+      "file": "/home/ats030/cache/species-eval/images/416914969.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Kagoshima, JP",
+      "longitude": 130.1495,
+      "latitude": 28.2312,
+      "observed_on": "2024-08-08",
+      "observed_time": "2024-08-08T21:49:06+09:00",
+      "elevation": null,
+      "surroundings": []
     },
     {
       "group": "昆虫",
@@ -466,7 +728,18 @@
         "common_name_ja": "オナガカツオゾウムシ",
         "ancestry": "48460/1/47120/372739/47158/184884/47208/71130/372852/60473/48736/272543/507383/71157/1134206"
       },
-      "file": "/home/ats030/cache/species-eval/images/524910806.jpg"
+      "file": "/home/ats030/cache/species-eval/images/524910806.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Saitama, JP",
+      "longitude": 139.4036,
+      "latitude": 36.0344,
+      "observed_on": "2025-06-22",
+      "observed_time": "2025-06-22T15:13:00+09:00",
+      "elevation": 33.6,
+      "surroundings": [
+        "公園",
+        "庭園"
+      ]
     },
     {
       "group": "昆虫",
@@ -482,7 +755,15 @@
         "common_name_ja": "スギウラナガタマムシ",
         "ancestry": "48460/1/47120/372739/47158/184884/47208/71130/372854/54965/54964/510063/510065/70058"
       },
-      "file": "/home/ats030/cache/species-eval/images/381313496.jpg"
+      "file": "/home/ats030/cache/species-eval/images/381313496.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Miyagi, JP",
+      "longitude": 140.5962,
+      "latitude": 38.1023,
+      "observed_on": "2022-08-11",
+      "observed_time": "2022-08-11T11:00:00+09:00",
+      "elevation": 435.3,
+      "surroundings": []
     },
     {
       "group": "昆虫",
@@ -498,7 +779,17 @@
         "common_name_ja": "ホシホウジャク",
         "ancestry": "48460/1/47120/372739/47158/184884/47157/47214/47213/124071/124065/124050/56294"
       },
-      "file": "/home/ats030/cache/species-eval/images/59347413.jpg"
+      "file": "/home/ats030/cache/species-eval/images/59347413.jpg",
+      "geoprivacy": "",
+      "place_guess": "Sembacho, Mito-Shi, Ibaraki, JP",
+      "longitude": 140.4694,
+      "latitude": 36.3606,
+      "observed_on": "2017-10-01",
+      "observed_time": "2017-10-01T09:27:41+09:00",
+      "elevation": 28.8,
+      "surroundings": [
+        "森林"
+      ]
     },
     {
       "group": "昆虫",
@@ -514,7 +805,15 @@
         "common_name_ja": "キンスジコガネ",
         "ancestry": "48460/1/47120/372739/47158/184884/47208/71130/702480/48202/48201/48857/425997/1582187/353345"
       },
-      "file": "/home/ats030/cache/species-eval/images/406080835.jpg"
+      "file": "/home/ats030/cache/species-eval/images/406080835.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Nagano, JP",
+      "longitude": 137.827,
+      "latitude": 35.8956,
+      "observed_on": "2019-07-02",
+      "observed_time": "2019-07-02T00:08:00+09:00",
+      "elevation": 1283.8,
+      "surroundings": []
     },
     {
       "group": "昆虫",
@@ -530,7 +829,18 @@
         "common_name_ja": "ノコギリハリアリ",
         "ancestry": "48460/1/47120/372739/47158/184884/47201/124417/326777/1269340/47336/338917/338919"
       },
-      "file": "/home/ats030/cache/species-eval/images/604152352.jpg"
+      "file": "/home/ats030/cache/species-eval/images/604152352.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Japan",
+      "longitude": 139.4285,
+      "latitude": 35.8327,
+      "observed_on": "2025-12-30",
+      "observed_time": "2025-12-30T14:07:00+09:00",
+      "elevation": 72.8,
+      "surroundings": [
+        "農地",
+        "果樹園"
+      ]
     },
     {
       "group": "昆虫",
@@ -546,7 +856,19 @@
         "common_name_ja": "ホソオビヒゲナガ",
         "ancestry": "48460/1/47120/372739/47158/184884/47157/51269/51270/512415/61547"
       },
-      "file": "/home/ats030/cache/species-eval/images/116291715.jpg"
+      "file": "/home/ats030/cache/species-eval/images/116291715.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒781-5233 高知県香南市野市町大谷 三宝山（金剛山）龍河洞スカイライン脇",
+      "longitude": 133.7113,
+      "latitude": 33.5715,
+      "observed_on": "2014-05-06",
+      "observed_time": "2014-05-06T15:06:00+09:00",
+      "elevation": 108.0,
+      "surroundings": [
+        "水辺",
+        "森林",
+        "草地"
+      ]
     },
     {
       "group": "昆虫",
@@ -562,7 +884,15 @@
         "common_name_ja": "オオモモブトスカシバ",
         "ancestry": "48460/1/47120/372739/47158/184884/47157/752400/51573/456401/456525/133347"
       },
-      "file": "/home/ats030/cache/species-eval/images/116551650.jpg"
+      "file": "/home/ats030/cache/species-eval/images/116551650.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Kochi, JP",
+      "longitude": 133.7066,
+      "latitude": 33.4675,
+      "observed_on": "2014-07-12",
+      "observed_time": "2014-07-12T14:42:00+09:00",
+      "elevation": null,
+      "surroundings": []
     },
     {
       "group": "昆虫",
@@ -578,7 +908,15 @@
         "common_name_ja": "タイコウチ",
         "ancestry": "48460/1/47120/372739/47158/184884/47744/61267/116696/81569/119347/481310/1404413/356346"
       },
-      "file": "/home/ats030/cache/species-eval/images/164359978.jpg"
+      "file": "/home/ats030/cache/species-eval/images/164359978.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Nagano, JP",
+      "longitude": 137.9263,
+      "latitude": 36.2224,
+      "observed_on": "2021-10-18",
+      "observed_time": "2021-10-18T12:02:00+09:00",
+      "elevation": 601.4,
+      "surroundings": []
     },
     {
       "group": "昆虫",
@@ -594,7 +932,17 @@
         "common_name_ja": "ムカシトンボ",
         "ancestry": "48460/1/47120/372739/47158/184884/47792/85551/85762/88201"
       },
-      "file": "/home/ats030/cache/species-eval/images/116271998.jpg"
+      "file": "/home/ats030/cache/species-eval/images/116271998.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Japan",
+      "longitude": 133.7144,
+      "latitude": 33.7625,
+      "observed_on": "2014-04-18",
+      "observed_time": "2014-04-18T15:59:00+09:00",
+      "elevation": 928.4,
+      "surroundings": [
+        "森林"
+      ]
     },
     {
       "group": "昆虫",
@@ -610,7 +958,15 @@
         "common_name_ja": "ツマグロムネスジハネカクシ",
         "ancestry": "48460/1/47120/372739/47158/184884/47208/71130/372870/48311/47951/359911/359910/359909/177876"
       },
-      "file": "/home/ats030/cache/species-eval/images/297963043.jpg"
+      "file": "/home/ats030/cache/species-eval/images/297963043.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Nagano, JP",
+      "longitude": 138.0067,
+      "latitude": 36.2439,
+      "observed_on": "2017-11-23",
+      "observed_time": "2017-11-23T09:06:00+09:00",
+      "elevation": 659.4,
+      "surroundings": []
     },
     {
       "group": "昆虫",
@@ -626,7 +982,17 @@
         "common_name_ja": "ヨツボシミズギワゴミムシ",
         "ancestry": "48460/1/47120/372739/47158/184884/47208/340471/372884/49567/333563/373648/373864/130639/555906"
       },
-      "file": "/home/ats030/cache/species-eval/images/297958009.jpg"
+      "file": "/home/ats030/cache/species-eval/images/297958009.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Nagano, JP",
+      "longitude": 137.8509,
+      "latitude": 36.3026,
+      "observed_on": "2017-10-26",
+      "observed_time": "2017-10-26T14:59:00+09:00",
+      "elevation": 620.4,
+      "surroundings": [
+        "公園"
+      ]
     },
     {
       "group": "昆虫",
@@ -642,7 +1008,15 @@
         "common_name_ja": "キボシミスジトガリバ",
         "ancestry": "48460/1/47120/372739/47158/184884/47157/84429/84430/123020/416167"
       },
-      "file": "/home/ats030/cache/species-eval/images/331315388.jpg"
+      "file": "/home/ats030/cache/species-eval/images/331315388.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒321-1662 栃木県日光市湯元",
+      "longitude": 139.3984,
+      "latitude": 36.8169,
+      "observed_on": "2023-05-17",
+      "observed_time": "2023-05-17T01:57:00+09:00",
+      "elevation": 1840.6,
+      "surroundings": []
     },
     {
       "group": "鳥",
@@ -658,7 +1032,17 @@
         "common_name_ja": "オオワシ",
         "ancestry": "48460/1/2/355675/3/71261/5067/1542783/5303"
       },
-      "file": "/home/ats030/cache/species-eval/images/578310480.jpg"
+      "file": "/home/ats030/cache/species-eval/images/578310480.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Notsuke, Betsukai, Notsuke District, Hokkaido 086-1645, Japan",
+      "longitude": 145.3062,
+      "latitude": 43.6025,
+      "observed_on": "2025-02-26",
+      "observed_time": "2025-02-26T06:22:00+09:00",
+      "elevation": 2.3,
+      "surroundings": [
+        "海岸"
+      ]
     },
     {
       "group": "鳥",
@@ -674,7 +1058,18 @@
         "common_name_ja": "ツグミ",
         "ancestry": "48460/1/2/355675/3/7251/15977/12705"
       },
-      "file": "/home/ats030/cache/species-eval/images/359893507.jpg"
+      "file": "/home/ats030/cache/species-eval/images/359893507.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Saitama, JP",
+      "longitude": 139.5153,
+      "latitude": 35.9339,
+      "observed_on": "2024-03-24",
+      "observed_time": "2024-03-24T08:45:00+09:00",
+      "elevation": 8.9,
+      "surroundings": [
+        "農地",
+        "森林"
+      ]
     },
     {
       "group": "鳥",
@@ -690,7 +1085,19 @@
         "common_name_ja": "キジ",
         "ancestry": "48460/1/2/355675/3/573/574/980"
       },
-      "file": "/home/ats030/cache/species-eval/images/422858525.jpg"
+      "file": "/home/ats030/cache/species-eval/images/422858525.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Japan",
+      "longitude": 139.4323,
+      "latitude": 35.8858,
+      "observed_on": "2024-08-24",
+      "observed_time": "2024-08-24T07:13:00+09:00",
+      "elevation": 33.7,
+      "surroundings": [
+        "農地",
+        "森林",
+        "草地"
+      ]
     },
     {
       "group": "鳥",
@@ -706,7 +1113,19 @@
         "common_name_ja": "カイツブリ",
         "ancestry": "48460/1/2/355675/3/67563/4203/4236"
       },
-      "file": "/home/ats030/cache/species-eval/images/647681640.jpg"
+      "file": "/home/ats030/cache/species-eval/images/647681640.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Machida, JP-TK, JP",
+      "longitude": 139.4484,
+      "latitude": 35.5787,
+      "observed_on": "2026-04-26",
+      "observed_time": "2026-04-26T13:34:00+09:00",
+      "elevation": 67.0,
+      "surroundings": [
+        "森林",
+        "水辺",
+        "公園"
+      ]
     },
     {
       "group": "鳥",
@@ -722,7 +1141,19 @@
         "common_name_ja": "キジバト",
         "ancestry": "48460/1/2/355675/3/2708/2715/2926"
       },
-      "file": "/home/ats030/cache/species-eval/images/250557494.jpg"
+      "file": "/home/ats030/cache/species-eval/images/250557494.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Takashimadaira, Itabashi City, Tokyo 175-0082, Japan",
+      "longitude": 139.6713,
+      "latitude": 35.7901,
+      "observed_on": "2023-01-03",
+      "observed_time": "2023-01-03T14:18:00+09:00",
+      "elevation": 3.1,
+      "surroundings": [
+        "公園",
+        "水辺",
+        "住宅地"
+      ]
     },
     {
       "group": "鳥",
@@ -738,7 +1169,18 @@
         "common_name_ja": "エナガ",
         "ancestry": "48460/1/2/355675/3/7251/7264/7275"
       },
-      "file": "/home/ats030/cache/species-eval/images/348620245.jpg"
+      "file": "/home/ats030/cache/species-eval/images/348620245.jpg",
+      "geoprivacy": "open",
+      "place_guess": "荻町, 大野郡白川村, 岐阜縣, JP",
+      "longitude": 136.9086,
+      "latitude": 36.2626,
+      "observed_on": "2024-01-29",
+      "observed_time": "2024-01-29T11:38:30+09:00",
+      "elevation": 533.9,
+      "surroundings": [
+        "農地",
+        "水辺"
+      ]
     },
     {
       "group": "鳥",
@@ -754,7 +1196,19 @@
         "common_name_ja": "オナガガモ",
         "ancestry": "48460/1/2/355675/3/6888/6912/6922"
       },
-      "file": "/home/ats030/cache/species-eval/images/250677147.jpg"
+      "file": "/home/ats030/cache/species-eval/images/250677147.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Ukima, Kita City, Tokyo 115-0051, Japan",
+      "longitude": 139.6938,
+      "latitude": 35.7938,
+      "observed_on": "2023-01-03",
+      "observed_time": "2023-01-03T15:40:00+09:00",
+      "elevation": 3.0,
+      "surroundings": [
+        "水辺",
+        "公園",
+        "草地"
+      ]
     },
     {
       "group": "鳥",
@@ -770,7 +1224,17 @@
         "common_name_ja": "ウミウ",
         "ancestry": "48460/1/2/355675/3/71268/4262/4263"
       },
-      "file": "/home/ats030/cache/species-eval/images/53444808.jpg"
+      "file": "/home/ats030/cache/species-eval/images/53444808.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Etomocho, Muroran, Hokkaido 051-0035, Japan",
+      "longitude": 140.9301,
+      "latitude": 42.3374,
+      "observed_on": "2018-05-04",
+      "observed_time": "2018-05-04T15:17:00+08:00",
+      "elevation": null,
+      "surroundings": [
+        "海岸"
+      ]
     },
     {
       "group": "鳥",
@@ -786,7 +1250,17 @@
         "common_name_ja": "ヒヨドリ",
         "ancestry": "48460/1/2/355675/3/7251/14556/14636"
       },
-      "file": "/home/ats030/cache/species-eval/images/354291700.jpg"
+      "file": "/home/ats030/cache/species-eval/images/354291700.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Saitama, JP",
+      "longitude": 139.4897,
+      "latitude": 35.9882,
+      "observed_on": "2024-02-29",
+      "observed_time": "2024-02-29T08:55:00+09:00",
+      "elevation": 11.9,
+      "surroundings": [
+        "農地"
+      ]
     },
     {
       "group": "鳥",
@@ -802,7 +1276,18 @@
         "common_name_ja": "ムクドリ",
         "ancestry": "48460/1/2/355675/3/7251/14841/547177"
       },
-      "file": "/home/ats030/cache/species-eval/images/388483723.jpg"
+      "file": "/home/ats030/cache/species-eval/images/388483723.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Saitama, JP",
+      "longitude": 139.5512,
+      "latitude": 35.9554,
+      "observed_on": "2024-05-31",
+      "observed_time": "2024-05-31T13:48:00+09:00",
+      "elevation": 15.9,
+      "surroundings": [
+        "森林",
+        "公園"
+      ]
     },
     {
       "group": "鳥",
@@ -818,7 +1303,17 @@
         "common_name_ja": "ワシカモメ",
         "ancestry": "48460/1/2/355675/3/67561/4342/447155/4343"
       },
-      "file": "/home/ats030/cache/species-eval/images/525916134.jpg"
+      "file": "/home/ats030/cache/species-eval/images/525916134.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Funamicho, Rausu, Menashi District, Hokkaido 086-1832, Japan",
+      "longitude": 145.1996,
+      "latitude": 44.0162,
+      "observed_on": "2025-02-26",
+      "observed_time": "2025-02-26T14:21:00+09:00",
+      "elevation": 0.0,
+      "surroundings": [
+        "水辺"
+      ]
     },
     {
       "group": "鳥",
@@ -834,7 +1329,17 @@
         "common_name_ja": "ユリカモメ",
         "ancestry": "48460/1/2/355675/3/67561/4342/447155/144320"
       },
-      "file": "/home/ats030/cache/species-eval/images/262966893.jpg"
+      "file": "/home/ats030/cache/species-eval/images/262966893.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Japan",
+      "longitude": 134.7376,
+      "latitude": 34.3207,
+      "observed_on": "2023-01-02",
+      "observed_time": "2023-01-02T15:59:00+09:00",
+      "elevation": 0.5,
+      "surroundings": [
+        "水辺"
+      ]
     },
     {
       "group": "鳥",
@@ -850,7 +1355,19 @@
         "common_name_ja": "シジュウカラ",
         "ancestry": "48460/1/2/355675/3/7251/13547/13548"
       },
-      "file": "/home/ats030/cache/species-eval/images/354291301.jpg"
+      "file": "/home/ats030/cache/species-eval/images/354291301.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Saitama, JP",
+      "longitude": 139.5839,
+      "latitude": 35.9523,
+      "observed_on": "2024-02-29",
+      "observed_time": "2024-02-29T08:36:00+09:00",
+      "elevation": 14.0,
+      "surroundings": [
+        "庭園",
+        "農地",
+        "低木林"
+      ]
     },
     {
       "group": "鳥",
@@ -866,7 +1383,19 @@
         "common_name_ja": "カワセミ",
         "ancestry": "48460/1/2/355675/3/2114/2314/1542373/2561"
       },
-      "file": "/home/ats030/cache/species-eval/images/344216131.jpg"
+      "file": "/home/ats030/cache/species-eval/images/344216131.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Saitama, JP",
+      "longitude": 139.451,
+      "latitude": 35.8621,
+      "observed_on": "2024-01-03",
+      "observed_time": "2024-01-03T10:07:00+09:00",
+      "elevation": 44.7,
+      "surroundings": [
+        "農地",
+        "工業地",
+        "森林"
+      ]
     },
     {
       "group": "鳥",
@@ -882,7 +1411,17 @@
         "common_name_ja": "コハクチョウ",
         "ancestry": "48460/1/2/355675/3/6888/6912/6913"
       },
-      "file": "/home/ats030/cache/species-eval/images/13167177.jpg"
+      "file": "/home/ats030/cache/species-eval/images/13167177.jpg",
+      "geoprivacy": "open",
+      "place_guess": "日本、〒526-0126 滋賀県長浜市安養寺町",
+      "longitude": 136.1997,
+      "latitude": 35.4226,
+      "observed_on": "2018-01-28",
+      "observed_time": "2018-01-28T06:39:00+09:00",
+      "elevation": 86.0,
+      "surroundings": [
+        "農地"
+      ]
     },
     {
       "group": "鳥",
@@ -898,7 +1437,19 @@
         "common_name_ja": "バン",
         "ancestry": "48460/1/2/355675/3/4/154/979864"
       },
-      "file": "/home/ats030/cache/species-eval/images/381358867.jpg"
+      "file": "/home/ats030/cache/species-eval/images/381358867.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Japan",
+      "longitude": 139.5467,
+      "latitude": 35.8104,
+      "observed_on": "2023-01-21",
+      "observed_time": "2023-01-21T16:50:00+09:00",
+      "elevation": 14.9,
+      "surroundings": [
+        "工業地",
+        "砂浜",
+        "農地"
+      ]
     },
     {
       "group": "鳥",
@@ -914,7 +1465,19 @@
         "common_name_ja": "コチドリ",
         "ancestry": "48460/1/2/355675/3/67561/4783/4911"
       },
-      "file": "/home/ats030/cache/species-eval/images/383922715.jpg"
+      "file": "/home/ats030/cache/species-eval/images/383922715.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Japan",
+      "longitude": 139.5887,
+      "latitude": 35.9854,
+      "observed_on": "2023-09-17",
+      "observed_time": "2023-09-17T07:42:00+09:00",
+      "elevation": 17.5,
+      "surroundings": [
+        "庭園",
+        "果樹園",
+        "農地"
+      ]
     },
     {
       "group": "鳥",
@@ -930,7 +1493,19 @@
         "common_name_ja": "ヒガラ",
         "ancestry": "48460/1/2/355675/3/7251/13547/144352"
       },
-      "file": "/home/ats030/cache/species-eval/images/577627179.jpg"
+      "file": "/home/ats030/cache/species-eval/images/577627179.jpg",
+      "geoprivacy": "open",
+      "place_guess": "42-13 Takaokacho, Hakodate, Hokkaido 042-0956日本",
+      "longitude": 140.8059,
+      "latitude": 41.7942,
+      "observed_on": "2025-10-06",
+      "observed_time": "2025-10-06T09:49:53+09:00",
+      "elevation": 43.9,
+      "surroundings": [
+        "公園",
+        "水辺",
+        "森林"
+      ]
     },
     {
       "group": "鳥",
@@ -946,7 +1521,19 @@
         "common_name_ja": "ビンズイ",
         "ancestry": "48460/1/2/355675/3/7251/71339/13706"
       },
-      "file": "/home/ats030/cache/species-eval/images/607337507.jpg"
+      "file": "/home/ats030/cache/species-eval/images/607337507.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Saitama, JP",
+      "longitude": 139.4475,
+      "latitude": 35.8279,
+      "observed_on": "2026-01-12",
+      "observed_time": "2026-01-12T09:51:00+09:00",
+      "elevation": 69.9,
+      "surroundings": [
+        "農地",
+        "公園",
+        "森林"
+      ]
     },
     {
       "group": "鳥",
@@ -962,7 +1549,18 @@
         "common_name_ja": "ホシハジロ",
         "ancestry": "48460/1/2/355675/3/6888/6912/7043"
       },
-      "file": "/home/ats030/cache/species-eval/images/259921447.jpg"
+      "file": "/home/ats030/cache/species-eval/images/259921447.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Osaka, JP",
+      "longitude": 135.5949,
+      "latitude": 34.7929,
+      "observed_on": "2023-01-04",
+      "observed_time": "2023-01-04T10:06:53+09:00",
+      "elevation": 3.7,
+      "surroundings": [
+        "農地",
+        "公園"
+      ]
     },
     {
       "group": "菌類",
@@ -978,7 +1576,19 @@
         "common_name_ja": "シロソウメンタケ",
         "ancestry": "48460/47170/47169/492000/50814/1094814/47167/1128526/49461/53886"
       },
-      "file": "/home/ats030/cache/species-eval/images/125430392.jpg"
+      "file": "/home/ats030/cache/species-eval/images/125430392.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、高知県安芸郡北川村野友 北川村「モネの庭」マルモッタン",
+      "longitude": 134.0358,
+      "latitude": 33.4406,
+      "observed_on": "2015-06-28",
+      "observed_time": "2015-06-28T12:20:00+09:00",
+      "elevation": 96.8,
+      "surroundings": [
+        "水辺",
+        "森林",
+        "庭園"
+      ]
     },
     {
       "group": "菌類",
@@ -994,7 +1604,19 @@
         "common_name_ja": "",
         "ancestry": "48460/47170/47169/416490/69967/69968/1151342/84768/84769"
       },
-      "file": "/home/ats030/cache/species-eval/images/114045922.jpg"
+      "file": "/home/ats030/cache/species-eval/images/114045922.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒781-5233 高知県香南市野市町大谷　Pucciniales",
+      "longitude": 133.7059,
+      "latitude": 33.5683,
+      "observed_on": "2015-05-05",
+      "observed_time": "2015-05-05T11:43:00+00:00",
+      "elevation": 88.1,
+      "surroundings": [
+        "水辺",
+        "墓地",
+        "森林"
+      ]
     },
     {
       "group": "菌類",
@@ -1010,7 +1632,18 @@
         "common_name_ja": "ツノマタタケ",
         "ancestry": "48460/47170/47169/492000/53277/53278/53279/53280"
       },
-      "file": "/home/ats030/cache/species-eval/images/125414822.jpg"
+      "file": "/home/ats030/cache/species-eval/images/125414822.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒783-0093 高知県南国市物部  高知大学物部キャンパス",
+      "longitude": 133.6759,
+      "latitude": 33.5525,
+      "observed_on": "2015-06-26",
+      "observed_time": "2015-06-26T13:47:00+09:00",
+      "elevation": 7.5,
+      "surroundings": [
+        "水辺",
+        "農地"
+      ]
     },
     {
       "group": "菌類",
@@ -1026,7 +1659,17 @@
         "common_name_ja": "トキイロヒラタケ",
         "ancestry": "48460/47170/47169/492000/50814/1094814/47167/905657/48495/48496/1352662"
       },
-      "file": "/home/ats030/cache/species-eval/images/452572674.jpg"
+      "file": "/home/ats030/cache/species-eval/images/452572674.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒894-0324 鹿児島県大島郡龍郷町円",
+      "longitude": 129.5945,
+      "latitude": 28.454,
+      "observed_on": "2024-06-07",
+      "observed_time": "2024-06-07T16:00:00+09:00",
+      "elevation": 278.0,
+      "surroundings": [
+        "公園"
+      ]
     },
     {
       "group": "菌類",
@@ -1042,7 +1685,19 @@
         "common_name_ja": "ムラサキチャツムタケ",
         "ancestry": "48460/47170/47169/492000/50814/1094814/47167/785517/416512/83198/1601571"
       },
-      "file": "/home/ats030/cache/species-eval/images/567715739.jpg"
+      "file": "/home/ats030/cache/species-eval/images/567715739.jpg",
+      "geoprivacy": "",
+      "place_guess": "Shimorenjaku 1-Chōme, Mitaka, Tokyo, JP",
+      "longitude": 139.5709,
+      "latitude": 35.6972,
+      "observed_on": "2025-09-16",
+      "observed_time": "2025-09-16T14:18:54+09:00",
+      "elevation": 56.4,
+      "surroundings": [
+        "森林",
+        "住宅地",
+        "公園"
+      ]
     },
     {
       "group": "菌類",
@@ -1058,7 +1713,19 @@
         "common_name_ja": "オニフスベ",
         "ancestry": "48460/47170/47169/492000/50814/1094814/47167/785517/48445/57693/1649462"
       },
-      "file": "/home/ats030/cache/species-eval/images/126915569.jpg"
+      "file": "/home/ats030/cache/species-eval/images/126915569.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒783-0093 高知県南国市物部  高知大学物部キャンパス",
+      "longitude": 133.6752,
+      "latitude": 33.5518,
+      "observed_on": "2015-07-10",
+      "observed_time": "2015-07-10T12:25:00+09:00",
+      "elevation": 7.4,
+      "surroundings": [
+        "草地",
+        "水辺",
+        "農地"
+      ]
     },
     {
       "group": "菌類",
@@ -1074,7 +1741,19 @@
         "common_name_ja": "",
         "ancestry": "48460/47170/48250/372740/55523/49073/55525/1394527/328021/1532360"
       },
-      "file": "/home/ats030/cache/species-eval/images/249315269.jpg"
+      "file": "/home/ats030/cache/species-eval/images/249315269.jpg",
+      "geoprivacy": "",
+      "place_guess": "The University of Tokyo Komaba Campus, Meguro, Tokyo, JP",
+      "longitude": 139.6854,
+      "latitude": 35.6598,
+      "observed_on": "2022-12-26",
+      "observed_time": "2022-12-26T14:17:05+09:00",
+      "elevation": 36.0,
+      "surroundings": [
+        "森林",
+        "庭園",
+        "公園"
+      ]
     },
     {
       "group": "菌類",
@@ -1090,7 +1769,19 @@
         "common_name_ja": "ハカワラタケ",
         "ancestry": "48460/47170/47169/492000/50814/57519/57518/118119"
       },
-      "file": "/home/ats030/cache/species-eval/images/605606687.jpg"
+      "file": "/home/ats030/cache/species-eval/images/605606687.jpg",
+      "geoprivacy": "",
+      "place_guess": "Saito Bridge, 八瀬駅前 Yasenosechō, Sakyo Ward, Kyoto, 601-1254, Japão",
+      "longitude": 135.8085,
+      "latitude": 35.0672,
+      "observed_on": "2026-01-04",
+      "observed_time": "2026-01-04T19:57:35+09:00",
+      "elevation": 118.6,
+      "surroundings": [
+        "森林",
+        "水辺",
+        "墓地"
+      ]
     },
     {
       "group": "菌類",
@@ -1106,7 +1797,17 @@
         "common_name_ja": "カワラタケ",
         "ancestry": "48460/47170/47169/492000/50814/47380/47379/47378/1153556"
       },
-      "file": "/home/ats030/cache/species-eval/images/351404711.jpg"
+      "file": "/home/ats030/cache/species-eval/images/351404711.jpg",
+      "geoprivacy": "",
+      "place_guess": "Kuramahommachi, Sakyo, Kyoto, Kyoto, JP",
+      "longitude": 135.767,
+      "latitude": 35.1192,
+      "observed_on": "2024-02-14",
+      "observed_time": "2024-02-14T13:42:35+09:00",
+      "elevation": 452.8,
+      "surroundings": [
+        "水辺"
+      ]
     },
     {
       "group": "菌類",
@@ -1122,7 +1823,19 @@
         "common_name_ja": "ホウロクタケ",
         "ancestry": "48460/47170/47169/492000/50814/47380/55974/118056/1537095"
       },
-      "file": "/home/ats030/cache/species-eval/images/429907140.jpg"
+      "file": "/home/ats030/cache/species-eval/images/429907140.jpg",
+      "geoprivacy": "",
+      "place_guess": "2-3 Fukakusa Sasayamachō, Fushimi Ward, Kyoto, 612-0811, Japan",
+      "longitude": 135.7773,
+      "latitude": 34.9681,
+      "observed_on": "2024-07-28",
+      "observed_time": "2024-07-28T12:56:28+09:00",
+      "elevation": 58.5,
+      "surroundings": [
+        "森林",
+        "水辺",
+        "農地"
+      ]
     },
     {
       "group": "菌類",
@@ -1138,7 +1851,18 @@
         "common_name_ja": "ヒイロタケ",
         "ancestry": "48460/47170/47169/492000/50814/47380/47379/47378/1660064"
       },
-      "file": "/home/ats030/cache/species-eval/images/116686296.jpg"
+      "file": "/home/ats030/cache/species-eval/images/116686296.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒781-8126 高知県高知市吸江 五台山",
+      "longitude": 133.5741,
+      "latitude": 33.5466,
+      "observed_on": "2014-07-20",
+      "observed_time": "2014-07-20T15:50:00+09:00",
+      "elevation": 134.9,
+      "surroundings": [
+        "庭園",
+        "公園"
+      ]
     },
     {
       "group": "菌類",
@@ -1154,7 +1878,19 @@
         "common_name_ja": "イボテングタケ",
         "ancestry": "48460/47170/47169/492000/50814/1094814/47167/785522/118249/1149497/48419/1142599/954920/1155969"
       },
-      "file": "/home/ats030/cache/species-eval/images/681330441.jpg"
+      "file": "/home/ats030/cache/species-eval/images/681330441.jpg",
+      "geoprivacy": "",
+      "place_guess": "Inokashira 4-Chōme, Mitaka, Tokyo, JP",
+      "longitude": 139.5781,
+      "latitude": 35.7001,
+      "observed_on": "2026-06-18",
+      "observed_time": "2026-06-18T13:16:53+09:00",
+      "elevation": 47.0,
+      "surroundings": [
+        "森林",
+        "公園",
+        "水辺"
+      ]
     },
     {
       "group": "菌類",
@@ -1170,7 +1906,15 @@
         "common_name_ja": "ケガワタケ",
         "ancestry": "48460/47170/47169/492000/50814/47380/47379/68311/1203424"
       },
-      "file": "/home/ats030/cache/species-eval/images/700518490.jpg"
+      "file": "/home/ats030/cache/species-eval/images/700518490.jpg",
+      "geoprivacy": "",
+      "place_guess": "Kichijoji Minamicho 2-Chōme, Musashino, Tokyo, JP",
+      "longitude": 139.587,
+      "latitude": 35.703,
+      "observed_on": "2026-07-18",
+      "observed_time": "2026-07-18T13:31:13+09:00",
+      "elevation": 53.3,
+      "surroundings": []
     },
     {
       "group": "菌類",
@@ -1186,7 +1930,19 @@
         "common_name_ja": "ヤナギマツタケ",
         "ancestry": "48460/47170/47169/492000/50814/1094814/47167/785517/416523/578451"
       },
-      "file": "/home/ats030/cache/species-eval/images/684653551.jpg"
+      "file": "/home/ats030/cache/species-eval/images/684653551.jpg",
+      "geoprivacy": "",
+      "place_guess": "Zempukuji 3-Chōme, Suginami, Tokyo, JP",
+      "longitude": 139.5908,
+      "latitude": 35.7153,
+      "observed_on": "2026-06-22",
+      "observed_time": "2026-06-22T14:09:41+09:00",
+      "elevation": 45.0,
+      "surroundings": [
+        "水辺",
+        "森林",
+        "農地"
+      ]
     },
     {
       "group": "菌類",
@@ -1202,7 +1958,19 @@
         "common_name_ja": "アラゲカワキタケ",
         "ancestry": "48460/47170/47169/492000/50814/47380/974750/59250"
       },
-      "file": "/home/ats030/cache/species-eval/images/684656763.jpg"
+      "file": "/home/ats030/cache/species-eval/images/684656763.jpg",
+      "geoprivacy": "",
+      "place_guess": "Suginami, Tokyo, JP",
+      "longitude": 139.5915,
+      "latitude": 35.714,
+      "observed_on": "2026-06-22",
+      "observed_time": "2026-06-22T13:57:11+09:00",
+      "elevation": 44.8,
+      "surroundings": [
+        "水辺",
+        "農地",
+        "公園"
+      ]
     },
     {
       "group": "菌類",
@@ -1218,7 +1986,19 @@
         "common_name_ja": "オオシロカラカサタケ",
         "ancestry": "48460/47170/47169/492000/50814/1094814/47167/785517/47394/1641209/56536/1413390"
       },
-      "file": "/home/ats030/cache/species-eval/images/538886889.jpg"
+      "file": "/home/ats030/cache/species-eval/images/538886889.jpg",
+      "geoprivacy": "",
+      "place_guess": "Kichijojihigashicho 4-Chōme, Musashino, Tokyo, JP",
+      "longitude": 139.5942,
+      "latitude": 35.7041,
+      "observed_on": "2025-07-19",
+      "observed_time": "2025-07-19T16:08:43+09:00",
+      "elevation": 48.7,
+      "surroundings": [
+        "公園",
+        "草地",
+        "住宅地"
+      ]
     },
     {
       "group": "菌類",
@@ -1234,7 +2014,15 @@
         "common_name_ja": "ツガサルノコシカケ",
         "ancestry": "48460/47170/47169/492000/50814/47380/55974/118056/1098279"
       },
-      "file": "/home/ats030/cache/species-eval/images/525060330.jpg"
+      "file": "/home/ats030/cache/species-eval/images/525060330.jpg",
+      "geoprivacy": "",
+      "place_guess": "Yoroushi Onsen, Yoroushi, Nakashibetsu, Shibetsu District, Hokkaido 088-2684, Japan",
+      "longitude": 144.7231,
+      "latitude": 43.5871,
+      "observed_on": "2025-03-01",
+      "observed_time": "2025-03-01T08:15:00+09:00",
+      "elevation": 202.6,
+      "surroundings": []
     },
     {
       "group": "菌類",
@@ -1250,7 +2038,15 @@
         "common_name_ja": "ヘリトリゴケ",
         "ancestry": "48460/47170/48250/372740/54743/952186/125752/154106/125754"
       },
-      "file": "/home/ats030/cache/species-eval/images/674994892.jpg"
+      "file": "/home/ats030/cache/species-eval/images/674994892.jpg",
+      "geoprivacy": "",
+      "place_guess": "Ikumi, Kamikatsu, Katsuura District, Tokushima 771-4503, Japan",
+      "longitude": 134.3763,
+      "latitude": 33.8958,
+      "observed_on": "2026-05-06",
+      "observed_time": "2026-05-06T15:08:00+09:00",
+      "elevation": 838.6,
+      "surroundings": []
     },
     {
       "group": "菌類",
@@ -1266,7 +2062,19 @@
         "common_name_ja": "チチアワタケ",
         "ancestry": "48460/47170/47169/492000/50814/1094814/48427/1432580/53489/53490/1634721/1634723"
       },
-      "file": "/home/ats030/cache/species-eval/images/588379186.jpg"
+      "file": "/home/ats030/cache/species-eval/images/588379186.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Kokyo Gaien National Garden, 1-1 Kōkyogaien, Chiyoda City, Tokyo 100-0002, Japan",
+      "longitude": 139.7583,
+      "latitude": 35.6835,
+      "observed_on": "2025-11-04",
+      "observed_time": "2025-11-04T15:27:53+09:00",
+      "elevation": 3.8,
+      "surroundings": [
+        "草地",
+        "森林",
+        "果樹園"
+      ]
     },
     {
       "group": "菌類",
@@ -1282,7 +2090,19 @@
         "common_name_ja": "コフキサルノコシカケ",
         "ancestry": "48460/47170/47169/492000/50814/47380/47379/48475/559675"
       },
-      "file": "/home/ats030/cache/species-eval/images/250049210.jpg"
+      "file": "/home/ats030/cache/species-eval/images/250049210.jpg",
+      "geoprivacy": "",
+      "place_guess": "Naritahigashi, Suginami City, Tokyo 166-0015, Japan",
+      "longitude": 139.6329,
+      "latitude": 35.6899,
+      "observed_on": "2022-12-31",
+      "observed_time": "2022-12-31T13:30:00+09:00",
+      "elevation": 37.3,
+      "surroundings": [
+        "森林",
+        "公園",
+        "住宅地"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1298,7 +2118,17 @@
         "common_name_ja": "ニホンヤモリ",
         "ancestry": "48460/1/2/355675/26036/26172/85552/371057/33177/34591/1676757"
       },
-      "file": "/home/ats030/cache/species-eval/images/120600104.jpg"
+      "file": "/home/ats030/cache/species-eval/images/120600104.jpg",
+      "geoprivacy": "open",
+      "place_guess": "日本、〒780-8072 高知県高知市曙町 高知大学朝倉キャンパス",
+      "longitude": 133.4886,
+      "latitude": 33.5485,
+      "observed_on": "2015-04-22",
+      "observed_time": "2015-04-22T14:08:00+09:00",
+      "elevation": 9.6,
+      "surroundings": [
+        "農地"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1314,7 +2144,19 @@
         "common_name_ja": "シマヘビ",
         "ancestry": "48460/1/2/355675/26036/26172/85553/26504/797520/30207"
       },
-      "file": "/home/ats030/cache/species-eval/images/79930442.jpg"
+      "file": "/home/ats030/cache/species-eval/images/79930442.jpg",
+      "geoprivacy": "open",
+      "place_guess": "kayabuki no sato",
+      "longitude": 135.6217,
+      "latitude": 35.3121,
+      "observed_on": "2010-04-29",
+      "observed_time": "2010-04-29T05:44:00-05:00",
+      "elevation": 248.6,
+      "surroundings": [
+        "農地",
+        "庭園",
+        "草地"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1330,7 +2172,15 @@
         "common_name_ja": "リュウキュウアオヘビ",
         "ancestry": "48460/1/2/355675/26036/26172/85553/26504/797520/28865"
       },
-      "file": "/home/ats030/cache/species-eval/images/28584765.jpg"
+      "file": "/home/ats030/cache/species-eval/images/28584765.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Ada, Kunigami, Kunigami District, Okinawa Prefecture 905-1503, Japan",
+      "longitude": 128.2857,
+      "latitude": 26.785,
+      "observed_on": "2018-11-25",
+      "observed_time": "2018-11-25T23:58:00+10:00",
+      "elevation": 260.6,
+      "surroundings": []
     },
     {
       "group": "は虫類・両生類",
@@ -1346,7 +2196,19 @@
         "common_name_ja": "スウィンホーキノボリトカゲ",
         "ancestry": "48460/1/2/355675/26036/26172/85552/1563907/1567778/31096/797575/797582"
       },
-      "file": "/home/ats030/cache/species-eval/images/685160022.jpg"
+      "file": "/home/ats030/cache/species-eval/images/685160022.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Kanagawa, JP",
+      "longitude": 139.3317,
+      "latitude": 35.5315,
+      "observed_on": "2026-06-24",
+      "observed_time": "2026-06-24T13:35:48+09:00",
+      "elevation": 118.0,
+      "surroundings": [
+        "工業地",
+        "商業地",
+        "森林"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1362,7 +2224,17 @@
         "common_name_ja": "ニホンカナヘビ",
         "ancestry": "48460/1/2/355675/26036/26172/85552/1567777/35360/1118992/35480"
       },
-      "file": "/home/ats030/cache/species-eval/images/115743320.jpg"
+      "file": "/home/ats030/cache/species-eval/images/115743320.jpg",
+      "geoprivacy": "open",
+      "place_guess": "日本、〒780-8072 高知県高知市曙町",
+      "longitude": 133.4869,
+      "latitude": 33.5489,
+      "observed_on": "2013-05-08",
+      "observed_time": "2013-05-08T16:13:00+09:00",
+      "elevation": 9.5,
+      "surroundings": [
+        "農地"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1378,7 +2250,18 @@
         "common_name_ja": "ヤマカガシ",
         "ancestry": "48460/1/2/355675/26036/26172/85553/26504/532896/28826"
       },
-      "file": "/home/ats030/cache/species-eval/images/217767675.jpg"
+      "file": "/home/ats030/cache/species-eval/images/217767675.jpg",
+      "geoprivacy": "open",
+      "place_guess": "県道40号, 米原市, 滋賀県, JP",
+      "longitude": 136.3692,
+      "latitude": 35.434,
+      "observed_on": "2021-08-15",
+      "observed_time": "2021-08-15T18:14:07+09:00",
+      "elevation": 234.0,
+      "surroundings": [
+        "森林",
+        "公園"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1394,7 +2277,17 @@
         "common_name_ja": "ジムグリ",
         "ancestry": "48460/1/2/355675/26036/26172/85553/26504/797520/88306"
       },
-      "file": "/home/ats030/cache/species-eval/images/217768509.jpg"
+      "file": "/home/ats030/cache/species-eval/images/217768509.jpg",
+      "geoprivacy": "open",
+      "place_guess": "県道40号, 米原市, 滋賀県, JP",
+      "longitude": 136.3697,
+      "latitude": 35.4284,
+      "observed_on": "2020-05-13",
+      "observed_time": "2020-05-13T08:43:02+09:00",
+      "elevation": 226.6,
+      "surroundings": [
+        "森林"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1410,7 +2303,18 @@
         "common_name_ja": "ニホンマムシ",
         "ancestry": "48460/1/2/355675/26036/26172/85553/30667/797576/31055"
       },
-      "file": "/home/ats030/cache/species-eval/images/217767614.jpg"
+      "file": "/home/ats030/cache/species-eval/images/217767614.jpg",
+      "geoprivacy": "open",
+      "place_guess": "下板並, 米原市, 滋賀県, JP",
+      "longitude": 136.3699,
+      "latitude": 35.4318,
+      "observed_on": "2021-07-03",
+      "observed_time": "2021-07-03T08:23:47+09:00",
+      "elevation": 230.9,
+      "surroundings": [
+        "森林",
+        "公園"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1426,7 +2330,17 @@
         "common_name_ja": "アオダイショウ",
         "ancestry": "48460/1/2/355675/26036/26172/85553/26504/797520/30207"
       },
-      "file": "/home/ats030/cache/species-eval/images/192738774.jpg"
+      "file": "/home/ats030/cache/species-eval/images/192738774.jpg",
+      "geoprivacy": "open",
+      "place_guess": "日本、〒386-0015 長野県上田市常入",
+      "longitude": 138.2508,
+      "latitude": 36.3934,
+      "observed_on": "2022-04-25",
+      "observed_time": "2022-04-25T18:00:00+09:00",
+      "elevation": 449.7,
+      "surroundings": [
+        "草地"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1442,7 +2356,17 @@
         "common_name_ja": "ツチガエル",
         "ancestry": "48460/1/2/355675/20978/20979/25473/64777"
       },
-      "file": "/home/ats030/cache/species-eval/images/528497059.jpg"
+      "file": "/home/ats030/cache/species-eval/images/528497059.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Yamagata, JP",
+      "longitude": 140.3966,
+      "latitude": 38.3682,
+      "observed_on": "2025-06-25",
+      "observed_time": "2025-06-25T20:43:00+09:00",
+      "elevation": 125.3,
+      "surroundings": [
+        "森林"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1458,7 +2382,15 @@
         "common_name_ja": "ニホントカゲ",
         "ancestry": "48460/1/2/355675/26036/26172/85552/1563904/36982/787700/37763"
       },
-      "file": "/home/ats030/cache/species-eval/images/530188111.jpg"
+      "file": "/home/ats030/cache/species-eval/images/530188111.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Zoshicho, Nara, 630-8211, Japan",
+      "longitude": 135.855,
+      "latitude": 34.6844,
+      "observed_on": "2025-07-02",
+      "observed_time": "2025-07-02T19:03:00+09:00",
+      "elevation": 210.9,
+      "surroundings": []
     },
     {
       "group": "は虫類・両生類",
@@ -1474,7 +2406,19 @@
         "common_name_ja": "アカミミガメ",
         "ancestry": "48460/1/2/355675/26036/39532/39760/797544/39776"
       },
-      "file": "/home/ats030/cache/species-eval/images/474236654.jpg"
+      "file": "/home/ats030/cache/species-eval/images/474236654.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Wake Bridge, 1 Chausuyamachō, Tennoji Ward, Osaka, 543-0063, Japan",
+      "longitude": 135.5116,
+      "latitude": 34.6511,
+      "observed_on": "2025-01-27",
+      "observed_time": "2025-01-27T08:50:51+09:00",
+      "elevation": 13.0,
+      "surroundings": [
+        "森林",
+        "草地",
+        "庭園"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1490,7 +2434,15 @@
         "common_name_ja": "シロアゴガエル",
         "ancestry": "48460/1/2/355675/20978/20979/26279/787586/26549"
       },
-      "file": "/home/ats030/cache/species-eval/images/712324189.jpg"
+      "file": "/home/ats030/cache/species-eval/images/712324189.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Okinawa, JP",
+      "longitude": 127.94,
+      "latitude": 26.7501,
+      "observed_on": "2026-07-26",
+      "observed_time": "2026-07-26T02:40:08+09:00",
+      "elevation": null,
+      "surroundings": []
     },
     {
       "group": "は虫類・両生類",
@@ -1506,7 +2458,17 @@
         "common_name_ja": "クロイワトカゲモドキ",
         "ancestry": "48460/1/2/355675/26036/26172/85552/371057/85768/34549"
       },
-      "file": "/home/ats030/cache/species-eval/images/712050382.jpg"
+      "file": "/home/ats030/cache/species-eval/images/712050382.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Okinawa, JP",
+      "longitude": 127.9866,
+      "latitude": 26.6706,
+      "observed_on": "2026-07-26",
+      "observed_time": "2026-07-26T00:02:20+09:00",
+      "elevation": 70.5,
+      "surroundings": [
+        "森林"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1522,7 +2484,17 @@
         "common_name_ja": "アカハライモリ",
         "ancestry": "48460/1/2/355675/20978/26718/27701/787591/27779"
       },
-      "file": "/home/ats030/cache/species-eval/images/265887210.jpg"
+      "file": "/home/ats030/cache/species-eval/images/265887210.jpg",
+      "geoprivacy": "obscured",
+      "place_guess": "Japan",
+      "longitude": 137.5403,
+      "latitude": 35.5076,
+      "observed_on": "2023-04-04",
+      "observed_time": "2023-04-04T20:23:00+09:00",
+      "elevation": 335.1,
+      "surroundings": [
+        "森林"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1538,7 +2510,15 @@
         "common_name_ja": "ニホンヒキガエル",
         "ancestry": "48460/1/2/355675/20978/20979/21359/21360"
       },
-      "file": "/home/ats030/cache/species-eval/images/115161129.jpg"
+      "file": "/home/ats030/cache/species-eval/images/115161129.jpg",
+      "geoprivacy": "",
+      "place_guess": "日本、〒781-6833 高知県吉良川町丙 室戸青少年自然の家敷地内",
+      "longitude": 134.1197,
+      "latitude": 33.3197,
+      "observed_on": "2015-05-22",
+      "observed_time": "2015-05-22T21:09:00+00:00",
+      "elevation": 292.7,
+      "surroundings": []
     },
     {
       "group": "は虫類・両生類",
@@ -1554,7 +2534,19 @@
         "common_name_ja": "ヒガシニホンアマガエル",
         "ancestry": "48460/1/2/355675/20978/20979/1658175/1668830"
       },
-      "file": "/home/ats030/cache/species-eval/images/417209981.jpg"
+      "file": "/home/ats030/cache/species-eval/images/417209981.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Saitama, JP",
+      "longitude": 139.4252,
+      "latitude": 35.8215,
+      "observed_on": "2024-08-09",
+      "observed_time": "2024-08-09T16:22:00+09:00",
+      "elevation": 85.1,
+      "surroundings": [
+        "農地",
+        "森林",
+        "工業地"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1570,7 +2562,19 @@
         "common_name_ja": "チュウゴクスッポン",
         "ancestry": "48460/1/2/355675/26036/39532/39539/797526/39570"
       },
-      "file": "/home/ats030/cache/species-eval/images/301096954.jpg"
+      "file": "/home/ats030/cache/species-eval/images/301096954.jpg",
+      "geoprivacy": "open",
+      "place_guess": "160-0014, Japan",
+      "longitude": 139.7105,
+      "latitude": 35.6839,
+      "observed_on": "2023-07-17",
+      "observed_time": "2023-07-17T12:47:37+09:00",
+      "elevation": 30.0,
+      "surroundings": [
+        "森林",
+        "公園",
+        "水辺"
+      ]
     },
     {
       "group": "は虫類・両生類",
@@ -1586,7 +2590,15 @@
         "common_name_ja": "ナガレタゴガエル",
         "ancestry": "48460/1/2/355675/20978/20979/25473/25474"
       },
-      "file": "/home/ats030/cache/species-eval/images/470446157.jpg"
+      "file": "/home/ats030/cache/species-eval/images/470446157.jpg",
+      "geoprivacy": "open",
+      "place_guess": "Japan",
+      "longitude": 139.153,
+      "latitude": 35.9756,
+      "observed_on": "2025-02-15",
+      "observed_time": "2025-02-15T10:01:00+09:00",
+      "elevation": 389.4,
+      "surroundings": []
     },
     {
       "group": "は虫類・両生類",
@@ -1602,7 +2614,17 @@
         "common_name_ja": "ヌマガエル",
         "ancestry": "48460/1/2/355675/20978/20979/64723/465715/26034/1660467"
       },
-      "file": "/home/ats030/cache/species-eval/images/464063558.jpg"
+      "file": "/home/ats030/cache/species-eval/images/464063558.jpg",
+      "geoprivacy": "",
+      "place_guess": "Shimokoshikicho Teuchi, Satsumasendai, Kagoshima 896-1601, Japan",
+      "longitude": 129.7041,
+      "latitude": 31.6397,
+      "observed_on": "2024-09-19",
+      "observed_time": "2024-09-19T13:01:00+09:00",
+      "elevation": 7.9,
+      "surroundings": [
+        "住宅地"
+      ]
     }
   ]
 }
