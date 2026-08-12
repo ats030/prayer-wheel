@@ -119,7 +119,7 @@ systemctl --user restart ikimono-note ikimono-note-public
 使うAI、APIキー、モデルは画面上部の「設定」から変更できます。OllamaではURLを入力でき、その接続先にインストール済みで画像入力に対応するモデルを自動表示します。別端末のOllamaを使う場合は、Ollama側でこのサーバーからの接続を許可してください。接続先とAPIキーは `~/.config/ikimono-note/settings.json` に権限 `0600` で保存し、APIキーは画面へ再表示しません。
 
 ```bash
-uv run --with pytest pytest -q                                    # 211件
+uv run --with pytest pytest -q                                    # 212件
 uv run --with playwright python tests/smoke_browser.py            # 実ブラウザで主要導線
 uv run --with playwright python tests/smoke_browser.py --identify # 識別まで通す
 ```

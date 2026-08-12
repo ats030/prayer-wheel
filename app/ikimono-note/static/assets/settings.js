@@ -18,21 +18,37 @@ function setupPublicSettings(data){
       (el=>{const has=Boolean(readApiKey(name));el.textContent=has?(keepingKeys()?"この端末に登録済み":"このタブに登録済み"):"APIキーが未登録です";el.dataset.missing=has?"0":"1"})($("configured-"+name));
     show(keep.checked?"APIキーをこの端末に残します。":"APIキーはタブを閉じると消えます。","success")}}
 
-  const stored=JSON.parse(localStorage.getItem("species-public-settings")||"{}");
   const localAvailable=Boolean(data.available_models.local.length);
   const localRadio=document.querySelector("[name=provider][value=local]");
   localRadio.disabled=!localAvailable;
-  const chosen={
-    provider:stored.provider||data.provider,
-    models:{...data.models,...(stored.models||{})}
+  const applyStored=()=>{
+    const stored=JSON.parse(localStorage.getItem("species-public-settings")||"{}");
+    const chosen={
+      provider:stored.provider||data.provider,
+      models:{...data.models,...(stored.models||{})}
+    };
+    if(!document.querySelector('[name=provider][value="'+chosen.provider+'"]'))chosen.provider="local";
+    if(chosen.provider==="local"&&!localAvailable)chosen.provider="gemini";
+    document.querySelector('[name=provider][value="'+chosen.provider+'"]').checked=true;
+    for(const name of ["local","openai","anthropic","gemini"]){
+      const field=$("model-"+name);
+      if(chosen.models[name])field.value=chosen.models[name];
+    }
+    return chosen;
   };
-  if(!document.querySelector('[name=provider][value="'+chosen.provider+'"]'))chosen.provider="local";
-  if(chosen.provider==="local"&&!localAvailable)chosen.provider="gemini";
-  document.querySelector('[name=provider][value="'+chosen.provider+'"]').checked=true;
-  for(const name of ["local","openai","anthropic","gemini"]){
-    const field=$("model-"+name);
-    if(chosen.models[name])field.value=chosen.models[name];
-  }
+  applyStored();
+  /* 別の端末の設定は、この画面を描いたあとに届く (ドライブの取り込みは非同期)。
+     画面へ入れ直さないと、利用者が何も触らずに「保存」を押しただけで、届いた設定を
+     古い表示で上書きしてしまう。そのままドライブへも書き戻るので、もう片方の端末の
+     設定まで巻き戻る。触りかけの入力は消さず、その場合は知らせるだけにする。 */
+  let touched=false;
+  $("settingsForm").addEventListener("change",()=>{touched=true});
+  document.addEventListener("species-records-restored",()=>{
+    if(touched){show("別の端末の設定が届きました。入力中の内容を残すため、画面はそのままにしています。","success");return}
+    const chosen=applyStored();
+    $("active-provider").textContent=providerLabels[chosen.provider]+" · "+chosen.models[chosen.provider];
+    show("別の端末の設定を読み込みました。","success");
+  });
   $("local-llm-url").value="";
   $("local-llm-url").disabled=true;
   $("local-llm-url").placeholder="公開版では運営者が管理します";

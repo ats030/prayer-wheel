@@ -1766,6 +1766,22 @@ def test_operator_records_travel_but_do_not_mix_with_visitors():
     assert "${driveFileName()}" in drive
 
 
+def test_pulled_settings_reach_the_settings_form():
+    """別の端末の設定は画面を描いたあとに届く。入れ直さないと、保存が巻き戻しになる。
+
+    ドライブの取り込みは非同期なので、設定画面は先に描き終わっている。画面へ
+    入れ直さないと、利用者が何も触らずに「保存」を押しただけで、届いた設定を古い
+    表示で上書きする。そのままドライブへも書き戻るので、もう片方の端末まで巻き戻る。
+    """
+    settings_js = client.get("/assets/settings.js").text
+    assert "const applyStored=()=>{" in settings_js
+    assert 'document.addEventListener("species-records-restored"' in settings_js
+    # 触りかけの入力は消さない。知らせるだけにする
+    assert 'let touched=false' in settings_js
+    assert '$("settingsForm").addEventListener("change",()=>{touched=true})' in settings_js
+    assert "if(touched){show(" in settings_js
+
+
 def test_no_manual_save_button_because_saving_is_automatic():
     """「いま保存」は要らない。押さないと保存されないように見えるボタンは害。
 
