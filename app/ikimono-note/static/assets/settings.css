@@ -13,3 +13,11 @@
 .hidden{display:none!important}
 [hidden]{display:none!important}
 .folder-list{list-style:none;margin:10px 0 0;padding:0;max-height:220px;overflow-y:auto;border:1px solid var(--color-line);border-radius:var(--radius-control)}.folder-list li+li{border-top:1px solid var(--color-line)}.folder-list button{display:block;width:100%;min-height:44px;padding:0 12px;border:0;background:none;color:var(--color-text);text-align:left;cursor:pointer;font:inherit}.folder-list button:hover{background:var(--color-raised)}.folder-list .empty{padding:12px;color:var(--color-muted);font-size:12px}
+/* 選んでいない提供元は、名前と一行の説明だけにする。3つ全部を開いておくと、
+   設定画面の6割が、選ばないものの入力欄で埋まる。
+   選んだときは元のスタイルに戻したいので、隠す側にだけ指定する */
+.provider:not(:has(input:checked)) .setup-guide,
+.provider:not(:has(input:checked)) .fields,
+.provider:not(:has(input:checked)) .configured{display:none}
+.provider{cursor:pointer}
+.provider:not(:has(input:checked)):hover{border-color:var(--color-accent-soft)}

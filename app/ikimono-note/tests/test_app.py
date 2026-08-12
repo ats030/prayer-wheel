@@ -1490,3 +1490,34 @@ def test_privacy_says_where_keys_can_go():
     assert "APIキーも一緒に保存する" in page
     assert "既定では保存しません" in page
     assert "ブラウザから Google へ直接" in page
+
+
+def test_settings_page_reads_top_to_bottom():
+    """順に読んで、順に決められる並びにする。以前は保存ボタンの後ろに設定項目があり、
+    誰でログインしているかは画面の真ん中にあった。"""
+    page = client.get("/settings").text
+    order = [page.index(marker) for marker in [
+        'id="account-section"',      # 誰で入っているか
+        'id="settingsForm"',         # 使うAI
+        'id="keep-keys"',            # キーの残し方 (保存より前)
+        'id="settings-save"' if 'id="settings-save"' in page else 'この端末に保存',
+        'aria-labelledby="backup-heading"',   # 記録の保存
+    ]]
+    assert order == sorted(order), "設定画面の並びが前後している"
+
+
+def test_only_the_chosen_provider_is_unfolded():
+    """3つ全部を開いておくと、設定画面の6割が、選ばないものの入力欄で埋まる。"""
+    css = client.get("/assets/settings.css").text
+    assert ".provider:not(:has(input:checked)) .fields" in css
+    assert ".provider:not(:has(input:checked)) .setup-guide" in css
+    # 選んだときは元の見た目に戻したいので、隠す側にだけ指定する
+    assert ".provider:has(input:checked)>*{display:block}" not in css
+
+
+def test_the_warning_does_not_greet_you_first():
+    """最初に目に入るのが長い警告では、使う前に気持ちが萎える。中身は残して畳む。"""
+    page = client.get("/settings").text
+    assert 'class="panel stacked guardian-note"' in page      # details で畳んである
+    assert "料金とお子さまの利用について" in page
+    assert "契約者ご本人" in page                              # 中身は消していない

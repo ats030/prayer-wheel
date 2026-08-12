@@ -12,7 +12,17 @@
 <body><main class="app">
   <header class="top"><div><div class="eyebrow">生きものノート</div><h1>設定</h1></div><div class="top-actions"><button class="back theme-toggle" id="themeToggle" type="button"><span class="theme-icon" aria-hidden="true">◐</span><span class="theme-label">自動</span></button><a class="back" href="/">撮影へ戻る</a></div></header>
   <div class="status-strip" aria-live="polite"><span>いま使うAI</span><strong id="active-provider">読み込み中…</strong></div>
-  <div class="status-strip guardian-note" data-only="public"><span>大人の方へ</span><strong>このページではAPIキー（有料サービスの鍵）を入力します。料金が発生する場合があるため、設定は契約者ご本人が行ってください。お子さんが使うときは、設定を済ませてから撮影画面をお渡しください。写真を撮って調べるだけなら、この画面を開く必要はありません。</strong></div><div class="status-strip guardian-note" data-only="operator"><span>運営者用</span><strong>この画面は運営者用です。ここで保存したAPIキーとモデルはサーバーに記録され、公開版の既定値としても使われます。公開版の利用者に自分のAPIキーを使わせる運用なら、ここでキーを登録する必要はありません。</strong></div>
+  <details class="panel stacked guardian-note" data-only="public"><summary><span><span class="detail-title">大人の方へ</span><span class="detail-copy">料金とお子さまの利用について</span></span></summary><div class="detail-body"><p class="help">このページではAPIキー（有料サービスの鍵）を入力します。料金が発生する場合があるため、設定は契約者ご本人が行ってください。お子さんが使うときは、設定を済ませてから撮影画面をお渡しください。写真を撮って調べるだけなら、この画面を開く必要はありません。</p></div></details><div class="status-strip guardian-note" data-only="operator"><span>運営者用</span><strong>この画面は運営者用です。ここで保存したAPIキーとモデルはサーバーに記録され、公開版の既定値としても使われます。公開版の利用者に自分のAPIキーを使わせる運用なら、ここでキーを登録する必要はありません。</strong></div>
+  <section class="section" id="account-section" hidden aria-labelledby="account-heading">
+    <div class="section-head"><h2 id="account-heading">アカウント</h2></div>
+    <div class="panel">
+      <div class="status-strip"><span>ログイン中</span><strong id="account-email">-</strong></div>
+      <p class="help">本サービスが預かっているのは、この<strong>メールアドレスとアカウントの識別子だけ</strong>です。写真・記録・APIキーは預かっていません。</p>
+      <div class="actions"><button class="button" id="account-logout" type="button">ログアウト</button><button class="button" id="account-delete" type="button">退会する</button></div>
+      <p class="message" id="account-message" aria-live="polite"></p>
+    </div>
+  </section>
+
   <form id="settingsForm">
     <section class="section" aria-labelledby="ai-heading"><div class="section-head"><h2 id="ai-heading">使うAIを選ぶ</h2><p>ひとつ選択してください</p></div><div class="panel">
       <label class="provider" data-only="local"><input type="radio" name="provider" value="local"><span><span class="provider-name">Ollama</span><span class="help">自分で用意したOllamaへ写真を送ります。外部の事業者へは送りません。</span><span class="setup-guide">設定方法：Ollamaを動かす端末で画像対応モデルを取得し、その端末のURLとモデル名を入力します。別端末の場合はOllamaのLAN公開設定も必要です。<a href="https://docs.ollama.com/capabilities/vision" target="_blank" rel="noopener noreferrer">Ollama公式ガイド</a></span><span class="fields"><span class="field"><label for="local-llm-url">Ollama URL</label><input id="local-llm-url" type="url" required placeholder="http://192.168.1.10:11434"></span><span class="field"><label for="model-local">モデル</label><input id="model-local" list="local-model-options" required placeholder="例: gemma4:12b"><datalist id="local-model-options"></datalist><span class="configured" id="local-model-note"></span></span></span></span></label>
@@ -25,19 +35,9 @@
       <details class="panel"><summary><span><span class="detail-title">Pl@ntNet 植物専用の識別</span><span class="detail-copy">選んだ植物の写真だけを専門サービスと照合します</span></span></summary><div class="detail-body"><span class="setup-guide">設定方法：<a href="https://my.plantnet.org/" target="_blank" rel="noopener noreferrer">my.plantnet.org</a>でアカウントとAPIキーを用意し、下へ貼り付けます。植物を調べるときに「植物専用の識別もいっしょに使う」を選ぶと使います。</span><div class="field spaced"><label for="key-plantnet">APIキー</label><span class="key-row"><input id="key-plantnet" type="password" autocomplete="new-password" placeholder="変更時だけ入力"><button class="button" type="button" data-delete="plantnet">登録を削除</button></span><span class="configured" id="configured-plantnet"></span></div></div></details>
       <details class="panel stacked" id="affiliate-panel" data-only="operator"><summary><span><span class="detail-title">関連商品の広告</span><span class="detail-copy">Amazon検索リンクとCreators API</span></span></summary><div class="detail-body fields"><span class="help">全商品検索用URLの検索語部分を {query} に置き換えてください。</span><div class="field"><label for="affiliate-title">広告名</label><input id="affiliate-title" maxlength="120" placeholder="例：身近な植物図鑑"></div><div class="field"><label for="affiliate-url">アフィリエイトURL</label><input id="affiliate-url" type="url" placeholder="https://www.amazon.co.jp/s?k={query}&amp;tag=..."></div><div class="field"><label for="affiliate-partner-tag">Partner Tag</label><input id="affiliate-partner-tag" placeholder="example-22"></div><div class="field"><label for="key-amazon_creators_id">Creators API Credential ID</label><span class="key-row"><input id="key-amazon_creators_id" type="password" autocomplete="new-password" placeholder="変更時だけ入力"><button class="button" type="button" data-delete="amazon_creators_id">登録を削除</button></span></div><div class="field"><label for="key-amazon_creators_secret">Creators API Secret</label><span class="key-row"><input id="key-amazon_creators_secret" type="password" autocomplete="new-password" placeholder="変更時だけ入力"><button class="button" type="button" data-delete="amazon_creators_secret">登録を削除</button></span><span class="configured" id="configured-amazon-creators"></span></div><label class="check"><input id="affiliate-product-enabled" type="checkbox"><span>Creators APIの商品ページを優先する</span></label><label class="check"><input id="affiliate-enabled" type="checkbox"><span>調べた結果に関連商品リンクを表示する</span></label><span class="configured" id="affiliate-metrics"></span></div></details>
     </section>
-    <div class="actions"><button class="button primary" id="save-button" type="submit"><span data-only="operator">変更を保存</span><span data-only="public">この端末に保存</span></button><a class="button" href="/">キャンセル</a></div><p class="message" id="message" aria-live="polite"></p>
+    <div class="panel" data-only="public"><label class="check"><input id="keep-keys" type="checkbox" checked><span>この端末にAPIキーを残す（次に開くとき入力しなくて済みます）。共用の端末では外してください。外すとタブを閉じたときに消えます。</span></label></div><div class="actions"><button class="button primary" id="save-button" type="submit"><span data-only="operator">変更を保存</span><span data-only="public">この端末に保存</span></button><a class="button" href="/">キャンセル</a></div><p class="message" id="message" aria-live="polite"></p>
   </form>
-  <section class="section" data-only="public"><div class="panel"><label class="check"><input id="keep-keys" type="checkbox" checked><span>この端末にAPIキーを残す（次に開くとき入力しなくて済みます）。共用の端末では外してください。外すとタブを閉じたときに消えます。</span></label></div></section>
-  <section class="section" id="account-section" hidden aria-labelledby="account-heading">
-    <div class="section-head"><h2 id="account-heading">アカウント</h2></div>
-    <div class="panel">
-      <div class="status-strip"><span>ログイン中</span><strong id="account-email">-</strong></div>
-      <p class="help">本サービスが預かっているのは、この<strong>メールアドレスとアカウントの識別子だけ</strong>です。写真・記録・APIキーは預かっていません。</p>
-      <div class="actions"><button class="button" id="account-logout" type="button">ログアウト</button><button class="button" id="account-delete" type="button">退会する</button></div>
-      <p class="message" id="account-message" aria-live="polite"></p>
-    </div>
-  </section>
-
+  
   <section class="section" aria-labelledby="backup-heading">
     <div class="section-head"><h2 id="backup-heading">記録の保存</h2><p>Google ドライブに置きます</p></div>
     <div class="panel">
