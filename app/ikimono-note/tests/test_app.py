@@ -1766,6 +1766,30 @@ def test_operator_records_travel_but_do_not_mix_with_visitors():
     assert "${driveFileName()}" in drive
 
 
+def test_the_backup_says_what_it_actually_carries():
+    """「使うAIの設定も保存します」は公開版だけの話。
+
+    運営者用のプロバイダーとモデルはサーバーの settings.json にあり、localStorage の
+    species-public-settings は書かれない。buildBackup はそこしか読まないので、
+    運営者用の書き出しの settings は常に null になる。記録の保存の節を運営者用でも
+    出すようにした結果、この一文がその画面で嘘になっていた。
+    """
+    backup = client.get("/assets/backup.js").text
+    assert 'localStorage.getItem("species-public-settings")' in backup
+    # APIキーはどちらのモードでも書き出さない
+    assert "species-key-" not in backup
+    assert "APIキーは含めません" in backup
+    settings_js = client.get("/assets/settings.js").text
+    assert 'localStorage.setItem("species-public-settings"' in settings_js
+    assert "if(data.public_mode)setupPublicSettings(data)" in settings_js
+
+    page = client.get("/settings").text
+    help_text = page.split('aria-labelledby="backup-heading"')[1].split('<p class="help">')[1].split("</p>")[0]
+    assert '<span data-only="public">と、使うAIの設定</span>' in help_text
+    assert 'data-only="operator">使うAIの設定はこのサーバーに保存されているので' in help_text
+    assert "APIキーはどちらの場合も含めません" in help_text
+
+
 def test_a_second_device_pulls_before_it_can_overwrite():
     """開いた直後に取り込む。書き込みは last-writer-wins で、統合は読み込みでしか起きない。
 
