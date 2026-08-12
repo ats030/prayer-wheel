@@ -31,3 +31,8 @@
    settings.css 側の名前で、ここでは未定義のまま参照していたため枠も背景も
    角丸も付いていなかった (値そのものは両ページで同じものを指している) */
 .save-state{margin:0 0 12px;padding:9px 12px;border-radius:8px;font-size:.9rem;border:1px solid var(--line)}.save-state.ok{background:var(--raised)}.save-state.warn{border-left:3px solid var(--accent);background:var(--raised)}
+
+/* 棚は候補ごと。一覧の中なので、撮影画面より控えめに詰める */
+.candidate .product-shell{margin-top:10px;padding-top:9px}
+.candidate .product-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));max-width:560px}
+.candidate .product-card{max-width:150px}

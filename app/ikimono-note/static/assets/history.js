@@ -30,7 +30,14 @@ async function render(){const entries=await all();mapEntries=entries;const locat
 /* 開いた直後にドライブから取り込むことがある。一覧はもう描き終わっているので、
    届いたら描き直す。押していないのに中身が入れ替わるのは、記録が端末をまたいで
    同じものになるという約束のとおり */
-document.addEventListener("species-records-restored",()=>{render().catch(e=>console.error("記録を描き直せませんでした",e))});
+document.addEventListener("species-records-restored",()=>{
+  /* 描き直すと「調べた内容を見る」の中身も棚も作り直しになる。読み込み直後と
+     同じ順で組み立てる (render → enrich → 広告)。ここを render だけにしていると、
+     取り込んだ記録の詳細が簡易表示のまま、広告も付かない */
+  affiliateLinksAdded=false;
+  render().then(enrich).then(addAffiliateLinks)
+    .catch(e=>console.error("記録を描き直せませんでした",e));
+});
 function evidence(label,items){return items?.length?'<div class="label">'+label+'</div><ul>'+items.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>':""}function candidateLinks(c,category){
   /* 撮影画面と同じ参照先を、記録からも辿れるようにする */
   const name=displayName(c),links=[];
@@ -58,18 +65,28 @@ function protectedBadge(c){const p=c.protected_species;if(!p||!p.category)return
   return '<div class="protected">種の保存法の'+esc(p.category)+(p.subtype?"（"+esc(p.subtype)+"）":"")+'です'
     +' <a target="_blank" rel="noopener noreferrer" href="https://www.env.go.jp/nature/kisho/domestic/list.html">環境省の一覧 ↗</a></div>'}
 function fullCandidate(c,category){const rank=({species:"種の候補",genus:"属（近いなかま）の候補",family:"科（大きなグループ）の候補"})[c.taxon_rank]||"グループの記録なし",status=c.evidence_status==="uncertain"?"決め手なし":c.evidence_status==="corroborated"?"2つの方法で確認":"写真からの推測";return '<li class="candidate"><strong>'+esc(commonNameLabel(c))+'</strong> <span class="muted">'+esc(c.scientific_name||"")+'</span><div><span class="badge">'+rank+'</span><span class="badge">'+status+'</span>'+taxonomyBadge(c)+(c.evidence_strength?'<span class="badge">証拠の強さ '+esc(c.evidence_strength)+'</span>':"")+(Number.isFinite(Number(c.confidence))?'<span class="badge">最大 '+esc(c.confidence)+'%</span>':"")+'</div>'+confidenceMeter(c)+protectedBadge(c)+candidateLinks(c,category)+evidence("写真から見つけた特徴（AI抽出・未確認）",c.traits)+evidence("似ている種との見分け方",c.distinguishing_features)+evidence("合わない点",c.contradictions)+evidence("決め手が足りない理由",c.evidence_gaps)+(c.uncertainty?'<div class="label">もっと確かめたいこと</div><div>'+esc(c.uncertainty)+'</div>':"")+(c.sex&&c.sex!=="対象外"?'<div class="label">オス・メスの推測</div><div>'+esc(c.sex)+'</div>'+evidence("そう考えた理由",c.sex_evidence):"")+'</li>'}function fullDetail(e){const x=e.context||{},m=e.resultMeta||{},c=e.coordinates;return '<div class="facts">'+(e.category?'<div>分類：'+esc(e.category)+'</div>':"")+(e.summary?'<div>'+esc(e.summary)+'</div>':"")+((e.provider||e.model)?'<div>使ったAI：'+esc([providerLabel(e.provider),e.model].filter(Boolean).join(" · "))+'</div>':"")+(x.observedDate?'<div>撮った日：'+esc(x.observedDate)+'</div>':"")+(x.size?'<div>大きさ：'+esc(x.size)+'</div>':"")+(x.location?'<div>撮った場所：'+esc(x.location)+'</div>':"")+(c?'<div>位置：'+esc(c.latitude)+'、'+esc(c.longitude)+'（おおまかな値）</div>':"")+(m.strictMode?'<div>まちがい防止：学名を図鑑データで自動チェック</div>':"")+(m.taxonomyChecked?'<div>学名を図鑑データで確認済み'+(m.rejectedCandidates?' · 除いた候補 '+esc(m.rejectedCandidates)+'件':"")+'</div>':"")+(m.plantnetUsed?'<div>植物の候補は <a href="https://plantnet.org/" target="_blank" rel="noopener noreferrer">Pl@ntNet recognition API</a> によるもの</div>':"")+'</div><ol>'+(e.candidates||[]).map(c=>fullCandidate(c,e.category)).join("")+'</ol>'}async function enrich(){const records=await all(),byId=new Map(records.map(e=>[String(e.id),e]));document.querySelectorAll(".entry").forEach(node=>{const e=byId.get(node.dataset.id);if(e)node.querySelector(".detail").innerHTML='<summary>調べた内容を見る</summary>'+fullDetail(e)});document.querySelectorAll('.meter span[data-width]').forEach(bar=>{bar.style.width=bar.dataset.width+'%'})}setTimeout(()=>enrich().catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
-/* 記録側の棚は記録に1つ。撮影画面は候補ごとに棚を持つが、こちらは「調べた内容を見る」
-   を開いたときに初めて叩くので、候補ぶん増やすと1回の開閉で商品APIを何度も叩く。
-   ひもづけ先は第一候補で、ラベルにその名前を入れて帰属を言い切る */
-async function loadProducts(record,shell){
-  const top=(record.candidates||[])[0];
-  const name=top?displayName(top):"";
-  const subject={name,scientific:top?.scientific_name||"",category:record.category||"",
-                 label:"Amazonで"+(name||"関連商品")+"の関連商品"};
-  const filled=await loadProductShelf(shell,subject,productBudget(4));
-  if(filled!==false)return;
-  /* window.name を拾わないよう、記録から取り直す */
-  if(name)shell.innerHTML='<a class="product-fallback" href="/affiliate/click?q='+encodeURIComponent(name+" "+(record.category||""))+'" target="_blank" rel="sponsored noopener noreferrer">広告 · Amazonで'+esc(name)+'の関連商品を探す ↗</a>';
+/* 撮影画面と同じく、棚は候補ごとにその候補の中へ置く。記録から読み返すときも
+   「どの候補の広告か」を位置で決められる。開いたときに初めて叩くのは変えない。
+   予算は1回の開閉につき通しで6回・1棚2回 (撮影画面と同じ)。集めた品は棚をまたいで
+   覚えるので、どの候補でも当たる一般書が候補の数だけ並ぶことはない。 */
+async function loadProducts(record,shells){
+  const candidates=record.candidates||[];
+  const budget=productBudget();
+  for(let i=0;i<shells.length;i++){
+    const candidate=candidates[i];
+    if(!candidate)continue;
+    const name=displayName(candidate);
+    const filled=await loadProductShelf(shells[i],{
+      name,scientific:candidate.scientific_name||"",category:record.category||"",
+      label:"Amazonで"+(name||"関連商品")+"の関連商品",
+    },budget);
+    /* window.name を拾わないよう、記録から取り直す */
+    if(filled===false&&name){
+      shells[i].innerHTML='<a class="product-fallback" href="/affiliate/click?q='
+        +encodeURIComponent(name+" "+(record.category||""))
+        +'" target="_blank" rel="sponsored noopener noreferrer">広告 · Amazonで'+esc(name)+'の関連商品を探す ↗</a>';
+    }
+  }
 }
 async function reidentify(record,button,message){
   /* 元の写真は保存していない。記録の縮小画像 (長辺960px) を送り直す。
@@ -136,10 +153,16 @@ async function addAffiliateLinks(){
     if(!record)return;
     const detail=node.querySelector(".detail");
     if(!detail||detail.querySelector(".product-shell"))return;
-    const shell=document.createElement("div");
-    shell.className="product-shell";
-    detail.append(shell);
-    const load=()=>{if(detail.open)loadProducts(record,shell)};
+    /* 候補は fullCandidate が record.candidates の順に描く。並びで対応づける */
+    const items=[...detail.querySelectorAll("li.candidate")];
+    if(!items.length)return;
+    const shells=items.map(item=>{
+      const shell=document.createElement("div");
+      shell.className="product-shell";
+      item.append(shell);
+      return shell;
+    });
+    const load=()=>{if(detail.open)loadProducts(record,shells)};
     detail.addEventListener("toggle",load);
     load();  // すでに開いている記録には即座に出す
   });

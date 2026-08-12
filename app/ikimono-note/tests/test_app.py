@@ -1185,7 +1185,7 @@ def test_record_ads_are_loaded_only_when_a_record_is_opened():
     products = client.get("/assets/products.js").text
     assert 'detail.addEventListener("toggle",load)' in history
     assert "if (shell.dataset.loaded) return" in products   # 開き直しで再取得しない
-    assert "if(detail.open)loadProducts(record,shell)" in history
+    assert "if(detail.open)loadProducts(record,shells)" in history
 
 
 def test_product_shelf_logic_is_shared_by_both_screens():
@@ -1288,7 +1288,9 @@ def test_each_candidate_owns_its_advert():
     assert "candidates[0]" not in index
     assert '"Amazonで"+shell.dataset.name+"の関連商品"' in index  # ラベルに候補名を入れる
     history = client.get("/assets/history.js").text
-    assert "const top=(record.candidates||[])[0]" in history  # 記録側は記録に1棚のまま
+    # 記録側も同じ約束。候補ごとの棚を、その候補の <li> の中に入れる
+    assert "item.append(shell)" in history
+    assert 'label:"Amazonで"+(name||"関連商品")+"の関連商品"' in history
     assert "Math.floor(Math.random()*named.length)" not in history
 
 
@@ -1764,6 +1766,31 @@ def test_operator_records_travel_but_do_not_mix_with_visitors():
     # 固定名のまま書き込むと、モードを分けた意味がなくなる
     assert "name: driveFileName()" in drive
     assert "${driveFileName()}" in drive
+
+
+def test_history_ads_sit_inside_each_candidate():
+    """記録から読み返すときも、どの候補の広告かを位置で決める。
+
+    以前は記録に1棚だけで、ひもづけ先は第一候補。撮影画面を候補ごとにした以上、
+    読み返す側だけ約束が違うと、同じ画面の話なのに帰属の決まり方が2通りになる。
+    """
+    history = client.get("/assets/history.js").text
+    assert 'detail.querySelectorAll("li.candidate")' in history
+    assert "async function loadProducts(record,shells)" in history
+    assert "const budget=productBudget();" in history      # 1回の開閉ぶんの予算
+    # 開いたときに初めて叩くのは変えない
+    assert 'detail.addEventListener("toggle",load)' in history
+    assert "if(detail.open)loadProducts(record,shells)" in history
+    css = client.get("/assets/history.css").text
+    assert ".candidate .product-shell{" in css
+
+
+def test_a_pulled_list_is_rebuilt_the_same_way_as_a_fresh_one():
+    """描き直したら詳細も広告も作り直す。render だけだと簡易表示のまま広告も付かない。"""
+    history = client.get("/assets/history.js").text
+    restored = history.split('document.addEventListener("species-records-restored"')[1].split("});")[0]
+    assert "affiliateLinksAdded=false" in restored
+    assert "render().then(enrich).then(addAffiliateLinks)" in restored
 
 
 def test_pulled_settings_reach_the_settings_form():
