@@ -1,0 +1,162 @@
+tool: GPS-based collection-restriction lookup (candidate geospatial and species data sources)
+question: Can the safety card replace "確認が必要" with an automatic "規制区域の可能性" derived from the user's coordinate?
+reviewed_at: 2026-08-12
+decision: declined
+summary: >
+  No combination of the available sources can answer the question the safety card asks.
+  Landowner permission and municipal ordinances have no national machine-readable source at
+  all, and the one park-boundary layer that permits commercial use is a 2015 vintage digitised
+  from 1:50,000 planning maps. The species half of the question is answerable and is broken
+  out as a separate, approved record below.
+
+candidates:
+  - name: 国土数値情報 自然公園地域データ (A10, 2015年度版)
+    official_url: https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A10-2015.html
+    license: CC BY 4.0 (国土数値情報 利用約款 https://nlftp.mlit.go.jp/ksj/other/agreement_02.html)
+    free_condition: Free download, no registration, no API — bulk shapefile/GML only.
+    commercial_use: allowed_except_one_prefecture
+    commercial_use_note: >
+      The dataset page carries 【重要：データ利用時の注意事項】岡山県のみ非商用. This app carries
+      Amazon affiliate advertising on the same page as the result, so Okayama polygons cannot be
+      used and would have to be cut out — a hole in coverage the user cannot see.
+    attribution: 出典記載が必須。加工した場合は編集・加工の主体も記載する (利用約款 第3条)。
+    update_frequency: >
+      2015年度版が最新。過去は 2006 / 2010 / 2011 年度。11年間更新されていない。
+    national_coverage: 全国 (ただし商用では岡山県を除外する必要がある)
+    boundary_error: >
+      原典は各都道府県「土地利用基本計画図（縮尺約5万分の1）」および LUCKY データ。公表された
+      実地誤差の数値はないが、1:50,000 の図面由来である以上、境界の実地誤差は数十m規模と見る
+      ほかない。アプリ側の座標は小数点4桁 (約11m) に丸めてあり、端末のGPS誤差も数m〜数十m。
+      境界の近くでは内外を判定できない。
+    zone_detail: 自然公園地域 / 特別地域 / 特別保護地区 の3段階のみ。第1種〜第3種特別地域の別はない。
+    decision: declined
+    reason: >
+      規制の強さは地種区分で変わるが、この層は特別地域を細分できない。加えて11年前の版で、
+      指定の変更が反映されていない。誤差の内側で「規制区域ではない」と読まれる危険のほうが、
+      得られる情報より大きい。
+
+  - name: 国土数値情報 鳥獣保護区データ (A15)
+    official_url: https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A15.html
+    license: 国土数値情報 利用約款 — 非商用
+    free_condition: Free download.
+    commercial_use: not_allowed
+    attribution: 出典記載が必須 (利用できる場合)。
+    update_frequency: 未確認 (採用しないため未調査)
+    national_coverage: 全国
+    boundary_error: 未確認 (採用しないため未調査)
+    decision: declined
+    reason: >
+      ライセンスが非商用。広告を載せている以上使えない。なお仮に使えても、鳥獣保護区が規制
+      するのは狩猟であって、植物や昆虫の採取ではない。「採取してよいか」への答えにはならない。
+
+  - name: 国土数値情報 世界自然遺産データ (A28)
+    official_url: https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A28.html
+    license: 国土数値情報 利用約款 — 非商用
+    free_condition: Free download.
+    commercial_use: not_allowed
+    attribution: 出典記載が必須 (利用できる場合)。
+    update_frequency: 未確認 (採用しないため未調査)
+    national_coverage: 5地域のみ
+    boundary_error: 未確認 (採用しないため未調査)
+    decision: declined
+    reason: ライセンスが非商用。対象も5地域だけで、全国の利用者への答えにならない。
+
+  - name: 国土数値情報 森林地域データ (A13, 2015年度版)
+    official_url: https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A13-2015.html
+    license: CC BY 4.0 (岡山県のみ非商用)
+    free_condition: Free download.
+    commercial_use: allowed_except_one_prefecture
+    attribution: 出典記載が必須。加工した場合は編集・加工の主体も記載する。
+    update_frequency: 2015年度版が最新。
+    national_coverage: 全国 (商用では岡山県を除外)
+    boundary_error: A10 と同じ原典 (縮尺約5万分の1) に由来する。
+    zone_detail: 森林地域 / 国有林 / 地域森林計画対象民有林 / 保安林
+    decision: declined
+    reason: >
+      「国有林」の別が分かるので土地の持ち主に一歩近いが、分かるのは国有林か民有林かだけで、
+      民有林の持ち主は分からない。許可を取る相手を示せない以上、採取の判断材料にならない。
+
+  - name: 環境省 生物多様性センター 国立公園区域・地種区分データ
+    official_url: https://www.biodic.go.jp/category/sonota/09.html
+    license: 生物多様性センターウェブサイト利用規約 (公共データ利用規約 第1.0版 / PDL1.0 準拠)
+      https://www.biodic.go.jp/copyright/terms_of_service.html
+    free_condition: Free download (KML)。
+    commercial_use: allowed_with_attribution
+    commercial_use_note: >
+      環境省の利用ルールは「どなたでも(略)自由に利用できます。商用利用も可能です」と明記する
+      (https://kanto.env.go.jp/help.html)。ただし国土地理院の地図を含むコンテンツは測量法により
+      別扱いで、国土地理院の長の承認が要る。
+    attribution: 「出典：環境省ホームページ（当該ページのURL）」等。加工時は加工の主体も記載。
+    update_frequency: >
+      配布物の基準は平成23年3月 (平成11年度版に平成22年度までの改変を反映したもの)。15年前。
+      配信元 gis.biodic.go.jp は 2026-08-12 時点でこの環境から名前解決できず、環境ジオポータル
+      (https://geoportal.env.go.jp/) への移行中とされる。移行先はSPAで、利用条件を静的に取得できなかった。
+    national_coverage: 国立公園のみ (国定公園・都道府県立自然公園は別)
+    boundary_error: >
+      数値は公表されていない。ただし提供元自身が「正確な区域等の把握のためには、環境省自然環境局
+      又は各地方環境事務所等へ確認すること」と注記している。作成者が位置の権威性を否定している。
+    zone_detail: 特別保護地区 / 特別地域 / 海域公園地区 / 普通地域 (特別地域の第1〜3種の別はない)
+    decision: declined
+    reason: >
+      ライセンスは問題ない。使わないのは、提供元が「正確な区域は事務所に確認せよ」と書いている
+      データを、アプリが現地判断の材料として出せないため。配信基盤も移行中で宛先が定まらない。
+
+  - name: 自治体条例 (採取規制・希少野生生物保護条例)
+    official_url: https://www.rilg.or.jp/htdocs/img/reiki/118_endangered_species.htm
+    license: 該当なし (一次データが存在しない)
+    free_condition: 該当なし
+    commercial_use: 該当なし
+    attribution: 該当なし
+    update_frequency: 該当なし
+    national_coverage: なし
+    boundary_error: 該当なし
+    decision: blocked
+    reason: >
+      全国の条例を機械判読可能な形でまとめた一次データ源が存在しない。e-Gov法令検索が扱うのは
+      国の法令で、条例は対象外。地方自治研究機構の一覧は人が読むための解説で、網羅性も更新も
+      保証されず、同機構の著作物である。1,700超の自治体を追い続ける手段がない。
+
+  - name: 土地の所有者・管理者
+    official_url: https://www.env.go.jp/park/doc/data.html
+    license: 該当なし (位置から引ける一次データが存在しない)
+    free_condition: 該当なし
+    commercial_use: 該当なし
+    attribution: 該当なし
+    update_frequency: 該当なし
+    national_coverage: なし
+    boundary_error: 該当なし
+    decision: blocked
+    reason: >
+      座標から所有者を引ける無償の全国データはない。登記情報は有償かつ一括取得を想定しない。
+      環境省が公表しているのは国定公園の土地所有別「面積」の集計であって、区画ごとの所有者ではない。
+      安全カードが最初に挙げる「その土地の持ち主の許可」は、どのデータでも埋められない。
+
+adoption:
+  verdict: >
+    座標から採取規制を判定する機能は採用しない。安全カードの現状 (現在地の誤差だけを示し、
+    所有者・区域・条例・種の4点すべてを未確認と述べ、環境省の確認先へ誘導する) を維持する。
+  never_display: 採取可能 / 採取してよい / 規制区域外 に相当する表示は、いかなるデータでも出さない。
+  rationale: >
+    「規制区域の可能性」だけを出すという逃げ道も採らない。可能性の表示がないことは、利用者には
+    「可能性なし」と読める。誤差数十mのデータで境界の外だと示唆することは、断定していなくても
+    採取を後押しする。埋められない4点のうち2点 (所有者・条例) は今後もデータが現れる見込みがなく、
+    残る2点を機械で示すと、確認済みの範囲が実際より広く見える。
+  revisit_if: >
+    (1) 環境ジオポータルが地種区分を第1〜3種特別地域まで含めて配信し、利用条件と更新頻度を明示したとき。
+    (2) 岡山県の非商用制限が外れ、自然公園地域データが現行の指定に追随して更新されるようになったとき。
+    上記が揃っても、所有者と条例が埋まらない限り verdict は変わらない。
+
+sources:
+  - https://nlftp.mlit.go.jp/ksj/other/agreement_02.html
+  - https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A10-2015.html
+  - https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A13-2015.html
+  - https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A15.html
+  - https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A28.html
+  - https://www.biodic.go.jp/category/sonota/09.html
+  - https://www.biodic.go.jp/copyright/terms_of_service.html
+  - https://geoportal.env.go.jp/
+  - https://kanto.env.go.jp/help.html
+  - https://www.env.go.jp/mail.html
+  - https://www.env.go.jp/park/doc/data.html
+  - https://laws.e-gov.go.jp/bulkdownload
+  - https://www.rilg.or.jp/htdocs/img/reiki/118_endangered_species.htm
