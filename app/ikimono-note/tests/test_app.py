@@ -1469,29 +1469,6 @@ def test_the_reason_a_popup_failed_is_shown():
     assert "popup_failed_to_open" in drive and "popup_closed" in drive
 
 
-def test_api_keys_are_left_out_unless_asked_for():
-    """既定では持ち出さない。ファイルが漏れたとき、そのまま課金されるキーが渡る。
-    ただし端末や入口 (公開版と :8443) を移るたびに入れ直すのは重いので、
-    承知のうえで一緒に置くことも選べる。"""
-    backup = client.get("/assets/backup.js").text
-    assert "function savingKeys()" in backup
-    assert 'localStorage.getItem(SAVE_KEYS_FLAG) === "1"' in backup   # 既定は false
-    assert "if (savingKeys()) {" in backup                            # 選んだときだけ入れる
-    page = client.get("/settings").text
-    assert 'id="save-keys"' in page
-    assert "料金が発生する恐れがあります" in page       # 何が起きるか書く
-    assert "共用の端末" in page
-    # 選ばせる以上、既定で入っていてはいけない
-    assert 'id="save-keys" type="checkbox"><span>' in page.replace('<input ', '')
-
-
-def test_privacy_says_where_keys_can_go():
-    page = client.get("/privacy").text
-    assert "APIキーも一緒に保存する" in page
-    assert "既定では保存しません" in page
-    assert "ブラウザから Google へ直接" in page
-
-
 def test_settings_page_reads_top_to_bottom():
     """順に読んで、順に決められる並びにする。以前は保存ボタンの後ろに設定項目があり、
     誰でログインしているかは画面の真ん中にあった。"""
@@ -1570,3 +1547,17 @@ def test_how_to_tell_them_apart_is_always_shown():
     assert body.index("points.length?") > body.index("const unsure=")
     # 手前で返さない
     assert "return c.traits.length?" not in body
+
+
+def test_api_keys_never_leave_the_browser():
+    """ドライブに置くのは記録と設定だけ。キーはブラウザのパスワード管理に預ける。
+    同じものを二重に持つと、片方が漏れる筋が増える。"""
+    backup = client.get("/assets/backup.js").text
+    assert "apiKeys" not in backup.split("async function restoreBackup")[0]  # 書き出しに入れない
+    assert "collectApiKeys" not in backup and "savingKeys" not in backup
+    assert "APIキーは含めない" in backup
+    page = client.get("/settings").text
+    assert 'id="save-keys"' not in page          # 選択肢そのものを置かない
+    privacy = client.get("/privacy").text
+    assert "Google ドライブへ保存する記録にも含めません" in privacy
+    assert "ブラウザのパスワード管理に預けた場合" in privacy
