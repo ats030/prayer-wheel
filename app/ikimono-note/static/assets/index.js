@@ -67,6 +67,8 @@ function affiliateProductLink(c,category){
   if(!affiliate||!affiliate.enabled)return "";
   const name=noJapaneseName(c.common_name_ja)?c.scientific_name:c.common_name_ja;
   const query=name+" "+category;
+  /* 商品APIを待たずに検索リンクは出しておく。APIが無効・不調のときはこれが残り、
+     返ってきたらカードと並べて置き直す (loadProductShelf) */
   return '<div class="product-shell amazon-products"'
     +' data-name="'+esc(name)+'" data-scientific="'+esc(c.scientific_name||"")+'"'
     +' data-category="'+esc(category||"")+'">'

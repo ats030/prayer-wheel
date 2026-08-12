@@ -1227,8 +1227,8 @@ def test_record_ads_prefer_the_species_over_generic_field_guides():
     assert '{ q: category + " 図鑑", index: "Books", generic: true }' in products
     # 一般書は枠を埋める保険。多くても2件までにして種固有の品を押しのけない
     assert "shuffle(found.generic).slice(0, 2)" in products
-    assert "product-fallback" in client.get("/assets/history.js").text  # 全滅なら検索リンクへ
-    assert "product-fallback" in client.get("/assets/index.js").text
+    assert "product-fallback" in client.get("/assets/products.js").text  # 検索リンクは共有側にある
+    assert "product-fallback" in client.get("/assets/index.js").text     # APIを待つ前から出しておく
 
 
 def test_record_ads_keep_food_away_from_the_safety_warning():
@@ -1766,6 +1766,28 @@ def test_operator_records_travel_but_do_not_mix_with_visitors():
     # 固定名のまま書き込むと、モードを分けた意味がなくなる
     assert "name: driveFileName()" in drive
     assert "${driveFileName()}" in drive
+
+
+def test_the_shelf_shows_cards_and_the_search_link_together():
+    """画像付きカードと Amazon の検索結果、両方を出す。
+
+    APIが返すのはその時点の上位4件までで、探し方を変えれば別のものが出る。
+    カードだけにすると、そこで打ち止めに見える。「広告」の断りは棚に1回でよいので、
+    カードがあるときはラベル側が担い、リンク側は繰り返さない。
+    """
+    products = client.get("/assets/products.js").text
+    assert "function productSearchLink(subject, besideCards)" in products
+    # カードの有無にかかわらず添える
+    assert "+ productSearchLink(subject, collected.length > 0)" in products
+    assert '"Amazonで" + esc(name) + "をもっと探す ↗"' in products          # カードと並ぶとき
+    assert '"広告 · Amazonで" + esc(name) + "の関連商品を探す ↗"' in products  # 単独のとき
+    assert 'rel="sponsored noopener noreferrer"' in products
+    assert '/affiliate/click?q=' in products
+    # 呼ぶ側は自前でリンクを組まない (二重に出る)
+    history = client.get("/assets/history.js").text
+    assert "product-fallback" not in history
+    for css_path in ["/assets/index.css", "/assets/history.css"]:
+        assert ".product-grid+.product-fallback{" in client.get(css_path).text, css_path
 
 
 def test_history_ads_sit_inside_each_candidate():

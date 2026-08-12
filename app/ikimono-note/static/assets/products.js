@@ -94,11 +94,29 @@ async function loadProductShelf(shell, subject, budget) {
   /* 分類群の一般書は枠を埋めるための保険。多くても2件までにして、
      その種に固有の品が押しのけられないようにする */
   const collected = [...shuffle(found.specific), ...shuffle(found.generic).slice(0, 2)].slice(0, 4);
-  if (!collected.length) return false;
-  shell.innerHTML = '<div class="affiliate-label">広告 · ' + esc(subject.label || "関連商品")
-    + '</div><div class="product-grid">' + collected.map(productCard).join("") + '</div>';
+  /* カードと検索リンクは両方出す。APIが返すのはその時点の上位4件までで、探し方を
+     変えれば別のものが出る。カードだけにすると、そこで打ち止めに見える。
+     「広告」の断りは棚に1回でよいので、ラベルがある側に寄せる */
+  shell.innerHTML = (collected.length
+      ? '<div class="affiliate-label">広告 · ' + esc(subject.label || "関連商品") + '</div>'
+        + '<div class="product-grid">' + collected.map(productCard).join("") + '</div>'
+      : "")
+    + productSearchLink(subject, collected.length > 0);
   shell.querySelectorAll(".product-card").forEach(link => {
     link.onclick = () => fetch("/api/affiliate/click", { method: "POST", keepalive: true }).catch(() => {});
   });
-  return true;
+  return collected.length > 0;
+}
+
+/* Amazon の検索結果へ送るリンク。承認済みの検索テンプレートをサーバー側で展開する
+   (/affiliate/click)。カードと並ぶときは、上のラベルがもう広告だと断っている */
+function productSearchLink(subject, besideCards) {
+  const name = String(subject.name || "").trim();
+  if (!name) return "";
+  const query = name + " " + String(subject.category || "").trim();
+  const label = besideCards
+    ? "Amazonで" + esc(name) + "をもっと探す ↗"
+    : "広告 · Amazonで" + esc(name) + "の関連商品を探す ↗";
+  return '<a class="product-fallback" href="/affiliate/click?q=' + encodeURIComponent(query.trim())
+    + '" target="_blank" rel="sponsored noopener noreferrer">' + label + '</a>';
 }

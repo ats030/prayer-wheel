@@ -36,3 +36,4 @@
 .candidate .product-shell{margin-top:10px;padding-top:9px}
 .candidate .product-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));max-width:560px}
 .candidate .product-card{max-width:150px}
+.product-grid+.product-fallback{margin-top:8px}

@@ -34,3 +34,5 @@
 .shooting-guide .name{font-size:15px}
 .shooting-guide .actions{max-width:420px}
 .guide-note{margin:9px 0 0;color:var(--muted);font-size:12px}
+/* カードの下に置く検索リンク。カードと地続きに見えるよう少しだけ離す */
+.product-grid+.product-fallback{display:inline-block;margin-top:9px}

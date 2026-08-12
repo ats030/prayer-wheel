@@ -76,16 +76,12 @@ async function loadProducts(record,shells){
     const candidate=candidates[i];
     if(!candidate)continue;
     const name=displayName(candidate);
-    const filled=await loadProductShelf(shells[i],{
+    /* 検索リンクは loadProductShelf が必ず添える (カードが出ても出なくても)。
+       name は記録から取り直したもので、window.name ではない */
+    await loadProductShelf(shells[i],{
       name,scientific:candidate.scientific_name||"",category:record.category||"",
       label:"Amazonで"+(name||"関連商品")+"の関連商品",
     },budget);
-    /* window.name を拾わないよう、記録から取り直す */
-    if(filled===false&&name){
-      shells[i].innerHTML='<a class="product-fallback" href="/affiliate/click?q='
-        +encodeURIComponent(name+" "+(record.category||""))
-        +'" target="_blank" rel="sponsored noopener noreferrer">広告 · Amazonで'+esc(name)+'の関連商品を探す ↗</a>';
-    }
   }
 }
 async function reidentify(record,button,message){
