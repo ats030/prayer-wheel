@@ -130,6 +130,9 @@ def main() -> int:
     parser.add_argument("--sleep", type=float, default=0.0, help="1件ごとの待ち時間 (秒)")
     parser.add_argument("--dataset", default=str(MANIFEST), help="評価に使うマニフェスト")
     parser.add_argument("--group", default="", help="この分類群だけを対象にする (植物/昆虫/鳥/菌類/は虫類・両生類)")
+    # 実際の利用では撮影地域を入れる人が多いのに、評価では空のまま測っていた。
+    # 日本固有種を近縁の別種と取り違える例が目立つので、効くかどうかを測れるようにする
+    parser.add_argument("--location", default="", help="撮影地域として渡す (例: 日本)")
     args = parser.parse_args()
 
     manifest = json.loads(Path(args.dataset).read_text(encoding="utf-8"))
@@ -178,6 +181,7 @@ def main() -> int:
             result = pipeline.identify_all(
                 prepared, provider=args.provider, model=model, api_key=api_key,
                 use_plantnet=args.use_plantnet, plantnet_key=plantnet_key,
+                location=args.location,
             )
         except Exception as error:  # 1枚の失敗で全体を止めない
             message = str(error)
@@ -207,6 +211,7 @@ def main() -> int:
         # だったのかファイルから確かめられなくなった
         "config": {"provider": args.provider, "model": model, "use_plantnet": args.use_plantnet,
                    "thinking_level": vision.GEMINI_THINKING_LEVEL if args.provider == "gemini" else None,
+                   "location": args.location,
                    "dataset": manifest["source"], "measured_at": time.strftime("%Y-%m-%d %H:%M")},
         "rows": rows,
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
