@@ -704,7 +704,12 @@ def test_csp_is_sent_without_unsafe_keywords():
             assert directive in policy, (path, directive)
     # 押して初めて出る地図タイルと広告画像だけを外部に許す
     policy = client.get("/").headers["content-security-policy"]
-    assert "img-src 'self' blob: https://tile.openstreetmap.org" in policy
+    # 並びをそのまま書くと、許可先を1つ足すたびに落ちる。何を許していないかを見る
+    images = policy.split("img-src")[1].split(";")[0]
+    assert "'self'" in images and "blob:" in images
+    assert "*" not in images.replace("https://*.media-amazon.com", "").replace(
+        "https://*.ssl-images-amazon.com", ""), images   # 任意のホストは許さない
+    assert "http://" not in images, images               # 平文で画像を取りに行かない
     assert "https://*.media-amazon.com" in policy
 
 
