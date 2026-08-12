@@ -15,7 +15,13 @@ _TOKEN_LOCK = threading.Lock()
 _TOKEN_CACHE: dict[str, tuple[str, float]] = {}
 
 class CreatorsAPIError(RuntimeError):
-    pass
+    """画面に出すのは message だけ。status と reason は運営者向けの内訳。"""
+
+    def __init__(self, message: str, *, status: int = 0, reason: str = "", hint: str = ""):
+        super().__init__(message)
+        self.status = status
+        self.reason = reason
+        self.hint = hint
 
 def _token(credential_id: str, secret: str) -> str:
     now = time.monotonic()
@@ -64,8 +70,8 @@ REFUSAL_HINTS = {
 }
 
 
-def _log_refusal(response: Any) -> None:
-    """Amazon が断った理由を journal へ出す。
+def _log_refusal(response: Any) -> tuple[int, str, str]:
+    """Amazon が断った理由を journal へ出し、(状態, 理由, 手だて) を返す。
 
     断られると画面は検索リンクのフォールバックへ静かに戻る。利用者にはそれでよいが、
     運営者に何も残らないと「設定したのに画像が出ない」から先へ進めない。実際に
@@ -78,10 +84,12 @@ def _log_refusal(response: Any) -> None:
         detail = str(body.get("message") or "")
     except (ValueError, AttributeError):
         detail = str(getattr(response, "text", ""))[:200]
+    status = int(getattr(response, "status_code", 0) or 0)
     hint = REFUSAL_HINTS.get(reason, "")
-    print(f"[ikimono-note] Amazon商品APIが {getattr(response, 'status_code', '?')} を返しました"
+    print(f"[ikimono-note] Amazon商品APIが {status or '?'} を返しました"
           f" ({reason or '理由の記載なし'}): {detail}" + (f" — {hint}" if hint else ""),
           flush=True)
+    return status, reason, hint
 
 
 def search_products(query: str, credential_id: str, secret: str, partner_tag: str, limit: int = 4, search_index: str = "All") -> list[dict[str, str]]:
@@ -95,11 +103,13 @@ def search_products(query: str, credential_id: str, secret: str, partner_tag: st
         response.raise_for_status()
         data = response.json()
     except httpx.HTTPStatusError as exc:
-        _log_refusal(exc.response)
-        raise CreatorsAPIError("Amazonの商品情報を取得できませんでした") from exc
+        status, reason, hint = _log_refusal(exc.response)
+        raise CreatorsAPIError("Amazonの商品情報を取得できませんでした",
+                               status=status, reason=reason, hint=hint) from exc
     except (httpx.HTTPError, ValueError, AttributeError) as exc:
         print(f"[ikimono-note] Amazon商品APIへ届きませんでした: {exc!r}", flush=True)
-        raise CreatorsAPIError("Amazonの商品情報を取得できませんでした") from exc
+        raise CreatorsAPIError("Amazonの商品情報を取得できませんでした",
+                               reason="Unreachable", hint="Amazonへ届いていません。回線と接続先を確認してください。") from exc
     result = data.get("searchResult") or data.get("SearchResult") or {}
     items = result.get("items") or result.get("Items") or []
     if not isinstance(items, list):

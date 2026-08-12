@@ -282,6 +282,11 @@ def get_settings() -> dict[str, object]:
     result = config_store.public()
     result["public_mode"] = PUBLIC_MODE
     result["google_client_id"] = GOOGLE_CLIENT_ID
+    # 商品APIの状態は運営者だけのもの。公開版の訪問者に運営者のアソシエイト口座の
+    # 事情を渡さない (広告を有効にした公開版でも affiliate 一式は返るため、
+    # public() 側には最初から入れず、ここで足す)
+    if not PUBLIC_MODE:
+        result["creators_api_state"] = config_store.load().get("creators_api_state") or {}
     if PUBLIC_MODE:
         result["local_llm"] = {"url": ""}
         result["api_key_configured"] = {
@@ -366,7 +371,11 @@ async def amazon_products(q: str = "", index: str = "All") -> JSONResponse:
     try:
         products = await run_in_threadpool(creators_api.search_products, q, keys.get("amazon_creators_id", ""), keys.get("amazon_creators_secret", ""), affiliate.get("partner_tag", ""), 4, index)
     except creators_api.CreatorsAPIError as exc:
+        # 断られたことを設定画面へ届ける。journal だけだと、運営者は「登録済み」の
+        # 表示を見て設定が効いていると思い込む
+        config_store.record_creators_result(False, reason=exc.reason, hint=exc.hint, status=exc.status)
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+    config_store.record_creators_result(True)
     if not products:
         raise HTTPException(status_code=404, detail="関連商品が見つかりません")
     return JSONResponse({"products": products})

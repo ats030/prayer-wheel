@@ -760,6 +760,31 @@ def test_page_assets_are_served_locally():
         assert "unpkg" not in page, path
 
 
+def test_creators_api_state_reaches_the_operator_screen_only():
+    """商品APIの状態は運営者だけのもの。公開版の訪問者へ渡さない。
+
+    広告を有効にした公開版では affiliate 一式が訪問者にも返る。そこへ相乗りさせると、
+    運営者のアソシエイト口座の事情 (適格販売が足りない等) が外へ出る。
+    """
+    source = page_source("/settings")
+    assert "function renderCreatorsState(state)" in source
+    assert 'id="creators-api-state"' in source
+    assert "Amazonが受け付けていません" in source
+    # 呼ぶ前に「正常」と書かない
+    assert 'if(!state||typeof state.ok!=="boolean"){box.hidden=true' in source
+
+    body = client.get("/api/settings").json()
+    assert "creators_api_state" in body, "運営者用では返すこと"
+
+    reloaded = importlib.reload(main)
+    try:
+        reloaded.PUBLIC_MODE = True
+        public_client = TestClient(reloaded.app, base_url="http://localhost")
+        assert "creators_api_state" not in public_client.get("/api/settings").json()
+    finally:
+        importlib.reload(main)
+
+
 def test_no_route_is_defined_twice():
     """同じ経路を二度定義しない。後ろの定義は到達せず、直したつもりが効かない。
 

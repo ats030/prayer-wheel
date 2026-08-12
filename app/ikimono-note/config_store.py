@@ -6,6 +6,7 @@ import json
 import os
 import tempfile
 import threading
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote_plus, urlparse
@@ -157,6 +158,16 @@ def load() -> dict[str, Any]:
     metrics = saved.get("affiliate_metrics") or {}
     if isinstance(metrics, dict):
         data["affiliate_metrics"] = {"impressions": max(0, int(metrics.get("impressions", 0))), "clicks": max(0, int(metrics.get("clicks", 0)))}
+    # 既定には置かない。一度も呼んでいない状態と、呼んで通った状態を混ぜないため
+    state = saved.get("creators_api_state")
+    if isinstance(state, dict) and isinstance(state.get("ok"), bool):
+        data["creators_api_state"] = {
+            "ok": state["ok"],
+            "reason": str(state.get("reason") or "")[:80],
+            "hint": str(state.get("hint") or "")[:200],
+            "status": max(0, int(state.get("status") or 0)),
+            "at": str(state.get("at") or "")[:40],
+        }
     return data
 
 
@@ -183,6 +194,23 @@ def record_affiliate(event: str) -> None:
     with _AFFILIATE_LOCK:
         current = load()
         current["affiliate_metrics"][event] += 1
+        _write(current)
+
+
+def record_creators_result(ok: bool, *, reason: str = "", hint: str = "", status: int = 0) -> None:
+    """商品APIの最後の結果を残す。状態が変わったときだけ書く。
+
+    毎回書くと、商品カードを描くたびに settings.json を触ることになる。知りたいのは
+    「いま通っているか、通っていないなら何と言われたか」だけなので、変化点で足りる。
+    """
+    state = {"ok": bool(ok), "reason": "" if ok else str(reason)[:80],
+             "hint": "" if ok else str(hint)[:200], "status": 0 if ok else int(status)}
+    with _AFFILIATE_LOCK:
+        current = load()
+        previous = current.get("creators_api_state") or {}
+        if {key: previous.get(key) for key in state} == state:
+            return
+        current["creators_api_state"] = {**state, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
         _write(current)
 
 

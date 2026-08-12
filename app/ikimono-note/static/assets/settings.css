@@ -31,3 +31,8 @@
 .configured:not(:empty)[data-missing="1"]{color:var(--color-accent);font-weight:600}
 .which-app{align-items:center;gap:10px;flex-wrap:wrap}
 .which-app .button{min-height:34px;padding:0 12px;font-size:13px;margin-left:auto}
+
+/* 商品APIの最後の結果。「認証情報を登録済み」の下に、Amazonが受け付けたかを分けて出す */
+.api-state{margin:4px 0 0;font-size:12px;line-height:1.5}
+.api-state.ok{color:var(--color-muted)}
+.api-state.warn{color:var(--color-danger)}

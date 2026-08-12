@@ -261,3 +261,26 @@ def test_legacy_books_search_url_is_migrated_to_all_categories(tmp_path, monkeyp
     loaded = config_store.load()
     assert loaded["affiliate"]["url"] == "https://www.amazon.co.jp/s?k={query}" + chr(38) + "tag=test-22"
     assert "図鑑" not in config_store.affiliate_target("タンポポ")
+
+
+def test_creators_state_is_written_only_when_it_changes(tmp_path, monkeypatch):
+    """商品カードを描くたびに settings.json を書かない。知りたいのは変化点だけ。"""
+    monkeypatch.setattr(config_store, "SETTINGS_PATH", tmp_path / "settings.json")
+    config_store.record_creators_result(False, reason="AssociateNotEligible", hint="適格販売が足りません", status=403)
+    first = config_store.load()["creators_api_state"]
+    assert first["ok"] is False and first["reason"] == "AssociateNotEligible" and first["status"] == 403
+    written_at = (tmp_path / "settings.json").stat().st_mtime_ns
+
+    config_store.record_creators_result(False, reason="AssociateNotEligible", hint="適格販売が足りません", status=403)
+    assert (tmp_path / "settings.json").stat().st_mtime_ns == written_at, "同じ状態で書き直している"
+
+    config_store.record_creators_result(True)
+    recovered = config_store.load()["creators_api_state"]
+    assert recovered["ok"] is True and recovered["reason"] == "" and recovered["status"] == 0
+    assert recovered["hint"] == "", "復旧したのに古い手だてが残っている"
+
+
+def test_creators_state_is_absent_until_the_api_is_called(tmp_path, monkeypatch):
+    """一度も呼んでいないうちは何も持たない。推測で「正常」と書かない。"""
+    monkeypatch.setattr(config_store, "SETTINGS_PATH", tmp_path / "settings.json")
+    assert "creators_api_state" not in config_store.load()
