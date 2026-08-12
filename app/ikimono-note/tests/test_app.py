@@ -760,6 +760,23 @@ def test_page_assets_are_served_locally():
         assert "unpkg" not in page, path
 
 
+def test_stylesheets_define_every_token_they_use():
+    """そのページで未定義の var() を参照しないこと。
+
+    未定義のトークンを参照した宣言は、エラーにならず静かに落ちる。実際に
+    /（.photo-notes）と /history（.save-state）が、settings.css 側の名前
+    (--color-line, --radius-control) を書いたまま枠も背景も付かない状態で
+    動いていた。名前を1つ間違えただけで見た目が消えるので、目視では気づけない。
+    """
+    for path in PAGES:
+        html = client.get(path).text
+        sheets = [client.get(href).text
+                  for href in re.findall(r'href="(/assets/[^"]+\.css)"', html)]
+        defined = {name for sheet in sheets for name in re.findall(r"(--[\w-]+)\s*:", sheet)}
+        used = {name for sheet in sheets for name in re.findall(r"var\((--[\w-]+)", sheet)}
+        assert not used - defined, (path, sorted(used - defined))
+
+
 def test_confidence_meter_avoids_inline_style():
     """幅は style 属性ではなく CSSOM で入れる。属性に戻すと CSP に弾かれる。"""
     index = client.get("/assets/index.js").text
