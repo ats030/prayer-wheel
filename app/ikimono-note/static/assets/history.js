@@ -54,74 +54,18 @@ function protectedBadge(c){const p=c.protected_species;if(!p||!p.category)return
   return '<div class="protected">種の保存法の'+esc(p.category)+(p.subtype?"（"+esc(p.subtype)+"）":"")+'です'
     +' <a target="_blank" rel="noopener noreferrer" href="https://www.env.go.jp/nature/kisho/domestic/list.html">環境省の一覧 ↗</a></div>'}
 function fullCandidate(c,category){const rank=({species:"種の候補",genus:"属（近いなかま）の候補",family:"科（大きなグループ）の候補"})[c.taxon_rank]||"グループの記録なし",status=c.evidence_status==="uncertain"?"決め手なし":c.evidence_status==="corroborated"?"2つの方法で確認":"写真からの推測";return '<li class="candidate"><strong>'+esc(commonNameLabel(c))+'</strong> <span class="muted">'+esc(c.scientific_name||"")+'</span><div><span class="badge">'+rank+'</span><span class="badge">'+status+'</span>'+taxonomyBadge(c)+(c.evidence_strength?'<span class="badge">証拠の強さ '+esc(c.evidence_strength)+'</span>':"")+(Number.isFinite(Number(c.confidence))?'<span class="badge">最大 '+esc(c.confidence)+'%</span>':"")+'</div>'+confidenceMeter(c)+protectedBadge(c)+candidateLinks(c,category)+evidence("写真から見つけた特徴（AI抽出・未確認）",c.traits)+evidence("似ている種との見分け方",c.distinguishing_features)+evidence("合わない点",c.contradictions)+evidence("決め手が足りない理由",c.evidence_gaps)+(c.uncertainty?'<div class="label">もっと確かめたいこと</div><div>'+esc(c.uncertainty)+'</div>':"")+(c.sex&&c.sex!=="対象外"?'<div class="label">オス・メスの推測</div><div>'+esc(c.sex)+'</div>'+evidence("そう考えた理由",c.sex_evidence):"")+'</li>'}function fullDetail(e){const x=e.context||{},m=e.resultMeta||{},c=e.coordinates;return '<div class="facts">'+(e.category?'<div>分類：'+esc(e.category)+'</div>':"")+(e.summary?'<div>'+esc(e.summary)+'</div>':"")+((e.provider||e.model)?'<div>使ったAI：'+esc([providerLabel(e.provider),e.model].filter(Boolean).join(" · "))+'</div>':"")+(x.observedDate?'<div>撮った日：'+esc(x.observedDate)+'</div>':"")+(x.size?'<div>大きさ：'+esc(x.size)+'</div>':"")+(x.location?'<div>撮った場所：'+esc(x.location)+'</div>':"")+(c?'<div>位置：'+esc(c.latitude)+'、'+esc(c.longitude)+'（おおまかな値）</div>':"")+(m.strictMode?'<div>まちがい防止：学名を図鑑データで自動チェック</div>':"")+(m.taxonomyChecked?'<div>学名を図鑑データで確認済み'+(m.rejectedCandidates?' · 除いた候補 '+esc(m.rejectedCandidates)+'件':"")+'</div>':"")+(m.plantnetUsed?'<div>植物の候補は <a href="https://plantnet.org/" target="_blank" rel="noopener noreferrer">Pl@ntNet recognition API</a> によるもの</div>':"")+'</div><ol>'+(e.candidates||[]).map(c=>fullCandidate(c,e.category)).join("")+'</ol>'}async function enrich(){const records=await all(),byId=new Map(records.map(e=>[String(e.id),e]));document.querySelectorAll(".entry").forEach(node=>{const e=byId.get(node.dataset.id);if(e)node.querySelector(".detail").innerHTML='<summary>調べた内容を見る</summary>'+fullDetail(e)});document.querySelectorAll('.meter span[data-width]').forEach(bar=>{bar.style.width=bar.dataset.width+'%'})}setTimeout(()=>enrich().catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
-/* 「食べられるかは判定しません」と言っている隣に食品を並べない。誤同定のとき
-   危険な後押しになる。語による除外なので完全ではないが、明らかなものは落とす */
-const EDIBLE_WORDS=["茶","ティー","食用","乾燥","天日干し","サプリ","パウダー","粉末","エキス","おやつ","フード","ドリンク","健康食品","コーヒー","はちみつ","ハーブティー"];
-function looksEdible(title){const t=String(title||"");return EDIBLE_WORDS.some(w=>t.includes(w))}
-function shuffle(items){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function productCard(p){return '<a class="product-card" href="'+esc(p.url)+'" target="_blank" rel="sponsored noopener noreferrer" aria-label="広告: '+esc(p.title)+'"><img class="product-image" src="'+esc(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer"><span class="product-title">'+esc(p.title)+'</span></a>'}
-function productQueries(record){
-  /* 種名を先に試し、汎用の図鑑は最後の逃げ道にする。
-     「分類+図鑑」は必ずヒットするので、先に置くとどの記録でも同じ図鑑が並ぶ。
-     Books に絞る切り口を混ぜると、その種を扱った本へ寄る */
-  /* 広告は第一候補にひもづける。候補ごとに商品が変わると、どの候補の話なのか
-     読み手に分からない */
+/* 記録側の棚は記録に1つ。撮影画面は候補ごとに棚を持つが、こちらは「調べた内容を見る」
+   を開いたときに初めて叩くので、候補ぶん増やすと1回の開閉で商品APIを何度も叩く。
+   ひもづけ先は第一候補で、ラベルにその名前を入れて帰属を言い切る */
+async function loadProducts(record,shell){
   const top=(record.candidates||[])[0];
   const name=top?displayName(top):"";
-  const scientific=String(top?.scientific_name||"").trim();
-  const category=record.category||"";
-  const grow=category==="動物"?"飼育":category==="菌類"?"きのこ 栽培":"育て方";
-  const specific=[];
-  if(name){
-    /* 種名だけで引くと食品が上位に来る (タンポポ → たんぽぽ茶)。安全カードで
-       「食べられるかは判定しません」と言っている隣に食品を並べると、誤同定のとき
-       危険な後押しになる。用途を添えて観察・栽培の周辺へ寄せる */
-    specific.push({q:name,index:"Books"});          // その種を扱った本
-    specific.push({q:name+" 観察",index:"All"});
-    specific.push({q:name+" "+grow,index:"All"});
-  }
-  if(scientific&&scientific!==name)specific.push({q:scientific,index:"Books"});
-  /* ここまでで出なければ、分類群の一般書へ落とす */
-  const generic=category?[{q:category+" 図鑑",index:"Books",generic:true},{q:category+" 観察 ルーペ",index:"All",generic:true}]:[];
-  return [...shuffle(specific).slice(0,3),...generic];
-}
-async function loadProducts(record,shell){
-  /* 記録を開いたときだけ叩く。一覧を出すだけで全記録ぶんの商品APIを呼ばない */
-  if(shell.dataset.loaded)return;
-  shell.dataset.loaded="1";
-  /* 種名で引くと1件しか返らないことが多い。切り口をまたいで集め、重複を除いて並べる。
-     先に試すのは種そのもの、足りないぶんを分類群の一般書で補う */
-  const found={specific:[],generic:[]},seen=new Set();
-  let attempts=0;
-  for(const query of productQueries(record)){
-    const enough=found.specific.length+Math.min(found.generic.length,2)>=4;
-    if(enough||attempts>=4)break;
-    attempts++;
-    try{
-      const r=await fetch("/api/amazon/products?q="+encodeURIComponent(query.q)+"&index="+encodeURIComponent(query.index));
-      if(!r.ok)continue;
-      const data=await r.json();
-      for(const product of (Array.isArray(data.products)?data.products:[])){
-        /* 同じ品が別URLで返ることがあるので、題名でも重複を見る */
-        const key=String(product?.title||"").trim();
-        if(!product?.url||seen.has(product.url)||seen.has(key)||looksEdible(product.title))continue;
-        seen.add(product.url);seen.add(key);
-        found[query.generic?"generic":"specific"].push(product);
-      }
-    }catch(e){/* 次の切り口を試す */}
-  }
-  /* 分類群の一般書は枠を埋めるための保険。多くても2件までにして、
-     その種に固有の品が押しのけられないようにする */
-  const collected=[...shuffle(found.specific),...shuffle(found.generic).slice(0,2)].slice(0,4);
-  if(collected.length){
-    shell.innerHTML='<div class="affiliate-label">広告 · Amazonの関連商品</div><div class="product-grid">'+collected.map(productCard).join("")+'</div>';
-    shell.querySelectorAll(".product-card").forEach(link=>link.onclick=()=>fetch("/api/affiliate/click",{method:"POST",keepalive:true}).catch(()=>{}));
-    return;
-  }
+  const subject={name,scientific:top?.scientific_name||"",category:record.category||"",
+                 label:"Amazonで"+(name||"関連商品")+"の関連商品"};
+  const filled=await loadProductShelf(shell,subject,productBudget(4));
+  if(filled!==false)return;
   /* window.name を拾わないよう、記録から取り直す */
-  const topCandidate=(record.candidates||[])[0];
-  const fallback=topCandidate?displayName(topCandidate):"";
-  if(fallback)shell.innerHTML='<a class="product-fallback" href="/affiliate/click?q='+encodeURIComponent(fallback+" "+(record.category||""))+'" target="_blank" rel="sponsored noopener noreferrer">広告 · Amazonで'+esc(fallback)+'の関連商品を探す ↗</a>';
+  if(name)shell.innerHTML='<a class="product-fallback" href="/affiliate/click?q='+encodeURIComponent(name+" "+(record.category||""))+'" target="_blank" rel="sponsored noopener noreferrer">広告 · Amazonで'+esc(name)+'の関連商品を探す ↗</a>';
 }
 async function reidentify(record,button,message){
   /* 元の写真は保存していない。記録の縮小画像 (長辺960px) を送り直す。

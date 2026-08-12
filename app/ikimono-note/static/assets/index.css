@@ -18,6 +18,11 @@
 /* トークン名はこのページの定義に合わせる。--color-* は login/settings 側の名前で、
    ここでは未定義のまま参照していたため枠も背景も付いていなかった */
 .photo-notes{margin:0 0 12px;padding:10px 13px;border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:var(--radius);background:var(--raised);font-size:.92rem}.photo-notes strong{display:block;margin-bottom:4px}.photo-notes ul{margin:0;padding-left:1.2em}
+/* 棚が候補の中に入ったので、候補どうしを分ける線と重ならないよう控えめにする。
+   結果パネルは全幅なので、4列のままだと商品が候補の本文より目立つ */
+.candidate .product-shell{margin-top:14px;padding-top:12px}
+.candidate .product-grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));max-width:620px}
+.candidate .product-card{max-width:168px}
 /* 種の保存法の指定。候補の名前のすぐ下に置く。証拠や見分け方より先に読ませる */
 .protected{margin:10px 0;padding:11px 13px;border:1px solid var(--danger);border-left-width:3px;border-radius:var(--radius);background:var(--warning)}
 .protected strong{display:block;color:var(--danger)}

@@ -47,6 +47,18 @@ PROTECTED_SAMPLE["candidates"][0].update({
                           "common_name_ja": "イタセンパラ", "as_of": "令和7年2月"},
 })
 
+# 候補3件。広告が候補ごとに付き、確からしさの低い候補にも付くことを目で見る
+THREE_CANDIDATE_SAMPLE = json.loads(json.dumps(SAMPLE))
+THREE_CANDIDATE_SAMPLE["candidates"] = [
+    {**json.loads(json.dumps(SAMPLE["candidates"][0])), "common_name_ja": name,
+     "scientific_name": latin, "evidence_status": status, "confidence": score}
+    for name, latin, status, score in [
+        ("セイヨウタンポポ", "Taraxacum officinale", "corroborated", 60),
+        ("カンサイタンポポ", "Taraxacum japonicum", "taxonomy_only", 40),
+        ("ノゲシ", "Sonchus oleraceus", "uncertain", 30),
+    ]
+]
+
 failures: list[str] = []
 
 
@@ -124,6 +136,19 @@ def run(base: str, do_identify: bool) -> None:
         check("安全カードが出る", page.locator("#safetyCard").count() == 1)
         widths = page.eval_on_selector_all(".meter span", "els => els.map(e => e.style.width)")
         check("確信度のメーターに幅が入る", widths == ["60%"], str(widths))
+
+        # 広告は候補ごと。商品APIが断られていても、候補ごとの検索リンクは残る
+        page.evaluate("data => render(data)", THREE_CANDIDATE_SAMPLE)
+        page.wait_for_timeout(2500)
+        shelves = page.locator("article.candidate .product-shell")
+        check("棚は候補の中に1つずつ置かれる", shelves.count() == 3, str(shelves.count()))
+        check("棚が候補の外に残っていない",
+              page.locator(".product-shell").count() == shelves.count())
+        labels = page.eval_on_selector_all(".product-shell", "els => els.map(e => e.innerText)")
+        check("どの候補の広告かを名前で言う",
+              all(name in text for name, text in zip(["セイヨウタンポポ", "カンサイタンポポ", "ノゲシ"], labels)),
+              " / ".join(t[:30] for t in labels))
+        page.evaluate("data => render(data)", SAMPLE)
 
         # 種の保存法の指定。指定のない候補には何も出さない (無印は「指定なし」ではない)
         check("指定のない候補には注意書きを出さない", page.locator(".protected").count() == 0)

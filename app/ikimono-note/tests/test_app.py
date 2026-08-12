@@ -193,7 +193,7 @@ def test_settings_page_enables_all_providers():
     assert "https://my.plantnet.org/" in response.text
     assert "ChatGPTの月額契約とは別" in response.text
     assert "Claudeの月額契約とは別" in response.text
-    assert "topCandidateAffiliateLink(data.candidates,data.category)" in page_source("/")
+    assert "affiliateProductLink(c,data.category)" in page_source("/")
     assert "loadAmazonProducts()" in page_source("/")
     assert "position:fixed" not in page_source("/")
     assert "position:sticky" not in page_source("/")
@@ -1182,50 +1182,72 @@ def test_subtitle_states_one_thing():
 def test_record_ads_are_loaded_only_when_a_record_is_opened():
     """一覧を出すだけで全記録ぶんの商品APIを呼ばない。50件×候補3で150回になる。"""
     history = client.get("/assets/history.js").text
+    products = client.get("/assets/products.js").text
     assert 'detail.addEventListener("toggle",load)' in history
-    assert "if(shell.dataset.loaded)return" in history      # 開き直しで再取得しない
+    assert "if (shell.dataset.loaded) return" in products   # 開き直しで再取得しない
     assert "if(detail.open)loadProducts(record,shell)" in history
 
 
-def test_record_ads_show_several_products_with_pictures():
+def test_product_shelf_logic_is_shared_by_both_screens():
+    """商品まわりを画面ごとに書かない。
+
+    食品の除外と切り口の使い分けは記録画面にしかなく、撮影画面には素の検索語しか
+    なかった。安全カードが「食べられるかは判定しません」と言っているのは撮影画面の
+    ほうなので、除外が要るのもそちら側だった。productCard も二重に書かれていた。
+    """
+    for page in ["/", "/history"]:
+        assert 'src="/assets/products.js"' in client.get(page).text, page
+    products = client.get("/assets/products.js").text
+    index = client.get("/assets/index.js").text
     history = client.get("/assets/history.js").text
-    assert "function productCard(p)" in history
-    assert 'class="product-image"' in history and 'class="product-grid"' in history
-    assert 'rel="sponsored noopener noreferrer"' in history
-    assert '広告 · ' in history                              # 広告と明示する
-    css = client.get("/assets/history.css").text
-    assert ".product-grid{" in css and ".product-card{" in css
+    for name in ["function productCard(", "function productQueries(", "function looksEdible(",
+                 "function shuffle(", "const EDIBLE_WORDS"]:
+        assert name in products, name
+        assert name not in index, (name, "index.js に写しが残っている")
+        assert name not in history, (name, "history.js に写しが残っている")
+
+
+def test_record_ads_show_several_products_with_pictures():
+    products = client.get("/assets/products.js").text
+    assert "function productCard(product)" in products
+    assert 'class="product-image"' in products and 'class="product-grid"' in products
+    assert 'rel="sponsored noopener noreferrer"' in products
+    assert '広告 · ' in products                              # 広告と明示する
+    for css_path in ["/assets/history.css", "/assets/index.css"]:
+        css = client.get(css_path).text
+        assert ".product-grid{" in css and ".product-card{" in css, css_path
 
 
 def test_record_ads_prefer_the_species_over_generic_field_guides():
-    """「分類+図鑑」は必ずヒットするので、先に置くとどの記録でも同じ図鑑が並ぶ。"""
-    history = client.get("/assets/history.js").text
-    assert "function productQueries(record)" in history
-    assert "shuffle(specific).slice(0,3)" in history        # 種名の切り口を先に、順はランダム
-    assert 'specific.push({q:name,index:"Books"})' in history   # その種を扱った本
-    assert '{q:category+" 図鑑",index:"Books",generic:true}' in history
+    """「分類+図鑑」は必ずヒットするので、先に置くとどの候補でも同じ図鑑が並ぶ。"""
+    products = client.get("/assets/products.js").text
+    assert "function productQueries(name, scientificName, category)" in products
+    assert "shuffle(specific).slice(0, 3)" in products      # 種名の切り口を先に、順はランダム
+    assert 'specific.push({ q: name, index: "Books" })' in products   # その種を扱った本
+    assert '{ q: category + " 図鑑", index: "Books", generic: true }' in products
     # 一般書は枠を埋める保険。多くても2件までにして種固有の品を押しのけない
-    assert 'shuffle(found.generic).slice(0,2)' in history
-    assert "product-fallback" in history                    # 全滅なら検索リンクへ
+    assert "shuffle(found.generic).slice(0, 2)" in products
+    assert "product-fallback" in client.get("/assets/history.js").text  # 全滅なら検索リンクへ
+    assert "product-fallback" in client.get("/assets/index.js").text
 
 
 def test_record_ads_keep_food_away_from_the_safety_warning():
     """「食べられるかは判定しません」の隣に食品を並べない。誤同定のとき危険な後押しになる。"""
-    history = client.get("/assets/history.js").text
-    assert "function looksEdible(title)" in history
-    assert "EDIBLE_WORDS" in history
+    products = client.get("/assets/products.js").text
+    assert "function looksEdible(title)" in products
+    assert "EDIBLE_WORDS" in products
     for word in ["茶", "食用", "乾燥", "サプリ", "おやつ"]:
-        assert f'"{word}"' in history, word
-    assert "looksEdible(product.title)" in history
+        assert f'"{word}"' in products, word
+    assert "looksEdible(product.title)" in products
     # 種名だけで引くと食品が上位に来るため、用途を添える
-    assert 'specific.push({q:name,index:"All"})' not in history
-    assert 'name+" 観察"' in history
+    assert 'specific.push({ q: name, index: "All" })' not in products
+    assert 'name + " 観察"' in products
 
 
 def test_record_ads_drop_duplicates_by_title_too():
     """同じ品が別URLで返ることがある。"""
-    history = client.get("/assets/history.js").text
-    assert "seen.has(product.url)||seen.has(key)" in history
+    products = client.get("/assets/products.js").text
+    assert "budget.seen.has(product.url)" in products and "budget.seen.has(key)" in products
 
 
 def test_product_images_are_allowed_by_the_policy():
@@ -1251,18 +1273,40 @@ def test_records_can_be_examined_again():
     assert ".slice(50)" in history   # 上限50件は撮影画面と同じ
 
 
-def test_adverts_follow_the_first_candidate():
-    """候補を巡回させると、確からしさの低い2番目3番目で商品を引く。
-    どの候補の広告なのかも読み手に分からない。"""
+def test_each_candidate_owns_its_advert():
+    """広告の帰属は位置で決める。巡回させない。
+
+    最初は1つの棚が候補間を巡回しており、どの候補の広告なのか読み手に分からなかった。
+    次に第一候補へ固定したが、棚は全候補の後ろにあり、結びつきは順序の暗黙知だった。
+    いまは候補のブロックの中に置く。名前もラベルに入れて、位置と文字の両方で言い切る。
+    そのぶん決め手のない候補にも広告が付くので、候補名を出す約束は外せない。
+    """
     index = client.get("/assets/index.js").text
-    assert "function topCandidateAffiliateLink(candidates,category)" in index
-    assert "affiliateCursor" not in index
-    assert "candidates[0]" in index
+    assert "affiliateProductLink(c,data.category)+'</article>'" in index  # 候補の中に置く
+    assert "topCandidateAffiliateLink" not in index      # 全候補の後ろの1棚をやめた
+    assert "affiliateCursor" not in index                # 巡回はしない
+    assert "candidates[0]" not in index
+    assert '"Amazonで"+shell.dataset.name+"の関連商品"' in index  # ラベルに候補名を入れる
     history = client.get("/assets/history.js").text
-    assert "const top=(record.candidates||[])[0]" in history
-    assert "Math.floor(Math.random()*named.length)" not in history  # ランダム選択をやめた
-    # フォールバックも第一候補から取る（window.name を拾わない）
-    assert "const topCandidate=(record.candidates||[])[0]" in history
+    assert "const top=(record.candidates||[])[0]" in history  # 記録側は記録に1棚のまま
+    assert "Math.floor(Math.random()*named.length)" not in history
+
+
+def test_candidate_adverts_stay_within_a_request_budget():
+    """候補ごとに棚を持つと、識別1回で商品APIを何度も叩く。上限と順序を決めておく。"""
+    index = client.get("/assets/index.js").text
+    products = client.get("/assets/products.js").text
+    assert "function productBudget(maxRequests = 6, perShelf = 2)" in products
+    assert "budget.left <= 0" in products                # 通しの予算が切れたら打ち切る
+    assert "budget.left--" in products
+    # 棚ごとの上限もいる。通しだけだと最初の候補が使い切り、3番目が1回も引けない
+    assert "used >= budget.perShelf" in products
+    # まとめて投げない。上の候補から順に使う (下の候補ほど確からしさが低い)
+    assert "for(const shell of document.querySelectorAll" in index
+    assert "await loadProductShelf(shell," in index
+    assert "Promise.all" not in index
+    # 集めた品は棚をまたいで覚える。どの候補でも当たる一般書が3つ並ぶのを防ぐ
+    assert "budget.seen.add(product.url)" in products
 
 
 def test_backup_carries_photos_without_tripping_the_policy():

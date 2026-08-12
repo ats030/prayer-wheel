@@ -58,12 +58,33 @@ function protectedSpeciesHtml(c){
     +'<a target="_blank" rel="noopener noreferrer" href="https://www.env.go.jp/nature/kisho/domestic/list.html">環境省 国内希少野生動植物種一覧 ↗</a></div>';
 }
 function sexHtml(c,category){if(category!=="動物")return "";const sex=["オス","メス"].includes(c.sex)?c.sex:"わかりません";const evidence=sex!=="わかりません"&&c.sex_evidence?.length?'<ul class="sex-evidence">'+c.sex_evidence.map(item=>'<li>'+esc(item)+'</li>').join("")+'</ul>':'<p>写真だけでは、この生きもののオス・メスの違いを確認できません。</p>';return '<div class="sex-result"><strong>オス・メスの推測：'+sex+'</strong><p>AIが写真から推測したものです。資料や実物で確かめてください。</p>'+evidence+'</div>'}
-function affiliateProductLink(c,category){if(!affiliate||!affiliate.enabled)return "";const name=noJapaneseName(c.common_name_ja)?c.scientific_name:c.common_name_ja;const query=name+" "+category;return `<div class="product-shell amazon-products" data-query="${encodeURIComponent(query)}"><a class="product-fallback" href="/affiliate/click?q=${encodeURIComponent(query)}" target="_blank" rel="sponsored noopener noreferrer">広告 · Amazonで関連商品を探す ↗</a></div>`}
-/* 広告は第一候補にひもづける。巡回させると、確からしさの低い2番目3番目の候補で
-   商品を引くことがあり、結果と広告の関係が分かりにくくなる */
-function topCandidateAffiliateLink(candidates,category){return candidates.length?affiliateProductLink(candidates[0],category):""}
-function productCard(product){return `<a class="product-card" href="${esc(product.url)}" target="_blank" rel="sponsored noopener noreferrer" aria-label="広告: ${esc(product.title)}"><img class="product-image" src="${esc(product.image)}" alt="" loading="lazy" referrerpolicy="no-referrer"><span class="product-title">${esc(product.title)}</span></a>`}
-async function loadAmazonProducts(){if(!affiliate?.product_enabled)return;await Promise.all([...document.querySelectorAll(".amazon-products")].map(async shell=>{try{const r=await fetch("/api/amazon/products?q="+shell.dataset.query);if(!r.ok)return;const data=await r.json();if(!Array.isArray(data.products)||!data.products.length)return;shell.innerHTML=`<div class="affiliate-label">広告 · Amazonの関連商品</div><div class="product-grid">${data.products.map(productCard).join("")}</div>`;shell.querySelectorAll(".product-card").forEach(link=>link.onclick=()=>fetch("/api/affiliate/click",{method:"POST",keepalive:true}).catch(()=>{}))}catch(e){}}))}
+/* 広告は候補ごとに、その候補のブロックの中へ置く。以前は棚を1つだけ置いて第一候補に
+   ひもづけていた。さらに前は1つの棚が候補間を巡回しており、どの候補の広告なのか
+   読み手に分からなかった。候補の中に入れれば、帰属は位置で決まる。
+   ただし決め手のない候補にも広告が付くことになる。ラベルに候補名を入れて、
+   何に対する広告なのかを言い切る。 */
+function affiliateProductLink(c,category){
+  if(!affiliate||!affiliate.enabled)return "";
+  const name=noJapaneseName(c.common_name_ja)?c.scientific_name:c.common_name_ja;
+  const query=name+" "+category;
+  return '<div class="product-shell amazon-products"'
+    +' data-name="'+esc(name)+'" data-scientific="'+esc(c.scientific_name||"")+'"'
+    +' data-category="'+esc(category||"")+'">'
+    +'<a class="product-fallback" href="/affiliate/click?q='+encodeURIComponent(query)+'"'
+    +' target="_blank" rel="sponsored noopener noreferrer">広告 · Amazonで'+esc(name)+'の関連商品を探す ↗</a></div>';
+}
+/* 棚を順に埋める。まとめて投げると、候補3件ぶんの商品APIが同時に飛ぶ。
+   予算は棚をまたいだ通しで持ち、上の候補から先に使う (下の候補ほど確からしさが低い) */
+async function loadAmazonProducts(){
+  if(!affiliate?.product_enabled)return;
+  const budget=productBudget();
+  for(const shell of document.querySelectorAll(".amazon-products")){
+    await loadProductShelf(shell,{
+      name:shell.dataset.name,scientific:shell.dataset.scientific,
+      category:shell.dataset.category,label:"Amazonで"+shell.dataset.name+"の関連商品",
+    },budget);
+  }
+}
 function safetyHtml(){const location=gps?`取得済み（誤差 約${Math.round(gps.accuracy)}m）`:"まだ取得していません";return `<aside class="safety-card" id="safetyCard"><h3>見つけた生きものの扱い</h3><p class="safety-lead">この結果は「たぶんこれ」という候補です。食べる・さわる・持ち帰るの判断には使えません。小さなお子さんが使うときは、大人といっしょに読んでください。</p><div class="safety-grid"><div class="safety-item"><span class="safety-status">食べられるか：判定しません</span><p>写真だけでは、よく似た毒のある種、毒のある部分、育ち具合を見分けられません。この結果をもとに食べないでください。</p><a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/shokuhin/yuudoku/index.html" target="_blank" rel="noopener noreferrer">厚生労働省の注意情報 ↗</a></div><div class="safety-item"><span class="safety-status">さわってよいか：判定しません</span><p>かぶれる植物、刺す・かむ生きものは、写真では見分けきれません。素手でさわらず、離れて観察してください。生きものを弱らせない距離を保ちましょう。</p></div><div class="safety-item"><span class="safety-status">持ち帰ってよいか：確認が必要</span><p>現在地：${location}。場所がわかっても、その土地の持ち主の許可、保護区域、自治体のきまり、保護されている種かどうかまでは確認できません。すべて確認できるまで採らないでください。</p><a href="https://www.env.go.jp/park/about/protect/index.html" target="_blank" rel="noopener noreferrer">環境省の採取規制を確認 ↗</a></div></div></aside>`}
 function plantnetCreditHtml(data){
   /* Pl@ntNet の無料枠は "based on the Pl@ntNet recognition API" の明示を求めている */
@@ -88,7 +109,7 @@ function evidenceHtml(c){
 /* 質で弾いたときの detail は {message, problems}。文字列とオブジェクトの両方が来る */
 function errorText(detail){if(!detail)return "調べられませんでした";if(typeof detail==="string")return detail;const notes=(detail.problems||[]).map(p=>p.message).join(" ");return (detail.message||"調べられませんでした")+(notes?" "+notes:"")}
 function photoNotes(data){const notes=(data.photo_notes||[]);if(!notes.length)return "";return '<div class="photo-notes"><strong>次に撮るときは</strong><ul>'+notes.map(n=>"<li>"+esc(n.message)+"</li>").join("")+"</ul></div>"}
-function render(data){if(!data.candidates.length){$('results').className='';$("results").innerHTML=photoNotes(data)+`<div class="placeholder">図鑑データで確認できる候補が見つかりませんでした。全体・もよう・特徴のある部分を、別の角度から撮ってみてください。</div>${safetyHtml()}`;return}$('results').className='';$('results').innerHTML=photoNotes(data)+'<p class="summary"><strong>'+esc(data.category)+'</strong> · '+esc(data.summary)+'</p>' +data.candidates.map((c,i)=>'<article class="candidate"><div class="name-row"><div><div class="name">'+(i+1)+'. '+esc(c.common_name_ja)+'</div><div class="latin">'+esc(c.scientific_name)+'</div>'+taxonomyBadge(c)+agreementBadge(c)+'</div>'+confidenceView(c)+protectedSpeciesHtml(c)+evidenceHtml(c)+sexHtml(c,data.category)+(c.uncertainty?'<div class="uncertainty">もっと確かめたいこと：'+esc(c.uncertainty)+'</div>':'')+'<div class="sources"><a target="_blank" rel="noopener" href="'+sourceUrl(noJapaneseName(c.common_name_ja)?c.scientific_name:c.common_name_ja)+'">図鑑を検索 ↗</a>'+(wikipediaUrl(c)?'<a target="_blank" rel="noopener noreferrer" href="'+esc(wikipediaUrl(c))+'">Wikipedia ↗</a>':'')+(c.taxonomy_url?'<a target="_blank" rel="noopener" href="'+esc(c.taxonomy_url)+'">iNaturalist ↗</a>':'')+'</div>'+animalReferenceHtml(c,data.category)+'</article>').join('')+safetyHtml()+plantnetCreditHtml(data)+topCandidateAffiliateLink(data.candidates,data.category)+affiliateHtml();applyMeters();if(document.getElementById('affiliateCard'))fetch('/api/affiliate/impression',{method:'POST'}).catch(()=>{});loadAmazonProducts()}
+function render(data){if(!data.candidates.length){$('results').className='';$("results").innerHTML=photoNotes(data)+`<div class="placeholder">図鑑データで確認できる候補が見つかりませんでした。全体・もよう・特徴のある部分を、別の角度から撮ってみてください。</div>${safetyHtml()}`;return}$('results').className='';$('results').innerHTML=photoNotes(data)+'<p class="summary"><strong>'+esc(data.category)+'</strong> · '+esc(data.summary)+'</p>' +data.candidates.map((c,i)=>'<article class="candidate"><div class="name-row"><div><div class="name">'+(i+1)+'. '+esc(c.common_name_ja)+'</div><div class="latin">'+esc(c.scientific_name)+'</div>'+taxonomyBadge(c)+agreementBadge(c)+'</div>'+confidenceView(c)+protectedSpeciesHtml(c)+evidenceHtml(c)+sexHtml(c,data.category)+(c.uncertainty?'<div class="uncertainty">もっと確かめたいこと：'+esc(c.uncertainty)+'</div>':'')+'<div class="sources"><a target="_blank" rel="noopener" href="'+sourceUrl(noJapaneseName(c.common_name_ja)?c.scientific_name:c.common_name_ja)+'">図鑑を検索 ↗</a>'+(wikipediaUrl(c)?'<a target="_blank" rel="noopener noreferrer" href="'+esc(wikipediaUrl(c))+'">Wikipedia ↗</a>':'')+(c.taxonomy_url?'<a target="_blank" rel="noopener" href="'+esc(c.taxonomy_url)+'">iNaturalist ↗</a>':'')+'</div>'+animalReferenceHtml(c,data.category)+affiliateProductLink(c,data.category)+'</article>').join('')+safetyHtml()+plantnetCreditHtml(data)+affiliateHtml();applyMeters();if(document.getElementById('affiliateCard'))fetch('/api/affiliate/impression',{method:'POST'}).catch(()=>{});loadAmazonProducts()}
 function historyDb(){return new Promise((resolve,reject)=>{if(!("indexedDB" in window)){reject(new Error("このブラウザでは、調べた記録を保存できません"));return}const request=indexedDB.open("species-history",1);request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("entries"))db.createObjectStore("entries",{keyPath:"id"})};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
 function requestValue(request){return new Promise((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
 function transactionDone(transaction){return new Promise((resolve,reject)=>{transaction.oncomplete=resolve;transaction.onerror=()=>reject(transaction.error);transaction.onabort=()=>reject(transaction.error)})}
