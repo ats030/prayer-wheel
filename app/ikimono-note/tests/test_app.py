@@ -1431,11 +1431,10 @@ def test_user_records_survive_a_stateless_host():
 def test_the_container_carries_only_what_it_needs():
     """ホーム全体の pyproject.toml には無関係な依存が106個ある。持ち込まない。"""
     root = Path(__file__).parents[1]
-    requirements = (root / "requirements.txt").read_text()
-    for needed in ["fastapi", "uvicorn", "httpx", "pillow", "python-multipart"]:
-        assert needed in requirements, needed
-    for unrelated in ["streamlit", "playwright", "pandas", "twscrape", "pyarrow"]:
-        assert unrelated not in requirements, unrelated
+    # コメントに書いた「streamlit など」に反応しないよう、実際の行だけを見る
+    lines = [line.split("#")[0].strip() for line in (root / "requirements.txt").read_text().splitlines()]
+    packages = {re.split(r"[=<>~\[]", line)[0] for line in lines if line}
+    assert packages == {"fastapi", "uvicorn", "httpx", "pillow", "python-multipart"}, packages
     dockerfile = (root / "Dockerfile").read_text()
     assert "${PORT}" in dockerfile          # Cloud Run が渡すポートに従う
     assert "USER app" in dockerfile         # root で動かさない
