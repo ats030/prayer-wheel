@@ -120,10 +120,10 @@ async function restoreBackup(payload) {
    ドライブにつながっていないときは何もしない (記録は端末の中に残る) */
 let backupTimer = null;
 function scheduleAutoBackup() {
-  /* 運営者用 (8443) は動作を確かめる場で、そこで撮った試しの記録がドライブに
-     混ざると、利用者の記録と見分けがつかなくなる。画面から隠すだけでは、
-     以前つないだ印が残っていると書き込まれてしまう */
-  if (document.body.dataset.appMode !== "public") return;
+  /* 運営者用も書く。以前は「試し撮りが利用者の記録に混ざる」を理由に止めていたが、
+     混ざるのは保存先が同じファイルだったからで、書き込み自体が悪かったのではない。
+     いまはモードごとに別ファイルへ書く (gdrive.js の driveFileName)。止めていた間、
+     運営者用の記録はその端末のブラウザから出られなかった。 */
   clearTimeout(backupTimer);
   backupTimer = setTimeout(() => {
     if (typeof autoSaveToDrive === "function") autoSaveToDrive();

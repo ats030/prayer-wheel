@@ -9,7 +9,14 @@
  */
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
-const DRIVE_FILE_NAME = "ikimono-note.json";
+/* 保存先は画面のモードで分ける。運営者用 (8443) の試し撮りが利用者の記録と同じ
+   ファイルに入ると、あとから見分けられない。以前はその理由で運営者用の書き込み
+   ごと止めていたが、それだと運営者の記録が端末から出られず、別の端末で見られない。
+   ファイルを分ければ、混ざらないことと持ち出せることが両立する。 */
+const DRIVE_FILE_NAMES = {operator: "ikimono-note-operator.json", public: "ikimono-note.json"};
+function driveFileName() {
+  return DRIVE_FILE_NAMES[document.body?.dataset?.appMode] || DRIVE_FILE_NAMES.public;
+}
 const DRIVE_KEY = "species-drive-file";   // 作ったファイルのIDを覚えておく
 
 let driveToken = null;      // メモリだけに置く。保存すると盗まれたとき困る
@@ -163,7 +170,7 @@ async function findDriveFile() {
     try { await driveFetch(`https://www.googleapis.com/drive/v3/files/${known}?fields=id,trashed`); return known; }
     catch (error) { rememberDriveFile(""); }
   }
-  const query = encodeURIComponent(`name='${DRIVE_FILE_NAME}' and trashed=false`);
+  const query = encodeURIComponent(`name='${driveFileName()}' and trashed=false`);
   const response = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)&pageSize=1`);
   const found = (await response.json()).files?.[0]?.id || "";
   if (found) rememberDriveFile(found);
@@ -174,7 +181,7 @@ async function saveToDrive() {
   const payload = await buildBackup();
   const body = new Blob([JSON.stringify(payload)], {type: "application/json"});
   const existing = await findDriveFile();
-  const metadata = existing ? {} : {name: DRIVE_FILE_NAME, mimeType: "application/json"};
+  const metadata = existing ? {} : {name: driveFileName(), mimeType: "application/json"};
   const form = new FormData();
   form.append("metadata", new Blob([JSON.stringify(metadata)], {type: "application/json"}));
   form.append("file", body);
@@ -190,4 +197,49 @@ async function loadFromDrive() {
   if (!existing) throw new Error("Google ドライブにまだ記録がありません");
   const response = await driveFetch(`https://www.googleapis.com/drive/v3/files/${existing}?alt=media`);
   return await restoreBackup(JSON.parse(await response.text()));
+}
+
+/* つないである端末では、画面を開いたときに一度だけ取り込む。
+ *
+ * 取り込みを設定画面のボタンだけに任せると、別の端末で先に1件調べた瞬間、
+ * その少ない側でドライブのファイルが上書きされる。書き込みは last-writer-wins で、
+ * 統合が起きるのは読み込みのときだけだから。開いた直後に合流させておけば、
+ * そのあとの自動保存はどの端末でも「全部入り」を書く。
+ *
+ * 1タブにつき1回。記録50件は数MBあるので、画面を移るたびに引き直さない。
+ */
+const DRIVE_PULLED = "species-drive-pulled";
+let drivePull = null;   // defer と DOMContentLoaded の両方から呼ばれる。二重に引かない
+
+function syncFromDriveOnce() {
+  if (!drivePull) drivePull = pullFromDrive();
+  return drivePull;
+}
+
+async function pullFromDrive() {
+  if (!driveLinked()) return false;
+  try { if (sessionStorage.getItem(DRIVE_PULLED) === "1") return false; } catch (error) { return false; }
+  try {
+    const settings = await fetch("/api/settings").then(r => r.ok ? r.json() : null);
+    if (!await ensureDriveToken(settings?.google_client_id || "")) {
+      noteDriveStatus(false, "つなぎ直しが必要です");
+      return false;
+    }
+    const restored = await loadFromDrive();
+    try { sessionStorage.setItem(DRIVE_PULLED, "1"); } catch (error) { /* 覚えられなくても取り込みは済んでいる */ }
+    /* 記録一覧はもう描き終わっている。描き直す機会を渡す */
+    document.dispatchEvent(new CustomEvent("species-records-restored", {detail: {restored}}));
+    return true;
+  } catch (error) {
+    /* まだ1件も保存していない端末では「記録がありません」で正常に落ちる。
+       画面に出すことはしない (利用者が押していない処理で赤字を出さない) */
+    console.info("ドライブから取り込めませんでした", error);
+    return false;
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => { syncFromDriveOnce(); });
+} else {
+  syncFromDriveOnce();
 }

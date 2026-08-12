@@ -39,10 +39,10 @@
     <div class="panel" data-only="public"><p class="help">APIキーを入れて保存すると、ブラウザから「パスワードを保存しますか」と聞かれることがあります。保存しておくと、別の端末でも<strong>ブラウザが覚えていて入力を補います</strong>。保存先はブラウザ（またはGoogleアカウント）で、本サービスは受け取りません。</p><label class="check"><input id="keep-keys" type="checkbox" checked><span>この端末にAPIキーを残す（次に開くとき入力しなくて済みます）。共用の端末では外してください。外すとタブを閉じたときに消えます。</span></label></div><div class="actions"><button class="button primary" id="save-button" type="submit"><span data-only="operator">変更を保存</span><span data-only="public">この端末に保存</span></button><a class="button" href="/">キャンセル</a></div><p class="message" id="message" aria-live="polite"></p>
   </form>
   
-  <section class="section" data-only="public" aria-labelledby="backup-heading">
+  <section class="section" aria-labelledby="backup-heading">
     <div class="section-head"><h2 id="backup-heading">記録の保存 <span class="need optional">任意</span></h2><p>設定しないと、記録はこの端末の中だけに残ります</p></div>
     <div class="panel">
-      <p class="help">調べた記録（写真を含む）と、使うAIの設定を、ご自身の Google ドライブへ自動で保存します。やり取りはブラウザから Google へ直接行き、<strong>本サービスのサーバーを通りません</strong>。このアプリが作った ikimono-note.json だけを読み書きします。</p>
+      <p class="help">調べた記録（写真を含む）と、使うAIの設定を、ご自身の Google ドライブへ自動で保存します。やり取りはブラウザから Google へ直接行き、<strong>本サービスのサーバーを通りません</strong>。このアプリが作ったファイルだけを読み書きします（運営者用の記録は ikimono-note-operator.json、公開版は ikimono-note.json と、別々に分けています）。同じ Google アカウントでつなげば、別の端末でも同じ記録になります。</p>
       <p class="help" id="drive-unavailable" hidden></p>
       <div class="status-strip" id="drive-strip" hidden><span>状態</span><strong id="drive-state">未接続</strong></div>
       <div class="actions" id="drive-actions" hidden><button class="button primary" id="drive-connect" type="button">ドライブにつなぐ</button><button class="button" id="drive-save" type="button" hidden>いま保存</button><button class="button" id="drive-load" type="button" hidden>読み込む</button><button class="button" id="drive-forget" type="button" hidden>接続を解除</button></div>

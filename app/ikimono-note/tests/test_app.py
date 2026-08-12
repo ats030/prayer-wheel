@@ -1744,17 +1744,44 @@ def test_the_words_stay_the_same_across_screens():
     assert "判定しません" in client.get("/assets/index.js").text
 
 
-def test_the_operator_screen_does_not_reach_the_drive():
-    """運営者用 (8443) は動作を確かめる場で、そこで撮った試しの記録がドライブに
-    混ざると、利用者の記録と見分けがつかなくなる。"""
+def test_operator_records_travel_but_do_not_mix_with_visitors():
+    """運営者用の記録も端末をまたいで同じものにする。ただし利用者の記録とは分ける。
+
+    以前は運営者用の書き込みごと止めていた。理由は「試し撮りが利用者の記録に混ざると
+    見分けがつかない」で、混ざるのは保存先が同じファイルだったから。書き込み自体が
+    悪かったのではない。止めていた間、運営者用の記録はその端末から出られなかった。
+    """
     page = client.get("/settings").text     # 既定は運営者モード
     section = page.split('aria-labelledby="backup-heading"')[0]
-    assert section.rstrip().endswith('data-only="public"'), "記録の保存が公開版限定になっていない"
-    # 画面から隠すだけでは、以前つないだ印が残っていると書き込まれる
+    assert not section.rstrip().endswith('data-only="public"'), "運営者用で記録の保存が隠れている"
     backup = client.get("/assets/backup.js").text
-    guard = backup.split("function scheduleAutoBackup() {")[1].split("clearTimeout")[0]
-    assert 'document.body.dataset.appMode !== "public"' in guard
-    assert "return;" in guard
+    guard = backup.split("function scheduleAutoBackup() {")[1].split("backupTimer = setTimeout")[0]
+    assert 'document.body.dataset.appMode !== "public"' not in guard
+    drive = client.get("/assets/gdrive.js").text
+    assert 'operator: "ikimono-note-operator.json"' in drive
+    assert 'public: "ikimono-note.json"' in drive
+    assert "function driveFileName()" in drive
+    # 固定名のまま書き込むと、モードを分けた意味がなくなる
+    assert "name: driveFileName()" in drive
+    assert "${driveFileName()}" in drive
+
+
+def test_a_second_device_pulls_before_it_can_overwrite():
+    """開いた直後に取り込む。書き込みは last-writer-wins で、統合は読み込みでしか起きない。
+
+    取り込みを設定画面のボタンだけに任せると、別の端末で先に1件調べた瞬間、その
+    少ない側でドライブのファイルが上書きされる。
+    """
+    drive = client.get("/assets/gdrive.js").text
+    assert "async function pullFromDrive()" in drive
+    assert "await loadFromDrive()" in drive
+    assert "if (!drivePull) drivePull = pullFromDrive()" in drive   # 二重に引かない
+    assert 'sessionStorage.getItem(DRIVE_PULLED)' in drive          # 1タブ1回
+    assert 'if (!driveLinked()) return false' in drive              # つないでいなければ何もしない
+    # 一覧はもう描き終わっているので、届いたら描き直す
+    assert 'document.dispatchEvent(new CustomEvent("species-records-restored"' in drive
+    history = client.get("/assets/history.js").text
+    assert 'document.addEventListener("species-records-restored"' in history
 
 
 def test_you_can_tell_what_must_be_set():

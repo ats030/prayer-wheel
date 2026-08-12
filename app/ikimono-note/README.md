@@ -39,7 +39,21 @@ APIキーは含めません。ファイルが漏れたとき、そのまま課�
 Google ドライブは WebDAV を提供していないため、OAuth と Drive API を使います。
 通信はブラウザから Google へ直接行き、本サービスのサーバーを経由しません
 (写真もトークンも運営者を通りません)。権限は drive.file に絞ってあり、この
-アプリが作った ikimono-note.json しか見えません。
+アプリが作ったファイルしか見えません。
+
+保存先は画面のモードで分けます。運営者用 (8443) は `ikimono-note-operator.json`、
+公開版は `ikimono-note.json` です。以前は運営者用の書き込みごと止めていました
+(試し撮りが利用者の記録に混ざると見分けがつかないため) が、混ざる原因は保存先が
+同じファイルだったことで、書き込み自体ではありません。止めていた間、運営者用の
+記録はその端末のブラウザから出られず、別の端末では見られませんでした。ファイルを
+分ければ、混ざらないことと持ち出せることが両立します。同じ Google アカウントで
+つなげば、どの端末でも同じ記録になります。
+
+つないである端末は、画面を開いたときに一度だけ取り込みます。取り込みを設定画面の
+ボタンだけに任せると、別の端末で先に1件調べた瞬間、その少ない側でドライブの
+ファイルが上書きされます (書き込みは last-writer-wins で、統合は読み込みのときにしか
+起きないため)。開いた直後に合流させておけば、そのあとの自動保存はどの端末でも
+全部入りを書きます。1タブにつき1回だけです (記録50件は数MBあるため)。
 
 使うには運営者が Google Cloud Console で OAuth クライアントID (ウェブアプリ
 ケーション) を作り、環境変数で渡します。クライアントIDは公開情報で、秘密鍵は
@@ -105,7 +119,7 @@ systemctl --user restart ikimono-note ikimono-note-public
 使うAI、APIキー、モデルは画面上部の「設定」から変更できます。OllamaではURLを入力でき、その接続先にインストール済みで画像入力に対応するモデルを自動表示します。別端末のOllamaを使う場合は、Ollama側でこのサーバーからの接続を許可してください。接続先とAPIキーは `~/.config/ikimono-note/settings.json` に権限 `0600` で保存し、APIキーは画面へ再表示しません。
 
 ```bash
-uv run --with pytest pytest -q                                    # 208件
+uv run --with pytest pytest -q                                    # 209件
 uv run --with playwright python tests/smoke_browser.py            # 実ブラウザで主要導線
 uv run --with playwright python tests/smoke_browser.py --identify # 識別まで通す
 ```
