@@ -45,6 +45,7 @@
       <p class="help">やり取りはブラウザから Google へ直接行き、<strong>本サービスのサーバーを通りません</strong>。このアプリが作った ikimono-note.json だけを読み書きし、ドライブの他のファイルは見えません。</p>
       <p class="help" id="drive-unavailable" hidden></p>
       <div class="status-strip" id="drive-strip" hidden><span>状態</span><strong id="drive-state">未接続</strong></div>
+      <label class="check" id="save-keys-field" hidden><input id="save-keys" type="checkbox"><span>APIキーも一緒に保存する。端末やタブを移っても入れ直さずに済みます。<strong>ただし、このファイルが他人に渡ると、あなたのAPIキーで料金が発生する恐れがあります。</strong>共用の端末や、ドライブを他の人と共有している場合は外してください。</span></label>
       <div class="actions" id="drive-actions" hidden><button class="button primary" id="drive-connect" type="button">ドライブにつなぐ</button><button class="button" id="drive-save" type="button" hidden>いま保存</button><button class="button" id="drive-load" type="button" hidden>読み込む</button><button class="button" id="drive-forget" type="button" hidden>接続を解除</button></div>
       <p class="message" id="backup-message" aria-live="polite"></p>
     </div>

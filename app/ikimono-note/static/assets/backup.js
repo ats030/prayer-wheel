@@ -4,7 +4,9 @@
  * 全員が持っている保存先はここで、選ばせる理由がない。以前は WebDAV・端末内の
  * フォルダ・ファイル書き出しも並べていたが、ボタンが7個並ぶ画面になっていた。
  *
- * APIキーは含めない。ファイルが漏れたとき、そのまま課金されるキーが渡ってしまう。
+ * APIキーは既定では含めない。ファイルが漏れたとき、そのまま課金されるキーが渡る。
+ * ただし端末や入口 (公開版と :8443) を移るたびに入れ直すのは重いので、承知のうえで
+ * 一緒に置くことも選べる。選んだ人だけが、その危険を引き受ける。
  */
 
 const BACKUP_FORMAT = "ikimono-note/1";
@@ -75,13 +77,19 @@ async function buildBackup() {
   }
   let settings = null;
   try { settings = JSON.parse(localStorage.getItem("species-public-settings") || "null"); } catch (error) { settings = null; }
-  return {
+
+  const payload = {
     format: BACKUP_FORMAT,
     exportedAt: new Date().toISOString(),
     note: "APIキーは含めません。別の端末では入れ直してください。",
     settings,
     records,
   };
+  if (savingKeys()) {
+    payload.apiKeys = collectApiKeys();
+    payload.note = "APIキーを含みます。このファイルが他人に渡ると、あなたのキーで料金が発生します。";
+  }
+  return payload;
 }
 
 /* 読み込んだ内容を戻す。既存の記録は消さず、同じidは新しいほうを残す。
@@ -89,6 +97,38 @@ async function buildBackup() {
  * 「混ぜる」動作にしてある。片方の端末で消した記録は、もう片方には残る。
  * 消したことを伝える印を持たない限り、削除は行き渡らない。消えるより残るほうが
  * 害が小さいので、こちらを既定にする。 */
+/* APIキーを一緒に置くかどうか。既定は置かない */
+const SAVE_KEYS_FLAG = "species-save-keys-to-cloud";
+
+function savingKeys() {
+  try { return localStorage.getItem(SAVE_KEYS_FLAG) === "1"; } catch (error) { return false; }
+}
+
+function setSavingKeys(on) {
+  try { on ? localStorage.setItem(SAVE_KEYS_FLAG, "1") : localStorage.removeItem(SAVE_KEYS_FLAG); }
+  catch (error) { /* 覚えられなくても、その場の選択は効く */ }
+}
+
+const KEY_NAMES = ["gemini", "openai", "anthropic", "plantnet"];
+
+function collectApiKeys() {
+  const keys = {};
+  for (const name of KEY_NAMES) {
+    const value = typeof readApiKey === "function" ? readApiKey(name) : "";
+    if (value) keys[name] = value;
+  }
+  return keys;
+}
+
+function restoreApiKeys(keys) {
+  if (!keys || typeof writeApiKey !== "function") return 0;
+  let restored = 0;
+  for (const name of KEY_NAMES) {
+    if (keys[name]) { writeApiKey(name, keys[name]); restored++; }
+  }
+  return restored;
+}
+
 async function restoreBackup(payload) {
   if (!payload || payload.format !== BACKUP_FORMAT) throw new Error("この生きものノートの書き出しファイルではありません");
   const records = Array.isArray(payload.records) ? payload.records : [];
@@ -107,6 +147,7 @@ async function restoreBackup(payload) {
   if (payload.settings) {
     localStorage.setItem("species-public-settings", JSON.stringify(payload.settings));
   }
+  restoreApiKeys(payload.apiKeys);
   return restored;
 }
 

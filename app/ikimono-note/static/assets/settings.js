@@ -100,7 +100,16 @@ async function refreshDrive(){
     $("drive-unavailable").textContent="この生きものノートでは Google ドライブへの保存が設定されていません。運営者が IKIMONO_GOOGLE_CLIENT_ID を設定すると使えます。";
     return;
   }
-  $("drive-strip").hidden=false;$("drive-actions").hidden=false;
+  $("drive-strip").hidden=false;$("drive-actions").hidden=false;$("save-keys-field").hidden=false;
+  /* APIキーを一緒に置くかどうか。既定は置かない */
+  $("save-keys").checked=savingKeys();
+  $("save-keys").onchange=async()=>{
+    setSavingKeys($("save-keys").checked);
+    if(!driveSignedIn()){backupMessage($("save-keys").checked?"次に保存するときから含めます。":"次に保存するときから外します。");return}
+    backupMessage($("save-keys").checked?"APIキーを含めて保存し直しています…":"APIキーを外して保存し直しています…");
+    try{await saveToDrive();backupMessage($("save-keys").checked?"APIキーを含めて保存しました。":"APIキーを外して保存し直しました。","success")}
+    catch(error){backupMessage("保存できませんでした。"+error.message,"error")}
+  };
   const paint=()=>{
     const on=driveSignedIn();
     $("drive-state").textContent=on?"つながっています（自動で保存します）":driveLinked()?"つなぎ直しが必要です":"未接続";

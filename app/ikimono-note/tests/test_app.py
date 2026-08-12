@@ -1467,3 +1467,26 @@ def test_the_reason_a_popup_failed_is_shown():
     drive = client.get("/assets/gdrive.js").text
     assert 'const kind = error?.type || "unknown"' in drive
     assert "popup_failed_to_open" in drive and "popup_closed" in drive
+
+
+def test_api_keys_are_left_out_unless_asked_for():
+    """既定では持ち出さない。ファイルが漏れたとき、そのまま課金されるキーが渡る。
+    ただし端末や入口 (公開版と :8443) を移るたびに入れ直すのは重いので、
+    承知のうえで一緒に置くことも選べる。"""
+    backup = client.get("/assets/backup.js").text
+    assert "function savingKeys()" in backup
+    assert 'localStorage.getItem(SAVE_KEYS_FLAG) === "1"' in backup   # 既定は false
+    assert "if (savingKeys()) {" in backup                            # 選んだときだけ入れる
+    page = client.get("/settings").text
+    assert 'id="save-keys"' in page
+    assert "料金が発生する恐れがあります" in page       # 何が起きるか書く
+    assert "共用の端末" in page
+    # 選ばせる以上、既定で入っていてはいけない
+    assert 'id="save-keys" type="checkbox"><span>' in page.replace('<input ', '')
+
+
+def test_privacy_says_where_keys_can_go():
+    page = client.get("/privacy").text
+    assert "APIキーも一緒に保存する" in page
+    assert "既定では保存しません" in page
+    assert "ブラウザから Google へ直接" in page
