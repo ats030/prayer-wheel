@@ -1,0 +1,9 @@
+tests/
+eval/
+__pycache__/
+*.pyc
+.pytest_cache/
+DESIGN.md
+README.md
+Dockerfile
+.dockerignore

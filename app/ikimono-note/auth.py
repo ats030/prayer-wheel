@@ -64,7 +64,66 @@ def redirect_uri() -> str:
 
 
 # ── 保管 ────────────────────────────────────────────────
-# 消えると戻らないので ~/data に置く (backup-data.timer の対象)。
+# 置き場は2通り。手元では SQLite ファイル、Cloud Run では Firestore。
+# Cloud Run はリクエストごとにインスタンスが入れ替わるので、ファイルに書いても
+# 次の呼び出しでは消えている。利用者の登録が残らないと、いつから使っている人か
+# 分からなくなり、課金も載せられない。
+#
+# Firestore は REST で叩く。google-cloud-firestore は grpc まで連れてきて、
+# 5個で済んでいる依存が一気に増える。ここで使うのは1コレクションへの読み書きだけ。
+FIRESTORE_PROJECT = os.getenv("IKIMONO_FIRESTORE_PROJECT", "").strip()
+_METADATA_TOKEN = ("http://metadata.google.internal/computeMetadata/v1/"
+                   "instance/service-accounts/default/token")
+
+
+def using_firestore() -> bool:
+    return bool(FIRESTORE_PROJECT)
+
+
+def _google_token() -> str:
+    """Cloud Run の中では、メタデータサーバーが鍵を貸してくれる。鍵ファイルを置かない。"""
+    response = httpx.get(_METADATA_TOKEN, headers={"Metadata-Flavor": "Google"}, timeout=10)
+    response.raise_for_status()
+    return response.json()["access_token"]
+
+
+def _firestore_url(subject: str = "") -> str:
+    base = (f"https://firestore.googleapis.com/v1/projects/{FIRESTORE_PROJECT}"
+            f"/databases/(default)/documents/users")
+    return f"{base}/{subject}" if subject else base
+
+
+def _to_fields(values: dict[str, str]) -> dict:
+    return {"fields": {k: {"stringValue": v} for k, v in values.items()}}
+
+
+def _from_fields(document: dict) -> dict[str, str]:
+    fields = document.get("fields", {})
+    return {k: v.get("stringValue", "") for k, v in fields.items()}
+
+
+def _firestore_get(subject: str) -> dict[str, str] | None:
+    with httpx.Client(timeout=15) as client:
+        response = client.get(_firestore_url(subject),
+                              headers={"Authorization": "Bearer " + _google_token()})
+    if response.status_code == 404:
+        return None
+    response.raise_for_status()
+    return _from_fields(response.json())
+
+
+def _firestore_put(subject: str, values: dict[str, str]) -> None:
+    with httpx.Client(timeout=15) as client:
+        response = client.patch(_firestore_url(subject), json=_to_fields(values),
+                                headers={"Authorization": "Bearer " + _google_token()})
+    response.raise_for_status()
+
+
+def _firestore_delete(subject: str) -> None:
+    with httpx.Client(timeout=15) as client:
+        client.delete(_firestore_url(subject),
+                      headers={"Authorization": "Bearer " + _google_token()})
+
 
 def _connect() -> sqlite3.Connection:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -86,6 +145,13 @@ def _connect() -> sqlite3.Connection:
 
 def upsert_user(subject: str, email: str) -> dict[str, str]:
     now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    if using_firestore():
+        existing = _firestore_get(subject) or {}
+        record = {"subject": subject, "email": email,
+                  "created_at": existing.get("created_at") or now, "last_seen_at": now,
+                  "plan": existing.get("plan") or "free"}
+        _firestore_put(subject, record)
+        return record
     with _connect() as connection:
         connection.execute(
             """INSERT INTO users (subject, email, created_at, last_seen_at) VALUES (?, ?, ?, ?)
@@ -97,6 +163,8 @@ def upsert_user(subject: str, email: str) -> dict[str, str]:
 
 
 def find_user(subject: str) -> dict[str, str] | None:
+    if using_firestore():
+        return _firestore_get(subject)
     with _connect() as connection:
         row = connection.execute(
             "SELECT subject, email, created_at, plan FROM users WHERE subject = ?", (subject,)).fetchone()
@@ -105,6 +173,9 @@ def find_user(subject: str) -> dict[str, str] | None:
 
 def delete_user(subject: str) -> None:
     """退会。持っているものが少ないので、消すのも一行で済む。"""
+    if using_firestore():
+        _firestore_delete(subject)
+        return
     with _connect() as connection:
         connection.execute("DELETE FROM users WHERE subject = ?", (subject,))
 

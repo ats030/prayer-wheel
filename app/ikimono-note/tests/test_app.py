@@ -1413,3 +1413,32 @@ def test_a_failed_save_is_not_kept_quiet():
     assert "Google ドライブへ保存できていません" in history
     assert "記録はこの端末の中だけにあります" in history      # 一度もつないでいない場合
     assert 'id="saveState"' in client.get("/history").text
+
+
+def test_user_records_survive_a_stateless_host():
+    """Cloud Run はリクエストごとにインスタンスが入れ替わる。ファイルに書いても
+    次の呼び出しでは消えており、いつから使っている人か分からなくなる。"""
+    source = (Path(__file__).parents[1] / "auth.py").read_text()
+    assert "def using_firestore()" in source
+    for entry in ["def upsert_user", "def find_user", "def delete_user"]:
+        body = source.split(entry)[1].split("\ndef ")[0]
+        assert "using_firestore()" in body, f"{entry} が置き場を見ていない"
+    # 鍵ファイルを置かない。Cloud Run の中ではメタデータサーバーが貸してくれる
+    assert "metadata.google.internal" in source
+    assert "service_account.json" not in source and "GOOGLE_APPLICATION_CREDENTIALS" not in source
+
+
+def test_the_container_carries_only_what_it_needs():
+    """ホーム全体の pyproject.toml には無関係な依存が106個ある。持ち込まない。"""
+    root = Path(__file__).parents[1]
+    requirements = (root / "requirements.txt").read_text()
+    for needed in ["fastapi", "uvicorn", "httpx", "pillow", "python-multipart"]:
+        assert needed in requirements, needed
+    for unrelated in ["streamlit", "playwright", "pandas", "twscrape", "pyarrow"]:
+        assert unrelated not in requirements, unrelated
+    dockerfile = (root / "Dockerfile").read_text()
+    assert "${PORT}" in dockerfile          # Cloud Run が渡すポートに従う
+    assert "USER app" in dockerfile         # root で動かさない
+    assert "IKIMONO_PUBLIC_MODE=1" in dockerfile
+    ignored = (root / ".dockerignore").read_text()
+    assert "tests/" in ignored and "eval/" in ignored
