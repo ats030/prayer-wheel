@@ -1613,3 +1613,15 @@ def test_you_can_tell_what_must_be_set():
     assert 'el.dataset.missing=has?"0":"1"' in script
     css = client.get("/assets/settings.css").text
     assert '.configured:not(:empty)[data-missing="1"]' in css
+
+
+def test_you_can_tell_which_screen_you_are_on():
+    """ポートが違えばブラウザは別サイトとして扱い、保存領域も分かれる。それを知らないと
+    行き来するたびに「設定が消えた」ように見える。"""
+    page = client.get("/settings").text
+    assert 'class="status-strip which-app" data-only="operator"' in page
+    assert "運営者用（設定はサーバーに保存されます）" in page
+    assert "公開版とはブラウザの保存領域が別です" in page
+    assert "ポートが違うため" in page
+    # 公開版へ渡れるようにしておく。利用者と同じ動きは、そちらでしか見られない
+    assert 'href="https://ubuntu-server-app.tailf74832.ts.net/settings"' in page

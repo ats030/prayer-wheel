@@ -29,3 +29,5 @@
 /* 「未登録」は、必須のものが欠けている合図。ほかの補助文と同じ灰色では気づけない */
 .configured{color:var(--color-muted);font-size:12px}
 .configured:not(:empty)[data-missing="1"]{color:var(--color-accent);font-weight:600}
+.which-app{align-items:center;gap:10px;flex-wrap:wrap}
+.which-app .button{min-height:34px;padding:0 12px;font-size:13px;margin-left:auto}

@@ -69,6 +69,14 @@ IKIMONO_GOOGLE_CLIENT_ID=xxxxx.apps.googleusercontent.com
 | 運営者用 `ikimono-note.service` | 8523 | `0.0.0.0` (Tailscale・LAN) | 非公開 | 設定の保存、動作確認 |
 | 公開版 `ikimono-note-public.service` | 8524 | `127.0.0.1` のみ | 公開 | Tailscale Funnel の向け先 |
 
+8523 と 8524 は、ブラウザから見ると別サイトです (ポートが違うため)。localStorage も
+sessionStorage も分かれるので、行き来すると設定が消えたように見えます。避けようが
+ないので、運営者用の画面には「この画面は運営者用」と出し、公開版へのリンクを置いて
+あります。利用者と同じ動きを確かめたいときは公開版で見てください。
+
+そもそも設定の持ち方が違います。運営者用はサーバー (settings.json) に保存し、公開版は
+利用者のブラウザに置きます。同じものを二度設定する必要はありません。
+
 Funnel は 8524 へ向けます。8523 は認証がなく設定を書き換えられるので、
 Funnel やポート開放の対象にしないでください。
 
