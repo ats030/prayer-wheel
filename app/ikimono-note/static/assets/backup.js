@@ -120,6 +120,10 @@ async function restoreBackup(payload) {
    ドライブにつながっていないときは何もしない (記録は端末の中に残る) */
 let backupTimer = null;
 function scheduleAutoBackup() {
+  /* 運営者用 (8443) は動作を確かめる場で、そこで撮った試しの記録がドライブに
+     混ざると、利用者の記録と見分けがつかなくなる。画面から隠すだけでは、
+     以前つないだ印が残っていると書き込まれてしまう */
+  if (document.body.dataset.appMode !== "public") return;
   clearTimeout(backupTimer);
   backupTimer = setTimeout(() => {
     if (typeof autoSaveToDrive === "function") autoSaveToDrive();

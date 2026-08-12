@@ -1585,3 +1585,16 @@ def test_the_words_stay_the_same_across_screens():
         assert "判定時" not in visible, path
     # 安全カードだけは「判定しません」を保つ
     assert "判定しません" in client.get("/assets/index.js").text
+
+
+def test_the_operator_screen_does_not_reach_the_drive():
+    """運営者用 (8443) は動作を確かめる場で、そこで撮った試しの記録がドライブに
+    混ざると、利用者の記録と見分けがつかなくなる。"""
+    page = client.get("/settings").text     # 既定は運営者モード
+    section = page.split('aria-labelledby="backup-heading"')[0]
+    assert section.rstrip().endswith('data-only="public"'), "記録の保存が公開版限定になっていない"
+    # 画面から隠すだけでは、以前つないだ印が残っていると書き込まれる
+    backup = client.get("/assets/backup.js").text
+    guard = backup.split("function scheduleAutoBackup() {")[1].split("clearTimeout")[0]
+    assert 'document.body.dataset.appMode !== "public"' in guard
+    assert "return;" in guard
