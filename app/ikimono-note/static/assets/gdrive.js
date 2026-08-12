@@ -43,15 +43,32 @@ async function driveSignIn(clientId, {silent = false} = {}) {
       client_id: clientId,
       scope: DRIVE_SCOPE,
       callback: (response) => {
-        if (response.error) { reject(new Error(response.error_description || response.error)); return; }
+        if (response.error) {
+          /* 何が起きたか分からないと直しようがない。Google が返す符丁をそのまま見せる */
+          reject(new Error(`${response.error}${response.error_description ? "：" + response.error_description : ""}`));
+          return;
+        }
         driveToken = response.access_token;
         rememberDriveLink(true);
         resolve(driveToken);
       },
-      error_callback: (error) => reject(new Error(error?.message || "Google の許可を得られませんでした")),
+      error_callback: (error) => {
+        /* type は popup_closed / popup_failed_to_open / unknown のいずれか。
+           閉じられたのか、開けなかったのか、Google に断られたのかで手が違う */
+        const kind = error?.type || "unknown";
+        const hint = kind === "popup_failed_to_open"
+          ? "ブラウザがポップアップを止めています。このサイトのポップアップを許可してください。"
+          : kind === "popup_closed"
+          ? "許可の画面が閉じられました。ログイン後に自動で閉じる場合は、Google Cloud Console で"
+            + "テストユーザーに自分のアカウントを追加し、スコープに drive.file を足してください。"
+          : "";
+        reject(new Error(`${error?.message || "Google の許可を得られませんでした"}（${kind}）${hint ? " " + hint : ""}`));
+      },
     });
-    // 初回は画面を出す。二度目からは、出さずに取れるなら出さない
-    driveTokenClient.requestAccessToken(silent ? {prompt: "none"} : {prompt: ""});
+    // 初回は同意画面を必ず出す。prompt に空文字を渡すと、同意が要るのに画面が
+    // 出ないまま閉じることがあり、GIS からは popup_closed としか見えない。
+    // 二度目からは prompt: "none" で、画面を出さずに取り直す
+    driveTokenClient.requestAccessToken(silent ? {prompt: "none"} : {prompt: "consent"});
   });
 }
 

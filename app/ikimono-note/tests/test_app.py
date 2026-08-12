@@ -1367,7 +1367,7 @@ def test_records_are_written_back_without_asking_every_time():
     """記録するたび許可を求められては使い物にならない。二度目からは黙って取り直す。"""
     drive = client.get("/assets/gdrive.js").text
     assert "async function ensureDriveToken(clientId)" in drive
-    assert 'requestAccessToken(silent ? {prompt: "none"} : {prompt: ""})' in drive
+    assert 'requestAccessToken(silent ? {prompt: "none"} : {prompt: "consent"})' in drive
     assert "async function autoSaveToDrive()" in drive
     # 取れなければ黙って諦める。記録は端末の中に残る
     body = drive.split("async function ensureDriveToken(clientId) {")[1].split("\n}")[0]
@@ -1441,3 +1441,29 @@ def test_the_container_carries_only_what_it_needs():
     assert "IKIMONO_PUBLIC_MODE=1" in dockerfile
     ignored = (root / ".dockerignore").read_text()
     assert "tests/" in ignored and "eval/" in ignored
+
+
+def test_connecting_writes_something_right_away():
+    """自動保存は記録が増減したときに動く。つないだだけでは何も現れず、
+    ドライブを見に行った利用者は失敗したと思う。"""
+    script = client.get("/assets/settings.js").text
+    connect = script.split('$("drive-connect").onclick')[1].split("};")[0]
+    assert "await saveToDrive()" in connect, "つないだ直後に書いていない"
+
+
+def test_popups_can_talk_back_to_us():
+    """COOP を same-origin にすると、開いたポップアップとの window.opener が切れる。
+    Google の認可はポップアップで許可を取り、親へ postMessage で結果を返すので、
+    認可が通っているのに結果が届かず「ポップアップが閉じられた」ようにしか見えない。
+    設定側をいくら直しても症状が変わらず、原因の特定に時間を要した。"""
+    policy = client.get("/settings").headers["cross-origin-opener-policy"]
+    assert policy == "same-origin-allow-popups"
+    # unsafe-none まで緩めない。別サイトから開かれたときの保護は残す
+    assert policy != "unsafe-none"
+
+
+def test_the_reason_a_popup_failed_is_shown():
+    """「つなげませんでした」だけでは、こちらの設定なのか相手の設定なのか分からない。"""
+    drive = client.get("/assets/gdrive.js").text
+    assert 'const kind = error?.type || "unknown"' in drive
+    assert "popup_failed_to_open" in drive and "popup_closed" in drive

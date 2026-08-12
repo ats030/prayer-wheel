@@ -95,7 +95,12 @@ async def security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(self), geolocation=(self)"
-    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    # same-origin にすると、開いたポップアップとの window.opener が切れる。
+    # Google の認可はポップアップで許可を取り、親へ postMessage で結果を返すので、
+    # 認可が通っているのに結果が届かず「ポップアップが閉じられた」ようにしか見えない。
+    # allow-popups は、自分が開いたポップアップとのやり取りだけを許す。
+    # 別サイトから開かれたときにこちらを覗かれない保護は残る。
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
     response.headers["Content-Security-Policy"] = CONTENT_SECURITY_POLICY
     # Cache-Control が無いと、ブラウザは Last-Modified から新鮮期間を推測して
     # 再検証せずに古い CSS/JS を使い続ける。HTML が古いと、新しく足したスクリプトの

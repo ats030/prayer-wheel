@@ -112,7 +112,14 @@ async function refreshDrive(){
   paint();
   $("drive-connect").onclick=async()=>{
     const button=$("drive-connect");button.disabled=true;backupMessage("Google の許可を求めています…");
-    try{await driveSignIn(clientId);paint();backupMessage("つながりました。これから記録は自動でドライブへ保存されます。","success")}
+    try{
+      await driveSignIn(clientId);paint();
+      /* つないだ直後に一度書く。自動保存は記録が増減したときに動くので、
+         つないだだけではドライブに何も現れず、失敗したように見える */
+      backupMessage("つながりました。いま保存しています…");
+      const count=await saveToDrive();
+      backupMessage(`つながりました。記録 ${count}件をドライブへ保存しました。これからは自動で保存されます。`,"success");
+    }
     catch(error){backupMessage("つなげませんでした。"+error.message,"error")}
     finally{button.disabled=false}
   };
