@@ -102,12 +102,12 @@ systemctl --user restart ikimono-note ikimono-note-public
 使うAI、APIキー、モデルは画面上部の「設定」から変更できます。OllamaではURLを入力でき、その接続先にインストール済みで画像入力に対応するモデルを自動表示します。別端末のOllamaを使う場合は、Ollama側でこのサーバーからの接続を許可してください。接続先とAPIキーは `~/.config/ikimono-note/settings.json` に権限 `0600` で保存し、APIキーは画面へ再表示しません。
 
 ```bash
-uv run --with pytest pytest -q                                    # 169件
+uv run --with pytest pytest -q                                    # 185件
 uv run --with playwright python tests/smoke_browser.py            # 実ブラウザで主要導線
 uv run --with playwright python tests/smoke_browser.py --identify # 識別まで通す
 ```
 
-pytest は速いものの、文字列を検査しているだけなので画面が動くかは分かりません。実際に、撮影画面が丸ごと動かない状態と、APIキーが保存できない状態を、全テストが緑のまま配ったことがあります (どちらも今は検査項目を足してあります)。`smoke_browser.py` は実ブラウザで5ページを開き、共通スクリプトの読み込み、保存先の選択、テーマの切り替え、結果の描画、JSエラーの有無を見ます。`--identify` を付けると、写真を選ぶところから識別・記録・調べ直しまで通します (Ollama で1分ほど)。
+pytest は速いものの、文字列を検査しているだけなので画面が動くかは分かりません。実際に、撮影画面が丸ごと動かない状態と、APIキーが保存できない状態を、全テストが緑のまま配ったことがあります (どちらも今は検査項目を足してあります)。`smoke_browser.py` は実ブラウザで5ページを開き、共通スクリプトの読み込み、保存先の選択、テーマの切り替え、結果の描画、撮り足し (写真が置き換わらず増えるか)、JSエラーの有無を見ます。`--identify` を付けると、写真を選ぶところから識別・記録・調べ直しまで通します (Ollama で1分ほど)。
 
 役目は、まだ検査項目を書いていない壊れ方を捕まえることです。壊し方を2通り試したときはどちらも pytest 側も拾ったので、置き換えではなく網を重ねるものと考えてください。
 

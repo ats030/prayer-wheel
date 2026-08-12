@@ -1,11 +1,33 @@
 function animalReferenceHtml(c,category){const ref=animalReference(c,category);return ref?'<div class="animal-references"><span>オス・メスの違いを調べる資料（外部サイト）</span><a target="_blank" rel="noopener noreferrer" href="'+esc(ref.url)+'">'+esc(ref.label)+' ↗</a></div>':""}
 const $=id=>document.getElementById(id);let plantnetReady=false;let affiliate=null;let provider="local";let providerName="Ollama";let selected=[];let gps=null;const drop=$("drop"),status=$("status"),previews=$("previews"),identify=$("identify");
 async function loadSettings(){try{const r=await fetch("/api/settings");const data=await r.json();window.speciesPublicMode=Boolean(data.public_mode);if(window.speciesPublicMode){const saved=JSON.parse(localStorage.getItem("species-public-settings")||"{}");if(saved.provider&&(saved.provider!=="local"||data.available_models.local.length))data.provider=saved.provider;if(saved.models)data.models={...data.models,...saved.models}}provider=data.provider;providerLabel(provider);const model=data.models[provider];window.speciesRuntimeModel=model;plantnetReady=Boolean(data.api_key_configured.plantnet||(window.speciesPublicMode&&readApiKey("plantnet")));affiliate=data.affiliate;document.getElementById("affiliateDisclosure").classList.toggle("hidden",!affiliate.enabled);document.getElementById("plantnetOption").classList.toggle("hidden",!plantnetReady);$("providerStatus").textContent=providerName+" · "+model+(provider==="local"?" · 写真は外部送信しません":" · 写真は保存しません")}catch(e){showStatus("設定を読み込めませんでした。",true)}}
-function setFiles(files){const chosen=[...files].filter(file=>file.type.startsWith("image/"));if(!chosen.length){showStatus("画像ファイルを選んでください。",true);return}if(chosen.length>3){showStatus("写真は最大3枚です。",true);return}selected=chosen;gps=null;document.body.classList.add("has-selection");previews.innerHTML=chosen.map((file,index)=>"<img class=\"preview\" src=\""+URL.createObjectURL(file)+"\" alt=\"調べる写真 "+(index+1)+"\">").join("");$("previewEmpty").classList.add("hidden");identify.classList.remove("hidden");$("captureTitle").textContent=chosen.length+"枚の写真を選択中";showStatus("写真の情報と現在地を確認しています。",false,true);readPhotoMetadata(chosen);requestCurrentLocation(true)}
+const MAX_PHOTOS=3;let previewUrls=[];
+function renderPreviews(){previewUrls.forEach(URL.revokeObjectURL);previewUrls=selected.map(file=>URL.createObjectURL(file));document.body.classList.add("has-selection");previews.innerHTML=previewUrls.map((url,index)=>"<img class=\"preview\" src=\""+url+"\" alt=\"調べる写真 "+(index+1)+"\">").join("");$("previewEmpty").classList.add("hidden");identify.classList.remove("hidden");$("captureTitle").textContent=selected.length+"枚の写真を選択中"}
+function setFiles(files){const chosen=[...files].filter(file=>file.type.startsWith("image/"));if(!chosen.length){showStatus("画像ファイルを選んでください。",true);return}if(chosen.length>MAX_PHOTOS){showStatus("写真は最大"+MAX_PHOTOS+"枚です。",true);return}selected=chosen;gps=null;renderPreviews();showStatus("写真の情報と現在地を確認しています。",false,true);readPhotoMetadata(chosen);requestCurrentLocation(true)}
+/* 足すときは、いま選んでいる写真を残す。置き換えると、最初に撮った全体像が消えて
+   候補が振り出しに戻る。「もっと確かめたいこと」を読んで撮り足す人が欲しいのは、
+   全体像に寄りの1枚を加えた組であって、寄りの1枚だけではない。
+   撮った日・場所はすでに1枚目から読み終わっているので、ここでは読み直さない。 */
+function addFiles(files){
+  const chosen=[...files].filter(file=>file.type.startsWith("image/"));
+  if(!chosen.length){showStatus("画像ファイルを選んでください。",true);return}
+  if(!selected.length){setFiles(chosen);return}
+  const room=MAX_PHOTOS-selected.length;
+  if(room<=0){showStatus("写真は"+MAX_PHOTOS+"枚までです。撮り直すときは「写真を選ぶ」から選びなおしてください。",true);return}
+  const added=chosen.slice(0,room);
+  selected=[...selected,...added];
+  renderPreviews();
+  const overflow=chosen.length>room?"（"+MAX_PHOTOS+"枚までなので"+added.length+"枚だけ足しました）":"";
+  showStatus("写真を足して"+selected.length+"枚になりました"+overflow+"。もう一度「名前を調べる」を押すと、足した写真も合わせて調べます。");
+  identify.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
+}
 function applyPhotoMetadata(data){const found=[];if(data.observed_date&&!$("observedDate").value){$("observedDate").value=data.observed_date;found.push("撮った日")}if(data.location&&!$("location").value){$("location").value=data.location;found.push("撮った場所");gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent="写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。"}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
 async function readPhotoMetadata(files){const fd=new FormData();files.forEach(file=>fd.append("files",file));try{const r=await fetch("/api/photo-metadata",{method:"POST",body:fd});if(!r.ok)throw new Error();const data=await r.json();if(selected[0]===files[0])applyPhotoMetadata(data)}catch(e){if(selected[0]===files[0])showStatus("写真を選びました。撮った日や場所の情報は読み取れませんでした。")}}
 function showStatus(text,error=false,busy=false){status.className='status'+(error?' error':'');status.innerHTML=(busy?'<span class="spinner"></span>':'')+text}
-$('libraryBtn').onclick=()=> $('library').click();$('cameraBtn').onclick=()=> $('camera').click();$("library").onchange=e=>setFiles(e.target.files);$("camera").onchange=e=>{setFiles([...selected,...e.target.files]);e.target.value=""};
+/* 「選びなおす」と「足す」で入力欄を分ける。1つの入力を旗で切り替えると、
+   #library はドロップ領域の <label> の中にあるため .click() が label まで
+   バブルし、旗を戻す側の処理と競合する。入力を分ければその競合ごと消える */
+$('libraryBtn').onclick=()=> $('library').click();$('cameraBtn').onclick=()=> $('camera').click();$("library").onchange=e=>{setFiles(e.target.files);e.target.value=""};$("libraryAdd").onchange=e=>{addFiles(e.target.files);e.target.value=""};$("camera").onchange=e=>{addFiles(e.target.files);e.target.value=""};
 ['dragenter','dragover'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove('drag')}));drop.addEventListener("drop",e=>setFiles(e.dataTransfer.files));
 function requestCurrentLocation(automatic=false){if(!navigator.geolocation){$("gpsStatus").textContent="このブラウザでは現在地を取得できません。位置情報なしでも使えます。";return}$("gpsButton").disabled=true;$("gpsStatus").textContent=automatic?"写真を選んだので、現在地を確認しています…":"現在地を確認しなおしています…";navigator.geolocation.getCurrentPosition(position=>{if(gps?.source!=="exif"){gps={latitude:position.coords.latitude,longitude:position.coords.longitude,accuracy:position.coords.accuracy,source:"current"};$("gpsStatus").textContent=`現在地を取得しました（誤差 約${Math.round(gps.accuracy)}m）。AIへは送らず、調べたあとにおおまかな位置にしてこの端末の記録だけに保存します。`}$("gpsButton").disabled=false},error=>{if(gps?.source!=="exif")$("gpsStatus").textContent=error.code===1?"位置情報が許可されませんでした。位置情報なしでも使えます。":"現在地を取得できませんでした。位置情報なしでも使えます。";$("gpsButton").disabled=false},{enableHighAccuracy:true,timeout:10000,maximumAge:0})}
 $("gpsButton").onclick=()=>requestCurrentLocation(false);
@@ -53,7 +75,7 @@ function evidenceHtml(c){
 /* 質で弾いたときの detail は {message, problems}。文字列とオブジェクトの両方が来る */
 function errorText(detail){if(!detail)return "調べられませんでした";if(typeof detail==="string")return detail;const notes=(detail.problems||[]).map(p=>p.message).join(" ");return (detail.message||"調べられませんでした")+(notes?" "+notes:"")}
 function photoNotes(data){const notes=(data.photo_notes||[]);if(!notes.length)return "";return '<div class="photo-notes"><strong>次に撮るときは</strong><ul>'+notes.map(n=>"<li>"+esc(n.message)+"</li>").join("")+"</ul></div>"}
-function render(data){if(!data.candidates.length){$("results").innerHTML=photoNotes(data)+`<div class="placeholder">図鑑データで確認できる候補が見つかりませんでした。全体・もよう・特徴のある部分を、別の角度から撮ってみてください。</div>${safetyHtml()}`;return}$('results').className='';$('results').innerHTML=photoNotes(data)+'<p class="summary"><strong>'+esc(data.category)+'</strong> · '+esc(data.summary)+'</p>' +data.candidates.map((c,i)=>'<article class="candidate"><div class="name-row"><div><div class="name">'+(i+1)+'. '+esc(c.common_name_ja)+'</div><div class="latin">'+esc(c.scientific_name)+'</div>'+taxonomyBadge(c)+agreementBadge(c)+'</div>'+confidenceView(c)+evidenceHtml(c)+sexHtml(c,data.category)+(c.uncertainty?'<div class="uncertainty">もっと確かめたいこと：'+esc(c.uncertainty)+'</div>':'')+'<div class="sources"><a target="_blank" rel="noopener" href="'+sourceUrl(noJapaneseName(c.common_name_ja)?c.scientific_name:c.common_name_ja)+'">図鑑を検索 ↗</a>'+(wikipediaUrl(c)?'<a target="_blank" rel="noopener noreferrer" href="'+esc(wikipediaUrl(c))+'">Wikipedia ↗</a>':'')+(c.taxonomy_url?'<a target="_blank" rel="noopener" href="'+esc(c.taxonomy_url)+'">iNaturalist ↗</a>':'')+'</div>'+animalReferenceHtml(c,data.category)+'</article>').join('')+safetyHtml()+plantnetCreditHtml(data)+topCandidateAffiliateLink(data.candidates,data.category)+affiliateHtml();applyMeters();if(document.getElementById('affiliateCard'))fetch('/api/affiliate/impression',{method:'POST'}).catch(()=>{});loadAmazonProducts()}
+function render(data){if(!data.candidates.length){$('results').className='';$("results").innerHTML=photoNotes(data)+`<div class="placeholder">図鑑データで確認できる候補が見つかりませんでした。全体・もよう・特徴のある部分を、別の角度から撮ってみてください。</div>${safetyHtml()}`;return}$('results').className='';$('results').innerHTML=photoNotes(data)+'<p class="summary"><strong>'+esc(data.category)+'</strong> · '+esc(data.summary)+'</p>' +data.candidates.map((c,i)=>'<article class="candidate"><div class="name-row"><div><div class="name">'+(i+1)+'. '+esc(c.common_name_ja)+'</div><div class="latin">'+esc(c.scientific_name)+'</div>'+taxonomyBadge(c)+agreementBadge(c)+'</div>'+confidenceView(c)+evidenceHtml(c)+sexHtml(c,data.category)+(c.uncertainty?'<div class="uncertainty">もっと確かめたいこと：'+esc(c.uncertainty)+'</div>':'')+'<div class="sources"><a target="_blank" rel="noopener" href="'+sourceUrl(noJapaneseName(c.common_name_ja)?c.scientific_name:c.common_name_ja)+'">図鑑を検索 ↗</a>'+(wikipediaUrl(c)?'<a target="_blank" rel="noopener noreferrer" href="'+esc(wikipediaUrl(c))+'">Wikipedia ↗</a>':'')+(c.taxonomy_url?'<a target="_blank" rel="noopener" href="'+esc(c.taxonomy_url)+'">iNaturalist ↗</a>':'')+'</div>'+animalReferenceHtml(c,data.category)+'</article>').join('')+safetyHtml()+plantnetCreditHtml(data)+topCandidateAffiliateLink(data.candidates,data.category)+affiliateHtml();applyMeters();if(document.getElementById('affiliateCard'))fetch('/api/affiliate/impression',{method:'POST'}).catch(()=>{});loadAmazonProducts()}
 function historyDb(){return new Promise((resolve,reject)=>{if(!("indexedDB" in window)){reject(new Error("このブラウザでは、調べた記録を保存できません"));return}const request=indexedDB.open("species-history",1);request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("entries"))db.createObjectStore("entries",{keyPath:"id"})};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
 function requestValue(request){return new Promise((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
 function transactionDone(transaction){return new Promise((resolve,reject)=>{transaction.oncomplete=resolve;transaction.onerror=()=>reject(transaction.error);transaction.onabort=()=>reject(transaction.error)})}
@@ -62,24 +84,37 @@ async function saveHistory(data){const db=await historyDb();let thumbnail=null;t
 identify.onclick=async()=>{if(!selected.length)return;identify.disabled=true;showStatus(providerName+"が写真を見ています。少しお待ちください。",false,true);$('results').className='placeholder';$('results').textContent='形・色・もようを確認中…';const fd=new FormData();selected.forEach(file=>fd.append("files",file));fd.append("location",$("location").value);fd.append("observed_date",$("observedDate").value);fd.append("size",$("size").value);fd.append("use_plantnet",document.getElementById("usePlantnet").checked);if(window.speciesPublicMode){const saved=JSON.parse(localStorage.getItem("species-public-settings")||"{}");fd.append("request_provider",provider);fd.append("request_model",saved.models?.[provider]||window.speciesRuntimeModel||"");fd.append("request_api_key",readApiKey(provider));fd.append("request_plantnet_key",readApiKey("plantnet"))}try{const r=await fetch('/identify',{method:'POST',body:fd});const data=await r.json();if(!r.ok)throw new Error(errorText(data.detail));render(data);showStatus('似ている生きものを表示しました。実物と見くらべてください。');saveHistory(data).catch(error=>showStatus("候補は表示できましたが、この端末の記録には保存できませんでした。 "+error.message,true))}catch(e){$('results').innerHTML='<div class="placeholder">結果を取得できませんでした。</div>';showStatus(e.message,true)}finally{identify.disabled=false}};
 loadSettings();
 const renderIdentification=render;
+/* 「もっと確かめたいこと」を読んだその場から撮り足せるようにする。以前は
+   evidence_status が taxonomy_only / uncertain の候補があるときしか出しておらず、
+   決め手はあるが確かめたいことが残っている候補では、書いてある「次はここを見る」を
+   写真にする手段が画面になかった。uncertainty や evidence_gaps が1つでもあれば出す */
 function shootingGuide(data){
-  const uncertain=(data.candidates||[]).filter(candidate=>["taxonomy_only","uncertain"].includes(candidate.evidence_status));
-  if(!uncertain.length)return "";
+  const candidates=data.candidates||[];
+  const weak=candidate=>["taxonomy_only","uncertain"].includes(candidate.evidence_status);
   const points=[];
-  uncertain.forEach(candidate=>{
+  /* 決め手のない候補の確かめどころを先に並べる。5件で切るので、順番が中身を決める */
+  [...candidates].sort((a,b)=>Number(weak(b))-Number(weak(a))).forEach(candidate=>{
     const name=candidate.common_name_ja||candidate.scientific_name||"候補";
     if(candidate.uncertainty)points.push(name+"："+candidate.uncertainty);
     (candidate.evidence_gaps||[]).forEach(gap=>points.push(name+"："+gap));
   });
+  if(!points.length&&candidates.length&&!candidates.some(weak))return "";
   const unique=[...new Set(points)].slice(0,5);
   if(!unique.length)unique.push("全体が写った写真","特徴のある部分を、表と裏から近づいて撮った写真","定規や硬貨と並べて大きさがわかる写真");
-  return '<aside class="candidate shooting-guide" id="shootingGuide"><div class="name">もう1枚撮ると、はっきりします</div><div class="uncertainty">次のところが写った写真を足してください。</div><ul>'+unique.map(point=>'<li>'+esc(point)+'</li>').join("")+'</ul><button class="btn" id="addPhotos" type="button">写真を追加する</button></aside>';
+  return '<aside class="candidate shooting-guide" id="shootingGuide"><div class="name">もう1枚撮ると、はっきりします</div><div class="uncertainty">もっと確かめたいことが写った写真を足してください。</div><ul>'
+    +unique.map(point=>'<li>'+esc(point)+'</li>').join("")
+    +'</ul><div class="actions"><button class="btn primary" id="addPhotoCamera" type="button">カメラで撮って足す</button><button class="btn" id="addPhotoLibrary" type="button">写真を選んで足す</button></div>'
+    +'<p class="guide-note">いま選んでいる写真はそのまま残ります（合わせて'+MAX_PHOTOS+'枚まで）。足したあと、もう一度「名前を調べる」を押してください。</p></aside>';
 }
 render=function(data){
   renderIdentification(data);
   const guide=shootingGuide(data);
   if(!guide)return;
-  const summary=$("results").querySelector(".summary");
-  if(summary)summary.insertAdjacentHTML("afterend",guide);
-  $("addPhotos").onclick=()=>$("library").click();
+  /* 候補が1件も残らなかったときは要約がない。撮り直しを促す一文の直後に置く
+     (安全カードの後ろに回すと、案内とボタンが画面の外へ出てしまう) */
+  const anchor=$("results").querySelector(".summary")||$("results").querySelector(".placeholder");
+  if(anchor)anchor.insertAdjacentHTML("afterend",guide);
+  else $("results").insertAdjacentHTML("beforeend",guide);
+  $("addPhotoCamera").onclick=()=>$("camera").click();
+  $("addPhotoLibrary").onclick=()=>$("libraryAdd").click();
 };

@@ -87,9 +87,33 @@ def test_index_has_additional_shooting_guide_for_uncertain_results():
     assert "function shootingGuide(data)" in source
     assert '["taxonomy_only","uncertain"]' in source
     assert "もう1枚撮ると、はっきりします" in source
+    assert "candidate.uncertainty" in source
     assert "candidate.evidence_gaps" in source
     assert ".slice(0,5)" in source
-    assert 'id="addPhotos"' in source
+
+
+def test_shooting_guide_offers_camera_and_library_without_losing_photos():
+    """「もっと確かめたいこと」を読んだその場から、撮り足せること。
+
+    案内の追加ボタンは、いま選んでいる写真を置き換えず足す。置き換えると
+    最初の全体像が消え、確かめたい寄りの1枚だけで調べ直すことになる。
+    """
+    source = page_source("/")
+    assert 'id="addPhotoCamera"' in source
+    assert 'id="addPhotoLibrary"' in source
+    assert 'id="libraryAdd"' in source
+    # 足す側は addFiles、選びなおす側だけが setFiles
+    assert '$("libraryAdd").onchange=e=>{addFiles(e.target.files)' in source
+    assert '$("camera").onchange=e=>{addFiles(e.target.files)' in source
+    assert '$("library").onchange=e=>{setFiles(e.target.files)' in source
+    assert "selected=[...selected,...added]" in source
+    assert "const MAX_PHOTOS=3" in source
+
+
+def test_shooting_guide_appears_whenever_something_is_left_to_check():
+    """決め手のある候補でも、確かめたいことが残っていれば案内を出すこと。"""
+    source = page_source("/")
+    assert "if(!points.length&&candidates.length&&!candidates.some(weak))return \"\"" in source
 
 
 def test_index_saves_history_but_does_not_render_it():

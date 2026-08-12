@@ -35,7 +35,22 @@ SAMPLE = {
     }],
 }
 
+# 決め手はあるが確かめたいことが残っている結果。撮り足しの案内はここでも出す
+UNCERTAIN_SAMPLE = json.loads(json.dumps(SAMPLE))
+UNCERTAIN_SAMPLE["candidates"][0]["uncertainty"] = "総苞外片が反り返っているかどうか"
+
 failures: list[str] = []
+
+
+def photo(name: str) -> dict:
+    """input へ渡す小さな JPEG。撮り足しの検査に本物の写真は要らない。"""
+    from io import BytesIO
+
+    from PIL import Image
+
+    buffer = BytesIO()
+    Image.new("RGB", (64, 64), (120, 160, 120)).save(buffer, "JPEG")
+    return {"name": name, "mimeType": "image/jpeg", "buffer": buffer.getvalue()}
 
 
 def check(label: str, ok: bool, detail: str = "") -> None:
@@ -101,6 +116,20 @@ def run(base: str, do_identify: bool) -> None:
         check("安全カードが出る", page.locator("#safetyCard").count() == 1)
         widths = page.eval_on_selector_all(".meter span", "els => els.map(e => e.style.width)")
         check("確信度のメーターに幅が入る", widths == ["60%"], str(widths))
+
+        # 「もっと確かめたいこと」から撮り足せるか
+        check("確かめたいことがなければ撮り足しの案内は出ない", page.locator("#shootingGuide").count() == 0)
+        page.evaluate("data => render(data)", UNCERTAIN_SAMPLE)
+        check("確かめたいことが残っていれば撮り足しの案内が出る", page.locator("#shootingGuide").count() == 1)
+        check("案内からカメラも写真選択も押せる",
+              page.locator("#addPhotoCamera").count() == 1 and page.locator("#addPhotoLibrary").count() == 1)
+        page.set_input_files("#library", [photo("a.jpg")]); page.wait_for_timeout(1500)
+        page.set_input_files("#libraryAdd", [photo("b.jpg")]); page.wait_for_timeout(600)
+        check("撮り足すと写真は置き換わらずに増える", page.locator("#previews img").count() == 2,
+              page.locator("#captureTitle").inner_text())
+        page.set_input_files("#libraryAdd", [photo("c.jpg"), photo("d.jpg")]); page.wait_for_timeout(600)
+        check("撮り足しても3枚を超えない", page.locator("#previews img").count() == 3,
+              page.locator("#captureTitle").inner_text())
 
         if do_identify:
             image = sorted(glob.glob("/home/ats030/cache/species-eval/images/*.jpg"))[0]

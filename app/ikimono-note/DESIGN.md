@@ -75,6 +75,8 @@ with the subject.
 - VLM candidates label photo observations as unverified AI extraction, cap the displayed score, and separate observations from discriminating features.
 - Specialist plant candidates retain their Pl@ntNet source, and exact VLM agreement is labeled as two independent paths.
 - If every candidate is rejected, the result asks for additional identifying photos instead of filling the gap with a guess.
+- Whatever the result still leaves unsettled — もっと確かめたいこと, 決め手が足りない理由, or no candidate at all — is followed in the same block by the two ways to answer it: カメラで撮って足す and 写真を選んで足す. Advice about what to photograph is only advice until the camera is one press away, and the reader is standing in front of the subject while they read it. The block is shown whenever anything is left to check, not only when a candidate lacks decisive evidence.
+- Added photos join the current selection instead of replacing it, up to the same three. The first frame is usually the whole organism; replacing it with the close-up the guide asked for would restart identification from less than it had. Identification is still one explicit press of 名前を調べる — adding a photo scrolls there and says so rather than spending a request on its own.
 - Affiliate product-search templates expand the verified candidate name plus identification category into {query}. When configured, Amazon Creators API may replace that fallback with up to four returned product cards containing an image, title, and detail-page URL; each link is labeled as advertising and never influences generation or ranking.
 - When affiliate advertising is enabled, it remains visible; only aggregate impressions and clicks are stored.
 - Images are processed in memory, EXIF metadata is stripped, and nothing is saved.
