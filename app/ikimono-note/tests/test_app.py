@@ -439,7 +439,7 @@ def test_settings_page_allows_custom_local_llm_url():
     assert 'local_llm:{url:' in source
     assert 'id="active-provider"' in source
     # 任意機能の2つ（Pl@ntNet と広告）。持ち出しのクラウド設定も同じ見た目だが別物
-    assert 'id="affiliate-panel"' in source and "Pl@ntNet 植物専用の識別" in source
+    assert 'id="affiliate-panel"' in source and "Pl@ntNet 植物にくわしいサービス" in source
     assert source.count('<details class="panel') >= 2
     assert 'id="save-button"' in source
     assert 'class="message" id="message" aria-live="polite"' in source
@@ -777,7 +777,7 @@ def test_capture_and_history_screens_use_one_word_per_concept():
     for script in ["/assets/index.js", "/assets/history.js"]:
         assert "providerLabel(" in client.get(script).text, script
     # 設定が引用するチェックボックスのラベルは、実際のラベルと一致する
-    label = "植物専用の識別もいっしょに使う"
+    label = "植物にくわしいサービスにも聞く"
     assert label in client.get("/").text
     assert label in client.get("/settings").text
 
@@ -1561,3 +1561,27 @@ def test_api_keys_never_leave_the_browser():
     privacy = client.get("/privacy").text
     assert "Google ドライブへ保存する記録にも含めません" in privacy
     assert "ブラウザのパスワード管理に預けた場合" in privacy
+
+
+def test_one_name_per_number():
+    """同じ c.confidence に「あてはまり度」と「写真からのAI推測 最大」の2つの名前を
+    付けていた。利用者には別の指標に見える。"""
+    script = client.get("/assets/index.js").text
+    body = script.split("function confidenceView(c){")[1].split("\n}")[0]
+    assert body.count("あてはまり度") == 1
+    assert "写真からのAI推測" not in body
+    assert "決め手は足りていません" in body      # 弱いことは別に伝える
+
+
+def test_the_words_stay_the_same_across_screens():
+    """1つのことを指す言葉は1つにする。「識別」「判定」は利用者向けの画面から外し、
+    「調べる」に寄せた。ただし安全カードの「判定しません」は残す。意図的にやらない
+    という宣言で、「調べません」より意味がはっきりする。"""
+    for path in ["/", "/settings", "/history", "/login"]:
+        page = client.get(path).text
+        visible = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", page, flags=re.S)
+        visible = " ".join(re.findall(r">([^<>]+)<", visible))
+        assert "植物専用の識別" not in visible, path
+        assert "判定時" not in visible, path
+    # 安全カードだけは「判定しません」を保つ
+    assert "判定しません" in client.get("/assets/index.js").text
