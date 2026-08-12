@@ -61,6 +61,10 @@ function setupPublicSettings(data){
     }
     deleteKeys.clear();
     $("active-provider").textContent=providerLabels[selectedProvider]+" · "+models[selectedProvider];
+    /* 自動保存は記録が増減したときに動く。設定だけ変えて調べずに閉じると、
+       使うAIの選択がドライブへ行かないまま残る。「いま保存」を置く代わりに、
+       設定を保存したこの時点で自動保存を促す */
+    scheduleAutoBackup();
     show("この端末の設定を保存しました。APIキーはタブを閉じると消えます。","success");
   };
 }
@@ -109,7 +113,7 @@ async function refreshDrive(){
     const on=driveSignedIn();
     $("drive-state").textContent=on?"つながっています（自動で保存します）":driveLinked()?"つなぎ直しが必要です":"未接続";
     $("drive-connect").hidden=on;
-    $("drive-save").hidden=!on;$("drive-load").hidden=!on;$("drive-forget").hidden=!on;
+    $("drive-load").hidden=!on;$("drive-forget").hidden=!on;
   };
   /* 一度つないだ相手なら、画面を出さずに取り直せることが多い */
   if(driveLinked())await ensureDriveToken(clientId);
@@ -126,12 +130,6 @@ async function refreshDrive(){
     }
     catch(error){backupMessage("つなげませんでした。"+error.message,"error")}
     finally{button.disabled=false}
-  };
-  $("drive-save").onclick=async()=>{
-    $("drive-save").disabled=true;backupMessage("保存しています…");
-    try{backupMessage(`記録 ${await saveToDrive()}件を保存しました。`,"success")}
-    catch(error){backupMessage("保存できませんでした。"+error.message,"error")}
-    finally{$("drive-save").disabled=false}
   };
   $("drive-load").onclick=async()=>{
     $("drive-load").disabled=true;backupMessage("読み込んでいます…");

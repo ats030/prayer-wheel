@@ -1766,6 +1766,26 @@ def test_operator_records_travel_but_do_not_mix_with_visitors():
     assert "${driveFileName()}" in drive
 
 
+def test_no_manual_save_button_because_saving_is_automatic():
+    """「いま保存」は要らない。押さないと保存されないように見えるボタンは害。
+
+    記録が増減すれば scheduleAutoBackup が書き、つないだ直後にも一度書く。
+    残っていた穴は設定だけ変えた場合で、そこは保存時に自動保存を促して塞ぐ。
+    """
+    page = client.get("/settings").text
+    assert 'id="drive-save"' not in page
+    assert "いま保存" not in page
+    settings_js = client.get("/assets/settings.js").text
+    assert "drive-save" not in settings_js
+    # 設定だけ変えて調べずに閉じても、使うAIの選択がドライブへ行く
+    start = settings_js.index('$("settingsForm").onsubmit=event=>{')
+    end = settings_js.index('show("この端末の設定を保存しました', start)
+    assert "scheduleAutoBackup();" in settings_js[start:end]
+    # 残す導線: つなぐ・読み込む・解除
+    for keep in ['id="drive-connect"', 'id="drive-load"', 'id="drive-forget"']:
+        assert keep in page, keep
+
+
 def test_the_backup_says_what_it_actually_carries():
     """「使うAIの設定も保存します」は公開版だけの話。
 
