@@ -1554,3 +1554,19 @@ def test_the_browser_can_keep_the_keys_for_us():
         assert f'value="{name}" autocomplete="username"' in page, name
     assert "パスワードを保存しますか" in page      # 知らなければ、提案が出ても意味が分からない
     assert "本サービスは受け取りません" in page
+
+
+def test_how_to_tell_them_apart_is_always_shown():
+    """実測で6割は種を外し (Top-1 40%)、その多くは属まで合っている。
+    「アオダイショウです」と言い切られて違うより、「シマヘビとはここで見分ける」が
+    添えてあるほうが、実物と見くらべられる。
+
+    以前は evidence_status が uncertain のときだけ出す作りで、しかも traits があると
+    手前で return して、一度も表示されていなかった。"""
+    script = client.get("/assets/index.js").text
+    body = script.split("function evidenceHtml(c){")[1].split("\n}")[0]
+    # 確信の度合いで見分け方を出し分けない
+    assert "似ている種との見分け方" in body
+    assert body.index("points.length?") > body.index("const unsure=")
+    # 手前で返さない
+    assert "return c.traits.length?" not in body

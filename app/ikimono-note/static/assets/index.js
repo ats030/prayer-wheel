@@ -30,7 +30,20 @@ function plantnetCreditHtml(data){
   return '<p class="source-credit">植物の候補は <a href="https://plantnet.org/" target="_blank" rel="noopener noreferrer">Pl@ntNet recognition API</a> によるものです。</p>';
 }
 function affiliateHtml(){if(!affiliate||!affiliate.enabled)return "";return "<aside class=\"affiliate-card\" id=\"affiliateCard\"><div class=\"affiliate-label\">関連商品の広告リンクを表示しています</div><div class=\"affiliate-disclosure\">購入されると運営者に紹介料が入る場合があります。</div></aside>"}
-function evidenceHtml(c){if(!["taxonomy_only","uncertain"].includes(c.evidence_status))return c.traits.length?'<ul>'+c.traits.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>':'';const observations=c.traits||[],points=c.distinguishing_features||[],gaps=c.evidence_gaps||[];return (observations.length?'<div class="uncertainty">AIが写真から見つけた特徴（未確認）</div><ul>'+observations.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>':'')+(points.length?'<div class="uncertainty">似ている種との見分け方</div><ul>'+points.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>':'')+(gaps.length?'<div class="uncertainty">決め手が足りない理由：'+gaps.map(esc).join('・')+'</div>':'')}
+/* 見分け方は、確信の度合いによらず出す。
+   実測で6割は種を外しており (Top-1 40%)、そのうち多くは属まで合っている。
+   「アオダイショウです」と言い切られて違うより、「シマヘビとはここで見分ける」が
+   添えてあるほうが、実物と見くらべられる。以前は evidence_status が uncertain の
+   ときだけ出しており、しかも traits があると手前で返って一度も表示されなかった。 */
+function evidenceHtml(c){
+  const observations=c.traits||[],points=c.distinguishing_features||[],gaps=c.evidence_gaps||[];
+  const unsure=["taxonomy_only","uncertain"].includes(c.evidence_status);
+  return (observations.length?(unsure?'<div class="uncertainty">AIが写真から見つけた特徴（未確認）</div>':'')
+           +'<ul>'+observations.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>':'')
+       +(points.length?'<div class="uncertainty">似ている種との見分け方</div><ul>'
+           +points.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>':'')
+       +(gaps.length?'<div class="uncertainty">決め手が足りない理由：'+gaps.map(esc).join('・')+'</div>':'');
+}
 /* 質で弾いたときの detail は {message, problems}。文字列とオブジェクトの両方が来る */
 function errorText(detail){if(!detail)return "調べられませんでした";if(typeof detail==="string")return detail;const notes=(detail.problems||[]).map(p=>p.message).join(" ");return (detail.message||"調べられませんでした")+(notes?" "+notes:"")}
 function photoNotes(data){const notes=(data.photo_notes||[]);if(!notes.length)return "";return '<div class="photo-notes"><strong>次に撮るときは</strong><ul>'+notes.map(n=>"<li>"+esc(n.message)+"</li>").join("")+"</ul></div>"}
