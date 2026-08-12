@@ -6,6 +6,7 @@
 
 from typing import Any
 
+import protected_species
 import vision
 
 
@@ -49,4 +50,6 @@ def identify_all(
                 result["plantnet_status"] = "unavailable"
                 result["plantnet_message"] = str(plantnet_error)
 
-    return vision.apply_evidence_gate(result)
+    # 種の保存法の照合は証拠ゲートのあと。ゲートを通らなかった候補は画面に出ないので、
+    # 出ないものへ注意書きを付けても意味がない。Pl@ntNet 経路もここを通る。
+    return protected_species.annotate(vision.apply_evidence_gate(result))

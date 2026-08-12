@@ -760,6 +760,36 @@ def test_page_assets_are_served_locally():
         assert "unpkg" not in page, path
 
 
+def test_protected_species_states_the_fact_without_granting_collection():
+    """種の保存法の指定は事実だけを出す。規制の中身は指定の種類で違い、要約すると外す。"""
+    source = page_source("/")
+    assert "function protectedSpeciesHtml(c)" in source
+    assert "c.protected_species" in source
+    assert "種の保存法の" in source
+    assert "https://www.env.go.jp/nature/kisho/domestic/list.html" in source
+    # 版を明かす。同梱したリストが古ければ、読み手がそれを見て判断できる
+    assert "p.as_of" in source
+    # 採取の可否は述べない。安全カードの「確認が必要」を上書きしない
+    for granted in ["採取できます", "持ち帰れます", "採取可能", "規制対象ではありません", "指定はありません"]:
+        assert granted not in source, granted
+
+
+def test_protected_species_is_silent_on_a_non_match():
+    """一致しなかった候補には何も出さない。都道府県の条例が独自に指定している種があり、
+    亜種で指定されているものは種名では当たらないため、無印は「指定なし」ではない。"""
+    for script in ["/assets/index.js", "/assets/history.js"]:
+        source = client.get(script).text
+        assert 'if(!p||!p.category)return ""' in source, script
+
+
+def test_history_also_shows_the_protected_designation():
+    """指定を見落として持ち帰るのは、結果を見た日とは限らない。"""
+    source = page_source("/history")
+    assert "function protectedBadge(c)" in source
+    assert "+protectedBadge(c)+" in source
+    assert "https://www.env.go.jp/nature/kisho/domestic/list.html" in source
+
+
 def test_stylesheets_define_every_token_they_use():
     """そのページで未定義の var() を参照しないこと。
 

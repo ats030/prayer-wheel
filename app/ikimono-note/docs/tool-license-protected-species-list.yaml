@@ -1,7 +1,8 @@
 tool: 環境省 国内希少野生動植物種一覧 (種の保存法)
-plan_or_version: 令和7年2月更新版 (458種)
+plan_or_version: 令和7年2月更新版 — 別表第一 458種 + 緊急指定種 3種 = 同梱 461件
 reviewed_at: 2026-08-12
 decision: approved
+implemented: 2026-08-12 (ats030-slxf) — data/protected_species.json, protected_species.py
 price:
   condition: Free. Static Excel and HTML on env.go.jp; no API, no key, no rate limit.
   source: https://www.env.go.jp/nature/kisho/domestic/list.html
@@ -19,7 +20,10 @@ attribution: >
 restrictions:
   - 環境省ロゴマークは対象外。
   - 国土地理院の地図を含むコンテンツは測量法により別扱い (この一覧には地図を含まない)。
-update_frequency: 不定期。直近は令和7年2月 (458種)。指定の追加は年単位で告示される。
+update_frequency: >
+  不定期。直近は令和7年2月 (458種)。指定の追加は年単位で告示される。同じ xlsx の別表第二
+  (国際希少野生動植物種) は令和8年3月版まで進んでいるので、ファイル自体はもっと頻繁に差し替わる。
+  同梱しているのは別表第一と緊急指定種の2枚だけ。
 national_coverage: 全国。地理データではなく種のリストなので、位置の網羅性という概念がない。
 boundary_error: 該当なし。座標を使わない。
 data_shape: 和名 + 学名。アプリが既に持ち、iNaturalist で実在確認済みの学名で突き合わせられる。
@@ -34,6 +38,11 @@ adoption:
     しか変わらないため)。同梱した版の更新日を画面に出す。一致は学名の完全一致に限る。
     一致しなかったことを「規制対象ではない」とは表示しない — 一致しない理由には、候補自体が
     外れている場合と、都道府県の条例で別に指定されている場合がある。
+known_gap: >
+  完全一致なので、亜種で指定されている分類群 (例 Acheilognathus tabira nakamurae) は、候補が種名
+  (Acheilognathus tabira) で返ったときに当たらない。取りこぼす向きに倒してある。前方一致を許すと、
+  亜種1つが指定されているだけの種を丸ごと「指定されています」と出すことになり、法律の話で嘘をつく。
+  取りこぼしても利用者が置かれる位置は今までと同じ (安全カードが「確認が必要」と述べている)。
   never_display: >
     一致したときも採取の可否は述べない。「種の保存法の国内希少野生動植物種です」と事実を示し、
     環境省の該当ページへ送る。安全カードの「持ち帰ってよいか：確認が必要」は変えない。

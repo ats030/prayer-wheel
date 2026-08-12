@@ -39,6 +39,14 @@ SAMPLE = {
 UNCERTAIN_SAMPLE = json.loads(json.dumps(SAMPLE))
 UNCERTAIN_SAMPLE["candidates"][0]["uncertainty"] = "総苞外片が反り返っているかどうか"
 
+# 種の保存法の指定がある候補。SAMPLE のほうは指定なしで、無印のままであることも見る
+PROTECTED_SAMPLE = json.loads(json.dumps(SAMPLE))
+PROTECTED_SAMPLE["candidates"][0].update({
+    "common_name_ja": "イタセンパラ", "scientific_name": "Acheilognathus longipinnis",
+    "protected_species": {"category": "国内希少野生動植物種", "subtype": "",
+                          "common_name_ja": "イタセンパラ", "as_of": "令和7年2月"},
+})
+
 failures: list[str] = []
 
 
@@ -116,6 +124,17 @@ def run(base: str, do_identify: bool) -> None:
         check("安全カードが出る", page.locator("#safetyCard").count() == 1)
         widths = page.eval_on_selector_all(".meter span", "els => els.map(e => e.style.width)")
         check("確信度のメーターに幅が入る", widths == ["60%"], str(widths))
+
+        # 種の保存法の指定。指定のない候補には何も出さない (無印は「指定なし」ではない)
+        check("指定のない候補には注意書きを出さない", page.locator(".protected").count() == 0)
+        page.evaluate("data => render(data)", PROTECTED_SAMPLE)
+        check("指定のある候補に注意書きが出る", page.locator(".protected").count() == 1,
+              page.locator("#results").inner_text()[:80])
+        check("注意書きから環境省の一覧へ行ける",
+              page.locator('.protected a[href*="env.go.jp/nature/kisho"]').count() == 1)
+        check("同梱したリストの版を出す", "令和7年2月" in (
+            page.locator(".protected").inner_text() if page.locator(".protected").count() else ""))
+        page.evaluate("data => render(data)", SAMPLE)
 
         # 「もっと確かめたいこと」から撮り足せるか
         check("確かめたいことがなければ撮り足しの案内は出ない", page.locator("#shootingGuide").count() == 0)

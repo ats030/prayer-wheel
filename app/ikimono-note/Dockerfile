@@ -17,6 +17,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY *.py ./
 COPY static ./static
+# 種の保存法のリスト。実行時に env.go.jp を叩かないので、同梱しないと公開版だけ
+# 照合が消える (画面上は「指定なし」と区別が付かない)。作り直す側の
+# data/build_protected_species.py は運用でしか使わないため入れない
+COPY data/protected_species.json ./data/
 
 # 公開版として動かす。運営者用の設定保存は 403 で拒否される
 ENV IKIMONO_PUBLIC_MODE=1 \

@@ -20,6 +20,9 @@
 .product-fallback{display:inline-block;color:var(--accent);font-size:12px;text-decoration:none}
 @media(max-width:520px){.product-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:5px}.product-card{flex:0 0 148px;scroll-snap-align:start}}
 
+/* 種の保存法の指定。記録からも見落とさないよう、候補名の直下に置く */
+.protected{margin:5px 0;padding:6px 9px;border-left:3px solid var(--danger);background:var(--raised);color:var(--danger);font-size:12px}
+.protected a{color:var(--accent);text-decoration:none}
 /* 記録ごとの操作。縦に積んで、一覧の3列目に収める */
 .entry-actions{display:flex;flex-direction:column;gap:6px;align-items:stretch}
 .again-message{grid-column:1/-1;margin:6px 0 0;color:var(--danger);font-size:12px}
