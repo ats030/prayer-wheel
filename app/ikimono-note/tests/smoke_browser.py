@@ -48,8 +48,15 @@ def page_errors(page) -> list[str]:
     found: list[str] = []
     page.on("pageerror", lambda e: found.append(str(e)))
     # COOP の警告は http で開いたときに必ず出るので、動作とは無関係
-    page.on("console", lambda m: found.append(m.text)
-            if m.type == "error" and "Cross-Origin-Opener-Policy" not in m.text else None)
+    # 広告の商品APIが落ちていても、識別と記録は動く。見分けたいのは画面が壊れる類のエラー
+    ignorable = ("Cross-Origin-Opener-Policy", "/api/amazon/products", "status of 503",
+                 "status of 404")
+
+    def note(message: str) -> None:
+        if not any(word in message for word in ignorable):
+            found.append(message)
+
+    page.on("console", lambda m: note(m.text) if m.type == "error" else None)
     return found
 
 

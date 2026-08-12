@@ -41,8 +41,7 @@
   <section class="section" aria-labelledby="backup-heading">
     <div class="section-head"><h2 id="backup-heading">記録の保存</h2><p>Google ドライブに置きます</p></div>
     <div class="panel">
-      <p class="help">調べた記録（写真を含む）と、使うAIの設定を、ご自身の Google ドライブへ保存します。記録が増えたり消えたりするたび、自動で書き直します。<strong>APIキーは含めません。</strong></p>
-      <p class="help">やり取りはブラウザから Google へ直接行き、<strong>本サービスのサーバーを通りません</strong>。このアプリが作った ikimono-note.json だけを読み書きし、ドライブの他のファイルは見えません。</p>
+      <p class="help">調べた記録（写真を含む）と、使うAIの設定を、ご自身の Google ドライブへ自動で保存します。やり取りはブラウザから Google へ直接行き、<strong>本サービスのサーバーを通りません</strong>。このアプリが作った ikimono-note.json だけを読み書きします。</p>
       <p class="help" id="drive-unavailable" hidden></p>
       <div class="status-strip" id="drive-strip" hidden><span>状態</span><strong id="drive-state">未接続</strong></div>
       <label class="check" id="save-keys-field" hidden><input id="save-keys" type="checkbox"><span>APIキーも一緒に保存する。端末やタブを移っても入れ直さずに済みます。<strong>ただし、このファイルが他人に渡ると、あなたのAPIキーで料金が発生する恐れがあります。</strong>共用の端末や、ドライブを他の人と共有している場合は外してください。</span></label>
@@ -51,5 +50,5 @@
     </div>
   </section>
 
-  <section class="section" aria-labelledby="security-heading"><div class="section-head"><h2 id="security-heading">保存と安全性</h2></div><div class="panel"><ul class="security" data-only="operator"><li>APIキーは所有者だけが読めるサーバー設定へ保存し、画面には再表示しません。</li><li>この画面にはパスワードがありません。Tailscale内と自宅LANからだけ開けるようにしています。一般公開には公開版 (別ポート) を使ってください。</li><li>写真はEXIF位置情報を除去し、保存しません。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li></ul><ul class="security" data-only="public"><li>APIキーはこのブラウザの中だけに保存します。上の設定で、この端末に残すか、タブを閉じたら消すかを選べます。</li><li>キーは判定時だけ暗号化通信で送信し、サーバー設定や記録には保存しません。</li><li>この画面にない項目 (Ollamaの接続先、広告) は運営者が管理していて、利用者からは変えられません。</li><li>写真はEXIF位置情報を除去し、保存しません。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li></ul></div></section>
+  <section class="section" aria-labelledby="security-heading"><div class="section-head"><h2 id="security-heading">保存と安全性</h2></div><details class="panel stacked"><summary><span><span class="detail-title">預かるもの・預からないもの</span><span class="detail-copy">APIキー、写真、記録の扱い</span></span></summary><div class="detail-body"><ul class="notes"><li>APIキーは所有者だけが読めるサーバー設定へ保存し、画面には再表示しません。</li><li>この画面にはパスワードがありません。Tailscale内と自宅LANからだけ開けるようにしています。一般公開には公開版 (別ポート) を使ってください。</li><li>写真はEXIF位置情報を除去し、保存しません。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li><li>APIキーはこのブラウザの中だけに保存します。上の設定で、この端末に残すか、タブを閉じたら消すかを選べます。</li><li>キーは判定時だけ暗号化通信で送信し、サーバー設定や記録には保存しません。</li><li>この画面にない項目 (Ollamaの接続先、広告) は運営者が管理していて、利用者からは変えられません。</li><li>写真はEXIF位置情報を除去し、保存しません。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li></ul></div></details></section>
 <nav aria-label="法務情報" class="legal-nav"><a href="/privacy">プライバシー</a><a href="/terms">利用規約</a></nav></main></body></html>

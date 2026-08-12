@@ -1521,3 +1521,21 @@ def test_the_warning_does_not_greet_you_first():
     assert 'class="panel stacked guardian-note"' in page      # details で畳んである
     assert "料金とお子さまの利用について" in page
     assert "契約者ご本人" in page                              # 中身は消していない
+
+
+def test_empty_areas_do_not_hold_space():
+    """写真を選ぶ前の 02 と 03 が、空のまま340pxほど占めていた。
+    案内の一行が読めれば足りる。"""
+    css = client.get("/assets/index.css").text
+    heights = re.findall(r"\.placeholder\{[^}]*min-height:(\d+)px", css)
+    assert heights, "placeholder の高さ指定が見つからない"
+    for value in heights:
+        assert int(value) <= 100, f"空欄が {value}px を占めている"
+
+
+def test_the_long_notes_are_folded_but_kept():
+    """大事だが、設定を触るたびに読むものではない。畳んでも中身は消さない。"""
+    page = client.get("/settings").text
+    security = page.split('aria-labelledby="security-heading"')[1].split("</section>")[0]
+    assert "<details" in security, "保存と安全性が畳まれていない"
+    assert security.count("<li>") >= 5, "中身が減っている"
