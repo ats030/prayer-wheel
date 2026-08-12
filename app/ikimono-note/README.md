@@ -203,15 +203,24 @@ APIキーの登録と料金負担は契約者本人が行う旨を設定画面�
 IKIMONO_PUBLIC_MODE=1
 IKIMONO_ALLOWED_HOSTS=species.example.com
 IKIMONO_PUBLIC_LOCAL=0
-IKIMONO_PUBLIC_AFFILIATE=0
+IKIMONO_PUBLIC_AFFILIATE=1
 ```
 
 - `IKIMONO_PUBLIC_MODE=1`: 共有設定の更新を403で拒否し、BYOK公開モードを有効化
 - `IKIMONO_ALLOWED_HOSTS`: 公開ドメインをカンマ区切りで指定
 - `IKIMONO_PUBLIC_LOCAL=1`: 運営者のOllamaを公開する場合だけ明示的に有効化
-- `IKIMONO_PUBLIC_AFFILIATE=1`: 商用利用可能な公開基盤へ移行後、広告を再有効化する場合だけ指定
+- `IKIMONO_PUBLIC_AFFILIATE=1`: 公開版でも広告を出す。値は `~/.env` に置く
 
-無料のTailscale Personalプランで公開するベータ版は非商用とし、広告・商品API・計測を強制的に無効化します。
+この環境変数は運営者設定より手前のゲートです。`0` だと `/api/settings` の広告設定ごと空になり、
+候補ごとの検索リンクの棚すら描かれません (`/api/amazon/products` も404)。運営者用 (8523) の
+設定画面で `enabled` を入れても、公開版には出ません。
+
+**未解決**: この公開はGmailアカウントで作ったtailnet (`*.ts.net`) のTailscale Funnel経由で、
+自動的に無料のPersonalプランです。Tailscaleは Personal プランを "only suitable for
+non-commercial use" としており、広告を載せた状態がこれに触れないかは確認できていません
+(ats030-rx76)。以前は同じ理由で `0` を既定にしていました。2026-08-12に運営者の判断で `1`
+にしています。触れると判断した場合は `~/.env` の行を `0` に戻して公開版を再起動すれば、
+広告は即座に消えます。
 
 公開はTailscale Funnel (TLS終端) 経由で8524番ポートへ流します。8523番ポートは
 運営者用でインターネットへ出しません。自前のリバースプロキシを使う場合も同様に、
