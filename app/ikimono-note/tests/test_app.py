@@ -1201,21 +1201,27 @@ def test_pages_load_every_script_they_depend_on():
     """settings.html が species-links.js を読み忘れ、APIキーを保存できていなかった。
     参照している関数が、そのページで読まれる範囲に定義されているか確かめる。"""
     provided = {}
-    for name in ["species-links.js", "backup.js", "index.js", "history.js", "settings.js"]:
+    for name in ["species-links.js", "backup.js", "gdrive.js", "index.js", "history.js", "settings.js"]:
         body = client.get(f"/assets/{name}").text
         provided[name] = set(re.findall(r"function\s+([A-Za-z_$][\w$]*)\s*\(", body))
     provided["theme.js"] = set(re.findall(r"function\s+([A-Za-z_$][\w$]*)\s*\(", client.get("/theme.js").text))
 
     shared = ["readApiKey", "writeApiKey", "clearApiKey", "keepingKeys", "displayName",
-              "wikipediaUrl", "providerLabel", "scheduleAutoBackup"]
-    for path, own in [("/", "index.js"), ("/history", "history.js"), ("/settings", "settings.js")]:
+              "wikipediaUrl", "providerLabel", "scheduleAutoBackup",
+              # ドライブへの保存。gdrive.js を設定画面にしか読ませておらず、写真を調べても
+              # 記録が書かれないまま黙っていた
+              "autoSaveToDrive", "ensureDriveToken", "saveToDrive", "loadFromDrive",
+              "driveSignedIn", "driveLinked", "driveConfigured", "forgetDrive", "buildBackup"]
+    for path in ["/", "/history", "/settings"]:
         html = client.get(path).text
-        loaded = set(re.findall(r'src="/assets/([a-z-]+\.js)"', html))
-        available = set().union(*[provided[name] for name in loaded if name in provided])
-        body = client.get(f"/assets/{own}").text
-        for func in shared:
-            if re.search(rf"\b{func}\s*\(", body):
-                assert func in available, f"{path}: {func} を呼ぶが定義が読み込まれていない"
+        loaded = [name for name in re.findall(r'src="/assets/([a-z-]+\.js)"', html) if name in provided]
+        available = set().union(*[provided[name] for name in loaded])
+        # そのページで読まれる全てのスクリプトを見る。呼ぶ側が共通ファイルのこともある
+        for name in loaded:
+            body = client.get(f"/assets/{name}").text
+            for func in shared:
+                if re.search(rf"\b{func}\s*\(", body):
+                    assert func in available, f"{path}: {name} が {func} を呼ぶが、定義が読み込まれていない"
 
 
 def test_google_drive_talks_to_google_directly():
@@ -1384,3 +1390,26 @@ def test_settings_page_touches_only_elements_that_exist():
     for name in sorted(used - ids):
         guarded = re.search(rf'const \w+=\$\("{re.escape(name)}"\);\s*\n\s*if\(\w+\)', script)
         assert guarded, f'{name} は settings.html に無く、存在確認もしていない'
+
+
+def test_every_page_that_records_can_also_save_them():
+    """記録を書き換えるページは、保存する手段も持っていなければならない。
+    gdrive.js を設定画面にしか読ませておらず、写真を調べても記録が
+    ドライブに書かれないまま黙っていた。"""
+    for path in ["/", "/history", "/settings"]:
+        html = client.get(path).text
+        if "scheduleAutoBackup" in client.get("/assets/backup.js").text and "backup.js" in html:
+            assert "gdrive.js" in html, f"{path}: 保存の呼び出しはあるが gdrive.js が無い"
+
+
+def test_a_failed_save_is_not_kept_quiet():
+    """黙って失敗し続けると、記録が残っていると思い込んだまま端末を変えて、
+    全部消えたことに後で気づく。"""
+    drive = client.get("/assets/gdrive.js").text
+    assert "function noteDriveStatus(ok, detail)" in drive
+    assert "noteDriveStatus(false," in drive and "noteDriveStatus(true," in drive
+    history = client.get("/assets/history.js").text
+    assert "showSaveState" in history
+    assert "Google ドライブへ保存できていません" in history
+    assert "記録はこの端末の中だけにあります" in history      # 一度もつないでいない場合
+    assert 'id="saveState"' in client.get("/history").text

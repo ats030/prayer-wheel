@@ -80,16 +80,37 @@ async function ensureDriveToken(clientId) {
   }
 }
 
-/* 記録が変わったあとに呼ばれる。つながっていなければ黙って何もしない */
+/* 最後に書けたかどうかを残す。黙って失敗し続けると、保存されたつもりで
+   記録がどこにも無い状態になる。画面はこれを見て伝える */
+const DRIVE_STATUS = "species-drive-status";
+
+function driveStatus() {
+  try { return JSON.parse(localStorage.getItem(DRIVE_STATUS) || "null"); } catch (error) { return null; }
+}
+
+function noteDriveStatus(ok, detail) {
+  try {
+    localStorage.setItem(DRIVE_STATUS, JSON.stringify({ok, detail: detail || "", at: new Date().toISOString()}));
+  } catch (error) { /* 残せなくても保存自体は行う */ }
+}
+
+/* 記録が変わったあとに呼ばれる。つながっていなければ何もしないが、
+   つないだはずなのに書けなかったときは、そのことを残す */
 async function autoSaveToDrive() {
+  const linked = driveLinked();
   try {
     const settings = await fetch("/api/settings").then(r => r.ok ? r.json() : null);
     const token = await ensureDriveToken(settings?.google_client_id || "");
-    if (!token) return false;
-    await saveToDrive();
+    if (!token) {
+      if (linked) noteDriveStatus(false, "つなぎ直しが必要です");
+      return false;
+    }
+    const count = await saveToDrive();
+    noteDriveStatus(true, `記録 ${count}件`);
     return true;
   } catch (error) {
     console.error("ドライブへ書けませんでした", error);
+    noteDriveStatus(false, error.message || "書き込めませんでした");
     return false;
   }
 }

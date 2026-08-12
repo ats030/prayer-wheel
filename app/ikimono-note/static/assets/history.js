@@ -170,3 +170,23 @@ async function addAffiliateLinks(){
   });
 }
 const addAffiliateLinksOnce=addAffiliateLinks;let affiliateLinksAdded=false;addAffiliateLinks=async()=>{if(affiliateLinksAdded)return;affiliateLinksAdded=true;await addAffiliateLinksOnce()};setTimeout(()=>enrich().then(addAffiliateLinks).catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
+
+/* 最後にドライブへ書けたかを出す。黙って失敗していると、記録が残っていると
+   思い込んだまま端末を変えて、全部消えたことに後で気づく */
+(function showSaveState(){
+  const el=document.getElementById("saveState");
+  if(!el||typeof driveStatus!=="function")return;
+  const state=driveStatus();
+  if(!state){
+    if(typeof driveLinked==="function"&&!driveLinked()){
+      el.hidden=false;el.className="save-state warn";
+      el.innerHTML='記録はこの端末の中だけにあります。<a href="/settings">設定</a>から Google ドライブにつなぐと、端末を変えても残ります。';
+    }
+    return;
+  }
+  el.hidden=false;
+  const when=new Date(state.at).toLocaleString("ja-JP");
+  if(state.ok){el.className="save-state ok";el.textContent=`Google ドライブに保存済み（${when}・${state.detail}）`}
+  else{el.className="save-state warn";
+    el.innerHTML=`Google ドライブへ保存できていません（${when}・${esc(state.detail)}）。<a href="/settings">設定</a>から確認してください。`}
+})();

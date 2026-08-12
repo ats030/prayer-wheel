@@ -24,3 +24,4 @@
 .entry-actions{display:flex;flex-direction:column;gap:6px;align-items:stretch}
 .again-message{grid-column:1/-1;margin:6px 0 0;color:var(--danger);font-size:12px}
 @media(max-width:520px){.entry-actions{grid-column:1/-1;flex-direction:row}.entry-actions .btn{flex:1}}
+.save-state{margin:0 0 12px;padding:9px 12px;border-radius:var(--radius-control);font-size:.9rem;border:1px solid var(--color-line)}.save-state.ok{background:var(--color-raised)}.save-state.warn{border-left:3px solid var(--color-accent);background:var(--color-raised)}
