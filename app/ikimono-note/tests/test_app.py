@@ -1539,3 +1539,18 @@ def test_the_long_notes_are_folded_but_kept():
     security = page.split('aria-labelledby="security-heading"')[1].split("</section>")[0]
     assert "<details" in security, "保存と安全性が畳まれていない"
     assert security.count("<li>") >= 5, "中身が減っている"
+
+
+def test_the_browser_can_keep_the_keys_for_us():
+    """autocomplete="new-password" は「新しいパスワードの入力欄」の宣言で、
+    ブラウザは保存を提案しない。端末を移るたびに入れ直すことになっていた。"""
+    page = client.get("/settings").text
+    # Amazon の認証情報は運営者専用で、利用者は触らない。ここでは対象外
+    for name in ["gemini", "openai", "anthropic", "plantnet"]:
+        assert f'id="key-{name}" name=' in page and f'autocomplete="new-password" placeholder' not in \
+            page.split(f'id="key-{name}"')[1][:120], name
+        assert f'name="ikimono-{name}-key" type="password" autocomplete="current-password"' in page, name
+        # どのサービスの鍵かを示さないと、ブラウザが4つを区別できない
+        assert f'value="{name}" autocomplete="username"' in page, name
+    assert "パスワードを保存しますか" in page      # 知らなければ、提案が出ても意味が分からない
+    assert "本サービスは受け取りません" in page
