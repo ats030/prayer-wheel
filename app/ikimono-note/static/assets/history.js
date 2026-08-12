@@ -3,7 +3,29 @@ async function all(){const d=await openDb(),t=d.transaction("entries"),v=await r
 function loadLeaflet(){if(window.L)return Promise.resolve();return new Promise((ok,no)=>{const css=document.createElement("link");css.rel="stylesheet";css.href="/vendor/leaflet/leaflet.css";document.head.append(css);const js=document.createElement("script");js.src="/vendor/leaflet/leaflet.js";js.onload=()=>ok();js.onerror=()=>no(new Error("地図を読み込めませんでした。"));document.head.append(js)})}
 async function showMap(){const button=$("showMap");button.disabled=true;button.textContent="地図を読み込み中…";try{await loadLeaflet();$("historyMap").classList.remove("hidden");map(mapEntries);button.remove()}catch(e){button.disabled=false;button.textContent="地図を表示";$("mapNotice").textContent=e.message}}
 $("showMap").onclick=showMap;
-function map(entries){const m=L.map("historyMap"),points=[];L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a href="https://leafletjs.com">Leaflet</a>'}).addTo(m);entries.forEach(e=>{const a=Number(e.coordinates?.latitude),o=Number(e.coordinates?.longitude);if(Number.isFinite(a)&&Number.isFinite(o)){points.push([a,o]);L.marker([a,o]).addTo(m).bindPopup("<strong>"+esc(title(e))+"</strong><br>"+esc(new Date(e.createdAt).toLocaleString("ja-JP")))}});points.length?m.fitBounds(points,{padding:[24,24],maxZoom:15}):m.setView([36.2,138.2],5)}
+/* 地図の下敷き。どこで見つけたかを思い出すには、道より地形が要ることがある。
+   国土地理院のタイルは出典を示せば自由に使える (政府標準利用規約)。日本の外は
+   写らないので、標準の地図は OpenStreetMap のままにする。 */
+const MAP_LAYERS = {
+  "地図": ["https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'],
+  "地形": ["https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png",
+          '<a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>（色別標高図）'],
+  "起伏": ["https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png",
+          '<a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>（陰影起伏図）'],
+  "写真": ["https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg",
+          '<a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>（写真）'],
+};
+
+function map(entries){
+  const m=L.map("historyMap"),points=[];
+  const layers={};
+  for(const [name,[url,credit]] of Object.entries(MAP_LAYERS)){
+    layers[name]=L.tileLayer(url,{maxZoom:18,attribution:credit});
+  }
+  layers["地図"].addTo(m);
+  L.control.layers(layers,null,{collapsed:false}).addTo(m);
+entries.forEach(e=>{const a=Number(e.coordinates?.latitude),o=Number(e.coordinates?.longitude);if(Number.isFinite(a)&&Number.isFinite(o)){points.push([a,o]);L.marker([a,o]).addTo(m).bindPopup("<strong>"+esc(title(e))+"</strong><br>"+esc(new Date(e.createdAt).toLocaleString("ja-JP")))}});points.length?m.fitBounds(points,{padding:[24,24],maxZoom:15}):m.setView([36.2,138.2],5)}
 async function render(){const entries=await all();mapEntries=entries;const located=entries.filter(e=>Number.isFinite(Number(e.coordinates?.latitude))&&Number.isFinite(Number(e.coordinates?.longitude)));$("showMap").disabled=!located.length;if(!located.length)$("mapNotice").textContent="場所を記録した記録がまだないため、地図は表示できません。";$("clear").disabled=!entries.length;$("historyList").innerHTML=entries.length?entries.map(e=>{const image=e.thumbnail?URL.createObjectURL(e.thumbnail):"";return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+image+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div><div class="muted">'+esc(e.context?.location||"場所の記録なし")+'</div></div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>調べた内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';document.querySelectorAll(".photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()});document.querySelectorAll(".entry").forEach(node=>{const b=node.querySelector(".again");if(!b)return;const rec=entries.find(e=>String(e.id)===node.dataset.id);if(rec)b.onclick=()=>reidentify(rec,b,node.querySelector(".again-message"))});document.querySelectorAll(".one").forEach(b=>b.onclick=async()=>{const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").delete(b.closest("article").dataset.id);await finished(t);scheduleAutoBackup();location.reload()})}$("close").onclick=()=>$("lightbox").close();$("clear").onclick=async()=>{if(confirm("この端末に保存した記録をすべて削除しますか？")){const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").clear();await finished(t);scheduleAutoBackup();location.reload()}};render().catch(e=>$("historyList").innerHTML='<div class="empty">記録を読み込めませんでした。 '+esc(e.message)+'</div>');
 function evidence(label,items){return items?.length?'<div class="label">'+label+'</div><ul>'+items.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>':""}function candidateLinks(c,category){
   /* 撮影画面と同じ参照先を、記録からも辿れるようにする */

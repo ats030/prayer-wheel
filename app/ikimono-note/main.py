@@ -84,7 +84,7 @@ CONTENT_SECURITY_POLICY = "; ".join([
     "script-src 'self' https://accounts.google.com",
     "style-src 'self'",
     "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com",
-    "img-src 'self' blob: https://tile.openstreetmap.org https://*.media-amazon.com https://*.ssl-images-amazon.com",
+    "img-src 'self' blob: data: https://tile.openstreetmap.org https://cyberjapandata.gsi.go.jp https://*.media-amazon.com https://*.ssl-images-amazon.com",
 ])
 
 

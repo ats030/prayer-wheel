@@ -1625,3 +1625,25 @@ def test_you_can_tell_which_screen_you_are_on():
     assert "ポートが違うため" in page
     # 公開版へ渡れるようにしておく。利用者と同じ動きは、そちらでしか見られない
     assert 'href="https://ubuntu-server-app.tailf74832.ts.net/settings"' in page
+
+
+def test_the_map_can_show_the_lay_of_the_land():
+    """どこで見つけたかを思い出すには、道より地形が要ることがある。"""
+    script = client.get("/assets/history.js").text
+    assert "const MAP_LAYERS = {" in script
+    for name in ["地図", "地形", "起伏", "写真"]:
+        assert f'"{name}"' in script.split("const MAP_LAYERS")[1].split("};")[0], name
+    # 出典を示せば自由に使える (政府標準利用規約)。示さないなら使えない
+    assert script.count("国土地理院") >= 3
+    assert "L.control.layers(layers,null,{collapsed:false})" in script
+    # Leaflet の表記はライブラリが自分で付ける。重ねると二重に出る
+    assert "leafletjs.com" not in script.split("const MAP_LAYERS")[1].split("};")[0]
+
+
+def test_the_policy_lets_the_tiles_through():
+    policy = client.get("/history").headers["content-security-policy"]
+    images = policy.split("img-src")[1].split(";")[0]
+    assert "https://cyberjapandata.gsi.go.jp" in images
+    # Leaflet はタイルの隙間に 1x1 の透明 GIF を data: で置く
+    assert " data:" in images
+    assert "'unsafe-inline'" not in policy
