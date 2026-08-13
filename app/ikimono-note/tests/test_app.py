@@ -2050,6 +2050,24 @@ def test_a_record_can_be_examined_again_with_extra_photos():
     assert ".rerun-box{" in css
 
 
+def test_the_search_link_uses_the_species_name_alone():
+    """検索語に分類を足さない。
+
+    「セイヨウタンポポ 植物」で引くと、その語を含む商品へ絞られて、その種を
+    扱った本や道具が落ちる。分類は言い換え (飼育/育て方) と、全滅したときの
+    一般書 (分類+図鑑) でだけ使う。
+    """
+    products = client.get("/assets/products.js").text
+    index = client.get("/assets/index.js").text
+    assert "const query = name;" in products
+    assert "const query=name;" in index
+    assert 'name + " " + String(subject.category' not in products
+    assert 'name+" "+category' not in index
+    # 分類そのものを捨てたわけではない
+    assert 'category === "動物" ? "飼育"' in products
+    assert 'q: category + " 図鑑"' in products
+
+
 def test_the_shelf_shows_cards_and_the_search_link_together():
     """画像付きカードと Amazon の検索結果、両方を出す。
 

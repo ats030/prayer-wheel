@@ -113,7 +113,10 @@ async function loadProductShelf(shell, subject, budget) {
 function productSearchLink(subject, besideCards) {
   const name = String(subject.name || "").trim();
   if (!name) return "";
-  const query = name + " " + String(subject.category || "").trim();
+  /* 検索語は種名だけ。「セイヨウタンポポ 植物」と分類を足すと、その語を含む商品へ
+     絞られて、その種を扱った本や道具が落ちる。分類は grow の言い換えと、
+     全滅したときの一般書 (productQueries) でだけ使う */
+  const query = name;
   const label = besideCards
     ? "Amazonで" + esc(name) + "をもっと探す ↗"
     : "広告 · Amazonで" + esc(name) + "の関連商品を探す ↗";

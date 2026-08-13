@@ -66,7 +66,7 @@ function sexHtml(c,category){if(category!=="動物")return "";const sex=["オス
 function affiliateProductLink(c,category){
   if(!affiliate||!affiliate.enabled)return "";
   const name=noJapaneseName(c.common_name_ja)?c.scientific_name:c.common_name_ja;
-  const query=name+" "+category;
+  const query=name;   /* 分類は足さない (products.js の productSearchLink と同じ理由) */
   /* 商品APIを待たずに検索リンクは出しておく。APIが無効・不調のときはこれが残り、
      返ってきたらカードと並べて置き直す (loadProductShelf) */
   return '<div class="product-shell amazon-products"'
