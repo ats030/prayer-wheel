@@ -2158,7 +2158,8 @@ def test_a_stranger_can_try_it_once_when_the_operator_opens_a_trial():
     # 枠があるときだけ、撮影画面と識別をログインの外に出す
     assert 'if trial_enabled() and (path in {"/", "/identify", "/api/settings", "/api/photo-metadata"}' in source
     # 記録と設定はログインの内側のまま
-    assert '"/history"' not in source.split("trial_enabled() and path in")[1][:160]
+    opened = source.split("if trial_enabled() and (path in")[1][:200]
+    assert '"/history"' not in opened and '"/settings"' not in opened
     # 使い切ったら、自分のキーを登録する道を案内する
     assert "今日のお試しは終わりです。" in source
     assert "if not api_key and trial_enabled():" in source
