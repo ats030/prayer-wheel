@@ -126,7 +126,7 @@ def test_index_saves_history_but_does_not_render_it():
     assert 'indexedDB.open("species-history",1)' in source
     assert 'slice(50)' in source
     assert 'gps.latitude.toFixed(4)' in source
-    assert '960/Math.max(bitmap.width,bitmap.height)' in source
+    assert 'HISTORY_MAX_EDGE/Math.max(bitmap.width,bitmap.height)' in source
     assert 'model:data.model||""' in source
     assert 'resultMeta:{strictMode:' in source
     # 表示専用の重複実装を持たないこと（隠れたまま到達できない実装を再び作らない）
@@ -1883,16 +1883,41 @@ def test_every_photo_used_is_kept_and_viewable():
     assert ".detail-photos{" in client.get("/assets/history.css").text
     # 書き出しにも入れる。入れないと別の端末で読み込んだとたんに消える
     backup = client.get("/assets/backup.js").text
-    assert "if (Array.isArray(entry.thumbnails))" in backup
-    assert "if (Array.isArray(record.thumbnails))" in backup
-    assert "entry.thumbnails = record.thumbnails.map(dataUrlToBlob).filter(Boolean)" in backup
+    assert "for (const blob of photos) copy.thumbnails.push(await blobToDataUrl(blob))" in backup
+    assert "record.thumbnails.map(dataUrlToBlob).filter(Boolean)" in backup
+
+
+def test_the_drive_file_has_a_photo_budget():
+    """ドライブのファイルはタブを開くたびに1回引く。写真で無制限に膨らませない。
+
+    以前ここを見積もったとき、元が500pxの評価用画像で測ってしまい、実際の4分の1の
+    大きさだと思い込んでいた。実カメラ写真では1枚が100KB〜300KBある。
+    """
+    backup = client.get("/assets/backup.js").text
+    assert "const BACKUP_PHOTO_BUDGET" in backup
+    assert "bytes <= budget" in backup
+    # 新しい記録から詰める。古いほうが本文だけになる
+    assert 'String(b.createdAt || "").localeCompare(String(a.createdAt || ""))' in backup
+    assert "photosOmitted: dropped" in backup
+    # 記録そのものは落とさない (写真だけ落とす)
+    assert "records.push(copy);" in backup
+
+
+def test_a_photoless_backup_does_not_erase_local_photos():
+    """予算で写真を落としたぶんが、写真のある手元を上書きしないこと。"""
+    backup = client.get("/assets/backup.js").text
+    assert "if (!entry.thumbnails.length && existing)" in backup
+    assert "entry.thumbnails = kept; entry.thumbnail = kept[0];" in backup
 
 
 def test_the_shrink_helper_is_shared_by_both_screens():
     """縮小は撮影画面と記録画面の両方が要る。写しを2つ持たない。"""
     backup = client.get("/assets/backup.js").text
     assert "async function shrinkForHistory(file)" in backup
-    assert "960/Math.max(bitmap.width,bitmap.height)" in backup
+    # 保存はサーバーが外部AIへ送る上限と同じ。低いと調べ直しだけ不利になる
+    assert "const HISTORY_MAX_EDGE = 1600" in backup
+    assert str(main.vision.MAX_EDGE) == "1600"
+    assert "HISTORY_MAX_EDGE/Math.max(bitmap.width,bitmap.height)" in backup
     for name in ["index.js", "history.js"]:
         assert "async function historyThumbnail" not in client.get(f"/assets/{name}").text, name
 

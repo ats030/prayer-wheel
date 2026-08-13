@@ -116,8 +116,8 @@ function historyDb(){return new Promise((resolve,reject)=>{if(!("indexedDB" in w
 function requestValue(request){return new Promise((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
 function transactionDone(transaction){return new Promise((resolve,reject)=>{transaction.oncomplete=resolve;transaction.onerror=()=>reject(transaction.error);transaction.onabort=()=>reject(transaction.error)})}
 /* 送った写真はすべて残す。1枚目だけだと、撮り足した寄りの1枚があとから見られず、
-   調べ直しも1枚目だけで走ることになる。実測で長辺960pxのJPEGは中央値33KBなので、
-   3枚×50件でもドライブのJSONは6MB台に収まる */
+   調べ直しも1枚目だけで走ることになる。大きさは backup.js の HISTORY_MAX_EDGE。
+   ドライブへ持ち出すぶんの上限は buildBackup 側で別に持つ */
 /* 写真も撮影情報も、投げる前に控えたぶん (pending) を使う。画面を更新すると
    選んだファイルも入力欄の中身も手元から消えるので、いま画面を見て作れない */
 async function saveHistory(data,pending){const db=await historyDb();const thumbnails=pending?.photos||[];const thumbnail=thumbnails[0]||null;const metadata=data.photo_metadata||{};const coordinates=pending?.coordinates||(metadata.latitude!=null?{latitude:metadata.latitude,longitude:metadata.longitude}:null);const record={id:(crypto.randomUUID?.()||Date.now()+"-"+Math.random()),createdAt:new Date().toISOString(),category:data.category,summary:data.summary,candidates:data.candidates,provider:providerName,model:data.model||"",resultMeta:{strictMode:Boolean(data.strict_mode),taxonomyChecked:Boolean(data.taxonomy_checked),rejectedCandidates:Number(data.rejected_candidates||0),plantnetUsed:Boolean(data.plantnet_used)},context:pending?.context||{location:"",observedDate:"",size:""},coordinates,thumbnail,thumbnails};let tx=db.transaction("entries","readwrite");tx.objectStore("entries").put(record);await transactionDone(tx);tx=db.transaction("entries","readonly");const all=await requestValue(tx.objectStore("entries").getAll());await transactionDone(tx);const excess=all.sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(50);if(excess.length){tx=db.transaction("entries","readwrite");excess.forEach(item=>tx.objectStore("entries").delete(item.id));await transactionDone(tx)}db.close();scheduleAutoBackup()}

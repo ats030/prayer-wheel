@@ -39,6 +39,10 @@ function backupTransaction(transaction) {
   });
 }
 
+/* 写真に使ってよい実体バイト数。base64 で約1.33倍になるので、ファイルは12MB前後で頭打ち。
+   端末の中 (IndexedDB) はこの制限を受けず、記録は全部そのまま残る */
+const BACKUP_PHOTO_BUDGET = 9 * 1024 * 1024;
+
 function blobToDataUrl(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -69,17 +73,35 @@ async function buildBackup() {
   await backupTransaction(transaction);
   db.close();
 
+  /* ドライブのファイルはタブを開くたびに1回引く。写真を無制限に詰めると、
+     モバイル回線で毎回それを落とすことになる。新しい記録から順に写真を入れ、
+     予算を使い切ったら、それより古い記録は本文だけにする (記録自体は消さない)。
+     以前ここを見積もったとき、元が500pxの評価用画像で測ってしまい、実際の
+     4分の1の大きさだと思い込んでいた。実カメラ写真では1枚が100KB〜300KBある。 */
+  const newestFirst = [...entries].sort((a, b) =>
+    String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+  let budget = BACKUP_PHOTO_BUDGET;
+  let dropped = 0;
   const records = [];
-  for (const entry of entries) {
+  for (const entry of newestFirst) {
     const copy = {...entry};
-    copy.thumbnail = entry.thumbnail ? await blobToDataUrl(entry.thumbnail) : null;
     /* 送った写真は全部残す。1枚目だけ書き出すと、別の端末で読み込んだとたんに
        撮り足した寄りの1枚が消える */
-    if (Array.isArray(entry.thumbnails)) {
+    const photos = Array.isArray(entry.thumbnails) && entry.thumbnails.length
+      ? entry.thumbnails.filter(Boolean)
+      : (entry.thumbnail ? [entry.thumbnail] : []);
+    const bytes = photos.reduce((total, blob) => total + (blob.size || 0), 0);
+    if (photos.length && bytes <= budget) {
+      budget -= bytes;
+      /* thumbnail は書き出さない。1枚目は thumbnails[0] と同じもので、両方入れると
+         ファイルの3分の1が同じ写真の写しになる。読み込む側が1枚目から組み直す */
+      copy.thumbnail = null;
       copy.thumbnails = [];
-      for (const blob of entry.thumbnails) {
-        if (blob) copy.thumbnails.push(await blobToDataUrl(blob));
-      }
+      for (const blob of photos) copy.thumbnails.push(await blobToDataUrl(blob));
+    } else {
+      if (photos.length) dropped++;
+      copy.thumbnail = null;
+      copy.thumbnails = [];
     }
     records.push(copy);
   }
@@ -87,6 +109,7 @@ async function buildBackup() {
   try { settings = JSON.parse(localStorage.getItem("species-public-settings") || "null"); } catch (error) { settings = null; }
 
   const payload = {
+    photosOmitted: dropped,
     format: BACKUP_FORMAT,
     exportedAt: new Date().toISOString(),
     note: "APIキーは含めません。別の端末では入れ直してください。",
@@ -111,9 +134,24 @@ async function restoreBackup(payload) {
   for (const record of records) {
     if (!record?.id) continue;
     const entry = {...record};
-    entry.thumbnail = dataUrlToBlob(record.thumbnail);
-    if (Array.isArray(record.thumbnails)) {
-      entry.thumbnails = record.thumbnails.map(dataUrlToBlob).filter(Boolean);
+    /* 新しい書き出しは thumbnails だけを持つ。古いものは thumbnail 1枚だけ持つ */
+    entry.thumbnails = Array.isArray(record.thumbnails)
+      ? record.thumbnails.map(dataUrlToBlob).filter(Boolean) : [];
+    if (!entry.thumbnails.length) {
+      const single = dataUrlToBlob(record.thumbnail);
+      if (single) entry.thumbnails = [single];
+    }
+    entry.thumbnail = entry.thumbnails[0] || null;
+    /* 予算の都合で写真を落としたぶんが入っていることがある。写真のない側で
+       写真のある手元を上書きしない。書き出しは新しい記録から詰めるので、
+       古い記録ほどこの形で戻ってくる */
+    const reading = db.transaction("entries", "readonly");
+    const existing = await backupRequest(reading.objectStore("entries").get(record.id));
+    await backupTransaction(reading);
+    if (!entry.thumbnails.length && existing) {
+      const kept = (Array.isArray(existing.thumbnails) && existing.thumbnails.length)
+        ? existing.thumbnails : (existing.thumbnail ? [existing.thumbnail] : []);
+      if (kept.length) { entry.thumbnails = kept; entry.thumbnail = kept[0]; }
     }
     const transaction = db.transaction("entries", "readwrite");
     transaction.objectStore("entries").put(entry);
@@ -142,5 +180,10 @@ function scheduleAutoBackup() {
 }
 
 /* 記録に残す縮小画像。撮影画面と記録画面の両方が作る (記録側は足した写真ぶん)。
-   長辺960pxのJPEGで、実測の中央値は33KB。3枚×50件でもドライブのJSONは6MB台 */
-async function shrinkForHistory(file){if(!file)return null;const bitmap=await createImageBitmap(file);const scale=Math.min(1,960/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext("2d").drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();return new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.78))}
+   長辺はサーバーが外部AIへ送る上限と同じ 1600px にそろえる (vision.MAX_EDGE)。
+   これより小さく持つと、記録から「調べ直す」ときだけ元より低い解像度で走る。
+   これより大きく持っても、送る前に縮められるので意味がない。
+   実カメラ写真 (1200x1600) で測ると 1600px で中央値 324KB、960px で 122KB。
+   ドライブへ持ち出すぶんは backupPhotoBudget で別に絞る。 */
+const HISTORY_MAX_EDGE = 1600;
+async function shrinkForHistory(file){if(!file)return null;const bitmap=await createImageBitmap(file);const scale=Math.min(1,HISTORY_MAX_EDGE/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext("2d").drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();return new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.78))}
