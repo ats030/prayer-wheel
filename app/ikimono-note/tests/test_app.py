@@ -2474,8 +2474,23 @@ def test_the_login_never_straddles_two_hostnames():
     """
     source = Path("main.py").read_text(encoding="utf-8")
     assert "async def keep_one_origin(request: Request, call_next):" in source
-    assert 'host != CANONICAL_HOST and host in ALLOWED_HOSTS' in source
+    assert "host != CANONICAL_HOST" in source and "host in ALLOWED_HOSTS" in source
     assert "status_code=307" in source          # 本文を保つ (POST を GET に変えない)
+
+
+def test_the_operator_screen_is_never_sent_to_the_public_site():
+    """運営者用と公開版は PUBLIC_ORIGIN を同じ ~/.env から読む。
+
+    入口を寄せる処理に手元からの接続を除く条件が無いと、192.168.11.9:8523 の
+    運営者用画面が公開サイト (tailnet の URL) へ 307 で飛ぶ。再起動していれば
+    そうなっていた。手元からの接続はそもそも Google を経由しないので寄せる理由が無い。
+    """
+    source = Path("main.py").read_text(encoding="utf-8")
+    assert "def _is_local_entry(host: str) -> bool:" in source
+    assert "not _is_local_entry(host)" in source
+    assert "PUBLIC_MODE and CANONICAL_HOST" in source      # 運営者用では動かさない
+    for name in ("localhost", "127.0.0.1", "192.168.", "ubuntu-server-app"):
+        assert name in source.split("def _is_local_entry")[1][:400]
 
 
 def test_a_failed_login_says_which_check_failed():

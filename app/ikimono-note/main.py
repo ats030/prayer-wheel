@@ -69,11 +69,21 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 # そこへ寄せる。
 CANONICAL_HOST = auth.PUBLIC_ORIGIN.split("://", 1)[-1].rstrip("/") if auth.PUBLIC_ORIGIN else ""
 
+# 手元から直接あてる入口は寄せない。運営者用も公開版も PUBLIC_ORIGIN を同じ
+# ~/.env から読むので、これが無いと 192.168.11.9:8523 の運営者用画面が公開サイトへ
+# 飛ぶ。ログインの流れが2つのドメインをまたぐのは公開の入口だけの問題で、
+# 手元からの接続はそもそも Google を経由しない。
+def _is_local_entry(host: str) -> bool:
+    name = host.rsplit(":", 1)[0].strip("[]")
+    return (name in {"localhost", "127.0.0.1", "::1", "ubuntu-server-app"}
+            or name.startswith(("192.168.", "10.", "100.")))
+
 
 @app.middleware("http")
 async def keep_one_origin(request: Request, call_next):
     host = request.headers.get("host", "")
-    if CANONICAL_HOST and host and host != CANONICAL_HOST and host in ALLOWED_HOSTS:
+    if (PUBLIC_MODE and CANONICAL_HOST and host and host != CANONICAL_HOST
+            and host in ALLOWED_HOSTS and not _is_local_entry(host)):
         target = auth.PUBLIC_ORIGIN.rstrip("/") + request.url.path
         if request.url.query:
             target += "?" + request.url.query
