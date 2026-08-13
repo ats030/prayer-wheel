@@ -18,6 +18,13 @@
 /app/memo/
 /app/tool-inventory/
 
+# アプリの設定 (APIキーが入る) と利用者のデータ。追跡されていないだけで無視は
+# されておらず、git add -A 一発で入りうる状態だった。非公開リポジトリでも、
+# 利用者のメールアドレスと課金される鍵を履歴に残す理由は無い。
+/.config/*/settings.json
+/data/
+/cache/
+
 # Python のバイトコードキャッシュ (app/ 配下のアプリが生成する)
 __pycache__/
 *.pyc
