@@ -36,7 +36,7 @@ function driveNote(){
 function confirmDelete(what){
   return confirm(what+"\n写真もいっしょに消え、元に戻せません。"+driveNote());
 }
-async function render(){const entries=await all();mapEntries=entries;const located=entries.filter(e=>Number.isFinite(Number(e.coordinates?.latitude))&&Number.isFinite(Number(e.coordinates?.longitude)));$("showMap").disabled=!located.length;if(!located.length)$("mapNotice").textContent="場所を記録した記録がまだないため、地図は表示できません。";$("clear").disabled=!entries.length;$("historyList").innerHTML=entries.length?entries.map(e=>{const image=e.thumbnail?URL.createObjectURL(e.thumbnail):"";return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+image+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div><div class="muted">'+esc(e.context?.location||"場所の記録なし")+'</div></div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>調べた内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';rerunRecords=new Map(entries.map(e=>[String(e.id),e]));document.querySelectorAll(".photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()});document.querySelectorAll(".entry").forEach(node=>{const b=node.querySelector(".again");if(!b)return;const rec=entries.find(e=>String(e.id)===node.dataset.id);if(rec)b.onclick=()=>reidentify(rec,b,node.querySelector(".again-message"))});document.querySelectorAll(".one").forEach(b=>b.onclick=async()=>{const node=b.closest("article");const entry=entries.find(e=>String(e.id)===node.dataset.id);if(!confirmDelete("「"+title(entry||{})+"」の記録を削除しますか？"))return;const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").delete(node.dataset.id);await finished(t);scheduleAutoBackup();location.reload()})}$("close").onclick=()=>$("lightbox").close();$("clear").onclick=async()=>{if(confirmDelete("この端末に保存した記録を、すべて削除しますか？")){const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").clear();await finished(t);scheduleAutoBackup();location.reload()}};render().catch(e=>$("historyList").innerHTML='<div class="empty">記録を読み込めませんでした。 '+esc(e.message)+'</div>');
+async function render(){const entries=await all();mapEntries=entries;const located=entries.filter(e=>Number.isFinite(Number(e.coordinates?.latitude))&&Number.isFinite(Number(e.coordinates?.longitude)));$("showMap").disabled=!located.length;if(!located.length)$("mapNotice").textContent="場所を記録した記録がまだないため、地図は表示できません。";$("clear").disabled=!entries.length;$("historyList").innerHTML=entries.length?entries.map(e=>{const image=(e.listThumbnail||e.thumbnail)?URL.createObjectURL(e.listThumbnail||e.thumbnail):"";return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+image+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div><div class="muted">'+esc(e.context?.location||"場所の記録なし")+'</div></div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>調べた内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';rerunRecords=new Map(entries.map(e=>[String(e.id),e]));document.querySelectorAll(".photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()});document.querySelectorAll(".entry").forEach(node=>{const b=node.querySelector(".again");if(!b)return;const rec=entries.find(e=>String(e.id)===node.dataset.id);if(rec)b.onclick=()=>reidentify(rec,b,node.querySelector(".again-message"))});document.querySelectorAll(".one").forEach(b=>b.onclick=async()=>{const node=b.closest("article");const entry=entries.find(e=>String(e.id)===node.dataset.id);if(!confirmDelete("「"+title(entry||{})+"」の記録を削除しますか？"))return;const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").delete(node.dataset.id);await finished(t);scheduleAutoBackup();location.reload()})}$("close").onclick=()=>$("lightbox").close();$("clear").onclick=async()=>{if(confirmDelete("この端末に保存した記録を、すべて削除しますか？")){const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").clear();await finished(t);scheduleAutoBackup();location.reload()}};render().catch(e=>$("historyList").innerHTML='<div class="empty">記録を読み込めませんでした。 '+esc(e.message)+'</div>');
 /* 開いた直後にドライブから取り込むことがある。一覧はもう描き終わっているので、
    届いたら描き直す。押していないのに中身が入れ替わるのは、記録が端末をまたいで
    同じものになるという約束のとおり */
@@ -76,7 +76,13 @@ function protectedBadge(c){const p=c.protected_species;if(!p||!p.category)return
     +' <a target="_blank" rel="noopener noreferrer" href="https://www.env.go.jp/nature/kisho/domestic/list.html">環境省の一覧 ↗</a></div>'}
 function fullCandidate(c,category){const rank=({species:"種の候補",genus:"属（近いなかま）の候補",family:"科（大きなグループ）の候補"})[c.taxon_rank]||"グループの記録なし",status=c.evidence_status==="uncertain"?"決め手なし":c.evidence_status==="corroborated"?"2つの方法で確認":"写真からの推測";return '<li class="candidate"><strong>'+esc(commonNameLabel(c))+'</strong> <span class="muted">'+esc(c.scientific_name||"")+'</span><div><span class="badge">'+rank+'</span><span class="badge">'+status+'</span>'+taxonomyBadge(c)+(c.evidence_strength?'<span class="badge">証拠の強さ '+esc(c.evidence_strength)+'</span>':"")+(Number.isFinite(Number(c.confidence))?'<span class="badge">最大 '+esc(c.confidence)+'%</span>':"")+'</div>'+confidenceMeter(c)+protectedBadge(c)+candidateLinks(c,category)+evidence("写真から見つけた特徴（AI抽出・未確認）",c.traits)+evidence("似ている種との見分け方",c.distinguishing_features)+evidence("合わない点",c.contradictions)+evidence("決め手が足りない理由",c.evidence_gaps)+(c.uncertainty?'<div class="label">もっと確かめたいこと</div><div>'+esc(c.uncertainty)+'</div>':"")+(c.sex&&c.sex!=="対象外"?'<div class="label">オス・メスの推測</div><div>'+esc(c.sex)+'</div>'+evidence("そう考えた理由",c.sex_evidence):"")+'</li>'}/* 使った写真をすべて並べる。一覧のサムネイルは1枚目だけなので、撮り足した寄りの1枚は
    ここでしか見られない。押すと拡大するのは一覧のサムネイルと同じ */
-function detailPhotos(e){const photos=recordPhotos(e);if(photos.length<2)return "";
+function detailPhotos(e){const photos=recordPhotos(e);
+  /* 別の端末から来た記録は、原寸をまだ手元に持っていない (ドライブの別ファイルにある)。
+     開いたときに引きに行く。引けるまでは一覧用の小さい1枚だけ出す */
+  if(!photos.length&&e.listThumbnail)return '<div class="detail-photos"><button class="photo detail-photo" type="button" data-src="'
+    +URL.createObjectURL(e.listThumbnail)+'"><img src="'+URL.createObjectURL(e.listThumbnail)+'" alt="調べた写真"></button></div>'
+    +'<div class="label">この記録で使った写真（原寸はこの端末にまだありません）</div>';
+  if(photos.length<2)return "";
   return '<div class="detail-photos">'+photos.map((blob,i)=>'<button class="photo detail-photo" type="button" data-src="'
     +URL.createObjectURL(blob)+'"><img src="'+URL.createObjectURL(blob)+'" alt="調べた写真 '+(i+1)+'"></button>').join("")
     +'</div><div class="label">この記録で使った写真 '+photos.length+'枚</div>';}
@@ -255,6 +261,7 @@ async function reidentify(record,button,message,extras=[]){
   }
 }
 async function saveRerun(source,data,photos=[]){
+  let listThumbnail=null;try{if(photos[0])listThumbnail=await shrinkForHistory(photos[0],LIST_MAX_EDGE)}catch(e){}
   /* 元の記録は残し、新しい記録として足す。前後を見くらべられるようにする */
   const db=await openDb();
   const record={
@@ -267,6 +274,7 @@ async function saveRerun(source,data,photos=[]){
                 rerunOf:source.id},
     context:source.context||{},coordinates:source.coordinates||null,
     thumbnail:photos[0]||source.thumbnail||null,thumbnails:photos,
+    listThumbnail:listThumbnail||source.listThumbnail||null,
   };
   let tx=db.transaction("entries","readwrite");
   tx.objectStore("entries").put(record);
@@ -297,7 +305,7 @@ async function addAffiliateLinks(){
       item.append(shell);
       return shell;
     });
-    const load=()=>{if(detail.open)loadProducts(record,shells)};
+    const load=()=>{if(detail.open){loadProducts(record,shells);pullPhotosIfMissing(record,node)}};
     detail.addEventListener("toggle",load);
     load();  // すでに開いている記録には即座に出す
   });
@@ -334,4 +342,21 @@ function resumeRerun(){
   const message=node?.querySelector(".again-message")||document.createElement("p");
   if(node)node.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
   watchRerun(pending,button,message);
+}
+
+/* 開いた記録の原寸がまだ手元になければ、ドライブから引いて描き直す。
+   一覧を出すだけでは引かない (50件ぶん引くことになる) */
+const pulledPhotos=new Set();
+async function pullPhotosIfMissing(record,node){
+  if(recordPhotos(record).length||!(record.drivePhotos||[]).length)return;
+  if(pulledPhotos.has(String(record.id))||typeof fetchRecordPhotos!=="function")return;
+  pulledPhotos.add(String(record.id));
+  try{
+    const photos=await fetchRecordPhotos(record);
+    if(!photos.length)return;
+    record.thumbnails=photos;record.thumbnail=photos[0];
+    const detail=node.querySelector(".detail");
+    if(detail){const open=detail.open;detail.innerHTML='<summary>調べた内容を見る</summary>'+fullDetail(record);detail.open=open;
+      detail.querySelectorAll(".detail-photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()})}
+  }catch(error){console.info("原寸を引けませんでした",error)}
 }

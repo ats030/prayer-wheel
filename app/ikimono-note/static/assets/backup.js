@@ -39,10 +39,6 @@ function backupTransaction(transaction) {
   });
 }
 
-/* 写真に使ってよい実体バイト数。base64 で約1.33倍になるので、ファイルは12MB前後で頭打ち。
-   端末の中 (IndexedDB) はこの制限を受けず、記録は全部そのまま残る */
-const BACKUP_PHOTO_BUDGET = 9 * 1024 * 1024;
-
 function blobToDataUrl(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -66,6 +62,26 @@ function dataUrlToBlob(value) {
 }
 
 /* 書き出す中身を組み立てる。写真は data URL にして1ファイルへ収める */
+/* 記録の読み書き。gdrive.js が写真の上げ下ろしで使うので、ここに置いて共有する */
+async function allHistoryEntries() {
+  const db = await backupDb();
+  const transaction = db.transaction("entries", "readonly");
+  const entries = await backupRequest(transaction.objectStore("entries").getAll());
+  await backupTransaction(transaction);
+  db.close();
+  return entries.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+}
+
+async function putHistoryEntries(entries) {
+  if (!entries.length) return 0;
+  const db = await backupDb();
+  const transaction = db.transaction("entries", "readwrite");
+  for (const entry of entries) transaction.objectStore("entries").put(entry);
+  await backupTransaction(transaction);
+  db.close();
+  return entries.length;
+}
+
 async function buildBackup() {
   const db = await backupDb();
   const transaction = db.transaction("entries", "readonly");
@@ -73,43 +89,27 @@ async function buildBackup() {
   await backupTransaction(transaction);
   db.close();
 
-  /* ドライブのファイルはタブを開くたびに1回引く。写真を無制限に詰めると、
-     モバイル回線で毎回それを落とすことになる。新しい記録から順に写真を入れ、
-     予算を使い切ったら、それより古い記録は本文だけにする (記録自体は消さない)。
-     以前ここを見積もったとき、元が500pxの評価用画像で測ってしまい、実際の
-     4分の1の大きさだと思い込んでいた。実カメラ写真では1枚が100KB〜300KBある。 */
-  const newestFirst = [...entries].sort((a, b) =>
-    String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
-  let budget = BACKUP_PHOTO_BUDGET;
-  let dropped = 0;
+  /* JSONへ入れるのは一覧用の小さい1枚だけ。原寸はドライブの別ファイルへ置き、
+     ここには置き場の札 (drivePhotos) だけを書く。1つのJSONに原寸を詰めると、
+     タブを開くたびに十数MBを引き、記録が1件増えるたびに丸ごと上げ直すことになる。
+     札の付け方と実際の上げ下ろしは gdrive.js が持つ。 */
   const records = [];
-  for (const entry of newestFirst) {
+  for (const entry of entries) {
     const copy = {...entry};
-    /* 送った写真は全部残す。1枚目だけ書き出すと、別の端末で読み込んだとたんに
-       撮り足した寄りの1枚が消える */
-    const photos = Array.isArray(entry.thumbnails) && entry.thumbnails.length
-      ? entry.thumbnails.filter(Boolean)
-      : (entry.thumbnail ? [entry.thumbnail] : []);
-    const bytes = photos.reduce((total, blob) => total + (blob.size || 0), 0);
-    if (photos.length && bytes <= budget) {
-      budget -= bytes;
-      /* thumbnail は書き出さない。1枚目は thumbnails[0] と同じもので、両方入れると
-         ファイルの3分の1が同じ写真の写しになる。読み込む側が1枚目から組み直す */
-      copy.thumbnail = null;
-      copy.thumbnails = [];
-      for (const blob of photos) copy.thumbnails.push(await blobToDataUrl(blob));
-    } else {
-      if (photos.length) dropped++;
-      copy.thumbnail = null;
-      copy.thumbnails = [];
-    }
+    const small = entry.listThumbnail || entry.thumbnail || null;
+    copy.listThumbnail = small ? await blobToDataUrl(small) : null;
+    /* 原寸は入れない。ドライブに上げていなければ札もないので、別の端末では
+       小さいほうだけが見える (記録も候補もそのまま揃う) */
+    copy.thumbnail = null;
+    copy.thumbnails = [];
+    copy.drivePhotos = Array.isArray(entry.drivePhotos) ? entry.drivePhotos : [];
     records.push(copy);
   }
+
   let settings = null;
   try { settings = JSON.parse(localStorage.getItem("species-public-settings") || "null"); } catch (error) { settings = null; }
 
   const payload = {
-    photosOmitted: dropped,
     format: BACKUP_FORMAT,
     exportedAt: new Date().toISOString(),
     note: "APIキーは含めません。別の端末では入れ直してください。",
@@ -134,7 +134,8 @@ async function restoreBackup(payload) {
   for (const record of records) {
     if (!record?.id) continue;
     const entry = {...record};
-    /* 新しい書き出しは thumbnails だけを持つ。古いものは thumbnail 1枚だけ持つ */
+    /* 新しい書き出しは小さい1枚と札だけを持つ。古いものは原寸が直に入っている */
+    entry.listThumbnail = dataUrlToBlob(record.listThumbnail);
     entry.thumbnails = Array.isArray(record.thumbnails)
       ? record.thumbnails.map(dataUrlToBlob).filter(Boolean) : [];
     if (!entry.thumbnails.length) {
@@ -142,16 +143,18 @@ async function restoreBackup(payload) {
       if (single) entry.thumbnails = [single];
     }
     entry.thumbnail = entry.thumbnails[0] || null;
-    /* 予算の都合で写真を落としたぶんが入っていることがある。写真のない側で
-       写真のある手元を上書きしない。書き出しは新しい記録から詰めるので、
-       古い記録ほどこの形で戻ってくる */
+    entry.drivePhotos = Array.isArray(record.drivePhotos) ? record.drivePhotos : [];
+    /* 原寸を持たないぶんが入ってくる。持っている手元を、持っていない側で
+       上書きしない。原寸はあとから札をたどって引く (gdrive.js) */
     const reading = db.transaction("entries", "readonly");
     const existing = await backupRequest(reading.objectStore("entries").get(record.id));
     await backupTransaction(reading);
-    if (!entry.thumbnails.length && existing) {
+    if (existing) {
       const kept = (Array.isArray(existing.thumbnails) && existing.thumbnails.length)
         ? existing.thumbnails : (existing.thumbnail ? [existing.thumbnail] : []);
-      if (kept.length) { entry.thumbnails = kept; entry.thumbnail = kept[0]; }
+      if (!entry.thumbnails.length && kept.length) { entry.thumbnails = kept; entry.thumbnail = kept[0]; }
+      if (!entry.listThumbnail && existing.listThumbnail) entry.listThumbnail = existing.listThumbnail;
+      if (!entry.drivePhotos.length && Array.isArray(existing.drivePhotos)) entry.drivePhotos = existing.drivePhotos;
     }
     const transaction = db.transaction("entries", "readwrite");
     transaction.objectStore("entries").put(entry);
@@ -186,4 +189,8 @@ function scheduleAutoBackup() {
    実カメラ写真 (1200x1600) で測ると 1600px で中央値 324KB、960px で 122KB。
    ドライブへ持ち出すぶんは backupPhotoBudget で別に絞る。 */
 const HISTORY_MAX_EDGE = 1600;
-async function shrinkForHistory(file){if(!file)return null;const bitmap=await createImageBitmap(file);const scale=Math.min(1,HISTORY_MAX_EDGE/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext("2d").drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();return new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.78))}
+/* 一覧の行に出す小さいほう。ドライブのJSONへ入れるのはこれだけにする。
+   1600pxを50件ぶん詰めると12MBを超え、タブを開くたびにそれを引くことになる。
+   320pxなら1件20KB前後で、50件でも1MBに収まり、全部の記録に絵が付く */
+const LIST_MAX_EDGE = 320;
+async function shrinkForHistory(file,edge=HISTORY_MAX_EDGE){if(!file)return null;const bitmap=await createImageBitmap(file);const scale=Math.min(1,edge/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext("2d").drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();return new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.78))}

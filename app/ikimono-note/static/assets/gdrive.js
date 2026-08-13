@@ -177,7 +177,93 @@ async function findDriveFile() {
   return found;
 }
 
+/* 原寸の写真は、記録ごとに1枚ずつ別ファイルとして置く。
+ *
+ * 1つのJSONへ base64 で詰めていたころは、タブを開くたびに十数MBを引き、記録が1件
+ * 増えるたびに丸ごと上げ直していた。写真を外へ出すと、JSONは小さい1枚と札だけになり、
+ * 上げ直すのは変わったぶんだけ、引くのは開いた記録のぶんだけで済む。
+ *
+ * 名前に記録のidを入れておくのは、札を失っても後片付けできるようにするため。
+ * drive.file なので、このアプリが作ったファイルしか見えない。
+ */
+const PHOTO_PREFIX = "ikimono-photo-";
+function photoFileName(recordId, index) {
+  return PHOTO_PREFIX + driveFileName().replace(/\.json$/, "") + "-" + recordId + "-" + index + ".jpg";
+}
+
+async function uploadPhoto(name, blob) {
+  const form = new FormData();
+  form.append("metadata", new Blob([JSON.stringify({name, mimeType: "image/jpeg"})],
+                                   {type: "application/json"}));
+  form.append("file", blob);
+  const response = await driveFetch(
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+    {method: "POST", body: form});
+  return (await response.json()).id || "";
+}
+
+/* まだ上げていない記録の原寸を上げ、札を記録へ書き戻す。
+   1回の保存で上げる枚数を抑える。50件×3枚を一度に上げると、記録を1件足しただけで
+   何十回も往復することになる。残りは次の保存で片付く */
+const PHOTO_UPLOADS_PER_SAVE = 6;
+async function uploadPendingPhotos() {
+  const entries = await allHistoryEntries();
+  let budget = PHOTO_UPLOADS_PER_SAVE;
+  const updated = [];
+  for (const entry of entries) {
+    if (budget <= 0) break;
+    const photos = (Array.isArray(entry.thumbnails) && entry.thumbnails.length)
+      ? entry.thumbnails : (entry.thumbnail ? [entry.thumbnail] : []);
+    const known = Array.isArray(entry.drivePhotos) ? entry.drivePhotos : [];
+    if (!photos.length || known.length >= photos.length) continue;
+    const ids = [...known];
+    for (let index = known.length; index < photos.length && budget > 0; index++) {
+      budget--;
+      const id = await uploadPhoto(photoFileName(entry.id, index), photos[index]);
+      if (!id) break;
+      ids.push(id);
+    }
+    if (ids.length !== known.length) updated.push({...entry, drivePhotos: ids});
+  }
+  if (updated.length) await putHistoryEntries(updated);
+  return updated.length;
+}
+
+/* 札をたどって原寸を引き、手元へ入れる。開いた記録のぶんだけ呼ぶ */
+async function fetchRecordPhotos(record) {
+  const ids = Array.isArray(record?.drivePhotos) ? record.drivePhotos : [];
+  if (!ids.length) return [];
+  const settings = await fetch("/api/settings").then(r => r.ok ? r.json() : null);
+  if (!await ensureDriveToken(settings?.google_client_id || "")) return [];
+  const photos = [];
+  for (const id of ids) {
+    const response = await driveFetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`);
+    photos.push(await response.blob());
+  }
+  if (photos.length) await putHistoryEntries([{...record, thumbnails: photos, thumbnail: photos[0]}]);
+  return photos;
+}
+
+/* 記録が消えたぶんのファイルを片付ける。drive.file なので自分のものしか見えない */
+async function pruneDrivePhotos() {
+  const entries = await allHistoryEntries();
+  const alive = new Set(entries.flatMap(entry => (entry.drivePhotos || [])));
+  const query = encodeURIComponent(`name contains '${PHOTO_PREFIX}' and trashed=false`);
+  const response = await driveFetch(
+    `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id)&pageSize=200`);
+  const files = (await response.json()).files || [];
+  let removed = 0;
+  for (const file of files) {
+    if (alive.has(file.id)) continue;
+    try { await driveFetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, {method: "DELETE"}); removed++; }
+    catch (error) { /* 消せなくても次回また試す */ }
+  }
+  return removed;
+}
+
 async function saveToDrive() {
+  /* 先に原寸を上げてから JSON を作る。順が逆だと、上げたばかりの札が JSON に入らない */
+  try { await uploadPendingPhotos(); } catch (error) { console.info("写真を上げられませんでした", error); }
   const payload = await buildBackup();
   const body = new Blob([JSON.stringify(payload)], {type: "application/json"});
   const existing = await findDriveFile();
@@ -189,6 +275,7 @@ async function saveToDrive() {
   const url = existing ? `${base}/${existing}?uploadType=multipart` : `${base}?uploadType=multipart`;
   const response = await driveFetch(url, {method: existing ? "PATCH" : "POST", body: form});
   rememberDriveFile((await response.json()).id || existing);
+  try { await pruneDrivePhotos(); } catch (error) { /* 後片付けは次回でよい */ }
   return payload.records.length;
 }
 

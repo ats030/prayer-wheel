@@ -126,7 +126,7 @@ def test_index_saves_history_but_does_not_render_it():
     assert 'indexedDB.open("species-history",1)' in source
     assert 'slice(50)' in source
     assert 'gps.latitude.toFixed(4)' in source
-    assert 'HISTORY_MAX_EDGE/Math.max(bitmap.width,bitmap.height)' in source
+    assert 'Math.min(1,edge/Math.max(bitmap.width,bitmap.height))' in source
     assert 'model:data.model||""' in source
     assert 'resultMeta:{strictMode:' in source
     # 表示専用の重複実装を持たないこと（隠れたまま到達できない実装を再び作らない）
@@ -1252,7 +1252,7 @@ def test_record_ads_are_loaded_only_when_a_record_is_opened():
     products = client.get("/assets/products.js").text
     assert 'detail.addEventListener("toggle",load)' in history
     assert "if (shell.dataset.loaded) return" in products   # 開き直しで再取得しない
-    assert "if(detail.open)loadProducts(record,shells)" in history
+    assert "if(detail.open){loadProducts(record,shells);pullPhotosIfMissing(record,node)}" in history
 
 
 def test_product_shelf_logic_is_shared_by_both_screens():
@@ -1874,50 +1874,70 @@ def test_every_photo_used_is_kept_and_viewable():
     index = client.get("/assets/index.js").text
     assert "for(const file of selected)" in index          # 選んだ全部を縮小する
     assert "const thumbnail=thumbnails[0]||null;" in index  # 一覧用の1枚は据え置き
-    assert "coordinates,thumbnail,thumbnails}" in index
+    assert "coordinates,thumbnail,thumbnails,listThumbnail}" in index
     history = client.get("/assets/history.js").text
     assert "function recordPhotos(record)" in history       # 旧形式は thumbnail 1枚
     assert "return record?.thumbnail?[record.thumbnail]:[]" in history
     assert "function detailPhotos(e)" in history
     assert 'class="photo detail-photo"' in history
     assert ".detail-photos{" in client.get("/assets/history.css").text
-    # 書き出しにも入れる。入れないと別の端末で読み込んだとたんに消える
+    # 別の端末へも渡す。原寸はドライブの別ファイル、一覧用の小さい1枚はJSONに入れる
     backup = client.get("/assets/backup.js").text
-    assert "for (const blob of photos) copy.thumbnails.push(await blobToDataUrl(blob))" in backup
     assert "record.thumbnails.map(dataUrlToBlob).filter(Boolean)" in backup
+    assert "copy.listThumbnail = small ? await blobToDataUrl(small) : null" in backup
+    assert "async function fetchRecordPhotos(record)" in client.get("/assets/gdrive.js").text
 
 
-def test_the_drive_file_has_a_photo_budget():
-    """ドライブのファイルはタブを開くたびに1回引く。写真で無制限に膨らませない。
+def test_the_drive_json_carries_thumbnails_not_full_photos():
+    """1つのJSONに原寸を詰めない。タブを開くたびに十数MBを引くことになる。
 
-    以前ここを見積もったとき、元が500pxの評価用画像で測ってしまい、実際の4分の1の
-    大きさだと思い込んでいた。実カメラ写真では1枚が100KB〜300KBある。
+    予算で古い記録の写真を落としていたのをやめ、原寸はドライブの別ファイルへ出した。
+    JSONには一覧用の320pxと、置き場の札だけを入れる。全部の記録に絵が付く。
     """
     backup = client.get("/assets/backup.js").text
-    assert "const BACKUP_PHOTO_BUDGET" in backup
-    assert "bytes <= budget" in backup
-    # 新しい記録から詰める。古いほうが本文だけになる
-    assert 'String(b.createdAt || "").localeCompare(String(a.createdAt || ""))' in backup
-    assert "photosOmitted: dropped" in backup
-    # 記録そのものは落とさない (写真だけ落とす)
-    assert "records.push(copy);" in backup
+    assert "const LIST_MAX_EDGE = 320" in backup
+    assert "copy.listThumbnail = small ? await blobToDataUrl(small) : null" in backup
+    assert "copy.thumbnail = null;" in backup and "copy.thumbnails = [];" in backup
+    assert "copy.drivePhotos =" in backup
+    assert "BACKUP_PHOTO_BUDGET" not in backup     # 予算で落とす方式はやめた
 
 
-def test_a_photoless_backup_does_not_erase_local_photos():
-    """予算で写真を落としたぶんが、写真のある手元を上書きしないこと。"""
-    backup = client.get("/assets/backup.js").text
-    assert "if (!entry.thumbnails.length && existing)" in backup
-    assert "entry.thumbnails = kept; entry.thumbnail = kept[0];" in backup
+def test_full_photos_live_in_their_own_drive_files():
+    """原寸は記録ごとに別ファイル。上げ直すのは変わったぶん、引くのは開いたぶんだけ。"""
+    drive = client.get("/assets/gdrive.js").text
+    assert 'const PHOTO_PREFIX = "ikimono-photo-"' in drive
+    assert "function photoFileName(recordId, index)" in drive
+    assert "async function uploadPendingPhotos()" in drive
+    assert "async function fetchRecordPhotos(record)" in drive
+    assert "async function pruneDrivePhotos()" in drive
+    # 1回の保存で上げる枚数を抑える (50件×3枚を一度に上げない)
+    assert "const PHOTO_UPLOADS_PER_SAVE = 6" in drive
+    # 札を JSON に載せるので、上げるのは JSON を作る前
+    upload = drive.index("await uploadPendingPhotos()")
+    build = drive.index("const payload = await buildBackup()")
+    assert upload < build, "札が JSON に入らない順序になっている"
+    # 記録が消えたぶんは片付ける
+    assert 'name contains \'${PHOTO_PREFIX}\'' in drive
+    assert "alive.has(file.id)" in drive
+
+
+def test_the_history_row_uses_the_small_thumbnail():
+    """行では80pxで出す。1600pxを50行ぶん展開しない。"""
+    history = client.get("/assets/history.js").text
+    assert "e.listThumbnail||e.thumbnail" in history
+    index = client.get("/assets/index.js").text
+    assert "shrinkForHistory(thumbnail,LIST_MAX_EDGE)" in index
+    assert "listThumbnail}" in index
 
 
 def test_the_shrink_helper_is_shared_by_both_screens():
     """縮小は撮影画面と記録画面の両方が要る。写しを2つ持たない。"""
     backup = client.get("/assets/backup.js").text
-    assert "async function shrinkForHistory(file)" in backup
+    assert "async function shrinkForHistory(file,edge=HISTORY_MAX_EDGE)" in backup
     # 保存はサーバーが外部AIへ送る上限と同じ。低いと調べ直しだけ不利になる
     assert "const HISTORY_MAX_EDGE = 1600" in backup
     assert str(main.vision.MAX_EDGE) == "1600"
-    assert "HISTORY_MAX_EDGE/Math.max(bitmap.width,bitmap.height)" in backup
+    assert "Math.min(1,edge/Math.max(bitmap.width,bitmap.height))" in backup
     for name in ["index.js", "history.js"]:
         assert "async function historyThumbnail" not in client.get(f"/assets/{name}").text, name
 
@@ -2027,7 +2047,7 @@ def test_history_ads_sit_inside_each_candidate():
     assert "const budget=productBudget();" in history      # 1回の開閉ぶんの予算
     # 開いたときに初めて叩くのは変えない
     assert 'detail.addEventListener("toggle",load)' in history
-    assert "if(detail.open)loadProducts(record,shells)" in history
+    assert "if(detail.open){loadProducts(record,shells);pullPhotosIfMissing(record,node)}" in history
     css = client.get("/assets/history.css").text
     assert ".candidate .product-shell{" in css
 
