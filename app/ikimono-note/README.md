@@ -114,6 +114,28 @@ tailscale serve --https=8443 off         # やめるとき
 
 `https://ubuntu-server-app.tailf74832.ts.net:8443/` で開きます。
 
+### Cloud Run へ出す
+
+```bash
+./deploy-cloudrun.sh            # 前提の確認だけ。何もしない
+./deploy-cloudrun.sh --deploy   # 実際に出す
+```
+
+前提は Console でしかできないものが3つあり、足りなければ確認で止まって何をすべきか言います。
+
+1. **請求先の紐づけ** — Cloud Run は無料枠を使う場合でも要ります
+2. **Firestore (ネイティブモード)** — ログイン情報の置き場 (`users.db` はディスクが無いので使えない)
+3. **OAuth の登録** — 承認済みリダイレクト URI に `<サービスURL>/auth/callback`、JS 生成元に
+   `<サービスURL>`。URLは初回のデプロイで決まるので、1回出してから登録します
+
+秘密 (ログインのクライアントシークレット、セッション鍵、Amazon の資格情報) は Secret Manager
+へ入れてから参照します。`--set-env-vars` で渡すと Console の環境変数欄に平文で並び、デプロイ
+履歴にも残るためです。広告の設定と Amazon の資格情報は運営者用の `settings.json` からも読みます
+(画面から入れたものがそこにあるため)。
+
+**運営者の Gemini キーは渡しません。** 公開版は BYOK で、サーバー側の鍵が要るのはお試し枠だけ。
+その枠は年齢条項で止めてある (ats030-rhfi) ので、鍵を置くとあとで黙って規約違反へ戻ります。
+
 ```bash
 systemctl --user restart ikimono-note ikimono-note-public
 /home/ats030/app/ikimono-note.sh          # 運営者用を手で起動する場合
