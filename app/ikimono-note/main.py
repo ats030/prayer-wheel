@@ -65,8 +65,27 @@ _RATE_BUCKETS: dict[tuple[str, str], deque[float]] = defaultdict(deque)
 _RATE_LOCK = threading.Lock()
 
 
+def _client_ip(request: Request) -> str:
+    """利用者のIP。公開版は前段のプロキシ越しに来る。
+
+    公開版は 127.0.0.1 で待ち受け、前段 (Tailscale Funnel / Cloud Run など) だけが
+    つながる。そのため request.client.host は常に前段のアドレスで、**全員が同じIPに
+    見える**。この状態でIPごとの制限をかけると、1分6回も1日N回も「全利用者の合計」に
+    なり、最初の1人が使い切ると他の全員が閉め出される。
+
+    運営者用では読まない。あちらは 0.0.0.0 で待ち受けるので、ヘッダを名乗るだけで
+    別人になれてしまう (もっとも運営者用に回数制限は掛けていない)。
+    """
+    if PUBLIC_MODE:
+        forwarded = request.headers.get("x-forwarded-for", "")
+        first = forwarded.split(",")[0].strip()
+        if first:
+            return first[:64]
+    return request.client.host if request.client else "unknown"
+
+
 def _rate_limit(request: Request, scope: str, limit: int, window: int = 60) -> None:
-    client = request.client.host if request.client else "unknown"
+    client = _client_ip(request)
     now = time.monotonic()
     key = (client, scope)
     with _RATE_LOCK:
@@ -194,7 +213,7 @@ def _trial_take(request: Request) -> bool:
     日付ごとに数えるだけの素朴な作り。プロセスが再起動すれば戻るが、無料枠の
     使いすぎを緩く抑えるのが目的で、厳密な会計ではない。
     """
-    client = request.client.host if request.client else "unknown"
+    client = _client_ip(request)
     today = time.strftime("%Y-%m-%d", time.gmtime())
     with _TRIAL_LOCK:
         for key in [k for k in _TRIAL_USED if k[1] != today]:

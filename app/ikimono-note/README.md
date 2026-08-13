@@ -123,7 +123,7 @@ systemctl --user restart ikimono-note ikimono-note-public
 使うAI、APIキー、モデルは画面上部の「設定」から変更できます。OllamaではURLを入力でき、その接続先にインストール済みで画像入力に対応するモデルを自動表示します。別端末のOllamaを使う場合は、Ollama側でこのサーバーからの接続を許可してください。接続先とAPIキーは `~/.config/ikimono-note/settings.json` に権限 `0600` で保存し、APIキーは画面へ再表示しません。
 
 ```bash
-uv run --with pytest pytest -q                                    # 242件
+uv run --with pytest pytest -q                                    # 243件
 uv run --with playwright python tests/smoke_browser.py            # 実ブラウザで主要導線
 uv run --with playwright python tests/smoke_browser.py --identify # 識別まで通す
 ```
@@ -271,6 +271,12 @@ APIキーを登録すると、続けて調べられます」と案内します�
 
 運営者の Gemini キー (`IKIMONO_GEMINI_API_KEY` かサーバー設定) が無いときは、回数を入れても
 無効のままです。数だけ入れて枠が無い、という状態を作らないためです。
+
+回数は利用者ごとに数えます。公開版は 127.0.0.1 で待ち受け、前段 (Tailscale Funnel や
+Cloud Run) だけがつながるため、`request.client.host` は常に前段のアドレスで**全員が同じIPに
+見えます**。そのままだと1分6回のレート制限も1日の回数も「全利用者の合計」になり、最初の1人が
+使い切ると他の全員が閉め出されます。公開版では `X-Forwarded-For` の先頭を利用者のIPとして
+読みます (運営者用は 0.0.0.0 で待つため読みません。ヘッダを名乗るだけで別人になれるので)。
 
 **既定を 0 にしてあるのは、見知らぬ人が運営者の枠を使うためです。** 入れるかどうかは運営者が
 決めることなので、こちらでは有効にしていません。

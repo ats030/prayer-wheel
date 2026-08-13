@@ -2101,6 +2101,22 @@ def test_waiting_is_visible_where_the_answer_will_appear():
     assert "identify.disabled=true" in index
 
 
+def test_per_visitor_limits_see_the_visitor_not_the_proxy():
+    """公開版は 127.0.0.1 で待ち受け、前段だけがつながる。
+
+    request.client.host は常に前段のアドレスなので、全員が同じIPに見える。この状態で
+    IPごとの制限をかけると、1分6回も1日N回も「全利用者の合計」になり、最初の1人が
+    使い切ると他の全員が閉め出される。実測でも Funnel 越しに 100.94.207.13 が見えていた。
+    """
+    source = (Path(__file__).parents[1] / "main.py").read_text(encoding="utf-8")
+    assert "def _client_ip(request: Request)" in source
+    assert 'request.headers.get("x-forwarded-for", "")' in source
+    assert source.count("_client_ip(request)") == 2      # レート制限とお試し枠の両方
+    assert "request.client.host" not in source.split("def _client_ip")[1].split("def _rate_limit")[1]
+    # 運営者用では読まない。0.0.0.0 で待つので、ヘッダを名乗るだけで別人になれる
+    assert "if PUBLIC_MODE:" in source.split("def _client_ip")[1][:400]
+
+
 def test_a_stranger_can_try_it_once_when_the_operator_opens_a_trial():
     """公開版は BYOK で、自分のキーが無いと1枚も調べられない。
 
