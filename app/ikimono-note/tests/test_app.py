@@ -1259,16 +1259,16 @@ def test_records_can_be_examined_again():
     """元の写真は残っていないので、保存済みの縮小画像を送り直す。"""
     history = client.get("/assets/history.js").text
     assert "async function reidentify(record,button,message,extras=[])" in history
-    assert 'fd.append("files",record.thumbnail,"photo.jpg")' in history
+    assert 'recordPhotos(record).forEach((blob,i)=>fd.append("files",blob,"photo-"+(i+1)+".jpg"))' in history
     assert 'e.thumbnail?\'<button class="btn again"' in history   # 写真が無い記録には出さない
     assert "調べ直しています…" in history
     # 公開版は BYOK。撮影画面と同じ形でキーとモデルを渡す
     for field in ["request_provider", "request_model", "request_api_key", "request_plantnet_key"]:
         assert field in history, field
     # 元の記録は消さず、新しい記録として足す（前後を見くらべられる）
-    assert "async function saveRerun(source,data)" in history
+    assert "async function saveRerun(source,data,photos=[])" in history
     assert "rerunOf:source.id" in history
-    assert "thumbnail:source.thumbnail" in history
+    assert "thumbnail:photos[0]||source.thumbnail||null,thumbnails:photos," in history
     assert "coordinates:source.coordinates" in history
     assert ".slice(50)" in history   # 上限50件は撮影画面と同じ
 
@@ -1768,6 +1768,39 @@ def test_operator_records_travel_but_do_not_mix_with_visitors():
     assert "${driveFileName()}" in drive
 
 
+def test_every_photo_used_is_kept_and_viewable():
+    """撮り足した写真も残して、あとから見返せること。
+
+    以前は1枚目しか残しておらず、寄りの1枚は識別が済んだ時点で消えていた。
+    一覧のサムネイルは1枚目だけなので、残りは詳細で見せる。
+    長辺960pxのJPEGは実測の中央値33KBで、3枚×50件でもドライブのJSONは6MB台。
+    """
+    index = client.get("/assets/index.js").text
+    assert "for(const file of selected)" in index          # 選んだ全部を縮小する
+    assert "const thumbnail=thumbnails[0]||null;" in index  # 一覧用の1枚は据え置き
+    assert "coordinates,thumbnail,thumbnails}" in index
+    history = client.get("/assets/history.js").text
+    assert "function recordPhotos(record)" in history       # 旧形式は thumbnail 1枚
+    assert "return record?.thumbnail?[record.thumbnail]:[]" in history
+    assert "function detailPhotos(e)" in history
+    assert 'class="photo detail-photo"' in history
+    assert ".detail-photos{" in client.get("/assets/history.css").text
+    # 書き出しにも入れる。入れないと別の端末で読み込んだとたんに消える
+    backup = client.get("/assets/backup.js").text
+    assert "if (Array.isArray(entry.thumbnails))" in backup
+    assert "if (Array.isArray(record.thumbnails))" in backup
+    assert "entry.thumbnails = record.thumbnails.map(dataUrlToBlob).filter(Boolean)" in backup
+
+
+def test_the_shrink_helper_is_shared_by_both_screens():
+    """縮小は撮影画面と記録画面の両方が要る。写しを2つ持たない。"""
+    backup = client.get("/assets/backup.js").text
+    assert "async function shrinkForHistory(file)" in backup
+    assert "960/Math.max(bitmap.width,bitmap.height)" in backup
+    for name in ["index.js", "history.js"]:
+        assert "async function historyThumbnail" not in client.get(f"/assets/{name}").text, name
+
+
 def test_the_hidden_attribute_actually_hides_on_every_page():
     """hidden 属性は .btn の display:inline-flex に負ける。
 
@@ -1788,17 +1821,19 @@ def test_a_record_can_be_examined_again_with_extra_photos():
     """
     history = client.get("/assets/history.js").text
     assert "function addRerunControls()" in history
-    assert "const RERUN_MAX_EXTRA=2" in history
+    assert "const RERUN_MAX_PHOTOS=3" in history
+    assert "const maxExtra=Math.max(0,RERUN_MAX_PHOTOS-kept.length)" in history
     assert "結果に納得できないときは" in history
     # カメラと写真選択の両方から足せる
     assert 'camera.capture="environment"' in history
     assert "box.querySelector(\".rerun-camera\").onclick=()=>camera.click()" in history
     assert "box.querySelector(\".rerun-library\").onclick=()=>library.click()" in history
     # 元の写真を先に、足した写真をあとに送る
-    assert 'fd.append("files",record.thumbnail,"photo.jpg");' in history
+    # 記録が持つ写真を先に、足した写真をあとに送る
+    assert 'recordPhotos(record).forEach((blob,i)=>fd.append("files",blob,"photo-"+(i+1)+".jpg"))' in history
     assert 'extras.forEach((file,i)=>fd.append("files",file,"added-"+(i+1)+".jpg"))' in history
     # 元の記録は消さず、新しい記録として足す
-    assert "await saveRerun(record,data)" in history
+    assert "await saveRerun(record,data,[...recordPhotos(record)," in history
     assert ".then(addRerunControls)" in history
     css = client.get("/assets/history.css").text
     assert ".rerun-box{" in css

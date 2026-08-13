@@ -73,6 +73,14 @@ async function buildBackup() {
   for (const entry of entries) {
     const copy = {...entry};
     copy.thumbnail = entry.thumbnail ? await blobToDataUrl(entry.thumbnail) : null;
+    /* 送った写真は全部残す。1枚目だけ書き出すと、別の端末で読み込んだとたんに
+       撮り足した寄りの1枚が消える */
+    if (Array.isArray(entry.thumbnails)) {
+      copy.thumbnails = [];
+      for (const blob of entry.thumbnails) {
+        if (blob) copy.thumbnails.push(await blobToDataUrl(blob));
+      }
+    }
     records.push(copy);
   }
   let settings = null;
@@ -104,6 +112,9 @@ async function restoreBackup(payload) {
     if (!record?.id) continue;
     const entry = {...record};
     entry.thumbnail = dataUrlToBlob(record.thumbnail);
+    if (Array.isArray(record.thumbnails)) {
+      entry.thumbnails = record.thumbnails.map(dataUrlToBlob).filter(Boolean);
+    }
     const transaction = db.transaction("entries", "readwrite");
     transaction.objectStore("entries").put(entry);
     await backupTransaction(transaction);
@@ -129,3 +140,7 @@ function scheduleAutoBackup() {
     if (typeof autoSaveToDrive === "function") autoSaveToDrive();
   }, 1500);
 }
+
+/* 記録に残す縮小画像。撮影画面と記録画面の両方が作る (記録側は足した写真ぶん)。
+   長辺960pxのJPEGで、実測の中央値は33KB。3枚×50件でもドライブのJSONは6MB台 */
+async function shrinkForHistory(file){if(!file)return null;const bitmap=await createImageBitmap(file);const scale=Math.min(1,960/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext("2d").drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();return new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.78))}

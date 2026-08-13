@@ -64,7 +64,13 @@ function confidenceMeter(c){
 function protectedBadge(c){const p=c.protected_species;if(!p||!p.category)return "";
   return '<div class="protected">種の保存法の'+esc(p.category)+(p.subtype?"（"+esc(p.subtype)+"）":"")+'です'
     +' <a target="_blank" rel="noopener noreferrer" href="https://www.env.go.jp/nature/kisho/domestic/list.html">環境省の一覧 ↗</a></div>'}
-function fullCandidate(c,category){const rank=({species:"種の候補",genus:"属（近いなかま）の候補",family:"科（大きなグループ）の候補"})[c.taxon_rank]||"グループの記録なし",status=c.evidence_status==="uncertain"?"決め手なし":c.evidence_status==="corroborated"?"2つの方法で確認":"写真からの推測";return '<li class="candidate"><strong>'+esc(commonNameLabel(c))+'</strong> <span class="muted">'+esc(c.scientific_name||"")+'</span><div><span class="badge">'+rank+'</span><span class="badge">'+status+'</span>'+taxonomyBadge(c)+(c.evidence_strength?'<span class="badge">証拠の強さ '+esc(c.evidence_strength)+'</span>':"")+(Number.isFinite(Number(c.confidence))?'<span class="badge">最大 '+esc(c.confidence)+'%</span>':"")+'</div>'+confidenceMeter(c)+protectedBadge(c)+candidateLinks(c,category)+evidence("写真から見つけた特徴（AI抽出・未確認）",c.traits)+evidence("似ている種との見分け方",c.distinguishing_features)+evidence("合わない点",c.contradictions)+evidence("決め手が足りない理由",c.evidence_gaps)+(c.uncertainty?'<div class="label">もっと確かめたいこと</div><div>'+esc(c.uncertainty)+'</div>':"")+(c.sex&&c.sex!=="対象外"?'<div class="label">オス・メスの推測</div><div>'+esc(c.sex)+'</div>'+evidence("そう考えた理由",c.sex_evidence):"")+'</li>'}function fullDetail(e){const x=e.context||{},m=e.resultMeta||{},c=e.coordinates;return '<div class="facts">'+(e.category?'<div>分類：'+esc(e.category)+'</div>':"")+(e.summary?'<div>'+esc(e.summary)+'</div>':"")+((e.provider||e.model)?'<div>使ったAI：'+esc([providerLabel(e.provider),e.model].filter(Boolean).join(" · "))+'</div>':"")+(x.observedDate?'<div>撮った日：'+esc(x.observedDate)+'</div>':"")+(x.size?'<div>大きさ：'+esc(x.size)+'</div>':"")+(x.location?'<div>撮った場所：'+esc(x.location)+'</div>':"")+(c?'<div>位置：'+esc(c.latitude)+'、'+esc(c.longitude)+'（おおまかな値）</div>':"")+(m.strictMode?'<div>まちがい防止：学名を図鑑データで自動チェック</div>':"")+(m.taxonomyChecked?'<div>学名を図鑑データで確認済み'+(m.rejectedCandidates?' · 除いた候補 '+esc(m.rejectedCandidates)+'件':"")+'</div>':"")+(m.plantnetUsed?'<div>植物の候補は <a href="https://plantnet.org/" target="_blank" rel="noopener noreferrer">Pl@ntNet recognition API</a> によるもの</div>':"")+'</div><ol>'+(e.candidates||[]).map(c=>fullCandidate(c,e.category)).join("")+'</ol>'}async function enrich(){const records=await all(),byId=new Map(records.map(e=>[String(e.id),e]));document.querySelectorAll(".entry").forEach(node=>{const e=byId.get(node.dataset.id);if(e)node.querySelector(".detail").innerHTML='<summary>調べた内容を見る</summary>'+fullDetail(e)});document.querySelectorAll('.meter span[data-width]').forEach(bar=>{bar.style.width=bar.dataset.width+'%'})}setTimeout(()=>enrich().catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
+function fullCandidate(c,category){const rank=({species:"種の候補",genus:"属（近いなかま）の候補",family:"科（大きなグループ）の候補"})[c.taxon_rank]||"グループの記録なし",status=c.evidence_status==="uncertain"?"決め手なし":c.evidence_status==="corroborated"?"2つの方法で確認":"写真からの推測";return '<li class="candidate"><strong>'+esc(commonNameLabel(c))+'</strong> <span class="muted">'+esc(c.scientific_name||"")+'</span><div><span class="badge">'+rank+'</span><span class="badge">'+status+'</span>'+taxonomyBadge(c)+(c.evidence_strength?'<span class="badge">証拠の強さ '+esc(c.evidence_strength)+'</span>':"")+(Number.isFinite(Number(c.confidence))?'<span class="badge">最大 '+esc(c.confidence)+'%</span>':"")+'</div>'+confidenceMeter(c)+protectedBadge(c)+candidateLinks(c,category)+evidence("写真から見つけた特徴（AI抽出・未確認）",c.traits)+evidence("似ている種との見分け方",c.distinguishing_features)+evidence("合わない点",c.contradictions)+evidence("決め手が足りない理由",c.evidence_gaps)+(c.uncertainty?'<div class="label">もっと確かめたいこと</div><div>'+esc(c.uncertainty)+'</div>':"")+(c.sex&&c.sex!=="対象外"?'<div class="label">オス・メスの推測</div><div>'+esc(c.sex)+'</div>'+evidence("そう考えた理由",c.sex_evidence):"")+'</li>'}/* 使った写真をすべて並べる。一覧のサムネイルは1枚目だけなので、撮り足した寄りの1枚は
+   ここでしか見られない。押すと拡大するのは一覧のサムネイルと同じ */
+function detailPhotos(e){const photos=recordPhotos(e);if(photos.length<2)return "";
+  return '<div class="detail-photos">'+photos.map((blob,i)=>'<button class="photo detail-photo" type="button" data-src="'
+    +URL.createObjectURL(blob)+'"><img src="'+URL.createObjectURL(blob)+'" alt="調べた写真 '+(i+1)+'"></button>').join("")
+    +'</div><div class="label">この記録で使った写真 '+photos.length+'枚</div>';}
+function fullDetail(e){const x=e.context||{},m=e.resultMeta||{},c=e.coordinates;return detailPhotos(e)+'<div class="facts">'+(e.category?'<div>分類：'+esc(e.category)+'</div>':"")+(e.summary?'<div>'+esc(e.summary)+'</div>':"")+((e.provider||e.model)?'<div>使ったAI：'+esc([providerLabel(e.provider),e.model].filter(Boolean).join(" · "))+'</div>':"")+(x.observedDate?'<div>撮った日：'+esc(x.observedDate)+'</div>':"")+(x.size?'<div>大きさ：'+esc(x.size)+'</div>':"")+(x.location?'<div>撮った場所：'+esc(x.location)+'</div>':"")+(c?'<div>位置：'+esc(c.latitude)+'、'+esc(c.longitude)+'（おおまかな値）</div>':"")+(m.strictMode?'<div>まちがい防止：学名を図鑑データで自動チェック</div>':"")+(m.taxonomyChecked?'<div>学名を図鑑データで確認済み'+(m.rejectedCandidates?' · 除いた候補 '+esc(m.rejectedCandidates)+'件':"")+'</div>':"")+(m.plantnetUsed?'<div>植物の候補は <a href="https://plantnet.org/" target="_blank" rel="noopener noreferrer">Pl@ntNet recognition API</a> によるもの</div>':"")+'</div><ol>'+(e.candidates||[]).map(c=>fullCandidate(c,e.category)).join("")+'</ol>'}async function enrich(){const records=await all(),byId=new Map(records.map(e=>[String(e.id),e]));document.querySelectorAll(".entry").forEach(node=>{const e=byId.get(node.dataset.id);if(e)node.querySelector(".detail").innerHTML='<summary>調べた内容を見る</summary>'+fullDetail(e)});document.querySelectorAll('.meter span[data-width]').forEach(bar=>{bar.style.width=bar.dataset.width+'%'});document.querySelectorAll(".detail-photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()})}setTimeout(()=>enrich().catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
 /* 撮影画面と同じく、棚は候補ごとにその候補の中へ置く。記録から読み返すときも
    「どの候補の広告か」を位置で決められる。開いたときに初めて叩くのは変えない。
    予算は1回の開閉につき通しで6回・1棚2回 (撮影画面と同じ)。集めた品は棚をまたいで
@@ -90,22 +96,30 @@ async function loadProducts(record,shells){
  * (サーバーの上限が3枚)。元の写真は全体像であることが多く、足すのは寄りの1枚に
  * なるので、順番は元→追加で送る。撮影画面で撮り足すときと同じ考え方。
  */
-const RERUN_MAX_EXTRA=2;
+/* 旧い記録は thumbnail 1枚しか持っていない。読む側はここを通して差を吸収する */
+function recordPhotos(record){
+  const list=Array.isArray(record?.thumbnails)?record.thumbnails.filter(Boolean):[];
+  if(list.length)return list;
+  return record?.thumbnail?[record.thumbnail]:[];
+}
+const RERUN_MAX_PHOTOS=3;
 function addRerunControls(){
   document.querySelectorAll(".entry").forEach(node=>{
     const detail=node.querySelector(".detail");
     if(!detail||detail.querySelector(".rerun-box"))return;
     const record=rerunRecords.get(node.dataset.id);
-    if(!record?.thumbnail)return;
+    const kept=recordPhotos(record);
+    if(!kept.length)return;
+    const maxExtra=Math.max(0,RERUN_MAX_PHOTOS-kept.length);
     const box=document.createElement("div");
     box.className="rerun-box";
     box.innerHTML='<div class="label">結果に納得できないときは</div>'
-      +'<p>写真を足すと、決め手が増えて答えが変わることがあります。元の写真はそのまま使います（足せるのは'+RERUN_MAX_EXTRA+'枚まで）。</p>'
+      +'<p>写真を足すと、決め手が増えて答えが変わることがあります。元の写真'+kept.length+'枚はそのまま使います（'+(maxExtra?'あと'+maxExtra+'枚まで足せます':'すでに'+RERUN_MAX_PHOTOS+'枚あるので、これ以上は足せません')+'）。</p>'
       +'<div class="rerun-previews"></div>'
-      +'<div class="rerun-actions">'
+      +(maxExtra?'<div class="rerun-actions">'
       +'<button class="btn rerun-camera" type="button">カメラで撮って足す</button>'
       +'<button class="btn rerun-library" type="button">写真を選んで足す</button>'
-      +'<button class="btn rerun-go" type="button" hidden>足した写真で調べ直す</button></div>'
+      +'<button class="btn rerun-go" type="button" hidden>足した写真で調べ直す</button></div>':'')
       +'<p class="rerun-message" hidden></p>';
     const camera=document.createElement("input");
     camera.type="file";camera.accept="image/*";camera.capture="environment";camera.hidden=true;
@@ -127,11 +141,11 @@ function addRerunControls(){
     const add=files=>{
       const chosen=[...files].filter(file=>file.type.startsWith("image/"));
       if(!chosen.length){say("画像ファイルを選んでください。");return}
-      const room=RERUN_MAX_EXTRA-extras.length;
-      if(room<=0){say("足せるのは"+RERUN_MAX_EXTRA+"枚までです。");return}
+      const room=maxExtra-extras.length;
+      if(room<=0){say(maxExtra?"あと足せる写真はありません。":"合わせて"+RERUN_MAX_PHOTOS+"枚までです。");return}
       extras.push(...chosen.slice(0,room));
       paint();
-      say(chosen.length>room?"（"+RERUN_MAX_EXTRA+"枚までなので"+room+"枚だけ足しました）":"");
+      say(chosen.length>room?"（合わせて"+RERUN_MAX_PHOTOS+"枚までなので"+room+"枚だけ足しました）":"");
     };
     camera.onchange=e=>{add(e.target.files);e.target.value=""};
     library.onchange=e=>{add(e.target.files);e.target.value=""};
@@ -144,15 +158,15 @@ function addRerunControls(){
 async function reidentify(record,button,message,extras=[]){
   /* 元の写真は保存していない。記録の縮小画像 (長辺960px) を送り直す。
      解像度が落ちているぶん、撮ったばかりの写真より不利になることがある */
-  if(!record.thumbnail){message.textContent="この記録には写真が残っていないため、調べ直せません。";message.hidden=false;return}
+  if(!recordPhotos(record).length){message.textContent="この記録には写真が残っていないため、調べ直せません。";message.hidden=false;return}
   const label=button.textContent;
   button.disabled=true;button.textContent="調べ直しています…";message.hidden=true;
   try{
     const settings=await fetch("/api/settings").then(r=>r.ok?r.json():null);
     if(!settings)throw new Error("設定を読み込めませんでした");
     const fd=new FormData();
-    /* 元の写真を先に送る。全体像であることが多く、足すのは寄りの1枚になる */
-    fd.append("files",record.thumbnail,"photo.jpg");
+    /* 記録が持つ写真を先に、足したぶんをあとに。全体像→寄りの順になる */
+    recordPhotos(record).forEach((blob,i)=>fd.append("files",blob,"photo-"+(i+1)+".jpg"));
     extras.forEach((file,i)=>fd.append("files",file,"added-"+(i+1)+".jpg"));
     fd.append("location",record.context?.location||"");
     fd.append("observed_date",record.context?.observedDate||"");
@@ -168,14 +182,14 @@ async function reidentify(record,button,message,extras=[]){
     const response=await fetch("/identify",{method:"POST",body:fd});
     const data=await response.json();
     if(!response.ok)throw new Error(data.detail||"調べられませんでした");
-    await saveRerun(record,data);
+    await saveRerun(record,data,[...recordPhotos(record),...await Promise.all(extras.map(shrinkForHistory))]);
     location.reload();
   }catch(error){
     message.textContent=error.message;message.hidden=false;
     button.disabled=false;button.textContent=label;
   }
 }
-async function saveRerun(source,data){
+async function saveRerun(source,data,photos=[]){
   /* 元の記録は残し、新しい記録として足す。前後を見くらべられるようにする */
   const db=await openDb();
   const record={
@@ -186,7 +200,8 @@ async function saveRerun(source,data){
     resultMeta:{strictMode:Boolean(data.strict_mode),taxonomyChecked:Boolean(data.taxonomy_checked),
                 rejectedCandidates:Number(data.rejected_candidates||0),plantnetUsed:Boolean(data.plantnet_used),
                 rerunOf:source.id},
-    context:source.context||{},coordinates:source.coordinates||null,thumbnail:source.thumbnail,
+    context:source.context||{},coordinates:source.coordinates||null,
+    thumbnail:photos[0]||source.thumbnail||null,thumbnails:photos,
   };
   let tx=db.transaction("entries","readwrite");
   tx.objectStore("entries").put(record);

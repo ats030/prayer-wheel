@@ -47,3 +47,8 @@
 .rerun-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
 .rerun-message{color:var(--danger)}
 .rerun-message:empty{display:none}
+
+/* 記録で使った写真。一覧のサムネイルは1枚目だけなので、足した写真はここで見る */
+.detail-photos{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.detail-photos .photo{padding:0;border:1px solid var(--line);border-radius:8px;background:var(--raised);overflow:hidden;cursor:pointer;min-height:0}
+.detail-photos img{display:block;width:104px;height:104px;object-fit:cover}
