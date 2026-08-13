@@ -1768,6 +1768,35 @@ def test_operator_records_travel_but_do_not_mix_with_visitors():
     assert "${driveFileName()}" in drive
 
 
+def test_deleting_a_record_asks_first():
+    """1件の削除に確認がなかった。押し間違いで写真ごと戻せなくなる。
+
+    すべて削除と退会には確認があるのに、行に並ぶ「削除」だけは即座に消していた。
+    写真を残すようにしてから、1件で最大3枚が消えるようになっている。ドライブに
+    つないでいれば次の自動保存で向こうからも消えるので、そこも伝える。
+    """
+    history = client.get("/assets/history.js").text
+    assert "function confirmDelete(what)" in history
+    assert "写真もいっしょに消え、元に戻せません。" in history
+    # どの記録を消すのかを名前で言う
+    assert 'confirmDelete("「"+title(entry||{})+"」の記録を削除しますか？")' in history
+    assert 'if(!confirmDelete(' in history
+    # すべて削除も同じ文面を通す
+    assert 'confirmDelete("この端末に保存した記録を、すべて削除しますか？")' in history
+    # つないでいるときだけドライブの話をする
+    assert 'typeof driveLinked==="function"&&driveLinked()' in history
+    assert "そちらからも消えます。" in history
+    # 確認と実際の削除がひと続きであること。間に何も挟まらない書き方で固定する
+    assert ('if(!confirmDelete("「"+title(entry||{})+"」の記録を削除しますか？"))return;'
+            'const d=await openDb(),t=d.transaction("entries","readwrite");'
+            't.objectStore("entries").delete(node.dataset.id)') in history
+    assert ('if(confirmDelete("この端末に保存した記録を、すべて削除しますか？")){'
+            'const d=await openDb(),t=d.transaction("entries","readwrite");'
+            't.objectStore("entries").clear()') in history
+    # 上限50件の間引きは利用者が押した削除ではないので聞かない
+    assert "excess.forEach(item=>tx.objectStore(\"entries\").delete(item.id))" in history
+
+
 def test_every_photo_used_is_kept_and_viewable():
     """撮り足した写真も残して、あとから見返せること。
 
