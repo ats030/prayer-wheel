@@ -1258,7 +1258,7 @@ def test_product_images_are_allowed_by_the_policy():
 def test_records_can_be_examined_again():
     """元の写真は残っていないので、保存済みの縮小画像を送り直す。"""
     history = client.get("/assets/history.js").text
-    assert "async function reidentify(record,button,message)" in history
+    assert "async function reidentify(record,button,message,extras=[])" in history
     assert 'fd.append("files",record.thumbnail,"photo.jpg")' in history
     assert 'e.thumbnail?\'<button class="btn again"' in history   # 写真が無い記録には出さない
     assert "調べ直しています…" in history
@@ -1766,6 +1766,42 @@ def test_operator_records_travel_but_do_not_mix_with_visitors():
     # 固定名のまま書き込むと、モードを分けた意味がなくなる
     assert "name: driveFileName()" in drive
     assert "${driveFileName()}" in drive
+
+
+def test_the_hidden_attribute_actually_hides_on_every_page():
+    """hidden 属性は .btn の display:inline-flex に負ける。
+
+    設定画面には [hidden]{display:none!important} があったが記録画面にはなく、
+    調べ直すボタンが写真を足す前から出ていた。クラスの .hidden だけでは足りない。
+    """
+    for name in ["settings.css", "history.css"]:
+        css = client.get(f"/assets/{name}").text
+        assert "[hidden]{display:none!important}" in css, name
+
+
+def test_a_record_can_be_examined_again_with_extra_photos():
+    """結果に納得できないときは、記録の中から写真を足して調べ直せること。
+
+    記録に残っているのは1枚目の縮小画像だけなので、足せるのは2枚まで
+    (サーバーの上限が3枚)。元の写真は全体像であることが多く、足すのは寄りの1枚に
+    なるので、送る順は元→追加にする。撮影画面で撮り足すときと同じ考え方。
+    """
+    history = client.get("/assets/history.js").text
+    assert "function addRerunControls()" in history
+    assert "const RERUN_MAX_EXTRA=2" in history
+    assert "結果に納得できないときは" in history
+    # カメラと写真選択の両方から足せる
+    assert 'camera.capture="environment"' in history
+    assert "box.querySelector(\".rerun-camera\").onclick=()=>camera.click()" in history
+    assert "box.querySelector(\".rerun-library\").onclick=()=>library.click()" in history
+    # 元の写真を先に、足した写真をあとに送る
+    assert 'fd.append("files",record.thumbnail,"photo.jpg");' in history
+    assert 'extras.forEach((file,i)=>fd.append("files",file,"added-"+(i+1)+".jpg"))' in history
+    # 元の記録は消さず、新しい記録として足す
+    assert "await saveRerun(record,data)" in history
+    assert ".then(addRerunControls)" in history
+    css = client.get("/assets/history.css").text
+    assert ".rerun-box{" in css
 
 
 def test_the_shelf_shows_cards_and_the_search_link_together():

@@ -1,5 +1,5 @@
 const $=x=>document.getElementById(x),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));function openDb(){return new Promise((ok,no)=>{const r=indexedDB.open("species-history",1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains("entries"))r.result.createObjectStore("entries",{keyPath:"id"})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function request(r){return new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function finished(t){return new Promise((ok,no)=>{t.oncomplete=ok;t.onerror=()=>no(t.error)})}const title=e=>e.candidates?.[0]?.common_name_ja||e.category||"調べた記録";
-async function all(){const d=await openDb(),t=d.transaction("entries"),v=await request(t.objectStore("entries").getAll());await finished(t);d.close();return v.sort((a,b)=>b.createdAt.localeCompare(a.createdAt))}let mapEntries=[];
+async function all(){const d=await openDb(),t=d.transaction("entries"),v=await request(t.objectStore("entries").getAll());await finished(t);d.close();return v.sort((a,b)=>b.createdAt.localeCompare(a.createdAt))}let mapEntries=[];let rerunRecords=new Map();
 function loadLeaflet(){if(window.L)return Promise.resolve();return new Promise((ok,no)=>{const css=document.createElement("link");css.rel="stylesheet";css.href="/vendor/leaflet/leaflet.css";document.head.append(css);const js=document.createElement("script");js.src="/vendor/leaflet/leaflet.js";js.onload=()=>ok();js.onerror=()=>no(new Error("地図を読み込めませんでした。"));document.head.append(js)})}
 async function showMap(){const button=$("showMap");button.disabled=true;button.textContent="地図を読み込み中…";try{await loadLeaflet();$("historyMap").classList.remove("hidden");map(mapEntries);button.remove()}catch(e){button.disabled=false;button.textContent="地図を表示";$("mapNotice").textContent=e.message}}
 $("showMap").onclick=showMap;
@@ -26,7 +26,7 @@ function map(entries){
   layers["地図"].addTo(m);
   L.control.layers(layers,null,{collapsed:false}).addTo(m);
 entries.forEach(e=>{const a=Number(e.coordinates?.latitude),o=Number(e.coordinates?.longitude);if(Number.isFinite(a)&&Number.isFinite(o)){points.push([a,o]);L.marker([a,o]).addTo(m).bindPopup("<strong>"+esc(title(e))+"</strong><br>"+esc(new Date(e.createdAt).toLocaleString("ja-JP")))}});points.length?m.fitBounds(points,{padding:[24,24],maxZoom:15}):m.setView([36.2,138.2],5)}
-async function render(){const entries=await all();mapEntries=entries;const located=entries.filter(e=>Number.isFinite(Number(e.coordinates?.latitude))&&Number.isFinite(Number(e.coordinates?.longitude)));$("showMap").disabled=!located.length;if(!located.length)$("mapNotice").textContent="場所を記録した記録がまだないため、地図は表示できません。";$("clear").disabled=!entries.length;$("historyList").innerHTML=entries.length?entries.map(e=>{const image=e.thumbnail?URL.createObjectURL(e.thumbnail):"";return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+image+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div><div class="muted">'+esc(e.context?.location||"場所の記録なし")+'</div></div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>調べた内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';document.querySelectorAll(".photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()});document.querySelectorAll(".entry").forEach(node=>{const b=node.querySelector(".again");if(!b)return;const rec=entries.find(e=>String(e.id)===node.dataset.id);if(rec)b.onclick=()=>reidentify(rec,b,node.querySelector(".again-message"))});document.querySelectorAll(".one").forEach(b=>b.onclick=async()=>{const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").delete(b.closest("article").dataset.id);await finished(t);scheduleAutoBackup();location.reload()})}$("close").onclick=()=>$("lightbox").close();$("clear").onclick=async()=>{if(confirm("この端末に保存した記録をすべて削除しますか？")){const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").clear();await finished(t);scheduleAutoBackup();location.reload()}};render().catch(e=>$("historyList").innerHTML='<div class="empty">記録を読み込めませんでした。 '+esc(e.message)+'</div>');
+async function render(){const entries=await all();mapEntries=entries;const located=entries.filter(e=>Number.isFinite(Number(e.coordinates?.latitude))&&Number.isFinite(Number(e.coordinates?.longitude)));$("showMap").disabled=!located.length;if(!located.length)$("mapNotice").textContent="場所を記録した記録がまだないため、地図は表示できません。";$("clear").disabled=!entries.length;$("historyList").innerHTML=entries.length?entries.map(e=>{const image=e.thumbnail?URL.createObjectURL(e.thumbnail):"";return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+image+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div><div class="muted">'+esc(e.context?.location||"場所の記録なし")+'</div></div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>調べた内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';rerunRecords=new Map(entries.map(e=>[String(e.id),e]));document.querySelectorAll(".photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()});document.querySelectorAll(".entry").forEach(node=>{const b=node.querySelector(".again");if(!b)return;const rec=entries.find(e=>String(e.id)===node.dataset.id);if(rec)b.onclick=()=>reidentify(rec,b,node.querySelector(".again-message"))});document.querySelectorAll(".one").forEach(b=>b.onclick=async()=>{const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").delete(b.closest("article").dataset.id);await finished(t);scheduleAutoBackup();location.reload()})}$("close").onclick=()=>$("lightbox").close();$("clear").onclick=async()=>{if(confirm("この端末に保存した記録をすべて削除しますか？")){const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").clear();await finished(t);scheduleAutoBackup();location.reload()}};render().catch(e=>$("historyList").innerHTML='<div class="empty">記録を読み込めませんでした。 '+esc(e.message)+'</div>');
 /* 開いた直後にドライブから取り込むことがある。一覧はもう描き終わっているので、
    届いたら描き直す。押していないのに中身が入れ替わるのは、記録が端末をまたいで
    同じものになるという約束のとおり */
@@ -35,7 +35,7 @@ document.addEventListener("species-records-restored",()=>{
      同じ順で組み立てる (render → enrich → 広告)。ここを render だけにしていると、
      取り込んだ記録の詳細が簡易表示のまま、広告も付かない */
   affiliateLinksAdded=false;
-  render().then(enrich).then(addAffiliateLinks)
+  render().then(enrich).then(addAffiliateLinks).then(addRerunControls)
     .catch(e=>console.error("記録を描き直せませんでした",e));
 });
 function evidence(label,items){return items?.length?'<div class="label">'+label+'</div><ul>'+items.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>':""}function candidateLinks(c,category){
@@ -84,7 +84,64 @@ async function loadProducts(record,shells){
     },budget);
   }
 }
-async function reidentify(record,button,message){
+/* 結果に納得できないときに、写真を足して調べ直す。
+ *
+ * 記録に残っているのは1枚目の縮小画像 (長辺960px) だけなので、足せるのは2枚まで
+ * (サーバーの上限が3枚)。元の写真は全体像であることが多く、足すのは寄りの1枚に
+ * なるので、順番は元→追加で送る。撮影画面で撮り足すときと同じ考え方。
+ */
+const RERUN_MAX_EXTRA=2;
+function addRerunControls(){
+  document.querySelectorAll(".entry").forEach(node=>{
+    const detail=node.querySelector(".detail");
+    if(!detail||detail.querySelector(".rerun-box"))return;
+    const record=rerunRecords.get(node.dataset.id);
+    if(!record?.thumbnail)return;
+    const box=document.createElement("div");
+    box.className="rerun-box";
+    box.innerHTML='<div class="label">結果に納得できないときは</div>'
+      +'<p>写真を足すと、決め手が増えて答えが変わることがあります。元の写真はそのまま使います（足せるのは'+RERUN_MAX_EXTRA+'枚まで）。</p>'
+      +'<div class="rerun-previews"></div>'
+      +'<div class="rerun-actions">'
+      +'<button class="btn rerun-camera" type="button">カメラで撮って足す</button>'
+      +'<button class="btn rerun-library" type="button">写真を選んで足す</button>'
+      +'<button class="btn rerun-go" type="button" hidden>足した写真で調べ直す</button></div>'
+      +'<p class="rerun-message" hidden></p>';
+    const camera=document.createElement("input");
+    camera.type="file";camera.accept="image/*";camera.capture="environment";camera.hidden=true;
+    const library=document.createElement("input");
+    library.type="file";library.accept="image/*";library.multiple=true;library.hidden=true;
+    box.append(camera,library);
+    detail.append(box);
+
+    const extras=[];let urls=[];
+    const message=box.querySelector(".rerun-message");
+    const say=text=>{message.textContent=text;message.hidden=!text};
+    const paint=()=>{
+      urls.forEach(URL.revokeObjectURL);
+      urls=extras.map(file=>URL.createObjectURL(file));
+      box.querySelector(".rerun-previews").innerHTML=urls
+        .map((url,i)=>'<img src="'+url+'" alt="足した写真 '+(i+1)+'">').join("");
+      box.querySelector(".rerun-go").hidden=!extras.length;
+    };
+    const add=files=>{
+      const chosen=[...files].filter(file=>file.type.startsWith("image/"));
+      if(!chosen.length){say("画像ファイルを選んでください。");return}
+      const room=RERUN_MAX_EXTRA-extras.length;
+      if(room<=0){say("足せるのは"+RERUN_MAX_EXTRA+"枚までです。");return}
+      extras.push(...chosen.slice(0,room));
+      paint();
+      say(chosen.length>room?"（"+RERUN_MAX_EXTRA+"枚までなので"+room+"枚だけ足しました）":"");
+    };
+    camera.onchange=e=>{add(e.target.files);e.target.value=""};
+    library.onchange=e=>{add(e.target.files);e.target.value=""};
+    box.querySelector(".rerun-camera").onclick=()=>camera.click();
+    box.querySelector(".rerun-library").onclick=()=>library.click();
+    box.querySelector(".rerun-go").onclick=()=>
+      reidentify(record,box.querySelector(".rerun-go"),message,extras);
+  });
+}
+async function reidentify(record,button,message,extras=[]){
   /* 元の写真は保存していない。記録の縮小画像 (長辺960px) を送り直す。
      解像度が落ちているぶん、撮ったばかりの写真より不利になることがある */
   if(!record.thumbnail){message.textContent="この記録には写真が残っていないため、調べ直せません。";message.hidden=false;return}
@@ -94,7 +151,9 @@ async function reidentify(record,button,message){
     const settings=await fetch("/api/settings").then(r=>r.ok?r.json():null);
     if(!settings)throw new Error("設定を読み込めませんでした");
     const fd=new FormData();
+    /* 元の写真を先に送る。全体像であることが多く、足すのは寄りの1枚になる */
     fd.append("files",record.thumbnail,"photo.jpg");
+    extras.forEach((file,i)=>fd.append("files",file,"added-"+(i+1)+".jpg"));
     fd.append("location",record.context?.location||"");
     fd.append("observed_date",record.context?.observedDate||"");
     fd.append("size",record.context?.size||"");
@@ -163,7 +222,7 @@ async function addAffiliateLinks(){
     load();  // すでに開いている記録には即座に出す
   });
 }
-const addAffiliateLinksOnce=addAffiliateLinks;let affiliateLinksAdded=false;addAffiliateLinks=async()=>{if(affiliateLinksAdded)return;affiliateLinksAdded=true;await addAffiliateLinksOnce()};setTimeout(()=>enrich().then(addAffiliateLinks).catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
+const addAffiliateLinksOnce=addAffiliateLinks;let affiliateLinksAdded=false;addAffiliateLinks=async()=>{if(affiliateLinksAdded)return;affiliateLinksAdded=true;await addAffiliateLinksOnce()};setTimeout(()=>enrich().then(addAffiliateLinks).then(addRerunControls).catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
 
 /* 最後にドライブへ書けたかを出す。黙って失敗していると、記録が残っていると
    思い込んだまま端末を変えて、全部消えたことに後で気づく */
