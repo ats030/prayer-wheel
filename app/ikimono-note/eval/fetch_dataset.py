@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import time
 from pathlib import Path
 
@@ -115,8 +116,44 @@ def download(client: httpx.Client, entries: list[dict]) -> None:
         time.sleep(1)  # 推奨 60 req/分より十分低く保つ
 
 
+def refetch(manifest: Path, output: Path, size: str, limit: int) -> int:
+    """既存のマニフェストと同じ写真を、別の大きさで取り直す。
+
+    解像度が効くかを測るには、種の顔ぶれを変えずに大きさだけ変えた組が要る。
+    新しく取り直すと観察そのものが入れ替わり、何が効いたのか分からなくなる。
+    """
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    entries = data["entries"][:limit] if limit else data["entries"]
+    target_dir = CACHE_DIR.parent / f"images-{size}"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    copied = []
+    with httpx.Client(headers={"User-Agent": USER_AGENT}) as client:
+        for index, entry in enumerate(entries, 1):
+            fresh = dict(entry)
+            fresh["photo_url"] = re.sub(r"/(square|small|medium|large|original)\.", f"/{size}.",
+                                        entry["photo_url"])
+            target = target_dir / f"{entry['photo_id']}.jpg"
+            fresh["file"] = str(target)
+            copied.append(fresh)
+            if target.exists():
+                continue
+            response = client.get(fresh["photo_url"], timeout=120)
+            response.raise_for_status()
+            target.write_bytes(response.content)
+            print(f"  {index:3}/{len(entries)} {target.name} {len(response.content)//1024}KB", flush=True)
+            time.sleep(1)
+    output.write_text(json.dumps({**data, "entries": copied,
+                                  "license_note": data.get("license_note", "") + f" ({size})"},
+                                 ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"{len(copied)}件 → {output}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--refetch", default="", metavar="SIZE",
+                        help="既存のマニフェストと同じ写真を、この大きさで取り直す (large / original)")
+    parser.add_argument("--limit", type=int, default=0, help="--refetch のとき先頭N件だけ")
     parser.add_argument("--per-group", type=int, default=6, help="分類群ごとの枚数")
     parser.add_argument("--groups", nargs="*", default=list(GROUPS), choices=list(GROUPS),
                         help="取得する分類群。既定は全部")
@@ -124,6 +161,11 @@ def main() -> int:
     parser.add_argument("--place-id", type=int, default=JAPAN_PLACE_ID,
                         help="iNaturalist の場所ID。既定は日本 (6737)。0 で全世界")
     args = parser.parse_args()
+
+    if args.refetch:
+        return refetch(MANIFEST, Path(args.output) if args.output != str(MANIFEST)
+                       else MANIFEST.with_name(f"dataset-{args.refetch}.json"),
+                       args.refetch, args.limit)
 
     entries: list[dict] = []
     with httpx.Client(headers={"User-Agent": USER_AGENT}) as client:
