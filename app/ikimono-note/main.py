@@ -61,6 +61,24 @@ ALLOWED_HOSTS = [host.strip() for host in os.getenv("IKIMONO_ALLOWED_HOSTS", "lo
 # 運営者用 (非公開モード) こそ設定を書き換えられるので、Host の検証は両モードで効かせる。
 # 以前は公開モードだけに付けていたため、運営者用が素通しだった。
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
+
+# Cloud Run は同じサービスを2つのURLで配信する (新形式と旧形式)。両方通しておかないと
+# 片方が 400 になるが、通すだけだとログインが壊れる。始めるときの state を載せた
+# cookie はドメインごとなので、旧形式で始めて新形式へ返ってくると cookie が届かず、
+# 「ログインできませんでした」になる。返り先は PUBLIC_ORIGIN 固定なので、入口の側を
+# そこへ寄せる。
+CANONICAL_HOST = auth.PUBLIC_ORIGIN.split("://", 1)[-1].rstrip("/") if auth.PUBLIC_ORIGIN else ""
+
+
+@app.middleware("http")
+async def keep_one_origin(request: Request, call_next):
+    host = request.headers.get("host", "")
+    if CANONICAL_HOST and host and host != CANONICAL_HOST and host in ALLOWED_HOSTS:
+        target = auth.PUBLIC_ORIGIN.rstrip("/") + request.url.path
+        if request.url.query:
+            target += "?" + request.url.query
+        return RedirectResponse(target, status_code=307)
+    return await call_next(request)
 _RATE_BUCKETS: dict[tuple[str, str], deque[float]] = defaultdict(deque)
 _RATE_LOCK = threading.Lock()
 
@@ -291,12 +309,19 @@ def auth_callback(request: Request, code: str = "", state: str = "", error: str 
     if error or not code:
         return RedirectResponse("/login?failed=1", status_code=303)
     flow = auth.read_session(request.cookies.get(LOGIN_FLOW_COOKIE))
-    # state が合わなければ、この画面を開かせたのは本人ではない
-    if not flow or not state or not secrets.compare_digest(flow.get("state", ""), state):
+    # state が合わなければ、この画面を開かせたのは本人ではない。
+    # どれで落ちたかは残す。理由が出ないと、本番の「ログインできませんでした」から
+    # 先へ進めない (実際に切り分けできず止まった)。値そのものは出さない。
+    if not flow:
+        print("login failed: 始めたときの cookie が届いていない", flush=True)
+        return RedirectResponse("/login?failed=1", status_code=303)
+    if not state or not secrets.compare_digest(flow.get("state", ""), state):
+        print("login failed: state が一致しない", flush=True)
         return RedirectResponse("/login?failed=1", status_code=303)
     try:
         user = await_free(auth.finish_login, code, flow["verifier"], flow["nonce"])
-    except auth.AuthError:
+    except auth.AuthError as exc:
+        print(f"login failed: {exc}", flush=True)
         return RedirectResponse("/login?failed=1", status_code=303)
     response = RedirectResponse("/settings", status_code=303)
     response.set_cookie(auth.SESSION_COOKIE, auth.session_for(user),

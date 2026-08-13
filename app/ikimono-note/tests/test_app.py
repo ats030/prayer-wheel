@@ -2463,3 +2463,28 @@ def test_the_policy_lets_the_tiles_through():
     # Leaflet はタイルの隙間に 1x1 の透明 GIF を data: で置く
     assert " data:" in images
     assert "'unsafe-inline'" not in policy
+
+
+def test_the_login_never_straddles_two_hostnames():
+    """Cloud Run は同じサービスを新旧2つのURLで配信する。
+
+    始めるときの state は cookie に載り、cookie はドメインごと。旧形式で始めて
+    新形式へ返ると cookie が届かず「ログインできませんでした」になる。本番で実際に
+    起きた。返り先は PUBLIC_ORIGIN 固定なので、入口をそこへ寄せる。
+    """
+    source = Path("main.py").read_text(encoding="utf-8")
+    assert "async def keep_one_origin(request: Request, call_next):" in source
+    assert 'host != CANONICAL_HOST and host in ALLOWED_HOSTS' in source
+    assert "status_code=307" in source          # 本文を保つ (POST を GET に変えない)
+
+
+def test_a_failed_login_says_which_check_failed():
+    """理由が出ないと、本番の「ログインできませんでした」から先へ進めない。
+
+    実際に切り分けできずに止まった。値そのものは出さない。
+    """
+    source = Path("main.py").read_text(encoding="utf-8")
+    assert 'print("login failed: 始めたときの cookie が届いていない", flush=True)' in source
+    assert 'print("login failed: state が一致しない", flush=True)' in source
+    assert 'print(f"login failed: {exc}", flush=True)' in source
+    assert "state}" not in source and "{code}" not in source   # 値は残さない

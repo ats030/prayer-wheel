@@ -47,8 +47,12 @@ for key, name in [("top1", "Top-1"), ("top3", "Top-3"), ("genus", "属まで一�
     print(f"{name:16} {a_hits:7}枚 {b_hits:7}枚   {gained:9}枚 {lost:9}枚 {p:7.3f}")
 
 print(f"\n1枚あたりの中央値: {left} {a_sum['median_seconds']}秒 / {right} {b_sum['median_seconds']}秒")
-changed = [p for p in shared if a_rows[p]["predicted"] != b_rows[p]["predicted"]]
+def predicted_of(row):
+    return row.get("predicted") or []          # 候補ゼロの行には predicted が無い
+
+
+changed = [p for p in shared if predicted_of(a_rows[p]) != predicted_of(b_rows[p])]
 print(f"第一候補そのものが変わった枚数: {len(changed)} / {len(shared)}")
 for p in changed[:6]:
     print(f"  {a_rows[p]['truth_ja'] or a_rows[p]['truth']}: "
-          f"{a_rows[p]['predicted_ja']} → {b_rows[p]['predicted_ja']}")
+          f"{a_rows[p].get('predicted_ja') or []} → {b_rows[p].get('predicted_ja') or []}")
