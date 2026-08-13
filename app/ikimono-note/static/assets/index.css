@@ -36,3 +36,7 @@
 .guide-note{margin:9px 0 0;color:var(--muted);font-size:12px}
 /* カードの下に置く検索リンク。カードと地続きに見えるよう少しだけ離す */
 .product-grid+.product-fallback{display:inline-block;margin-top:9px}
+/* 調べているあいだの表示。答えが出る場所を、そのまま待ちの場所にする */
+.placeholder.working{color:var(--ink)}
+.placeholder.working strong{display:block;font-size:15px}
+.placeholder.working p{margin:6px 0 0;color:var(--muted);font-size:12px}

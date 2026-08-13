@@ -1,6 +1,7 @@
 import importlib
 import os
 import re
+import time
 import io
 import sys
 from pathlib import Path
@@ -133,7 +134,9 @@ def test_index_saves_history_but_does_not_render_it():
                  "historyCandidateHtml", "historyAffiliateLink", "historyMessage"]:
         assert gone not in source, gone
     # 保存に失敗したら、隠れた要素ではなく利用者が見ている場所へ出す
-    assert 'saveHistory(data).catch(error=>showStatus(' in source
+    # 書き込みの失敗は、識別と同じ status 行に出す (隠れた場所へ落とさない)
+    assert 'saveHistory(data,{...pending,photos:pendingToBlobs(pending?.photos)})' in source
+    assert 'この端末の記録には保存できませんでした。' in source
     assert "この端末の記録には保存できませんでした" in source
     assert all("history" not in route.path for route in main.app.routes if route.path.startswith("/api/"))
 
@@ -332,6 +335,70 @@ def test_photo_metadata_reads_exif_before_identification():
 
     assert response.status_code == 200
     assert response.json() == {"observed_date": "2024-11-12"}
+
+
+def test_identify_can_run_behind_a_job_so_a_refresh_does_not_lose_it(monkeypatch):
+    """画面を更新しても続きから受け取れること。
+
+    ブラウザが待っているあいだだけ生きる作りだと、更新した瞬間に答えが行き場を
+    なくす。Ollama では1分ほどかかるので、その1分は画面を触れないことになる。
+    """
+    monkeypatch.setattr(main.vision, "identify",
+                        lambda images, model, **context: {"category": "植物", "summary": "", "candidates": []})
+    with TestClient(main.app, base_url="http://localhost") as running_client:
+        started = running_client.post("/identify", files=[("files", ("a.jpg", usable_photo(), "image/jpeg"))],
+                                      data={"background": "true"})
+        assert started.status_code == 202
+        job = started.json()["job"]
+        assert started.json()["status"] == "running"
+        assert job
+
+        for _ in range(80):
+            polled = running_client.get(f"/identify/job/{job}")
+            assert polled.status_code == 200
+            if polled.json()["status"] != "running":
+                break
+            time.sleep(0.1)
+        payload = polled.json()
+        assert payload["status"] == "done", payload
+        assert payload["result"]["category"] == "植物"
+        # 同じ札で二度読める (受け取った直後に閉じてしまっても、開き直せば見られる)
+        assert running_client.get(f"/identify/job/{job}").json()["status"] == "done"
+
+
+def test_a_failed_job_carries_the_reason_not_a_hang(monkeypatch):
+    """後ろで落ちたときも札に残す。残さないと画面が待ち続ける。"""
+    def boom(*args, **kwargs):
+        raise main.vision.VisionError("Ollamaに接続できませんでした")
+    monkeypatch.setattr(main.vision, "identify", boom)
+    with TestClient(main.app, base_url="http://localhost") as running_client:
+        job = running_client.post("/identify", files=[("files", ("a.jpg", usable_photo(), "image/jpeg"))],
+                                  data={"background": "true"}).json()["job"]
+        for _ in range(80):
+            payload = running_client.get(f"/identify/job/{job}").json()
+            if payload["status"] != "running":
+                break
+            time.sleep(0.1)
+    assert payload["status"] == "error"
+    assert payload["status_code"] == 422
+    assert "Ollama" in payload["detail"]
+
+
+def test_an_unknown_job_is_not_a_silent_wait():
+    """期限切れ・再起動・別人。どれでも利用者にできることは同じなので同じ答えにする。"""
+    response = client.get("/identify/job/deadbeef")
+    assert response.status_code == 404
+    assert "もう一度お試しください" in response.json()["detail"]
+
+
+def test_the_job_store_keeps_results_not_photos():
+    """置くのは結果だけ。写真は仕事が走っているあいだしか存在しない。"""
+    source = (Path(__file__).parents[1] / "jobs.py").read_text(encoding="utf-8")
+    assert "TTL_SECONDS" in source and "MAX_JOBS" in source
+    for leaked in ["raw_images", "prepared", "image", "photo"]:
+        assert leaked not in source.replace("写真", ""), leaked
+    main_source = (Path(__file__).parents[1] / "main.py").read_text(encoding="utf-8")
+    assert "raw_images.clear()" in main_source     # 終わったら捨てる
 
 
 def test_identify_uses_exif_date_when_form_date_is_empty(monkeypatch):
@@ -1841,6 +1908,39 @@ def test_the_hidden_attribute_actually_hides_on_every_page():
         assert "[hidden]{display:none!important}" in css, name
 
 
+def test_waiting_is_visible_where_the_answer_will_appear():
+    """処理中が分かりづらかった。status 行は撮影パネルの下にあり、目に入らない。"""
+    index = client.get("/assets/index.js").text
+    assert "function showWorking(startedAt)" in index
+    assert "が写真を見ています（\"+seconds+\"秒）" in index      # 止まっていないことを秒で示す
+    assert "setInterval(tick,1000)" in index
+    assert "$('results').className='placeholder working'" in index  # 答えが出る場所にも出す
+    assert '<span class="spinner"></span>' in index
+    assert ".placeholder.working{" in client.get("/assets/index.css").text
+    # 待っているあいだは押せない
+    assert "identify.disabled=true" in index
+
+
+def test_identification_survives_a_reload():
+    """画面を更新しても続きから受け取れること。両方の画面で。"""
+    index = client.get("/assets/index.js").text
+    assert 'const PENDING_KEY="species-pending-identify"' in index
+    assert 'fd.append("background","true")' in index
+    assert '"/identify/job/"+encodeURIComponent(pending.job)' in index
+    assert "const pending=readPending();" in index
+    assert "if(!pending?.job)return;" in index                 # 開いたときに続きを聞く
+    # 更新すると選んだファイルも入力欄も消える。投げる前に控えておく
+    assert "async function pendingPhotos()" in index
+    assert "await blobToDataUrl(blob)" in index
+    assert "coordinates:gps?{latitude:" in index
+    assert "context:pending?.context||" in index
+    history = client.get("/assets/history.js").text
+    assert 'const RERUN_PENDING_KEY="species-pending-rerun"' in history
+    assert "function resumeRerun()" in history
+    assert ".then(resumeRerun)" in history
+    assert "async function watchRerun(pending,button,message)" in history
+
+
 def test_a_record_can_be_examined_again_with_extra_photos():
     """結果に納得できないときは、記録の中から写真を足して調べ直せること。
 
@@ -1862,7 +1962,7 @@ def test_a_record_can_be_examined_again_with_extra_photos():
     assert 'recordPhotos(record).forEach((blob,i)=>fd.append("files",blob,"photo-"+(i+1)+".jpg"))' in history
     assert 'extras.forEach((file,i)=>fd.append("files",file,"added-"+(i+1)+".jpg"))' in history
     # 元の記録は消さず、新しい記録として足す
-    assert "await saveRerun(record,data,[...recordPhotos(record)," in history
+    assert "await saveRerun(source,payload.result,[...recordPhotos(source),...added])" in history
     assert ".then(addRerunControls)" in history
     css = client.get("/assets/history.css").text
     assert ".rerun-box{" in css

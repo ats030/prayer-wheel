@@ -5,6 +5,7 @@
 設定ファイルは共有するため、運営者用での変更は公開版にも反映される。
 """
 
+import asyncio
 from collections import defaultdict, deque
 from pathlib import Path
 import os
@@ -25,6 +26,7 @@ import auth
 import config_store
 import image_quality
 import creators_api
+import jobs
 import pipeline
 import vision
 
@@ -412,9 +414,36 @@ async def photo_metadata(request: Request, files: list[UploadFile] = File(defaul
     return metadata
 
 
+_RUNNING_TASKS: set[asyncio.Task] = set()
+
+
+def _job_owner(request: Request) -> str:
+    """公開版では、札を知っていても他人の結果は見えないようにする。"""
+    if not PUBLIC_MODE:
+        return ""
+    session = auth.read_session(request.cookies.get(auth.SESSION_COOKIE))
+    return str((session or {}).get("sub") or "")
+
+
+@app.get("/identify/job/{job_id}")
+def identify_job(request: Request, job_id: str) -> JSONResponse:
+    """走らせた識別の様子を返す。画面を更新したあとはここへ聞きに来る。"""
+    job = jobs.get(job_id, _job_owner(request))
+    if job is None:
+        # 期限切れ・再起動・別人。どれでも利用者にできることは同じ
+        raise HTTPException(status_code=404, detail="この調べものは見つかりませんでした。もう一度お試しください。")
+    if job["status"] == "running":
+        return JSONResponse({"status": "running"})
+    if job["status"] == "error":
+        return JSONResponse({"status": "error", "status_code": job["status_code"],
+                             "detail": job["detail"]})
+    return JSONResponse({"status": "done", "result": job["result"]})
+
+
 @app.post("/identify")
 async def identify(
     request: Request,
+    background: bool = Form(default=False),
     files: list[UploadFile] = File(default=[]),
     file: UploadFile | None = File(default=None),
     location: str = Form(default=""),
@@ -457,6 +486,34 @@ async def identify(
     if any(upload.content_type and not upload.content_type.startswith("image/") for upload in uploads):
         raise HTTPException(status_code=415, detail="写真を選んでください")
     raw_images = [await upload.read(vision.MAX_UPLOAD_BYTES + 1) for upload in uploads]
+    work = dict(
+        provider=provider, model=model, api_key=api_key, settings=settings,
+        location=location, observed_date=observed_date, size=size,
+        use_plantnet=use_plantnet, request_plantnet_key=request_plantnet_key)
+    if background:
+        # 写真はこのあとの仕事の中にしか残らない。終わったら捨てる (jobs.py)
+        job_id = jobs.start(_job_owner(request))
+        # 参照を持たないと、走っている途中で回収されることがある
+        task = asyncio.create_task(_run_identify_job(job_id, raw_images, work))
+        _RUNNING_TASKS.add(task)
+        task.add_done_callback(_RUNNING_TASKS.discard)
+        return JSONResponse({"status": "running", "job": job_id}, status_code=202)
+    return JSONResponse(await _identify_images(
+        raw_images, provider=provider, model=model, api_key=api_key, settings=settings,
+        location=location, observed_date=observed_date, size=size,
+        use_plantnet=use_plantnet, request_plantnet_key=request_plantnet_key))
+
+
+async def _identify_images(
+    raw_images: list[bytes], *, provider: str, model: str, api_key: str,
+    settings: dict, location: str, observed_date: str, size: str,
+    use_plantnet: bool, request_plantnet_key: str,
+) -> dict:
+    """写真の生バイトから結果を作る。HTTP 層と、後ろで走らせる仕事の共通部分。
+
+    切り出したのは、画面を更新しても識別を続けられるようにするため。同じ手順を
+    2か所に書くと、質のゲートや EXIF の扱いが片方だけ古くなる。
+    """
     try:
         photo_metadata: dict[str, object] = {}
         for raw in raw_images:
@@ -492,7 +549,20 @@ async def identify(
         result["photo_notes"] = [problem for q in quality for problem in q["problems"]]
     except vision.VisionError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    return JSONResponse(result)
+    return result
+
+
+async def _run_identify_job(job_id: str, raw_images: list[bytes], work: dict) -> None:
+    """後ろで走らせるぶん。例外は札の側へ移し、ここでは外に投げない。"""
+    try:
+        jobs.finish(job_id, await _identify_images(raw_images, **work))
+    except HTTPException as exc:
+        jobs.fail(job_id, exc.status_code, exc.detail)
+    except Exception as exc:  # noqa: BLE001 - 何であれ札に残さないと画面が待ち続ける
+        print(f"[ikimono-note] 識別 {job_id} が落ちました: {exc!r}", flush=True)
+        jobs.fail(job_id, 500, "調べられませんでした。もう一度お試しください。")
+    finally:
+        raw_images.clear()
 
 
 if __name__ == "__main__":

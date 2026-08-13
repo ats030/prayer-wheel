@@ -165,11 +165,61 @@ function addRerunControls(){
       reidentify(record,box.querySelector(".rerun-go"),message,extras);
   });
 }
+/* 調べ直しも後ろで走らせる。撮影画面と同じ理由 (Ollama で1分)。札と、足した写真を
+   控えておき、画面を更新しても続きから受け取る。記録に元からある写真は
+   IndexedDB にあるので預けない */
+const RERUN_PENDING_KEY="species-pending-rerun";
+function readRerunPending(){try{return JSON.parse(localStorage.getItem(RERUN_PENDING_KEY)||"null")}catch(e){return null}}
+function writeRerunPending(v){try{v?localStorage.setItem(RERUN_PENDING_KEY,JSON.stringify(v)):localStorage.removeItem(RERUN_PENDING_KEY)}catch(e){}}
+
+function rerunWorking(button,message,startedAt){
+  const tick=()=>{
+    const seconds=Math.max(0,Math.round((Date.now()-startedAt)/1000));
+    if(button){button.disabled=true;button.textContent="調べ直しています…（"+seconds+"秒）"}
+    message.textContent="この画面を閉じても、開き直せば続きから受け取れます。";message.hidden=false;
+  };
+  tick();
+  return setInterval(tick,1000);
+}
+
+async function watchRerun(pending,button,message){
+  const timer=rerunWorking(button,message,pending.startedAt||Date.now());
+  const stop=()=>{clearInterval(timer);if(button){button.disabled=false;button.textContent="もう一度調べる"}};
+  while(true){
+    await new Promise(done=>setTimeout(done,1500));
+    if(readRerunPending()?.job!==pending.job){clearInterval(timer);return}
+    let payload;
+    try{
+      const response=await fetch("/identify/job/"+encodeURIComponent(pending.job));
+      payload=await response.json();
+      if(response.status===404)throw new Error(payload.detail||"この調べものは見つかりませんでした。");
+    }catch(error){
+      stop();writeRerunPending(null);
+      message.textContent=error.message;message.hidden=false;return;
+    }
+    if(payload.status==="running")continue;
+    stop();
+    if(payload.status==="error"){
+      writeRerunPending(null);
+      message.textContent=typeof payload.detail==="string"?payload.detail:"調べられませんでした";
+      message.hidden=false;return;
+    }
+    const source=rerunRecords.get(String(pending.recordId));
+    if(!source){writeRerunPending(null);message.textContent="元の記録が見つかりませんでした。";message.hidden=false;return}
+    const added=(pending.photos||[]).map(dataUrlToBlob).filter(Boolean);
+    writeRerunPending(null);
+    await saveRerun(source,payload.result,[...recordPhotos(source),...added]);
+    location.reload();
+    return;
+  }
+}
+
 async function reidentify(record,button,message,extras=[]){
   /* 元の写真は保存していない。記録の縮小画像 (長辺960px) を送り直す。
      解像度が落ちているぶん、撮ったばかりの写真より不利になることがある */
   if(!recordPhotos(record).length){message.textContent="この記録には写真が残っていないため、調べ直せません。";message.hidden=false;return}
   const label=button.textContent;
+  const startedAt=Date.now();
   button.disabled=true;button.textContent="調べ直しています…";message.hidden=true;
   try{
     const settings=await fetch("/api/settings").then(r=>r.ok?r.json():null);
@@ -189,11 +239,16 @@ async function reidentify(record,button,message,extras=[]){
       fd.append("request_api_key",readApiKey(provider));
       fd.append("request_plantnet_key",readApiKey("plantnet"));
     }
+    fd.append("background","true");
     const response=await fetch("/identify",{method:"POST",body:fd});
     const data=await response.json();
     if(!response.ok)throw new Error(data.detail||"調べられませんでした");
-    await saveRerun(record,data,[...recordPhotos(record),...await Promise.all(extras.map(shrinkForHistory))]);
-    location.reload();
+    const shrunk=[];
+    for(const file of extras){try{const blob=await shrinkForHistory(file);if(blob)shrunk.push(await blobToDataUrl(blob))}catch(e){}}
+    const pending={job:data.job,recordId:record.id,startedAt,photos:shrunk};
+    writeRerunPending(pending);
+    watchRerun(pending,button,message);
+    return;
   }catch(error){
     message.textContent=error.message;message.hidden=false;
     button.disabled=false;button.textContent=label;
@@ -247,7 +302,7 @@ async function addAffiliateLinks(){
     load();  // すでに開いている記録には即座に出す
   });
 }
-const addAffiliateLinksOnce=addAffiliateLinks;let affiliateLinksAdded=false;addAffiliateLinks=async()=>{if(affiliateLinksAdded)return;affiliateLinksAdded=true;await addAffiliateLinksOnce()};setTimeout(()=>enrich().then(addAffiliateLinks).then(addRerunControls).catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
+const addAffiliateLinksOnce=addAffiliateLinks;let affiliateLinksAdded=false;addAffiliateLinks=async()=>{if(affiliateLinksAdded)return;affiliateLinksAdded=true;await addAffiliateLinksOnce()};setTimeout(()=>enrich().then(addAffiliateLinks).then(addRerunControls).then(resumeRerun).catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
 
 /* 最後にドライブへ書けたかを出す。黙って失敗していると、記録が残っていると
    思い込んだまま端末を変えて、全部消えたことに後で気づく */
@@ -268,3 +323,15 @@ const addAffiliateLinksOnce=addAffiliateLinks;let affiliateLinksAdded=false;addA
   else{el.className="save-state warn";
     el.innerHTML=`Google ドライブへ保存できていません（${when}・${esc(state.detail)}）。<a href="/settings">設定</a>から確認してください。`}
 })();
+
+/* 開き直したとき、走らせたままの調べ直しがあれば続きから受け取る。記録の一覧が
+   組み上がったあとに呼ぶ (元の記録を rerunRecords から引くため) */
+function resumeRerun(){
+  const pending=readRerunPending();
+  if(!pending?.job)return;
+  const node=document.querySelector('.entry[data-id="'+CSS.escape(String(pending.recordId))+'"]');
+  const button=node?.querySelector(".again")||null;
+  const message=node?.querySelector(".again-message")||document.createElement("p");
+  if(node)node.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
+  watchRerun(pending,button,message);
+}

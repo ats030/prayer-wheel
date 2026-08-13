@@ -118,8 +118,142 @@ function transactionDone(transaction){return new Promise((resolve,reject)=>{tran
 /* 送った写真はすべて残す。1枚目だけだと、撮り足した寄りの1枚があとから見られず、
    調べ直しも1枚目だけで走ることになる。実測で長辺960pxのJPEGは中央値33KBなので、
    3枚×50件でもドライブのJSONは6MB台に収まる */
-async function saveHistory(data){const db=await historyDb();const thumbnails=[];for(const file of selected){try{const shrunk=await shrinkForHistory(file);if(shrunk)thumbnails.push(shrunk)}catch(e){}}const thumbnail=thumbnails[0]||null;const metadata=data.photo_metadata||{};const coordinates=gps?{latitude:Number(gps.latitude.toFixed(4)),longitude:Number(gps.longitude.toFixed(4))}:metadata.latitude!=null?{latitude:metadata.latitude,longitude:metadata.longitude}:null;const record={id:(crypto.randomUUID?.()||Date.now()+"-"+Math.random()),createdAt:new Date().toISOString(),category:data.category,summary:data.summary,candidates:data.candidates,provider:providerName,model:data.model||"",resultMeta:{strictMode:Boolean(data.strict_mode),taxonomyChecked:Boolean(data.taxonomy_checked),rejectedCandidates:Number(data.rejected_candidates||0),plantnetUsed:Boolean(data.plantnet_used)},context:{location:$("location").value,observedDate:$("observedDate").value,size:$("size").value},coordinates,thumbnail,thumbnails};let tx=db.transaction("entries","readwrite");tx.objectStore("entries").put(record);await transactionDone(tx);tx=db.transaction("entries","readonly");const all=await requestValue(tx.objectStore("entries").getAll());await transactionDone(tx);const excess=all.sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(50);if(excess.length){tx=db.transaction("entries","readwrite");excess.forEach(item=>tx.objectStore("entries").delete(item.id));await transactionDone(tx)}db.close();scheduleAutoBackup()}
-identify.onclick=async()=>{if(!selected.length)return;identify.disabled=true;showStatus(providerName+"が写真を見ています。少しお待ちください。",false,true);$('results').className='placeholder';$('results').textContent='形・色・もようを確認中…';const fd=new FormData();selected.forEach(file=>fd.append("files",file));fd.append("location",$("location").value);fd.append("observed_date",$("observedDate").value);fd.append("size",$("size").value);fd.append("use_plantnet",document.getElementById("usePlantnet").checked);if(window.speciesPublicMode){const saved=JSON.parse(localStorage.getItem("species-public-settings")||"{}");fd.append("request_provider",provider);fd.append("request_model",saved.models?.[provider]||window.speciesRuntimeModel||"");fd.append("request_api_key",readApiKey(provider));fd.append("request_plantnet_key",readApiKey("plantnet"))}try{const r=await fetch('/identify',{method:'POST',body:fd});const data=await r.json();if(!r.ok)throw new Error(errorText(data.detail));render(data);showStatus('似ている生きものを表示しました。実物と見くらべてください。');saveHistory(data).catch(error=>showStatus("候補は表示できましたが、この端末の記録には保存できませんでした。 "+error.message,true))}catch(e){$('results').innerHTML='<div class="placeholder">結果を取得できませんでした。</div>';showStatus(e.message,true)}finally{identify.disabled=false}};
+/* 写真も撮影情報も、投げる前に控えたぶん (pending) を使う。画面を更新すると
+   選んだファイルも入力欄の中身も手元から消えるので、いま画面を見て作れない */
+async function saveHistory(data,pending){const db=await historyDb();const thumbnails=pending?.photos||[];const thumbnail=thumbnails[0]||null;const metadata=data.photo_metadata||{};const coordinates=pending?.coordinates||(metadata.latitude!=null?{latitude:metadata.latitude,longitude:metadata.longitude}:null);const record={id:(crypto.randomUUID?.()||Date.now()+"-"+Math.random()),createdAt:new Date().toISOString(),category:data.category,summary:data.summary,candidates:data.candidates,provider:providerName,model:data.model||"",resultMeta:{strictMode:Boolean(data.strict_mode),taxonomyChecked:Boolean(data.taxonomy_checked),rejectedCandidates:Number(data.rejected_candidates||0),plantnetUsed:Boolean(data.plantnet_used)},context:pending?.context||{location:"",observedDate:"",size:""},coordinates,thumbnail,thumbnails};let tx=db.transaction("entries","readwrite");tx.objectStore("entries").put(record);await transactionDone(tx);tx=db.transaction("entries","readonly");const all=await requestValue(tx.objectStore("entries").getAll());await transactionDone(tx);const excess=all.sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(50);if(excess.length){tx=db.transaction("entries","readwrite");excess.forEach(item=>tx.objectStore("entries").delete(item.id));await transactionDone(tx)}db.close();scheduleAutoBackup()}
+/* 識別は後ろで走らせ、札 (job) を持って様子を聞きに行く。
+ *
+ * ブラウザが待っているあいだだけ生きる作りだと、画面を更新した瞬間に答えが行き場を
+ * なくす。Ollama では1分ほどかかるので、その1分のあいだ画面を触れないのは実用に
+ * 堪えない。札は localStorage に置き、開き直したら続きから聞く。
+ *
+ * 記録に残す写真は、投げる前に縮小して札と一緒に預けておく。更新すると選んだ
+ * ファイルは手元から消えるので、あとから作れない。
+ */
+const PENDING_KEY="species-pending-identify";
+let elapsedTimer=null;
+
+/* 待っていることは、答えが出る場所にも書く。status 行は撮影パネルの下にあり、
+   スマホでも画面を更新した直後でも目に入らない。1分かかる相手なので、
+   止まっているのか動いているのかは秒数で示す */
+function showWorking(startedAt){
+  identify.disabled=true;
+  $('results').className='placeholder working';
+  const tick=()=>{
+    const seconds=Math.max(0,Math.round((Date.now()-startedAt)/1000));
+    const line=providerName+"が写真を見ています（"+seconds+"秒）";
+    $('results').innerHTML='<div><strong><span class="spinner"></span>'+esc(line)+'</strong>'
+      +'<p>形・色・もようを確認中…</p>'
+      +'<p>この画面を閉じても、開き直せば続きから見られます。</p></div>';
+    showStatus(line+"。この画面を閉じても、開き直せば続きから見られます。",false,true);
+  };
+  tick();
+  clearInterval(elapsedTimer);
+  elapsedTimer=setInterval(tick,1000);
+}
+function stopWorking(){clearInterval(elapsedTimer);elapsedTimer=null;identify.disabled=false}
+
+function readPending(){try{return JSON.parse(localStorage.getItem(PENDING_KEY)||"null")}catch(e){return null}}
+function writePending(value){
+  try{value?localStorage.setItem(PENDING_KEY,JSON.stringify(value)):localStorage.removeItem(PENDING_KEY)}
+  catch(e){/* 覚えられなくても、このタブで待っているあいだは動く */}
+}
+
+/* 縮小した写真は data URL にして預ける。3枚でも実測100KB台で localStorage に収まる。
+   data URL との往復は backup.js のものを使う (CSP で fetch(data:) が使えない事情も同じ) */
+async function pendingPhotos(){
+  const out=[];
+  for(const file of selected){
+    try{
+      const blob=await shrinkForHistory(file);
+      if(blob)out.push(await blobToDataUrl(blob));
+    }catch(e){/* 1枚読めなくても調べるのは続ける */}
+  }
+  return out;
+}
+function pendingToBlobs(urls){return (urls||[]).map(dataUrlToBlob).filter(Boolean)}
+
+async function finishIdentification(data,pending){
+  render(data);
+  showStatus('似ている生きものを表示しました。実物と見くらべてください。');
+  writePending(null);
+  try{await saveHistory(data,{...pending,photos:pendingToBlobs(pending?.photos)})}
+  catch(error){showStatus("候補は表示できましたが、この端末の記録には保存できませんでした。 "+error.message,true)}
+}
+
+async function pollIdentification(pending){
+  showWorking(pending.startedAt||Date.now());
+  while(true){
+    await new Promise(done=>setTimeout(done,1500));
+    if(readPending()?.job!==pending.job)return;   // 途中で別の調べものが始まった
+    let payload;
+    try{
+      const response=await fetch("/identify/job/"+encodeURIComponent(pending.job));
+      payload=await response.json();
+      if(response.status===404)throw new Error(payload.detail||"この調べものは見つかりませんでした。");
+    }catch(error){
+      stopWorking();writePending(null);
+      $('results').innerHTML='<div class="placeholder">結果を取得できませんでした。</div>';
+      showStatus(error.message,true);
+      return;
+    }
+    if(payload.status==="running")continue;
+    stopWorking();
+    if(payload.status==="error"){
+      writePending(null);
+      $('results').innerHTML='<div class="placeholder">結果を取得できませんでした。</div>';
+      showStatus(errorText(payload.detail),true);
+      return;
+    }
+    await finishIdentification(payload.result,pending);
+    return;
+  }
+}
+
+identify.onclick=async()=>{
+  if(!selected.length)return;
+  identify.disabled=true;
+  const startedAt=Date.now();
+  showWorking(startedAt);
+  const fd=new FormData();
+  selected.forEach(file=>fd.append("files",file));
+  fd.append("background","true");
+  fd.append("location",$("location").value);
+  fd.append("observed_date",$("observedDate").value);
+  fd.append("size",$("size").value);
+  fd.append("use_plantnet",document.getElementById("usePlantnet").checked);
+  if(window.speciesPublicMode){
+    const saved=JSON.parse(localStorage.getItem("species-public-settings")||"{}");
+    fd.append("request_provider",provider);
+    fd.append("request_model",saved.models?.[provider]||window.speciesRuntimeModel||"");
+    fd.append("request_api_key",readApiKey(provider));
+    fd.append("request_plantnet_key",readApiKey("plantnet"));
+  }
+  const photos=await pendingPhotos();
+  try{
+    const response=await fetch('/identify',{method:'POST',body:fd});
+    const data=await response.json();
+    if(!response.ok)throw new Error(errorText(data.detail));
+    const pending={job:data.job,startedAt,photos,
+      context:{location:$("location").value,observedDate:$("observedDate").value,size:$("size").value},
+      coordinates:gps?{latitude:Number(gps.latitude.toFixed(4)),longitude:Number(gps.longitude.toFixed(4))}:null};
+    writePending(pending);
+    pollIdentification(pending);
+  }catch(e){
+    stopWorking();
+    $('results').innerHTML='<div class="placeholder">結果を取得できませんでした。</div>';
+    showStatus(e.message,true);
+  }
+};
+/* 開き直したとき、走らせたままの調べものがあれば続きから聞く */
+(()=>{
+  const pending=readPending();
+  if(!pending?.job)return;
+  pollIdentification(pending);
+  /* 更新して戻ってきた人は、自分で下まで見に行かないと待っていることが分からない */
+  $('results').scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
+})();
+
 loadSettings();
 const renderIdentification=render;
 /* 「もっと確かめたいこと」を読んだその場から撮り足せるようにする。以前は
