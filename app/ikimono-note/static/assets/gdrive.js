@@ -20,6 +20,11 @@ function driveFileName() {
 const DRIVE_KEY = "species-drive-file";   // 作ったファイルのIDを覚えておく
 
 let driveToken = null;      // メモリだけに置く。保存すると盗まれたとき困る
+/* Google のアクセストークンは1時間ほどで切れる。期限を見ずに持ち続けていたため、
+   タブを開いたまま1時間たつと最初の書き込みが 401 で落ち、「許可が切れました」と
+   出ていた。黙って取り直せば済む場面で、利用者につなぎ直しを求めていた。 */
+let driveTokenExpiry = 0;
+let driveClientId = "";     // 取り直すときに要る。公開情報なので秘密ではない
 let driveTokenClient = null;
 const DRIVE_LINKED = "species-drive-linked";   // 一度つないだかどうか。トークンそのものではない
 
@@ -44,6 +49,7 @@ function loadGoogleIdentity() {
 }
 
 async function driveSignIn(clientId, {silent = false} = {}) {
+  driveClientId = clientId || driveClientId;
   await loadGoogleIdentity();
   return new Promise((resolve, reject) => {
     driveTokenClient = google.accounts.oauth2.initTokenClient({
@@ -56,6 +62,10 @@ async function driveSignIn(clientId, {silent = false} = {}) {
           return;
         }
         driveToken = response.access_token;
+        /* 期限ぎりぎりで使うと、往復のあいだに切れる。1分手前で切れた扱いにする */
+        /* 期限ぎりぎりで使うと、往復のあいだに切れる。1分手前で切れた扱いにする。
+           下限を置くと、短いトークンを実際より長生きだと思い込む */
+        driveTokenExpiry = Date.now() + Math.max(0, Number(response.expires_in || 3600) - 60) * 1000;
         rememberDriveLink(true);
         resolve(driveToken);
       },
@@ -79,8 +89,15 @@ async function driveSignIn(clientId, {silent = false} = {}) {
   });
 }
 
+function driveTokenAlive() {
+  return Boolean(driveToken) && Date.now() < driveTokenExpiry;
+}
+
 function driveSignedIn() {
-  return Boolean(driveToken);
+  /* 使えるトークンがあるかどうかだけを答える。設定画面はこれを呼ぶ前に
+     ensureDriveToken で取り直しているので、ここで false なら本当に駄目な状態。
+     取り直せば済む状態を「つながっています」と見せると、直せる不調が隠れる */
+  return driveTokenAlive();
 }
 
 function driveLinked() {
@@ -95,10 +112,14 @@ function rememberDriveLink(linked) {
 /* 一度つないだ相手なら、画面を出さずに取り直せることが多い。取れなければ諦める。
    自動保存のたびに許可を求めると、記録するたび画面が出て使い物にならない */
 async function ensureDriveToken(clientId) {
-  if (driveToken) return driveToken;
-  if (!clientId || !driveLinked()) return null;
+  driveClientId = clientId || driveClientId;
+  /* 期限を見ずに持ち続けていたため、1時間たったトークンをそのまま使って 401 を
+     踏んでいた。切れていれば黙って取り直す */
+  if (driveTokenAlive()) return driveToken;
+  driveToken = null;
+  if (!driveClientId || !driveLinked()) return null;
   try {
-    return await driveSignIn(clientId, {silent: true});
+    return await driveSignIn(driveClientId, {silent: true});
   } catch (error) {
     return null;
   }
@@ -145,6 +166,7 @@ function driveFileId() {
 
 function forgetDrive() {
   driveToken = null;
+  driveTokenExpiry = 0;
   rememberDriveLink(false);
   rememberDriveFile("");
 }
@@ -153,12 +175,25 @@ function rememberDriveFile(id) {
   try { id ? localStorage.setItem(DRIVE_KEY, id) : localStorage.removeItem(DRIVE_KEY); } catch (error) { /* 覚えられなくても保存はできる */ }
 }
 
-async function driveFetch(url, options = {}) {
+async function driveFetch(url, options = {}, {retried = false} = {}) {
   const response = await fetch(url, {
     ...options,
     headers: {...(options.headers || {}), Authorization: "Bearer " + driveToken},
   });
-  if (response.status === 401) { driveToken = null; throw new Error("Google の許可が切れました。もう一度つないでください"); }
+  if (response.status === 401) {
+    driveToken = null;
+    driveTokenExpiry = 0;
+    /* 期限より先に無効化されることがある (別の端末で許可を外した等)。
+       一度だけ黙って取り直して、同じ要求をやり直す。それでも駄目なら諦める */
+    if (!retried && driveLinked() && driveClientId) {
+      try {
+        if (await driveSignIn(driveClientId, {silent: true})) {
+          return await driveFetch(url, options, {retried: true});
+        }
+      } catch (error) { /* 取り直せなかった。下のメッセージで伝える */ }
+    }
+    throw new Error("Google の許可が切れました。もう一度つないでください");
+  }
   if (!response.ok) throw new Error(`Google ドライブが応答しませんでした（${response.status}）`);
   return response;
 }

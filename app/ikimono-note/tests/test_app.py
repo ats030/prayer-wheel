@@ -1988,6 +1988,29 @@ def test_the_hidden_attribute_actually_hides_on_every_page():
         assert "[hidden]{display:none!important}" in css, name
 
 
+def test_the_drive_connection_renews_itself():
+    """つないだあと切れっぱなしにしない。
+
+    Google のアクセストークンは1時間ほどで切れる。期限を見ずに持ち続けていたので、
+    タブを開いたまま1時間たつと最初の書き込みが 401 で落ち、「許可が切れました。
+    もう一度つないでください」と出ていた。黙って取り直せば済む場面だった。
+    """
+    drive = client.get("/assets/gdrive.js").text
+    assert "let driveTokenExpiry = 0;" in drive
+    assert "function driveTokenAlive()" in drive
+    assert "Date.now() < driveTokenExpiry" in drive
+    # 期限は Google が返す expires_in から。手前で切れた扱いにする
+    assert "Math.max(0, Number(response.expires_in || 3600) - 60) * 1000" in drive
+    # 期限内は取り直さない。切れていたら黙って取り直す
+    assert "if (driveTokenAlive()) return driveToken;" in drive
+    # 期限より先に無効化されることもある。401 は一度だけやり直す
+    assert "async function driveFetch(url, options = {}, {retried = false} = {})" in drive
+    assert "return await driveFetch(url, options, {retried: true});" in drive
+    assert "let driveClientId" in drive       # やり直しに要る
+    # 取り直せるかどうかは、画面には正直に出す
+    assert "return driveTokenAlive();" in drive
+
+
 def test_the_screen_names_the_ai_that_actually_ran():
     """Gemini を選んでいるのに Ollama と出ていた。
 
