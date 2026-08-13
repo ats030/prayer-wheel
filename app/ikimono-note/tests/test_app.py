@@ -2101,6 +2101,33 @@ def test_waiting_is_visible_where_the_answer_will_appear():
     assert "identify.disabled=true" in index
 
 
+def test_the_trial_opens_the_whole_round_trip_not_just_the_start():
+    """識別は始まるのに結果を取りに行けない、という開け方をしない。
+
+    札の問い合わせ先 (/identify/job/<id>) を閉じたままにしていたため、ポーリングが
+    ログイン画面のHTMLを受け取り「Unexpected token '<'」で終わっていた。実測で
+    181秒待たされて失敗し、開けたあとは14秒で候補が出た。
+    """
+    source = (Path(__file__).parents[1] / "main.py").read_text(encoding="utf-8")
+    assert 'or path.startswith("/identify/job/")' in source
+
+
+def test_the_screen_names_the_model_the_trial_actually_runs():
+    """お試し枠で走るモデルは利用者が選んだものではない。
+
+    画面が別の名前を出したままだと、どのAIに写真が行くのかを偽ることになる。
+    実測で、キーを持たない訪問者の画面は gemini-3.6-flash と出ていたが、
+    実際に走っていたのは gemini-3.5-flash-lite だった。
+    """
+    source = (Path(__file__).parents[1] / "main.py").read_text(encoding="utf-8")
+    assert 'result["trial"] = {"per_day": TRIAL_PER_DAY, "provider": "gemini", "model": TRIAL_MODEL}' in source
+    index = client.get("/assets/index.js").text
+    assert "window.speciesTrial=data.trial||null;" in index
+    assert "model=window.speciesTrial.model;" in index
+    # 自分のキーを持っている人には、選んだものをそのまま出す
+    assert "!readApiKey(window.speciesTrial.provider)&&!readApiKey(provider)" in index
+
+
 def test_per_visitor_limits_see_the_visitor_not_the_proxy():
     """公開版は 127.0.0.1 で待ち受け、前段だけがつながる。
 
@@ -2129,7 +2156,7 @@ def test_a_stranger_can_try_it_once_when_the_operator_opens_a_trial():
     assert main.TRIAL_PER_DAY == 0                    # 既定は無効
     assert main.trial_enabled() is False              # 運営者用モードでも当然無効
     # 枠があるときだけ、撮影画面と識別をログインの外に出す
-    assert 'if trial_enabled() and path in {"/", "/identify", "/api/settings", "/api/photo-metadata"}' in source
+    assert 'if trial_enabled() and (path in {"/", "/identify", "/api/settings", "/api/photo-metadata"}' in source
     # 記録と設定はログインの内側のまま
     assert '"/history"' not in source.split("trial_enabled() and path in")[1][:160]
     # 使い切ったら、自分のキーを登録する道を案内する

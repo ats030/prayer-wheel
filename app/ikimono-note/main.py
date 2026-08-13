@@ -246,7 +246,11 @@ async def require_login(request: Request, call_next):
         return await call_next(request)
     # お試し枠があるなら、撮影画面と識別はログイン前でも通す。ここを閉じたままだと
     # 枠を用意しても誰も辿り着けない (記録・設定はログインの内側のまま)
-    if trial_enabled() and path in {"/", "/identify", "/api/settings", "/api/photo-metadata"}:
+    # 札の問い合わせ先 (/identify/job/<id>) も開ける。ここを閉じたままだと、識別は
+    # 始まるのに結果を取りに行けず、ポーリングがログイン画面のHTMLを受け取って
+    # 「Unexpected token '<'」で終わる (実測でそうなった)
+    if trial_enabled() and (path in {"/", "/identify", "/api/settings", "/api/photo-metadata"}
+                            or path.startswith("/identify/job/")):
         return await call_next(request)
     if auth.read_session(request.cookies.get(auth.SESSION_COOKIE)):
         return await call_next(request)
@@ -350,6 +354,10 @@ app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets"
 def get_settings() -> dict[str, object]:
     result = config_store.public()
     result["public_mode"] = PUBLIC_MODE
+    # お試し枠で走るモデルは、利用者が選んだものではなくこちらが決める。
+    # 画面が別の名前を出したままだと、どのAIに写真が行くのかを偽ることになる
+    if trial_enabled():
+        result["trial"] = {"per_day": TRIAL_PER_DAY, "provider": "gemini", "model": TRIAL_MODEL}
     result["google_client_id"] = GOOGLE_CLIENT_ID
     # 商品APIの状態は運営者だけのもの。公開版の訪問者に運営者のアソシエイト口座の
     # 事情を渡さない (広告を有効にした公開版でも affiliate 一式は返るため、
