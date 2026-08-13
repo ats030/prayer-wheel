@@ -127,7 +127,11 @@ async function refreshDrive(){
   $("drive-strip").hidden=false;$("drive-actions").hidden=false;
   const paint=()=>{
     const on=driveSignedIn();
-    $("drive-state").textContent=on?"つながっています（自動で保存します）":driveLinked()?"つなぎ直しが必要です":"未接続";
+    /* 取り直せなかったときは、Google が何と言ったかも出す。「つなぎ直しが必要です」
+       だけでは、ポップアップの設定なのかCookieなのか許可の取り消しなのか分からない */
+    const trouble=typeof driveTokenTrouble==="function"?driveTokenTrouble():"";
+    $("drive-state").textContent=on?"つながっています（自動で保存します）"
+      :driveLinked()?("つなぎ直しが必要です"+(trouble?"（"+trouble+"）":"")):"未接続";
     $("drive-connect").hidden=on;
     $("drive-load").hidden=!on;$("drive-forget").hidden=!on;
   };

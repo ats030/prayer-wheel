@@ -2011,6 +2011,33 @@ def test_the_drive_connection_renews_itself():
     assert "return driveTokenAlive();" in drive
 
 
+def test_a_failed_drive_refresh_says_why():
+    """「つなぎ直しが必要です」だけでは、次に切れても同じ調査になる。
+
+    prompt:"none" が通らない理由は、サードパーティCookie、Google側のセッション切れ、
+    同意の取り消し、OAuth同意画面がテスト中で期限切れ、と何通りもある。Google が
+    何と言ったかを残さないと、どれなのか分からない。
+    """
+    drive = client.get("/assets/gdrive.js").text
+    assert "let lastDriveTokenError" in drive
+    assert "function driveTokenTrouble()" in drive
+    assert 'console.info("ドライブのトークンを取り直せませんでした", error)' in drive
+    assert 'noteDriveStatus(false, "つなぎ直しが必要です" + (driveTokenTrouble()' in drive
+    settings_js = client.get("/assets/settings.js").text
+    assert 'typeof driveTokenTrouble==="function"?driveTokenTrouble():""' in settings_js
+
+
+def test_drive_tokens_are_not_requested_in_parallel():
+    """並行で投げると、あとの initTokenClient が先の要求のコールバックを捨てる。
+
+    設定画面では「開いたときの取り込み」と「画面の状態を描く」が同時に走る。
+    """
+    drive = client.get("/assets/gdrive.js").text
+    assert "let driveTokenRequest = null;" in drive
+    assert "if (driveTokenRequest) return driveTokenRequest;" in drive
+    assert "driveTokenRequest = null;" in drive.split("finally")[1][:120]
+
+
 def test_the_screen_names_the_ai_that_actually_ran():
     """Gemini を選んでいるのに Ollama と出ていた。
 

@@ -25,6 +25,13 @@ let driveToken = null;      // メモリだけに置く。保存すると盗ま�
    出ていた。黙って取り直せば済む場面で、利用者につなぎ直しを求めていた。 */
 let driveTokenExpiry = 0;
 let driveClientId = "";     // 取り直すときに要る。公開情報なので秘密ではない
+/* 取り直しは同時に走らせない。GIS のトークン要求を並行で投げると、あとから
+   initTokenClient したほうが driveTokenClient を上書きし、先の要求のコールバックが
+   どこにも届かなくなる。設定画面では「開いたときの取り込み」と「画面の状態を描く」が
+   同時に走るので、これは実際に起きる筋 */
+let driveTokenRequest = null;
+/* 取り直せなかった理由。握りつぶすと、切れたという報告から先へ進めない */
+let lastDriveTokenError = "";
 let driveTokenClient = null;
 const DRIVE_LINKED = "species-drive-linked";   // 一度つないだかどうか。トークンそのものではない
 
@@ -118,11 +125,29 @@ async function ensureDriveToken(clientId) {
   if (driveTokenAlive()) return driveToken;
   driveToken = null;
   if (!driveClientId || !driveLinked()) return null;
-  try {
-    return await driveSignIn(driveClientId, {silent: true});
-  } catch (error) {
-    return null;
-  }
+  if (driveTokenRequest) return driveTokenRequest;   // すでに誰かが取りに行っている
+  driveTokenRequest = (async () => {
+    try {
+      const token = await driveSignIn(driveClientId, {silent: true});
+      lastDriveTokenError = "";
+      return token;
+    } catch (error) {
+      /* prompt:"none" は、ブラウザがサードパーティCookieを止めていたり、Google 側の
+         セッションが切れていると通らない。何と言われたかを残さないと直しようがない */
+      lastDriveTokenError = String(error?.message || error || "理由の記載なし");
+      console.info("ドライブのトークンを取り直せませんでした", error);
+      return null;
+    } finally {
+      driveTokenRequest = null;
+    }
+  })();
+  return driveTokenRequest;
+}
+
+/* 画面に出す「なぜ取り直せなかったか」。利用者が押せる手は「つなぎ直す」だけだが、
+   何と言われたかが出ていれば、運営者は原因に辿り着ける */
+function driveTokenTrouble() {
+  return lastDriveTokenError;
 }
 
 /* 最後に書けたかどうかを残す。黙って失敗し続けると、保存されたつもりで
@@ -147,7 +172,7 @@ async function autoSaveToDrive() {
     const settings = await fetch("/api/settings").then(r => r.ok ? r.json() : null);
     const token = await ensureDriveToken(settings?.google_client_id || "");
     if (!token) {
-      if (linked) noteDriveStatus(false, "つなぎ直しが必要です");
+      if (linked) noteDriveStatus(false, "つなぎ直しが必要です" + (driveTokenTrouble() ? "（" + driveTokenTrouble() + "）" : ""));
       return false;
     }
     const count = await saveToDrive();
@@ -344,7 +369,7 @@ async function pullFromDrive() {
   try {
     const settings = await fetch("/api/settings").then(r => r.ok ? r.json() : null);
     if (!await ensureDriveToken(settings?.google_client_id || "")) {
-      noteDriveStatus(false, "つなぎ直しが必要です");
+      noteDriveStatus(false, "つなぎ直しが必要です" + (driveTokenTrouble() ? "（" + driveTokenTrouble() + "）" : ""));
       return false;
     }
     const restored = await loadFromDrive();
