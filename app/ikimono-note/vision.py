@@ -38,7 +38,12 @@ _LAST_TAXONOMY_REQUEST = 0.0
 _TAXONOMY_CACHE: dict[str, list[dict[str, Any]]] = {}
 _JAPANESE_NAME_RE = re.compile(r"[ぁ-んァ-ヶ一-龯々]")
 MAX_UPLOAD_BYTES = 15 * 1024 * 1024
-MAX_EDGE = 1600
+# 外部AIへ送る前に縮める長辺。上げれば細部は残るが、モデルによってはタイル数が増えて
+# 課金と待ち時間がそのぶん伸びる (Gemini は 768px のタイルに割り、最大 3072px まで)。
+# 効くかどうかは測らないと分からないのに、eval の写真が長辺500pxしかなく、この上限は
+# 一度も評価で踏まれていなかった (eval/fetch_dataset.py の --size を original にすると踏む)。
+# 既定は据え置き、環境変数で振れるようにして測れる形にする。
+MAX_EDGE = int(os.getenv("IKIMONO_MAX_EDGE", "1600"))
 
 PROMPT = """あなたは野外観察を補助する生物識別アシスタントです。添付された同一個体の写真を横断して、主要な植物または動物を観察してください。
 次のJSONだけを返してください。

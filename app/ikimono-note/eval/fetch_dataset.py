@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import time
 from pathlib import Path
 
@@ -36,6 +37,13 @@ GROUPS = {
     "は虫類・両生類": "Reptilia,Amphibia",
 }
 
+
+# iNaturalist の写真サイズ。medium は長辺500pxで、アプリが外部AIへ送る上限
+# (vision.MAX_EDGE=1600) に一度も届かない。つまり既存の結果はどれも、本番より
+# 小さい写真での成績になっている。解像度の効き方を測るときは original を使う。
+SIZE = os.getenv("IKIMONO_EVAL_PHOTO_SIZE", "medium")
+if SIZE not in {"medium", "large", "original"}:
+    raise SystemExit("IKIMONO_EVAL_PHOTO_SIZE は medium / large / original のいずれか")
 
 def search(client: httpx.Client, iconic: str, per_group: int, place_id: int | None) -> list[dict]:
     """1グループぶんの観察を取る。取りこぼしを見越して多めに引く。"""
@@ -78,7 +86,7 @@ def pick(results: list[dict], group: str, want: int) -> list[dict]:
             "group": group,
             "observation_id": observation["id"],
             "photo_id": photo["id"],
-            "photo_url": photo["url"].replace("/square.", "/medium."),
+            "photo_url": photo["url"].replace("/square.", f"/{SIZE}."),
             "license_code": photo["license_code"],
             "attribution": photo.get("attribution", ""),
             "truth": {

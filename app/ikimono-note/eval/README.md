@@ -4,6 +4,25 @@
 実態と合っているかは測らないと分からない。安全カードに「まちがえることがあります」と
 書く以上、どのくらい間違えるのかは運営者が把握しておく。
 
+## 写真の大きさ
+
+既定で取るのは iNaturalist の `medium`、長辺500pxである。アプリが外部AIへ送る前に
+縮める上限は長辺1600px (`vision.MAX_EDGE`) なので、**この既定で測るかぎり上限には
+一度も届かない**。`eval/results/` にある成績はすべて、本番より小さい写真でのものだと
+思って読むこと。
+
+解像度が効くかどうかを測るときは、写真を取り直してから振る。
+
+```bash
+IKIMONO_EVAL_PHOTO_SIZE=original uv run python eval/fetch_dataset.py   # 元の大きさで取る
+IKIMONO_MAX_EDGE=1600 uv run python eval/run_eval.py --provider local  # 送る側の上限を振る
+IKIMONO_MAX_EDGE=2400 uv run python eval/run_eval.py --provider local
+```
+
+上げれば細部は残るが、モデルによってはタイル数が増えて課金と待ち時間が伸びる
+(Gemini は768pxのタイルに割り、最大3072pxまで受ける)。既定を動かす前に、この2本を
+並べて Top-1 が動くかを見ること。
+
 ## 検証はOllamaで行う
 
 既定は `--provider local`。外部APIは無料枠に**モデルごとの日次上限**があり、評価を1回

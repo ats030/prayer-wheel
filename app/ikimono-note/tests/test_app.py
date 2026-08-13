@@ -1921,6 +1921,34 @@ def test_full_photos_live_in_their_own_drive_files():
     assert "alive.has(file.id)" in drive
 
 
+def test_the_preview_uses_the_space_it_has():
+    """「写真を確認」はピントと被写体の位置を見る場所。3列固定だと小さすぎた。
+
+    1枚でも横幅の3分の1しか使わず、携帯では110pxほどだった。写真の解像度は
+    元のまま (createObjectURL) なので、足りていなかったのは表示枠のほう。
+    """
+    index = client.get("/assets/index.js").text
+    assert 'previews.className="previews count-"+selected.length' in index
+    assert "URL.createObjectURL(file)" in index          # 元の解像度のまま見せる
+    css = client.get("/assets/index.css").text
+    assert ".previews{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))" in css
+    assert ".previews.count-1 .preview{height:min(58vh,440px)}" in css
+    assert "repeat(3,minmax(0,1fr))" not in css          # 3列固定はやめた
+
+
+def test_the_send_size_can_be_measured_not_just_asserted():
+    """外部AIへ送る長辺は振れるようにする。効くかどうかは測らないと分からない。
+
+    eval の写真は長辺500pxで、この上限 (1600) に一度も届いていなかった。
+    つまり既存の結果はどれも本番より小さい写真での成績になっている。
+    """
+    assert "IKIMONO_MAX_EDGE" in (Path(__file__).parents[1] / "vision.py").read_text(encoding="utf-8")
+    fetcher = (Path(__file__).parents[1] / "eval" / "fetch_dataset.py").read_text(encoding="utf-8")
+    assert "IKIMONO_EVAL_PHOTO_SIZE" in fetcher
+    assert '{"medium", "large", "original"}' in fetcher
+    assert 'f"/{SIZE}."' in fetcher
+
+
 def test_the_history_row_uses_the_small_thumbnail():
     """行では80pxで出す。1600pxを50行ぶん展開しない。"""
     history = client.get("/assets/history.js").text
