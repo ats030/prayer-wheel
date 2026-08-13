@@ -123,7 +123,7 @@ systemctl --user restart ikimono-note ikimono-note-public
 使うAI、APIキー、モデルは画面上部の「設定」から変更できます。OllamaではURLを入力でき、その接続先にインストール済みで画像入力に対応するモデルを自動表示します。別端末のOllamaを使う場合は、Ollama側でこのサーバーからの接続を許可してください。接続先とAPIキーは `~/.config/ikimono-note/settings.json` に権限 `0600` で保存し、APIキーは画面へ再表示しません。
 
 ```bash
-uv run --with pytest pytest -q                                    # 239件
+uv run --with pytest pytest -q                                    # 241件
 uv run --with playwright python tests/smoke_browser.py            # 実ブラウザで主要導線
 uv run --with playwright python tests/smoke_browser.py --identify # 識別まで通す
 ```
@@ -223,6 +223,35 @@ IKIMONO_ALLOWED_HOSTS=species.example.com
 IKIMONO_PUBLIC_LOCAL=0
 IKIMONO_PUBLIC_AFFILIATE=1
 ```
+
+### ディスクのない置き場 (Cloud Run / Container Apps など) へ出すとき
+
+このPCの外へ出すと、3つがディスクとプロセスの前提に引っかかります。どれもアプリの形から
+来る話で、置き場を変えても同じです。逆に言えば、ここを埋めればどの置き場でも動きます。
+
+```bash
+# 1. 広告の設定。settings.json が無いと空になるので環境変数から読む
+#    (ファイル側が空のときだけ使う。運営者用の設定画面で保存したものは上書きしない)
+IKIMONO_AFFILIATE_URL='https://www.amazon.co.jp/s?k={query}&tag=xxxx-22'
+IKIMONO_AFFILIATE_PARTNER_TAG=xxxx-22
+IKIMONO_AFFILIATE_ENABLED=1
+IKIMONO_AFFILIATE_PRODUCT_ENABLED=1
+IKIMONO_AMAZON_CREATORS_ID=...
+IKIMONO_AMAZON_CREATORS_SECRET=...
+IKIMONO_AFFILIATE_TITLE=生き物
+
+# 2. ログイン情報。SQLite (~/data/.../users.db) の代わりに Firestore を使う
+IKIMONO_FIRESTORE_PROJECT=your-project
+
+# 3. 識別を後ろで走らせない。レスポンスを返した瞬間に CPU を止める置き場では
+#    後ろの仕事が凍るため (Cloud Run / Container Apps の既定)。同期で返す。
+#    画面はどちらでも動く (札が返らなければ結果そのものとして扱う)
+IKIMONO_BACKGROUND_JOBS=0
+```
+
+3を 0 にすると「画面を更新しても識別が続く」は失われます。常時CPUを割り当てる設定
+(Cloud Run の CPU always allocated など) にすれば 1 のままで動きますが、起動している
+あいだ課金対象になります。アクセスがほぼ無い立ち上げ期は 0 のほうが読めます。
 
 - `IKIMONO_PUBLIC_MODE=1`: 共有設定の更新を403で拒否し、BYOK公開モードを有効化
 - `IKIMONO_ALLOWED_HOSTS`: 公開ドメインをカンマ区切りで指定

@@ -130,6 +130,9 @@ def load() -> dict[str, Any]:
     try:
         saved = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
     except (FileNotFoundError, json.JSONDecodeError, OSError):
+        # ディスクのない置き場ではここを通る。環境変数を読まずに返すと、
+        # まさにその置き場でだけ広告の設定が空になる
+        _apply_env_affiliate(data)
         return data
     if saved.get("provider") in MODELS:
         data["provider"] = saved["provider"]
@@ -158,6 +161,7 @@ def load() -> dict[str, Any]:
     metrics = saved.get("affiliate_metrics") or {}
     if isinstance(metrics, dict):
         data["affiliate_metrics"] = {"impressions": max(0, int(metrics.get("impressions", 0))), "clicks": max(0, int(metrics.get("clicks", 0)))}
+    _apply_env_affiliate(data)
     # 既定には置かない。一度も呼んでいない状態と、呼んで通った状態を混ぜないため
     state = saved.get("creators_api_state")
     if isinstance(state, dict) and isinstance(state.get("ok"), bool):
@@ -195,6 +199,47 @@ def record_affiliate(event: str) -> None:
         current = load()
         current["affiliate_metrics"][event] += 1
         _write(current)
+
+
+# ディスクのない置き場 (Cloud Run / Container Apps など) では settings.json が存在せず、
+# 広告の設定ごと消える。公開版は設定を書けない (403) ので、読む先を環境変数にも広げる。
+# 埋めるのは「ファイル側が空のときだけ」。上書きにすると、運営者用の設定画面で保存しても
+# 環境変数に戻されて、保存が効かないように見える。
+ENV_AFFILIATE = {
+    "title": "IKIMONO_AFFILIATE_TITLE",
+    "url": "IKIMONO_AFFILIATE_URL",
+    "partner_tag": "IKIMONO_AFFILIATE_PARTNER_TAG",
+}
+ENV_AFFILIATE_FLAGS = {
+    "enabled": "IKIMONO_AFFILIATE_ENABLED",
+    "product_enabled": "IKIMONO_AFFILIATE_PRODUCT_ENABLED",
+}
+ENV_API_KEYS = {
+    "amazon_creators_id": "IKIMONO_AMAZON_CREATORS_ID",
+    "amazon_creators_secret": "IKIMONO_AMAZON_CREATORS_SECRET",
+}
+
+
+def _truthy(value: str) -> bool:
+    return value.strip().lower() in {"1", "true", "yes"}
+
+
+def _apply_env_affiliate(data: dict[str, Any]) -> None:
+    for field, name in ENV_AFFILIATE.items():
+        if not data["affiliate"].get(field):
+            value = os.getenv(name, "").strip()
+            if value:
+                data["affiliate"][field] = value[:120] if field == "title" else value
+    for field, name in ENV_AFFILIATE_FLAGS.items():
+        if not data["affiliate"].get(field):
+            value = os.getenv(name, "")
+            if value:
+                data["affiliate"][field] = _truthy(value)
+    for field, name in ENV_API_KEYS.items():
+        if not data["api_keys"].get(field):
+            value = os.getenv(name, "").strip()
+            if value:
+                data["api_keys"][field] = value
 
 
 def record_creators_result(ok: bool, *, reason: str = "", hint: str = "", status: int = 0) -> None:

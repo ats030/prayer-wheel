@@ -281,6 +281,12 @@ async function reidentify(record,button,message,extras=[]){
     if(!response.ok)throw new Error(data.detail||"調べられませんでした");
     const shrunk=[];
     for(const file of extras){try{const blob=await shrinkForHistory(file);if(blob)shrunk.push(await blobToDataUrl(blob))}catch(e){}}
+    /* 札が返らない置き場では、返ってきたものが結果そのもの (main.py の BACKGROUND_JOBS) */
+    if(!data.job){
+      await saveRerun(record,data,[...recordPhotos(record),...(shrunk.map(dataUrlToBlob).filter(Boolean))]);
+      location.reload();
+      return;
+    }
     const pending={job:data.job,recordId:record.id,startedAt,photos:shrunk};
     writeRerunPending(pending);
     watchRerun(pending,button,message);

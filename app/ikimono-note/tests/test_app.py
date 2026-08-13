@@ -2101,6 +2101,39 @@ def test_waiting_is_visible_where_the_answer_will_appear():
     assert "identify.disabled=true" in index
 
 
+def test_the_app_runs_where_there_is_no_disk_and_no_background_cpu():
+    """このPCの外へ出すための3点。どれもアプリの形から来る話で、置き場によらない。
+
+    1. 広告の設定が settings.json (ディスク) から来る
+    2. ログイン情報が SQLite (ディスク) — auth.py に Firestore 経路が既にある
+    3. レスポンス後に CPU を止める置き場では、後ろで走らせた識別が凍る
+    """
+    source = (Path(__file__).parents[1] / "config_store.py").read_text(encoding="utf-8")
+    # ファイルが無い経路でも環境変数を読む (まさにその置き場でだけ空になっていた)
+    assert source.count("_apply_env_affiliate(data)") == 2
+    for name in ["IKIMONO_AFFILIATE_URL", "IKIMONO_AFFILIATE_PARTNER_TAG",
+                 "IKIMONO_AMAZON_CREATORS_ID", "IKIMONO_AMAZON_CREATORS_SECRET"]:
+        assert name in source, name
+    # 上書きではなく穴埋め。運営者用の設定画面で保存したものを環境変数で戻さない
+    assert 'if not data["affiliate"].get(field):' in source
+
+    auth_source = (Path(__file__).parents[1] / "auth.py").read_text(encoding="utf-8")
+    assert auth_source.count("if using_firestore():") == 3   # 読み・書き・削除の3経路
+
+    main_source = (Path(__file__).parents[1] / "main.py").read_text(encoding="utf-8")
+    assert "BACKGROUND_JOBS = os.getenv" in main_source
+    assert "if background and BACKGROUND_JOBS:" in main_source
+
+
+def test_the_screen_works_without_a_job_ticket():
+    """札が返らない置き場では、返ってきたものが結果そのもの。"""
+    index = client.get("/assets/index.js").text
+    assert "if(!data.job){stopWorking();await finishIdentification(data," in index
+    history = client.get("/assets/history.js").text
+    assert "if(!data.job){" in history
+    assert "await saveRerun(record,data,[...recordPhotos(record)," in history
+
+
 def test_identification_survives_a_reload():
     """画面を更新しても続きから受け取れること。両方の画面で。"""
     index = client.get("/assets/index.js").text
@@ -2112,7 +2145,7 @@ def test_identification_survives_a_reload():
     # 更新すると選んだファイルも入力欄も消える。投げる前に控えておく
     assert "async function pendingPhotos()" in index
     assert "await blobToDataUrl(blob)" in index
-    assert "coordinates:gps?{latitude:" in index
+    assert "const coordinates=gps?{latitude:" in index
     assert "context:pending?.context||" in index
     history = client.get("/assets/history.js").text
     assert 'const RERUN_PENDING_KEY="species-pending-rerun"' in history

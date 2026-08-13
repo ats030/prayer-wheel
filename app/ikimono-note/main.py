@@ -51,6 +51,10 @@ app = FastAPI(
 STATIC_DIR = Path(__file__).parent / "static"
 PUBLIC_LOCAL_ENABLED = os.getenv("IKIMONO_PUBLIC_LOCAL", "").lower() in {"1", "true", "yes"}
 PUBLIC_AFFILIATE_ENABLED = os.getenv("IKIMONO_PUBLIC_AFFILIATE", "").lower() in {"1", "true", "yes"}
+# 識別を後ろで走らせるか。サーバーレスの置き場ではレスポンスを返した瞬間に CPU を
+# 止められるため (Cloud Run / Container Apps の既定)、後ろの仕事はそこで凍る。
+# 0 を渡すと同期で返す。画面はどちらでも動く (札が返らなければ結果そのものとして扱う)。
+BACKGROUND_JOBS = os.getenv("IKIMONO_BACKGROUND_JOBS", "1").lower() not in {"0", "false", "no"}
 # Google Drive 連携のクライアントID。公開情報なので画面へ渡してよい (秘密鍵は使わない)
 GOOGLE_CLIENT_ID = os.getenv("IKIMONO_GOOGLE_CLIENT_ID", "").strip()
 ALLOWED_HOSTS = [host.strip() for host in os.getenv("IKIMONO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
@@ -490,7 +494,7 @@ async def identify(
         provider=provider, model=model, api_key=api_key, settings=settings,
         location=location, observed_date=observed_date, size=size,
         use_plantnet=use_plantnet, request_plantnet_key=request_plantnet_key)
-    if background:
+    if background and BACKGROUND_JOBS:
         # 写真はこのあとの仕事の中にしか残らない。終わったら捨てる (jobs.py)
         job_id = jobs.start(_job_owner(request))
         # 参照を持たないと、走っている途中で回収されることがある

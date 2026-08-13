@@ -235,9 +235,13 @@ identify.onclick=async()=>{
     const response=await fetch('/identify',{method:'POST',body:fd});
     const data=await response.json();
     if(!response.ok)throw new Error(errorText(data.detail));
+    const context={location:$("location").value,observedDate:$("observedDate").value,size:$("size").value};
+    const coordinates=gps?{latitude:Number(gps.latitude.toFixed(4)),longitude:Number(gps.longitude.toFixed(4))}:null;
+    /* 札が返らない置き場もある (サーバーレスでは後ろの仕事が凍るので同期で返す)。
+       その場合は返ってきたものが結果そのもの */
+    if(!data.job){stopWorking();await finishIdentification(data,{photos,context,coordinates});return}
     const pending={job:data.job,startedAt,photos,
-      context:{location:$("location").value,observedDate:$("observedDate").value,size:$("size").value},
-      coordinates:gps?{latitude:Number(gps.latitude.toFixed(4)),longitude:Number(gps.longitude.toFixed(4))}:null};
+      context,coordinates};
     writePending(pending);
     pollIdentification(pending);
   }catch(e){
