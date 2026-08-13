@@ -2101,6 +2101,28 @@ def test_waiting_is_visible_where_the_answer_will_appear():
     assert "identify.disabled=true" in index
 
 
+def test_a_stranger_can_try_it_once_when_the_operator_opens_a_trial():
+    """公開版は BYOK で、自分のキーが無いと1枚も調べられない。
+
+    ログインを外しても、入り口の次に「APIキーを登録してください」が立っているだけで
+    通りすがりの人には何も起きない。試させるには運営者の枠を分けるしかない。
+    既定は 0 (無効)。運営者の枠を見知らぬ人が使うので、入れるかは運営者が決める。
+    """
+    source = (Path(__file__).parents[1] / "main.py").read_text(encoding="utf-8")
+    assert 'TRIAL_PER_DAY = max(0, int(os.getenv("IKIMONO_PUBLIC_TRIAL_PER_DAY", "0")' in source
+    assert main.TRIAL_PER_DAY == 0                    # 既定は無効
+    assert main.trial_enabled() is False              # 運営者用モードでも当然無効
+    # 枠があるときだけ、撮影画面と識別をログインの外に出す
+    assert 'if trial_enabled() and path in {"/", "/identify", "/api/settings", "/api/photo-metadata"}' in source
+    # 記録と設定はログインの内側のまま
+    assert '"/history"' not in source.split("trial_enabled() and path in")[1][:160]
+    # 使い切ったら、自分のキーを登録する道を案内する
+    assert "今日のお試しは終わりです。" in source
+    assert "if not api_key and trial_enabled():" in source
+    # 運営者のキーが無ければ、数を入れても有効にならない
+    assert 'return bool(config_store.load()["api_keys"].get("gemini"))' in source
+
+
 def test_the_app_runs_where_there_is_no_disk_and_no_background_cpu():
     """このPCの外へ出すための3点。どれもアプリの形から来る話で、置き場によらない。
 

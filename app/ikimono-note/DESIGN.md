@@ -123,6 +123,8 @@ with the subject.
 - Optional specialist services remain hidden until configured and require an explicit per-request photo-sharing choice.
 - Settings are reachable from the header and use a dedicated page with a clear
   return path. API keys are write-only in the UI; configured state and allowed model choices remain visible.
+- A stranger can be given a few identifications on the operator's key, or none, and nothing in between is silently possible. BYOK means a visitor who has not brought a key cannot use the app at all; removing the login would only move the wall one screen later. The trial is off by default because it spends the operator's quota on people they have never met, and it refuses to switch on when no operator key exists — a count without a key would look enabled and do nothing.
+- When the trial is on, the capture screen and identification leave the login wall; the records and settings screens do not. What a visitor needs in order to decide whether the app is worth an account is the thing itself, not their history.
 - Public mode keeps each visitor's provider and model choice in localStorage,
   but API keys only in sessionStorage. Keys are submitted with an identification
   request and are never written to server settings or browser history.

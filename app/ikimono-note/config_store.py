@@ -214,7 +214,14 @@ ENV_AFFILIATE_FLAGS = {
     "enabled": "IKIMONO_AFFILIATE_ENABLED",
     "product_enabled": "IKIMONO_AFFILIATE_PRODUCT_ENABLED",
 }
+# プロバイダーのキーも環境変数から。公開版は BYOK だが、お試し枠 (運営者が貸す枠) は
+# サーバー側のキーを使う。ディスクの無い置き場ではファイルが無いので、ここが無いと
+# 枠を有効にしても静かに無効のままになる。
 ENV_API_KEYS = {
+    "gemini": "IKIMONO_GEMINI_API_KEY",
+    "openai": "IKIMONO_OPENAI_API_KEY",
+    "anthropic": "IKIMONO_ANTHROPIC_API_KEY",
+    "plantnet": "IKIMONO_PLANTNET_API_KEY",
     "amazon_creators_id": "IKIMONO_AMAZON_CREATORS_ID",
     "amazon_creators_secret": "IKIMONO_AMAZON_CREATORS_SECRET",
 }

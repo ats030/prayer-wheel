@@ -123,7 +123,7 @@ systemctl --user restart ikimono-note ikimono-note-public
 使うAI、APIキー、モデルは画面上部の「設定」から変更できます。OllamaではURLを入力でき、その接続先にインストール済みで画像入力に対応するモデルを自動表示します。別端末のOllamaを使う場合は、Ollama側でこのサーバーからの接続を許可してください。接続先とAPIキーは `~/.config/ikimono-note/settings.json` に権限 `0600` で保存し、APIキーは画面へ再表示しません。
 
 ```bash
-uv run --with pytest pytest -q                                    # 241件
+uv run --with pytest pytest -q                                    # 242件
 uv run --with playwright python tests/smoke_browser.py            # 実ブラウザで主要導線
 uv run --with playwright python tests/smoke_browser.py --identify # 識別まで通す
 ```
@@ -243,11 +243,37 @@ IKIMONO_AFFILIATE_TITLE=生き物
 # 2. ログイン情報。SQLite (~/data/.../users.db) の代わりに Firestore を使う
 IKIMONO_FIRESTORE_PROJECT=your-project
 
+# 運営者のプロバイダーキー。公開版は BYOK だが、お試し枠 (下記) はサーバー側の
+# キーを使うので、ディスクの無い置き場ではここから渡す
+IKIMONO_GEMINI_API_KEY=...
+# IKIMONO_OPENAI_API_KEY / IKIMONO_ANTHROPIC_API_KEY / IKIMONO_PLANTNET_API_KEY も同様
+
 # 3. 識別を後ろで走らせない。レスポンスを返した瞬間に CPU を止める置き場では
 #    後ろの仕事が凍るため (Cloud Run / Container Apps の既定)。同期で返す。
 #    画面はどちらでも動く (札が返らなければ結果そのものとして扱う)
 IKIMONO_BACKGROUND_JOBS=0
 ```
+
+### 通りすがりの人に試させる (お試し枠)
+
+公開版は BYOK で、利用者が自分のAPIキーを入れないと1枚も調べられません。ログインを外しても
+入り口の次に「APIキーを登録してください」が立っているだけなので、通りすがりの人には何も
+起きません。試させるには運営者の枠を分けるしかありません。
+
+```bash
+IKIMONO_PUBLIC_TRIAL_PER_DAY=3          # 既定 0 (無効)。1つのIPにつき1日この回数まで
+IKIMONO_PUBLIC_TRIAL_MODEL=gemini-3.5-flash-lite   # 貸すときに使うモデル
+```
+
+有効にすると、撮影画面と識別だけがログインの外に出ます (記録と設定は内側のまま)。自分のキーを
+持たない人は、1日この回数だけ**運営者の Gemini の枠**で調べられ、使い切ると「設定画面でご自身の
+APIキーを登録すると、続けて調べられます」と案内します。
+
+運営者の Gemini キー (`IKIMONO_GEMINI_API_KEY` かサーバー設定) が無いときは、回数を入れても
+無効のままです。数だけ入れて枠が無い、という状態を作らないためです。
+
+**既定を 0 にしてあるのは、見知らぬ人が運営者の枠を使うためです。** 入れるかどうかは運営者が
+決めることなので、こちらでは有効にしていません。
 
 3を 0 にすると「画面を更新しても識別が続く」は失われます。常時CPUを割り当てる設定
 (Cloud Run の CPU always allocated など) にすれば 1 のままで動きますが、起動している

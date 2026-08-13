@@ -172,6 +172,46 @@ OPEN_PATHS = {"/login", "/auth/google", "/auth/callback", "/api/me", "/privacy",
               "/favicon.svg", "/theme.js", "/healthz"}
 OPEN_PREFIXES = ("/assets/", "/vendor/", "/static/")
 
+# 見知らぬ人が、その場で1回試せるようにするための枠。
+#
+# 公開版は BYOK で、利用者が自分のAPIキーを入れないと1枚も調べられない。ログインを
+# 外しても、入り口の次に「APIキーを入れてください」が立っているだけで、通りすがりの
+# 人には何も起きない。試させるには運営者の枠を分けるしかない。
+#
+# 既定は 0 (無効)。有効にすると運営者の Gemini の枠を見知らぬ人が使うので、
+# 入れるかどうかは運営者が決めること。
+TRIAL_PER_DAY = max(0, int(os.getenv("IKIMONO_PUBLIC_TRIAL_PER_DAY", "0") or 0))
+TRIAL_MODEL = os.getenv("IKIMONO_PUBLIC_TRIAL_MODEL", "gemini-3.5-flash-lite")
+
+
+_TRIAL_LOCK = threading.Lock()
+_TRIAL_USED: dict[tuple[str, str], int] = {}
+
+
+def _trial_take(request: Request) -> bool:
+    """お試しを1回ぶん使う。使い切っていれば False。
+
+    日付ごとに数えるだけの素朴な作り。プロセスが再起動すれば戻るが、無料枠の
+    使いすぎを緩く抑えるのが目的で、厳密な会計ではない。
+    """
+    client = request.client.host if request.client else "unknown"
+    today = time.strftime("%Y-%m-%d", time.gmtime())
+    with _TRIAL_LOCK:
+        for key in [k for k in _TRIAL_USED if k[1] != today]:
+            _TRIAL_USED.pop(key, None)
+        used = _TRIAL_USED.get((client, today), 0)
+        if used >= TRIAL_PER_DAY:
+            return False
+        _TRIAL_USED[(client, today)] = used + 1
+        return True
+
+
+def trial_enabled() -> bool:
+    """お試し枠が使える状態か。運営者のキーが無ければ、数を入れても意味がない。"""
+    if not (PUBLIC_MODE and TRIAL_PER_DAY):
+        return False
+    return bool(config_store.load()["api_keys"].get("gemini"))
+
 
 @app.middleware("http")
 async def require_login(request: Request, call_next):
@@ -184,6 +224,10 @@ async def require_login(request: Request, call_next):
     path = request.url.path
     if (not PUBLIC_MODE or not auth.configured()
             or path in OPEN_PATHS or path.startswith(OPEN_PREFIXES)):
+        return await call_next(request)
+    # お試し枠があるなら、撮影画面と識別はログイン前でも通す。ここを閉じたままだと
+    # 枠を用意しても誰も辿り着けない (記録・設定はログインの内側のまま)
+    if trial_enabled() and path in {"/", "/identify", "/api/settings", "/api/photo-metadata"}:
         return await call_next(request)
     if auth.read_session(request.cookies.get(auth.SESSION_COOKIE)):
         return await call_next(request)
@@ -479,6 +523,16 @@ async def identify(
         api_key = request_api_key.strip()
         if len(api_key) > 512:
             raise HTTPException(status_code=400, detail="APIキーを確認してください")
+        # 自分のキーが無い人には、運営者の枠から1日 TRIAL_PER_DAY 回だけ貸す。
+        # ここが無いと、通りすがりの人は入り口の次で必ず止まる
+        if not api_key and trial_enabled():
+            if not _trial_take(request):
+                raise HTTPException(status_code=429, detail=(
+                    "今日のお試しは終わりです。設定画面でご自身のAPIキーを登録すると、"
+                    "続けて調べられます。"))
+            provider = "gemini"
+            model = TRIAL_MODEL
+            api_key = settings["api_keys"].get("gemini", "")
     else:
         model = settings["models"][provider]
         api_key = settings["api_keys"].get(provider, "")
