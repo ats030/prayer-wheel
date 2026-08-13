@@ -262,12 +262,12 @@ IKIMONO_BACKGROUND_JOBS=0
 候補ごとの検索リンクの棚すら描かれません (`/api/amazon/products` も404)。運営者用 (8523) の
 設定画面で `enabled` を入れても、公開版には出ません。
 
-**未解決**: この公開はGmailアカウントで作ったtailnet (`*.ts.net`) のTailscale Funnel経由で、
-自動的に無料のPersonalプランです。Tailscaleは Personal プランを "only suitable for
+**現在は `0` です。** この公開はGmailアカウントで作ったtailnet (`*.ts.net`) のTailscale Funnel
+経由で、自動的に無料のPersonalプランです。Tailscaleは Personal プランを "only suitable for
 non-commercial use" としており、広告を載せた状態がこれに触れないかは確認できていません
-(ats030-rx76)。以前は同じ理由で `0` を既定にしていました。2026-08-12に運営者の判断で `1`
-にしています。触れると判断した場合は `~/.env` の行を `0` に戻して公開版を再起動すれば、
-広告は即座に消えます。
+(ats030-rx76)。加えて Amazon は 403 `AssociateNotEligible` のままで**広告は1円も生んでいない**
+ため、生まれていない収益のために規約上のリスクを負う状態でした。2026-08-13 に `0` へ戻して
+います。商用可の基盤へ移したときに `1` にします。
 
 公開はTailscale Funnel (TLS終端) 経由で8524番ポートへ流します。8523番ポートは
 運営者用でインターネットへ出しません。自前のリバースプロキシを使う場合も同様に、
