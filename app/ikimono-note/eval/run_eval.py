@@ -144,56 +144,36 @@ def summarize(rows: list[dict], label: str, seconds: list[float]) -> dict[str, o
     }
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    # 検証はOllamaを既定にする。外部APIは無料枠の日次上限があり、評価を回すたびに
-    # 公開版の利用者ぶんの枠を削ってしまう。比較で外部が要るときだけ --provider で切り替える。
-    parser.add_argument("--provider", default="local", choices=["local", "openai", "anthropic", "gemini"])
-    parser.add_argument("--model", default="", help="未指定なら設定中のモデル")
-    parser.add_argument("--use-plantnet", action="store_true")
-    parser.add_argument("--label", default="", help="結果ファイル名。未指定なら provider から作る")
-    parser.add_argument("--limit", type=int, default=0, help="先頭N件だけ試す")
-    parser.add_argument("--no-family", action="store_true", help="科の照合を省いて速く回す")
-    parser.add_argument("--sleep", type=float, default=0.0, help="1件ごとの待ち時間 (秒)")
-    parser.add_argument("--dataset", default=str(MANIFEST), help="評価に使うマニフェスト")
-    parser.add_argument("--group", default="", help="この分類群だけを対象にする (植物/昆虫/鳥/菌類/は虫類・両生類)")
-    # 実際の利用では撮影地域を入れる人が多いのに、評価では空のまま測っていた。
-    # 日本固有種を近縁の別種と取り違える例が目立つので、効くかどうかを測れるようにする
-    parser.add_argument("--location", default="", help="撮影地域として渡す (例: 日本)")
-    # 「日本」では広すぎて絞れなかった。沖縄と北海道では出る種が違う。
-    # アプリは EXIF の座標を「緯度 35.2900, 経度 139.5800」の形で渡すので、同じ形にする
-    parser.add_argument("--location-from-coordinates", action="store_true",
-                        help="観察地点の座標を撮影地域として渡す (アプリが EXIF から作る形式)")
-    parser.add_argument("--location-from-place", action="store_true",
-                        help="観察地点の地名を撮影地域として渡す")
-    # アプリは EXIF の撮影日時から日付だけを取り出し、時刻を捨てている。
-    # 夜行性か昼行性かは、ガとチョウのような相手を分ける手がかりになる
-    # 緯度経度そのものは VLM にとってただの数字で、分布の知識と結びつきにくい。
-    # 「標高1200mの森林」に直せば、種を絞る手がかりになる
-    parser.add_argument("--location-from-geo", action="store_true",
-                        help="標高と周辺の土地利用を撮影地域として渡す")
-    parser.add_argument("--date-from-dataset", action="store_true", help="観察日を撮影日として渡す")
-    parser.add_argument("--time-from-dataset", action="store_true", help="観察日時 (時刻まで) を渡す")
-    args = parser.parse_args()
+MEASURES = ("top1_percent", "top3_percent", "genus_percent",
+            "family_or_above_percent", "rejected_percent", "median_seconds")
 
-    manifest = json.loads(Path(args.dataset).read_text(encoding="utf-8"))
-    entries = manifest["entries"]
-    if args.group:
-        entries = [e for e in entries if e["group"] == args.group]
-    entries = entries[: args.limit or None]
-    settings = config_store.load()
-    model = args.model or settings["models"][args.provider]
-    api_key = settings["api_keys"].get(args.provider, "")
-    plantnet_key = settings["api_keys"].get("plantnet", "") if args.use_plantnet else ""
-    label = args.label or f"{args.provider}-{model}" + ("-plantnet" if args.use_plantnet else "")
 
-    if args.provider != "local" and not api_key:
-        print(f"APIキーが未登録です: {args.provider}", file=sys.stderr)
-        return 1
-    if args.use_plantnet and not plantnet_key:
-        print("Pl@ntNet のAPIキーが未登録です", file=sys.stderr)
-        return 1
+def spread_of(summaries: list[dict], label: str, repeat: int) -> dict[str, object]:
+    """指標ごとに平均と幅。幅が重なる差は、この評価では見えない差である。"""
+    metrics: dict[str, object] = {}
+    for key in MEASURES:
+        values = [s[key] for s in summaries if s.get(key) is not None]
+        if not values:
+            continue
+        metrics[key] = {"mean": round(sum(values) / len(values), 1),
+                        "min": min(values), "max": max(values), "values": values}
+    return {"label": label, "repeats": repeat,
+            "count": summaries[0]["count"], "metrics": metrics,
+            # 既存の道具が1回ぶんの要約として読めるよう、平均を素の名前でも置く
+            **{key: metrics[key]["mean"] for key in metrics}}
 
+
+def print_spread(spread: dict) -> None:
+    print(f"\n■ {spread['label']} を {spread['repeats']}回")
+    print(f"{'指標':24} {'平均':>8} {'幅':>16}")
+    for key, value in spread["metrics"].items():
+        width = f"{value['min']} 〜 {value['max']}"
+        print(f"{key:24} {value['mean']:8} {width:>16}")
+    print("\n幅が重なっている差は、この評価では見えない差として扱うこと。")
+
+
+def run_one(args, entries, manifest, model, api_key, plantnet_key, label) -> dict[str, object] | None:
+    """1回ぶん回して結果を書き、要約を返す。上限で打ち切られたら None。"""
     # 無料枠の日次上限に当たっても捨てずに済むよう、成功ぶんは引き継ぐ
     output = RESULTS_DIR / f"{label.replace('/', '_')}.json"
     done: dict[int, dict] = {}
@@ -262,8 +242,92 @@ def main() -> int:
         "rows": rows,
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    print("\n" + json.dumps(summary, ensure_ascii=False, indent=2))
     print(f"→ {output}")
+    return summary
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    # 検証はOllamaを既定にする。外部APIは無料枠の日次上限があり、評価を回すたびに
+    # 公開版の利用者ぶんの枠を削ってしまう。比較で外部が要るときだけ --provider で切り替える。
+    parser.add_argument("--provider", default="local", choices=["local", "openai", "anthropic", "gemini"])
+    parser.add_argument("--model", default="", help="未指定なら設定中のモデル")
+    parser.add_argument("--use-plantnet", action="store_true")
+    parser.add_argument("--label", default="", help="結果ファイル名。未指定なら provider から作る")
+    parser.add_argument("--limit", type=int, default=0, help="先頭N件だけ試す")
+    parser.add_argument("--no-family", action="store_true", help="科の照合を省いて速く回す")
+    parser.add_argument("--sleep", type=float, default=0.0, help="1件ごとの待ち時間 (秒)")
+    parser.add_argument("--repeat", type=int, default=1,
+                        help="同じ設定で何回まわすか。2以上で平均と幅を出す")
+    parser.add_argument("--dataset", default=str(MANIFEST), help="評価に使うマニフェスト")
+    parser.add_argument("--group", default="", help="この分類群だけを対象にする (植物/昆虫/鳥/菌類/は虫類・両生類)")
+    # 実際の利用では撮影地域を入れる人が多いのに、評価では空のまま測っていた。
+    # 日本固有種を近縁の別種と取り違える例が目立つので、効くかどうかを測れるようにする
+    parser.add_argument("--location", default="", help="撮影地域として渡す (例: 日本)")
+    # 「日本」では広すぎて絞れなかった。沖縄と北海道では出る種が違う。
+    # アプリは EXIF の座標を「緯度 35.2900, 経度 139.5800」の形で渡すので、同じ形にする
+    parser.add_argument("--location-from-coordinates", action="store_true",
+                        help="観察地点の座標を撮影地域として渡す (アプリが EXIF から作る形式)")
+    parser.add_argument("--location-from-place", action="store_true",
+                        help="観察地点の地名を撮影地域として渡す")
+    # アプリは EXIF の撮影日時から日付だけを取り出し、時刻を捨てている。
+    # 夜行性か昼行性かは、ガとチョウのような相手を分ける手がかりになる
+    # 緯度経度そのものは VLM にとってただの数字で、分布の知識と結びつきにくい。
+    # 「標高1200mの森林」に直せば、種を絞る手がかりになる
+    parser.add_argument("--location-from-geo", action="store_true",
+                        help="標高と周辺の土地利用を撮影地域として渡す")
+    parser.add_argument("--date-from-dataset", action="store_true", help="観察日を撮影日として渡す")
+    parser.add_argument("--time-from-dataset", action="store_true", help="観察日時 (時刻まで) を渡す")
+    args = parser.parse_args()
+
+    manifest = json.loads(Path(args.dataset).read_text(encoding="utf-8"))
+    entries = manifest["entries"]
+    if args.group:
+        entries = [e for e in entries if e["group"] == args.group]
+    entries = entries[: args.limit or None]
+    settings = config_store.load()
+    model = args.model or settings["models"][args.provider]
+    api_key = settings["api_keys"].get(args.provider, "")
+    plantnet_key = settings["api_keys"].get("plantnet", "") if args.use_plantnet else ""
+    label = args.label or f"{args.provider}-{model}" + ("-plantnet" if args.use_plantnet else "")
+
+    if args.provider != "local" and not api_key:
+        print(f"APIキーが未登録です: {args.provider}", file=sys.stderr)
+        return 1
+    if args.use_plantnet and not plantnet_key:
+        print("Pl@ntNet のAPIキーが未登録です", file=sys.stderr)
+        return 1
+
+    if args.repeat < 1:
+        print("--repeat は1以上", file=sys.stderr)
+        return 1
+
+    # 同じ設定でも実行ごとに答えが変わる。gemma4:31b は temperature 0.1 でも
+    # 第一候補が100枚中36枚入れ替わり、科以上は13ポイント動いた (ats030-0rte)。
+    # 1回の数字だけを見て「良くなった/悪くなった」と読むと、ばらつきを実力の差と
+    # 取り違える。2回以上まわしたときは平均と幅を出す。
+    summaries: list[dict[str, object]] = []
+    for turn in range(1, args.repeat + 1):
+        turn_label = label if args.repeat == 1 else f"{label}-r{turn}"
+        if args.repeat > 1:
+            print(f"\n===== {turn}回目 / {args.repeat} =====")
+        summary = run_one(args, entries, manifest, model, api_key, plantnet_key, turn_label)
+        if summary is None:
+            return 1
+        summaries.append(summary)
+
+    if args.repeat == 1:
+        print("\n" + json.dumps(summaries[0], ensure_ascii=False, indent=2))
+        return 0
+
+    spread = spread_of(summaries, label, args.repeat)
+    RESULTS_DIR.mkdir(exist_ok=True)
+    output = RESULTS_DIR / f"{label.replace('/', '_')}.json"
+    output.write_text(json.dumps({"summary": spread, "runs": [s["label"] for s in summaries]},
+                                 ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print_spread(spread)
+    print(f"→ {output}")
+    return 0
     return 0
 
 

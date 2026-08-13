@@ -1497,7 +1497,10 @@ def test_sessions_cannot_be_forged():
     cookie = auth.session_for(user)
     assert auth.read_session(cookie)["sub"] == "sub-1"
     body, _, signature = cookie.partition(".")
-    assert auth.read_session(body + ".x" + signature[1:]) is None       # 署名を差し替える
+    # 先頭を必ず別の文字にする。"x" 決め打ちだと、元の署名が x で始まったとき
+    # 差し替えても同じ文字列になり、改竄を弾けていないのに通ってしまう (1/64 で揺れた)
+    other = "y" if signature[0] == "x" else "x"
+    assert auth.read_session(body + "." + other + signature[1:]) is None
     forged = auth.sign_session({"sub": "someone-else", "exp": 9999999999})
     assert auth.read_session(forged.split(".")[0] + "." + signature) is None
     # 期限切れは通さない
@@ -2503,3 +2506,22 @@ def test_a_failed_login_says_which_check_failed():
     assert 'print("login failed: state が一致しない", flush=True)' in source
     assert 'print(f"login failed: {exc}", flush=True)' in source
     assert "state}" not in source and "{code}" not in source   # 値は残さない
+
+
+def test_the_evaluation_can_run_the_same_setting_more_than_once():
+    """1回の数字だけでは、ばらつきを実力の差と取り違える。
+
+    同一設定でも第一候補が100枚中36枚入れ替わり、科以上は13ポイント動いた
+    (ats030-0rte)。2回以上まわしたときは平均と幅を出し、幅を見ずに平均だけを
+    比べないよう、出力に一行そえる。
+    """
+    source = Path("eval/run_eval.py").read_text(encoding="utf-8")
+    assert '"--repeat", type=int, default=1' in source
+    assert "def spread_of(summaries: list[dict], label: str, repeat: int)" in source
+    assert '"mean":' in source and '"min":' in source and '"max":' in source
+    assert "幅が重なっている差は、この評価では見えない差として扱うこと。" in source
+    # 各回は別ファイルへ。混ざると、途中で上限に当たったとき引き継げない
+    assert 'f"{label}-r{turn}"' in source
+    # 既存の道具が1回ぶんの要約として読めるよう、平均は素の名前でも置く
+    assert "**{key: metrics[key]['mean'] for key in metrics}" in source \
+        or '**{key: metrics[key]["mean"] for key in metrics}' in source
