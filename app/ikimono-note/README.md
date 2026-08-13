@@ -126,10 +126,23 @@ tailscale serve --https=8443 off         # やめるとき
 1. **請求先の紐づけ** — Cloud Run は無料枠を使う場合でも要ります
 2. **Firestore (ネイティブモード)** — ログイン情報の置き場 (`users.db` はディスクが無いので使えない)
 3. **OAuth の登録** — 承認済みリダイレクト URI に `<サービスURL>/auth/callback`、JS 生成元に
-   `<サービスURL>`。URLは初回のデプロイで決まるので、1回出してから登録します
+   `<サービスURL>`。**Cloud Run は新旧2つのURLを配信する**ので、両方を登録します
+
+   | 形式 | 例 |
+   |---|---|
+   | 新 (サービス名-プロジェクト番号.リージョン.run.app) | `ikimono-note-736831430371.asia-northeast1.run.app` |
+   | 旧 (`status.url` が返すのはこちら) | `ikimono-note-vcxjhzkhsa-an.a.run.app` |
+
+   `IKIMONO_ALLOWED_HOSTS` も両方入れます。片方だけだと、もう片方は
+   `TrustedHostMiddleware` に 400 で弾かれます。
+
+   **登録できたかの確認はブラウザで行うこと。** curl では `/auth/google` が 302 を
+   返しますが、その行き先が同意画面かエラー画面かは追わないと分かりません。
+   実際にこれで `redirect_uri_mismatch` を「受理された」と読み違えました。
 
 秘密 (ログインのクライアントシークレット、セッション鍵、Amazon の資格情報) は Secret Manager
-へ入れてから参照します。`--set-env-vars` で渡すと Console の環境変数欄に平文で並び、デプロイ
+へ入れ、**実行サービスアカウントにその秘密だけの読み取りを与えてから**参照します。作るだけでは
+読めず、ビルドが通ったあとリビジョン作成で落ちます。`--set-env-vars` で渡すと Console の環境変数欄に平文で並び、デプロイ
 履歴にも残るためです。広告の設定と Amazon の資格情報は運営者用の `settings.json` からも読みます
 (画面から入れたものがそこにあるため)。
 

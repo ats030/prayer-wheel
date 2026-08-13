@@ -86,6 +86,11 @@ if [ "$DEPLOY" != "1" ]; then
   exit 0
 fi
 
+PROJECT_NUMBER=$("$GCLOUD" projects describe "$PROJECT" --format='value(projectNumber)')
+# 新形式のURLは決まっている (サービス名-プロジェクト番号.リージョン.run.app) ので、
+# 最初のデプロイから通しておける。旧形式は status.url にしか出ないので後で足す。
+NEW_HOST="$SERVICE-$PROJECT_NUMBER.$REGION.run.app"
+
 say ""
 say "■ API を有効化"
 "$GCLOUD" services enable run.googleapis.com cloudbuild.googleapis.com \
@@ -107,23 +112,46 @@ put_secret ikimono-session-secret "$SESSION_SECRET"
 put_secret ikimono-amazon-creators-id "$CREATORS_ID"
 put_secret ikimono-amazon-creators-secret "$CREATORS_SECRET"
 
+# 作っただけでは Cloud Run から読めない。実行サービスアカウントに、その秘密だけの
+# 読み取りを与える (プロジェクト全体には広げない)。
+# これが無いとビルドは通ってリビジョン作成で落ちる。実際に1周無駄にした。
+RUNTIME_SA="${IKIMONO_RUNTIME_SA:-$PROJECT_NUMBER-compute@developer.gserviceaccount.com}"
+say "■ 秘密の読み取りを許可 ($RUNTIME_SA)"
+for name in ikimono-google-client-secret ikimono-session-secret             ikimono-amazon-creators-id ikimono-amazon-creators-secret; do
+  "$GCLOUD" secrets describe "$name" --project "$PROJECT" >/dev/null 2>&1 || continue
+  "$GCLOUD" secrets add-iam-policy-binding "$name"     --member="serviceAccount:$RUNTIME_SA"     --role="roles/secretmanager.secretAccessor"     --project "$PROJECT" >/dev/null
+  say "  $name"
+done
+
 SECRETS="IKIMONO_GOOGLE_CLIENT_SECRET=ikimono-google-client-secret:latest"
 SECRETS="$SECRETS,IKIMONO_SESSION_SECRET=ikimono-session-secret:latest"
 [ -n "$CREATORS_ID" ] && SECRETS="$SECRETS,IKIMONO_AMAZON_CREATORS_ID=ikimono-amazon-creators-id:latest"
 [ -n "$CREATORS_SECRET" ] && SECRETS="$SECRETS,IKIMONO_AMAZON_CREATORS_SECRET=ikimono-amazon-creators-secret:latest"
 
-# 公開版の姿。ディスクも常時CPUも要らない形にしてある (README の該当節)
-VARS="IKIMONO_PUBLIC_MODE=1"
-VARS="$VARS,IKIMONO_PUBLIC_LOCAL=0"          # Ollama はここに無い
-VARS="$VARS,IKIMONO_BACKGROUND_JOBS=0"       # レスポンス後に CPU が止まるため同期で返す
-VARS="$VARS,IKIMONO_PUBLIC_TRIAL_PER_DAY=0"  # 年齢条項のため無効 (ats030-rhfi)
-VARS="$VARS,IKIMONO_PUBLIC_AFFILIATE=1"      # 商用可の基盤なので広告を出す
-VARS="$VARS,IKIMONO_FIRESTORE_PROJECT=$PROJECT"
-VARS="$VARS,IKIMONO_GOOGLE_CLIENT_ID=$CLIENT_ID"
-[ -n "$AFFILIATE_URL" ] && VARS="$VARS,^|^IKIMONO_AFFILIATE_URL=$AFFILIATE_URL"
-[ -n "$PARTNER_TAG" ] && VARS="$VARS,IKIMONO_AFFILIATE_PARTNER_TAG=$PARTNER_TAG"
-[ -n "$PARTNER_TAG" ] && VARS="$VARS,IKIMONO_AFFILIATE_ENABLED=1,IKIMONO_AFFILIATE_PRODUCT_ENABLED=1"
-[ -n "$AFFILIATE_TITLE" ] && VARS="$VARS,IKIMONO_AFFILIATE_TITLE=$AFFILIATE_TITLE"
+# 公開版の姿。ディスクも常時CPUも要らない形にしてある (README の該当節)。
+#
+# 区切りは @ にする。ALLOWED_HOSTS は値の中にカンマが要り、既定の区切り (カンマ) の
+# ままでは2つ目のホストが別の変数として解釈される。gcloud の区切り指定 ^@^ は
+# **値全体の先頭**に1回だけ置くもので、途中に書くと変数名の一部になる。実際に
+# ^|^IKIMONO_AFFILIATE_URL という名前の変数ができ、広告URLが渡っていなかった。
+add_var() { VARS="${VARS:+$VARS@}$1=$2"; }
+VARS=""
+add_var IKIMONO_PUBLIC_MODE 1
+add_var IKIMONO_PUBLIC_LOCAL 0          # Ollama はここに無い
+add_var IKIMONO_BACKGROUND_JOBS 0       # レスポンス後に CPU が止まるため同期で返す
+add_var IKIMONO_PUBLIC_TRIAL_PER_DAY 0  # 年齢条項のため無効 (ats030-rhfi)
+add_var IKIMONO_PUBLIC_AFFILIATE 1      # 商用可の基盤なので広告を出す
+add_var IKIMONO_FIRESTORE_PROJECT "$PROJECT"
+add_var IKIMONO_GOOGLE_CLIENT_ID "$CLIENT_ID"
+add_var IKIMONO_ALLOWED_HOSTS "$NEW_HOST"
+add_var IKIMONO_PUBLIC_ORIGIN "https://$NEW_HOST"
+[ -n "$AFFILIATE_URL" ] && add_var IKIMONO_AFFILIATE_URL "$AFFILIATE_URL"
+[ -n "$AFFILIATE_TITLE" ] && add_var IKIMONO_AFFILIATE_TITLE "$AFFILIATE_TITLE"
+if [ -n "$PARTNER_TAG" ]; then
+  add_var IKIMONO_AFFILIATE_PARTNER_TAG "$PARTNER_TAG"
+  add_var IKIMONO_AFFILIATE_ENABLED 1
+  add_var IKIMONO_AFFILIATE_PRODUCT_ENABLED 1
+fi
 
 say "■ デプロイ"
 "$GCLOUD" run deploy "$SERVICE" \
@@ -132,19 +160,38 @@ say "■ デプロイ"
   --max-instances=1 \
   --timeout=300 \
   --memory=1Gi \
-  --set-env-vars "$VARS" \
+  --set-env-vars "^@^$VARS" \
   --set-secrets "$SECRETS"
 
 URL=$("$GCLOUD" run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" \
       --format='value(status.url)')
-HOST=${URL#https://}
+OLD_HOST=${URL#https://}
+NEW_URL="https://$NEW_HOST"
+
+# Google は新旧2つのURLを配信する。status.url は旧形式しか返さないので、両方通す。
+# 片方だけ許可していると、もう片方は TrustedHostMiddleware に 400 で弾かれる。
+if [ -n "$OLD_HOST" ] && [ "$OLD_HOST" != "$NEW_HOST" ]; then
+  say ""
+  say "■ 旧形式のURLも通す ($OLD_HOST)"
+  "$GCLOUD" run services update "$SERVICE" --project "$PROJECT" --region "$REGION" \
+    --update-env-vars "^@^IKIMONO_ALLOWED_HOSTS=$NEW_HOST,$OLD_HOST" >/dev/null
+fi
+
 say ""
-say "■ 出ました: $URL"
-say "  ホストを通す設定を入れて、もう一度出します"
-"$GCLOUD" run services update "$SERVICE" --project "$PROJECT" --region "$REGION" \
-  --update-env-vars "IKIMONO_ALLOWED_HOSTS=$HOST,IKIMONO_PUBLIC_ORIGIN=$URL" >/dev/null
+say "■ 出ました"
+say "  $NEW_URL"
+[ "$OLD_HOST" != "$NEW_HOST" ] && say "  $URL  (旧形式。併存する)"
 say ""
 say "■ 残りは Console での登録 (これをしないとログインできません)"
-say "  OAuth 承認済みリダイレクト URI : $URL/auth/callback"
-say "  OAuth 承認済み JS 生成元       : $URL"
 say "  https://console.cloud.google.com/apis/credentials?project=$PROJECT"
+say "  クライアント: $CLIENT_ID"
+say ""
+say "  承認済みのリダイレクト URI (両方):"
+say "    $NEW_URL/auth/callback"
+[ "$OLD_HOST" != "$NEW_HOST" ] && say "    $URL/auth/callback"
+say "  承認済みの JavaScript 生成元 (両方):"
+say "    $NEW_URL"
+[ "$OLD_HOST" != "$NEW_HOST" ] && say "    $URL"
+say ""
+say "  確認はブラウザで行うこと。curl だと 302 が返るが、その行き先が同意画面か"
+say "  エラー画面かは追わないと分からない (redirect_uri_mismatch を見落とした)。"
