@@ -163,7 +163,7 @@ def test_index_result_view_keeps_its_own_labels():
 def test_history_page_renders_saved_records():
     page = page_source("/history")
     assert 'id="clearHistory"' not in page
-    assert 'id="clear"' in page
+    assert 'id="clear"' not in page   # まとめて消すボタンは置かない
     assert "fullCandidate" in page
     assert "写真から見つけた特徴（AI抽出・未確認）" in page
     assert "似ている種との見分け方" in page
@@ -963,12 +963,14 @@ def test_capture_and_history_screens_use_one_word_per_concept():
 
 
 def test_privacy_policy_matches_where_deletion_actually_lives():
+    """書いてある消し方が、画面に本当にあること。"""
     privacy = client.get("/privacy").text
     assert "設定画面・履歴画面から利用者が削除できます" not in privacy
-    assert "「調べた記録」の画面から、1件ずつ、またはすべてを利用者が削除できます" in privacy
-    settings = page_source("/settings")
-    assert "すべて削除" not in settings  # 削除は /history だけが持つ
-    assert "すべて削除" in page_source("/history")
+    assert "「調べた記録」の画面から、記録を1件ずつ利用者が削除できます" in privacy
+    # まとめて消す手段は画面に持たないので、代わりの行き先を書く
+    assert "サイトデータを削除" in privacy
+    for path in ["/settings", "/history"]:
+        assert "すべて削除" not in page_source(path), path
 
 
 def test_host_header_is_validated_in_both_modes():
@@ -1848,8 +1850,6 @@ def test_deleting_a_record_asks_first():
     # どの記録を消すのかを名前で言う
     assert 'confirmDelete("「"+title(entry||{})+"」の記録を削除しますか？")' in history
     assert 'if(!confirmDelete(' in history
-    # すべて削除も同じ文面を通す
-    assert 'confirmDelete("この端末に保存した記録を、すべて削除しますか？")' in history
     # つないでいるときだけドライブの話をする
     assert 'typeof driveLinked==="function"&&driveLinked()' in history
     assert "そちらからも消えます。" in history
@@ -1857,9 +1857,7 @@ def test_deleting_a_record_asks_first():
     assert ('if(!confirmDelete("「"+title(entry||{})+"」の記録を削除しますか？"))return;'
             'const d=await openDb(),t=d.transaction("entries","readwrite");'
             't.objectStore("entries").delete(node.dataset.id)') in history
-    assert ('if(confirmDelete("この端末に保存した記録を、すべて削除しますか？")){'
-            'const d=await openDb(),t=d.transaction("entries","readwrite");'
-            't.objectStore("entries").clear()') in history
+    assert 'objectStore("entries").clear()' not in history   # まとめて消す道は持たない
     # 上限50件の間引きは利用者が押した削除ではないので聞かない
     assert "excess.forEach(item=>tx.objectStore(\"entries\").delete(item.id))" in history
 

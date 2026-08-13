@@ -36,7 +36,7 @@ function driveNote(){
 function confirmDelete(what){
   return confirm(what+"\n写真もいっしょに消え、元に戻せません。"+driveNote());
 }
-async function render(){const entries=await all();mapEntries=entries;const located=entries.filter(e=>Number.isFinite(Number(e.coordinates?.latitude))&&Number.isFinite(Number(e.coordinates?.longitude)));$("showMap").disabled=!located.length;if(!located.length)$("mapNotice").textContent="場所を記録した記録がまだないため、地図は表示できません。";$("clear").disabled=!entries.length;$("historyList").innerHTML=entries.length?entries.map(e=>{/* 行に出すのは小さいほう (50行ぶん展開するので)。押して開くのは原寸。
+async function render(){const entries=await all();mapEntries=entries;const located=entries.filter(e=>Number.isFinite(Number(e.coordinates?.latitude))&&Number.isFinite(Number(e.coordinates?.longitude)));$("showMap").disabled=!located.length;if(!located.length)$("mapNotice").textContent="場所を記録した記録がまだないため、地図は表示できません。";$("historyList").innerHTML=entries.length?entries.map(e=>{/* 行に出すのは小さいほう (50行ぶん展開するので)。押して開くのは原寸。
    ここを同じものにしていたため、拡大すると320pxが引き伸ばされて出ていた */
 const full=recordPhotos(e)[0]||null;const small=e.listThumbnail||full;
 const image=small?URL.createObjectURL(small):"";const large=full?URL.createObjectURL(full):image;
@@ -48,7 +48,7 @@ document.querySelectorAll(".entry .photo").forEach(b=>b.onclick=async()=>{
   if(!record||recordPhotos(record).length)return;
   const photos=await pullPhotosIfMissing(record,b.closest("article"));
   if(photos&&photos[0])$("large").src=URL.createObjectURL(photos[0]);
-});document.querySelectorAll(".entry").forEach(node=>{const b=node.querySelector(".again");if(!b)return;const rec=entries.find(e=>String(e.id)===node.dataset.id);if(rec)b.onclick=()=>reidentify(rec,b,node.querySelector(".again-message"))});document.querySelectorAll(".one").forEach(b=>b.onclick=async()=>{const node=b.closest("article");const entry=entries.find(e=>String(e.id)===node.dataset.id);if(!confirmDelete("「"+title(entry||{})+"」の記録を削除しますか？"))return;const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").delete(node.dataset.id);await finished(t);scheduleAutoBackup();location.reload()})}$("close").onclick=()=>$("lightbox").close();$("clear").onclick=async()=>{if(confirmDelete("この端末に保存した記録を、すべて削除しますか？")){const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").clear();await finished(t);scheduleAutoBackup();location.reload()}};render().catch(e=>$("historyList").innerHTML='<div class="empty">記録を読み込めませんでした。 '+esc(e.message)+'</div>');
+});document.querySelectorAll(".entry").forEach(node=>{const b=node.querySelector(".again");if(!b)return;const rec=entries.find(e=>String(e.id)===node.dataset.id);if(rec)b.onclick=()=>reidentify(rec,b,node.querySelector(".again-message"))});document.querySelectorAll(".one").forEach(b=>b.onclick=async()=>{const node=b.closest("article");const entry=entries.find(e=>String(e.id)===node.dataset.id);if(!confirmDelete("「"+title(entry||{})+"」の記録を削除しますか？"))return;const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").delete(node.dataset.id);await finished(t);scheduleAutoBackup();location.reload()})}$("close").onclick=()=>$("lightbox").close();render().catch(e=>$("historyList").innerHTML='<div class="empty">記録を読み込めませんでした。 '+esc(e.message)+'</div>');
 /* 開いた直後にドライブから取り込むことがある。一覧はもう描き終わっているので、
    届いたら描き直す。押していないのに中身が入れ替わるのは、記録が端末をまたいで
    同じものになるという約束のとおり */
