@@ -249,7 +249,11 @@ async def require_login(request: Request, call_next):
     # 札の問い合わせ先 (/identify/job/<id>) も開ける。ここを閉じたままだと、識別は
     # 始まるのに結果を取りに行けず、ポーリングがログイン画面のHTMLを受け取って
     # 「Unexpected token '<'」で終わる (実測でそうなった)
-    if trial_enabled() and (path in {"/", "/identify", "/api/settings", "/api/photo-metadata"}
+    # 設定も開ける。お試しを使い切った人に「設定でご自身のAPIキーを」と案内しながら
+    # その設定がログインの内側だと、案内が行き止まりになる。公開版の設定は
+    # ブラウザの中だけに書く (POST /api/settings は公開版では403) ので、開けても安全
+    if trial_enabled() and (path in {"/", "/settings", "/identify",
+                                     "/api/settings", "/api/photo-metadata"}
                             or path.startswith("/identify/job/")):
         return await call_next(request)
     if auth.read_session(request.cookies.get(auth.SESSION_COOKIE)):

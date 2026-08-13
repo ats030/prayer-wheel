@@ -1,5 +1,27 @@
 function animalReferenceHtml(c,category){const ref=animalReference(c,category);return ref?'<div class="animal-references"><span>オス・メスの違いを調べる資料（外部サイト）</span><a target="_blank" rel="noopener noreferrer" href="'+esc(ref.url)+'">'+esc(ref.label)+' ↗</a></div>':""}
 const $=id=>document.getElementById(id);let plantnetReady=false;let affiliate=null;let provider="local";let providerName="Ollama";let selected=[];let gps=null;const drop=$("drop"),status=$("status"),previews=$("previews"),identify=$("identify");
+/* お試し枠のことは、使い切る前に言う。1日3回だと知らずに2回使い、3回目で
+   初めて壁に当たるのは不親切。続ける道 (自分のキーを入れる) も一緒に出す。
+   ログインの導線も、未ログインの人にだけ出す。記録を端末をまたいで残したい人が、
+   入り口を見つけられないままになるため */
+function showTrialNote(data){
+  const trial=data.trial;
+  const note=$("trialNote");
+  if(!note)return;
+  const hasKey=Boolean(readApiKey("gemini")||readApiKey("openai")||readApiKey("anthropic"));
+  if(!trial||hasKey){note.classList.add("hidden");return}
+  note.classList.remove("hidden");
+  note.innerHTML="このまま1日"+trial.per_day+"回まで試せます。続けて使うには、"
+    +'<a href="/settings">設定</a>でご自身のAPIキーを登録してください（Geminiには無料枠があります）。';
+}
+async function showSignIn(){
+  const link=$("signInLink");
+  if(!link)return;
+  try{
+    const me=await fetch("/api/me").then(r=>r.ok?r.json():null);
+    link.classList.toggle("hidden",!(me&&me.available&&!me.signed_in));
+  }catch(e){/* 出せなくても使える */}
+}
 async function loadSettings(){try{const r=await fetch("/api/settings");const data=await r.json();window.speciesPublicMode=Boolean(data.public_mode);if(window.speciesPublicMode){const saved=JSON.parse(localStorage.getItem("species-public-settings")||"{}");if(saved.provider&&(saved.provider!=="local"||data.available_models.local.length))data.provider=saved.provider;if(saved.models)data.models={...data.models,...saved.models}}provider=data.provider;providerName=providerLabel(provider);let model=data.models[provider];
 /* 自分のキーを持たない人は、運営者のお試し枠で走る。その場合に動くのはこちらが決めた
    プロバイダーとモデルなので、選択中のものを出したままだと写真の行き先を偽ることになる */
@@ -7,7 +29,8 @@ window.speciesTrial=data.trial||null;
 if(window.speciesTrial&&!readApiKey(window.speciesTrial.provider)&&!readApiKey(provider)){
   provider=window.speciesTrial.provider;providerName=providerLabel(provider);model=window.speciesTrial.model;
 }
-window.speciesRuntimeModel=model;plantnetReady=Boolean(data.api_key_configured.plantnet||(window.speciesPublicMode&&readApiKey("plantnet")));affiliate=data.affiliate;document.getElementById("affiliateDisclosure").classList.toggle("hidden",!affiliate.enabled);document.getElementById("plantnetOption").classList.toggle("hidden",!plantnetReady);$("providerStatus").textContent=providerName+" · "+model+(provider==="local"?" · 写真は外部送信しません":" · 写真は保存しません")}catch(e){showStatus("設定を読み込めませんでした。",true)}}
+window.speciesRuntimeModel=model;
+  showTrialNote(data);plantnetReady=Boolean(data.api_key_configured.plantnet||(window.speciesPublicMode&&readApiKey("plantnet")));affiliate=data.affiliate;document.getElementById("affiliateDisclosure").classList.toggle("hidden",!affiliate.enabled);document.getElementById("plantnetOption").classList.toggle("hidden",!plantnetReady);$("providerStatus").textContent=providerName+" · "+model+(provider==="local"?" · 写真は外部送信しません":" · 写真は保存しません")}catch(e){showStatus("設定を読み込めませんでした。",true)}}
 const MAX_PHOTOS=3;let previewUrls=[];
 function renderPreviews(){previewUrls.forEach(URL.revokeObjectURL);previewUrls=selected.map(file=>URL.createObjectURL(file));document.body.classList.add("has-selection");/* 枚数で列を変える。3列固定だと、1枚のときも横幅の3分の1しか使わない。 携帯では110pxほどになり、ピントや被写体の位置を確かめられない */previews.className="previews count-"+selected.length;previews.innerHTML=previewUrls.map((url,index)=>"<img class=\"preview\" src=\""+url+"\" alt=\"調べる写真 "+(index+1)+"\">").join("");$("previewEmpty").classList.add("hidden");identify.classList.remove("hidden");$("captureTitle").textContent=selected.length+"枚の写真を選択中"}
 function setFiles(files){const chosen=[...files].filter(file=>file.type.startsWith("image/"));if(!chosen.length){showStatus("画像ファイルを選んでください。",true);return}if(chosen.length>MAX_PHOTOS){showStatus("写真は最大"+MAX_PHOTOS+"枚です。",true);return}selected=chosen;gps=null;renderPreviews();showStatus("写真の情報と現在地を確認しています。",false,true);readPhotoMetadata(chosen);requestCurrentLocation(true)}
@@ -267,6 +290,7 @@ identify.onclick=async()=>{
 })();
 
 loadSettings();
+showSignIn();
 const renderIdentification=render;
 /* 「もっと確かめたいこと」を読んだその場から撮り足せるようにする。以前は
    evidence_status が taxonomy_only / uncertain の候補があるときしか出しておらず、

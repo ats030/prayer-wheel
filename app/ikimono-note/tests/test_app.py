@@ -2101,6 +2101,29 @@ def test_waiting_is_visible_where_the_answer_will_appear():
     assert "identify.disabled=true" in index
 
 
+def test_the_visitor_learns_the_limit_before_hitting_it():
+    """1日3回だと知らずに2回使い、3回目で初めて壁に当たるのは不親切。
+
+    続ける道 (自分のキーを入れる) も一緒に出す。自分のキーを持っている人には出さない。
+    """
+    index = client.get("/assets/index.js").text
+    assert "function showTrialNote(data)" in index
+    assert '"このまま1日"+trial.per_day+"回まで試せます。' in index
+    assert 'const hasKey=Boolean(readApiKey("gemini")' in index
+    assert 'if(!trial||hasKey){note.classList.add("hidden");return}' in index
+    assert 'id="trialNote"' in client.get("/").text
+    assert ".trial-note{" in client.get("/assets/index.css").text
+
+
+def test_an_anonymous_visitor_can_find_the_way_in():
+    """記録を端末をまたいで残したい人が、ログインの入り口を見つけられないままになる。"""
+    index = client.get("/assets/index.js").text
+    assert "async function showSignIn()" in index
+    assert 'me.available&&!me.signed_in' in index      # 未ログインのときだけ
+    assert 'id="signInLink"' in client.get("/").text
+    assert 'href="/login"' in client.get("/").text
+
+
 def test_the_trial_opens_the_whole_round_trip_not_just_the_start():
     """識別は始まるのに結果を取りに行けない、という開け方をしない。
 
@@ -2156,10 +2179,13 @@ def test_a_stranger_can_try_it_once_when_the_operator_opens_a_trial():
     assert main.TRIAL_PER_DAY == 0                    # 既定は無効
     assert main.trial_enabled() is False              # 運営者用モードでも当然無効
     # 枠があるときだけ、撮影画面と識別をログインの外に出す
-    assert 'if trial_enabled() and (path in {"/", "/identify", "/api/settings", "/api/photo-metadata"}' in source
+    assert 'if trial_enabled() and (path in {"/", "/settings", "/identify",' in source
+    # 使い切った人に「設定でキーを」と案内する以上、その設定も開いていないと行き止まり
+    assert '"/settings"' in source.split("if trial_enabled() and (path in")[1][:200]
     # 記録と設定はログインの内側のまま
+    # 記録はログインの内側のまま
     opened = source.split("if trial_enabled() and (path in")[1][:200]
-    assert '"/history"' not in opened and '"/settings"' not in opened
+    assert '"/history"' not in opened
     # 使い切ったら、自分のキーを登録する道を案内する
     assert "今日のお試しは終わりです。" in source
     assert "if not api_key and trial_enabled():" in source

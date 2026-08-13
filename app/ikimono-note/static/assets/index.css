@@ -46,3 +46,6 @@
 .previews.count-1 .preview{height:min(58vh,440px)}
 .previews.count-2 .preview{height:min(42vh,320px)}
 @media(max-width:760px){.previews.count-1 .preview{height:min(52vh,360px)}.previews.count-2 .preview{height:min(34vh,240px)}}
+/* お試し枠の案内。使い切って初めて知る、という出し方にしない */
+.trial-note{margin:10px 0 0;padding:9px 12px;border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:8px;background:var(--surface);color:var(--muted);font-size:12px}
+.trial-note a{color:var(--accent-hover)}
