@@ -278,8 +278,22 @@ Cloud Run) だけがつながるため、`request.client.host` は常に前段�
 使い切ると他の全員が閉め出されます。公開版では `X-Forwarded-For` の先頭を利用者のIPとして
 読みます (運営者用は 0.0.0.0 で待つため読みません。ヘッダを名乗るだけで別人になれるので)。
 
-**既定を 0 にしてあるのは、見知らぬ人が運営者の枠を使うためです。** 入れるかどうかは運営者が
-決めることなので、こちらでは有効にしていません。
+**現在は 0 (無効) です。** 一度有効にしたが、Gemini API Additional Terms と衝突するため止めた
+(ats030-rhfi)。
+
+> You must be 18 years of age or older to use the APIs.
+> You also will not use the Services as part of a website, application, or other service … that is
+> directed towards or is likely to be accessed by individuals under the age of 18.
+
+このアプリは全年齢を明言している (利用規約「年齢制限はなく、どなたでもご利用いただけます」、
+DESIGN.md "No age restriction")。BYOK なら規約上の "You" は鍵の持ち主 (成年の利用者) だが、
+お試し枠は**運営者の鍵**で走るので、運営者が違反を引き受けることになる。有料枠にしても
+解決しない (有料が変えるのはデータ利用だけで、年齢条項は残る)。無料枠では加えて
+"human reviewers may read, annotate, and process your API input and output" があり、
+子どもの写真が人手レビューに入る。
+
+いまの実装は provider を gemini に決め打ちしているので、この機能自体が Gemini 専用。
+年齢条項の無いプロバイダーで貸す形にしない限り、有効にできない。
 
 3を 0 にすると「画面を更新しても識別が続く」は失われます。常時CPUを割り当てる設定
 (Cloud Run の CPU always allocated など) にすれば 1 のままで動きますが、起動している
