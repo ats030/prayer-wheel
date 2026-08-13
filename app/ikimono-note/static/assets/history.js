@@ -36,7 +36,19 @@ function driveNote(){
 function confirmDelete(what){
   return confirm(what+"\n写真もいっしょに消え、元に戻せません。"+driveNote());
 }
-async function render(){const entries=await all();mapEntries=entries;const located=entries.filter(e=>Number.isFinite(Number(e.coordinates?.latitude))&&Number.isFinite(Number(e.coordinates?.longitude)));$("showMap").disabled=!located.length;if(!located.length)$("mapNotice").textContent="場所を記録した記録がまだないため、地図は表示できません。";$("clear").disabled=!entries.length;$("historyList").innerHTML=entries.length?entries.map(e=>{const image=(e.listThumbnail||e.thumbnail)?URL.createObjectURL(e.listThumbnail||e.thumbnail):"";return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+image+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div><div class="muted">'+esc(e.context?.location||"場所の記録なし")+'</div></div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>調べた内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';rerunRecords=new Map(entries.map(e=>[String(e.id),e]));document.querySelectorAll(".photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()});document.querySelectorAll(".entry").forEach(node=>{const b=node.querySelector(".again");if(!b)return;const rec=entries.find(e=>String(e.id)===node.dataset.id);if(rec)b.onclick=()=>reidentify(rec,b,node.querySelector(".again-message"))});document.querySelectorAll(".one").forEach(b=>b.onclick=async()=>{const node=b.closest("article");const entry=entries.find(e=>String(e.id)===node.dataset.id);if(!confirmDelete("「"+title(entry||{})+"」の記録を削除しますか？"))return;const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").delete(node.dataset.id);await finished(t);scheduleAutoBackup();location.reload()})}$("close").onclick=()=>$("lightbox").close();$("clear").onclick=async()=>{if(confirmDelete("この端末に保存した記録を、すべて削除しますか？")){const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").clear();await finished(t);scheduleAutoBackup();location.reload()}};render().catch(e=>$("historyList").innerHTML='<div class="empty">記録を読み込めませんでした。 '+esc(e.message)+'</div>');
+async function render(){const entries=await all();mapEntries=entries;const located=entries.filter(e=>Number.isFinite(Number(e.coordinates?.latitude))&&Number.isFinite(Number(e.coordinates?.longitude)));$("showMap").disabled=!located.length;if(!located.length)$("mapNotice").textContent="場所を記録した記録がまだないため、地図は表示できません。";$("clear").disabled=!entries.length;$("historyList").innerHTML=entries.length?entries.map(e=>{/* 行に出すのは小さいほう (50行ぶん展開するので)。押して開くのは原寸。
+   ここを同じものにしていたため、拡大すると320pxが引き伸ばされて出ていた */
+const full=recordPhotos(e)[0]||null;const small=e.listThumbnail||full;
+const image=small?URL.createObjectURL(small):"";const large=full?URL.createObjectURL(full):image;
+return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+large+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div><div class="muted">'+esc(e.context?.location||"場所の記録なし")+'</div></div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>調べた内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';rerunRecords=new Map(entries.map(e=>[String(e.id),e]));/* 原寸がまだ手元にない記録 (別の端末から来たもの) は、押されたときに引く。
+   引くまでは小さいほうを出しておく — 何も出さないより読み手の役に立つ */
+document.querySelectorAll(".entry .photo").forEach(b=>b.onclick=async()=>{
+  $("large").src=b.dataset.src;$("lightbox").showModal();
+  const record=rerunRecords.get(b.closest("article").dataset.id);
+  if(!record||recordPhotos(record).length)return;
+  const photos=await pullPhotosIfMissing(record,b.closest("article"));
+  if(photos&&photos[0])$("large").src=URL.createObjectURL(photos[0]);
+});document.querySelectorAll(".entry").forEach(node=>{const b=node.querySelector(".again");if(!b)return;const rec=entries.find(e=>String(e.id)===node.dataset.id);if(rec)b.onclick=()=>reidentify(rec,b,node.querySelector(".again-message"))});document.querySelectorAll(".one").forEach(b=>b.onclick=async()=>{const node=b.closest("article");const entry=entries.find(e=>String(e.id)===node.dataset.id);if(!confirmDelete("「"+title(entry||{})+"」の記録を削除しますか？"))return;const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").delete(node.dataset.id);await finished(t);scheduleAutoBackup();location.reload()})}$("close").onclick=()=>$("lightbox").close();$("clear").onclick=async()=>{if(confirmDelete("この端末に保存した記録を、すべて削除しますか？")){const d=await openDb(),t=d.transaction("entries","readwrite");t.objectStore("entries").clear();await finished(t);scheduleAutoBackup();location.reload()}};render().catch(e=>$("historyList").innerHTML='<div class="empty">記録を読み込めませんでした。 '+esc(e.message)+'</div>');
 /* 開いた直後にドライブから取り込むことがある。一覧はもう描き終わっているので、
    届いたら描き直す。押していないのに中身が入れ替わるのは、記録が端末をまたいで
    同じものになるという約束のとおり */
@@ -348,15 +360,17 @@ function resumeRerun(){
    一覧を出すだけでは引かない (50件ぶん引くことになる) */
 const pulledPhotos=new Set();
 async function pullPhotosIfMissing(record,node){
-  if(recordPhotos(record).length||!(record.drivePhotos||[]).length)return;
-  if(pulledPhotos.has(String(record.id))||typeof fetchRecordPhotos!=="function")return;
+  if(recordPhotos(record).length||!(record.drivePhotos||[]).length)return [];
+  if(pulledPhotos.has(String(record.id))||typeof fetchRecordPhotos!=="function")return [];
   pulledPhotos.add(String(record.id));
   try{
     const photos=await fetchRecordPhotos(record);
-    if(!photos.length)return;
+    if(!photos.length)return [];
     record.thumbnails=photos;record.thumbnail=photos[0];
     const detail=node.querySelector(".detail");
     if(detail){const open=detail.open;detail.innerHTML='<summary>調べた内容を見る</summary>'+fullDetail(record);detail.open=open;
       detail.querySelectorAll(".detail-photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()})}
+    return photos;
   }catch(error){console.info("原寸を引けませんでした",error)}
+  return [];
 }

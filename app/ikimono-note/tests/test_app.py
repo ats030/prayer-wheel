@@ -1949,10 +1949,19 @@ def test_the_send_size_can_be_measured_not_just_asserted():
     assert 'f"/{SIZE}."' in fetcher
 
 
-def test_the_history_row_uses_the_small_thumbnail():
-    """行では80pxで出す。1600pxを50行ぶん展開しない。"""
+def test_the_row_shows_the_small_one_but_opens_the_full_one():
+    """行に出すのは小さいほう、押して開くのは原寸。
+
+    同じものを両方に使っていたため、拡大すると320pxが引き伸ばされて出ていた。
+    行は80pxで50行ぶん展開するので小さいほうが要り、拡大は原寸でなければ意味がない。
+    """
     history = client.get("/assets/history.js").text
-    assert "e.listThumbnail||e.thumbnail" in history
+    assert "const full=recordPhotos(e)[0]||null;const small=e.listThumbnail||full;" in history
+    assert 'data-src="\'+large+\'"' in history       # 押して開くのは原寸
+    assert '<img class="thumb" src="\'+image+\'"' in history  # 行に出すのは小さいほう
+    # 原寸が手元にない記録は、押されたときに引いて差し替える
+    assert "const photos=await pullPhotosIfMissing(record,b.closest(\"article\"))" in history
+    assert "if(photos&&photos[0])$(\"large\").src=URL.createObjectURL(photos[0])" in history
     index = client.get("/assets/index.js").text
     assert "shrinkForHistory(thumbnail,LIST_MAX_EDGE)" in index
     assert "listThumbnail}" in index
