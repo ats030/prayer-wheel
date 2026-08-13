@@ -1988,6 +1988,23 @@ def test_the_hidden_attribute_actually_hides_on_every_page():
         assert "[hidden]{display:none!important}" in css, name
 
 
+def test_the_screen_names_the_ai_that_actually_ran():
+    """Gemini を選んでいるのに Ollama と出ていた。
+
+    loadSettings が providerLabel(provider) を呼びながら戻り値を捨てており、
+    providerName は初期値の "Ollama" のまま一度も更新されなかった。ヘッダー、
+    待っているあいだの表示、そして記録に残す provider まで全部が嘘になる。
+    DESIGN.md が「使うAIは実物の名前で言う」と決めているのはここのこと。
+    """
+    index = client.get("/assets/index.js").text
+    assert "providerName=providerLabel(provider);" in index
+    assert "providerLabel(provider);" not in index.replace("providerName=providerLabel(provider);", "")
+    # 記録にもその名前が入る
+    assert "provider:providerName" in index
+    links = client.get("/assets/species-links.js").text
+    assert 'gemini: "Gemini"' in links and 'local: "Ollama"' in links
+
+
 def test_waiting_is_visible_where_the_answer_will_appear():
     """処理中が分かりづらかった。status 行は撮影パネルの下にあり、目に入らない。"""
     index = client.get("/assets/index.js").text
