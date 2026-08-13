@@ -1,4 +1,6 @@
-const $=x=>document.getElementById(x),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));function openDb(){return new Promise((ok,no)=>{const r=indexedDB.open("species-history",1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains("entries"))r.result.createObjectStore("entries",{keyPath:"id"})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function request(r){return new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function finished(t){return new Promise((ok,no)=>{t.oncomplete=ok;t.onerror=()=>no(t.error)})}const title=e=>e.candidates?.[0]?.common_name_ja||e.category||"調べた記録";
+const $=x=>document.getElementById(x),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));function openDb(){return new Promise((ok,no)=>{const r=indexedDB.open("species-history",1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains("entries"))r.result.createObjectStore("entries",{keyPath:"id"})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function request(r){return new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function finished(t){return new Promise((ok,no)=>{t.oncomplete=ok;t.onerror=()=>no(t.error)})}/* 候補ゼロのとき分類名に落ちると、「菌類」という名前の生きものを見つけたように読める。
+   分類は行の印のほうへ回す */
+const title=e=>e.candidates?.[0]?.common_name_ja||(e.candidates?"候補が見つかりませんでした":"調べた記録");
 async function all(){const d=await openDb(),t=d.transaction("entries"),v=await request(t.objectStore("entries").getAll());await finished(t);d.close();return v.sort((a,b)=>b.createdAt.localeCompare(a.createdAt))}let mapEntries=[];let rerunRecords=new Map();
 function loadLeaflet(){if(window.L)return Promise.resolve();return new Promise((ok,no)=>{const css=document.createElement("link");css.rel="stylesheet";css.href="/vendor/leaflet/leaflet.css";document.head.append(css);const js=document.createElement("script");js.src="/vendor/leaflet/leaflet.js";js.onload=()=>ok();js.onerror=()=>no(new Error("地図を読み込めませんでした。"));document.head.append(js)})}
 async function showMap(){const button=$("showMap");button.disabled=true;button.textContent="地図を読み込み中…";try{await loadLeaflet();$("historyMap").classList.remove("hidden");map(mapEntries);button.remove()}catch(e){button.disabled=false;button.textContent="地図を表示";$("mapNotice").textContent=e.message}}
@@ -36,11 +38,27 @@ function driveNote(){
 function confirmDelete(what){
   return confirm(what+"\n写真もいっしょに消え、元に戻せません。"+driveNote());
 }
+/* 一覧の行は候補名を太字で出すだけだった。60%「2つの方法で確認」も30%「決め手なし」も
+   同じ見た目で、結果画面が守っている「これは候補である」という約束を一覧だけが破っていた。
+   記録は後日読み返すもので、そのときには確からしさの記憶が消えている。 */
+const ROW_STATUS={corroborated:"2つの方法で確認",specialist_only:"植物のサービスだけが答えた",
+                  taxonomy_only:"写真からの推測",uncertain:"決め手なし"};
+function rowMarks(e){
+  const top=(e.candidates||[])[0];
+  const marks=[];
+  if(!top)marks.push('<span class="badge">'+esc(e.category||"分類なし")+'</span>');
+  else marks.push('<span class="badge'+(top.evidence_status==="corroborated"?" verified":"")+'">'
+    +esc(ROW_STATUS[top.evidence_status]||"写真からの推測")+'</span>');
+  /* 法律に関わる唯一の事実が、開かないと出てこないのはおかしい */
+  if((e.candidates||[]).some(c=>c?.protected_species?.category))
+    marks.push('<span class="badge protected-mark">種の保存法の指定</span>');
+  return '<span class="row-marks">'+marks.join("")+'</span>';
+}
 async function render(){const entries=await all();mapEntries=entries;const located=entries.filter(e=>Number.isFinite(Number(e.coordinates?.latitude))&&Number.isFinite(Number(e.coordinates?.longitude)));$("showMap").disabled=!located.length;if(!located.length)$("mapNotice").textContent="場所を記録した記録がまだないため、地図は表示できません。";$("historyList").innerHTML=entries.length?entries.map(e=>{/* 行に出すのは小さいほう (50行ぶん展開するので)。押して開くのは原寸。
    ここを同じものにしていたため、拡大すると320pxが引き伸ばされて出ていた */
 const full=recordPhotos(e)[0]||null;const small=e.listThumbnail||full;
 const image=small?URL.createObjectURL(small):"";const large=full?URL.createObjectURL(full):image;
-return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+large+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div><div class="muted">'+esc(e.context?.location||"場所の記録なし")+'</div></div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>調べた内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';rerunRecords=new Map(entries.map(e=>[String(e.id),e]));/* 原寸がまだ手元にない記録 (別の端末から来たもの) は、押されたときに引く。
+return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+large+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+rowMarks(e)+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div><div class="muted">'+esc(e.context?.location||"場所の記録なし")+'</div></div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>調べた内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';rerunRecords=new Map(entries.map(e=>[String(e.id),e]));/* 原寸がまだ手元にない記録 (別の端末から来たもの) は、押されたときに引く。
    引くまでは小さいほうを出しておく — 何も出さないより読み手の役に立つ */
 document.querySelectorAll(".entry .photo").forEach(b=>b.onclick=async()=>{
   $("large").src=b.dataset.src;$("lightbox").showModal();

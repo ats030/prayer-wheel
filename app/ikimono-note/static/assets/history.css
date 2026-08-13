@@ -52,3 +52,9 @@
 .detail-photos{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
 .detail-photos .photo{padding:0;border:1px solid var(--line);border-radius:8px;background:var(--raised);overflow:hidden;cursor:pointer;min-height:0}
 .detail-photos img{display:block;width:104px;height:104px;object-fit:cover}
+
+/* 行の印。候補名だけだと、決め手のない推測も確認済みも同じ見た目になる */
+.row-marks{display:inline-flex;flex-wrap:wrap;gap:5px;margin-left:8px;vertical-align:middle}
+.row-marks .badge{margin:0}
+.badge.protected-mark{border-color:var(--danger);color:var(--danger)}
+@media(max-width:520px){.row-marks{display:flex;margin:4px 0 0}}

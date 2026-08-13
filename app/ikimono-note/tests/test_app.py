@@ -1947,6 +1947,39 @@ def test_the_send_size_can_be_measured_not_just_asserted():
     assert 'f"/{SIZE}."' in fetcher
 
 
+def test_the_list_says_how_sure_each_record_is():
+    """一覧が候補を断定に見せていた。
+
+    行は候補名を太字で出すだけで、60%「2つの方法で確認」も30%「決め手なし」も
+    同じ見た目だった。結果画面が守っている「これは候補である」という約束を、
+    一覧だけが破っていた。記録は後日読み返すもので、確からしさの記憶は消えている。
+    """
+    history = client.get("/assets/history.js").text
+    assert "function rowMarks(e)" in history
+    assert "const ROW_STATUS=" in history
+    for word in ["2つの方法で確認", "決め手なし", "写真からの推測", "植物のサービスだけが答えた"]:
+        assert word in history, word
+    assert "esc(title(e))+rowMarks(e)" in history      # 行の見出しに添える
+    assert ".row-marks{" in client.get("/assets/history.css").text
+
+
+def test_a_record_with_no_candidate_does_not_look_like_a_species():
+    """候補ゼロのとき分類名に落ちると、「菌類」という名前の生きものに見えた。"""
+    history = client.get("/assets/history.js").text
+    assert '"候補が見つかりませんでした"' in history
+    assert 'e.candidates?.[0]?.common_name_ja||e.category' not in history
+    # 分類は見出しではなく印のほうへ回す
+    assert 'if(!top)marks.push(\'<span class="badge">\'+esc(e.category||"分類なし")' in history
+
+
+def test_a_protected_species_is_visible_without_opening_the_record():
+    """法律に関わる唯一の事実が、開かないと出てこないのはおかしい。"""
+    history = client.get("/assets/history.js").text
+    assert 'c?.protected_species?.category' in history
+    assert '種の保存法の指定</span>' in history
+    assert ".badge.protected-mark{" in client.get("/assets/history.css").text
+
+
 def test_the_row_shows_the_small_one_but_opens_the_full_one():
     """行に出すのは小さいほう、押して開くのは原寸。
 
