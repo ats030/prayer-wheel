@@ -2900,3 +2900,30 @@ def test_the_browser_may_reach_a_local_ollama():
     assert "localRadio.disabled=!(localAvailable||data.local_in_browser);" in settings
     assert "localUrl:$(\"local-llm-url\").value.trim()" in settings
     assert "公開版では運営者が管理します" not in settings
+
+
+def test_security_headers_survive_an_early_return():
+    """途中の処理が早めに返すと、内側にある処理は動かない。
+
+    ヘッダ付けを require_login より内側に置いていたため、ログインへの転送も、
+    401 の応答も、未ログインのトップも CSP なしで出ていた。トップを直接返す
+    ようにした時点で、表紙が丸ごと無防備になった。
+    """
+    source = Path("main.py").read_text(encoding="utf-8")
+    # 最後に登録したものが一番外側で回る
+    assert source.index("async def require_login") < source.index("async def security_headers")
+
+    for path in ("/", "/login", "/privacy"):
+        headers = client.get(path).headers
+        assert "content-security-policy" in headers, f"{path} に CSP が無い"
+        assert headers["x-content-type-options"] == "nosniff"
+
+    # 転送と 401 にも付く
+    import main
+    original = main.PUBLIC_MODE
+    try:
+        main.PUBLIC_MODE = True
+        blocked = client.get("/api/history-key")
+        assert "content-security-policy" in blocked.headers
+    finally:
+        main.PUBLIC_MODE = original

@@ -145,32 +145,6 @@ CONTENT_SECURITY_POLICY = "; ".join([
 ])
 
 
-@app.middleware("http")
-async def security_headers(request: Request, call_next):
-    response = await call_next(request)
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "camera=(self), geolocation=(self)"
-    # same-origin にすると、開いたポップアップとの window.opener が切れる。
-    # Google の認可はポップアップで許可を取り、親へ postMessage で結果を返すので、
-    # 認可が通っているのに結果が届かず「ポップアップが閉じられた」ようにしか見えない。
-    # allow-popups は、自分が開いたポップアップとのやり取りだけを許す。
-    # 別サイトから開かれたときにこちらを覗かれない保護は残る。
-    response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
-    response.headers["Content-Security-Policy"] = CONTENT_SECURITY_POLICY
-    # Cache-Control が無いと、ブラウザは Last-Modified から新鮮期間を推測して
-    # 再検証せずに古い CSS/JS を使い続ける。HTML が古いと、新しく足したスクリプトの
-    # <script> タグごと存在しないことになり、変更がまるごと反映されない。
-    # ETag は付いているので no-cache でも 304 で済む。
-    if request.url.path.startswith("/vendor/"):
-        # 同梱ライブラリはバージョン固定で中身が変わらない
-        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
-    else:
-        response.headers.setdefault("Cache-Control", "no-cache")
-    return response
-
-
 def _inject_site_verification(html: str) -> str:
     """Search Console の合言葉を head へ差す。設定していなければ何もしない。"""
     if not SITE_VERIFICATION or "google-site-verification" in html:
@@ -312,6 +286,38 @@ async def require_login(request: Request, call_next):
         # ログイン済みの人はここへ来ない (上で素通ししている)
         return _page("login.html")
     return RedirectResponse("/login", status_code=303)
+
+
+# ヘッダは一番外側で付ける。
+#
+# 途中の処理が早めに返すと、内側にある処理は動かない。require_login より内側に
+# 置いていたため、ログインへの転送・401の応答・未ログインのトップに CSP が
+# 付いていなかった。トップを直接返すようにした時点で、表紙が丸ごと無防備になった。
+# 最後に登録したものが一番外側で回るので、ここに置く。
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(self), geolocation=(self)"
+    # same-origin にすると、開いたポップアップとの window.opener が切れる。
+    # Google の認可はポップアップで許可を取り、親へ postMessage で結果を返すので、
+    # 認可が通っているのに結果が届かず「ポップアップが閉じられた」ようにしか見えない。
+    # allow-popups は、自分が開いたポップアップとのやり取りだけを許す。
+    # 別サイトから開かれたときにこちらを覗かれない保護は残る。
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
+    response.headers["Content-Security-Policy"] = CONTENT_SECURITY_POLICY
+    # Cache-Control が無いと、ブラウザは Last-Modified から新鮮期間を推測して
+    # 再検証せずに古い CSS/JS を使い続ける。HTML が古いと、新しく足したスクリプトの
+    # <script> タグごと存在しないことになり、変更がまるごと反映されない。
+    # ETag は付いているので no-cache でも 304 で済む。
+    if request.url.path.startswith("/vendor/"):
+        # 同梱ライブラリはバージョン固定で中身が変わらない
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    else:
+        response.headers.setdefault("Cache-Control", "no-cache")
+    return response
 
 
 def await_free(function, *args):
