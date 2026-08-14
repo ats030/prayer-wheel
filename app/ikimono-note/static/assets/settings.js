@@ -20,7 +20,9 @@ function setupPublicSettings(data){
 
   const localAvailable=Boolean(data.available_models.local.length);
   const localRadio=document.querySelector("[name=provider][value=local]");
-  localRadio.disabled=!localAvailable;
+  /* サーバーからは手元の一覧を引けないが、ブラウザからは呼べる。使えない扱いに
+     しない (local_in_browser)。モデル名は利用者が直接入力する */
+  localRadio.disabled=!(localAvailable||data.local_in_browser);
   const applyStored=()=>{
     const stored=JSON.parse(localStorage.getItem("species-public-settings")||"{}");
     const chosen={
@@ -28,7 +30,7 @@ function setupPublicSettings(data){
       models:{...data.models,...(stored.models||{})}
     };
     if(!document.querySelector('[name=provider][value="'+chosen.provider+'"]'))chosen.provider="local";
-    if(chosen.provider==="local"&&!localAvailable)chosen.provider="gemini";
+    if(chosen.provider==="local"&&!(localAvailable||data.local_in_browser))chosen.provider="gemini";
     document.querySelector('[name=provider][value="'+chosen.provider+'"]').checked=true;
     for(const name of ["local","openai","anthropic","gemini"]){
       const field=$("model-"+name);
@@ -49,9 +51,15 @@ function setupPublicSettings(data){
     $("active-provider").textContent=providerLabels[chosen.provider]+" · "+chosen.models[chosen.provider];
     show("別の端末の設定を読み込みました。","success");
   });
-  $("local-llm-url").value="";
-  $("local-llm-url").disabled=true;
-  $("local-llm-url").placeholder="公開版では運営者が管理します";
+  /* 手元の Ollama はブラウザから直接呼ぶので、公開版でも宛先を入れてもらう。
+     以前は「運営者が管理します」と言って塞いでいたが、公開版のサーバーに
+     Ollama は無く、運営者は何も管理していなかった */
+  {
+    const stored=JSON.parse(localStorage.getItem("species-public-settings")||"{}");
+    $("local-llm-url").value=stored.localUrl||"http://localhost:11434";
+    $("local-llm-url").disabled=false;
+    $("local-llm-url").placeholder="http://localhost:11434";
+  }
   for(const name of ["openai","anthropic","gemini","plantnet"]){
     (el=>{const has=Boolean(readApiKey(name));el.textContent=has?(keepingKeys()?"この端末に登録済み":"このタブに登録済み"):"APIキーが未登録です";el.dataset.missing=has?"0":"1"})($("configured-"+name));
   }
@@ -67,7 +75,9 @@ function setupPublicSettings(data){
     const selectedProvider=document.querySelector("[name=provider]:checked")?.value;
     const models={};
     for(const name of ["local","openai","anthropic","gemini"])models[name]=$("model-"+name).value;
-    localStorage.setItem("species-public-settings",JSON.stringify({provider:selectedProvider,models}));
+    localStorage.setItem("species-public-settings",JSON.stringify({
+      provider:selectedProvider,models,
+      localUrl:$("local-llm-url").value.trim()||"http://localhost:11434"}));
     for(const name of ["openai","anthropic","gemini","plantnet"]){
       const input=$("key-"+name);
       if(deleteKeys.has(name))clearApiKey(name);

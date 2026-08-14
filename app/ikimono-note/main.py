@@ -136,7 +136,11 @@ CONTENT_SECURITY_POLICY = "; ".join([
     "form-action 'self'",
     "script-src 'self' https://accounts.google.com",
     "style-src 'self'",
-    "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com",
+    # 手元の Ollama をブラウザから直接呼ぶ経路のために localhost を通す。
+    # localhost はその端末の外へ出ないので、ここを開けても写真の行き先は増えない。
+    # 逆にここを閉じたままだと、利用者の Ollama に接続できない
+    "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com "
+    "https://www.googleapis.com http://localhost:11434 http://127.0.0.1:11434",
     "img-src 'self' blob: data: https://tile.openstreetmap.org https://cyberjapandata.gsi.go.jp https://*.media-amazon.com https://*.ssl-images-amazon.com",
 ])
 
@@ -185,7 +189,10 @@ def _page(name: str) -> HTMLResponse:
     html = (STATIC_DIR / name).read_text(encoding="utf-8")
     mode = "public" if PUBLIC_MODE else "operator"
     # 公開版で Ollama を出すかは PUBLIC_LOCAL の設定次第。モードとは別の軸
-    show_local = "0" if (PUBLIC_MODE and not PUBLIC_LOCAL_ENABLED) else "1"
+    # 公開版でも手元の Ollama は選べる。サーバーからは呼べないが、ブラウザからは
+    # 直接呼べるため。以前はここで隠しており、手元で動かしている人まで選択肢を
+    # 失っていた
+    show_local = "1"
     html = html.replace("<body", f'<body data-app-mode="{mode}" data-show-local="{show_local}"', 1)
     return HTMLResponse(_inject_site_verification(html))
 
@@ -461,10 +468,14 @@ def get_settings() -> dict[str, object]:
                 "partner_tag": "", "product_enabled": False,
                 "creators_api_configured": False,
             }
-        if not PUBLIC_LOCAL_ENABLED:
-            result["available_models"]["local"] = []
-            if result["provider"] == "local":
-                result["provider"] = "gemini"
+        # 公開版のサーバーに Ollama は無い。一覧も引けないので空のまま。
+        # ただし利用者の手元では動いているかもしれず、ブラウザから直接呼べる。
+        # 選べることだけ伝える。既定は Gemini のまま — 訪問者の多くは Ollama を
+        # 持っておらず、既定を local にすると初回が必ず失敗する
+        result["local_in_browser"] = True
+        result["available_models"]["local"] = []
+        if result["provider"] == "local":
+            result["provider"] = "gemini"
     return result
 
 
@@ -676,6 +687,49 @@ def identify_job(request: Request, job_id: str) -> JSONResponse:
         return JSONResponse({"status": "error", "status_code": job["status_code"],
                              "detail": job["detail"]})
     return JSONResponse({"status": "done", "result": job["result"]})
+
+
+# 手元の Ollama を、ブラウザから直接呼ぶための2つ。
+#
+# 公開版のサーバーに Ollama は無く、利用者の localhost へも届かない。かといって
+# 利用者に Ollama をインターネットへ晒させるのは筋が悪いし、サーバーが任意のURLへ
+# 接続する形は SSRF の入り口になる。写真はブラウザから手元の Ollama へ直接渡し、
+# サーバーは「何を訊くか」と「答えをどう仕上げるか」だけを貸す。
+#
+# こうするとプロンプトと仕上げ (証拠ゲート・種の保存法) がサーバーに1つのまま
+# 残る。JavaScript 側に写すと、片方だけ直して食い違う。
+
+
+class LocalResult(BaseModel):
+    text: str = Field(max_length=200_000)
+    model: str = Field(default="", max_length=120)
+
+
+@app.get("/api/local/prompt")
+def local_prompt(request: Request, location: str = "", observed_date: str = "", size: str = "") -> dict[str, object]:
+    """手元の Ollama に投げる中身。サーバーが組み立てたものをそのまま渡す。"""
+    _rate_limit(request, "local-prompt", 60)
+    return {
+        "prompt": vision.identification_prompt(location[:200], observed_date[:40], size[:120]),
+        # サーバーが Ollama を呼ぶときと同じ条件。揃えないと結果の傾向が変わる
+        "options": {"temperature": 0.1, "num_predict": 1200},
+        "format": "json",
+        "think": False,
+    }
+
+
+@app.post("/api/local/result")
+def local_result(request: Request, body: LocalResult) -> dict[str, object]:
+    """手元の Ollama が返した本文を仕上げる。写真はここへ来ない。"""
+    _rate_limit(request, "local-result", 30)
+    try:
+        parsed = vision.normalize(vision._extract_json(body.text),
+                                  model=(body.model or "local")[:120], provider="local")
+    except vision.VisionError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    except (ValueError, KeyError, TypeError) as error:
+        raise HTTPException(status_code=422, detail="手元のAIの答えを読み取れませんでした") from error
+    return pipeline.finish(parsed)
 
 
 @app.post("/identify")

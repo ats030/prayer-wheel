@@ -50,6 +50,16 @@ def identify_all(
                 result["plantnet_status"] = "unavailable"
                 result["plantnet_message"] = str(plantnet_error)
 
+    return finish(result)
+
+
+def finish(result: dict[str, Any]) -> dict[str, Any]:
+    """モデルの答えを受け取ってからの仕上げ。
+
+    ブラウザが手元の Ollama を直接呼ぶ経路 (公開版) も、ここだけを借りる。
+    証拠ゲートと種の保存法の照合をJavaScript側にも書くと、片方だけ直して
+    食い違う。写真はサーバーへ来ないが、仕上げは1か所のままにする。
+    """
     # 種の保存法の照合は証拠ゲートのあと。ゲートを通らなかった候補は画面に出ないので、
     # 出ないものへ注意書きを付けても意味がない。Pl@ntNet 経路もここを通る。
     return protected_species.annotate(vision.apply_evidence_gate(result))

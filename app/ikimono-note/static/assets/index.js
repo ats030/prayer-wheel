@@ -262,6 +262,19 @@ identify.onclick=async()=>{
   }
   const photos=await pendingPhotos();
   try{
+    /* 公開版で「手元のAI」を選んだときは、写真をサーバーへ送らない。ブラウザから
+       その場の Ollama を直接呼び、返ってきた本文だけをサーバーで仕上げる。
+       プロンプトと仕上げ (証拠ゲート・種の保存法) はサーバーに1つだけ置き、
+       ここへは写さない。写すと片方だけ直して食い違う */
+    if(window.speciesPublicMode&&provider==="local"){
+      const data=await identifyWithLocalOllama(selected,{
+        location:$("location").value,observed_date:$("observedDate").value,size:$("size").value});
+      stopWorking();
+      const context={location:$("location").value,observedDate:$("observedDate").value,size:$("size").value};
+      const coordinates=gps?{latitude:Number(gps.latitude.toFixed(4)),longitude:Number(gps.longitude.toFixed(4))}:null;
+      await finishIdentification(data,{photos,context,coordinates});
+      return;
+    }
     const response=await fetch('/identify',{method:'POST',body:fd});
     const data=await response.json();
     if(!response.ok)throw new Error(errorText(data.detail));
@@ -326,3 +339,78 @@ render=function(data){
   $("addPhotoCamera").onclick=()=>$("camera").click();
   $("addPhotoLibrary").onclick=()=>$("libraryAdd").click();
 };
+
+/* 手元の Ollama を、ブラウザから直接呼ぶ。
+ *
+ * 公開版のサーバーに Ollama は無く、利用者の localhost にも届かない。かといって
+ * 利用者に Ollama をインターネットへ晒させるのは筋が悪く、サーバーが任意のURLへ
+ * つなぐ形は SSRF の入り口になる。写真はこの端末から出さず、サーバーには
+ * 「何を訊くか」と「答えの仕上げ」だけを借りる。
+ */
+const LOCAL_OLLAMA_DEFAULT = "http://localhost:11434";
+
+function localOllamaUrl() {
+  const saved = JSON.parse(localStorage.getItem("species-public-settings") || "{}");
+  return String(saved.localUrl || LOCAL_OLLAMA_DEFAULT).replace(/\/+$/, "");
+}
+
+function localOllamaModel() {
+  const saved = JSON.parse(localStorage.getItem("species-public-settings") || "{}");
+  return String(saved.models?.local || "").trim();
+}
+
+async function fileToBase64(file) {
+  const buffer = await file.arrayBuffer();
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  /* 一度に渡すと引数の数で落ちるので刻む */
+  for (let i = 0; i < bytes.length; i += 8192) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+  }
+  return btoa(binary);
+}
+
+async function identifyWithLocalOllama(files, context) {
+  const model = localOllamaModel();
+  if (!model) throw new Error("設定で、手元のAIのモデル名を入れてください（例: gemma4:12b）");
+  const url = localOllamaUrl();
+
+  const query = new URLSearchParams(context).toString();
+  const asked = await fetch("/api/local/prompt?" + query);
+  if (!asked.ok) throw new Error("問いかけの文面を受け取れませんでした");
+  const ask = await asked.json();
+
+  const images = [];
+  for (const file of files) images.push(await fileToBase64(file));
+
+  let content;
+  try {
+    const response = await fetch(url + "/api/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        model,
+        messages: [{role: "user", content: ask.prompt, images}],
+        stream: false, think: ask.think, format: ask.format, options: ask.options,
+      }),
+    });
+    if (!response.ok) throw new Error("手元のAIがエラーを返しました（" + response.status + "）");
+    content = (await response.json())?.message?.content || "";
+  } catch (error) {
+    /* つながらない理由はだいたい3つで、利用者が打てる手が違う */
+    if (error instanceof TypeError) {
+      throw new Error("手元のAIにつながりません。Ollama が動いているか、"
+        + "このサイトからの接続を許しているか（OLLAMA_ORIGINS）を確かめてください。"
+        + "接続先: " + url);
+    }
+    throw error;
+  }
+
+  const finished = await fetch("/api/local/result", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({text: content, model}),
+  });
+  const data = await finished.json();
+  if (!finished.ok) throw new Error(errorText(data.detail));
+  return data;
+}

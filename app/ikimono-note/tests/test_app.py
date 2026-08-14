@@ -641,9 +641,14 @@ def test_public_settings_ui_keeps_keys_in_tab_session():
 def test_public_mode_disables_operator_local_llm_by_default(monkeypatch):
     monkeypatch.setattr(main, "PUBLIC_MODE", True)
     monkeypatch.setattr(main, "PUBLIC_LOCAL_ENABLED", False)
-    response = client.get("/api/settings")
-    assert response.json()["provider"] == "gemini"
-    assert response.json()["available_models"]["local"] == []
+    body = client.get("/api/settings").json()
+    # 既定は Gemini。訪問者の多くは Ollama を持っておらず、local を既定にすると
+    # 初回が必ず失敗する
+    assert body["provider"] == "gemini"
+    # サーバーからは手元の一覧を引けない
+    assert body["available_models"]["local"] == []
+    # ただし選べることは伝える。ブラウザから直接呼べるため
+    assert body["local_in_browser"] is True
 
 
 def test_rate_limit_returns_retry_after():
@@ -2838,3 +2843,60 @@ def test_the_entrance_describes_the_real_data_path():
     # サーバーが受け取る作りであることを、実装の側でも確かめる
     source = Path("main.py").read_text(encoding="utf-8")
     assert "request_api_key" in source
+
+
+def test_a_visitor_can_use_their_own_ollama_without_exposing_it():
+    """公開版のサーバーに Ollama は無く、利用者の localhost にも届かない。
+
+    利用者に Ollama をインターネットへ晒させるのは筋が悪く、サーバーが任意の
+    URL へつなぐ形は SSRF の入り口になる。写真はブラウザから手元の Ollama へ
+    直接渡し、サーバーは「何を訊くか」と「答えの仕上げ」だけを貸す。
+    """
+    ask = client.get("/api/local/prompt?location=日本&size=5cm")
+    assert ask.status_code == 200
+    body = ask.json()
+    assert "撮影地域: 日本" in body["prompt"] and "大きさ: 5cm" in body["prompt"]
+    # サーバーが Ollama を呼ぶときと同じ条件。揃えないと結果の傾向が変わる
+    assert body["options"] == {"temperature": 0.1, "num_predict": 1200}
+    assert body["format"] == "json" and body["think"] is False
+
+    raw = ('{"category":"植物","candidates":[{"scientific_name":"Taraxacum officinale",'
+           '"common_name_ja":"セイヨウタンポポ","confidence":70,"traits":["頭花が黄色"],'
+           '"distinguishing_features":["総苞外片が反り返る"],"contradictions":[]}]}')
+    done = client.post("/api/local/result", json={"text": raw, "model": "gemma4:12b"})
+    assert done.status_code == 200
+    assert done.json()["provider"] == "local"
+    # 読めない答えは 422。500 にすると、利用者の側の問題が障害に見える
+    assert client.post("/api/local/result", json={"text": "ただの文章"}).status_code == 422
+
+
+def test_the_finishing_touches_live_in_one_place():
+    """証拠ゲートと種の保存法の照合を JavaScript にも書くと、片方だけ直して食い違う。"""
+    pipeline_source = Path("pipeline.py").read_text(encoding="utf-8")
+    assert "def finish(result: dict[str, Any]) -> dict[str, Any]:" in pipeline_source
+    assert "return finish(result)" in pipeline_source
+    main_source = Path("main.py").read_text(encoding="utf-8")
+    assert "return pipeline.finish(parsed)" in main_source
+    index = client.get("/assets/index.js").text
+    assert "async function identifyWithLocalOllama(files, context)" in index
+    # ブラウザは写真を渡して本文を受け取り、仕上げはサーバーへ預ける。
+    # 注記を画面に描くのはブラウザの仕事だが、誰が保護種かを決めるのはサーバー
+    assert '/api/local/prompt?' in index and '"/api/local/result"' in index
+    assert "protected_species.json" not in index
+
+    # 両方の経路が同じ仕上げを通る。サーバー経由の識別も、手元の Ollama も
+    assert main_source.count("pipeline.finish(") == 1
+    assert pipeline_source.count("def finish(") == 1
+
+
+def test_the_browser_may_reach_a_local_ollama():
+    """localhost はその端末の外へ出ない。ここを閉じたままだと接続できない。"""
+    csp = client.get("/login").headers.get("content-security-policy", "")
+    assert "http://localhost:11434" in csp and "http://127.0.0.1:11434" in csp
+    # 公開版でも選べる。以前は隠しており、手元で動かしている人まで選択肢を失っていた
+    source = Path("main.py").read_text(encoding="utf-8")
+    assert 'show_local = "1"' in source
+    settings = client.get("/assets/settings.js").text
+    assert "localRadio.disabled=!(localAvailable||data.local_in_browser);" in settings
+    assert "localUrl:$(\"local-llm-url\").value.trim()" in settings
+    assert "公開版では運営者が管理します" not in settings

@@ -15,6 +15,11 @@ from __future__ import annotations
 import argparse
 import glob
 import os
+from pathlib import Path
+import httpx
+import time
+import subprocess
+import contextlib
 import json
 import sys
 
@@ -22,8 +27,41 @@ from playwright.sync_api import sync_playwright
 
 # 公開の経路は変わりうる (Tailscale Funnel は .ts.net しか使えず、独自ドメインへ
 # 移るときに丸ごと差し替わる)。環境変数で上書きできるようにしておく。
-ADMIN = os.getenv("IKIMONO_ADMIN_ORIGIN", "https://ubuntu-server-app.tailf74832.ts.net:8443")
-PUBLIC = os.getenv("IKIMONO_PUBLIC_ORIGIN", "https://ubuntu-server-app.tailf74832.ts.net")
+# 手元の2つ (運営者用 :8443 と Funnel 公開版) は 2026-08-14 に止めた。本番は
+# ログインの内側なので、この検査は通せない (画面の中身を見るため)。
+# 既定では、この場でアプリを1つ起こして当てる。外の相手を見たいときは環境変数で。
+LOCAL_PORT = int(os.getenv("IKIMONO_SMOKE_PORT", "8531"))
+LOCAL = f"http://127.0.0.1:{LOCAL_PORT}"
+ADMIN = os.getenv("IKIMONO_ADMIN_ORIGIN", "")
+PUBLIC = os.getenv("IKIMONO_PUBLIC_ORIGIN", "")
+
+
+@contextlib.contextmanager
+def app_for_checking():
+    """検査用に1つ起こす。運営者モード (ログイン無し) で、手元の設定を読む。"""
+    if ADMIN:
+        yield ADMIN, PUBLIC or ADMIN
+        return
+    environment = {**os.environ, "IKIMONO_PUBLIC_MODE": "0",
+                   "IKIMONO_ALLOWED_HOSTS": "127.0.0.1,localhost"}
+    process = subprocess.Popen(
+        [sys.executable, "-m", "uvicorn", "main:app", "--host", "127.0.0.1",
+         "--port", str(LOCAL_PORT), "--log-level", "warning"],
+        cwd=str(Path(__file__).resolve().parent.parent), env=environment,
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        for _ in range(60):
+            try:
+                if httpx.get(LOCAL + "/health", timeout=2).status_code == 200:
+                    break
+            except httpx.HTTPError:
+                time.sleep(0.5)
+        else:
+            raise SystemExit("検査用のアプリが起動しませんでした")
+        yield LOCAL, LOCAL
+    finally:
+        process.terminate()
+        process.wait(timeout=15)
 SAMPLE = {
     "category": "植物", "summary": "キク科の草本と考えられます。", "plantnet_used": False,
     "candidates": [{
@@ -194,13 +232,14 @@ def run(base: str, do_identify: bool) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--base", default=ADMIN, help=f"確かめる入口 (既定: {ADMIN})")
-    parser.add_argument("--public", action="store_true", help=f"公開版 ({PUBLIC}) を見る")
+    parser.add_argument("--base", default="", help="確かめる入口 (既定: この場で1つ起こす)")
+    parser.add_argument("--public", action="store_true", help="公開版として見る")
     parser.add_argument("--identify", action="store_true", help="実際に識別まで通す (1分ほどかかる)")
     args = parser.parse_args()
-    base = PUBLIC if args.public else args.base
-    print(f"■ {base}")
-    run(base, args.identify)
+    with app_for_checking() as (admin, public):
+        base = args.base or (public if args.public else admin)
+        print(f"■ {base}")
+        run(base, args.identify)
     if failures:
         print(f"\n{len(failures)}件だめでした: {', '.join(failures)}")
         return 1
