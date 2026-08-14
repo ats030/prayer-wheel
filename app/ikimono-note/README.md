@@ -122,8 +122,23 @@ Tailscale Funnel での公開は 2026-08-14 に止めた (`ikimono-note-public.s
 stop + disable、`tailscale funnel --https=443 off`)。Personal プランは非商用限定で、
 広告を出す以上そこには置けない (ats030-rx76)。
 
-手元に残っているのは運営者用だけ。`ikimono-note.service` (:8523) を tailnet の
-:8443 が見ている。こちらは公開されていない。
+**手元では何も動いていない。** 運営者用 (`ikimono-note.service` :8523 → tailnet :8443) も
+2026-08-14 に止めた (stop + disable、`tailscale serve --https=8443 off`)。同じアプリを
+2つの姿で動かす手間に見合わなくなったため。実際、公開版向けに入れた転送処理が運営者用の
+画面を公開サイトへ飛ばしかけている。
+
+止めても失われないもの:
+
+- **評価** — `eval/run_eval.py` は `import pipeline` でモジュールを直接呼ぶ。Web サービスを
+  経由しないので、Ollama (:11434) さえ動いていれば従来どおり回る
+- **Ollama** — 別プロセスなので影響を受けない
+- **設定値** — `~/.config/ikimono-note/settings.json` は残っており、`deploy-cloudrun.sh` が
+  ここからアフィリエイトと Amazon の値を読む。画面から編集できなくなったので、変えるときは
+  JSON を直接編集する
+
+再開するときは `systemctl --user enable --now ikimono-note.service` と
+`tailscale serve --bg --https=8443 http://127.0.0.1:8523`。`~/.env` の
+`IKIMONO_PUBLIC_ORIGIN` は tailnet の URL のまま残してあるので、そのまま動く。
 
 ### Cloud Run へ出す
 
