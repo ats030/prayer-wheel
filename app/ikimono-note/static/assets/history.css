@@ -58,3 +58,14 @@
 .row-marks .badge{margin:0}
 .badge.protected-mark{border-color:var(--danger);color:var(--danger)}
 @media(max-width:520px){.row-marks{display:flex;margin:4px 0 0}}
+
+/* 利用者自身の観察。AIの要約・候補とは面も見出しも分け、出所を混ぜない */
+.observation-note{margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--raised)}
+.note-heading{font-weight:700}
+.observation-note p{margin:3px 0 8px;color:var(--muted);font-size:12px}
+.note-input{display:block;width:100%;min-height:104px;resize:vertical;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);padding:10px;font:inherit;line-height:1.55}
+.note-input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.note-meta{display:flex;justify-content:space-between;gap:12px;margin-top:6px;color:var(--muted);font-size:11px}
+.note-status{text-align:right}
+.badge.note-mark{border-color:var(--accent);color:var(--accent)}
+@media(max-width:520px){.note-meta{align-items:flex-start;flex-direction:column;gap:2px}.note-status{text-align:left}}

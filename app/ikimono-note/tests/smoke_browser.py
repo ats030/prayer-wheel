@@ -159,6 +159,48 @@ def run(base: str, do_identify: bool) -> None:
         check("モデルの選択肢が描けている", page.locator("select[id^=model-]").count() >= 3)
         check("ドライブの導線が出る", page.locator("#drive-connect").count() == 1)
 
+        # 利用者自身の観察メモ。AIの候補とは別に保存され、再読込でも残る
+        page.goto(base + "/history"); page.wait_for_load_state("networkidle")
+        note_record = {**json.loads(json.dumps(SAMPLE)), "id": "note-smoke",
+                       "createdAt": "2026-08-14T12:00:00Z", "context": {},
+                       "coordinates": None, "provider": "ollama", "model": "smoke"}
+        page.evaluate("""record => new Promise((resolve, reject) => {
+          const open = indexedDB.open("species-history", 1);
+          open.onupgradeneeded = () => open.result.createObjectStore("entries", {keyPath: "id"});
+          open.onerror = () => reject(open.error);
+          open.onsuccess = () => {
+            const tx = open.result.transaction("entries", "readwrite");
+            tx.objectStore("entries").put(record);
+            tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+          };
+        })""", note_record)
+        page.reload(); page.wait_for_load_state("networkidle"); page.wait_for_timeout(500)
+        page.locator('.entry[data-id="note-smoke"] summary').click()
+        note = page.locator('.entry[data-id="note-smoke"] .note-input')
+        check("記録に自分の観察欄が出る", note.count() == 1)
+        note.fill("<b>夕方には花が閉じていた</b>")
+        page.wait_for_timeout(1000)
+        check("観察メモが自動保存される", "保存済み" in page.locator(
+              '.entry[data-id="note-smoke"] .note-status').inner_text())
+        page.reload(); page.wait_for_load_state("networkidle"); page.wait_for_timeout(500)
+        page.locator('.entry[data-id="note-smoke"] summary').click()
+        check("観察メモが再読込後も残る", page.locator(
+              '.entry[data-id="note-smoke"] .note-input').input_value() == "<b>夕方には花が閉じていた</b>")
+        check("メモのある記録に印が付く", page.locator(
+              '.entry[data-id="note-smoke"] .note-mark').count() == 1)
+        older = {**note_record, "userNote": "古い端末のメモ",
+                 "noteUpdatedAt": "2020-01-01T00:00:00Z"}
+        page.evaluate("record => restoreBackup({format: BACKUP_FORMAT, records: [record]})", older)
+        page.reload(); page.wait_for_load_state("networkidle"); page.wait_for_timeout(500)
+        page.locator('.entry[data-id="note-smoke"] summary').click()
+        check("古いDriveメモで新しい端末メモを上書きしない", page.locator(
+              '.entry[data-id="note-smoke"] .note-input').input_value() == "<b>夕方には花が閉じていた</b>")
+        page.set_viewport_size({"width": 390, "height": 844})
+        box = page.locator('.entry[data-id="note-smoke"] .note-input').bounding_box()
+        check("観察メモ欄がスマホ幅に収まる", bool(box) and box["x"] >= 0 and box["x"] + box["width"] <= 390,
+              str(box))
+        page.set_viewport_size({"width": 1100, "height": 900})
+
         # テーマの切り替え
         page.goto(base + "/"); page.wait_for_load_state("networkidle")
         before = page.evaluate("() => getComputedStyle(document.body).backgroundColor")

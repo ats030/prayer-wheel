@@ -155,6 +155,14 @@ async function restoreBackup(payload) {
       if (!entry.thumbnails.length && kept.length) { entry.thumbnails = kept; entry.thumbnail = kept[0]; }
       if (!entry.listThumbnail && existing.listThumbnail) entry.listThumbnail = existing.listThumbnail;
       if (!entry.drivePhotos.length && Array.isArray(existing.drivePhotos)) entry.drivePhotos = existing.drivePhotos;
+      /* 同じ記録を別端末で編集した場合、古いDriveファイルで新しい観察メモを
+         上書きしない。空欄への変更も更新時刻を持つので、削除も正しく伝わる。 */
+      const incomingNoteAt = String(entry.noteUpdatedAt || "");
+      const existingNoteAt = String(existing.noteUpdatedAt || "");
+      if (existingNoteAt && (!incomingNoteAt || existingNoteAt > incomingNoteAt)) {
+        entry.userNote = existing.userNote || "";
+        entry.noteUpdatedAt = existingNoteAt;
+      }
     }
     const transaction = db.transaction("entries", "readwrite");
     transaction.objectStore("entries").put(entry);

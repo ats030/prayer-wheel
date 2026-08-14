@@ -52,13 +52,15 @@ function rowMarks(e){
   /* 法律に関わる唯一の事実が、開かないと出てこないのはおかしい */
   if((e.candidates||[]).some(c=>c?.protected_species?.category))
     marks.push('<span class="badge protected-mark">種の保存法の指定</span>');
+  if(String(e.userNote||"").trim())
+    marks.push('<span class="badge note-mark">観察メモあり</span>');
   return '<span class="row-marks">'+marks.join("")+'</span>';
 }
 async function render(){const entries=await all();mapEntries=entries;const located=entries.filter(e=>Number.isFinite(Number(e.coordinates?.latitude))&&Number.isFinite(Number(e.coordinates?.longitude)));$("showMap").disabled=!located.length;if(!located.length)$("mapNotice").textContent="場所を記録した記録がまだないため、地図は表示できません。";$("historyList").innerHTML=entries.length?entries.map(e=>{/* 行に出すのは小さいほう (50行ぶん展開するので)。押して開くのは原寸。
    ここを同じものにしていたため、拡大すると320pxが引き伸ばされて出ていた */
 const full=recordPhotos(e)[0]||null;const small=e.listThumbnail||full;
 const image=small?URL.createObjectURL(small):"";const large=full?URL.createObjectURL(full):image;
-return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+large+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+rowMarks(e)+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div><div class="muted">'+esc(e.context?.location||"場所の記録なし")+'</div></div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>調べた内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';rerunRecords=new Map(entries.map(e=>[String(e.id),e]));/* 原寸がまだ手元にない記録 (別の端末から来たもの) は、押されたときに引く。
+return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+large+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+rowMarks(e)+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div><div class="muted">'+esc(e.context?.location||"場所の記録なし")+'</div></div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>記録の内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';rerunRecords=new Map(entries.map(e=>[String(e.id),e]));/* 原寸がまだ手元にない記録 (別の端末から来たもの) は、押されたときに引く。
    引くまでは小さいほうを出しておく — 何も出さないより読み手の役に立つ */
 document.querySelectorAll(".entry .photo").forEach(b=>b.onclick=async()=>{
   $("large").src=b.dataset.src;$("lightbox").showModal();
@@ -71,7 +73,7 @@ document.querySelectorAll(".entry .photo").forEach(b=>b.onclick=async()=>{
    届いたら描き直す。押していないのに中身が入れ替わるのは、記録が端末をまたいで
    同じものになるという約束のとおり */
 document.addEventListener("species-records-restored",()=>{
-  /* 描き直すと「調べた内容を見る」の中身も棚も作り直しになる。読み込み直後と
+  /* 描き直すと「記録の内容を見る」の中身も棚も作り直しになる。読み込み直後と
      同じ順で組み立てる (render → enrich → 広告)。ここを render だけにしていると、
      取り込んだ記録の詳細が簡易表示のまま、広告も付かない */
   affiliateLinksAdded=false;
@@ -116,7 +118,11 @@ function detailPhotos(e){const photos=recordPhotos(e);
   return '<div class="detail-photos">'+photos.map((blob,i)=>'<button class="photo detail-photo" type="button" data-src="'
     +URL.createObjectURL(blob)+'"><img src="'+URL.createObjectURL(blob)+'" alt="調べた写真 '+(i+1)+'"></button>').join("")
     +'</div><div class="label">この記録で使った写真 '+photos.length+'枚</div>';}
-function fullDetail(e){const x=e.context||{},m=e.resultMeta||{},c=e.coordinates;return detailPhotos(e)+'<div class="facts">'+(e.category?'<div>分類：'+esc(e.category)+'</div>':"")+(e.summary?'<div>'+esc(e.summary)+'</div>':"")+((e.provider||e.model)?'<div>使ったAI：'+esc([providerLabel(e.provider),e.model].filter(Boolean).join(" · "))+'</div>':"")+(x.observedDate?'<div>撮った日：'+esc(x.observedDate)+'</div>':"")+(x.size?'<div>大きさ：'+esc(x.size)+'</div>':"")+(x.location?'<div>撮った場所：'+esc(x.location)+'</div>':"")+(c?'<div>位置：'+esc(c.latitude)+'、'+esc(c.longitude)+'（おおまかな値）</div>':"")+(m.strictMode?'<div>まちがい防止：学名を図鑑データで自動チェック</div>':"")+(m.taxonomyChecked?'<div>学名を図鑑データで確認済み'+(m.rejectedCandidates?' · 除いた候補 '+esc(m.rejectedCandidates)+'件':"")+'</div>':"")+(m.plantnetUsed?'<div>植物の候補は <a href="https://plantnet.org/" target="_blank" rel="noopener noreferrer">Pl@ntNet recognition API</a> によるもの</div>':"")+'</div><ol>'+(e.candidates||[]).map(c=>fullCandidate(c,e.category)).join("")+'</ol>'}async function enrich(){const records=await all(),byId=new Map(records.map(e=>[String(e.id),e]));document.querySelectorAll(".entry").forEach(node=>{const e=byId.get(node.dataset.id);if(e)node.querySelector(".detail").innerHTML='<summary>調べた内容を見る</summary>'+fullDetail(e)});document.querySelectorAll('.meter span[data-width]').forEach(bar=>{bar.style.width=bar.dataset.width+'%'});document.querySelectorAll(".detail-photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()})}setTimeout(()=>enrich().catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
+const NOTE_MAX_LENGTH=2000;
+function noteEditor(e){const updated=e.noteUpdatedAt?new Date(e.noteUpdatedAt).toLocaleString("ja-JP"):"";return '<section class="observation-note"><div class="note-heading">自分の観察</div><p>自分で気づいたことを書く欄です。AIが写真から読み取った内容とは別に保存します。</p><textarea class="note-input" maxlength="'+NOTE_MAX_LENGTH+'" aria-label="自分の観察" placeholder="例：葉の裏に小さな虫がいた。夕方には花が閉じていた。">'+esc(e.userNote||"")+'</textarea><div class="note-meta"><span class="note-count">'+String(e.userNote||"").length+' / '+NOTE_MAX_LENGTH+'</span><span class="note-status" role="status">'+(updated?'この端末に保存済み（'+esc(updated)+'）':'この端末に自動で保存します')+'</span></div></section>'}
+async function saveObservationNote(id,value,node){const db=await openDb(),tx=db.transaction("entries","readwrite"),store=tx.objectStore("entries"),current=await request(store.get(id));if(!current){db.close();throw new Error("記録が見つかりません")};const updated={...current,userNote:String(value).slice(0,NOTE_MAX_LENGTH),noteUpdatedAt:new Date().toISOString()};store.put(updated);await finished(tx);db.close();rerunRecords.set(String(id),updated);scheduleAutoBackup();const mark=node.querySelector(".note-mark");if(updated.userNote.trim()&&!mark){const marks=node.querySelector(".row-marks");if(marks)marks.insertAdjacentHTML("beforeend",'<span class="badge note-mark">観察メモあり</span>')}else if(!updated.userNote.trim()&&mark)mark.remove();return updated}
+function bindNoteEditor(node,e){const input=node.querySelector(".note-input"),count=node.querySelector(".note-count"),status=node.querySelector(".note-status");if(!input||!count||!status)return;let timer=null,saving=false;const save=async()=>{clearTimeout(timer);timer=null;if(saving){timer=setTimeout(save,100);return}saving=true;status.textContent="保存中…";try{const updated=await saveObservationNote(e.id,input.value,node);e.userNote=updated.userNote;e.noteUpdatedAt=updated.noteUpdatedAt;status.textContent="この端末に保存済み（"+new Date(updated.noteUpdatedAt).toLocaleString("ja-JP")+"）"}catch(error){status.textContent="保存できませんでした。もう一度入力してください";console.error("観察メモを保存できませんでした",error)}finally{saving=false}};input.addEventListener("input",()=>{count.textContent=input.value.length+" / "+NOTE_MAX_LENGTH;status.textContent="入力中…";clearTimeout(timer);timer=setTimeout(save,700)});input.addEventListener("blur",()=>{if(timer)save()})}
+function fullDetail(e){const x=e.context||{},m=e.resultMeta||{},c=e.coordinates;return detailPhotos(e)+noteEditor(e)+'<div class="facts">'+(e.category?'<div>分類：'+esc(e.category)+'</div>':"")+(e.summary?'<div>'+esc(e.summary)+'</div>':"")+((e.provider||e.model)?'<div>使ったAI：'+esc([providerLabel(e.provider),e.model].filter(Boolean).join(" · "))+'</div>':"")+(x.observedDate?'<div>撮った日：'+esc(x.observedDate)+'</div>':"")+(x.size?'<div>大きさ：'+esc(x.size)+'</div>':"")+(x.location?'<div>撮った場所：'+esc(x.location)+'</div>':"")+(c?'<div>位置：'+esc(c.latitude)+'、'+esc(c.longitude)+'（おおまかな値）</div>':"")+(m.strictMode?'<div>まちがい防止：学名を図鑑データで自動チェック</div>':"")+(m.taxonomyChecked?'<div>学名を図鑑データで確認済み'+(m.rejectedCandidates?' · 除いた候補 '+esc(m.rejectedCandidates)+'件':"")+'</div>':"")+(m.plantnetUsed?'<div>植物の候補は <a href="https://plantnet.org/" target="_blank" rel="noopener noreferrer">Pl@ntNet recognition API</a> によるもの</div>':"")+'</div><ol>'+(e.candidates||[]).map(c=>fullCandidate(c,e.category)).join("")+'</ol>'}async function enrich(){const records=await all(),byId=new Map(records.map(e=>[String(e.id),e]));document.querySelectorAll(".entry").forEach(node=>{const e=byId.get(node.dataset.id);if(e){node.querySelector(".detail").innerHTML='<summary>記録の内容を見る</summary>'+fullDetail(e);bindNoteEditor(node,e)}});document.querySelectorAll('.meter span[data-width]').forEach(bar=>{bar.style.width=bar.dataset.width+'%'});document.querySelectorAll(".detail-photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()})}setTimeout(()=>enrich().catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
 /* 撮影画面と同じく、棚は候補ごとにその候補の中へ置く。記録から読み返すときも
    「どの候補の広告か」を位置で決められる。開いたときに初めて叩くのは変えない。
    予算は1回の開閉につき通しで6回・1棚2回 (撮影画面と同じ)。集めた品は棚をまたいで
@@ -363,7 +369,7 @@ const addAffiliateLinksOnce=addAffiliateLinks;let affiliateLinksAdded=false;addA
   }
   el.hidden=false;
   const when=new Date(state.at).toLocaleString("ja-JP");
-  if(state.ok){el.className="save-state ok";el.textContent=`Google ドライブに保存済み（${when}・${state.detail}）`}
+  if(state.ok){el.className="save-state ok";el.textContent=`Google ドライブにこの端末に保存済み（${when}・${state.detail}）`}
   else{el.className="save-state warn";
     el.innerHTML=`Google ドライブへ保存できていません（${when}・${esc(state.detail)}）。<a href="/settings">設定</a>から確認してください。`}
 })();
@@ -392,7 +398,7 @@ async function pullPhotosIfMissing(record,node){
     if(!photos.length)return [];
     record.thumbnails=photos;record.thumbnail=photos[0];
     const detail=node.querySelector(".detail");
-    if(detail){const open=detail.open;detail.innerHTML='<summary>調べた内容を見る</summary>'+fullDetail(record);detail.open=open;
+    if(detail){const open=detail.open;detail.innerHTML='<summary>記録の内容を見る</summary>'+fullDetail(record);detail.open=open;bindNoteEditor(node,record);
       detail.querySelectorAll(".detail-photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()})}
     return photos;
   }catch(error){console.info("原寸を引けませんでした",error)}

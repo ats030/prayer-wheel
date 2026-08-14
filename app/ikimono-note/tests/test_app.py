@@ -1414,6 +1414,23 @@ def test_records_are_written_back_whenever_they_change():
         assert '<script src="/assets/backup.js" defer></script>' in client.get(page).text, page
 
 
+def test_user_observation_notes_are_separate_safe_and_persistent():
+    history = client.get("/assets/history.js").text
+    backup = client.get("/assets/backup.js").text
+    css = client.get("/assets/history.css").text
+    assert 'class="observation-note"' in history
+    assert 'class="note-input"' in history
+    assert "NOTE_MAX_LENGTH=2000" in history
+    assert 'esc(e.userNote||"")' in history       # textareaへHTMLを差し込まない
+    assert "userNote:String(value).slice(0,NOTE_MAX_LENGTH)" in history
+    assert "noteUpdatedAt:new Date().toISOString()" in history
+    assert "scheduleAutoBackup()" in history
+    assert ".observation-note" in css
+    # 古いDrive側の値で、端末内の新しいメモや空欄への変更を潰さない
+    assert "existingNoteAt > incomingNoteAt" in backup
+    assert "entry.userNote = existing.userNote" in backup
+
+
 def test_every_script_actually_parses():
     """文字列検査だけでは構文エラーを見逃す。実際に壊れた JS を配って
     撮影画面が動かなくなったことがあるため、パースまで確かめる。"""
