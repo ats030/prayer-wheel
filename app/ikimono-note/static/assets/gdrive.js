@@ -19,11 +19,36 @@ function driveFileName() {
 }
 const DRIVE_KEY = "species-drive-file";   // 作ったファイルのIDを覚えておく
 
-let driveToken = null;      // メモリだけに置く。保存すると盗まれたとき困る
+/* トークンはタブの中に置く (sessionStorage)。以前はメモリだけに置いていたが、
+   この画面はページごとに別なので、画面を移るたびに消えていた。消えたら取り直す
+   作りにしてあったものの、GIS の取り直しはポップアップを開くため、利用者の操作
+   なしには通らない。結果、画面を移るたびに「つなぎ直しが必要です」が出ていた。
+   タブを閉じれば消える。ディスクには残さない */
+const DRIVE_TOKEN_KEY = "species-drive-token";
+let driveToken = null;
 /* Google のアクセストークンは1時間ほどで切れる。期限を見ずに持ち続けていたため、
    タブを開いたまま1時間たつと最初の書き込みが 401 で落ち、「許可が切れました」と
    出ていた。黙って取り直せば済む場面で、利用者につなぎ直しを求めていた。 */
 let driveTokenExpiry = 0;
+
+function rememberDriveToken(token, expiry) {
+  driveToken = token;
+  driveTokenExpiry = expiry;
+  try {
+    if (token) sessionStorage.setItem(DRIVE_TOKEN_KEY, JSON.stringify({token, expiry}));
+    else sessionStorage.removeItem(DRIVE_TOKEN_KEY);
+  } catch (error) { /* 覚えられなくても、その画面のあいだは使える */ }
+}
+
+(function recallDriveToken() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(DRIVE_TOKEN_KEY) || "null");
+    if (saved && saved.token && Date.now() < saved.expiry) {
+      driveToken = saved.token;
+      driveTokenExpiry = saved.expiry;
+    }
+  } catch (error) { /* 壊れていたら無いものとして扱う */ }
+})();
 let driveClientId = "";     // 取り直すときに要る。公開情報なので秘密ではない
 /* 取り直しは同時に走らせない。GIS のトークン要求を並行で投げると、あとから
    initTokenClient したほうが driveTokenClient を上書きし、先の要求のコールバックが
@@ -55,7 +80,7 @@ function loadGoogleIdentity() {
   });
 }
 
-async function driveSignIn(clientId, {silent = false} = {}) {
+async function driveSignIn(clientId) {
   driveClientId = clientId || driveClientId;
   await loadGoogleIdentity();
   return new Promise((resolve, reject) => {
@@ -68,11 +93,11 @@ async function driveSignIn(clientId, {silent = false} = {}) {
           reject(new Error(`${response.error}${response.error_description ? "：" + response.error_description : ""}`));
           return;
         }
-        driveToken = response.access_token;
         /* 期限ぎりぎりで使うと、往復のあいだに切れる。1分手前で切れた扱いにする */
         /* 期限ぎりぎりで使うと、往復のあいだに切れる。1分手前で切れた扱いにする。
            下限を置くと、短いトークンを実際より長生きだと思い込む */
-        driveTokenExpiry = Date.now() + Math.max(0, Number(response.expires_in || 3600) - 60) * 1000;
+        rememberDriveToken(response.access_token,
+                           Date.now() + Math.max(0, Number(response.expires_in || 3600) - 60) * 1000);
         rememberDriveLink(true);
         resolve(driveToken);
       },
@@ -89,10 +114,10 @@ async function driveSignIn(clientId, {silent = false} = {}) {
         reject(new Error(`${error?.message || "Google の許可を得られませんでした"}（${kind}）${hint ? " " + hint : ""}`));
       },
     });
-    // 初回は同意画面を必ず出す。prompt に空文字を渡すと、同意が要るのに画面が
-    // 出ないまま閉じることがあり、GIS からは popup_closed としか見えない。
-    // 二度目からは prompt: "none" で、画面を出さずに取り直す
-    driveTokenClient.requestAccessToken(silent ? {prompt: "none"} : {prompt: "consent"});
+    /* 画面を出さない取得はできない。GIS のトークン取得は必ずポップアップを開き、
+       公式にも "from a user-driven event such as a button press" とある。
+       prompt: "none" を渡しても窓は開くので、押されたときにだけここへ来る */
+    driveTokenClient.requestAccessToken({prompt: "consent"});
   });
 }
 
@@ -116,24 +141,31 @@ function rememberDriveLink(linked) {
   catch (error) { /* 覚えられなくても、その場では使える */ }
 }
 
-/* 一度つないだ相手なら、画面を出さずに取り直せることが多い。取れなければ諦める。
-   自動保存のたびに許可を求めると、記録するたび画面が出て使い物にならない */
-async function ensureDriveToken(clientId) {
+/* 使えるトークンがあれば返す。無ければ、押されたときだけ取りに行く。
+ *
+ * 以前は無ければ黙って取り直していたが、GIS のトークン取得は必ずポップアップを
+ * 開き、公式にも "obtain a new token by calling requestAccessToken() from a
+ * user-driven event such as a button press" とある。読み込み時に呼んでも
+ * ブラウザに止められ、popup_failed_to_open になるだけだった。画面を移るたびに
+ * これが起き、「すぐ切れる」ように見えていた。
+ */
+async function ensureDriveToken(clientId, {interactive = false} = {}) {
   driveClientId = clientId || driveClientId;
-  /* 期限を見ずに持ち続けていたため、1時間たったトークンをそのまま使って 401 を
-     踏んでいた。切れていれば黙って取り直す */
   if (driveTokenAlive()) return driveToken;
-  driveToken = null;
+  rememberDriveToken(null, 0);
   if (!driveClientId || !driveLinked()) return null;
+  if (!interactive) {
+    /* 押されていないのに窓を開けにいかない。理由は画面に出す側で言い換える */
+    lastDriveTokenError = "";
+    return null;
+  }
   if (driveTokenRequest) return driveTokenRequest;   // すでに誰かが取りに行っている
   driveTokenRequest = (async () => {
     try {
-      const token = await driveSignIn(driveClientId, {silent: true});
+      const token = await driveSignIn(driveClientId);
       lastDriveTokenError = "";
       return token;
     } catch (error) {
-      /* prompt:"none" は、ブラウザがサードパーティCookieを止めていたり、Google 側の
-         セッションが切れていると通らない。何と言われたかを残さないと直しようがない */
       lastDriveTokenError = String(error?.message || error || "理由の記載なし");
       console.info("ドライブのトークンを取り直せませんでした", error);
       return null;
@@ -200,24 +232,17 @@ function rememberDriveFile(id) {
   try { id ? localStorage.setItem(DRIVE_KEY, id) : localStorage.removeItem(DRIVE_KEY); } catch (error) { /* 覚えられなくても保存はできる */ }
 }
 
-async function driveFetch(url, options = {}, {retried = false} = {}) {
+async function driveFetch(url, options = {}) {
   const response = await fetch(url, {
     ...options,
     headers: {...(options.headers || {}), Authorization: "Bearer " + driveToken},
   });
   if (response.status === 401) {
-    driveToken = null;
-    driveTokenExpiry = 0;
     /* 期限より先に無効化されることがある (別の端末で許可を外した等)。
-       一度だけ黙って取り直して、同じ要求をやり直す。それでも駄目なら諦める */
-    if (!retried && driveLinked() && driveClientId) {
-      try {
-        if (await driveSignIn(driveClientId, {silent: true})) {
-          return await driveFetch(url, options, {retried: true});
-        }
-      } catch (error) { /* 取り直せなかった。下のメッセージで伝える */ }
-    }
-    throw new Error("Google の許可が切れました。もう一度つないでください");
+       ここで黙って取り直そうとしていたが、それは窓を開ける操作で、押されていない
+       以上ブラウザに止められる。取り直しは設定画面のボタンに任せる */
+    rememberDriveToken(null, 0);
+    throw new Error("Google の許可が切れました。設定画面でもう一度つないでください");
   }
   if (!response.ok) throw new Error(`Google ドライブが応答しませんでした（${response.status}）`);
   return response;
@@ -369,7 +394,8 @@ async function pullFromDrive() {
   try {
     const settings = await fetch("/api/settings").then(r => r.ok ? r.json() : null);
     if (!await ensureDriveToken(settings?.google_client_id || "")) {
-      noteDriveStatus(false, "つなぎ直しが必要です" + (driveTokenTrouble() ? "（" + driveTokenTrouble() + "）" : ""));
+      noteDriveStatus(false, "ドライブから取り込むには、設定画面でつなぎ直してください"
+                             + (driveTokenTrouble() ? "（" + driveTokenTrouble() + "）" : ""));
       return false;
     }
     const restored = await loadFromDrive();

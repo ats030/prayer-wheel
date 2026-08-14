@@ -130,23 +130,36 @@ async function refreshDrive(){
     /* 取り直せなかったときは、Google が何と言ったかも出す。「つなぎ直しが必要です」
        だけでは、ポップアップの設定なのかCookieなのか許可の取り消しなのか分からない */
     const trouble=typeof driveTokenTrouble==="function"?driveTokenTrouble():"";
+    /* つないだ端末で期限が切れただけなら、責める言い方をしない。押せば直る。
+       別の端末では「未接続」。記録は端末ごとにつなぐ必要があると添える */
     $("drive-state").textContent=on?"つながっています（自動で保存します）"
-      :driveLinked()?("つなぎ直しが必要です"+(trouble?"（"+trouble+"）":"")):"未接続";
+      :driveLinked()?("許可の期限が切れました。つなぎ直してください"+(trouble?"（"+trouble+"）":""))
+      :"未接続（この端末ではまだつないでいません。つなぐと、ほかの端末で保存した記録も取り込みます）";
     $("drive-connect").hidden=on;
     $("drive-load").hidden=!on;$("drive-forget").hidden=!on;
   };
   /* 一度つないだ相手なら、画面を出さずに取り直せることが多い */
+  /* 押されていないので窓は開けない。生きているトークンがあれば拾うだけ */
   if(driveLinked())await ensureDriveToken(clientId);
   paint();
   $("drive-connect").onclick=async()=>{
     const button=$("drive-connect");button.disabled=true;backupMessage("Google の許可を求めています…");
     try{
       await driveSignIn(clientId);paint();
-      /* つないだ直後に一度書く。自動保存は記録が増減したときに動くので、
-         つないだだけではドライブに何も現れず、失敗したように見える */
-      backupMessage("つながりました。いま保存しています…");
+      /* 先に取り込んでから書く。順が逆だと、別の端末でつないだ瞬間に、その端末の
+         (まだ空の) 記録でドライブのファイルを上書きしてしまう。saveToDrive は
+         PATCH で丸ごと差し替えるので、前の端末の記録がそこで消える。取り込みは
+         統合なので、先に引いておけば両方が残る */
+      backupMessage("つながりました。ドライブの記録を取り込んでいます…");
+      let pulled=0;
+      try{pulled=await loadFromDrive()}
+      catch(error){/* 初めてつなぐときは、まだファイルが無い。それは失敗ではない */}
+      backupMessage("いま保存しています…");
       const count=await saveToDrive();
-      backupMessage(`つながりました。記録 ${count}件をドライブへ保存しました。これからは自動で保存されます。`,"success");
+      backupMessage(pulled
+        ?`つながりました。ドライブから ${pulled}件を取り込み、あわせて ${count}件を保存しました。これからは自動で保存されます。`
+        :`つながりました。記録 ${count}件をドライブへ保存しました。これからは自動で保存されます。`,"success");
+      document.dispatchEvent(new CustomEvent("species-records-restored",{detail:{restored:pulled}}));
     }
     catch(error){backupMessage("つなげませんでした。"+error.message,"error")}
     finally{button.disabled=false}

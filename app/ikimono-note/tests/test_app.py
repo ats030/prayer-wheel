@@ -1595,19 +1595,23 @@ def test_the_relay_is_gone():
 
 
 def test_records_are_written_back_without_asking_every_time():
-    """記録するたび許可を求められては使い物にならない。二度目からは黙って取り直す。"""
+    """記録するたび許可を求められては使い物にならない。
+
+    以前ここは「二度目からは黙って取り直す」と書いてあり、その思い込みが
+    popup_failed_to_open の原因だった。GIS に画面を出さない取得は無い。
+    許可を求めずに済ませる方法は、取り直しを減らすこと (トークンをタブ内で
+    持ち回す) であって、黙って窓を開けようとすることではない。
+    """
     drive = client.get("/assets/gdrive.js").text
-    assert "async function ensureDriveToken(clientId)" in drive
-    assert 'requestAccessToken(silent ? {prompt: "none"} : {prompt: "consent"})' in drive
+    assert 'requestAccessToken({prompt: "consent"})' in drive
+    assert "silent" not in drive                 # 画面を出さない取得は無い
     assert "async function autoSaveToDrive()" in drive
-    # 取れなければ黙って諦める。記録は端末の中に残る
-    body = drive.split("async function ensureDriveToken(clientId) {")[1].split("\n}")[0]
-    assert body.count("return null;") == 2      # つないでいないとき、取れなかったとき
+    assert "const DRIVE_TOKEN_KEY" in drive      # 画面を移っても持ち回す
     backup = client.get("/assets/backup.js").text
     assert "if (typeof autoSaveToDrive === \"function\") autoSaveToDrive();" in backup
-    # トークンは保存しない。覚えるのは「一度つないだ」という事実だけ
+    # 覚えるのは「一度つないだ」という事実。トークンはタブを閉じれば消える
     assert "species-drive-linked" in drive
-    assert "localStorage" not in drive.split("let driveToken")[1].split("const DRIVE_LINKED")[0]
+    assert "localStorage.setItem(DRIVE_TOKEN_KEY" not in drive
 
 
 def test_settings_page_touches_only_elements_that_exist():
@@ -2028,8 +2032,11 @@ def test_the_drive_connection_renews_itself():
     """つないだあと切れっぱなしにしない。
 
     Google のアクセストークンは1時間ほどで切れる。期限を見ずに持ち続けていたので、
-    タブを開いたまま1時間たつと最初の書き込みが 401 で落ち、「許可が切れました。
-    もう一度つないでください」と出ていた。黙って取り直せば済む場面だった。
+    タブを開いたまま1時間たつと最初の書き込みが 401 で落ちていた。期限を持ち、
+    タブの中で持ち回すことで、1時間のあいだは画面を移っても切れない。
+
+    切れたあとの取り直しは、押されたときだけ。黙って取り直す道は無い
+    (GIS は必ずポップアップを開くので、押されていなければ止められる)。
     """
     drive = client.get("/assets/gdrive.js").text
     assert "let driveTokenExpiry = 0;" in drive
@@ -2037,12 +2044,15 @@ def test_the_drive_connection_renews_itself():
     assert "Date.now() < driveTokenExpiry" in drive
     # 期限は Google が返す expires_in から。手前で切れた扱いにする
     assert "Math.max(0, Number(response.expires_in || 3600) - 60) * 1000" in drive
-    # 期限内は取り直さない。切れていたら黙って取り直す
+    # 期限内は取り直さない
     assert "if (driveTokenAlive()) return driveToken;" in drive
-    # 期限より先に無効化されることもある。401 は一度だけやり直す
-    assert "async function driveFetch(url, options = {}, {retried = false} = {})" in drive
-    assert "return await driveFetch(url, options, {retried: true});" in drive
-    assert "let driveClientId" in drive       # やり直しに要る
+    # 画面を移っても消えない。ただしタブを閉じれば消える
+    assert "sessionStorage.setItem(DRIVE_TOKEN_KEY" in drive
+    assert "function recallDriveToken()" in drive
+    # 401 でこっそり取り直さない。窓を開ける操作なので、押されていなければ止められる
+    assert "return await driveFetch(url, options, {retried: true});" not in drive
+    assert "設定画面でもう一度つないでください" in drive
+    assert "let driveClientId" in drive       # つなぎ直しに要る
     # 取り直せるかどうかは、画面には正直に出す
     assert "return driveTokenAlive();" in drive
 
@@ -2525,3 +2535,33 @@ def test_the_evaluation_can_run_the_same_setting_more_than_once():
     # 既存の道具が1回ぶんの要約として読めるよう、平均は素の名前でも置く
     assert "**{key: metrics[key]['mean'] for key in metrics}" in source \
         or '**{key: metrics[key]["mean"] for key in metrics}' in source
+
+
+def test_connecting_a_second_device_does_not_wipe_the_first():
+    """つないだ直後の保存は、ドライブのファイルを丸ごと差し替える (PATCH)。
+
+    別の端末でつなぐと、その端末のまだ空の記録で上書きされ、前の端末の記録が
+    そこで消える。取り込みは統合なので、先に引いてから書けば両方残る。
+    """
+    settings = client.get("/assets/settings.js").text
+    connect = settings.split('$("drive-connect").onclick')[1][:900]
+    assert "loadFromDrive()" in connect and "saveToDrive()" in connect
+    assert connect.index("loadFromDrive()") < connect.index("saveToDrive()")
+    # 初めてつなぐ端末では、まだファイルが無い。それは失敗ではない
+    assert "catch(error){" in connect
+
+
+def test_the_drive_token_is_not_fetched_without_a_press():
+    """GIS のトークン取得は必ずポップアップを開く。
+
+    公式に "obtain a new token by calling requestAccessToken() from a user-driven
+    event such as a button press" とある。読み込み時に呼ぶとブラウザに止められ、
+    popup_failed_to_open になる。画面を移るたびにこれが起き、「すぐ切れる」ように
+    見えていた。トークンはタブの中に持ち回し、取り直しは押されたときだけにする。
+    """
+    gdrive = client.get("/assets/gdrive.js").text
+    assert "async function ensureDriveToken(clientId, {interactive = false} = {})" in gdrive
+    assert "if (!interactive) {" in gdrive
+    assert "const DRIVE_TOKEN_KEY" in gdrive and "sessionStorage.setItem(DRIVE_TOKEN_KEY" in gdrive
+    # ディスクには残さない
+    assert "localStorage.setItem(DRIVE_TOKEN_KEY" not in gdrive
