@@ -667,7 +667,7 @@ def test_legal_pages_disclose_data_handling_and_contact():
     assert terms.status_code == 200
     assert "APIキーはブラウザ内（localStorage または sessionStorage）に保持し" in privacy.text
     assert "OpenAI、Anthropic、Google GeminiまたはPl@ntNet" in privacy.text
-    assert "Tailscale Funnel" in privacy.text
+    assert "Google Cloud Run（東京リージョン）" in privacy.text   # 公開の入口。変わったらここも変える
     assert "https://lit.link/ats030_main" in privacy.text
     assert "運営者プロフィール" in privacy.text
     assert "食用・毒性・採取許可" in terms.text
@@ -2565,3 +2565,29 @@ def test_the_drive_token_is_not_fetched_without_a_press():
     assert "const DRIVE_TOKEN_KEY" in gdrive and "sessionStorage.setItem(DRIVE_TOKEN_KEY" in gdrive
     # ディスクには残さない
     assert "localStorage.setItem(DRIVE_TOKEN_KEY" not in gdrive
+
+
+def test_the_terms_describe_the_advertising_that_is_actually_shown():
+    """広告を出しているのに「表示しません」と書いてあった。
+
+    景品表示法の指定告示 (いわゆるステマ規制) は、広告を広告と分かる形で
+    示すことを求める。アフィリエイトであることと、紹介料を受け取ることを
+    規約に書く。Amazon アソシエイトの表示義務もここで満たす。
+    """
+    terms = client.get("/terms").text
+    assert "無料公開ベータ版では広告を表示しません" not in terms
+    assert "アフィリエイトリンク" in terms and "紹介料" in terms
+    assert "Amazonのアソシエイトとして、生きものノートは適格販売により収入を得ています。" in terms
+    assert "識別候補やその順位には一切影響しません" in terms
+    # 広告のために利用者の中身を渡していない、と言い切る
+    assert "写真、位置情報、判定結果をAmazonへ送信しません" in terms
+
+
+def test_the_privacy_policy_names_the_right_processor():
+    """Tailscale Funnel を止めて Cloud Run へ移ったのに、Tailscale が処理すると
+    書いたままだった。接続情報の渡り先を誤って公表することになる。
+    """
+    privacy = client.get("/privacy").text
+    assert "Tailscale" not in privacy
+    assert "Google Cloud Run（東京リージョン）" in privacy
+    assert "Google Cloud Firestore（東京リージョン）" in privacy

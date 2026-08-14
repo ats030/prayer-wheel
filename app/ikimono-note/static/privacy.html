@@ -1,5 +1,5 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f4faf2" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#121a14" media="(prefers-color-scheme: dark)"><title>プライバシーポリシー · 生きものノート</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><script src="/theme.js"></script><link rel="stylesheet" href="/assets/privacy.css"></head><body><main class="app"><header class="top"><div><div class="eyebrow">生きものノート</div><h1>プライバシーポリシー</h1></div><div class="top-actions"><button class="back theme-toggle" id="themeToggle" type="button"><span class="theme-icon" aria-hidden="true">◐</span><span class="theme-label">自動</span></button><a class="back" href="/">撮影へ戻る</a></div></header><article class="panel">
-<p class="meta">制定日：2026年8月10日　運営者：生きものノート 運営者</p>
+<p class="meta">制定日：2026年8月14日　運営者：生きものノート 運営者</p>
 <p>本ポリシーは、生きものノート（以下「本サービス」）における利用者情報の取扱いを説明します。</p>
 <h2>取得・処理する情報</h2><ul>
 <li>利用者が選択した写真、写真に含まれる撮影日時・位置情報、入力した撮影地域・日付・大きさ</li>
@@ -15,7 +15,7 @@
 <li>判定履歴（画面上の表記は「調べた記録」）と縮小画像は、利用者のブラウザ内IndexedDBへ最大50件保存されます。「調べた記録」の画面から、記録を1件ずつ利用者が削除できます。まとめて消す場合は、ブラウザの「サイトデータを削除」から本サービスの保存データを削除してください。</li>
 <li>アプリケーションのアクセスログは無効化します。公開基盤事業者が接続情報を処理する場合は、各事業者のポリシーが適用されます。</li>
 </ul>
-<h2>第三者への送信</h2><p>利用者が選択した場合、写真と入力した撮影情報をOpenAI、Anthropic、Google GeminiまたはPl@ntNetへ送信します。APIキーは選択された事業者へのAPI呼出しにだけ使用します。各事業者の無料枠は、送信内容を製品改善や機械学習に利用し、担当者が内容を確認する場合があります（例：Google Gemini の無料枠）。機密情報や人物が写った写真を送らないでください。Pl@ntNet は送信された写真をデータベースへ保存せず、識別処理中のみメモリ上で扱うと公表しています。地図ボタンを押した場合は丸めた座標をOpenStreetMapへ、Amazonリンクを開いた場合は閲覧情報をAmazonへ送信します。地図の表示に使うプログラム（Leaflet）は本サービスから配信しており、外部の配信網へは接続しません。公開入口にはTailscale Funnelを使用し、接続情報はTailscaleにより処理されます。</p>
+<h2>第三者への送信</h2><p>利用者が選択した場合、写真と入力した撮影情報をOpenAI、Anthropic、Google GeminiまたはPl@ntNetへ送信します。APIキーは選択された事業者へのAPI呼出しにだけ使用します。各事業者の無料枠は、送信内容を製品改善や機械学習に利用し、担当者が内容を確認する場合があります（例：Google Gemini の無料枠）。機密情報や人物が写った写真を送らないでください。Pl@ntNet は送信された写真をデータベースへ保存せず、識別処理中のみメモリ上で扱うと公表しています。地図ボタンを押した場合は丸めた座標をOpenStreetMapへ、Amazonリンクを開いた場合は閲覧情報をAmazonへ送信します。地図の表示に使うプログラム（Leaflet）は本サービスから配信しており、外部の配信網へは接続しません。本サービスはGoogle Cloud Run（東京リージョン）で稼働しており、接続情報はGoogle LLCにより処理されます。ログイン情報（メールアドレスと識別子）の保存先はGoogle Cloud Firestore（東京リージョン）です。広告のリンクを開いた場合は、以後の閲覧情報がAmazonへ送信されます。広告の表示にあたって、写真、位置情報、判定結果をAmazonへ送信することはありません。</p>
 <h2>位置情報</h2><p>現在地取得は利用者の操作または写真選択後のブラウザ許可に基づきます。現在地は識別AIへ送信しません。写真のEXIF位置は確認・修正後に撮影地域として識別先へ送信される場合があります。希少種や私有地の位置を共有しないでください。</p>
 <h2>お子さまの利用</h2><p>本サービスは年齢制限を設けていません。ご利用にはGoogleアカウントでのログインが必要です。お子さまがご自身のアカウントでログインする場合は、保護者の方の同意を得たうえでご利用ください。氏名・年齢・住所・電話番号は取得しません。写真と位置情報はサーバーへ保存されませんが、選択したAI事業者へは送信されます。人物が写り込んだ写真や、自宅など生活圏が特定できる位置を送信しないでください。お子さまが利用する場合は、保護者の方が送信内容とAI事業者の選択を確認してください。</p>
 <h2>記録の持ち出し</h2><p>設定画面から、調べた記録（写真を含む）と使うAIの設定を1つのファイルへ書き出せます。保存先は利用者が選び、本サービスのサーバーを経由しません。運営者はそのファイルの内容を知りません。クラウドの同期フォルダへ保存した場合、そのクラウド事業者の取扱いが適用されます。APIキーはファイルに含めません。</p>
