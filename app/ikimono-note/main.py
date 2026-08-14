@@ -17,7 +17,7 @@ import secrets
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.staticfiles import StaticFiles
@@ -167,6 +167,14 @@ async def security_headers(request: Request, call_next):
     return response
 
 
+def _inject_site_verification(html: str) -> str:
+    """Search Console の合言葉を head へ差す。設定していなければ何もしない。"""
+    if not SITE_VERIFICATION or "google-site-verification" in html:
+        return html
+    tag = f'<meta name="google-site-verification" content="{SITE_VERIFICATION}">'
+    return html.replace("<head>", "<head>" + tag, 1)
+
+
 def _page(name: str) -> HTMLResponse:
     """モードを body に埋めて返す。
 
@@ -179,7 +187,7 @@ def _page(name: str) -> HTMLResponse:
     # 公開版で Ollama を出すかは PUBLIC_LOCAL の設定次第。モードとは別の軸
     show_local = "0" if (PUBLIC_MODE and not PUBLIC_LOCAL_ENABLED) else "1"
     html = html.replace("<body", f'<body data-app-mode="{mode}" data-show-local="{show_local}"', 1)
-    return HTMLResponse(html)
+    return HTMLResponse(_inject_site_verification(html))
 
 
 @app.get("/", include_in_schema=False)
@@ -291,6 +299,11 @@ async def require_login(request: Request, call_next):
         return await call_next(request)
     if path.startswith("/api/"):
         return JSONResponse({"detail": "ログインしてください"}, status_code=401)
+    if path == "/":
+        # トップは転送せず、そのまま入口を出す。公開サイトの表紙が /login なのは
+        # 不自然だし、Search Console の所有権確認は転送を挟むと通らない。
+        # ログイン済みの人はここへ来ない (上で素通ししている)
+        return _page("login.html")
     return RedirectResponse("/login", status_code=303)
 
 
@@ -372,6 +385,21 @@ def api_me_delete(request: Request) -> JSONResponse:
     response = JSONResponse({"ok": True})
     response.delete_cookie(auth.SESSION_COOKIE, path="/")
     return response
+
+
+# Search Console の所有権確認。合言葉は環境変数で渡し、再ビルドせずに差せるように
+# する (確認 → 審査の往復が速い)。meta と HTML ファイルの両方の方式に備える。
+SITE_VERIFICATION = os.getenv("IKIMONO_SITE_VERIFICATION", "").strip()
+SITE_VERIFICATION_FILE = os.getenv("IKIMONO_SITE_VERIFICATION_FILE", "").strip()
+
+
+@app.get("/{name}.html", include_in_schema=False)
+def site_verification_file(name: str) -> Response:
+    """google<合言葉>.html を置けと言われる方式。名前が一致したときだけ答える。"""
+    if not SITE_VERIFICATION_FILE or f"{name}.html" != SITE_VERIFICATION_FILE:
+        raise HTTPException(status_code=404, detail="not found")
+    return Response(f"google-site-verification: {SITE_VERIFICATION_FILE}",
+                    media_type="text/html")
 
 
 @app.get("/robots.txt", include_in_schema=False)

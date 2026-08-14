@@ -1,0 +1,2091 @@
+{
+  "summary": {
+    "label": "gemini-3.5-flash-lite-r3",
+    "count": 100,
+    "errors": 17,
+    "top1_percent": 30.1,
+    "top3_percent": 34.9,
+    "genus_percent": 51.8,
+    "family_or_above_percent": 91.6,
+    "rejected_percent": 8.4,
+    "median_seconds": 7.7,
+    "mean_confidence_when_answered": 42.8,
+    "top1_percent_when_answered": 32.9
+  },
+  "config": {
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite",
+    "use_plantnet": false,
+    "thinking_level": "high",
+    "location": "",
+    "date": "",
+    "dataset": "iNaturalist API v1 (quality_grade=research, photo_license=cc0)",
+    "measured_at": "2026-08-14 02:10"
+  },
+  "rows": [
+    {
+      "photo_id": 344654543,
+      "group": "植物",
+      "truth": "Dumortiera hirsuta",
+      "truth_ja": "ケゼニゴケ",
+      "predicted": [],
+      "predicted_ja": [],
+      "category": "植物",
+      "rejected": true,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": false,
+      "confidence_top1": null,
+      "evidence_status_top1": null,
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 536404899,
+      "group": "植物",
+      "truth": "Calanthe mannii",
+      "truth_ja": "サクラジマエビネ",
+      "predicted": [
+        "Cyrtosia septentrionalis",
+        "Gastrodia elata",
+        "Lecanorchis kiusiana"
+      ],
+      "predicted_ja": [
+        "ツチアケビ",
+        "オニノヤガラ",
+        "ウスキムヨウラン"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 124479108,
+      "group": "植物",
+      "truth": "Elodea densa",
+      "truth_ja": "オオカナダモ",
+      "predicted": [
+        "Ludwigia grandiflora",
+        "Utricularia australis"
+      ],
+      "predicted_ja": [
+        "オオバナミズキンバイ",
+        "タヌキモ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 348431422,
+      "group": "植物",
+      "truth": "Lespedeza kagoshimensis",
+      "truth_ja": "",
+      "predicted": [
+        "Indigofera pseudotinctoria",
+        "Lespedeza cyrtobotrya",
+        "Lespedeza bicolor"
+      ],
+      "predicted_ja": [
+        "コマツナギ",
+        "マルバハギ",
+        "ヤマハギ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 55,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 107134799,
+      "group": "植物",
+      "truth": "Thrixspermum japonicum",
+      "truth_ja": "カヤラン",
+      "predicted": [
+        "Thrixspermum japonicum",
+        "Oberonia caulescens",
+        "Taeniophyllum glandulosum"
+      ],
+      "predicted_ja": [
+        "カヤラン",
+        "日本語名なし",
+        "クモラン"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 543289462,
+      "group": "植物",
+      "truth": "Chara braunii",
+      "truth_ja": "シャジクモ",
+      "predicted": [
+        "Chara braunii",
+        "Nitella",
+        "Chara"
+      ],
+      "predicted_ja": [
+        "シャジクモ",
+        "フラスコモ属",
+        "シャジクモ属"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 32718778,
+      "group": "植物",
+      "truth": "Cymbidium goeringii",
+      "truth_ja": "シュンラン",
+      "predicted": [
+        "Cymbidium goeringii",
+        "Cymbidium ensifolium"
+      ],
+      "predicted_ja": [
+        "シュンラン",
+        "スルガラン"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 344650850,
+      "group": "植物",
+      "truth": "Sandea japonica",
+      "truth_ja": "ヒメジャゴケ",
+      "predicted": [
+        "Marchantia polymorpha",
+        "Conocephalum conicum"
+      ],
+      "predicted_ja": [
+        "ゼニゴケ",
+        "日本語名なし"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 600880897,
+      "group": "植物",
+      "truth": "Scleria levis",
+      "truth_ja": "シンジュガヤ",
+      "predicted": [
+        "Carex"
+      ],
+      "predicted_ja": [
+        "スゲ属"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 40,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 512681579,
+      "group": "植物",
+      "truth": "Gastrodia elata",
+      "truth_ja": "オニノヤガラ",
+      "predicted": [
+        "Gastrodia elata",
+        "Gastrodia nipponica",
+        "Cyrtosia septentrionalis"
+      ],
+      "predicted_ja": [
+        "オニノヤガラ",
+        "ハルザキヤツシロラン",
+        "ツチアケビ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 268069892,
+      "group": "植物",
+      "truth": "Arisaema angustatum",
+      "truth_ja": "ホソバテンナンショウ",
+      "predicted": [
+        "Arisaema serratum"
+      ],
+      "predicted_ja": [
+        "カントウマムシグサ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 281245032,
+      "group": "植物",
+      "truth": "Damnacanthus indicus",
+      "truth_ja": "アリドオシ(広義)",
+      "predicted": [
+        "Zanthoxylum armatum",
+        "Zanthoxylum schinifolium",
+        "Zanthoxylum piperitum"
+      ],
+      "predicted_ja": [
+        "フユザンショウ",
+        "イヌザンショウ",
+        "サンショウ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 387222584,
+      "group": "植物",
+      "truth": "Eschenbachia japonica",
+      "truth_ja": "イズハハコ",
+      "predicted": [
+        "Erigeron canadensis"
+      ],
+      "predicted_ja": [
+        "ヒメムカシヨモギ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 426677984,
+      "group": "植物",
+      "truth": "Amorpha fruticosa",
+      "truth_ja": "イタチハギ",
+      "predicted": [
+        "Amorpha fruticosa",
+        "Indigofera pseudotinctoria"
+      ],
+      "predicted_ja": [
+        "イタチハギ",
+        "コマツナギ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 449847700,
+      "group": "植物",
+      "truth": "Phlegmariurus fordii",
+      "truth_ja": "ナンカクラン",
+      "predicted": [
+        "Lycopodium clavatum",
+        "Lycopodiella"
+      ],
+      "predicted_ja": [
+        "ヒカゲノカズラ",
+        "ヤチスギラン属"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 139154408,
+      "group": "植物",
+      "truth": "Saururus chinensis",
+      "truth_ja": "ハンゲショウ",
+      "predicted": [
+        "Piper betle"
+      ],
+      "predicted_ja": [
+        "キンマ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 469996838,
+      "group": "植物",
+      "truth": "Quercus acuta",
+      "truth_ja": "アカガシ",
+      "predicted": [
+        "Gardenia jasminoides",
+        "Ficus erecta",
+        "Lasianthus japonicus"
+      ],
+      "predicted_ja": [
+        "クチナシ",
+        "イヌビワ(広義)",
+        "ルリミノキ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 120243883,
+      "group": "植物",
+      "truth": "Acer diabolicum",
+      "truth_ja": "カジカエデ",
+      "predicted": [
+        "Acer rubrum",
+        "Acer saccharinum"
+      ],
+      "predicted_ja": [
+        "アカカエデ",
+        "ギンヨウカエデ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 344746446,
+      "group": "植物",
+      "truth": "Acrolejeunea sandvicensis",
+      "truth_ja": "フルノコゴケ",
+      "predicted": [
+        "Metzgeria",
+        "Riccardia",
+        "Frullania"
+      ],
+      "predicted_ja": [
+        "日本語名なし",
+        "スジゴケ属",
+        "ヤスデゴケ属"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 414253580,
+      "group": "植物",
+      "truth": "Athyrium otophorum",
+      "truth_ja": "タニイヌワラビ",
+      "predicted": [
+        "Adiantum pedatum"
+      ],
+      "predicted_ja": [
+        "クジャクシダ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 596867238,
+      "group": "昆虫",
+      "truth": "Paraparatrechina sakurae",
+      "truth_ja": "サクラアリ",
+      "predicted": [
+        "Caeciliusidae",
+        "Psocidae"
+      ],
+      "predicted_ja": [
+        "ケチャタテ科",
+        "チャタテ科"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 114039337,
+      "group": "昆虫",
+      "truth": "Brahmaea japonica",
+      "truth_ja": "イボタガ",
+      "predicted": [
+        "Brahmaea hearseyi",
+        "Brahmaea certhia"
+      ],
+      "predicted_ja": [
+        "日本語名なし",
+        "日本語名なし"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 127649238,
+      "group": "昆虫",
+      "truth": "Cosmia restituta",
+      "truth_ja": "シラホシキリガ",
+      "predicted": [
+        "Orthosia evanida"
+      ],
+      "predicted_ja": [
+        "カバキリガ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 55,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 118167215,
+      "group": "昆虫",
+      "truth": "Euconocephalus varius",
+      "truth_ja": "クビキリギス",
+      "predicted": [
+        "Euconocephalus thunbergii",
+        "Euconocephalus pallidus"
+      ],
+      "predicted_ja": [
+        "日本語名なし",
+        "日本語名なし"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 118894236,
+      "group": "昆虫",
+      "truth": "Ippa conspersa",
+      "truth_ja": "マダラマルハヒロズコガ",
+      "predicted": [
+        "Aristolochia",
+        "Dioscorea"
+      ],
+      "predicted_ja": [
+        "ウマノスズクサ属",
+        "ヤマノイモ属"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 40,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 127678541,
+      "group": "昆虫",
+      "truth": "Chasminodes nigrilinea",
+      "truth_ja": "ヒロオビクロギンガ",
+      "predicted": [
+        "Barsine defecta"
+      ],
+      "predicted_ja": [
+        "日本語名なし"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 430232461,
+      "group": "昆虫",
+      "truth": "Tenodera angustipennis",
+      "truth_ja": "チョウセンカマキリ",
+      "predicted": [
+        "Tenodera angustipennis",
+        "Tenodera aridifolia"
+      ],
+      "predicted_ja": [
+        "チョウセンカマキリ",
+        "日本語名なし"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 416914969,
+      "group": "昆虫",
+      "truth": "Tenodera fasciata",
+      "truth_ja": "マエモンカマキリ",
+      "predicted": [
+        "Hierodula patellifera",
+        "Tenodera aridifolia",
+        "Tenodera angustipennis"
+      ],
+      "predicted_ja": [
+        "ハラビロカマキリ",
+        "日本語名なし",
+        "チョウセンカマキリ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 524910806,
+      "group": "昆虫",
+      "truth": "Lixus moiwanus",
+      "truth_ja": "オナガカツオゾウムシ",
+      "predicted": [],
+      "predicted_ja": [],
+      "category": "動物",
+      "rejected": true,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": false,
+      "confidence_top1": null,
+      "evidence_status_top1": null,
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 381313496,
+      "group": "昆虫",
+      "truth": "Agrilus sugiurai",
+      "truth_ja": "スギウラナガタマムシ",
+      "predicted": [
+        "Agrilus",
+        "Elateridae"
+      ],
+      "predicted_ja": [
+        "ナガタマムシ属",
+        "コメツキムシ科"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 59347413,
+      "group": "昆虫",
+      "truth": "Macroglossum pyrrhosticta",
+      "truth_ja": "ホシホウジャク",
+      "predicted": [
+        "Macroglossum stellatarum"
+      ],
+      "predicted_ja": [
+        "ホウジャク"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 406080835,
+      "group": "昆虫",
+      "truth": "Mimela holosericea",
+      "truth_ja": "キンスジコガネ",
+      "predicted": [
+        "Anomala albopilosa",
+        "Anomala trapezifera",
+        "Anomala cuprea"
+      ],
+      "predicted_ja": [
+        "アオドウガネ",
+        "日本語名なし",
+        "ドウガネブイブイ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 604152352,
+      "group": "昆虫",
+      "truth": "Stigmatomma silvestrii",
+      "truth_ja": "ノコギリハリアリ",
+      "predicted": [
+        "Ponerinae",
+        "Myrmicinae",
+        "Myrmicinae"
+      ],
+      "predicted_ja": [
+        "ハリアリ亜科",
+        "フタフシアリ亜科",
+        "フタフシアリ亜科"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 116291715,
+      "group": "昆虫",
+      "truth": "Nemophora aurifera",
+      "truth_ja": "ホソオビヒゲナガ",
+      "predicted": [],
+      "predicted_ja": [],
+      "category": "動物",
+      "rejected": true,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": false,
+      "confidence_top1": null,
+      "evidence_status_top1": null,
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 116551650,
+      "group": "昆虫",
+      "truth": "Melittia sangaica",
+      "truth_ja": "オオモモブトスカシバ",
+      "predicted": [],
+      "predicted_ja": [],
+      "category": "動物",
+      "rejected": true,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": false,
+      "confidence_top1": null,
+      "evidence_status_top1": null,
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 164359978,
+      "group": "昆虫",
+      "truth": "Laccotrephes japonensis",
+      "truth_ja": "タイコウチ",
+      "predicted": [
+        "Laccotrephes japonensis",
+        "Nepa hoffmanni",
+        "Laccotrephes robustus"
+      ],
+      "predicted_ja": [
+        "タイコウチ",
+        "ヒメタイコウチ",
+        "日本語名なし"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 116271998,
+      "group": "昆虫",
+      "truth": "Epiophlebia superstes",
+      "truth_ja": "ムカシトンボ",
+      "predicted": [
+        "Aeshnidae",
+        "Gomphidae",
+        "Corduliidae"
+      ],
+      "predicted_ja": [
+        "ヤンマ科",
+        "サナエトンボ科",
+        "エゾトンボ科"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 297963043,
+      "group": "昆虫",
+      "truth": "Hesperus tiro",
+      "truth_ja": "ツマグロムネスジハネカクシ",
+      "predicted": [
+        "Staphylinidae",
+        "Paederus fuscipes",
+        "Paederus"
+      ],
+      "predicted_ja": [
+        "ハネカクシ科",
+        "アオバアリガタハネカクシ",
+        "アリガタハネカクシ属"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 297958009,
+      "group": "昆虫",
+      "truth": "Bembidion morawitzi",
+      "truth_ja": "ヨツボシミズギワゴミムシ",
+      "predicted": [
+        "Carabidae"
+      ],
+      "predicted_ja": [
+        "オサムシ科"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 331315388,
+      "group": "昆虫",
+      "truth": "Achlya longipennis",
+      "truth_ja": "キボシミスジトガリバ",
+      "predicted": [
+        "Cerura menciana",
+        "Furcula furcula"
+      ],
+      "predicted_ja": [
+        "日本語名なし",
+        "ナカグロモクメシャチホコ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 45,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 578310480,
+      "group": "鳥",
+      "truth": "Haliaeetus pelagicus",
+      "truth_ja": "オオワシ",
+      "predicted": [
+        "Haliaeetus albicilla",
+        "Haliaeetus leucocephalus",
+        "Haliaeetus pelagicus"
+      ],
+      "predicted_ja": [
+        "オジロワシ",
+        "ハクトウワシ",
+        "オオワシ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 359893507,
+      "group": "鳥",
+      "truth": "Turdus eunomus",
+      "truth_ja": "ツグミ",
+      "predicted": [
+        "Turdus eunomus"
+      ],
+      "predicted_ja": [
+        "ツグミ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 422858525,
+      "group": "鳥",
+      "truth": "Phasianus versicolor",
+      "truth_ja": "キジ",
+      "predicted": [
+        "Bambusicola thoracicus",
+        "Phasianus colchicus"
+      ],
+      "predicted_ja": [
+        "コジュケイ",
+        "コウライキジ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 647681640,
+      "group": "鳥",
+      "truth": "Tachybaptus ruficollis",
+      "truth_ja": "カイツブリ",
+      "predicted": [
+        "Tachybaptus ruficollis"
+      ],
+      "predicted_ja": [
+        "カイツブリ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 250557494,
+      "group": "鳥",
+      "truth": "Streptopelia orientalis",
+      "truth_ja": "キジバト",
+      "predicted": [
+        "Streptopelia orientalis",
+        "Streptopelia decaocto"
+      ],
+      "predicted_ja": [
+        "キジバト",
+        "シラコバト"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 348620245,
+      "group": "鳥",
+      "truth": "Aegithalos caudatus",
+      "truth_ja": "エナガ",
+      "predicted": [
+        "Aegithalos caudatus"
+      ],
+      "predicted_ja": [
+        "エナガ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 250677147,
+      "group": "鳥",
+      "truth": "Anas acuta",
+      "truth_ja": "オナガガモ",
+      "predicted": [
+        "Anas acuta"
+      ],
+      "predicted_ja": [
+        "オナガガモ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 53444808,
+      "group": "鳥",
+      "truth": "Phalacrocorax capillatus",
+      "truth_ja": "ウミウ",
+      "predicted": [
+        "Phalacrocorax carbo",
+        "Phalacrocorax capillatus"
+      ],
+      "predicted_ja": [
+        "カワウ",
+        "ウミウ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 354291700,
+      "group": "鳥",
+      "truth": "Hypsipetes amaurotis",
+      "truth_ja": "ヒヨドリ",
+      "predicted": [
+        "Hypsipetes amaurotis"
+      ],
+      "predicted_ja": [
+        "ヒヨドリ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 388483723,
+      "group": "鳥",
+      "truth": "Spodiopsar cineraceus",
+      "truth_ja": "ムクドリ",
+      "predicted": [
+        "Spodiopsar cineraceus",
+        "Sturnus vulgaris"
+      ],
+      "predicted_ja": [
+        "ムクドリ",
+        "ホシムクドリ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 525916134,
+      "group": "鳥",
+      "truth": "Larus glaucescens",
+      "truth_ja": "ワシカモメ",
+      "predicted": [
+        "Larus crassirostris",
+        "Larus schistisagus",
+        "Larus argentatus"
+      ],
+      "predicted_ja": [
+        "ウミネコ",
+        "オオセグロカモメ",
+        "日本語名なし"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 45,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 262966893,
+      "group": "鳥",
+      "truth": "Chroicocephalus ridibundus",
+      "truth_ja": "ユリカモメ",
+      "predicted": [
+        "Chroicocephalus ridibundus"
+      ],
+      "predicted_ja": [
+        "ユリカモメ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 354291301,
+      "group": "鳥",
+      "truth": "Parus cinereus",
+      "truth_ja": "シジュウカラ",
+      "predicted": [
+        "Parus major",
+        "Sittiparus varius",
+        "Periparus ater"
+      ],
+      "predicted_ja": [
+        "シジュウカラ(旧名)",
+        "ヤマガラ",
+        "ヒガラ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 344216131,
+      "group": "鳥",
+      "truth": "Alcedo atthis",
+      "truth_ja": "カワセミ",
+      "predicted": [
+        "Alcedo atthis"
+      ],
+      "predicted_ja": [
+        "カワセミ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 13167177,
+      "group": "鳥",
+      "truth": "Cygnus columbianus",
+      "truth_ja": "コハクチョウ",
+      "predicted": [
+        "Cygnus cygnus",
+        "Cygnus columbianus"
+      ],
+      "predicted_ja": [
+        "オオハクチョウ",
+        "コハクチョウ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 381358867,
+      "group": "鳥",
+      "truth": "Gallinula chloropus",
+      "truth_ja": "バン",
+      "predicted": [
+        "Gallinula chloropus",
+        "Fulica atra"
+      ],
+      "predicted_ja": [
+        "バン",
+        "オオバン"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 383922715,
+      "group": "鳥",
+      "truth": "Thinornis dubius",
+      "truth_ja": "コチドリ",
+      "predicted": [],
+      "predicted_ja": [],
+      "category": "動物",
+      "rejected": true,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": false,
+      "confidence_top1": null,
+      "evidence_status_top1": null,
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 577627179,
+      "group": "鳥",
+      "truth": "Periparus ater",
+      "truth_ja": "ヒガラ",
+      "predicted": [
+        "Periparus ater",
+        "Poecile montanus",
+        "Parus major"
+      ],
+      "predicted_ja": [
+        "ヒガラ",
+        "コガラ",
+        "シジュウカラ(旧名)"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 607337507,
+      "group": "鳥",
+      "truth": "Anthus hodgsoni",
+      "truth_ja": "ビンズイ",
+      "predicted": [
+        "Anthus hodgsoni",
+        "Anthus spinoletta"
+      ],
+      "predicted_ja": [
+        "ビンズイ",
+        "ヒガシヨーロッパタヒバリ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 259921447,
+      "group": "鳥",
+      "truth": "Aythya ferina",
+      "truth_ja": "ホシハジロ",
+      "predicted": [
+        "Aythya ferina",
+        "Aythya americana",
+        "Aythya nyroca"
+      ],
+      "predicted_ja": [
+        "ホシハジロ",
+        "アメリカホシハジロ",
+        "メジロガモ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 125430392,
+      "group": "菌類",
+      "truth": "Clavaria fragilis",
+      "truth_ja": "シロソウメンタケ",
+      "predicted": [
+        "Clavulina rugosa",
+        "Clavariaceae"
+      ],
+      "predicted_ja": [
+        "カレエダタケモドキ",
+        "シロソウメンタケ科"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 40,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 114045922,
+      "group": "菌類",
+      "truth": "Puccinia paederiae",
+      "truth_ja": "",
+      "predicted": [
+        "Pucciniales"
+      ],
+      "predicted_ja": [
+        "サビキン目"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 125414822,
+      "group": "菌類",
+      "truth": "Dacrymyces spathularia",
+      "truth_ja": "ツノマタタケ",
+      "predicted": [
+        "Calocera cornea",
+        "Calocera furcata"
+      ],
+      "predicted_ja": [
+        "ツノフノリタケ",
+        "フノリタケ"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 452572674,
+      "group": "菌類",
+      "truth": "Pleurotus djamor",
+      "truth_ja": "トキイロヒラタケ",
+      "predicted": [
+        "Pleurotus djamor"
+      ],
+      "predicted_ja": [
+        "日本語名なし"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 567715739,
+      "group": "菌類",
+      "truth": "Gymnopilus dilepis",
+      "truth_ja": "ムラサキチャツムタケ",
+      "predicted": [
+        "Pholiota lubrica",
+        "Hypholoma lateritium",
+        "Hypholoma fasciculare"
+      ],
+      "predicted_ja": [
+        "チャナメツムタケ",
+        "クリタケ",
+        "ニガクリタケ"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 126915569,
+      "group": "菌類",
+      "truth": "Calvatia nipponica",
+      "truth_ja": "オニフスベ",
+      "predicted": [
+        "Calvatia gigantea",
+        "Calvatia craniiformis"
+      ],
+      "predicted_ja": [
+        "セイヨウオニフスベ",
+        "ノウタケ"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 249315269,
+      "group": "菌類",
+      "truth": "Erysiphe uncinuloides",
+      "truth_ja": "",
+      "predicted": [
+        "Quercus salicina",
+        "Quercus acuta",
+        "Quercus sessilifolia"
+      ],
+      "predicted_ja": [
+        "ウラジロガシ",
+        "アカガシ",
+        "ツクバネガシ"
+      ],
+      "category": "植物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 605606687,
+      "group": "菌類",
+      "truth": "Trichaptum biforme",
+      "truth_ja": "ハカワラタケ",
+      "predicted": [
+        "Trametes versicolor",
+        "Schizophyllum commune"
+      ],
+      "predicted_ja": [
+        "日本語名なし",
+        "スエヒロタケ"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 351404711,
+      "group": "菌類",
+      "truth": "Trametes versicolor",
+      "truth_ja": "カワラタケ",
+      "predicted": [
+        "Trametes versicolor"
+      ],
+      "predicted_ja": [
+        "日本語名なし"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 429907140,
+      "group": "菌類",
+      "truth": "Fomitopsis dickinsii",
+      "truth_ja": "ホウロクタケ",
+      "predicted": [
+        "Schizophyllum commune",
+        "Trametes versicolor"
+      ],
+      "predicted_ja": [
+        "スエヒロタケ",
+        "日本語名なし"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 116686296,
+      "group": "菌類",
+      "truth": "Trametes coccinea",
+      "truth_ja": "ヒイロタケ",
+      "predicted": [],
+      "predicted_ja": [],
+      "category": "菌類",
+      "rejected": true,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": false,
+      "confidence_top1": null,
+      "evidence_status_top1": null,
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 681330441,
+      "group": "菌類",
+      "truth": "Amanita ibotengutake",
+      "truth_ja": "イボテングタケ",
+      "predicted": [
+        "Amanita pantherina"
+      ],
+      "predicted_ja": [
+        "テングタケ"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 50,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 700518490,
+      "group": "菌類",
+      "truth": "Lentinus squarrosulus",
+      "truth_ja": "ケガワタケ",
+      "predicted": [
+        "Pleurotus ostreatus",
+        "Pleurotus pulmonarius",
+        "Pleurotus citrinopileatus"
+      ],
+      "predicted_ja": [
+        "日本語名なし",
+        "ウスヒラタケ",
+        "タモギタケ"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 50,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 684653551,
+      "group": "菌類",
+      "truth": "Cyclocybe cylindracea",
+      "truth_ja": "ヤナギマツタケ",
+      "predicted": [
+        "Pleurotus ostreatus",
+        "Omphalotus japonicus",
+        "Gymnopilus junonius"
+      ],
+      "predicted_ja": [
+        "日本語名なし",
+        "ツキヨタケ",
+        "日本語名なし"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 30,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 684656763,
+      "group": "菌類",
+      "truth": "Panus lecomtei",
+      "truth_ja": "アラゲカワキタケ",
+      "predicted": [
+        "Stereum hirsutum",
+        "Trametes hirsuta",
+        "Schizophyllum commune"
+      ],
+      "predicted_ja": [
+        "キウロコタケ",
+        "アラゲカワラタケ",
+        "スエヒロタケ"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 50,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 538886889,
+      "group": "菌類",
+      "truth": "Chlorophyllum molybdites",
+      "truth_ja": "オオシロカラカサタケ",
+      "predicted": [
+        "Chlorophyllum molybdites",
+        "Macrolepiota procera",
+        "Agaricus arvensis"
+      ],
+      "predicted_ja": [
+        "オオシロカラカサタケ",
+        "カラカサタケ",
+        "シロオオハラタケ"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 525060330,
+      "group": "菌類",
+      "truth": "Fomitopsis pinicola",
+      "truth_ja": "ツガサルノコシカケ",
+      "predicted": [
+        "Ganoderma applanatum",
+        "Ganoderma lucidum"
+      ],
+      "predicted_ja": [
+        "コフキサルノコシカケ",
+        "日本語名なし"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 674994892,
+      "group": "菌類",
+      "truth": "Porpidia albocaerulescens",
+      "truth_ja": "ヘリトリゴケ",
+      "predicted": [],
+      "predicted_ja": [],
+      "category": "菌類",
+      "rejected": true,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": false,
+      "confidence_top1": null,
+      "evidence_status_top1": null,
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 588379186,
+      "group": "菌類",
+      "truth": "Suillus granulatus",
+      "truth_ja": "チチアワタケ",
+      "predicted": [
+        "Suillus bovinus",
+        "Suillus luteus"
+      ],
+      "predicted_ja": [
+        "アミタケ",
+        "ヌメリイグチ"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 250049210,
+      "group": "菌類",
+      "truth": "Ganoderma applanatum",
+      "truth_ja": "コフキサルノコシカケ",
+      "predicted": [
+        "Ganoderma applanatum",
+        "Fomitopsis pinicola",
+        "Phellinus igniarius"
+      ],
+      "predicted_ja": [
+        "コフキサルノコシカケ",
+        "日本語名なし",
+        "キコブタケ"
+      ],
+      "category": "菌類",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 50,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 120600104,
+      "group": "は虫類・両生類",
+      "truth": "Gekko japonicus",
+      "truth_ja": "ニホンヤモリ",
+      "predicted": [
+        "Gekko japonicus",
+        "Hemidactylus frenatus"
+      ],
+      "predicted_ja": [
+        "ニホンヤモリ",
+        "ホオグロヤモリ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": true,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 60,
+      "evidence_status_top1": "taxonomy_only",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 79930442,
+      "group": "は虫類・両生類",
+      "truth": "Elaphe quadrivirgata",
+      "truth_ja": "シマヘビ",
+      "predicted": [
+        "Hebius vibakari",
+        "Elaphe quadrivirgata",
+        "Elaphe climacophora"
+      ],
+      "predicted_ja": [
+        "ヒバカリ",
+        "シマヘビ",
+        "アオダイショウ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": true,
+      "genus": true,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 28584765,
+      "group": "は虫類・両生類",
+      "truth": "Ptyas semicarinata",
+      "truth_ja": "リュウキュウアオヘビ",
+      "predicted": [
+        "Elaphe climacophora"
+      ],
+      "predicted_ja": [
+        "アオダイショウ"
+      ],
+      "category": "動物",
+      "rejected": false,
+      "top1": false,
+      "top3": false,
+      "genus": false,
+      "family_or_above": true,
+      "confidence_top1": 20,
+      "evidence_status_top1": "uncertain",
+      "plantnet_status": "",
+      "plantnet_used": false
+    },
+    {
+      "photo_id": 685160022,
+      "truth": "Diploderma swinhonis",
+      "group": "は虫類・両生類",
+      "error": "VisionError: Geminiの利用上限またはレート制限に達しました"
+    },
+    {
+      "photo_id": 115743320,
+      "truth": "Takydromus tachydromoides",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 217767675,
+      "truth": "Rhabdophis tigrinus",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 217768509,
+      "truth": "Euprepiophis conspicillata",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 217767614,
+      "truth": "Gloydius blomhoffii",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 192738774,
+      "truth": "Elaphe climacophora",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 528497059,
+      "truth": "Glandirana rugosa",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 530188111,
+      "truth": "Plestiodon japonicus",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 474236654,
+      "truth": "Trachemys scripta",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 712324189,
+      "truth": "Polypedates leucomystax",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 712050382,
+      "truth": "Goniurosaurus kuroiwae",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 265887210,
+      "truth": "Cynops pyrrhogaster",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 115161129,
+      "truth": "Bufo praetextatus",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 417209981,
+      "truth": "Dryophytes leopardus",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 301096954,
+      "truth": "Pelodiscus sinensis",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 470446157,
+      "truth": "Rana sakuraii",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    },
+    {
+      "photo_id": 464063558,
+      "truth": "Fejervarya kawamurai",
+      "group": "は虫類・両生類",
+      "error": "skipped: 日次上限"
+    }
+  ]
+}

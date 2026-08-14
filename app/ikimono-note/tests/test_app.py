@@ -2692,7 +2692,9 @@ def test_the_public_pages_can_be_shared_and_found():
 
     sitemap = client.get("/sitemap.xml")
     assert sitemap.status_code == 200
-    for path in ("/login", "/privacy", "/terms"):
+    # 表紙は / 。未ログインでも転送せずに入口が出る (所有権確認が転送を嫌う)
+    assert "run.app/</loc>" in sitemap.text
+    for path in ("/privacy", "/terms"):
         assert f"run.app{path}</loc>" in sitemap.text
 
     assert client.get("/ogp.png").status_code == 200
@@ -2794,3 +2796,29 @@ def test_the_health_check_can_be_reached_from_outside():
     assert body.status_code == 200 and body.json()["ok"] is True
     # 公開版では中身を伏せる。動いているかを知るのにモデル名は要らない
     assert "if PUBLIC_MODE:\n        return {\"ok\": True}" in source
+
+
+def test_the_front_page_does_not_bounce_anonymous_visitors():
+    """公開サイトの表紙が /login なのは不自然で、所有権の確認も転送を挟むと通らない。
+
+    未ログインの / は転送せず、そのまま入口を出す。ログイン済みの人はアプリが出る。
+    """
+    source = Path("main.py").read_text(encoding="utf-8")
+    assert 'if path == "/":' in source
+    assert 'return _page("login.html")' in source
+    # /login も残す。失敗の印つきで戻る先になっている
+    assert '@app.get("/login", include_in_schema=False)' in source
+
+
+def test_the_ownership_token_can_be_set_without_rebuilding():
+    """確認 → 審査の往復を速くする。合言葉は環境変数で差せるようにしておく。"""
+    source = Path("main.py").read_text(encoding="utf-8")
+    assert 'SITE_VERIFICATION = os.getenv("IKIMONO_SITE_VERIFICATION", "").strip()' in source
+    assert "def _inject_site_verification(html: str) -> str:" in source
+    assert 'return HTMLResponse(_inject_site_verification(html))' in source
+    # ファイルを置けと言われる方式にも備える
+    assert 'SITE_VERIFICATION_FILE = os.getenv("IKIMONO_SITE_VERIFICATION_FILE", "").strip()' in source
+    assert 'return Response(f"google-site-verification: {SITE_VERIFICATION_FILE}"' in source
+    # 設定していなければ何も差さない
+    assert client.get("/login").text.count("google-site-verification") == 0
+    assert client.get("/googleabc.html").status_code == 404
