@@ -114,6 +114,17 @@ tailscale serve --https=8443 off         # やめるとき
 
 `https://ubuntu-server-app.tailf74832.ts.net:8443/` で開きます。
 
+### いま公開しているのはどこか
+
+**本番は Cloud Run。** `https://ikimono-note-736831430371.asia-northeast1.run.app`
+
+Tailscale Funnel での公開は 2026-08-14 に止めた (`ikimono-note-public.service` は
+stop + disable、`tailscale funnel --https=443 off`)。Personal プランは非商用限定で、
+広告を出す以上そこには置けない (ats030-rx76)。
+
+手元に残っているのは運営者用だけ。`ikimono-note.service` (:8523) を tailnet の
+:8443 が見ている。こちらは公開されていない。
+
 ### Cloud Run へ出す
 
 ```bash
