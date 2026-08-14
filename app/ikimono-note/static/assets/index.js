@@ -125,7 +125,8 @@ function plantnetCreditHtml(data){
 }
 function affiliateHtml(){if(!affiliate||!affiliate.enabled)return "";return "<aside class=\"affiliate-card\" id=\"affiliateCard\"><div class=\"affiliate-label\">関連商品の広告リンクを表示しています</div><div class=\"affiliate-disclosure\">購入されると運営者に紹介料が入る場合があります。</div></aside>"}
 /* 見分け方は、確信の度合いによらず出す。
-   実測で6割は種を外しており (Top-1 40%)、そのうち多くは属まで合っている。
+   実測で7割は種を外しており (Top-1 31.4%、100枚3回の平均)、そのうち多くは
+   属まで合っている (属 52.6%、科以上 91.9%)。
    「アオダイショウです」と言い切られて違うより、「シマヘビとはここで見分ける」が
    添えてあるほうが、実物と見くらべられる。以前は evidence_status が uncertain の
    ときだけ出しており、しかも traits があると手前で返って一度も表示されなかった。 */
