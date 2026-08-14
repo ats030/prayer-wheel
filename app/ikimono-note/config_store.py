@@ -26,9 +26,14 @@ MODELS = {
     "local": [{"id": "gemma4:12b", "label": "gemma4:12b（ローカル）"}],
     # 無料枠は同じ Gemini でもモデルごとに大きく違う。実測で 3.6 Flash は1日20回しか
     # 通らず、30枚の評価すら回らなかった。Flash-Lite は30枚を完走している。
+    #
+    # 回数そのものは書かない。Google はモデル別の表を公開しなくなり、いまは
+    # AI Studio でアカウントごとに見る形になっている (2026-08-14 に確認)。
+    # 数字を書くと、確かめられないものを断定することになる。
     "gemini": [
         {"id": "gemini-3.5-flash-lite", "label": "Gemini 3.5 Flash-Lite（推奨・無料枠が広い）"},
-        {"id": "gemini-3.6-flash", "label": "Gemini 3.6 Flash（無料枠は1日20回）"},
+        {"id": "gemini-3.7-flash", "label": "Gemini 3.7 Flash（最新・速い）"},
+        {"id": "gemini-3.6-flash", "label": "Gemini 3.6 Flash（無料枠が狭い）"},
         {"id": "gemini-3.5-flash", "label": "Gemini 3.5 Flash"},
     ],
     "openai": [

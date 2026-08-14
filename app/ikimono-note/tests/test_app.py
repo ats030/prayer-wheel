@@ -2591,3 +2591,27 @@ def test_the_privacy_policy_names_the_right_processor():
     assert "Tailscale" not in privacy
     assert "Google Cloud Run（東京リージョン）" in privacy
     assert "Google Cloud Firestore（東京リージョン）" in privacy
+
+
+def test_the_newest_gemini_is_offered():
+    """モデルは増える。古い一覧のままだと、利用者は新しいものを選べない。
+
+    2026-08-14 に API の models.list を引いたところ gemini-3.7-flash が出ていた。
+    同じ写真で試すと 3.6 Flash が 14.7秒、3.7 Flash は 8〜9秒で、動作も確認できた。
+    """
+    import config_store
+    ids = [m["id"] for m in config_store.MODELS["gemini"]]
+    assert "gemini-3.7-flash" in ids
+    # 既定は据え置き。速さより無料枠の広さが要る (BYOK の利用者が自分で払う)
+    assert config_store.DEFAULT_MODELS["gemini"] == "gemini-3.5-flash-lite"
+
+
+def test_free_tier_numbers_are_not_asserted_in_the_labels():
+    """Google はモデル別の無料枠の表を公開しなくなった (AI Studio でアカウントごと)。
+
+    確かめられない数字を画面に書くと、古くなったまま断定し続けることになる。
+    """
+    import config_store
+    labels = " ".join(m["label"] for m in config_store.MODELS["gemini"])
+    assert "1日20回" not in labels
+    assert "無料枠が広い" in labels        # 相対的な言い方は残す
