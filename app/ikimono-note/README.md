@@ -172,6 +172,18 @@ stop + disable、`tailscale funnel --https=443 off`)。Personal プランは非�
 履歴にも残るためです。広告の設定と Amazon の資格情報は運営者用の `settings.json` からも読みます
 (画面から入れたものがそこにあるため)。
 
+デプロイのたびにイメージが1つ増える (1回あたり約62MB)。Artifact Registry の無料枠は
+0.5GB なので、放っておくと数回で超える。自動の掃除を入れてある。
+
+```bash
+gcloud artifacts repositories describe cloud-run-source-deploy \
+  --location=asia-northeast1 --project=ikimono-note-12205 --format='yaml(cleanupPolicies)'
+```
+
+新しい3つを残し、7日より古いものを消す。3つ残すのは、いま出ているものと、
+戻せる先を2つ確保するため。Cloud Run のリビジョンは残るが、イメージを消した
+ぶんへは戻せなくなる。
+
 **運営者の Gemini キーは渡しません。** 公開版は BYOK で、サーバー側の鍵が要るのはお試し枠だけ。
 その枠は年齢条項で止めてある (ats030-rhfi) ので、鍵を置くとあとで黙って規約違反へ戻ります。
 
