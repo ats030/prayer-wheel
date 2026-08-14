@@ -357,9 +357,15 @@ async function saveToDrive() {
   form.append("metadata", new Blob([JSON.stringify(metadata)], {type: "application/json"}));
   form.append("file", body);
   const base = "https://www.googleapis.com/upload/drive/v3/files";
-  const url = existing ? `${base}/${existing}?uploadType=multipart` : `${base}?uploadType=multipart`;
+  /* 更新時刻も一緒に貰う。自分が書いたぶんを「新しくなった」と数えると、
+     次に画面へ戻るたび、書いたばかりのものを落とし直すことになる */
+  const fields = "&fields=id,modifiedTime";
+  const url = existing ? `${base}/${existing}?uploadType=multipart${fields}`
+                       : `${base}?uploadType=multipart${fields}`;
   const response = await driveFetch(url, {method: existing ? "PATCH" : "POST", body: form});
-  rememberDriveFile((await response.json()).id || existing);
+  const written = await response.json();
+  rememberDriveFile(written.id || existing);
+  rememberDriveSeen(written.modifiedTime || "");
   try { await pruneDrivePhotos(); } catch (error) { /* 後片付けは次回でよい */ }
   return payload.records.length;
 }
@@ -381,12 +387,57 @@ async function loadFromDrive() {
  * 1タブにつき1回。記録50件は数MBあるので、画面を移るたびに引き直さない。
  */
 const DRIVE_PULLED = "species-drive-pulled";
+/* 最後に取り込んだファイルの更新時刻。これより新しくなければ、中身は落とさない。
+   記録50件は数MBあるので、開くたびに丸ごと引くわけにはいかない */
+const DRIVE_SEEN = "species-drive-seen";
 let drivePull = null;   // defer と DOMContentLoaded の両方から呼ばれる。二重に引かない
+let lastLookedAt = 0;   // 見に行った時刻。戻ってくるたびに叩かない
 
 function syncFromDriveOnce() {
   if (!drivePull) drivePull = pullFromDrive();
   return drivePull;
 }
+
+function driveSeenAt() {
+  try { return localStorage.getItem(DRIVE_SEEN) || ""; } catch (error) { return ""; }
+}
+
+function rememberDriveSeen(stamp) {
+  try { stamp ? localStorage.setItem(DRIVE_SEEN, stamp) : localStorage.removeItem(DRIVE_SEEN); }
+  catch (error) { /* 覚えられなくても取り込みは済んでいる */ }
+}
+
+/* 別の端末で保存されたものを、戻ってきたときに拾う。
+ *
+ * 取り込みは1タブに1回だけだった。タブを開いたまま別の端末で1件足しても、
+ * こちらの画面には出てこない。かといって開くたびに丸ごと引くのは重い
+ * (記録50件で数MB)。更新時刻だけ先に見て、新しくなければ何もしない。 */
+const DRIVE_LOOK_INTERVAL = 60 * 1000;
+
+async function pullIfDriveChanged({force = false} = {}) {
+  if (!driveLinked() || !driveTokenAlive()) return false;
+  if (!force && Date.now() - lastLookedAt < DRIVE_LOOK_INTERVAL) return false;
+  lastLookedAt = Date.now();
+  try {
+    const id = await findDriveFile();
+    if (!id) return false;
+    const response = await driveFetch(
+      `https://www.googleapis.com/drive/v3/files/${id}?fields=modifiedTime`);
+    const stamp = (await response.json()).modifiedTime || "";
+    if (!stamp || stamp === driveSeenAt()) return false;
+    const restored = await loadFromDrive();
+    rememberDriveSeen(stamp);
+    document.dispatchEvent(new CustomEvent("species-records-restored", {detail: {restored}}));
+    return true;
+  } catch (error) {
+    console.info("ドライブの更新を確かめられませんでした", error);
+    return false;
+  }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") pullIfDriveChanged();
+});
 
 async function pullFromDrive() {
   if (!driveLinked()) return false;
@@ -399,6 +450,14 @@ async function pullFromDrive() {
       return false;
     }
     const restored = await loadFromDrive();
+    try {
+      const id = driveFileId();
+      if (id) {
+        const meta = await driveFetch(
+          `https://www.googleapis.com/drive/v3/files/${id}?fields=modifiedTime`);
+        rememberDriveSeen((await meta.json()).modifiedTime || "");
+      }
+    } catch (error) { /* 覚えられなくても、次は落とし直すだけ */ }
     try { sessionStorage.setItem(DRIVE_PULLED, "1"); } catch (error) { /* 覚えられなくても取り込みは済んでいる */ }
     /* 記録一覧はもう描き終わっている。描き直す機会を渡す */
     document.dispatchEvent(new CustomEvent("species-records-restored", {detail: {restored}}));

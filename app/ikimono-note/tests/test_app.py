@@ -2927,3 +2927,24 @@ def test_security_headers_survive_an_early_return():
         assert "content-security-policy" in blocked.headers
     finally:
         main.PUBLIC_MODE = original
+
+
+def test_records_saved_on_another_device_arrive_when_you_come_back():
+    """取り込みは1タブに1回だけだった。タブを開いたまま別の端末で足しても出てこない。
+
+    かといって開くたび丸ごと引くのは重い (記録50件で数MB)。更新時刻だけ先に見て、
+    新しくなければ何もしない。
+    """
+    drive = client.get("/assets/gdrive.js").text
+    assert "async function pullIfDriveChanged(" in drive
+    assert 'document.addEventListener("visibilitychange"' in drive
+    # 中身を落とす前に更新時刻を見る
+    assert "fields=modifiedTime" in drive
+    assert 'if (!stamp || stamp === driveSeenAt()) return false;' in drive
+    # 戻ってくるたびに叩かない
+    assert "DRIVE_LOOK_INTERVAL" in drive
+    # 自分が書いたぶんを「新しくなった」と数えない
+    assert 'const fields = "&fields=id,modifiedTime";' in drive
+    assert "rememberDriveSeen(written.modifiedTime" in drive
+    # 押されていないので窓は開けない。生きているトークンがあるときだけ動く
+    assert "if (!driveLinked() || !driveTokenAlive()) return false;" in drive
