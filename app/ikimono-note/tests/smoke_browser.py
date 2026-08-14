@@ -170,12 +170,28 @@ def run(base: str, do_identify: bool) -> None:
           open.onerror = () => reject(open.error);
           open.onsuccess = () => {
             const tx = open.result.transaction("entries", "readwrite");
+            const bytes = Uint8Array.from(atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="), c => c.charCodeAt(0));
+            const blob = new Blob([bytes], {type: "image/png"});
+            record.thumbnail = blob; record.thumbnails = [blob, blob];
             tx.objectStore("entries").put(record);
             tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
           };
         })""", note_record)
         page.reload(); page.wait_for_load_state("networkidle"); page.wait_for_timeout(500)
         page.locator('.entry[data-id="note-smoke"] summary').click()
+        page.wait_for_timeout(300)
+        rerun = page.locator('.entry[data-id="note-smoke"] .rerun-remove')
+        check("調べ直す写真ごとに外すボタンが出る", rerun.count() == 2)
+        check("元の記録には2枚の写真が残る", page.locator('.entry[data-id="note-smoke"] .detail-photo').count() == 2)
+        rerun.first.click(); page.wait_for_timeout(150)
+        check("調べ直す写真を1枚ずつ外せる", rerun.count() == 1)
+        check("外しても元の記録の写真は消えない", page.locator('.entry[data-id="note-smoke"] .detail-photo').count() == 2)
+        rerun.first.click(); page.wait_for_timeout(150)
+        check("調べ直す最後の1枚は残す", rerun.count() == 1 and "1枚以上必要" in page.locator('.entry[data-id="note-smoke"] .rerun-message').inner_text())
+        page.set_viewport_size({"width": 390, "height": 844})
+        remove_box = rerun.first.bounding_box()
+        check("写真を外す操作がスマホ幅に収まる", bool(remove_box) and remove_box["x"] >= 0 and remove_box["x"] + remove_box["width"] <= 390 and remove_box["height"] >= 44, str(remove_box))
+        page.set_viewport_size({"width": 1100, "height": 900})
         note = page.locator('.entry[data-id="note-smoke"] .note-input')
         check("記録に自分の観察欄が出る", note.count() == 1)
         note.fill("<b>夕方には花が閉じていた</b>")
@@ -254,6 +270,13 @@ def run(base: str, do_identify: bool) -> None:
         page.set_input_files("#libraryAdd", [photo("c.jpg"), photo("d.jpg")]); page.wait_for_timeout(600)
         check("撮り足しても3枚を超えない", page.locator("#previews img").count() == 3,
               page.locator("#captureTitle").inner_text())
+        remove = page.locator("#previews .preview-remove")
+        remove.first.click(); page.wait_for_timeout(150)
+        check("選択中の写真を1枚ずつ外せる", page.locator("#previews img").count() == 2)
+        remove.first.click(); page.wait_for_timeout(150)
+        check("写真を1枚まで減らせる", page.locator("#previews img").count() == 1)
+        remove.first.click(); page.wait_for_timeout(150)
+        check("最後の1枚は残す", page.locator("#previews img").count() == 1 and "1枚以上必要" in page.locator("#status").inner_text())
 
         if do_identify:
             image = sorted(glob.glob("/home/ats030/cache/species-eval/images/*.jpg"))[0]

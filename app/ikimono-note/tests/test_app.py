@@ -109,6 +109,10 @@ def test_shooting_guide_offers_camera_and_library_without_losing_photos():
     assert '$("library").onchange=e=>{setFiles(e.target.files)' in source
     assert "selected=[...selected,...added]" in source
     assert "const MAX_PHOTOS=3" in source
+    assert 'class="btn preview-remove"' in source
+    assert "function removeSelectedPhoto(index)" in source
+    assert "selected.splice(index,1)" in source
+    assert "調べる写真は1枚以上必要です。" in source
 
 
 def test_shooting_guide_appears_whenever_something_is_left_to_check():
@@ -1332,8 +1336,9 @@ def test_product_images_are_allowed_by_the_policy():
 def test_records_can_be_examined_again():
     """元の写真は残っていないので、保存済みの縮小画像を送り直す。"""
     history = client.get("/assets/history.js").text
-    assert "async function reidentify(record,button,message,extras=[])" in history
-    assert 'recordPhotos(record).forEach((blob,i)=>fd.append("files",blob,"photo-"+(i+1)+".jpg"))' in history
+    assert "async function reidentify(record,button,message,selection=null)" in history
+    assert "const keptIndexes=Array.isArray(selection?.keptIndexes)" in history
+    assert 'kept.forEach((blob,i)=>fd.append("files",blob,"photo-"+(i+1)+".jpg"))' in history
     assert 'e.thumbnail?\'<button class="btn again"' in history   # 写真が無い記録には出さない
     assert "調べ直しています…" in history
     # 公開版は BYOK。撮影画面と同じ形でキーとモデルを渡す
@@ -2258,7 +2263,7 @@ def test_the_screen_works_without_a_job_ticket():
     assert "if(!data.job){stopWorking();await finishIdentification(data," in index
     history = client.get("/assets/history.js").text
     assert "if(!data.job){" in history
-    assert "await saveRerun(record,data,[...recordPhotos(record)," in history
+    assert "await saveRerun(record,data,selected)" in history
 
 
 def test_identification_survives_a_reload():
@@ -2284,25 +2289,29 @@ def test_identification_survives_a_reload():
 def test_a_record_can_be_examined_again_with_extra_photos():
     """結果に納得できないときは、記録の中から写真を足して調べ直せること。
 
-    記録に残っているのは1枚目の縮小画像だけなので、足せるのは2枚まで
-    (サーバーの上限が3枚)。元の写真は全体像であることが多く、足すのは寄りの1枚に
-    なるので、送る順は元→追加にする。撮影画面で撮り足すときと同じ考え方。
+    旧い記録は1枚、新しい記録は最大3枚の縮小画像を持つ。元写真と追加写真から
+    最大3枚を選び、元の記録を変えずに新しい記録として保存する。
     """
     history = client.get("/assets/history.js").text
     assert "function addRerunControls()" in history
     assert "const RERUN_MAX_PHOTOS=3" in history
-    assert "const maxExtra=Math.max(0,RERUN_MAX_PHOTOS-kept.length)" in history
-    assert "結果に納得できないときは" in history
+    assert "const keptIndexes=originals.map((_,index)=>index),extras=[]" in history
+    assert "RERUN_MAX_PHOTOS-keptIndexes.length-extras.length" in history
+    assert "写真を足したり外したりできます" in history
+    assert 'class="btn rerun-remove"' in history
+    assert "調べ直す写真は1枚以上必要です。" in history
+    assert "元の記録には残っています。" in history
     # カメラと写真選択の両方から足せる
     assert 'camera.capture="environment"' in history
     assert "box.querySelector(\".rerun-camera\").onclick=()=>camera.click()" in history
     assert "box.querySelector(\".rerun-library\").onclick=()=>library.click()" in history
-    # 元の写真を先に、足した写真をあとに送る
-    # 記録が持つ写真を先に、足した写真をあとに送る
-    assert 'recordPhotos(record).forEach((blob,i)=>fd.append("files",blob,"photo-"+(i+1)+".jpg"))' in history
+    # 選んで残した元写真を先に、足した写真をあとに送る
+    assert 'kept.forEach((blob,i)=>fd.append("files",blob,"photo-"+(i+1)+".jpg"))' in history
     assert 'extras.forEach((file,i)=>fd.append("files",file,"added-"+(i+1)+".jpg"))' in history
-    # 元の記録は消さず、新しい記録として足す
-    assert "await saveRerun(source,payload.result,[...recordPhotos(source),...added])" in history
+    # 元の記録は消さず、選んだ写真だけを新しい記録として足す
+    assert "await saveRerun(source,payload.result,[...kept,...added])" in history
+    assert "keptIndexes,photos:shrunk" in history
+    assert "pending.keptIndexes" in history
     assert ".then(addRerunControls)" in history
     css = client.get("/assets/history.css").text
     assert ".rerun-box{" in css

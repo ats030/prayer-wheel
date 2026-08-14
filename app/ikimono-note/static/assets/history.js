@@ -160,55 +160,64 @@ function addRerunControls(){
     const detail=node.querySelector(".detail");
     if(!detail||detail.querySelector(".rerun-box"))return;
     const record=rerunRecords.get(node.dataset.id);
-    const kept=recordPhotos(record);
-    if(!kept.length)return;
-    const maxExtra=Math.max(0,RERUN_MAX_PHOTOS-kept.length);
+    const originals=recordPhotos(record);
+    if(!originals.length)return;
     const box=document.createElement("div");
     box.className="rerun-box";
-    box.innerHTML='<div class="label">結果に納得できないときは</div>'
-      +'<p>写真を足すと、決め手が増えて答えが変わることがあります。元の写真'+kept.length+'枚はそのまま使います（'+(maxExtra?'あと'+maxExtra+'枚まで足せます':'すでに'+RERUN_MAX_PHOTOS+'枚あるので、これ以上は足せません')+'）。</p>'
-      +'<div class="rerun-previews"></div>'
-      +(maxExtra?'<div class="rerun-actions">'
+    box.innerHTML='<div class="label">調べ直しに使う写真</div>'
+      +'<p>写真を足したり外したりできます。ここで外しても、元の記録の写真は消えません。</p>'
+      +'<div class="rerun-previews"></div><div class="rerun-actions">'
       +'<button class="btn rerun-camera" type="button">カメラで撮って足す</button>'
       +'<button class="btn rerun-library" type="button">写真を選んで足す</button>'
-      +'<button class="btn rerun-go" type="button" hidden>足した写真で調べ直す</button></div>':'')
+      +'<button class="btn rerun-go" type="button">選んだ写真で調べ直す</button></div>'
       +'<p class="rerun-message" hidden></p>';
     const camera=document.createElement("input");
     camera.type="file";camera.accept="image/*";camera.capture="environment";camera.hidden=true;
     const library=document.createElement("input");
     library.type="file";library.accept="image/*";library.multiple=true;library.hidden=true;
-    box.append(camera,library);
-    detail.append(box);
+    box.append(camera,library);detail.append(box);
 
-    const extras=[];let urls=[];
+    const keptIndexes=originals.map((_,index)=>index),extras=[];let urls=[];
     const message=box.querySelector(".rerun-message");
     const say=text=>{message.textContent=text;message.hidden=!text};
     const paint=()=>{
       urls.forEach(URL.revokeObjectURL);
-      urls=extras.map(file=>URL.createObjectURL(file));
-      box.querySelector(".rerun-previews").innerHTML=urls
-        .map((url,i)=>'<img src="'+url+'" alt="足した写真 '+(i+1)+'">').join("");
-      box.querySelector(".rerun-go").hidden=!extras.length;
+      const items=[...keptIndexes.map(index=>({file:originals[index],kind:"original",index,label:"元の写真"})),
+                   ...extras.map((file,index)=>({file,kind:"extra",index,label:"足した写真"}))];
+      urls=items.map(item=>URL.createObjectURL(item.file));
+      box.querySelector(".rerun-previews").innerHTML=items.map((item,i)=>
+        '<div class="rerun-preview"><img src="'+urls[i]+'" alt="'+item.label+' '+(i+1)+'">'
+        +'<button class="btn rerun-remove" type="button" data-kind="'+item.kind+'" data-index="'+item.index+'">この写真を外す</button></div>').join("");
+      box.querySelectorAll(".rerun-remove").forEach(button=>button.onclick=()=>{
+        if(keptIndexes.length+extras.length<=1){say("調べ直す写真は1枚以上必要です。");return}
+        const index=Number(button.dataset.index);
+        if(button.dataset.kind==="original"){const position=keptIndexes.indexOf(index);if(position>=0)keptIndexes.splice(position,1)}
+        else extras.splice(index,1);
+        paint();say("写真を1枚外しました。元の記録には残っています。");
+      });
+      const full=items.length>=RERUN_MAX_PHOTOS;
+      box.querySelector(".rerun-camera").disabled=full;
+      box.querySelector(".rerun-library").disabled=full;
     };
     const add=files=>{
       const chosen=[...files].filter(file=>file.type.startsWith("image/"));
       if(!chosen.length){say("画像ファイルを選んでください。");return}
-      const room=maxExtra-extras.length;
-      if(room<=0){say(maxExtra?"あと足せる写真はありません。":"合わせて"+RERUN_MAX_PHOTOS+"枚までです。");return}
-      extras.push(...chosen.slice(0,room));
-      paint();
+      const room=RERUN_MAX_PHOTOS-keptIndexes.length-extras.length;
+      if(room<=0){say("合わせて"+RERUN_MAX_PHOTOS+"枚までです。写真を外すと別の写真を足せます。");return}
+      extras.push(...chosen.slice(0,room));paint();
       say(chosen.length>room?"（合わせて"+RERUN_MAX_PHOTOS+"枚までなので"+room+"枚だけ足しました）":"");
     };
     camera.onchange=e=>{add(e.target.files);e.target.value=""};
     library.onchange=e=>{add(e.target.files);e.target.value=""};
     box.querySelector(".rerun-camera").onclick=()=>camera.click();
     box.querySelector(".rerun-library").onclick=()=>library.click();
-    box.querySelector(".rerun-go").onclick=()=>
-      reidentify(record,box.querySelector(".rerun-go"),message,extras);
+    box.querySelector(".rerun-go").onclick=()=>reidentify(record,box.querySelector(".rerun-go"),message,
+      {keptIndexes:[...keptIndexes],extras:[...extras]});
+    paint();
   });
 }
-/* 調べ直しも後ろで走らせる。撮影画面と同じ理由 (Ollama で1分)。札と、足した写真を
-   控えておき、画面を更新しても続きから受け取る。記録に元からある写真は
+/* 調べ直しも後ろで走らせる。撮影画面と同じ理由 (Ollama で1分)。札と、使う元写真の
+   番号、足した写真を控え、画面を更新しても続きから受け取る。元写真そのものは
    IndexedDB にあるので預けない */
 const RERUN_PENDING_KEY="species-pending-rerun";
 function readRerunPending(){try{return JSON.parse(localStorage.getItem(RERUN_PENDING_KEY)||"null")}catch(e){return null}}
@@ -248,59 +257,44 @@ async function watchRerun(pending,button,message){
     }
     const source=rerunRecords.get(String(pending.recordId));
     if(!source){writeRerunPending(null);message.textContent="元の記録が見つかりませんでした。";message.hidden=false;return}
+    const originals=recordPhotos(source);
+    const keptIndexes=Array.isArray(pending.keptIndexes)?pending.keptIndexes:originals.map((_,index)=>index);
+    const kept=keptIndexes.filter(index=>index>=0&&index<originals.length).map(index=>originals[index]);
     const added=(pending.photos||[]).map(dataUrlToBlob).filter(Boolean);
     writeRerunPending(null);
-    await saveRerun(source,payload.result,[...recordPhotos(source),...added]);
+    await saveRerun(source,payload.result,[...kept,...added]);
     location.reload();
     return;
   }
 }
 
-async function reidentify(record,button,message,extras=[]){
-  /* 元の写真は保存していない。記録の縮小画像 (長辺960px) を送り直す。
-     解像度が落ちているぶん、撮ったばかりの写真より不利になることがある */
-  if(!recordPhotos(record).length){message.textContent="この記録には写真が残っていないため、調べ直せません。";message.hidden=false;return}
-  const label=button.textContent;
-  const startedAt=Date.now();
+async function reidentify(record,button,message,selection=null){
+  /* 元の記録は変えず、今回使う写真だけを組み立てる。行の「もう一度調べる」は全写真、
+     詳細の選択画面は残した元写真と足した写真を送る。 */
+  const originals=recordPhotos(record);
+  const keptIndexes=Array.isArray(selection?.keptIndexes)?selection.keptIndexes:originals.map((_,index)=>index);
+  const kept=keptIndexes.filter(index=>index>=0&&index<originals.length).map(index=>originals[index]);
+  const extras=Array.isArray(selection?.extras)?selection.extras:[];
+  if(!kept.length&&!extras.length){message.textContent="調べ直す写真は1枚以上必要です。";message.hidden=false;return}
+  const label=button.textContent,startedAt=Date.now();
   button.disabled=true;button.textContent="調べ直しています…";message.hidden=true;
   try{
     const settings=await fetch("/api/settings").then(r=>r.ok?r.json():null);
     if(!settings)throw new Error("設定を読み込めませんでした");
     const fd=new FormData();
-    /* 記録が持つ写真を先に、足したぶんをあとに。全体像→寄りの順になる */
-    recordPhotos(record).forEach((blob,i)=>fd.append("files",blob,"photo-"+(i+1)+".jpg"));
+    kept.forEach((blob,i)=>fd.append("files",blob,"photo-"+(i+1)+".jpg"));
     extras.forEach((file,i)=>fd.append("files",file,"added-"+(i+1)+".jpg"));
-    fd.append("location",record.context?.location||"");
-    fd.append("observed_date",record.context?.observedDate||"");
-    fd.append("size",record.context?.size||"");
-    if(settings.public_mode){
-      const saved=JSON.parse(localStorage.getItem("species-public-settings")||"{}");
-      const provider=saved.provider||settings.provider;
-      fd.append("request_provider",provider);
-      fd.append("request_model",saved.models?.[provider]||settings.models?.[provider]||"");
-      fd.append("request_api_key",readApiKey(provider));
-      fd.append("request_plantnet_key",readApiKey("plantnet"));
-    }
+    fd.append("location",record.context?.location||"");fd.append("observed_date",record.context?.observedDate||"");fd.append("size",record.context?.size||"");
+    if(settings.public_mode){const saved=JSON.parse(localStorage.getItem("species-public-settings")||"{}");const provider=saved.provider||settings.provider;fd.append("request_provider",provider);fd.append("request_model",saved.models?.[provider]||settings.models?.[provider]||"");fd.append("request_api_key",readApiKey(provider));fd.append("request_plantnet_key",readApiKey("plantnet"))}
     fd.append("background","true");
-    const response=await fetch("/identify",{method:"POST",body:fd});
-    const data=await response.json();
+    const response=await fetch("/identify",{method:"POST",body:fd}),data=await response.json();
     if(!response.ok)throw new Error(data.detail||"調べられませんでした");
-    const shrunk=[];
-    for(const file of extras){try{const blob=await shrinkForHistory(file);if(blob)shrunk.push(await blobToDataUrl(blob))}catch(e){}}
-    /* 札が返らない置き場では、返ってきたものが結果そのもの (main.py の BACKGROUND_JOBS) */
-    if(!data.job){
-      await saveRerun(record,data,[...recordPhotos(record),...(shrunk.map(dataUrlToBlob).filter(Boolean))]);
-      location.reload();
-      return;
-    }
-    const pending={job:data.job,recordId:record.id,startedAt,photos:shrunk};
-    writeRerunPending(pending);
-    watchRerun(pending,button,message);
-    return;
-  }catch(error){
-    message.textContent=error.message;message.hidden=false;
-    button.disabled=false;button.textContent=label;
-  }
+    const shrunk=[];for(const file of extras){try{const blob=await shrinkForHistory(file);if(blob)shrunk.push(await blobToDataUrl(blob))}catch(e){}}
+    const selected=[...kept,...(shrunk.map(dataUrlToBlob).filter(Boolean))];
+    if(!data.job){await saveRerun(record,data,selected);location.reload();return}
+    const pending={job:data.job,recordId:record.id,startedAt,keptIndexes,photos:shrunk};
+    writeRerunPending(pending);watchRerun(pending,button,message);return;
+  }catch(error){message.textContent=error.message;message.hidden=false;button.disabled=false;button.textContent=label}
 }
 async function saveRerun(source,data,photos=[]){
   let listThumbnail=null;try{if(photos[0])listThumbnail=await shrinkForHistory(photos[0],LIST_MAX_EDGE)}catch(e){}

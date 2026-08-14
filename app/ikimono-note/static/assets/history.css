@@ -43,7 +43,7 @@
 .rerun-box p{margin:4px 0 0;color:var(--muted);font-size:12px}
 .rerun-previews{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .rerun-previews:empty{display:none}
-.rerun-previews img{width:84px;height:84px;object-fit:cover;border-radius:8px;background:var(--raised)}
+.rerun-preview{display:flex;width:112px;flex-direction:column;gap:5px}.rerun-previews img{width:112px;height:96px;object-fit:cover;border-radius:8px;background:var(--raised)}.rerun-remove{width:100%;min-height:44px;padding:0 7px;font-size:11px}
 .rerun-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
 .rerun-message{color:var(--danger)}
 .rerun-message:empty{display:none}
