@@ -189,7 +189,7 @@ def public(data: dict[str, Any] | None = None) -> dict[str, Any]:
         "local_llm": data["local_llm"],
         "available_models": catalog,
         "incompatible_local_models": incompatible,
-        "affiliate": {"title": data["affiliate"]["title"], "url": data["affiliate"]["url"], "enabled": bool(data["affiliate"]["enabled"] and data["affiliate"]["url"]), "metrics": data["affiliate_metrics"], "partner_tag": data["affiliate"].get("partner_tag", ""), "product_enabled": bool(data["affiliate"].get("product_enabled") and data["affiliate"].get("partner_tag") and data["api_keys"].get("amazon_creators_id") and data["api_keys"].get("amazon_creators_secret")), "creators_api_configured": bool(data["api_keys"].get("amazon_creators_id") and data["api_keys"].get("amazon_creators_secret"))},
+        "affiliate": {"title": data["affiliate"]["title"], "url": data["affiliate"]["url"], "enabled": bool(data["affiliate"]["enabled"] and data["affiliate"]["url"]), "metrics": affiliate_metrics(), "partner_tag": data["affiliate"].get("partner_tag", ""), "product_enabled": bool(data["affiliate"].get("product_enabled") and data["affiliate"].get("partner_tag") and data["api_keys"].get("amazon_creators_id") and data["api_keys"].get("amazon_creators_secret")), "creators_api_configured": bool(data["api_keys"].get("amazon_creators_id") and data["api_keys"].get("amazon_creators_secret"))},
         "api_key_configured": {
             provider: bool(data["api_keys"].get(provider))
             for provider in ("openai", "anthropic", "gemini", "plantnet")
@@ -198,12 +198,39 @@ def public(data: dict[str, Any] | None = None) -> dict[str, Any]:
 
 
 def record_affiliate(event: str) -> None:
+    """広告が出た / 押された、を数える。
+
+    ディスクのある運営者用は settings.json に足す。Cloud Run にはディスクが無く、
+    インスタンスが入れ替わるたび 0 に戻っていた。数えていたつもりで何も残らず、
+    商品APIの資格 (直近30日で適格販売10件) までの距離が分からなかった。
+    Firestore が使えるならそちらへ足す。
+    """
     if event not in {"impressions", "clicks"}:
         raise ValueError("unknown affiliate event")
+    import auth  # 循環を避けるため、呼ばれたときに読む
+    if auth.using_firestore():
+        try:
+            auth.bump_metric(event)
+        except Exception as error:      # 数えられなくても、広告そのものは出す
+            print(f"広告の数えを記録できませんでした（{event}）: {error}", flush=True)
+        return
     with _AFFILIATE_LOCK:
         current = load()
         current["affiliate_metrics"][event] += 1
         _write(current)
+
+
+def affiliate_metrics() -> dict[str, int]:
+    """いまの数え。置き場が2通りあるので、読む側はここだけ見ればよい。"""
+    import auth
+    if auth.using_firestore():
+        try:
+            stored = auth.read_metrics()
+        except Exception:
+            return {"impressions": 0, "clicks": 0}
+        return {"impressions": int(stored.get("impressions", 0)),
+                "clicks": int(stored.get("clicks", 0))}
+    return dict(load().get("affiliate_metrics") or {"impressions": 0, "clicks": 0})
 
 
 # ディスクのない置き場 (Cloud Run / Container Apps など) では settings.json が存在せず、

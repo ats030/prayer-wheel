@@ -2748,3 +2748,34 @@ def test_six_cards_do_not_leave_a_ragged_row():
         css = client.get(sheet).text
         assert "repeat(4,minmax(0,1fr))" not in css
         assert "repeat(auto-fill,minmax(132px,1fr))" in css
+
+
+def test_the_click_count_survives_a_restart_in_production():
+    """Cloud Run にディスクは無い。settings.json に足していたぶんは、インスタンスが
+    入れ替わるたび 0 に戻っていた。数えていたつもりで何も残っていない。
+
+    商品APIの資格 (直近30日で適格販売10件) までの距離を見るには、クリックが
+    実際に起きているかどうかが要る。Firestore が使えるならそちらへ足す。
+    """
+    source = Path("auth.py").read_text(encoding="utf-8")
+    assert "def bump_metric(field: str, amount: int = 1) -> None:" in source
+    assert "def read_metrics() -> dict[str, int]:" in source
+    # 読んで足して書くと、同時に押されたぶんが落ちる
+    assert '"updateTransforms"' in source and '"increment"' in source
+    assert "documents:commit" in source
+    # 利用者の記録とは別の入れ物
+    assert "/documents/metrics/" in source
+
+    store = Path("config_store.py").read_text(encoding="utf-8")
+    assert "if auth.using_firestore():" in store
+    assert "auth.bump_metric(event)" in store
+    assert "def affiliate_metrics() -> dict[str, int]:" in store
+    # 数えられなくても広告そのものは出す
+    assert "except Exception as error:      # 数えられなくても、広告そのものは出す" in store
+
+
+def test_the_settings_screen_reads_whichever_store_is_in_use():
+    """置き場が2通りあるので、読む側は1か所だけ見ればよい形にする。"""
+    store = Path("config_store.py").read_text(encoding="utf-8")
+    assert '"metrics": affiliate_metrics()' in store
+    assert '"metrics": data["affiliate_metrics"]' not in store

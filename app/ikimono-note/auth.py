@@ -119,6 +119,52 @@ def _firestore_put(subject: str, values: dict[str, str]) -> None:
     response.raise_for_status()
 
 
+# 広告の数え。利用者の記録とは別の入れ物に置く。
+#
+# 以前は settings.json に足していたが、Cloud Run にはディスクが無く、インスタンスが
+# 入れ替わるたびに 0 に戻っていた。数えていたつもりで、何も残っていなかった。
+# 商品APIの資格 (直近30日で適格販売10件) まであとどれくらいかを見るには、
+# クリックが実際に起きているかどうかが要る。
+_METRICS_DOC = "affiliate"
+
+
+def _metrics_path() -> str:
+    """Firestore の資源名。URL ではなく、この形で書き込みに渡す。"""
+    return f"projects/{FIRESTORE_PROJECT}/databases/(default)/documents/metrics/{_METRICS_DOC}"
+
+
+def _metrics_url() -> str:
+    return "https://firestore.googleapis.com/v1/" + _metrics_path()
+
+
+def bump_metric(field: str, amount: int = 1) -> None:
+    """1つ増やす。読んで足して書くと、同時に押されたぶんが落ちるので transform を使う。"""
+    commit = (f"https://firestore.googleapis.com/v1/projects/{FIRESTORE_PROJECT}"
+              f"/databases/(default)/documents:commit")
+    body = {"writes": [{
+        # 空の update と空の mask で、無ければ作る。あれば何も変えない
+        "update": {"name": _metrics_path(), "fields": {}},
+        "updateMask": {"fieldPaths": []},
+        "updateTransforms": [{"fieldPath": field,
+                              "increment": {"integerValue": str(int(amount))}}],
+    }]}
+    with httpx.Client(timeout=15) as client:
+        response = client.post(commit, json=body,
+                               headers={"Authorization": "Bearer " + _google_token()})
+    response.raise_for_status()
+
+
+def read_metrics() -> dict[str, int]:
+    with httpx.Client(timeout=15) as client:
+        response = client.get(_metrics_url(),
+                              headers={"Authorization": "Bearer " + _google_token()})
+    if response.status_code == 404:
+        return {}
+    response.raise_for_status()
+    fields = response.json().get("fields", {})
+    return {k: int(v.get("integerValue", 0)) for k, v in fields.items() if "integerValue" in v}
+
+
 def _firestore_delete(subject: str) -> None:
     with httpx.Client(timeout=15) as client:
         client.delete(_firestore_url(subject),
