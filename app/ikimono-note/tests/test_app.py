@@ -2779,3 +2779,18 @@ def test_the_settings_screen_reads_whichever_store_is_in_use():
     store = Path("config_store.py").read_text(encoding="utf-8")
     assert '"metrics": affiliate_metrics()' in store
     assert '"metrics": data["affiliate_metrics"]' not in store
+
+
+def test_the_health_check_can_be_reached_from_outside():
+    """死活の確認がログインの内側にあり、外からは 303 しか返らなかった。
+
+    OPEN_PATHS には "/healthz" と書いてあったが、その名前のルートは無く 404。
+    どちらの名前でも確かめられず、監視を掛けようがない状態だった。
+    """
+    source = Path("main.py").read_text(encoding="utf-8")
+    assert '"/health",' in source.split("OPEN_PATHS = {")[1][:400]
+    assert '"/healthz"' not in source.split("OPEN_PATHS = {")[1][:400]
+    body = client.get("/health")
+    assert body.status_code == 200 and body.json()["ok"] is True
+    # 公開版では中身を伏せる。動いているかを知るのにモデル名は要らない
+    assert "if PUBLIC_MODE:\n        return {\"ok\": True}" in source

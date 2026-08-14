@@ -216,7 +216,7 @@ LOGIN_FLOW_COOKIE = "ikimono_login"
 # ログインしていなくても通す道。ログイン自体と、読んでから決めるための文書、
 # それに画面を組み立てる部品。ここを絞りすぎるとログイン画面が裸になる。
 OPEN_PATHS = {"/login", "/auth/google", "/auth/callback", "/api/me", "/privacy", "/terms",
-              "/favicon.svg", "/theme.js", "/healthz",
+              "/favicon.svg", "/theme.js", "/health",
               # クローラと、共有したときの見え方。ログインへ飛ばすと robots.txt が
               # 読めず、共有カードの画像も出ない
               "/robots.txt", "/sitemap.xml", "/ogp.png"}
@@ -587,6 +587,17 @@ async def amazon_products(q: str = "", index: str = "All") -> JSONResponse:
 
 @app.get("/health")
 def health() -> dict[str, object]:
+    """生きているかどうか。
+
+    ログインの内側に置いていたため、外からは 303 が返るだけで、死活の監視を
+    掛けようがなかった。OPEN_PATHS に "/healthz" とだけ書いてあったが、その名前の
+    ルートは無く 404 で、どちらからも確かめられない状態だった。
+
+    公開版では中身を伏せる。動いているかを知るのに、運営者が選んだモデルの名前は
+    要らない。
+    """
+    if PUBLIC_MODE:
+        return {"ok": True}
     return {"ok": True, "model": vision.MODEL, "local_processing": True, "providers": ["local", "openai", "anthropic", "gemini"]}
 
 
