@@ -2673,3 +2673,36 @@ def test_the_entrance_uses_styles_that_exist():
     names = {c for group in used for c in group.split()}
     for name in names:
         assert f".{name}" in css, f"{name} に対応する定義が login.css に無い"
+
+
+def test_the_public_pages_can_be_shared_and_found():
+    """商用の基盤へ移した動機は「人に届くこと」だった。
+
+    URL を貼っても素のリンクにしかならず、robots.txt はログインへ 303 で
+    飛んでいてクローラが読めなかった。入口と文書だけを開ける。
+    """
+    robots = client.get("/robots.txt")
+    assert robots.status_code == 200
+    assert robots.headers["content-type"].startswith("text/plain")
+    assert "Allow: /login" in robots.text
+    # 中の画面はログインが要る。辿らせても何も読めないので、叩かせない
+    for closed in ("Disallow: /settings", "Disallow: /history", "Disallow: /api/"):
+        assert closed in robots.text
+    assert "Sitemap: " in robots.text
+
+    sitemap = client.get("/sitemap.xml")
+    assert sitemap.status_code == 200
+    for path in ("/login", "/privacy", "/terms"):
+        assert f"run.app{path}</loc>" in sitemap.text
+
+    assert client.get("/ogp.png").status_code == 200
+
+
+def test_every_public_page_has_a_sharing_card():
+    """3ページとも、貼られたときに何のページか分かるようにする。"""
+    for path in ("/login", "/privacy", "/terms"):
+        page = client.get(path).text
+        for tag in ('property="og:title"', 'property="og:description"',
+                    'property="og:image"', 'name="twitter:card"', 'name="description"'):
+            assert tag in page, f"{path} に {tag} が無い"
+        assert "/ogp.png" in page

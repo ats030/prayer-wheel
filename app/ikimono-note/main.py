@@ -216,7 +216,10 @@ LOGIN_FLOW_COOKIE = "ikimono_login"
 # ログインしていなくても通す道。ログイン自体と、読んでから決めるための文書、
 # それに画面を組み立てる部品。ここを絞りすぎるとログイン画面が裸になる。
 OPEN_PATHS = {"/login", "/auth/google", "/auth/callback", "/api/me", "/privacy", "/terms",
-              "/favicon.svg", "/theme.js", "/healthz"}
+              "/favicon.svg", "/theme.js", "/healthz",
+              # クローラと、共有したときの見え方。ログインへ飛ばすと robots.txt が
+              # 読めず、共有カードの画像も出ない
+              "/robots.txt", "/sitemap.xml", "/ogp.png"}
 OPEN_PREFIXES = ("/assets/", "/vendor/", "/static/")
 
 # 見知らぬ人が、その場で1回試せるようにするための枠。
@@ -369,6 +372,21 @@ def api_me_delete(request: Request) -> JSONResponse:
     response = JSONResponse({"ok": True})
     response.delete_cookie(auth.SESSION_COOKIE, path="/")
     return response
+
+
+@app.get("/robots.txt", include_in_schema=False)
+def robots() -> FileResponse:
+    return FileResponse(STATIC_DIR / "robots.txt", media_type="text/plain")
+
+
+@app.get("/sitemap.xml", include_in_schema=False)
+def sitemap() -> FileResponse:
+    return FileResponse(STATIC_DIR / "sitemap.xml", media_type="application/xml")
+
+
+@app.get("/ogp.png", include_in_schema=False)
+def ogp() -> FileResponse:
+    return FileResponse(STATIC_DIR / "ogp.png", media_type="image/png")
 
 
 @app.get("/favicon.svg", include_in_schema=False)
