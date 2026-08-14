@@ -3,40 +3,80 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ログイン｜生きものノート</title>
+  <title>生きものノート｜写真から生きものの名前を調べます</title>
+  <meta name="description" content="草花・虫・鳥・きのこ。撮った写真から、似ている生きものの候補と、そう考えた理由を出します。毒のあるものや、法律で守られているものには札が出ます。">
   <link rel="icon" href="/favicon.svg">
   <link rel="stylesheet" href="/assets/login.css">
   <link rel="stylesheet" href="/assets/mode.css">
   <script src="/theme.js"></script>
 </head>
 <body>
-<main class="wrap narrow">
-  <header class="page-head">
-    <h1 class="app-title">生きものノート</h1>
-    <p class="lead">写真から生きものを調べます</p>
+<main class="app">
+  <header class="top">
+    <div>
+      <p class="eyebrow">生きものノート</p>
+      <h1>写真から、生きものの名前を調べます</h1>
+    </div>
   </header>
 
-  <section class="panel stacked">
-    <h2>ログインしてはじめる</h2>
-    <p class="help">Google アカウントでログインします。<strong>パスワードは本サービスでは預かりません。</strong></p>
+  <p class="lede">草花、虫、鳥、きのこ。撮った写真を送ると、似ている生きものの候補と、
+    そう考えた理由が出ます。名前を言い当てる道具ではなく、<strong>見くらべるための手がかり</strong>を出す道具です。</p>
 
-    <div class="actions">
-      <a class="button primary" id="google-login" href="/auth/google">Google でログイン</a>
+  <section class="section">
+    <div class="section-head"><h2>できること</h2></div>
+    <div class="panel points">
+      <p class="point"><strong>写真を3枚まで送れます</strong>
+        <span class="help">同じ1匹・1株を、上から・横から・葉の裏から。手がかりが増えるほど絞り込めます。</span></p>
+      <p class="point"><strong>危ないものには札が出ます</strong>
+        <span class="help">毒のあるもの、触ると危ないもの、法律で守られていて採ってはいけないもの。
+          候補にそういう生きものが混ざったときは、名前といっしょに出します。</span></p>
+      <p class="point"><strong>調べた記録が残ります</strong>
+        <span class="help">いつ・どこで見たかを、この端末の中に残します。Google ドライブへ保存すれば、ほかの端末でも見られます。</span></p>
     </div>
-
-    <p class="message" id="login-message" aria-live="polite" hidden></p>
-
-    <h3>ログインしても、預かるものは増えません</h3>
-    <ul class="notes">
-      <li>本サービスが保存するのは<strong>アカウントの識別子とメールアドレスだけ</strong>です。</li>
-      <li>写真は保存しません。調べるあいだメモリ上で扱い、外部AIへ送る前に位置情報などを取り除きます。</li>
-      <li>調べた記録はこの端末の中に残ります。保存先を決めた場合は、その保存先にだけ届きます。</li>
-      <li>APIキーはこのブラウザの中だけに置き、調べるときに送るだけです。</li>
-      <li>いつでも退会できます。設定画面から、預けた情報をまとめて削除できます。</li>
-    </ul>
-
-    <p class="help"><a href="/privacy">プライバシーポリシー</a>／<a href="/terms">利用規約</a></p>
   </section>
+
+  <section class="section">
+    <div class="section-head"><h2>はじめるのに必要なもの</h2></div>
+    <div class="panel">
+      <ol class="needs">
+        <li><strong>Google アカウント</strong>
+          <span class="help">ログインに使います。パスワードは本サービスでは預かりません。</span></li>
+        <li><strong>ご自身の AI の APIキー</strong>
+          <span class="help">調べるときは、あなたが登録したAIへブラウザから直接つなぎます。運営者のAIは使いません。
+            <strong>Gemini には無料枠があります。</strong>料金が発生する場合は、登録した方（成年の方）のご負担になります。</span></li>
+      </ol>
+      <p class="help">キーの取り方は、ログインしたあとの設定画面で案内します。</p>
+
+      <div class="actions">
+        <a class="button primary" id="google-login" href="/auth/google">Google でログイン</a>
+      </div>
+      <p class="message" id="login-message" aria-live="polite" hidden></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>ログインしても、預かるものは増えません</h2></div>
+    <div class="panel">
+      <ul class="security">
+        <li>本サービスが保存するのは<strong>アカウントの識別子とメールアドレスだけ</strong>です。</li>
+        <li>写真は保存しません。調べるあいだメモリ上で扱い、外部AIへ送る前に位置情報などを取り除きます。</li>
+        <li>調べた記録はこの端末の中に残ります。保存先を決めた場合は、その保存先にだけ届きます。</li>
+        <li>APIキーはこのブラウザの中だけに置き、調べるときに送るだけです。</li>
+        <li>いつでも退会できます。設定画面から、預けた情報をまとめて削除できます。</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="status-strip guardian-note">
+    <span>おとなの方へ</span>
+    <strong>年齢を問わず使えますが、小学生以下のお子さんは大人といっしょに使ってください。
+      識別結果には限界があります。採る・触る・食べるの判断は、必ず大人が確かめてください。</strong>
+  </div>
+
+  <nav class="legal-nav">
+    <a href="/privacy">プライバシーポリシー</a>
+    <a href="/terms">利用規約</a>
+  </nav>
 </main>
 <script src="/assets/login.js" defer></script>
 </body>

@@ -2636,3 +2636,40 @@ def test_amazon_is_not_asked_again_while_it_keeps_refusing():
     # 休んでいるあいだは 404。503 だと画面が赤字になる
     assert 'raise HTTPException(status_code=404, detail="商品APIはいま使えません")' in source
     main._creators_pause_until = 0.0
+
+
+def test_the_entrance_says_what_the_app_is_before_asking_to_sign_in():
+    """未ログインの人が見る唯一の画面。ここで何のアプリか分からなければ誰も入らない。
+
+    以前は「預かるものは増えません」から始まっており、何ができるかも、自分の
+    APIキーが要ることも書いていなかった。ログインして初めてキーが要ると知る形は、
+    人を無駄に歩かせる。
+    """
+    page = client.get("/login").text
+    assert "写真から、生きものの名前を調べます" in page
+    assert "できること" in page
+    # 要るものを、ログインボタンより前に出す
+    assert "はじめるのに必要なもの" in page
+    assert page.index("ご自身の AI の APIキー") < page.index('id="google-login"')
+    assert "Gemini には無料枠があります" in page
+    # 検索や共有で出たときに、何のページか分かるようにする
+    assert '<meta name="description"' in page
+    assert "ログイン｜生きものノート" not in page      # 何のサイトか分からない題名
+
+
+def test_the_entrance_still_warns_the_grown_ups():
+    """全年齢のアプリなので、採る・触る・食べるの判断は大人が確かめる、を入口にも置く。"""
+    page = client.get("/login").text
+    assert "小学生以下のお子さんは大人といっしょに" in page
+    assert "採る・触る・食べるの判断は、必ず大人が確かめてください" in page
+
+
+def test_the_entrance_uses_styles_that_exist():
+    """以前の入口は .wrap .lead .notes を使っていたが、どれも定義が無く素の見た目で出ていた。"""
+    page = client.get("/login").text
+    css = client.get("/assets/login.css").text
+    import re
+    used = set(re.findall(r'class="([^"]+)"', page))
+    names = {c for group in used for c in group.split()}
+    for name in names:
+        assert f".{name}" in css, f"{name} に対応する定義が login.css に無い"

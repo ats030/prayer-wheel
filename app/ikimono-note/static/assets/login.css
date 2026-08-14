@@ -16,3 +16,16 @@
 .hidden{display:none!important}
 [hidden]{display:none!important}
 .folder-list{list-style:none;margin:10px 0 0;padding:0;max-height:220px;overflow-y:auto;border:1px solid var(--color-line);border-radius:var(--radius-control)}.folder-list li+li{border-top:1px solid var(--color-line)}.folder-list button{display:block;width:100%;min-height:44px;padding:0 12px;border:0;background:none;color:var(--color-text);text-align:left;cursor:pointer;font:inherit}.folder-list button:hover{background:var(--color-raised)}.folder-list .empty{padding:12px;color:var(--color-muted);font-size:12px}
+
+/* 入口の説明。ここは未ログインの人が最初に見る唯一の画面なので、何ができるかと
+   何が要るかを、ログインの前に出す。以前は預かるものの説明から始まっていて、
+   何のアプリか分からないまま「自分のAPIキーが要る」ことにも触れておらず、
+   ログインして初めてそれを知る形だった。 */
+.lede{margin:14px 2px 0;color:var(--color-muted);font-size:13px;line-height:1.7}
+.lede strong{color:var(--color-text)}
+.points .point{margin:0;padding:13px 0;border-top:1px solid var(--color-line)}
+.points .point:first-child{border-top:0;padding-top:0}
+.points .point:last-child{padding-bottom:0}
+.needs{margin:0;padding-left:20px}
+.needs li+li{margin-top:12px}
+.needs .help{margin-top:3px}
