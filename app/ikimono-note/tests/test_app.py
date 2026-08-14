@@ -2822,3 +2822,19 @@ def test_the_ownership_token_can_be_set_without_rebuilding():
     # 設定していなければ何も差さない
     assert client.get("/login").text.count("google-site-verification") == 0
     assert client.get("/googleabc.html").status_code == 404
+
+
+def test_the_entrance_describes_the_real_data_path():
+    """識別はサーバー経由。ブラウザから直接ではない。
+
+    /identify は request_api_key を受け取り、サーバーが事業者を呼ぶ。入口に
+    「ブラウザから直接つなぎます」と書いていたが、これは事実と違った。
+    データの流れを誤って公表することになる。
+    """
+    page = client.get("/login").text
+    assert "ブラウザから直接つなぎます" not in page
+    assert "サーバーへ送り、サーバーがあなたの選んだAIを呼びます" in page
+    assert "写真は保存せず" in page
+    # サーバーが受け取る作りであることを、実装の側でも確かめる
+    source = Path("main.py").read_text(encoding="utf-8")
+    assert "request_api_key" in source
