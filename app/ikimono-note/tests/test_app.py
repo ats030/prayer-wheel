@@ -2615,3 +2615,24 @@ def test_free_tier_numbers_are_not_asserted_in_the_labels():
     labels = " ".join(m["label"] for m in config_store.MODELS["gemini"])
     assert "1日20回" not in labels
     assert "無料枠が広い" in labels        # 相対的な言い方は残す
+
+
+def test_amazon_is_not_asked_again_while_it_keeps_refusing():
+    """適格審査は日単位でしか変わらない。断られるたびに呼び直しても答えは同じ。
+
+    本番のエラーログは /api/amazon/products の 503 で埋まり、ほかの異変が埋もれて
+    いた。識別1回ごとに往復ぶんの待ち時間も乗る。断られたらしばらく呼ばない。
+    """
+    import main
+
+    main._creators_pause_until = 0.0
+    assert not main._creators_paused()
+    main._pause_creators("AssociateNotEligible")
+    assert main._creators_paused()
+
+    source = Path("main.py").read_text(encoding="utf-8")
+    # 資格・認証・混雑は待っても次の1回で直らない。5xx は一時的なので止めない
+    assert "if exc.status in (401, 403, 429):" in source
+    # 休んでいるあいだは 404。503 だと画面が赤字になる
+    assert 'raise HTTPException(status_code=404, detail="商品APIはいま使えません")' in source
+    main._creators_pause_until = 0.0

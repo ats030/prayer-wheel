@@ -475,6 +475,25 @@ def affiliate_click_event() -> dict[str, bool]:
     return {"ok": True}
 
 
+# Amazon の適格審査は日単位でしか変わらない (直近30日の適格販売が要る)。断られる
+# たびに呼び直しても答えは同じで、識別1回につき往復ぶんの待ち時間と、失敗のログ
+# だけが積まれる。本番のエラーログは実際これで埋まり、ほかの異変が埋もれていた。
+# 断られたらしばらく呼ばない。1時間なら、資格が戻ったときも同じ日のうちに拾える。
+_CREATORS_PAUSE_SECONDS = 3600
+_creators_pause_until = 0.0
+
+
+def _creators_paused() -> bool:
+    return time.monotonic() < _creators_pause_until
+
+
+def _pause_creators(reason: str) -> None:
+    """設定の誤りと資格切れは、待っても次の1回で直らない。混雑 (429) も同じ。"""
+    global _creators_pause_until
+    _creators_pause_until = time.monotonic() + _CREATORS_PAUSE_SECONDS
+    print(f"Amazon商品APIを{_CREATORS_PAUSE_SECONDS // 60}分ほど呼びません（{reason}）", flush=True)
+
+
 @app.get("/api/amazon/products")
 async def amazon_products(q: str = "", index: str = "All") -> JSONResponse:
     if PUBLIC_MODE and not PUBLIC_AFFILIATE_ENABLED:
@@ -484,12 +503,17 @@ async def amazon_products(q: str = "", index: str = "All") -> JSONResponse:
     keys = settings["api_keys"]
     if not affiliate.get("product_enabled"):
         raise HTTPException(status_code=404, detail="商品APIが設定されていません")
+    if _creators_paused():
+        # 404 は「出すものが無い」。画面はカードを描かずに済ませる (503 は赤字になる)
+        raise HTTPException(status_code=404, detail="商品APIはいま使えません")
     try:
         products = await run_in_threadpool(creators_api.search_products, q, keys.get("amazon_creators_id", ""), keys.get("amazon_creators_secret", ""), affiliate.get("partner_tag", ""), 4, index)
     except creators_api.CreatorsAPIError as exc:
         # 断られたことを設定画面へ届ける。journal だけだと、運営者は「登録済み」の
         # 表示を見て設定が効いていると思い込む
         config_store.record_creators_result(False, reason=exc.reason, hint=exc.hint, status=exc.status)
+        if exc.status in (401, 403, 429):
+            _pause_creators(exc.reason or exc.status)
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     config_store.record_creators_result(True)
     if not products:
