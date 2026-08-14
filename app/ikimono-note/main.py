@@ -205,7 +205,7 @@ LOGIN_FLOW_COOKIE = "ikimono_login"
 # ログインしていなくても通す道。ログイン自体と、読んでから決めるための文書、
 # それに画面を組み立てる部品。ここを絞りすぎるとログイン画面が裸になる。
 OPEN_PATHS = {"/login", "/auth/google", "/auth/callback", "/api/me", "/privacy", "/terms",
-              "/favicon.svg", "/theme.js", "/health",
+              "/favicon.png", "/apple-touch-icon.png", "/theme.js", "/health",
               # クローラと、共有したときの見え方。ログインへ飛ばすと robots.txt が
               # 読めず、共有カードの画像も出ない
               "/robots.txt", "/sitemap.xml", "/ogp.png"}
@@ -430,9 +430,14 @@ def ogp() -> FileResponse:
     return FileResponse(STATIC_DIR / "ogp.png", media_type="image/png")
 
 
-@app.get("/favicon.svg", include_in_schema=False)
+@app.get("/favicon.png", include_in_schema=False)
 def favicon() -> FileResponse:
-    return FileResponse(STATIC_DIR / "favicon.svg", media_type="image/svg+xml")
+    return FileResponse(STATIC_DIR / "favicon.png", media_type="image/png")
+
+
+@app.get("/apple-touch-icon.png", include_in_schema=False)
+def apple_touch_icon() -> FileResponse:
+    return FileResponse(STATIC_DIR / "apple-touch-icon.png", media_type="image/png")
 
 
 @app.get("/theme.js", include_in_schema=False)
