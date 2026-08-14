@@ -1,33 +1,7 @@
 const $=x=>document.getElementById(x),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));function openDb(){return new Promise((ok,no)=>{const r=indexedDB.open("species-history",1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains("entries"))r.result.createObjectStore("entries",{keyPath:"id"})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function request(r){return new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function finished(t){return new Promise((ok,no)=>{t.oncomplete=ok;t.onerror=()=>no(t.error)})}/* 候補ゼロのとき分類名に落ちると、「菌類」という名前の生きものを見つけたように読める。
    分類は行の印のほうへ回す */
 const title=e=>e.candidates?.[0]?.common_name_ja||(e.candidates?"候補が見つかりませんでした":"調べた記録");
-async function all(){const d=await openDb(),t=d.transaction("entries"),v=await request(t.objectStore("entries").getAll());await finished(t);d.close();return v.sort((a,b)=>b.createdAt.localeCompare(a.createdAt))}let mapEntries=[];let rerunRecords=new Map();
-function loadLeaflet(){if(window.L)return Promise.resolve();return new Promise((ok,no)=>{const css=document.createElement("link");css.rel="stylesheet";css.href="/vendor/leaflet/leaflet.css";document.head.append(css);const js=document.createElement("script");js.src="/vendor/leaflet/leaflet.js";js.onload=()=>ok();js.onerror=()=>no(new Error("地図を読み込めませんでした。"));document.head.append(js)})}
-async function showMap(){const button=$("showMap");button.disabled=true;button.textContent="地図を読み込み中…";try{await loadLeaflet();$("historyMap").classList.remove("hidden");map(mapEntries);button.remove()}catch(e){button.disabled=false;button.textContent="地図を表示";$("mapNotice").textContent=e.message}}
-$("showMap").onclick=showMap;
-/* 地図の下敷き。どこで見つけたかを思い出すには、道より地形が要ることがある。
-   国土地理院のタイルは出典を示せば自由に使える (政府標準利用規約)。日本の外は
-   写らないので、標準の地図は OpenStreetMap のままにする。 */
-const MAP_LAYERS = {
-  "地図": ["https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'],
-  "地形": ["https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png",
-          '<a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>（色別標高図）'],
-  "起伏": ["https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png",
-          '<a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>（陰影起伏図）'],
-  "写真": ["https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg",
-          '<a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>（写真）'],
-};
-
-function map(entries){
-  const m=L.map("historyMap"),points=[];
-  const layers={};
-  for(const [name,[url,credit]] of Object.entries(MAP_LAYERS)){
-    layers[name]=L.tileLayer(url,{maxZoom:18,attribution:credit});
-  }
-  layers["地図"].addTo(m);
-  L.control.layers(layers,null,{collapsed:false}).addTo(m);
-entries.forEach(e=>{const a=Number(e.coordinates?.latitude),o=Number(e.coordinates?.longitude);if(Number.isFinite(a)&&Number.isFinite(o)){points.push([a,o]);L.marker([a,o]).addTo(m).bindPopup("<strong>"+esc(title(e))+"</strong><br>"+esc(new Date(e.createdAt).toLocaleString("ja-JP")))}});points.length?m.fitBounds(points,{padding:[24,24],maxZoom:15}):m.setView([36.2,138.2],5)}
+async function all(){const d=await openDb(),t=d.transaction("entries"),v=await request(t.objectStore("entries").getAll());await finished(t);d.close();return v.sort((a,b)=>b.createdAt.localeCompare(a.createdAt))}let rerunRecords=new Map();
 /* 消す前に確かめる。記録は写真ごと消え、ドライブにつないでいれば次の自動保存で
    向こうからも消える。押し間違いで戻せなくなるのは、写真を残すようにしてから
    さらに重くなった (1件に最大3枚入っている) */
@@ -56,7 +30,7 @@ function rowMarks(e){
     marks.push('<span class="badge note-mark">観察メモあり</span>');
   return '<span class="row-marks">'+marks.join("")+'</span>';
 }
-async function render(){const entries=await all();mapEntries=entries;const located=entries.filter(e=>Number.isFinite(Number(e.coordinates?.latitude))&&Number.isFinite(Number(e.coordinates?.longitude)));$("showMap").disabled=!located.length;if(!located.length)$("mapNotice").textContent="場所を記録した記録がまだないため、地図は表示できません。";$("historyList").innerHTML=entries.length?entries.map(e=>{/* 行に出すのは小さいほう (50行ぶん展開するので)。押して開くのは原寸。
+async function render(){const entries=await all();$("historyList").innerHTML=entries.length?entries.map(e=>{/* 行に出すのは小さいほう (50行ぶん展開するので)。押して開くのは原寸。
    ここを同じものにしていたため、拡大すると320pxが引き伸ばされて出ていた */
 const full=recordPhotos(e)[0]||null;const small=e.listThumbnail||full;
 const image=small?URL.createObjectURL(small):"";const large=full?URL.createObjectURL(full):image;

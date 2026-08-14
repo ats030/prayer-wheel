@@ -49,3 +49,5 @@
 /* お試し枠の案内。使い切って初めて知る、という出し方にしない */
 .trial-note{margin:10px 0 0;padding:9px 12px;border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:8px;background:var(--surface);color:var(--muted);font-size:12px}
 .trial-note a{color:var(--accent-hover)}
+
+@media(max-width:390px){.top{flex-wrap:wrap}.top-actions{width:100%;justify-content:flex-start}}

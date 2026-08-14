@@ -186,6 +186,11 @@ def history() -> HTMLResponse:
     return _page("history.html")
 
 
+@app.get("/dashboard", include_in_schema=False)
+def dashboard() -> HTMLResponse:
+    return _page("dashboard.html")
+
+
 @app.get("/privacy", include_in_schema=False)
 def privacy() -> HTMLResponse:
     return _page("privacy.html")

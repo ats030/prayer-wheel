@@ -140,8 +140,9 @@ def run(base: str, do_identify: bool) -> None:
         page = context.new_page()
         errors = page_errors(page)
 
-        for path, marker in [("/", "#identify"), ("/history", "#showMap"),
-                             ("/settings", "#settingsForm"), ("/privacy", ".panel"), ("/terms", ".panel")]:
+        for path, marker in [("/", "#identify"), ("/dashboard", "#showMap"),
+                             ("/history", "#historyList"), ("/settings", "#settingsForm"),
+                             ("/privacy", ".panel"), ("/terms", ".panel")]:
             page.goto(base + path)
             page.wait_for_load_state("networkidle")
             check(f"{path} が開く", page.locator(marker).count() > 0)
@@ -163,7 +164,8 @@ def run(base: str, do_identify: bool) -> None:
         page.goto(base + "/history"); page.wait_for_load_state("networkidle")
         note_record = {**json.loads(json.dumps(SAMPLE)), "id": "note-smoke",
                        "createdAt": "2026-08-14T12:00:00Z", "context": {},
-                       "coordinates": None, "provider": "ollama", "model": "smoke"}
+                       "coordinates": {"latitude": 35.6812, "longitude": 139.7671},
+                       "provider": "ollama", "model": "smoke"}
         page.evaluate("""record => new Promise((resolve, reject) => {
           const open = indexedDB.open("species-history", 1);
           open.onupgradeneeded = () => open.result.createObjectStore("entries", {keyPath: "id"});
@@ -177,6 +179,19 @@ def run(base: str, do_identify: bool) -> None:
             tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
           };
         })""", note_record)
+        page.goto(base + "/dashboard"); page.wait_for_load_state("networkidle"); page.wait_for_timeout(300)
+        check("ダッシュボードが記録件数を数える", page.locator("#totalCount").inner_text() == "1")
+        check("場所のある記録を数える", page.locator("#locatedCount").inner_text() == "1")
+        check("最近の観察を表示する", "セイヨウタンポポ" in page.locator("#recentList").inner_text())
+        check("押す前は地図ライブラリを読まない", page.evaluate("() => typeof window.L") == "undefined")
+        page.click("#showMap"); page.wait_for_selector("#historyMap.leaflet-container")
+        check("ダッシュボードで地図を表示できる", page.locator("#historyMap .leaflet-marker-icon").count() == 1)
+        page.set_viewport_size({"width": 390, "height": 844})
+        summary = page.locator(".summary-grid").bounding_box()
+        check("ダッシュボードがスマホ幅に収まる", bool(summary) and summary["x"] >= 0 and summary["x"] + summary["width"] <= 390, str(summary))
+        page.set_viewport_size({"width": 1100, "height": 900})
+        page.goto(base + "/history"); page.wait_for_load_state("networkidle")
+        check("地図を記録ページから移動した", page.locator("#historyMap").count() == 0)
         page.reload(); page.wait_for_load_state("networkidle"); page.wait_for_timeout(500)
         page.locator('.entry[data-id="note-smoke"] summary').click()
         page.wait_for_timeout(300)
@@ -219,6 +234,10 @@ def run(base: str, do_identify: bool) -> None:
 
         # テーマの切り替え
         page.goto(base + "/"); page.wait_for_load_state("networkidle")
+        page.set_viewport_size({"width": 390, "height": 844})
+        header_actions = page.locator(".top-actions").bounding_box()
+        check("撮影画面の追加ナビがスマホ幅に収まる", bool(header_actions) and header_actions["x"] >= 0 and header_actions["x"] + header_actions["width"] <= 390, str(header_actions))
+        page.set_viewport_size({"width": 1100, "height": 900})
         before = page.evaluate("() => getComputedStyle(document.body).backgroundColor")
         page.click("#themeToggle"); page.wait_for_timeout(300)
         page.click("#themeToggle"); page.wait_for_timeout(300)

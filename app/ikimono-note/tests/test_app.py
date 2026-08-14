@@ -178,7 +178,7 @@ def test_history_page_renders_saved_records():
     assert "属（近いなかま）の候補" in page
     assert "historyAffiliateLink" not in page
     assert "広告 · Amazonで" in page
-    assert 'OpenStreetMap contributors' in page
+    assert 'OpenStreetMap contributors' in page_source("/dashboard")
 
 
 def test_settings_page_enables_all_providers():
@@ -715,7 +715,7 @@ def test_private_mode_keeps_operator_affiliate_configuration(monkeypatch):
 
 
 def test_all_pages_use_light_first_theme_with_dark_fallback():
-    for path in ["/", "/settings", "/history", "/privacy", "/terms"]:
+    for path in ["/", "/settings", "/history", "/dashboard", "/privacy", "/terms"]:
         page = page_source(path)
         assert "color-scheme:light dark" in page, path
         assert "@media(prefers-color-scheme:dark)" in page, path
@@ -756,7 +756,7 @@ def test_theme_toggle_is_available_on_every_page():
     assert 'localStorage.getItem("species-theme")' in script or 'var KEY = "species-theme"' in script
     assert 'root.removeAttribute("data-theme")' in script
     assert 'root.setAttribute("data-theme", mode)' in script
-    for path in ["/", "/settings", "/history", "/privacy", "/terms"]:
+    for path in ["/", "/settings", "/history", "/dashboard", "/privacy", "/terms"]:
         page = page_source(path)
         assert '<script src="/theme.js"></script>' in page, path
         assert 'id="themeToggle"' in page, path
@@ -765,32 +765,46 @@ def test_theme_toggle_is_available_on_every_page():
 
 
 def test_theme_script_loads_before_the_page_body():
-    for path in ["/", "/settings", "/history", "/privacy", "/terms"]:
+    for path in ["/", "/settings", "/history", "/dashboard", "/privacy", "/terms"]:
         page = page_source(path)
         tag_start = page.index('<script src="/theme.js">')
         assert tag_start < page.index("<body"), path
         assert "<style" not in page[:tag_start], path
 
 
-def test_history_map_is_never_loaded_without_an_explicit_press():
-    """位置を含む地図タイルは、利用者が押すまで第三者へ要求しない。"""
-    page = page_source("/history")
+def test_dashboard_summarizes_existing_records_without_a_new_data_store():
+    page = page_source("/dashboard")
+    script = client.get("/assets/dashboard.js").text
+    assert 'id="totalCount"' in page
+    assert 'id="locatedCount"' in page
+    assert 'id="notedCount"' in page
+    assert 'id="recentList"' in page
+    assert 'indexedDB.open("species-history",1)' in script
+    assert 'entries.slice(0,5)' in script
+    assert 'href="/dashboard"' in page_source("/")
+    assert 'href="/dashboard"' in page_source("/history")
+
+
+def test_dashboard_map_is_never_loaded_without_an_explicit_press():
+    """位置を含む地図タイルは、ダッシュボードで押すまで第三者へ要求しない。"""
+    page = page_source("/dashboard")
     assert "unpkg.com" not in page
     assert '"/vendor/leaflet/leaflet.js"' in page
     assert '"/vendor/leaflet/leaflet.css"' in page
     assert 'id="showMap"' in page
     assert '$("showMap").onclick=showMap' in page
-    # 描画は押下ハンドラの中だけ。読み込み時の render() からは呼ばない
-    assert "map(entries);$(\"clear\")" not in page
-    assert "map(mapEntries)" in page
+    assert "drawMap(mapEntries)" in page
     assert "「地図を表示」を押したときだけ" in page
+    history = page_source("/history")
+    assert 'id="showMap"' not in history
+    assert 'id="historyMap"' not in history
     for path in ["/vendor/leaflet/leaflet.js", "/vendor/leaflet/leaflet.css",
                  "/vendor/leaflet/images/marker-icon.png", "/vendor/leaflet/LICENSE"]:
         assert client.get(path).status_code == 200, path
     assert "BSD 2-Clause" in client.get("/vendor/leaflet/LICENSE").text
 
 
-PAGES = ["/", "/settings", "/history", "/privacy", "/terms"]
+PAGES = ["/", "/settings", "/history", "/dashboard", "/privacy", "/terms"]
 
 
 def test_csp_is_sent_without_unsafe_keywords():
@@ -2489,8 +2503,8 @@ def test_you_can_tell_which_screen_you_are_on():
 
 def test_the_map_can_show_the_lay_of_the_land():
     """どこで見つけたかを思い出すには、道より地形が要ることがある。"""
-    script = client.get("/assets/history.js").text
-    assert "const MAP_LAYERS = {" in script
+    script = client.get("/assets/dashboard.js").text
+    assert "const MAP_LAYERS={" in script
     for name in ["地図", "地形", "起伏", "写真"]:
         assert f'"{name}"' in script.split("const MAP_LAYERS")[1].split("};")[0], name
     # 出典を示せば自由に使える (政府標準利用規約)。示さないなら使えない
@@ -2501,7 +2515,7 @@ def test_the_map_can_show_the_lay_of_the_land():
 
 
 def test_the_policy_lets_the_tiles_through():
-    policy = client.get("/history").headers["content-security-policy"]
+    policy = client.get("/dashboard").headers["content-security-policy"]
     images = policy.split("img-src")[1].split(";")[0]
     assert "https://cyberjapandata.gsi.go.jp" in images
     # Leaflet はタイルの隙間に 1x1 の透明 GIF を data: で置く
