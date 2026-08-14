@@ -12,7 +12,7 @@
 /* 記録の商品カード。撮影画面と同じ見え方にそろえる */
 .product-shell{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .affiliate-label{color:var(--muted);font-size:11px;margin-bottom:6px}
-.product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:9px}
 .product-card{display:flex;min-width:0;overflow:hidden;flex-direction:column;border:1px solid var(--line);border-radius:9px;background:var(--raised);color:var(--text)!important;text-decoration:none}
 .product-card:hover{border-color:var(--accent)}
 .product-image{width:100%;aspect-ratio:1;object-fit:contain;background:#fff}

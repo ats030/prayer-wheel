@@ -250,7 +250,7 @@ def test_amazon_products_endpoint_uses_verified_query(monkeypatch):
     assert response.status_code == 200
     assert response.json()["products"][0]["title"] == "タンポポ図鑑"
     assert seen == {"query": "タンポポ", "credential": "credential", "secret": "secret",
-                    "partner_tag": "test-22", "limit": 4, "search_index": "All"}
+                    "partner_tag": "test-22", "limit": 10, "search_index": "All"}
     # 書籍に絞れる。種名で引くと一般向けの図鑑が上位を占めるため
     client.get("/api/amazon/products?q=タンポポ&index=Books")
     assert seen["search_index"] == "Books"
@@ -2706,3 +2706,45 @@ def test_every_public_page_has_a_sharing_card():
                     'property="og:image"', 'name="twitter:card"', 'name="description"'):
             assert tag in page, f"{path} に {tag} が無い"
         assert "/ogp.png" in page
+
+
+def test_the_shelf_varies_without_asking_amazon_again():
+    """開くたびに顔ぶれを変えたいが、そのたび問い合わせるのは筋が悪い。
+
+    商品APIには秒あたりの上限があり、売上に応じてしか増えない。多めに取って
+    覚えておき、どれを見せるかはブラウザ側で選ぶ。問い合わせは減り、並びは毎回
+    変わる。LLM は一切増えない (問い合わせ語は識別済みの名前から作る)。
+    """
+    import main
+
+    source = Path("main.py").read_text(encoding="utf-8")
+    # 商品APIの上限まで貰う。見せる数ではなく、選択肢の数
+    assert 'affiliate.get("partner_tag", ""), 10, index' in source
+    assert "def _products_cached(" in source and "def _remember_products(" in source
+    assert "_PRODUCT_TTL_SECONDS = 6 * 3600" in source
+    # 価格は持たない。持っていれば24時間の制限がかかる
+    creators = Path("creators_api.py").read_text(encoding="utf-8")
+    assert '"title": title[:240], "url": url, "image": image' in creators
+    assert '"price"' not in creators
+
+    products = client.get("/assets/products.js").text
+    assert "const SHELF_CARDS = 6;" in products
+    # 受け取った時点で混ぜる。同じ切り口でも顔ぶれが変わる
+    assert "for (const product of shuffle(Array.isArray(data.products) ? data.products : []))" in products
+    # 問い合わせ語は識別結果から作る。LLM を呼び直さない
+    assert "function productQueries(name, scientificName, category)" in products
+    assert "fetch(\"/api/identify" not in products
+
+    # 覚えたものは、休止中でも返す
+    main._product_cache.clear()
+    main._remember_products(("テスト", "All"), [{"title": "図鑑", "url": "u", "image": "i"}])
+    assert main._products_cached(("テスト", "All"))[0]["title"] == "図鑑"
+    main._product_cache.clear()
+
+
+def test_six_cards_do_not_leave_a_ragged_row():
+    """4列固定のままカードを6枚にすると、2行目が2つだけになる。"""
+    for sheet in ("/assets/index.css", "/assets/history.css"):
+        css = client.get(sheet).text
+        assert "repeat(4,minmax(0,1fr))" not in css
+        assert "repeat(auto-fill,minmax(132px,1fr))" in css

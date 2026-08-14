@@ -500,6 +500,42 @@ def affiliate_click_event() -> dict[str, bool]:
 _CREATORS_PAUSE_SECONDS = 3600
 _creators_pause_until = 0.0
 
+# 同じ切り口で何度も Amazon を叩かない。
+#
+# 画面を開くたびに並びを変えたいが、そのたびに問い合わせるのは筋が悪い。商品API
+# には秒あたりの上限があり、そこは売上に応じてしか増えない。多めに取って覚えて
+# おき、どれを見せるかはブラウザ側で選ぶ。問い合わせは減り、並びは毎回変わる。
+#
+# 覚えるのは題名・URL・画像だけで、価格と在庫は持たない。アソシエイトの規約は
+# 価格情報の保持を24時間までに制限しているが、そもそも持っていない。それでも
+# 品揃えは動くので、6時間で捨てる。
+_PRODUCT_TTL_SECONDS = 6 * 3600
+_PRODUCT_CACHE_MAX = 200
+_product_cache: dict[tuple[str, str], tuple[float, list[dict[str, str]]]] = {}
+_PRODUCT_CACHE_LOCK = threading.Lock()
+
+
+def _products_cached(key: tuple[str, str]) -> list[dict[str, str]] | None:
+    with _PRODUCT_CACHE_LOCK:
+        found = _product_cache.get(key)
+        if not found:
+            return None
+        stored_at, products = found
+        if time.monotonic() - stored_at > _PRODUCT_TTL_SECONDS:
+            _product_cache.pop(key, None)
+            return None
+        return products
+
+
+def _remember_products(key: tuple[str, str], products: list[dict[str, str]]) -> None:
+    with _PRODUCT_CACHE_LOCK:
+        if len(_product_cache) >= _PRODUCT_CACHE_MAX:
+            # 古い順に捨てる。件数が知れているので、並べ替えて足りる
+            oldest = sorted(_product_cache.items(), key=lambda item: item[1][0])
+            for stale, _ in oldest[: len(oldest) // 2 or 1]:
+                _product_cache.pop(stale, None)
+        _product_cache[key] = (time.monotonic(), products)
+
 
 def _creators_paused() -> bool:
     return time.monotonic() < _creators_pause_until
@@ -521,11 +557,17 @@ async def amazon_products(q: str = "", index: str = "All") -> JSONResponse:
     keys = settings["api_keys"]
     if not affiliate.get("product_enabled"):
         raise HTTPException(status_code=404, detail="商品APIが設定されていません")
+    cache_key = (" ".join(str(q).split())[:80], str(index))
+    cached = _products_cached(cache_key)
+    if cached is not None:
+        return JSONResponse({"products": cached})
     if _creators_paused():
         # 404 は「出すものが無い」。画面はカードを描かずに済ませる (503 は赤字になる)
         raise HTTPException(status_code=404, detail="商品APIはいま使えません")
     try:
-        products = await run_in_threadpool(creators_api.search_products, q, keys.get("amazon_creators_id", ""), keys.get("amazon_creators_secret", ""), affiliate.get("partner_tag", ""), 4, index)
+        # 10件は商品APIの上限。見せるのは4件でも、多めに貰っておけば、次に開いた
+        # ときの並びを問い合わせ無しで変えられる
+        products = await run_in_threadpool(creators_api.search_products, q, keys.get("amazon_creators_id", ""), keys.get("amazon_creators_secret", ""), affiliate.get("partner_tag", ""), 10, index)
     except creators_api.CreatorsAPIError as exc:
         # 断られたことを設定画面へ届ける。journal だけだと、運営者は「登録済み」の
         # 表示を見て設定が効いていると思い込む
@@ -534,6 +576,7 @@ async def amazon_products(q: str = "", index: str = "All") -> JSONResponse:
             _pause_creators(exc.reason or exc.status)
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     config_store.record_creators_result(True)
+    _remember_products(cache_key, products)
     if not products:
         raise HTTPException(status_code=404, detail="関連商品が見つかりません")
     return JSONResponse({"products": products})

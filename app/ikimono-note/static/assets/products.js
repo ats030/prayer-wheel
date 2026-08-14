@@ -11,6 +11,10 @@ const EDIBLE_WORDS = ["茶", "ティー", "食用", "乾燥", "天日干し", "�
                       "エキス", "おやつ", "フード", "ドリンク", "健康食品", "コーヒー",
                       "はちみつ", "ハーブティー"];
 
+/* 1つの棚に並べる数。サーバーは切り口ごとに10件まで覚えているので、ここを
+   増やしても Amazon への問い合わせは増えない。増えるのは選択肢のほう */
+const SHELF_CARDS = 6;
+
 function looksEdible(title) {
   const text = String(title || "");
   return EDIBLE_WORDS.some(word => text.includes(word));
@@ -71,7 +75,7 @@ async function loadProductShelf(shell, subject, budget) {
   const found = { specific: [], generic: [] };
   let used = 0;
   for (const query of productQueries(subject.name, subject.scientific, subject.category)) {
-    const enough = found.specific.length + Math.min(found.generic.length, 2) >= 4;
+    const enough = found.specific.length + Math.min(found.generic.length, 2) >= SHELF_CARDS;
     if (enough || budget.left <= 0 || used >= budget.perShelf) break;
     budget.left--;
     used++;
@@ -80,7 +84,9 @@ async function loadProductShelf(shell, subject, budget) {
         + "&index=" + encodeURIComponent(query.index));
       if (!response.ok) continue;
       const data = await response.json();
-      for (const product of (Array.isArray(data.products) ? data.products : [])) {
+      /* サーバーは10件まで返し、しばらく覚えている。ここで混ぜてから受け取ると、
+         同じ切り口でも開くたびに顔ぶれが変わる。問い合わせは増えない */
+      for (const product of shuffle(Array.isArray(data.products) ? data.products : [])) {
         /* 同じ品が別URLで返ることがあるので、題名でも重複を見る */
         const key = String(product?.title || "").trim();
         if (!product?.url || budget.seen.has(product.url) || budget.seen.has(key)
@@ -93,7 +99,7 @@ async function loadProductShelf(shell, subject, budget) {
   }
   /* 分類群の一般書は枠を埋めるための保険。多くても2件までにして、
      その種に固有の品が押しのけられないようにする */
-  const collected = [...shuffle(found.specific), ...shuffle(found.generic).slice(0, 2)].slice(0, 4);
+  const collected = [...shuffle(found.specific), ...shuffle(found.generic).slice(0, 2)].slice(0, SHELF_CARDS);
   /* カードと検索リンクは両方出す。APIが返すのはその時点の上位4件までで、探し方を
      変えれば別のものが出る。カードだけにすると、そこで打ち止めに見える。
      「広告」の断りは棚に1回でよいので、ラベルがある側に寄せる */
