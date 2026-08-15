@@ -221,7 +221,8 @@ def run(base: str, do_identify: bool) -> None:
                 check("詳細土地条件を広域版より上に表示する", int(detail_z) > int(broad_z), str((broad_z, detail_z)))
             if layer_name == "標高・起伏":
                 page.wait_for_function("() => document.getElementById(\'mapValue\').textContent.endsWith(\' m\')")
-                check("中央地点の標高を表示する", page.locator("#mapValueLabel").inner_text() == "中心の標高" and page.locator("#mapValue").inner_text().endswith(" m"))
+                elevation_text = page.locator("#mapValue").inner_text()
+                check("中央地点の標高を0.1m単位で表示する", page.locator("#mapValueLabel").inner_text() == "中心の標高" and re.fullmatch(r"-?\d+\.\d m", elevation_text) is not None, elevation_text)
                 check("標高・起伏でも背景地図が表示される", page.locator('#historyMap img[src*="tile.openstreetmap.org"]').count() > 0)
         check("標高・起伏レイヤが陰影タイルを読み込む", page.locator('#historyMap img[src*="/hillshademap/"]').count() > 0)
         page.set_viewport_size({"width": 390, "height": 844})

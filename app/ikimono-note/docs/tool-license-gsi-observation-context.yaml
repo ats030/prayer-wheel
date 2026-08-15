@@ -1,5 +1,5 @@
-tool: 国土地理院 淡色地図・地形分類（自然地形）・数値地図25000（土地条件）・陰影起伏図・標高タイル
-plan_or_version: pale, experimental_landformclassification1 GeoJSON, lcm25k_2012, hillshademap, DEM1A/5A/5B/5C/10B PNG tiles, reviewed 2026-08-15
+tool: 国土地理院 淡色地図・地形分類（自然地形）・数値地図25000（土地条件）・陰影起伏図・標高API
+plan_or_version: pale, experimental_landformclassification1 GeoJSON, lcm25k_2012, hillshademap, getelevation.php, reviewed 2026-08-15
 decision: approved
 implemented: 2026-08-15 (ats030-71g7, ats030-1roe, ats030-6lmb, ats030-yk69)
 price:
@@ -16,17 +16,17 @@ attribution:
   natural_landform: 国土地理院（地形分類・自然地形）
   land_conditions: 国土地理院（数値地図25000・土地条件）
   hillshade: 国土地理院（陰影起伏図）
-  elevation: 国土地理院（標高タイル）
+  elevation: 国土地理院（標高API）
 restrictions:
   - 土地条件の提供ズームは10〜16。選択時に10未満なら10へ移動し、16超ではZL16を拡大表示する。詳細タイルの空白は提供実験中の地形分類（自然地形）のZL5〜13を下層に描画して補完する。両方にデータがない地点は最下層の淡色地図で地理的文脈だけを残し、土地分類として扱わない。
   - 地形分類（自然地形）は提供実験中で、URL・構成・内容が変わる可能性がある。利用者が表示中の範囲だけを取得し、取得失敗時は淡色地図へ安全にフォールバックする。
   - 陰影起伏図の提供ズームは2〜16、日本全国。16超ではZL16を拡大表示する。
-  - 中央地点の標高は更新停止済みのテキスト形式ではなくPNG形式を使う。国土地理院の標高算出例と同じくDEM1A、DEM5A、DEM5B、DEM5C、DEM10Bの順で有効値を探し、RGB値を仕様どおり0.01m単位へ変換する。
+  - 中央地点の標高は国土地理院の公式標高APIを使い、APIが選んだ最も精度のよいDEMの値を0.1m単位で表示する。画像の色変換に左右されるクライアント側RGB復号は行わない。
   - タイルを一括取得・再配布せず、利用者が地図を開いて該当レイヤを選択したときだけ取得する。
   - 公開タイルサービスに可用性保証はない。取得失敗時はアプリ本体と記録データへ影響させない。
 privacy:
   decision: opt-in
-  detail: 地図表示ボタン押下後、利用者がGSIレイヤを選んだ場合だけ表示範囲のタイル座標が国土地理院へ送られる。写真・候補名・観察記録は送らない。
+  detail: 地図表示ボタン押下後、利用者がGSIレイヤを選んだ場合だけ表示範囲のタイル座標または地図中央の緯度経度が国土地理院へ送られる。写真・候補名・観察記録は送らない。
 adoption:
   rationale: 湖沼水深の限定的な調査範囲をやめ、既存Leafletと既存配信元のまま、全国の尾根・谷・高低差という生息環境の文脈を地名と同時に確認できる。
   rollback: MAP_LAYERSの標高・起伏を除くか直前コミットへ戻せば、データ移行なしで復旧できる。
@@ -37,5 +37,6 @@ sources:
   - https://maps.gsi.go.jp/development/siyou.html
   - https://maps.gsi.go.jp/development/demtile.html
   - https://maps.gsi.go.jp/development/elevation.html
+  - https://maps.gsi.go.jp/development/elevation_s.html
   - https://web1.gsi.go.jp/kikakuchousei/kikakuchousei40182.html
   - https://www.gsi.go.jp/LAW/2930-qa.html
