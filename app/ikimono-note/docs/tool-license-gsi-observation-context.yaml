@@ -1,7 +1,7 @@
-tool: 国土地理院 数値地図25000（土地条件）・陰影起伏図
-plan_or_version: lcm25k_2012 and hillshademap raster tiles, reviewed 2026-08-15
+tool: 国土地理院 淡色地図・数値地図25000（土地条件）・陰影起伏図
+plan_or_version: pale, lcm25k_2012 and hillshademap raster tiles, reviewed 2026-08-15
 decision: approved
-implemented: 2026-08-15 (ats030-71g7)
+implemented: 2026-08-15 (ats030-71g7, ats030-1roe)
 price:
   condition: Free public XYZ tile service; no API key, account, or paid plan.
   source: https://maps.gsi.go.jp/development/ichiran.html
@@ -12,10 +12,11 @@ commercial_use:
   allowed: true
   evidence: 商用利用可。ウェブサイトでの地理院タイルのリアルタイム読み込みは、出典明示により申請不要。
 attribution:
+  pale: 国土地理院（淡色地図）
   land_conditions: 国土地理院（数値地図25000・土地条件）
   hillshade: 国土地理院（陰影起伏図）
 restrictions:
-  - 土地条件の提供ズームは10〜16。選択時に10未満なら10へ移動し、16超ではZL16を拡大表示する。詳細タイルの空白は同一データのZL10を下層で拡大して補完し、別の分類データとは混ぜない。
+  - 土地条件の提供ズームは10〜16。選択時に10未満なら10へ移動し、16超ではZL16を拡大表示する。詳細タイルの空白は同一データのZL10を下層で拡大して補完する。ZL10もない未整備地点は最下層の淡色地図で地理的文脈だけを残し、土地分類として扱わない。
   - 陰影起伏図の提供ズームは2〜16、日本全国。16超ではZL16を拡大表示する。
   - タイルを一括取得・再配布せず、利用者が地図を開いて該当レイヤを選択したときだけ取得する。
   - 公開タイルサービスに可用性保証はない。取得失敗時はアプリ本体と記録データへ影響させない。

@@ -818,9 +818,11 @@ def test_dashboard_map_is_never_loaded_without_an_explicit_press():
     assert '"土地条件"' in page
     assert '"標高・起伏"' in page
     assert '"湖沼（水深）"' not in page
+    assert "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png" in page
     assert page.count("https://cyberjapandata.gsi.go.jp/xyz/lcm25k_2012/{z}/{x}/{y}.png") == 2
     assert "https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png" in page
     assert "lakedata" not in page and "/lake1/" not in page
+    assert "minNativeZoom:5,maxNativeZoom:18" in page
     assert "minNativeZoom:10,maxNativeZoom:10" in page
     assert "minNativeZoom:10,maxNativeZoom:16" in page
     assert "minSelectZoom:10" in page
@@ -2562,7 +2564,7 @@ def test_the_map_can_show_the_lay_of_the_land():
         assert f'"{removed}"' not in layer_config, removed
     # 出典を示せば自由に使える (政府標準利用規約)。示さないなら使えない
     assert "国土地理院" in script
-    assert script.count("GSI_CREDIT+") == 3
+    assert script.count("GSI_CREDIT+") == 4
     assert "L.control.layers(layers,null,{collapsed:false})" in script
     # Leaflet の表記はライブラリが自分で付ける。重ねると二重に出る
     assert "leafletjs.com" not in script.split("const MAP_LAYERS")[1].split("};")[0]
