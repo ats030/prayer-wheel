@@ -155,6 +155,11 @@ def run(base: str, do_identify: bool) -> None:
 
         check("Ollama URLへhttpを補える", page.evaluate("() => normalizeOllamaUrl('localhost:11434')") == "http://localhost:11434")
         check("空のOllama URLを日本語で案内する", page.evaluate("() => { try { normalizeOllamaUrl(''); return false } catch (error) { return error.message === 'Ollama URLを入力してください' } }") is True)
+        page.fill("#model-local", "gemma4:12b")
+        page.locator("[name=provider][value=local]").check()
+        check("Ollama選択が現在のAIへ即時反映される", page.locator("#active-provider").inner_text() == "Ollama · gemma4:12b")
+        page.locator("[name=provider][value=gemini]").check()
+        check("Geminiへ戻しても現在のAIと一致する", page.locator("#active-provider").inner_text().startswith("Google Gemini API · "))
         # 記録の保存 (ドライブ) の導線が出ているか
         page.wait_for_timeout(800)
         check("設定画面がエラーを出していない",

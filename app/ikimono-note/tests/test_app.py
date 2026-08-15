@@ -3024,6 +3024,7 @@ def test_the_finishing_touches_live_in_one_place():
     assert "async function identifyWithLocalOllama(files, context)" in index
     assert 'targetAddressSpace: "local"' in index
     assert "ローカルネットワークへのアクセス" in index
+    assert 'saved.provider!=="local"||data.available_models.local.length||data.local_in_browser' in index
     # ブラウザは写真を渡して本文を受け取り、仕上げはサーバーへ預ける。
     # 注記を画面に描くのはブラウザの仕事だが、誰が保護種かを決めるのはサーバー
     assert '/api/local/prompt?' in index and '"/api/local/result"' in index
