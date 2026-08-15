@@ -818,10 +818,12 @@ def test_dashboard_map_is_never_loaded_without_an_explicit_press():
     assert '"土地条件"' in page
     assert '"標高・起伏"' in page
     assert '"湖沼（水深）"' not in page
-    assert "https://cyberjapandata.gsi.go.jp/xyz/lcm25k_2012/{z}/{x}/{y}.png" in page
+    assert page.count("https://cyberjapandata.gsi.go.jp/xyz/lcm25k_2012/{z}/{x}/{y}.png") == 2
     assert "https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png" in page
     assert "lakedata" not in page and "/lake1/" not in page
-    assert "minNativeZoom:10,maxNativeZoom:16,minSelectZoom:10" in page
+    assert "minNativeZoom:10,maxNativeZoom:10" in page
+    assert "minNativeZoom:10,maxNativeZoom:16" in page
+    assert "minSelectZoom:10" in page
     assert "minNativeZoom:2,maxNativeZoom:16" in page
     assert "opacity:.5" in page and "opacity:tile.opacity??1" in page
     assert 'background:"地図"' in page
