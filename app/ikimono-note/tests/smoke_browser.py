@@ -208,8 +208,12 @@ def run(base: str, do_identify: bool) -> None:
             if layer_name == "土地条件":
                 land_tiles = page.locator('#historyMap img[src*="/lcm25k_2012/"]').evaluate_all("nodes => nodes.map(node => node.src)")
                 check("土地条件の未整備地点を淡色地図で補う", page.locator('#historyMap img[src*="/pale/"]').count() > 0)
-                check("土地条件の低解像度タイルを下層に表示する", any("/lcm25k_2012/10/" in src for src in land_tiles), str(land_tiles[:3]))
+                page.wait_for_function("() => performance.getEntriesByType(\'resource\').some(entry => entry.name.includes(\'/experimental_landformclassification1/13/\'))")
+                check("土地条件の広域版を補完層として取得する", page.locator("#historyMap .leaflet-landform-pane path").count() > 0)
                 check("土地条件の詳細タイルを上層に表示する", any("/lcm25k_2012/15/" in src for src in land_tiles), str(land_tiles[:3]))
+                detail_z = page.locator("#historyMap .leaflet-landDetail-pane").evaluate("node => getComputedStyle(node).zIndex")
+                broad_z = page.locator("#historyMap .leaflet-landform-pane").evaluate("node => getComputedStyle(node).zIndex")
+                check("詳細土地条件を広域版より上に表示する", int(detail_z) > int(broad_z), str((broad_z, detail_z)))
             if layer_name == "標高・起伏":
                 check("標高・起伏でも背景地図が表示される", page.locator('#historyMap img[src*="tile.openstreetmap.org"]').count() > 0)
         check("標高・起伏レイヤが陰影タイルを読み込む", page.locator('#historyMap img[src*="/hillshademap/"]').count() > 0)

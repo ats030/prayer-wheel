@@ -819,17 +819,21 @@ def test_dashboard_map_is_never_loaded_without_an_explicit_press():
     assert '"標高・起伏"' in page
     assert '"湖沼（水深）"' not in page
     assert "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png" in page
-    assert page.count("https://cyberjapandata.gsi.go.jp/xyz/lcm25k_2012/{z}/{x}/{y}.png") == 2
+    assert page.count("https://cyberjapandata.gsi.go.jp/xyz/lcm25k_2012/{z}/{x}/{y}.png") == 1
+    assert "https://cyberjapandata.gsi.go.jp/xyz/experimental_landformclassification1/" in page
     assert "https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png" in page
     assert "lakedata" not in page and "/lake1/" not in page
     assert "minNativeZoom:5,maxNativeZoom:18" in page
-    assert "minNativeZoom:10,maxNativeZoom:10" in page
+    assert 'type:"landform"' in page
+    assert "Math.min(13,Math.max(5,map.getZoom()))" in page
     assert "minNativeZoom:10,maxNativeZoom:16" in page
     assert "minSelectZoom:10" in page
     assert "minNativeZoom:2,maxNativeZoom:16" in page
     assert "opacity:.5" in page and "opacity:tile.opacity??1" in page
     assert 'background:"地図"' in page
     assert "function mapLayer(source)" in page and "L.layerGroup(tiles)" in page
+    assert "function landformLayer(source)" in page and "L.geoJSON(data" in page
+    assert 'pane:"landformPane"' in page and 'pane:"landDetailPane"' in page
     assert "source.background?[MAP_LAYERS[source.background]]" in page
     assert "attribution:tile.credit||source.credit" in page
     assert "const minimum=MAP_LAYERS[event.name]?.minSelectZoom" in page
@@ -2564,7 +2568,7 @@ def test_the_map_can_show_the_lay_of_the_land():
         assert f'"{removed}"' not in layer_config, removed
     # 出典を示せば自由に使える (政府標準利用規約)。示さないなら使えない
     assert "国土地理院" in script
-    assert script.count("GSI_CREDIT+") == 4
+    assert script.count("GSI_CREDIT+") == 5
     assert "L.control.layers(layers,null,{collapsed:false})" in script
     # Leaflet の表記はライブラリが自分で付ける。重ねると二重に出る
     assert "leafletjs.com" not in script.split("const MAP_LAYERS")[1].split("};")[0]
@@ -2574,6 +2578,8 @@ def test_the_policy_lets_the_tiles_through():
     policy = client.get("/dashboard").headers["content-security-policy"]
     images = policy.split("img-src")[1].split(";")[0]
     assert "https://cyberjapandata.gsi.go.jp" in images
+    connections = policy.split("connect-src")[1].split(";")[0]
+    assert "https://cyberjapandata.gsi.go.jp" in connections
     # Leaflet はタイルの隙間に 1x1 の透明 GIF を data: で置く
     assert " data:" in images
     assert "'unsafe-inline'" not in policy
