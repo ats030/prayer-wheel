@@ -351,6 +351,10 @@ render=function(data){
  */
 const LOCAL_OLLAMA_DEFAULT = "http://localhost:11434";
 
+function ollamaFetch(url, options={}) {
+  return fetch(url, {...options, targetAddressSpace: "local"});
+}
+
 function localOllamaUrl() {
   const saved = JSON.parse(localStorage.getItem("species-public-settings") || "{}");
   return String(saved.localUrl || LOCAL_OLLAMA_DEFAULT).replace(/\/+$/, "");
@@ -387,7 +391,7 @@ async function identifyWithLocalOllama(files, context) {
 
   let content;
   try {
-    const response = await fetch(url + "/api/chat", {
+    const response = await ollamaFetch(url + "/api/chat", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
@@ -401,8 +405,8 @@ async function identifyWithLocalOllama(files, context) {
   } catch (error) {
     /* つながらない理由はだいたい3つで、利用者が打てる手が違う */
     if (error instanceof TypeError) {
-      throw new Error("手元のAIにつながりません。Ollama が動いているか、"
-        + "このサイトからの接続を許しているか（OLLAMA_ORIGINS）を確かめてください。"
+      throw new Error("手元のAIにつながりません。ブラウザの「ローカルネットワークへのアクセス」を許可し、"
+        + "Ollama が動いているか、このサイトからの接続を許しているか（OLLAMA_ORIGINS）を確かめてください。"
         + "接続先: " + url);
     }
     throw error;

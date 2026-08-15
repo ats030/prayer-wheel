@@ -538,6 +538,8 @@ def test_settings_page_allows_custom_local_llm_url():
     assert 'url+"/api/show"' in settings_js
     assert '.includes("vision")' in settings_js
     assert "OLLAMA_HOST、OLLAMA_ORIGINS" in settings_js
+    assert 'targetAddressSpace:"local"' in settings_js
+    assert "ローカルネットワークへのアクセス" in settings_js
     assert 'local_llm:{url:' in source
     assert 'id="active-provider"' in source
     # 任意機能の2つ（Pl@ntNet と広告）。持ち出しのクラウド設定も同じ見た目だが別物
@@ -3016,6 +3018,8 @@ def test_the_finishing_touches_live_in_one_place():
     assert "return pipeline.finish(parsed)" in main_source
     index = client.get("/assets/index.js").text
     assert "async function identifyWithLocalOllama(files, context)" in index
+    assert 'targetAddressSpace: "local"' in index
+    assert "ローカルネットワークへのアクセス" in index
     # ブラウザは写真を渡して本文を受け取り、仕上げはサーバーへ預ける。
     # 注記を画面に描くのはブラウザの仕事だが、誰が保護種かを決めるのはサーバー
     assert '/api/local/prompt?' in index and '"/api/local/result"' in index

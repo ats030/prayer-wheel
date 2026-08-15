@@ -2,6 +2,7 @@ const $=id=>document.getElementById(id);let current=null;const deleteKeys=new Se
 const providerLabels={local:"Ollama",openai:"OpenAI API",anthropic:"Anthropic API",gemini:"Google Gemini API"};
 const esc=value=>String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 function show(text,state=""){$("message").textContent=text;$("message").className="message"+(state?" "+state:"")}
+function ollamaFetch(url,options={}){return fetch(url,{...options,targetAddressSpace:"local"})}
 function ollamaState(text,state=""){
   const node=$("ollama-check-state");
   node.textContent=text;
@@ -15,14 +16,14 @@ async function checkOllama(){
   }catch(error){ollamaState(error.message||"Ollama URLを確認してください","error");return}
   button.disabled=true;button.textContent="接続中…";ollamaState("Ollamaへ接続しています…");
   try{
-    const response=await fetch(url+"/api/tags");
+    const response=await ollamaFetch(url+"/api/tags");
     if(!response.ok)throw new Error("Ollamaがエラーを返しました（"+response.status+"）");
     const installed=(await response.json()).models||[];
     const checked=await Promise.all(installed.map(async item=>{
       const name=String(item.name||item.model||"").trim();
       if(!name)return null;
       try{
-        const detail=await fetch(url+"/api/show",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({model:name,verbose:false})});
+        const detail=await ollamaFetch(url+"/api/show",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({model:name,verbose:false})});
         if(!detail.ok)return null;
         const data=await detail.json();
         return(data.capabilities||[]).includes("vision")?{id:name,label:name+((item.details||{}).parameter_size?" · "+item.details.parameter_size:"")}:null;
@@ -33,7 +34,7 @@ async function checkOllama(){
     if(vision.length&&!vision.some(item=>item.id===model.value))model.value=vision[0].id;
     if(vision.length){ollamaState("接続できました。画像対応モデル "+vision.length+"件を取得しました。","ok");$("local-model-note").textContent="選択中: "+model.value}
     else ollamaState(installed.length?"接続できましたが、画像対応モデルがありません。Ollamaで画像対応モデルを取得して、もう一度お試しください。":"接続できましたが、モデルがありません。Ollamaで画像対応モデルを取得してください。","error");
-  }catch(error){ollamaState(error instanceof TypeError?"接続できません。Ollamaの起動、URL、OLLAMA_HOST、OLLAMA_ORIGINSを確認してください。":error.message,"error")}
+  }catch(error){ollamaState(error instanceof TypeError?"接続できません。ブラウザの「ローカルネットワークへのアクセス」を許可し、Ollamaの起動、URL、OLLAMA_HOST、OLLAMA_ORIGINSを確認してください。":error.message,"error")}
   finally{button.disabled=false;button.textContent="接続してモデルを取得"}
 }
 $("ollama-check").onclick=event=>{event.preventDefault();event.stopPropagation();checkOllama()};
