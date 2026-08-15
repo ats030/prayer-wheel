@@ -822,7 +822,10 @@ def test_dashboard_map_is_never_loaded_without_an_explicit_press():
     assert "https://cyberjapandata.gsi.go.jp/xyz/lake1/{z}/{x}/{y}.png" in page
     assert "minNativeZoom:10,maxNativeZoom:16,minSelectZoom:10" in page
     assert "maxNativeZoom:18" in page and "maxNativeZoom:17" in page
+    assert 'background:"地図"' in page
     assert "function mapLayer(source)" in page and "L.layerGroup(tiles)" in page
+    assert "source.background?[MAP_LAYERS[source.background]]" in page
+    assert "attribution:tile.credit||source.credit" in page
     assert "const minimum=MAP_LAYERS[event.name]?.minSelectZoom" in page
     assert '"地形"' not in page and '"起伏"' not in page and '"土地利用（1982〜83年）"' not in page
     history = page_source("/history")

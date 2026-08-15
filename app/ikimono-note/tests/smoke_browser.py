@@ -205,6 +205,8 @@ def run(base: str, do_identify: bool) -> None:
             layer = page.locator(".leaflet-control-layers label", has_text=layer_name)
             layer.click(); page.wait_for_timeout(500)
             check(layer_name+"レイヤへ切り替えられる", layer.locator('input[type="radio"]').is_checked() and credit in page.locator(".leaflet-control-attribution").inner_text())
+            if layer_name == "湖沼（水深）":
+                check("湖沼レイヤでも背景地図が表示される", page.locator('#historyMap img[src*="tile.openstreetmap.org"]').count() > 0)
         page.set_viewport_size({"width": 390, "height": 844})
         summary = page.locator(".summary-grid").bounding_box()
         breakdown_box = page.locator(".breakdown-summary").bounding_box()
