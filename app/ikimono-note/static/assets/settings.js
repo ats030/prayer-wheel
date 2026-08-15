@@ -2,6 +2,43 @@ const $=id=>document.getElementById(id);let current=null;const deleteKeys=new Se
 const providerLabels={local:"Ollama",openai:"OpenAI API",anthropic:"Anthropic API",gemini:"Google Gemini API"};
 const esc=value=>String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 function show(text,state=""){$("message").textContent=text;$("message").className="message"+(state?" "+state:"")}
+function ollamaState(text,state=""){
+  const node=$("ollama-check-state");
+  node.textContent=text;
+  node.className="configured"+(state?" ollama-check-"+state:"");
+}
+async function checkOllama(){
+  const button=$("ollama-check"),input=$("local-llm-url"),url=input.value.trim().replace(/\/+$/,"");
+  try{
+    const parsed=new URL(url);
+    if(!["http:","https:"].includes(parsed.protocol))throw new Error("URLは http:// または https:// から入力してください");
+  }catch(error){ollamaState(error.message||"Ollama URLを確認してください","error");return}
+  button.disabled=true;button.textContent="接続中…";ollamaState("Ollamaへ接続しています…");
+  try{
+    const response=await fetch(url+"/api/tags");
+    if(!response.ok)throw new Error("Ollamaがエラーを返しました（"+response.status+"）");
+    const installed=(await response.json()).models||[];
+    const checked=await Promise.all(installed.map(async item=>{
+      const name=String(item.name||item.model||"").trim();
+      if(!name)return null;
+      try{
+        const detail=await fetch(url+"/api/show",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({model:name,verbose:false})});
+        if(!detail.ok)return null;
+        const data=await detail.json();
+        return(data.capabilities||[]).includes("vision")?{id:name,label:name+((item.details||{}).parameter_size?" · "+item.details.parameter_size:"")}:null;
+      }catch{return null}
+    }));
+    const vision=checked.filter(Boolean),options=$("local-model-options"),model=$("model-local");
+    options.innerHTML=vision.map(item=>`<option value="${esc(item.id)}">${esc(item.label)}</option>`).join("");
+    if(vision.length&&!vision.some(item=>item.id===model.value))model.value=vision[0].id;
+    if(vision.length){ollamaState("接続できました。画像対応モデル "+vision.length+"件を取得しました。","ok");$("local-model-note").textContent="選択中: "+model.value}
+    else ollamaState(installed.length?"接続できましたが、画像対応モデルがありません。Ollamaで画像対応モデルを取得して、もう一度お試しください。":"接続できましたが、モデルがありません。Ollamaで画像対応モデルを取得してください。","error");
+  }catch(error){ollamaState(error instanceof TypeError?"接続できません。Ollamaの起動、URL、OLLAMA_HOST、OLLAMA_ORIGINSを確認してください。":error.message,"error")}
+  finally{button.disabled=false;button.textContent="接続してモデルを取得"}
+}
+$("ollama-check").onclick=event=>{event.preventDefault();event.stopPropagation();checkOllama()};
+$("local-llm-url").addEventListener("input",()=>ollamaState("URLを変更しました。接続を確認してください。"));
+$("model-local").addEventListener("input",()=>{$("local-model-note").textContent="選択中: "+$("model-local").value});
 function render(data){current=data;document.querySelector('[name=provider][value="'+data.provider+'"]').checked=true;$("active-provider").textContent=providerLabels[data.provider]+" · "+data.models[data.provider];$("local-llm-url").value=data.local_llm.url;$("local-model-options").innerHTML=data.available_models.local.map(item=>'<option value="'+esc(item.id)+'">'+esc(item.label)+'</option>').join("");$("model-local").value=data.models.local;for(const provider of ["openai","anthropic","gemini"]){const select=$("model-"+provider);select.innerHTML=data.available_models[provider].map(item=>'<option value="'+esc(item.id)+'">'+esc(item.label)+'</option>').join("");select.value=data.models[provider]}const incompatible=data.incompatible_local_models||[];$("local-model-note").textContent=incompatible.length?"画像非対応: "+incompatible.join("、"):"画像対応モデル（名前の直接入力も可能）";for(const provider of ["openai","anthropic","gemini","plantnet"]){$("configured-"+provider).textContent=data.api_key_configured[provider]?"登録済み（変更時だけ入力）":"未登録"}$("affiliate-title").value=data.affiliate.title||"";$("affiliate-url").value=data.affiliate.url||"";$("affiliate-enabled").checked=Boolean(data.affiliate.enabled);$("affiliate-partner-tag").value=data.affiliate.partner_tag||"";$("affiliate-product-enabled").checked=Boolean(data.affiliate.product_enabled);$("configured-amazon-creators").textContent=data.affiliate.creators_api_configured?"認証情報を登録済み":"認証情報は未登録";renderCreatorsState(data.creators_api_state);$("affiliate-metrics").textContent="表示 "+data.affiliate.metrics.impressions+" · クリック "+data.affiliate.metrics.clicks}
 async function load(){try{const response=await fetch("/api/settings");if(!response.ok)throw new Error("設定を読み込めませんでした");const data=await response.json();render(data);if(data.public_mode)setupPublicSettings(data);else{operatorNote();}}catch(error){show(error.message,"error")}}
 document.querySelectorAll("[data-delete]").forEach(button=>button.onclick=()=>{const provider=button.dataset.delete;deleteKeys.add(provider);$("key-"+provider).value="";const note=$("configured-"+provider);if(note)note.textContent="保存すると登録を削除します"});

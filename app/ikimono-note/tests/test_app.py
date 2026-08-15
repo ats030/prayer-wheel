@@ -531,6 +531,13 @@ def test_settings_page_allows_custom_local_llm_url():
     source = page_source("/settings")
     assert response.status_code == 200
     assert 'id="local-llm-url"' in source
+    assert 'id="ollama-check"' in source
+    assert 'id="ollama-check-state"' in source
+    settings_js = client.get("/assets/settings.js").text
+    assert 'url+"/api/tags"' in settings_js
+    assert 'url+"/api/show"' in settings_js
+    assert '.includes("vision")' in settings_js
+    assert "OLLAMA_HOST、OLLAMA_ORIGINS" in settings_js
     assert 'local_llm:{url:' in source
     assert 'id="active-provider"' in source
     # 任意機能の2つ（Pl@ntNet と広告）。持ち出しのクラウド設定も同じ見た目だが別物

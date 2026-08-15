@@ -133,8 +133,7 @@ with the subject.
 - Public mode keeps each visitor's provider and model choice in localStorage,
   but API keys only in sessionStorage. Keys are submitted with an identification
   request and are never written to server settings or browser history.
-- Public mode makes operator settings read-only, rejects arbitrary Ollama URLs,
-  and disables operator-funded local inference unless explicitly enabled.
+- Public mode makes operator-only settings read-only and disables operator-funded local inference unless explicitly enabled. Ollama setup follows URL, explicit connection check, then selection from installed vision-capable models; the browser calls the local tags and show APIs directly, while manual model entry remains available. Connection, HTTP, empty-model, and no-vision failures are stated separately.
 - External-provider copy states where photographs are sent; Gemini also distinguishes unpaid data-improvement handling from paid-service handling.
 - Gemini identification performs a bounded observe, compare-lookalikes, reject-contradictions pass before schema-constrained output; high thinking is preferred for accuracy, while the independent taxonomy gate still treats the photo match as unverified.
 - Animal candidates include a sex estimate only when at least one directly visible, species-specific sexual-dimorphism feature is supplied. Otherwise the UI says undetermined; plants are out of scope. The estimate remains explicitly model-derived and requires comparison with a taxon-appropriate external reference.

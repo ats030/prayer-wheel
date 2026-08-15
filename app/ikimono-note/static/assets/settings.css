@@ -36,3 +36,5 @@
 .api-state{margin:4px 0 0;font-size:12px;line-height:1.5}
 .api-state.ok{color:var(--color-muted)}
 .api-state.warn{color:var(--color-danger)}
+.ollama-url-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.ollama-url-row .button{padding-inline:12px}.ollama-check-ok{color:var(--color-success)}.ollama-check-error{color:var(--color-danger)}
+@media(max-width:520px){.ollama-url-row{grid-template-columns:minmax(0,1fr)}.ollama-url-row .button{width:100%}}
