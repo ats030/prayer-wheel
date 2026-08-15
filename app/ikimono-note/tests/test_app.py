@@ -786,6 +786,12 @@ def test_dashboard_summarizes_existing_records_without_a_new_data_store():
     assert 'indexedDB.open("species-history",1)' in script
     assert 'function categoryCounts(entries)' in script
     assert 'function rankCounts(entries)' in script
+    assert 'function piePath(start,end)' in script
+    assert 'function pieChart(items,total,label)' in script
+    assert 'class="pie-chart"' in script
+    assert 'role="img"' in script
+    assert 'class="pie-legend-row"' in script
+    assert 'style="' not in script
     assert 'CATEGORY_ORDER=["植物","動物","菌類","不明"]' in script
     assert 'species:"種まで",genus:"属まで",family:"科まで"' in script
     assert '"階級の記録なし"' in script
