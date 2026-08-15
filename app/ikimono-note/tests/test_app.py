@@ -779,16 +779,20 @@ def test_dashboard_summarizes_existing_records_without_a_new_data_store():
     assert 'id="locatedCount"' in page
     assert 'id="notedCount"' in page
     assert 'id="recentList"' in page
-    assert 'id="speciesList"' in page
-    assert "生きもの別の記録" in page
-    assert "名前が確定したという意味ではありません" in page
+    assert 'id="categoryList"' in page
+    assert 'id="rankList"' in page
+    assert "観察の内訳" in page
+    assert "何を観察したかと、名前をどこまで絞れたか" in page
     assert 'indexedDB.open("species-history",1)' in script
-    assert 'function speciesCounts(entries)' in script
-    assert 'candidate.taxon_rank!=="species"' in script
-    assert '"scientific:"+scientific.toLocaleLowerCase()' in script
-    assert 'common:"種まで分からない記録"' in script
+    assert 'function categoryCounts(entries)' in script
+    assert 'function rankCounts(entries)' in script
+    assert 'CATEGORY_ORDER=["植物","動物","菌類","不明"]' in script
+    assert 'species:"種まで",genus:"属まで",family:"科まで"' in script
+    assert '"階級の記録なし"' in script
+    assert '"候補なし"' in script
     assert 'function showLoadError(error)' in script
-    assert '$("speciesList").innerHTML=html' in script
+    assert '$("categoryList").innerHTML=html' in script
+    assert '$("rankList").innerHTML=html' in script
     assert 'entries.slice(0,5)' in script
     assert 'href="/dashboard"' in page_source("/")
     assert 'href="/dashboard"' in page_source("/history")
