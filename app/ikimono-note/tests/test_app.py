@@ -539,6 +539,10 @@ def test_settings_page_allows_custom_local_llm_url():
     assert '.includes("vision")' in settings_js
     assert "OLLAMA_HOST、OLLAMA_ORIGINS" in settings_js
     assert 'targetAddressSpace:"local"' in settings_js
+    assert "function normalizeOllamaUrl(value)" in settings_js
+    assert 'url="http://"+url' in settings_js
+    assert "Ollama URLを入力してください" in settings_js
+    assert "Ollama URLの形式を確認してください" in settings_js
     assert "ローカルネットワークへのアクセス" in settings_js
     assert 'local_llm:{url:' in source
     assert 'id="active-provider"' in source

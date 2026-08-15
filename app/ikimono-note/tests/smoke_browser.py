@@ -150,9 +150,11 @@ def run(base: str, do_identify: bool) -> None:
 
         # 共通スクリプトが読まれ、関数が生きているか（読み込み忘れで静かに壊れた箇所）
         page.goto(base + "/settings"); page.wait_for_load_state("networkidle")
-        for name in ["readApiKey", "keepingKeys", "buildBackup", "displayName", "providerLabel"]:
+        for name in ["readApiKey", "keepingKeys", "buildBackup", "displayName", "providerLabel", "normalizeOllamaUrl"]:
             check(f"設定画面で {name} が使える", page.evaluate(f"() => typeof {name}") == "function")
 
+        check("Ollama URLへhttpを補える", page.evaluate("() => normalizeOllamaUrl('localhost:11434')") == "http://localhost:11434")
+        check("空のOllama URLを日本語で案内する", page.evaluate("() => { try { normalizeOllamaUrl(''); return false } catch (error) { return error.message === 'Ollama URLを入力してください' } }") is True)
         # 記録の保存 (ドライブ) の導線が出ているか
         page.wait_for_timeout(800)
         check("設定画面がエラーを出していない",

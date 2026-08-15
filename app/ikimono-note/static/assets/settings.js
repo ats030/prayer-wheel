@@ -3,17 +3,25 @@ const providerLabels={local:"Ollama",openai:"OpenAI API",anthropic:"Anthropic AP
 const esc=value=>String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 function show(text,state=""){$("message").textContent=text;$("message").className="message"+(state?" "+state:"")}
 function ollamaFetch(url,options={}){return fetch(url,{...options,targetAddressSpace:"local"})}
+function normalizeOllamaUrl(value){
+  let url=String(value||"").trim();
+  if(!url)throw new Error("Ollama URLを入力してください");
+  if(!url.includes("://"))url="http://"+url;
+  let parsed;
+  try{parsed=new URL(url)}catch{throw new Error("Ollama URLの形式を確認してください（例: http://localhost:11434）")}
+  if(!["http:","https:"].includes(parsed.protocol))throw new Error("URLは http:// または https:// から入力してください");
+  return parsed.toString().replace(/\/+$/,"");
+}
 function ollamaState(text,state=""){
   const node=$("ollama-check-state");
   node.textContent=text;
   node.className="configured"+(state?" ollama-check-"+state:"");
 }
 async function checkOllama(){
-  const button=$("ollama-check"),input=$("local-llm-url"),url=input.value.trim().replace(/\/+$/,"");
-  try{
-    const parsed=new URL(url);
-    if(!["http:","https:"].includes(parsed.protocol))throw new Error("URLは http:// または https:// から入力してください");
-  }catch(error){ollamaState(error.message||"Ollama URLを確認してください","error");return}
+  const button=$("ollama-check"),input=$("local-llm-url");
+  let url;
+  try{url=normalizeOllamaUrl(input.value);input.value=url}
+  catch(error){ollamaState(error.message,"error");return}
   button.disabled=true;button.textContent="接続中…";ollamaState("Ollamaへ接続しています…");
   try{
     const response=await ollamaFetch(url+"/api/tags");
@@ -39,6 +47,7 @@ async function checkOllama(){
 }
 $("ollama-check").onclick=event=>{event.preventDefault();event.stopPropagation();checkOllama()};
 $("local-llm-url").addEventListener("input",()=>ollamaState("URLを変更しました。接続を確認してください。"));
+$("local-llm-url").addEventListener("blur",event=>{try{if(event.target.value.trim())event.target.value=normalizeOllamaUrl(event.target.value)}catch{}});
 $("model-local").addEventListener("input",()=>{$("local-model-note").textContent="選択中: "+$("model-local").value});
 function render(data){current=data;document.querySelector('[name=provider][value="'+data.provider+'"]').checked=true;$("active-provider").textContent=providerLabels[data.provider]+" · "+data.models[data.provider];$("local-llm-url").value=data.local_llm.url;$("local-model-options").innerHTML=data.available_models.local.map(item=>'<option value="'+esc(item.id)+'">'+esc(item.label)+'</option>').join("");$("model-local").value=data.models.local;for(const provider of ["openai","anthropic","gemini"]){const select=$("model-"+provider);select.innerHTML=data.available_models[provider].map(item=>'<option value="'+esc(item.id)+'">'+esc(item.label)+'</option>').join("");select.value=data.models[provider]}const incompatible=data.incompatible_local_models||[];$("local-model-note").textContent=incompatible.length?"画像非対応: "+incompatible.join("、"):"画像対応モデル（名前の直接入力も可能）";for(const provider of ["openai","anthropic","gemini","plantnet"]){$("configured-"+provider).textContent=data.api_key_configured[provider]?"登録済み（変更時だけ入力）":"未登録"}$("affiliate-title").value=data.affiliate.title||"";$("affiliate-url").value=data.affiliate.url||"";$("affiliate-enabled").checked=Boolean(data.affiliate.enabled);$("affiliate-partner-tag").value=data.affiliate.partner_tag||"";$("affiliate-product-enabled").checked=Boolean(data.affiliate.product_enabled);$("configured-amazon-creators").textContent=data.affiliate.creators_api_configured?"認証情報を登録済み":"認証情報は未登録";renderCreatorsState(data.creators_api_state);$("affiliate-metrics").textContent="表示 "+data.affiliate.metrics.impressions+" · クリック "+data.affiliate.metrics.clicks}
 async function load(){try{const response=await fetch("/api/settings");if(!response.ok)throw new Error("設定を読み込めませんでした");const data=await response.json();render(data);if(data.public_mode)setupPublicSettings(data);else{operatorNote();}}catch(error){show(error.message,"error")}}
