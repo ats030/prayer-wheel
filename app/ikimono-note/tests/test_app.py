@@ -814,14 +814,16 @@ def test_dashboard_map_is_never_loaded_without_an_explicit_press():
     assert '$("showMap").onclick=showMap' in page
     assert "drawMap(mapEntries)" in page
     assert "「地図を表示」を押したときだけ" in page
-    assert "写真・土地条件・湖沼など国土地理院のレイヤを選ぶと" in page
+    assert "写真・土地条件・標高・起伏など国土地理院のレイヤを選ぶと" in page
     assert '"土地条件"' in page
-    assert '"湖沼（水深）"' in page
+    assert '"標高・起伏"' in page
+    assert '"湖沼（水深）"' not in page
     assert "https://cyberjapandata.gsi.go.jp/xyz/lcm25k_2012/{z}/{x}/{y}.png" in page
-    assert "https://cyberjapandata.gsi.go.jp/xyz/lakedata/{z}/{x}/{y}.png" in page
-    assert "https://cyberjapandata.gsi.go.jp/xyz/lake1/{z}/{x}/{y}.png" in page
+    assert "https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png" in page
+    assert "lakedata" not in page and "/lake1/" not in page
     assert "minNativeZoom:10,maxNativeZoom:16,minSelectZoom:10" in page
-    assert "maxNativeZoom:18" in page and "maxNativeZoom:17" in page
+    assert "minNativeZoom:2,maxNativeZoom:16" in page
+    assert "opacity:.5" in page and "opacity:tile.opacity??1" in page
     assert 'background:"地図"' in page
     assert "function mapLayer(source)" in page and "L.layerGroup(tiles)" in page
     assert "source.background?[MAP_LAYERS[source.background]]" in page
@@ -2552,7 +2554,7 @@ def test_the_map_can_show_the_lay_of_the_land():
     script = client.get("/assets/dashboard.js").text
     assert "const MAP_LAYERS={" in script
     layer_config = script.split("const MAP_LAYERS")[1].split("};")[0]
-    for name in ["地図", "写真", "土地条件", "湖沼（水深）"]:
+    for name in ["地図", "写真", "土地条件", "標高・起伏"]:
         assert f'"{name}"' in layer_config, name
     for removed in ["地形", "起伏", "土地利用（1982〜83年）"]:
         assert f'"{removed}"' not in layer_config, removed

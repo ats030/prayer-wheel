@@ -1,32 +1,33 @@
-tool: 国土地理院 数値地図25000（土地条件）・湖沼データ
-plan_or_version: lcm25k_2012, lakedata and lake1 raster tiles, reviewed 2026-08-15
+tool: 国土地理院 数値地図25000（土地条件）・陰影起伏図
+plan_or_version: lcm25k_2012 and hillshademap raster tiles, reviewed 2026-08-15
 decision: approved
-implemented: 2026-08-15 (ats030-i079)
+implemented: 2026-08-15 (ats030-71g7)
 price:
-  condition: Free public XYZ tile service; no API key or paid plan.
+  condition: Free public XYZ tile service; no API key, account, or paid plan.
   source: https://maps.gsi.go.jp/development/ichiran.html
 license:
   terms: 国土地理院コンテンツ利用規約（公共データ利用規約 第1.0版 / PDL1.0）
   source: https://web1.gsi.go.jp/kikakuchousei/kikakuchousei40182.html
 commercial_use:
   allowed: true
-  evidence: ウェブサイトでの地理院タイルのリアルタイム読み込みは、出典明示により申請不要。
+  evidence: 商用利用可。ウェブサイトでの地理院タイルのリアルタイム読み込みは、出典明示により申請不要。
 attribution:
   land_conditions: 国土地理院（数値地図25000・土地条件）
-  lakes: 国土地理院（湖沼データ・湖沼図／調査済み80湖沼）
+  hillshade: 国土地理院（陰影起伏図）
 restrictions:
   - 土地条件の提供ズームは10〜16。選択時に10未満なら10へ移動し、16超ではZL16を拡大表示する。
-  - 湖沼データはズーム11〜18、旧湖沼図は11〜17。選択時に11未満なら11へ移動する。
-  - 新しい湖沼データ67湖沼と旧湖沼図13湖沼を重ねて調査済み80湖沼を表示する。空白を「湖がない」と解釈しない。
+  - 陰影起伏図の提供ズームは2〜16、日本全国。16超ではZL16を拡大表示する。
   - タイルを一括取得・再配布せず、利用者が地図を開いて該当レイヤを選択したときだけ取得する。
+  - 公開タイルサービスに可用性保証はない。取得失敗時はアプリ本体と記録データへ影響させない。
 privacy:
   decision: opt-in
   detail: 地図表示ボタン押下後、利用者がGSIレイヤを選んだ場合だけ表示範囲のタイル座標が国土地理院へ送られる。写真・候補名・観察記録は送らない。
 adoption:
-  rationale: 既存Leafletと既存配信元のまま、旧河道・後背低地・湖の水深など観察環境に直接関係する文脈を追加できる。
-  rollback: MAP_LAYERSから該当項目を除けば、データ移行なしで元に戻せる。
+  rationale: 湖沼水深の限定的な調査範囲をやめ、既存Leafletと既存配信元のまま、全国の尾根・谷・高低差という生息環境の文脈を地名と同時に確認できる。
+  rollback: MAP_LAYERSの標高・起伏を除くか直前コミットへ戻せば、データ移行なしで復旧できる。
 sources:
   - https://maps.gsi.go.jp/development/ichiran.html
+  - https://www.gsi.go.jp/bousaichiri/hillshademap.html
   - https://maps.gsi.go.jp/development/siyou.html
   - https://web1.gsi.go.jp/kikakuchousei/kikakuchousei40182.html
-  - https://www.gsi.go.jp/LAW/2930-index.html
+  - https://www.gsi.go.jp/LAW/2930-qa.html

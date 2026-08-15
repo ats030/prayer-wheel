@@ -200,13 +200,14 @@ def run(base: str, do_identify: bool) -> None:
         check("ダッシュボードで地図を表示できる", page.locator("#historyMap .leaflet-marker-icon").count() == 1)
         layer_labels = page.locator(".leaflet-control-layers label")
         labels = layer_labels.all_inner_texts()
-        check("観察環境向けの4レイヤだけを表示する", layer_labels.count() == 4 and all(any(name in label for label in labels) for name in ["地図", "写真", "土地条件", "湖沼（水深）"]), str(labels))
-        for layer_name, credit in [("土地条件", "数値地図25000・土地条件"), ("湖沼（水深）", "湖沼データ・湖沼図／調査済み80湖沼")]:
+        check("観察環境向けの4レイヤだけを表示する", layer_labels.count() == 4 and all(any(name in label for label in labels) for name in ["地図", "写真", "土地条件", "標高・起伏"]), str(labels))
+        for layer_name, credit in [("土地条件", "数値地図25000・土地条件"), ("標高・起伏", "陰影起伏図")]:
             layer = page.locator(".leaflet-control-layers label", has_text=layer_name)
             layer.click(); page.wait_for_timeout(500)
             check(layer_name+"レイヤへ切り替えられる", layer.locator('input[type="radio"]').is_checked() and credit in page.locator(".leaflet-control-attribution").inner_text())
-            if layer_name == "湖沼（水深）":
-                check("湖沼レイヤでも背景地図が表示される", page.locator('#historyMap img[src*="tile.openstreetmap.org"]').count() > 0)
+            if layer_name == "標高・起伏":
+                check("標高・起伏でも背景地図が表示される", page.locator('#historyMap img[src*="tile.openstreetmap.org"]').count() > 0)
+        check("標高・起伏レイヤが陰影タイルを読み込む", page.locator('#historyMap img[src*="/hillshademap/"]').count() > 0)
         page.set_viewport_size({"width": 390, "height": 844})
         summary = page.locator(".summary-grid").bounding_box()
         breakdown_box = page.locator(".breakdown-summary").bounding_box()
