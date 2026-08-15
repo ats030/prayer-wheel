@@ -2591,6 +2591,7 @@ def test_the_policy_lets_the_tiles_through():
     assert "https://cyberjapandata.gsi.go.jp" in images
     connections = policy.split("connect-src")[1].split(";")[0]
     assert "https://cyberjapandata.gsi.go.jp" in connections
+    assert "https://cyberjapandata2.gsi.go.jp" in connections
     # Leaflet はタイルの隙間に 1x1 の透明 GIF を data: で置く
     assert " data:" in images
     assert "'unsafe-inline'" not in policy

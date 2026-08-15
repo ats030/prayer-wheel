@@ -21,6 +21,7 @@ import time
 import subprocess
 import contextlib
 import json
+import re
 import sys
 
 from playwright.sync_api import sync_playwright

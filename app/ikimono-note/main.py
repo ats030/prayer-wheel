@@ -141,6 +141,7 @@ CONTENT_SECURITY_POLICY = "; ".join([
     # 逆にここを閉じたままだと、利用者の Ollama に接続できない
     "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com "
     "https://www.googleapis.com https://cyberjapandata.gsi.go.jp "
+    "https://cyberjapandata2.gsi.go.jp "
     "http://localhost:11434 http://127.0.0.1:11434",
     "img-src 'self' blob: data: https://tile.openstreetmap.org https://cyberjapandata.gsi.go.jp https://*.media-amazon.com https://*.ssl-images-amazon.com",
 ])
