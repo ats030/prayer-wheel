@@ -1,7 +1,8 @@
 tool: 国土地理院 20万分1土地利用図（1982〜1983年）地理院タイル
 plan_or_version: lum200k raster tiles, reviewed 2026-08-15
-decision: approved
+decision: declined
 implemented: 2026-08-15 (ats030-zk4l)
+removed: 2026-08-15 (ats030-i079)
 price:
   condition: Free public XYZ tile service; no API key or paid plan.
   source: https://maps.gsi.go.jp/development/ichiran.html
@@ -28,3 +29,6 @@ sources:
   - https://maps.gsi.go.jp/development/siyou.html
   - https://web1.gsi.go.jp/kikakuchousei/kikakuchousei40182.html
   - https://www.gsi.go.jp/LAW/2930-index.html
+
+removal:
+  reason: JAXA 2024 land cover is the adopted successor direction; retaining the 1982–83 layer would crowd the picker and invite comparison as if it described current habitat.
