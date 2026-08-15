@@ -2,7 +2,7 @@ const $=x=>document.getElementById(x),esc=v=>String(v??"").replace(/[&<>"']/g,c=
    分類は行の印のほうへ回す */
 const title=e=>e.candidates?.[0]?.common_name_ja||(e.candidates?"候補が見つかりませんでした":"調べた記録");
 const coordinateLocation=v=>/^\s*緯度\s*-?\d+(?:\.\d+)?\s*[,、]\s*経度\s*-?\d+(?:\.\d+)?\s*$/.test(String(v||""));
-function rowLocation(e){const location=e.context?.location;return coordinateLocation(location)?"位置の記録あり":location||"場所の記録なし"}
+function rowLocation(e){const location=e.context?.location;return coordinateLocation(location)?"":location||"場所の記録なし"}
 async function all(){const d=await openDb(),t=d.transaction("entries"),v=await request(t.objectStore("entries").getAll());await finished(t);d.close();return v.sort((a,b)=>b.createdAt.localeCompare(a.createdAt))}let rerunRecords=new Map();
 /* 消す前に確かめる。記録は写真ごと消え、ドライブにつないでいれば次の自動保存で
    向こうからも消える。押し間違いで戻せなくなるのは、写真を残すようにしてから
@@ -35,8 +35,8 @@ function rowMarks(e){
 async function render(){const entries=await all();$("historyList").innerHTML=entries.length?entries.map(e=>{/* 行に出すのは小さいほう (50行ぶん展開するので)。押して開くのは原寸。
    ここを同じものにしていたため、拡大すると320pxが引き伸ばされて出ていた */
 const full=recordPhotos(e)[0]||null;const small=e.listThumbnail||full;
-const image=small?URL.createObjectURL(small):"";const large=full?URL.createObjectURL(full):image;
-return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+large+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+rowMarks(e)+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div><div class="muted">'+esc(rowLocation(e))+'</div></div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>記録の内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';rerunRecords=new Map(entries.map(e=>[String(e.id),e]));/* 原寸がまだ手元にない記録 (別の端末から来たもの) は、押されたときに引く。
+const image=small?URL.createObjectURL(small):"";const large=full?URL.createObjectURL(full):image;const location=rowLocation(e);
+return '<article class="entry" data-id="'+esc(e.id)+'">'+(image?'<button class="btn photo" data-src="'+large+'"><img class="thumb" src="'+image+'" alt=""></button>':'<div class="thumb"></div>')+'<div><div class="name">'+esc(title(e))+rowMarks(e)+'</div><div class="muted">'+esc(new Date(e.createdAt).toLocaleString("ja-JP"))+' · '+esc(providerLabel(e.provider))+'</div>'+(location?'<div class="muted">'+esc(location)+'</div>':"")+'</div><div class="entry-actions">'+(e.thumbnail?'<button class="btn again" type="button">もう一度調べる</button>':"")+'<button class="btn delete one">削除</button></div>'+'<p class="again-message" hidden></p><details class="detail"><summary>記録の内容を見る</summary><p>'+esc(e.summary||"")+'</p><ol>'+(e.candidates||[]).map(c=>'<li>'+esc(commonNameLabel(c))+' <span class="muted">'+esc(c.scientific_name||"")+'</span>'+candidateLinks(c)+'</li>').join("")+'</ol></details></article>'}).join(""):'<div class="empty">まだ調べた記録はありません。</div>';rerunRecords=new Map(entries.map(e=>[String(e.id),e]));/* 原寸がまだ手元にない記録 (別の端末から来たもの) は、押されたときに引く。
    引くまでは小さいほうを出しておく — 何も出さないより読み手の役に立つ */
 document.querySelectorAll(".entry .photo").forEach(b=>b.onclick=async()=>{
   $("large").src=b.dataset.src;$("lightbox").showModal();

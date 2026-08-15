@@ -216,7 +216,7 @@ def run(base: str, do_identify: bool) -> None:
         check("手入力した地名は一覧表示に残す", page.evaluate("() => rowLocation({context: {location: \"東京都 高尾山\"}})") == "東京都 高尾山")
         record = page.locator('.entry[data-id="note-smoke"]')
         outside_detail = record.evaluate("node => { const copy = node.cloneNode(true); copy.querySelector('.detail').remove(); return copy.textContent }")
-        check("緯度経度を閉じた記録の外側に表示しない", all(value not in outside_detail for value in ["緯度", "経度", "35.6812", "139.7671"]) and "位置の記録あり" in outside_detail, outside_detail)
+        check("緯度経度を閉じた記録の外側に表示しない", all(value not in outside_detail for value in ["緯度", "経度", "35.6812", "139.7671"]) and "位置の記録あり" not in outside_detail, outside_detail)
         detail = record.locator(".detail")
         check("緯度経度は開くまで見えない", not detail.evaluate("node => node.open") and "35.6812" not in detail.inner_text() and "139.7671" not in detail.inner_text())
         detail.locator("summary").click(); page.wait_for_timeout(300)

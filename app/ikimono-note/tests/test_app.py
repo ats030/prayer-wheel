@@ -1383,7 +1383,8 @@ def test_history_coordinates_are_rendered_only_by_the_detail_builder():
     assert "coordinates" not in render_source
     assert "function coordinateDetail(e)" in history
     assert "function rowLocation(e)" in history
-    assert 'coordinateLocation(location)?"位置の記録あり"' in history
+    assert 'coordinateLocation(location)?""' in history
+    assert "(location?" in history
     assert "x.location&&!coordinateLocation(x.location)" in history
     assert history.count("coordinateDetail(e)") == 2
     assert "位置：" in history and "（おおまかな値）" in history
