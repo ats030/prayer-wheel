@@ -1,7 +1,7 @@
-tool: 国土地理院 淡色地図・地形分類（自然地形）・数値地図25000（土地条件）・陰影起伏図
-plan_or_version: pale, experimental_landformclassification1 GeoJSON, lcm25k_2012 and hillshademap tiles, reviewed 2026-08-15
+tool: 国土地理院 淡色地図・地形分類（自然地形）・数値地図25000（土地条件）・陰影起伏図・標高タイル
+plan_or_version: pale, experimental_landformclassification1 GeoJSON, lcm25k_2012, hillshademap, DEM1A/5A/5B/5C/10B PNG tiles, reviewed 2026-08-15
 decision: approved
-implemented: 2026-08-15 (ats030-71g7, ats030-1roe, ats030-6lmb)
+implemented: 2026-08-15 (ats030-71g7, ats030-1roe, ats030-6lmb, ats030-yk69)
 price:
   condition: Free public XYZ tile service; no API key, account, or paid plan.
   source: https://maps.gsi.go.jp/development/ichiran.html
@@ -16,10 +16,12 @@ attribution:
   natural_landform: 国土地理院（地形分類・自然地形）
   land_conditions: 国土地理院（数値地図25000・土地条件）
   hillshade: 国土地理院（陰影起伏図）
+  elevation: 国土地理院（標高タイル）
 restrictions:
   - 土地条件の提供ズームは10〜16。選択時に10未満なら10へ移動し、16超ではZL16を拡大表示する。詳細タイルの空白は提供実験中の地形分類（自然地形）のZL5〜13を下層に描画して補完する。両方にデータがない地点は最下層の淡色地図で地理的文脈だけを残し、土地分類として扱わない。
   - 地形分類（自然地形）は提供実験中で、URL・構成・内容が変わる可能性がある。利用者が表示中の範囲だけを取得し、取得失敗時は淡色地図へ安全にフォールバックする。
   - 陰影起伏図の提供ズームは2〜16、日本全国。16超ではZL16を拡大表示する。
+  - 中央地点の標高は更新停止済みのテキスト形式ではなくPNG形式を使う。国土地理院の標高算出例と同じくDEM1A、DEM5A、DEM5B、DEM5C、DEM10Bの順で有効値を探し、RGB値を仕様どおり0.01m単位へ変換する。
   - タイルを一括取得・再配布せず、利用者が地図を開いて該当レイヤを選択したときだけ取得する。
   - 公開タイルサービスに可用性保証はない。取得失敗時はアプリ本体と記録データへ影響させない。
 privacy:
@@ -33,5 +35,7 @@ sources:
   - https://github.com/gsi-cyberjapan/experimental_landformclassification
   - https://www.gsi.go.jp/bousaichiri/hillshademap.html
   - https://maps.gsi.go.jp/development/siyou.html
+  - https://maps.gsi.go.jp/development/demtile.html
+  - https://maps.gsi.go.jp/development/elevation.html
   - https://web1.gsi.go.jp/kikakuchousei/kikakuchousei40182.html
   - https://www.gsi.go.jp/LAW/2930-qa.html
