@@ -845,11 +845,15 @@ def test_dashboard_map_is_never_loaded_without_an_explicit_press():
     map_style = client.get("/assets/dashboard.css").text
     assert ".map-cursor::before{left:50%" in map_style and "transform:translateX(-50%)" in map_style
     assert ".map-cursor::after{left:-8px;top:50%" in map_style and "transform:translateY(-50%)" in map_style
-    assert "function centerReadout(map,activeName)" in page
+    assert "function centerReadout(map)" in page
+    for value_id in ["mapLandform", "mapElevation", "mapMicroterrain", "mapLandUse"]:
+        assert f'id="{value_id}"' in page
+    assert "meshinfo.geojson" in page
+    assert "api/map/land-use" in page
     assert "instance.on(\"moveend\",updateReadout)" in page
     assert "https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php" in page
     assert 'outtype:"JSON"' in page
-    assert 'elevation.toFixed(1)+" m"' in page
+    assert 'value.toFixed(1)+" m"' in page
     assert "緯度" not in page.split('id="mapReadout"')[1].split("</dl>")[0]
     assert "経度" not in page.split('id="mapReadout"')[1].split("</dl>")[0]
     assert "source.background?[MAP_LAYERS[source.background]]" in page

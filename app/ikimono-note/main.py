@@ -7,12 +7,16 @@
 
 import asyncio
 from collections import defaultdict, deque
+from io import BytesIO
+import math
 from pathlib import Path
 import os
 import threading
 import time
 
 import secrets
+
+import httpx
 
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -21,6 +25,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.staticfiles import StaticFiles
+from PIL import Image
 
 import auth
 import config_store
@@ -140,7 +145,7 @@ CONTENT_SECURITY_POLICY = "; ".join([
     # localhost はその端末の外へ出ないので、ここを開けても写真の行き先は増えない。
     # 逆にここを閉じたままだと、利用者の Ollama に接続できない
     "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com "
-    "https://www.googleapis.com https://cyberjapandata.gsi.go.jp "
+    "https://www.googleapis.com https://cyberjapandata.gsi.go.jp https://www.j-shis.bosai.go.jp "
     "https://cyberjapandata2.gsi.go.jp "
     "http://localhost:11434 http://127.0.0.1:11434",
     "img-src 'self' blob: data: https://tile.openstreetmap.org https://cyberjapandata.gsi.go.jp https://www.j-shis.bosai.go.jp https://nlftp.mlit.go.jp https://*.media-amazon.com https://*.ssl-images-amazon.com",
@@ -192,6 +197,38 @@ def history() -> HTMLResponse:
 def dashboard() -> HTMLResponse:
     return _page("dashboard.html")
 
+
+LAND_USE_NAMES = {
+    (255, 255, 0): "田", (255, 204, 153): "その他の農用地",
+    (0, 170, 0): "森林", (255, 153, 0): "荒地", (255, 0, 0): "建物用地",
+    (139, 140, 139): "道路", (180, 180, 180): "鉄道",
+    (199, 70, 14): "その他の用地", (0, 0, 255): "河川地・湖沼",
+    (255, 255, 153): "海浜", (0, 204, 255): "海水域", (0, 255, 0): "ゴルフ場",
+}
+
+def land_use_tile_position(latitude: float, longitude: float, zoom: int = 16) -> tuple[int, int, int, int]:
+    scale = 2 ** zoom
+    x = (longitude + 180) / 360 * scale
+    sin_lat = math.sin(math.radians(latitude))
+    y = (1 - math.log((1 + sin_lat) / (1 - sin_lat)) / (2 * math.pi)) / 2 * scale
+    return int(x), int(y), int((x % 1) * 256), int((y % 1) * 256)
+
+@app.get("/api/map/land-use")
+async def land_use_at(latitude: float, longitude: float) -> JSONResponse:
+    if not (-85 <= latitude <= 85 and -180 <= longitude <= 180):
+        raise HTTPException(status_code=400, detail="地図の位置が範囲外です")
+    x, y, px, py = land_use_tile_position(latitude, longitude)
+    url = f"https://nlftp.mlit.go.jp/ksj/tile/L03-b/L03-b-2016/16/{x}/{y}.png"
+    try:
+        async with httpx.AsyncClient(timeout=6, follow_redirects=True) as client:
+            response = await client.get(url)
+            if response.status_code == 404:
+                return JSONResponse({"name": None})
+            response.raise_for_status()
+        pixel = Image.open(BytesIO(response.content)).convert("RGBA").getpixel((px, py))
+    except (httpx.HTTPError, OSError):
+        raise HTTPException(status_code=502, detail="土地利用を取得できませんでした")
+    return JSONResponse({"name": LAND_USE_NAMES.get(pixel[:3]) if pixel[3] else None})
 
 @app.get("/privacy", include_in_schema=False)
 def privacy() -> HTMLResponse:
