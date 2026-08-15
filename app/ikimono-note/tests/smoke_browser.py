@@ -201,8 +201,8 @@ def run(base: str, do_identify: bool) -> None:
         check("ダッシュボードで地図を表示できる", page.locator("#historyMap .leaflet-marker-icon").count() == 1)
         layer_labels = page.locator(".leaflet-control-layers label")
         labels = layer_labels.all_inner_texts()
-        check("観察環境向けの4レイヤだけを表示する", layer_labels.count() == 4 and all(any(name in label for label in labels) for name in ["地図", "写真", "土地条件", "標高・起伏"]), str(labels))
-        for layer_name, credit in [("土地条件", "数値地図25000・土地条件"), ("標高・起伏", "陰影起伏図")]:
+        check("観察環境向けの6レイヤを表示する", layer_labels.count() == 6 and all(any(name in label for label in labels) for name in ["地図", "写真", "土地条件", "標高・起伏", "全国微地形", "土地利用"]), str(labels))
+        for layer_name, credit in [("土地条件", "数値地図25000・土地条件"), ("標高・起伏", "陰影起伏図"), ("全国微地形", "J-SHIS"), ("土地利用", "国土数値情報")]:
             layer = page.locator(".leaflet-control-layers label", has_text=layer_name)
             layer.click(); page.wait_for_timeout(500)
             check(layer_name+"レイヤへ切り替えられる", layer.locator('input[type="radio"]').is_checked() and credit in page.locator(".leaflet-control-attribution").inner_text())
@@ -220,12 +220,17 @@ def run(base: str, do_identify: bool) -> None:
                 detail_z = page.locator("#historyMap .leaflet-landDetail-pane").evaluate("node => getComputedStyle(node).zIndex")
                 broad_z = page.locator("#historyMap .leaflet-landform-pane").evaluate("node => getComputedStyle(node).zIndex")
                 check("詳細土地条件を広域版より上に表示する", int(detail_z) > int(broad_z), str((broad_z, detail_z)))
+            if layer_name == "全国微地形":
+                page.wait_for_function("() => performance.getEntriesByType('resource').some(entry => entry.name.includes('/map/wms/sstrct/V4'))")
+                check("全国微地形レイヤがJ-SHIS WMSを読み込む", page.locator('#historyMap img[src*="/map/wms/sstrct/V4"]').count() > 0)
+            if layer_name == "土地利用":
+                check("土地利用レイヤが国土数値情報タイルを読み込む", page.locator('#historyMap img[src*="/ksj/tile/L03-b/L03-b-2016/"]').count() > 0)
             if layer_name == "標高・起伏":
                 page.wait_for_function("() => document.getElementById(\'mapValue\').textContent.endsWith(\' m\')")
                 elevation_text = page.locator("#mapValue").inner_text()
                 check("中央地点の標高を0.1m単位で表示する", page.locator("#mapValueLabel").inner_text() == "中心の標高" and re.fullmatch(r"-?\d+\.\d m", elevation_text) is not None, elevation_text)
                 check("標高・起伏でも背景地図が表示される", page.locator('#historyMap img[src*="tile.openstreetmap.org"]').count() > 0)
-        check("標高・起伏レイヤが陰影タイルを読み込む", page.locator('#historyMap img[src*="/hillshademap/"]').count() > 0)
+        check("標高・起伏レイヤが陰影タイルを読み込む", page.evaluate("() => performance.getEntriesByType('resource').some(entry => entry.name.includes('/hillshademap/'))"))
         page.set_viewport_size({"width": 390, "height": 844})
         summary = page.locator(".summary-grid").bounding_box()
         breakdown_box = page.locator(".breakdown-summary").bounding_box()

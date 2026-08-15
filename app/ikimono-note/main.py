@@ -143,7 +143,7 @@ CONTENT_SECURITY_POLICY = "; ".join([
     "https://www.googleapis.com https://cyberjapandata.gsi.go.jp "
     "https://cyberjapandata2.gsi.go.jp "
     "http://localhost:11434 http://127.0.0.1:11434",
-    "img-src 'self' blob: data: https://tile.openstreetmap.org https://cyberjapandata.gsi.go.jp https://*.media-amazon.com https://*.ssl-images-amazon.com",
+    "img-src 'self' blob: data: https://tile.openstreetmap.org https://cyberjapandata.gsi.go.jp https://www.j-shis.bosai.go.jp https://nlftp.mlit.go.jp https://*.media-amazon.com https://*.ssl-images-amazon.com",
 ])
 
 
