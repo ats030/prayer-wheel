@@ -835,6 +835,9 @@ def test_dashboard_map_is_never_loaded_without_an_explicit_press():
     assert "function landformLayer(source)" in page and "L.geoJSON(data" in page
     assert 'pane:"landformPane"' in page and 'pane:"landDetailPane"' in page
     assert 'class="map-cursor"' in page and 'id="mapReadout"' in page
+    map_style = client.get("/assets/dashboard.css").text
+    assert ".map-cursor::before{left:50%" in map_style and "transform:translateX(-50%)" in map_style
+    assert ".map-cursor::after{left:-8px;top:50%" in map_style and "transform:translateY(-50%)" in map_style
     assert "function centerReadout(map,activeName)" in page
     assert "instance.on(\"moveend\",updateReadout)" in page
     assert "dem1a_png" in page and "dem5a_png" in page and "dem5b_png" in page and "dem5c_png" in page and "dem_png" in page
