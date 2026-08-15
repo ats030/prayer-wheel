@@ -2806,6 +2806,7 @@ def test_the_entrance_says_what_the_app_is_before_asking_to_sign_in():
     assert "はじめるのに必要なもの" in page
     assert page.index("利用するAIの設定") < page.index('id="google-login"')
     assert "OllamaにはAPIキーは不要です" in page
+    assert "写真を、写真を" not in page
     assert "Gemini には無料枠があります" in page
     # 検索や共有で出たときに、何のページか分かるようにする
     assert '<meta name="description"' in page
