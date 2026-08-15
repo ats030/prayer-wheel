@@ -3038,6 +3038,7 @@ def test_the_browser_may_reach_a_local_ollama():
     """localhost はその端末の外へ出ない。ここを閉じたままだと接続できない。"""
     csp = client.get("/login").headers.get("content-security-policy", "")
     assert "http://localhost:11434" in csp and "http://127.0.0.1:11434" in csp
+    assert "http://192.168.11.13:11434" in csp
     # 公開版でも選べる。以前は隠しており、手元で動かしている人まで選択肢を失っていた
     source = Path("main.py").read_text(encoding="utf-8")
     assert 'show_local = "1"' in source

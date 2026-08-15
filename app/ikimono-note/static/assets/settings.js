@@ -103,9 +103,11 @@ function setupPublicSettings(data){
      Ollama は無く、運営者は何も管理していなかった */
   {
     const stored=JSON.parse(localStorage.getItem("species-public-settings")||"{}");
-    $("local-llm-url").value=stored.localUrl||"http://localhost:11434";
+    const savedLocal=String(stored.localUrl||"");
+    const oldLocal=["http://localhost:11434","http://127.0.0.1:11434"].includes(savedLocal.endsWith("/")?savedLocal.slice(0,-1):savedLocal);
+    $("local-llm-url").value=!stored.localUrl||oldLocal?"http://192.168.11.13:11434":stored.localUrl;
     $("local-llm-url").disabled=false;
-    $("local-llm-url").placeholder="http://localhost:11434";
+    $("local-llm-url").placeholder="http://192.168.11.13:11434";
   }
   for(const name of ["openai","anthropic","gemini","plantnet"]){
     (el=>{const has=Boolean(readApiKey(name));el.textContent=has?(keepingKeys()?"この端末に登録済み":"このタブに登録済み"):"APIキーが未登録です";el.dataset.missing=has?"0":"1"})($("configured-"+name));
@@ -124,7 +126,7 @@ function setupPublicSettings(data){
     for(const name of ["local","openai","anthropic","gemini"])models[name]=$("model-"+name).value;
     localStorage.setItem("species-public-settings",JSON.stringify({
       provider:selectedProvider,models,
-      localUrl:$("local-llm-url").value.trim()||"http://localhost:11434"}));
+      localUrl:$("local-llm-url").value.trim()||"http://192.168.11.13:11434"}));
     for(const name of ["openai","anthropic","gemini","plantnet"]){
       const input=$("key-"+name);
       if(deleteKeys.has(name))clearApiKey(name);

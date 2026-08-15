@@ -349,7 +349,7 @@ render=function(data){
  * つなぐ形は SSRF の入り口になる。写真はこの端末から出さず、サーバーには
  * 「何を訊くか」と「答えの仕上げ」だけを借りる。
  */
-const LOCAL_OLLAMA_DEFAULT = "http://localhost:11434";
+const LOCAL_OLLAMA_DEFAULT = "http://192.168.11.13:11434";
 
 function ollamaFetch(url, options={}) {
   return fetch(url, {...options, targetAddressSpace: "local"});

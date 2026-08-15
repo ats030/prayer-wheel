@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import json
+import ipaddress
 import os
 import signal
 import sys
+import threading
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -54,6 +56,16 @@ TARGET_BASE_URL = env("OLLAMA_PROXY_TARGET_URL") or (
 )
 TARGET_BASE_URL = TARGET_BASE_URL.rstrip("/")
 REQUEST_TIMEOUT = int(env("OLLAMA_PROXY_TIMEOUT", "600"))
+ALLOWED_NETWORKS = tuple(
+    ipaddress.ip_network(value.strip())
+    for value in env("OLLAMA_PROXY_ALLOWED_NETWORKS", "127.0.0.0/8").split(",")
+    if value.strip()
+)
+ALLOWED_ORIGINS = {
+    value.strip()
+    for value in env("OLLAMA_PROXY_ALLOWED_ORIGINS").split(",")
+    if value.strip()
+}
 
 
 def require_config() -> None:
@@ -86,9 +98,40 @@ class ProxyHandler(BaseHTTPRequestHandler):
         self.forward()
 
     def do_OPTIONS(self) -> None:  # noqa: N802
-        self.forward()
+        if not self.request_allowed():
+            return
+        origin = self.headers.get("Origin", "")
+        self.send_response(204)
+        if origin:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Private-Network", "true")
+        self.send_header("Access-Control-Max-Age", "600")
+        self.end_headers()
+
+    def request_allowed(self) -> bool:
+        client = ipaddress.ip_address(self.client_address[0])
+        origin = self.headers.get("Origin", "")
+        if not any(client in network for network in ALLOWED_NETWORKS):
+            self.send_error(403, "Client network is not allowed")
+            return False
+        if origin and origin not in ALLOWED_ORIGINS:
+            self.send_error(403, "Origin is not allowed")
+            return False
+        if not client.is_loopback and not origin:
+            self.send_error(403, "Browser origin is required from LAN")
+            return False
+        browser_routes = {("GET", "/api/tags"), ("POST", "/api/show"), ("POST", "/api/chat"), ("OPTIONS", self.path)}
+        if not client.is_loopback and (self.command, self.path) not in browser_routes:
+            self.send_error(403, "Route is not allowed from LAN")
+            return False
+        return True
 
     def forward(self) -> None:
+        if not self.request_allowed():
+            return
         target_url = TARGET_BASE_URL + self.path
         request = urllib.request.Request(
             target_url,
@@ -156,7 +199,7 @@ def main() -> None:
     server = ThreadingHTTPServer((LISTEN_HOST, LISTEN_PORT), ProxyHandler)
 
     def shutdown(_signum: int, _frame: object) -> None:
-        server.shutdown()
+        threading.Thread(target=server.shutdown, daemon=True).start()
 
     signal.signal(signal.SIGTERM, shutdown)
     signal.signal(signal.SIGINT, shutdown)
