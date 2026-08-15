@@ -30,7 +30,7 @@ if(window.speciesTrial&&!readApiKey(window.speciesTrial.provider)&&!readApiKey(p
   provider=window.speciesTrial.provider;providerName=providerLabel(provider);model=window.speciesTrial.model;
 }
 window.speciesRuntimeModel=model;
-  showTrialNote(data);plantnetReady=Boolean(data.api_key_configured.plantnet||(window.speciesPublicMode&&readApiKey("plantnet")));affiliate=data.affiliate;document.getElementById("affiliateDisclosure").classList.toggle("hidden",!affiliate.enabled);document.getElementById("plantnetOption").classList.toggle("hidden",!plantnetReady);$("providerStatus").textContent=providerName+" · "+model+(provider==="local"?" · 写真は外部送信しません":" · 写真は保存しません")}catch(e){showStatus("設定を読み込めませんでした。",true)}}
+  showTrialNote(data);plantnetReady=Boolean(data.api_key_configured.plantnet||(window.speciesPublicMode&&readApiKey("plantnet")));affiliate=data.affiliate;document.getElementById("affiliateDisclosure").classList.toggle("hidden",!affiliate.enabled);document.getElementById("plantnetOption").classList.toggle("hidden",!plantnetReady);$("providerStatus").textContent=providerName+" · "+model+(provider==="local"?" · LAN内のOllamaへ送ります":" · 写真は保存しません")}catch(e){showStatus("設定を読み込めませんでした。",true)}}
 const MAX_PHOTOS=3;let previewUrls=[];
 function renderPreviews(){previewUrls.forEach(URL.revokeObjectURL);previewUrls=selected.map(file=>URL.createObjectURL(file));document.body.classList.add("has-selection");/* 枚数で列を変える。3列固定だと、1枚のときも横幅の3分の1しか使わない。 携帯では110pxほどになり、ピントや被写体の位置を確かめられない */previews.className="previews count-"+selected.length;previews.innerHTML=previewUrls.map((url,index)=>'<div class="preview-item"><img class="preview" src="'+url+'" alt="調べる写真 '+(index+1)+'"><button class="btn preview-remove" type="button" data-index="'+index+'">この写真を外す</button></div>').join("");previews.querySelectorAll(".preview-remove").forEach(button=>button.onclick=()=>removeSelectedPhoto(Number(button.dataset.index)));$("previewEmpty").classList.add("hidden");identify.classList.remove("hidden");$("captureTitle").textContent=selected.length+"枚の写真を選択中"}
 function removeSelectedPhoto(index){if(selected.length<=1){showStatus("調べる写真は1枚以上必要です。",true);return}selected.splice(index,1);renderPreviews();showStatus("写真を1枚外して"+selected.length+"枚になりました。")}
@@ -346,7 +346,7 @@ render=function(data){
  *
  * 公開版のサーバーに Ollama は無く、利用者の localhost にも届かない。かといって
  * 利用者に Ollama をインターネットへ晒させるのは筋が悪く、サーバーが任意のURLへ
- * つなぐ形は SSRF の入り口になる。写真はこの端末から出さず、サーバーには
+ * つなぐ形は SSRF の入り口になる。写真はブラウザで再エンコードしてからLAN内のOllamaへ直接送り、サーバーには
  * 「何を訊くか」と「答えの仕上げ」だけを借りる。
  */
 const LOCAL_OLLAMA_DEFAULT = "http://192.168.11.13:11434";
@@ -387,7 +387,10 @@ async function identifyWithLocalOllama(files, context) {
   const ask = await asked.json();
 
   const images = [];
-  for (const file of files) images.push(await fileToBase64(file));
+  for (const file of files) {
+    const cleaned = await shrinkForHistory(file);
+    images.push(await fileToBase64(cleaned || file));
+  }
 
   let content;
   try {

@@ -340,7 +340,7 @@ const addAffiliateLinksOnce=addAffiliateLinks;let affiliateLinksAdded=false;addA
   }
   el.hidden=false;
   const when=new Date(state.at).toLocaleString("ja-JP");
-  if(state.ok){el.className="save-state ok";el.textContent=`Google ドライブにこの端末に保存済み（${when}・${state.detail}）`}
+  if(state.ok){el.className="save-state ok";el.textContent=`Google ドライブへ保存済み（${when}・${state.detail}）`}
   else{el.className="save-state warn";
     el.innerHTML=`Google ドライブへ保存できていません（${when}・${esc(state.detail)}）。<a href="/settings">設定</a>から確認してください。`}
 })();

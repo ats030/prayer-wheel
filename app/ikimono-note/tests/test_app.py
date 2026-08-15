@@ -551,6 +551,9 @@ def test_settings_page_allows_custom_local_llm_url():
     assert source.count('<details class="panel') >= 2
     assert 'id="save-button"' in source
     assert 'class="message" id="message" aria-live="polite"' in source
+    assert source.count("写真から位置情報などを取り除き") == 1
+    assert "この画面にない項目（Ollama" not in source
+
 
 
 def test_gemini_provider_dispatches_without_exposing_key(monkeypatch):
@@ -689,6 +692,9 @@ def test_legal_pages_disclose_data_handling_and_contact():
     assert terms.status_code == 200
     assert "APIキーはブラウザ内（localStorage または sessionStorage）に保持し" in privacy.text
     assert "OpenAI、Anthropic、Google GeminiまたはPl@ntNet" in privacy.text
+    assert "同じLAN内のOllama（192.168.11.13）" in privacy.text
+    assert "Google ドライブへの保存" in privacy.text
+    assert "1つのファイルへ書き出せます" not in privacy.text
     assert "Google Cloud Run（東京リージョン）" in privacy.text   # 公開の入口。変わったらここも変える
     assert "https://lit.link/ats030_main" in privacy.text
     assert "運営者プロフィール" in privacy.text
@@ -1884,7 +1890,7 @@ def test_the_long_notes_are_folded_but_kept():
     page = client.get("/settings").text
     security = page.split('aria-labelledby="security-heading"')[1].split("</section>")[0]
     assert "<details" in security, "保存と安全性が畳まれていない"
-    assert security.count("<li>") >= 5, "中身が減っている"
+    assert security.count("<li") >= 5, "中身が減っている"
 
 
 def test_the_browser_can_keep_the_keys_for_us():
@@ -2798,7 +2804,8 @@ def test_the_entrance_says_what_the_app_is_before_asking_to_sign_in():
     assert "できること" in page
     # 要るものを、ログインボタンより前に出す
     assert "はじめるのに必要なもの" in page
-    assert page.index("ご自身の AI の APIキー") < page.index('id="google-login"')
+    assert page.index("利用するAIの設定") < page.index('id="google-login"')
+    assert "OllamaにはAPIキーは不要です" in page
     assert "Gemini には無料枠があります" in page
     # 検索や共有で出たときに、何のページか分かるようにする
     assert '<meta name="description"' in page
@@ -3011,6 +3018,10 @@ def test_a_visitor_can_use_their_own_ollama_without_exposing_it():
     assert done.json()["provider"] == "local"
     # 読めない答えは 422。500 にすると、利用者の側の問題が障害に見える
     assert client.post("/api/local/result", json={"text": "ただの文章"}).status_code == 422
+    index = client.get("/assets/index.js").text
+    assert "const cleaned = await shrinkForHistory(file);" in index
+    assert "images.push(await fileToBase64(cleaned || file));" in index
+    assert "LAN内のOllamaへ送ります" in index
 
 
 def test_the_finishing_touches_live_in_one_place():
