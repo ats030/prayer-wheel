@@ -544,6 +544,9 @@ def test_settings_page_allows_custom_local_llm_url():
     assert "Ollama URLを入力してください" in settings_js
     assert "Ollama URLの形式を確認してください" in settings_js
     assert "ローカルネットワークへのアクセス" in settings_js
+    assert "設定済みの別端末用URL" not in source
+    assert "192.168.11.13" not in source
+    assert "Ollama端末のIPアドレス" in source
     assert 'local_llm:{url:' in source
     assert 'id="active-provider"' in source
     # 任意機能の2つ（Pl@ntNet と広告）。持ち出しのクラウド設定も同じ見た目だが別物
@@ -692,7 +695,8 @@ def test_legal_pages_disclose_data_handling_and_contact():
     assert terms.status_code == 200
     assert "APIキーはブラウザ内（localStorage または sessionStorage）に保持し" in privacy.text
     assert "OpenAI、Anthropic、Google GeminiまたはPl@ntNet" in privacy.text
-    assert "同じLAN内のOllama（192.168.11.13）" in privacy.text
+    assert "利用者が指定した同じLAN内のOllama" in privacy.text
+    assert "192.168.11.13" not in privacy.text
     assert "Google ドライブへの保存" in privacy.text
     assert "1つのファイルへ書き出せます" not in privacy.text
     assert "Google Cloud Run（東京リージョン）" in privacy.text   # 公開の入口。変わったらここも変える
