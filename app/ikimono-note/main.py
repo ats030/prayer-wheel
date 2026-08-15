@@ -148,7 +148,7 @@ CONTENT_SECURITY_POLICY = "; ".join([
     "https://www.googleapis.com https://cyberjapandata.gsi.go.jp https://www.j-shis.bosai.go.jp "
     "https://cyberjapandata2.gsi.go.jp "
     "http://localhost:11434 http://127.0.0.1:11434",
-    "img-src 'self' blob: data: https://tile.openstreetmap.org https://cyberjapandata.gsi.go.jp https://www.j-shis.bosai.go.jp https://nlftp.mlit.go.jp https://*.media-amazon.com https://*.ssl-images-amazon.com",
+    "img-src 'self' blob: data: https://tile.openstreetmap.org https://cyberjapandata.gsi.go.jp https://www.j-shis.bosai.go.jp https://nlftp.mlit.go.jp https://arc-gis.biodic.go.jp https://*.media-amazon.com https://*.ssl-images-amazon.com",
 ])
 
 
@@ -229,6 +229,35 @@ async def land_use_at(latitude: float, longitude: float) -> JSONResponse:
     except (httpx.HTTPError, OSError):
         raise HTTPException(status_code=502, detail="土地利用を取得できませんでした")
     return JSONResponse({"name": LAND_USE_NAMES.get(pixel[:3]) if pixel[3] else None})
+
+@app.get("/api/map/vegetation")
+async def vegetation_at(latitude: float, longitude: float) -> JSONResponse:
+    if not (-85 <= latitude <= 85 and -180 <= longitude <= 180):
+        raise HTTPException(status_code=400, detail="地図の位置が範囲外です")
+    margin = 0.01
+    params = {
+        "geometry": f"{longitude},{latitude}", "geometryType": "esriGeometryPoint",
+        "sr": "4326", "layers": "all", "tolerance": "1",
+        "mapExtent": f"{longitude-margin},{latitude-margin},{longitude+margin},{latitude+margin}",
+        "imageDisplay": "1000,1000,96", "returnGeometry": "false", "f": "json",
+    }
+    url = "https://arc-gis.biodic.go.jp/arcgis/rest/services/webgis/vg2024/MapServer/identify"
+    try:
+        async with httpx.AsyncClient(timeout=8, follow_redirects=True) as client:
+            response = await client.get(url, params=params)
+            response.raise_for_status()
+            payload = response.json()
+    except (httpx.HTTPError, ValueError):
+        raise HTTPException(status_code=502, detail="植生を取得できませんでした")
+    results = payload.get("results") or []
+    attributes = results[0].get("attributes", {}) if results else {}
+    return JSONResponse({
+        "name": attributes.get("凡例名"),
+        "naturalness": attributes.get("植生自然度"),
+        "naturalness_name": attributes.get("植生自然度区分"),
+        "category": attributes.get("植生区分"),
+        "year": attributes.get("作成年度"),
+    })
 
 @app.get("/privacy", include_in_schema=False)
 def privacy() -> HTMLResponse:

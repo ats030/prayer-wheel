@@ -200,11 +200,11 @@ def run(base: str, do_identify: bool) -> None:
         page.click("#showMap"); page.wait_for_selector("#historyMap.leaflet-container")
         check("ダッシュボードで地図を表示できる", page.locator("#historyMap .leaflet-marker-icon").count() == 1)
         page.wait_for_function("() => [\'mapLandform\',\'mapElevation\',\'mapMicroterrain\',\'mapLandUse\'].every(id => ![\'\',\'調べています…\'].includes(document.getElementById(id).textContent))")
-        check("中央地点の4種の土地情報を同時表示する", all(page.locator("#"+value_id).inner_text() not in ["", "調べています…"] for value_id in ["mapLandform", "mapElevation", "mapMicroterrain", "mapLandUse"]))
+        check("中央地点の5種の土地情報を同時表示する", all(page.locator("#"+value_id).inner_text() not in ["", "調べています…"] for value_id in ["mapLandform", "mapElevation", "mapMicroterrain", "mapLandUse", "mapVegetation"]))
         layer_labels = page.locator(".leaflet-control-layers label")
         labels = layer_labels.all_inner_texts()
-        check("観察環境向けの6レイヤを表示する", layer_labels.count() == 6 and all(any(name in label for label in labels) for name in ["地図", "写真", "土地条件", "標高・起伏", "全国微地形", "土地利用"]), str(labels))
-        for layer_name, credit in [("土地条件", "数値地図25000・土地条件"), ("標高・起伏", "陰影起伏図"), ("全国微地形", "J-SHIS"), ("土地利用", "国土数値情報")]:
+        check("観察環境向けの7レイヤを表示する", layer_labels.count() == 7 and all(any(name in label for label in labels) for name in ["地図", "写真", "土地条件", "標高・起伏", "全国微地形", "土地利用", "植生"]), str(labels))
+        for layer_name, credit in [("土地条件", "数値地図25000・土地条件"), ("標高・起伏", "陰影起伏図"), ("全国微地形", "J-SHIS"), ("土地利用", "国土数値情報"), ("植生", "現存植生図2024")]:
             layer = page.locator(".leaflet-control-layers label", has_text=layer_name)
             layer.click(); page.wait_for_timeout(500)
             check(layer_name+"レイヤへ切り替えられる", layer.locator('input[type="radio"]').is_checked() and credit in page.locator(".leaflet-control-attribution").inner_text())
@@ -225,6 +225,8 @@ def run(base: str, do_identify: bool) -> None:
             if layer_name == "全国微地形":
                 page.wait_for_function("() => performance.getEntriesByType('resource').some(entry => entry.name.includes('/map/wms/sstrct/V4'))")
                 check("全国微地形レイヤがJ-SHIS WMSを読み込む", page.locator('#historyMap img[src*="/map/wms/sstrct/V4"]').count() > 0)
+            if layer_name == "植生":
+                check("植生レイヤが環境省の現存植生図2024を読み込む", page.locator('#historyMap img[src*="/webgis/vg2024/MapServer/tile/"]').count() > 0)
             if layer_name == "土地利用":
                 check("土地利用レイヤが国土数値情報タイルを読み込む", page.locator('#historyMap img[src*="/ksj/tile/L03-b/L03-b-2016/"]').count() > 0)
             if layer_name == "標高・起伏":
