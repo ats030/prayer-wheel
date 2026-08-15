@@ -1,0 +1,80 @@
+{
+  "summary": {
+    "label": "gemini-loc-japan",
+    "repeats": 3,
+    "count": 100,
+    "metrics": {
+      "top1_percent": {
+        "mean": 30.7,
+        "min": 29.0,
+        "max": 32.0,
+        "values": [
+          29.0,
+          31.0,
+          32.0
+        ]
+      },
+      "top3_percent": {
+        "mean": 38.0,
+        "min": 34.0,
+        "max": 40.0,
+        "values": [
+          34.0,
+          40.0,
+          40.0
+        ]
+      },
+      "genus_percent": {
+        "mean": 51.3,
+        "min": 45.0,
+        "max": 56.0,
+        "values": [
+          45.0,
+          53.0,
+          56.0
+        ]
+      },
+      "family_or_above_percent": {
+        "mean": 90.0,
+        "min": 87.0,
+        "max": 93.0,
+        "values": [
+          87.0,
+          90.0,
+          93.0
+        ]
+      },
+      "rejected_percent": {
+        "mean": 10.0,
+        "min": 7.0,
+        "max": 13.0,
+        "values": [
+          13.0,
+          10.0,
+          7.0
+        ]
+      },
+      "median_seconds": {
+        "mean": 10.0,
+        "min": 8.7,
+        "max": 11.5,
+        "values": [
+          11.5,
+          9.9,
+          8.7
+        ]
+      }
+    },
+    "top1_percent": 30.7,
+    "top3_percent": 38.0,
+    "genus_percent": 51.3,
+    "family_or_above_percent": 90.0,
+    "rejected_percent": 10.0,
+    "median_seconds": 10.0
+  },
+  "runs": [
+    "gemini-loc-japan-r1",
+    "gemini-loc-japan-r2",
+    "gemini-loc-japan-r3"
+  ]
+}
