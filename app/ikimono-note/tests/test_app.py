@@ -1382,6 +1382,9 @@ def test_history_coordinates_are_rendered_only_by_the_detail_builder():
     render_source = history.split("async function render()", 1)[1].split("function detailPhotos", 1)[0]
     assert "coordinates" not in render_source
     assert "function coordinateDetail(e)" in history
+    assert "function rowLocation(e)" in history
+    assert 'coordinateLocation(location)?"位置の記録あり"' in history
+    assert "x.location&&!coordinateLocation(x.location)" in history
     assert history.count("coordinateDetail(e)") == 2
     assert "位置：" in history and "（おおまかな値）" in history
 

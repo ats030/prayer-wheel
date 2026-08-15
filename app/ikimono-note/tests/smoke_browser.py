@@ -163,7 +163,8 @@ def run(base: str, do_identify: bool) -> None:
         # 利用者自身の観察メモ。AIの候補とは別に保存され、再読込でも残る
         page.goto(base + "/history"); page.wait_for_load_state("networkidle")
         note_record = {**json.loads(json.dumps(SAMPLE)), "id": "note-smoke",
-                       "createdAt": "2026-08-14T12:00:00Z", "context": {},
+                       "createdAt": "2026-08-14T12:00:00Z",
+                       "context": {"location": "緯度 35.6812, 経度 139.7671"},
                        "coordinates": {"latitude": 35.6812, "longitude": 139.7671},
                        "provider": "ollama", "model": "smoke"}
         page.evaluate("""record => new Promise((resolve, reject) => {
@@ -212,9 +213,10 @@ def run(base: str, do_identify: bool) -> None:
         page.goto(base + "/history"); page.wait_for_load_state("networkidle")
         check("地図を記録ページから移動した", page.locator("#historyMap").count() == 0)
         page.reload(); page.wait_for_load_state("networkidle"); page.wait_for_timeout(500)
+        check("手入力した地名は一覧表示に残す", page.evaluate("() => rowLocation({context: {location: \"東京都 高尾山\"}})") == "東京都 高尾山")
         record = page.locator('.entry[data-id="note-smoke"]')
         outside_detail = record.evaluate("node => { const copy = node.cloneNode(true); copy.querySelector('.detail').remove(); return copy.textContent }")
-        check("緯度経度を閉じた記録の外側に表示しない", "35.6812" not in outside_detail and "139.7671" not in outside_detail, outside_detail)
+        check("緯度経度を閉じた記録の外側に表示しない", all(value not in outside_detail for value in ["緯度", "経度", "35.6812", "139.7671"]) and "位置の記録あり" in outside_detail, outside_detail)
         detail = record.locator(".detail")
         check("緯度経度は開くまで見えない", not detail.evaluate("node => node.open") and "35.6812" not in detail.inner_text() and "139.7671" not in detail.inner_text())
         detail.locator("summary").click(); page.wait_for_timeout(300)
