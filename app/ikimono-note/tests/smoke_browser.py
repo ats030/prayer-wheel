@@ -211,7 +211,7 @@ def run(base: str, do_identify: bool) -> None:
             if layer_name == "土地条件":
                 land_tiles = page.locator('#historyMap img[src*="/lcm25k_2012/"]').evaluate_all("nodes => nodes.map(node => node.src)")
                 check("土地条件の未整備地点を淡色地図で補う", page.locator('#historyMap img[src*="/pale/"]').count() > 0)
-                page.wait_for_function("() => performance.getEntriesByType(\'resource\').some(entry => entry.name.includes(\'/experimental_landformclassification1/13/\'))")
+                page.wait_for_function("() => performance.getEntriesByType(\'resource\').some(entry => entry.name.includes(\'/experimental_landformclassification1/14/\'))")
                 check("土地条件の広域版を補完層として取得する", page.locator("#historyMap .leaflet-landform-pane path").count() > 0)
                 page.wait_for_function("() => document.getElementById(\'mapLandform\').textContent !== \'調べています…\'")
                 check("中央カーソルを表示する", page.locator(".map-cursor").is_visible())

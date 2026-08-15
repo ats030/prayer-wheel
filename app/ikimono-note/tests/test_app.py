@@ -849,6 +849,8 @@ def test_dashboard_map_is_never_loaded_without_an_explicit_press():
     for value_id in ["mapLandform", "mapElevation", "mapMicroterrain", "mapLandUse"]:
         assert f'id="{value_id}"' in page
     assert "meshinfo.geojson" in page
+    assert 'code.length>=5' in page
+    assert "数値地図25000（土地条件）" in page
     assert "api/map/land-use" in page
     assert "instance.on(\"moveend\",updateReadout)" in page
     assert "https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php" in page
