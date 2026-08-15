@@ -814,6 +814,12 @@ def test_dashboard_map_is_never_loaded_without_an_explicit_press():
     assert '$("showMap").onclick=showMap' in page
     assert "drawMap(mapEntries)" in page
     assert "「地図を表示」を押したときだけ" in page
+    assert "土地利用など国土地理院のレイヤを選ぶと" in page
+    assert '"土地利用（1982〜83年）"' in page
+    assert "https://cyberjapandata.gsi.go.jp/xyz/lum200k/{z}/{x}/{y}.png" in page
+    assert "minNativeZoom:11,maxNativeZoom:14" in page
+    assert 'event.name.startsWith("土地利用")&&instance.getZoom()<11' in page
+    assert 'GSI_CREDIT+"（20万分1土地利用図・1982〜83年）"' in page
     history = page_source("/history")
     assert 'id="showMap"' not in history
     assert 'id="historyMap"' not in history
@@ -2527,7 +2533,8 @@ def test_the_map_can_show_the_lay_of_the_land():
     for name in ["地図", "地形", "起伏", "写真"]:
         assert f'"{name}"' in script.split("const MAP_LAYERS")[1].split("};")[0], name
     # 出典を示せば自由に使える (政府標準利用規約)。示さないなら使えない
-    assert script.count("国土地理院") >= 3
+    assert "国土地理院" in script
+    assert script.count("GSI_CREDIT+") >= 4
     assert "L.control.layers(layers,null,{collapsed:false})" in script
     # Leaflet の表記はライブラリが自分で付ける。重ねると二重に出る
     assert "leafletjs.com" not in script.split("const MAP_LAYERS")[1].split("};")[0]
