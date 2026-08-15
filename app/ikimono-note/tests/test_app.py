@@ -834,6 +834,12 @@ def test_dashboard_map_is_never_loaded_without_an_explicit_press():
     assert '"/vendor/leaflet/leaflet.js"' in page
     assert '"/vendor/leaflet/leaflet.css"' in page
     assert 'id="showMap"' in page
+    assert 'id="locateMe"' in page
+    assert "現在地へ移動」を押した場合だけ" in page
+    assert "navigator.geolocation.getCurrentPosition" in page
+    assert "mapInstance.setView([latitude,longitude]" in page
+    assert "現在地の利用が許可されていません" in page
+    assert 'id="mapLocationState" aria-live="polite"' in page
     assert '$("showMap").onclick=showMap' in page
     assert "drawMap(mapEntries)" in page
     assert "「地図を表示」を押したときだけ" in page

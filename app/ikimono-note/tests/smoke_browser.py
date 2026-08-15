@@ -138,6 +138,8 @@ def run(base: str, do_identify: bool) -> None:
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
         context = browser.new_context(ignore_https_errors=True, viewport={"width": 1100, "height": 900})
+        context.set_geolocation({"latitude": 35.681236, "longitude": 139.767125, "accuracy": 12})
+        context.grant_permissions(["geolocation"], origin=base)
         page = context.new_page()
         errors = page_errors(page)
 
@@ -206,6 +208,11 @@ def run(base: str, do_identify: bool) -> None:
         check("押す前は地図ライブラリを読まない", page.evaluate("() => typeof window.L") == "undefined")
         page.click("#showMap"); page.wait_for_selector("#historyMap.leaflet-container")
         check("ダッシュボードで地図を表示できる", page.locator("#historyMap .leaflet-marker-icon").count() == 1)
+        check("現在地へ移動ボタンが表示される", page.locator("#locateMe").is_visible())
+        page.click("#locateMe")
+        page.wait_for_function("() => document.getElementById('mapLocationState').textContent.includes('移動しました')")
+        current_center = page.evaluate("() => { const c=mapInstance.getCenter(); return {lat:c.lat,lng:c.lng} }")
+        check("現在地へカーソルを合わせる", abs(current_center["lat"]-35.681236)<0.0001 and abs(current_center["lng"]-139.767125)<0.0001, str(current_center))
         page.wait_for_function("() => [\'mapLandform\',\'mapElevation\',\'mapMicroterrain\',\'mapLandUse\'].every(id => ![\'\',\'調べています…\'].includes(document.getElementById(id).textContent))")
         check("中央地点の5種の土地情報を同時表示する", all(page.locator("#"+value_id).inner_text() not in ["", "調べています…"] for value_id in ["mapLandform", "mapElevation", "mapMicroterrain", "mapLandUse", "mapVegetation"]))
         layer_labels = page.locator(".leaflet-control-layers label")
