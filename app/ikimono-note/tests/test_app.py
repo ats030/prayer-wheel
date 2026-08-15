@@ -1377,6 +1377,15 @@ def test_product_images_are_allowed_by_the_policy():
     assert "https://*.media-amazon.com" in policy
 
 
+def test_history_coordinates_are_rendered_only_by_the_detail_builder():
+    history = client.get("/assets/history.js").text
+    render_source = history.split("async function render()", 1)[1].split("function detailPhotos", 1)[0]
+    assert "coordinates" not in render_source
+    assert "function coordinateDetail(e)" in history
+    assert history.count("coordinateDetail(e)") == 2
+    assert "位置：" in history and "（おおまかな値）" in history
+
+
 def test_records_can_be_examined_again():
     """元の写真は残っていないので、保存済みの縮小画像を送り直す。"""
     history = client.get("/assets/history.js").text
