@@ -1,0 +1,23 @@
+tool: Google Analytics 4 Standard (Google tag)
+reviewed_at: 2026-08-16
+status: conditional
+cost:
+  condition: GA4 Standard properties are provided without charge; Google may change fees and policies.
+license:
+  service_terms: Google Analytics Terms of Service
+  commercial_use: allowed_for_business_use_under_terms
+conditions:
+  - The account owner must accept and periodically review the Google Analytics Terms and policies.
+  - Use Basic Consent Mode; do not load the Google tag before analytics consent.
+  - Disable advertising storage, advertising user data, advertising personalization, and Google Signals.
+  - Do not send photos, coordinates, species candidates, API keys, email addresses, or login identifiers.
+  - Disclose Google Analytics in the privacy policy and provide refusal and withdrawal controls.
+  - Set the GA4 user and event data retention control to 2 months.
+privacy:
+  decision: Explicit opt-in on the public site; no request to Google before consent.
+sources:
+  - https://marketingplatform.google.com/about/analytics/terms/jp/
+  - https://developers.google.com/tag-platform/security/concepts/consent-mode
+  - https://developers.google.com/tag-platform/security/guides/consent
+  - https://support.google.com/analytics/answer/7667196
+adoption: approved_only_with_the_conditions_above

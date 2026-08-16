@@ -3122,3 +3122,26 @@ def test_records_saved_on_another_device_arrive_when_you_come_back():
     assert "rememberDriveSeen(written.modifiedTime" in drive
     # 押されていないので窓は開けない。生きているトークンがあるときだけ動く
     assert "if (!driveLinked() || !driveTokenAlive()) return false;" in drive
+
+
+def test_public_analytics_waits_for_explicit_consent(monkeypatch):
+    private_page = client.get("/login").text
+    assert "/assets/analytics.js" not in private_page
+    monkeypatch.setattr(main, "PUBLIC_MODE", True)
+    public_page = client.get("/login")
+    assert 'src="/assets/analytics.js" defer' in public_page.text
+    assert 'href="/assets/analytics.css"' in public_page.text
+    csp = public_page.headers["content-security-policy"]
+    assert "https://www.googletagmanager.com" in csp
+    assert "https://www.google-analytics.com" in csp
+    script = client.get("/assets/analytics.js").text
+    assert 'ANALYTICS_ID="G-T9FSRF5Q4F"' in script
+    assert 'if(choice==="granted")loadAnalytics()' in script
+    assert 'script.src="https://www.googletagmanager.com/gtag/js?id="' in script
+    assert 'ad_storage:"denied"' in script
+    assert "allow_google_signals:false" in script
+    assert "写真、位置情報、調べた結果は送りません" in script
+    privacy = client.get("/privacy").text
+    assert 'id="analytics-reset"' in privacy
+    assert "保持期間はGoogle Analyticsの管理画面で設定されます" in privacy
+    assert "同意しない場合はGoogleのタグを読み込みません" in privacy
