@@ -298,7 +298,7 @@ def run(base: str, do_identify: bool) -> None:
         check("共有ページが開ける", share_page.status == 200, str(share_page.status))
         body = share_page.text()
         check("共有ページにカード用のタグが入る", 'property="og:image"' in body and 'name="twitter:card"' in body)
-        check("共有ページを検索に載せない", 'content="noindex, nofollow"' in body)
+        check("共有ページに robots の指示を置かない", 'name="robots"' not in body)
         check("共有ページに観察メモと緯度経度を出さない",
               "夕方には花が閉じていた" not in body and "35.6812" not in body)
         check("公開したら取り消しボタンが出る", detail.locator(".share-revoke").count() == 1)

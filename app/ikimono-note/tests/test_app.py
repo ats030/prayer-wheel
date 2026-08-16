@@ -3219,9 +3219,12 @@ def test_share_page_publishes_only_the_fields_we_chose(tmp_path, monkeypatch):
     for leaked in ["キク科の草本と考えられます", "自宅の庭で見つけた", "35.6812", "139.7671",
                    "2026-08-16", "gemini"]:
         assert leaked not in page.text, leaked
-    # カードに要るタグと、検索には載せない宣言
+    # カードに要るタグ。robots の指示は置かない — noindex があると X はカードを
+    # 作らず、画像もタイトルも取りに来ない。ここに noindex を足した版を配って、
+    # 共有ページの唯一の用途を黙って壊したことがある
     assert 'property="og:image"' in page.text and 'name="twitter:card"' in page.text
-    assert 'content="noindex, nofollow"' in page.text
+    assert 'name="robots"' not in page.text
+    assert "<meta name=\"robots\"" not in page.text
     assert client.get(f"/s/{token}/photo").status_code == 200
 
 
