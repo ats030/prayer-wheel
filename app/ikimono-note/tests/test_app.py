@@ -3169,6 +3169,8 @@ def test_result_and_history_sharing_use_one_safe_helper():
     assert "widgets.js" not in page_source("/") + page_source("/history")
     assert 'pageUrl||location.origin+"/"' in sharing
     assert "結果は候補です。図鑑や実物で確かめてください。" in sharing
+    # カードが出ない相手には本文しか残らない。アプリが名乗れるのはここだけ
+    assert "「生きものノート」で調べました。" in sharing
     # 本文は識別結果の traits から組み立てる。AI を呼び直さないので共有時の通信は増えない
     assert "写真から見えた特徴：" in sharing
     assert "candidates?.[0]?.traits" in sharing

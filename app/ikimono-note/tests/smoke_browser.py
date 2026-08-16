@@ -25,6 +25,7 @@ import json
 import re
 import sys
 import tempfile
+from urllib.parse import unquote_plus
 
 from playwright.sync_api import sync_playwright
 
@@ -291,9 +292,14 @@ def run(base: str, do_identify: bool) -> None:
         intent = next((url for url in opened if "x.com/intent/tweet" in url), "")
         check("記録の共有がXの投稿画面を開く", bool(intent), str(opened))
         check("投稿画面に共有ページのURLを載せる", "%2Fs%2F" in intent, intent[:160])
-        check("投稿本文に候補と特徴が入る", "%E5%80%99%E8%A3%9C" in intent, intent[:160])
+        # エンコードされたまま見ると、何を検査しているのか読めない
+        posted = unquote_plus(re.search(r"text=([^&]+)", intent).group(1))
+        check("投稿本文に候補と特徴が入る",
+              "写真から調べた候補" in posted and "ぎざぎざした根生葉" in posted, posted[:120])
+        check("投稿本文がアプリ名を名乗る", "「生きものノート」で調べました。" in posted, posted[:120])
+        check("投稿本文が候補を断定しない", "結果は候補です。" in posted, posted[:120])
         check("投稿本文に観察メモや緯度経度を入れない",
-              "35.6812" not in intent and "%E5%A4%95%E6%96%B9" not in intent, intent[:200])
+              "夕方には花が閉じていた" not in posted and "35.6812" not in posted, posted[:160])
         share_url = re.search(r"url=([^&]+)", intent)
         share_page = page.request.get(re.sub(r"%3A", ":", re.sub(r"%2F", "/", share_url.group(1))))
         check("共有ページが開ける", share_page.status == 200, str(share_page.status))

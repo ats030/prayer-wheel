@@ -10,7 +10,10 @@ function xWeight(text){
   }
   return total;
 }
-const SHARE_NOTE="結果は候補です。図鑑や実物で確かめてください。";
+/* 名乗りと但し書き。カードが出ない相手には本文しか残らないので、アプリ名はここに置く。
+   但し書きを削って宣伝を伸ばすことはしない — 全年齢のアプリで、候補を断定に読ませない一文は
+   共有ページ側にもあるが、本文だけを見て終わる人がいる */
+const SHARE_FOOTER="「生きものノート」で調べました。結果は候補です。図鑑や実物で確かめてください。";
 function shareCandidateLine(candidates){
   const names=(candidates||[]).slice(0,3).map(candidate=>(candidate.common_name_ja||candidate.scientific_name||"名前不明")+"（あてはまり度 "+Number(candidate.confidence||0)+"%）");
   return "写真から調べた候補："+names.join("、");
@@ -21,7 +24,7 @@ function shareTraits(candidates){
   return (candidates?.[0]?.traits||[]).filter(trait=>typeof trait==="string"&&trait.trim()).map(trait=>trait.trim());
 }
 function shareBodyText(head,traits){
-  return traits.length?head+"\n写真から見えた特徴："+traits.join("、")+"\n"+SHARE_NOTE:head+"\n"+SHARE_NOTE;
+  return traits.length?head+"\n写真から見えた特徴："+traits.join("、")+"\n"+SHARE_FOOTER:head+"\n"+SHARE_FOOTER;
 }
 function shareBody(candidates){
   const head=shareCandidateLine(candidates);
