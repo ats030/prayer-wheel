@@ -437,6 +437,20 @@ def run(base: str, do_identify: bool) -> None:
             page.click("#identify")
             page.wait_for_selector(".candidate .sources", timeout=300000)
             check("実際に識別できる", page.locator(".candidate").count() >= 1)
+            # ここまで render() を直接呼ぶ検査しかなく、撮影から識別を通したときに
+            # 共有ボタンへ写真が渡るかは誰も見ていなかった。渡っていなければボタンは
+            # 「Xで共有」と名乗り、写真なしで X の投稿画面へ落ちる
+            share_label = page.locator(".share-result .x-share").inner_text()
+            check("識別を通した結果の共有ボタンに写真が渡る", "写真" in share_label, share_label)
+            shared = page.evaluate("""() => {
+                Object.defineProperty(navigator, "canShare", {configurable: true, value: payload => Boolean(payload.files?.length)});
+                Object.defineProperty(navigator, "share", {configurable: true, value: async payload => { window.flowShared = payload; }});
+                return true;
+            }""")
+            page.locator(".share-result .x-share").click()
+            page.wait_for_timeout(300)
+            flow_share = page.evaluate("() => ({files: window.flowShared?.files?.length || 0, type: window.flowShared?.files?.[0]?.type || ''})")
+            check("識別を通した写真がX向け共有画面へ渡る", flow_share["files"] >= 1, str(flow_share))
             page.wait_for_timeout(2500)
             page.goto(base + "/history"); page.wait_for_load_state("networkidle"); page.wait_for_timeout(1500)
             check("記録に残る", page.locator(".entry").count() >= 1)
