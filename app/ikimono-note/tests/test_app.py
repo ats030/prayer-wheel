@@ -3177,6 +3177,12 @@ def test_result_and_history_sharing_use_one_safe_helper():
     assert 'error?.name==="AbortError"' in sharing
     assert 'url:location.origin+"/"' in sharing
     assert "結果は候補です。図鑑や実物で確かめてください。" in sharing
+    # 本文は識別結果の traits から組み立てる。AI を呼び直さないので共有時の通信は増えない
+    assert "写真から見えた特徴：" in sharing
+    assert "candidates?.[0]?.traits" in sharing
+    assert "function xWeight(text)" in sharing and "X_WEIGHTED_LIMIT=280" in sharing
+    assert "X_URL_WEIGHT=23" in sharing
+    assert "fetch(" not in sharing and "XMLHttpRequest" not in sharing
 
     share_body = sharing.split("function xShareUrl", 1)[0]
     for private_field in [

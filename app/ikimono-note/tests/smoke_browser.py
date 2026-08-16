@@ -366,6 +366,18 @@ def run(base: str, do_identify: bool) -> None:
         check("結果から判別写真を2枚ともX向け共有画面へ渡せる", photo_share["keys"] == ["files"] and photo_share["files"] == 2 and photo_share["type"] == "image/jpeg", str(photo_share))
         copied = page.evaluate("() => window.copiedText || ''")
         check("結果の共有で本文をクリップボードへ渡す", "写真から調べた候補" in copied and "あてはまり度" in copied, copied)
+        check("共有本文に写真から見えた特徴が入る", "写真から見えた特徴" in copied and "ぎざぎざした根生葉" in copied, copied)
+        check("共有本文に観察の要約を入れない", "キク科の草本と考えられます" not in copied, copied)
+        # 日本語は1文字が2文字ぶん。text.length で数えると上限を超えたことに気づけない
+        limit_case = page.evaluate("""() => {
+            const candidates = [{common_name_ja: "ながいなまえのいきもの", confidence: 60,
+                traits: ["とてもながいとくちょうのせつめい".repeat(6), "ふたつめのとくちょう".repeat(6)]}];
+            const text = shareBody(candidates);
+            return {weight: xWeight(text) + 1 + 23, text,
+                    ends: text.endsWith("確かめてください。")};
+        }""")
+        check("長い特徴でもXの上限に収まる", limit_case["weight"] <= 280, str(limit_case["weight"]))
+        check("上限に収めるときも文を途中で切らない", limit_case["ends"], limit_case["text"][-40:])
 
         # 共有シートを持たないPCでは、写真を端末へ落として投稿画面を開き、添付だけ利用者に委ねる
         page.evaluate("""() => {
