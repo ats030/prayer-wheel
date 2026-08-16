@@ -273,13 +273,19 @@ def run(base: str, do_identify: bool) -> None:
         check("記録の内容を開くと緯度経度を表示する", detail.evaluate("node => node.open") and "35.6812" in detail.inner_text() and "139.7671" in detail.inner_text())
         check("記録の候補に写真付きX共有ボタンが1つ出る", detail.locator(".x-share").count() == 1 and detail.locator(".share-record").count() == 0)
         check("押す前はXへ通信しない", not page.evaluate("() => performance.getEntriesByType('resource').some(entry => entry.name.includes('x.com/'))"))
+        check("記録の共有ボタンが渡す枚数を名乗る", "写真2枚つきでXへ" in detail.locator(".record-share").inner_text(), detail.locator(".record-share").inner_text())
         page.evaluate("""() => {
             Object.defineProperty(navigator, "canShare", {configurable: true, value: payload => Boolean(payload.files?.length)});
             Object.defineProperty(navigator, "share", {configurable: true, value: async payload => { window.historySharedPayload = payload; }});
+            Object.defineProperty(navigator, "clipboard", {configurable: true, value: {writeText: async text => { window.historyCopiedText = text; }}});
         }""")
         detail.locator(".x-share").click()
+        page.wait_for_timeout(300)
         history_photo_share = page.evaluate("() => ({keys: Object.keys(window.historySharedPayload || {}), files: window.historySharedPayload?.files?.length, type: window.historySharedPayload?.files?.[0]?.type})")
-        check("記録から判別写真をX向け共有画面へ渡せる", history_photo_share["keys"] == ["files"] and history_photo_share["files"] == 1 and history_photo_share["type"] == "image/png", str(history_photo_share))
+        check("記録の判別写真を2枚ともX向け共有画面へ渡せる", history_photo_share["keys"] == ["files"] and history_photo_share["files"] == 2 and history_photo_share["type"] == "image/png", str(history_photo_share))
+        history_copied = page.evaluate("() => window.historyCopiedText || ''")
+        check("記録の共有で本文をクリップボードへ渡す", "写真から調べた候補" in history_copied and "夕方には花が閉じていた" not in history_copied and "35.6812" not in history_copied, history_copied)
+        check("本文をコピーしたことを記録画面で知らせる", "貼り付け" in detail.locator(".share-message").inner_text(), detail.locator(".share-message").inner_text())
         page.set_viewport_size({"width": 390, "height": 844})
         history_share_box = detail.locator(".record-share").bounding_box()
         history_share_button = detail.locator(".x-share").bounding_box()
@@ -338,7 +344,7 @@ def run(base: str, do_identify: bool) -> None:
               page.evaluate("() => getComputedStyle(document.body).backgroundColor") != before)
 
         # 結果の描画（識別を通さずに確かめる）
-        page.evaluate("data => render(data, new Blob(['identification-photo'], {type: 'image/jpeg'}))", SAMPLE)
+        page.evaluate("data => render(data, [new Blob(['identification-photo'], {type: 'image/jpeg'}), new Blob(['identification-photo-2'], {type: 'image/jpeg'})])", SAMPLE)
         check("結果が描ける", page.locator(".candidate .name").count() == 1)
         check("参照リンクが並ぶ", page.locator(".sources a").count() >= 2)
         check("安全カードが出る", page.locator("#safetyCard").count() == 1)
@@ -348,13 +354,30 @@ def run(base: str, do_identify: bool) -> None:
 
         # X向けは判別写真をOSの共有画面へ渡す。一般共有は従来どおり本文だけ
         check("結果のX共有も押す前は通信しない", not page.evaluate("() => performance.getEntriesByType('resource').some(entry => entry.name.includes('x.com/'))"))
+        check("結果の共有ボタンが渡す枚数を名乗る", "写真2枚つきでXへ" in page.locator(".share-result").inner_text(), page.locator(".share-result").inner_text())
         page.evaluate("""() => {
             Object.defineProperty(navigator, "canShare", {configurable: true, value: payload => Boolean(payload.files?.length)});
             Object.defineProperty(navigator, "share", {configurable: true, value: async payload => { window.sharedPayload = payload; }});
+            Object.defineProperty(navigator, "clipboard", {configurable: true, value: {writeText: async text => { window.copiedText = text; }}});
         }""")
         page.locator(".share-result .x-share").click()
+        page.wait_for_timeout(300)
         photo_share = page.evaluate("() => ({keys: Object.keys(window.sharedPayload || {}), files: window.sharedPayload?.files?.length, type: window.sharedPayload?.files?.[0]?.type})")
-        check("結果から判別写真をX向け共有画面へ渡せる", photo_share["keys"] == ["files"] and photo_share["files"] == 1 and photo_share["type"] == "image/jpeg", str(photo_share))
+        check("結果から判別写真を2枚ともX向け共有画面へ渡せる", photo_share["keys"] == ["files"] and photo_share["files"] == 2 and photo_share["type"] == "image/jpeg", str(photo_share))
+        copied = page.evaluate("() => window.copiedText || ''")
+        check("結果の共有で本文をクリップボードへ渡す", "写真から調べた候補" in copied and "あてはまり度" in copied, copied)
+
+        # 共有シートを持たないPCでは、写真を端末へ落として投稿画面を開き、添付だけ利用者に委ねる
+        page.evaluate("""() => {
+            window.openedShareUrl = null;
+            Object.defineProperty(navigator, "canShare", {configurable: true, value: () => false});
+            window.open = url => { window.openedShareUrl = url; return {}; };
+        }""")
+        with page.expect_download() as download_info:
+            page.locator(".share-result .x-share").click()
+        check("共有シートがなくても写真を端末に保存する", download_info.value.suggested_filename.endswith(".jpg"), download_info.value.suggested_filename)
+        check("共有シートがなくてもXの投稿画面を開く", "x.com/intent/tweet" in (page.evaluate("() => window.openedShareUrl") or ""), str(page.evaluate("() => window.openedShareUrl")))
+        check("写真を保存したことを結果画面で知らせる", "添付" in page.locator("#status").inner_text(), page.locator("#status").inner_text())
         page.set_viewport_size({"width": 390, "height": 844})
         share_box = page.locator(".share-result").bounding_box()
         check("共有ボタンがスマホ幅に収まる", bool(share_box) and share_box["x"] >= 0 and share_box["x"] + share_box["width"] <= 390, str(share_box))

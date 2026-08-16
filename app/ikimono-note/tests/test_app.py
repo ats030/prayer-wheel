@@ -3158,17 +3158,21 @@ def test_result_and_history_sharing_use_one_safe_helper():
     assert history.count('class="btn x-share"') == 1
     assert 'if(!e.candidates?.length)return' in history
     assert 'function xShareUrl(candidates)' in sharing
-    assert 'function sharePhotoForX(candidates,photo,onError)' in sharing
-    assert 'navigator.canShare?.({files:[file]})' in sharing
-    assert 'navigator.share({files:[file]})' in sharing
+    assert 'async function sharePhotoForX(candidates,photos,onError,onNotice)' in sharing
+    assert 'navigator.canShare({files:subset})' in sharing
+    assert 'navigator.share({files:sendable})' in sharing
     assert 'new File([photo]' in sharing
+    # 共有シートへ渡すのは写真だけ。本文を混ぜると共有先が写真を落とすので、本文はクリップボードへ回す
+    assert 'navigator.share({text' not in sharing and 'navigator.share({title' not in sharing
+    assert 'navigator.clipboard.writeText(shareText(candidates))' in sharing
+    assert 'link.download=file.name' in sharing
     assert '"https://x.com/intent/tweet?"+params.toString()' in sharing
     assert "new URLSearchParams({text:payload.text,url:payload.url})" in sharing
     assert 'class="btn x-share"' in index
     assert 'class="btn x-share"' in history
     assert 'id="sharePhotoX"' in index
     assert '写真つきでXへ' in index
-    assert '共有先でXを選び、本文はXで入力します。' in index
+    assert '共有先でXを選び、本文は貼り付けてください。' in index
     assert "widgets.js" not in page_source("/") + page_source("/history")
     assert 'error?.name==="AbortError"' in sharing
     assert 'url:location.origin+"/"' in sharing
