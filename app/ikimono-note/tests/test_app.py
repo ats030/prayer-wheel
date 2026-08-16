@@ -3183,12 +3183,15 @@ def test_result_and_history_sharing_use_one_safe_helper():
     assert 'revokeShare' in revoke_script and '/api/share/' in revoke_script
 
     # 本文にも、公開ページへ送る中身にも、載せないと決めたものが混ざらないこと。
-    # 範囲を切らずにファイル全体で見る。送る側が増えても、ここで気づける
+    # 範囲を切らずにファイル全体で見る。送る側が増えても、ここで気づける。
+    # コメントは外す。理由を書いた文に禁止語が出るだけで落ちると、説明を削る方向へ働く
+    # (summary_large_image は X のカード種別の名前で、識別結果の summary とは無関係)
+    code_only = re.sub(r"/\*.*?\*/", "", sharing, flags=re.S)
     for private_field in [
         "thumbnail", "thumbnails", "coordinates", "observedDate", "userNote",
         "noteUpdatedAt", "summary", "provider", "model", "email", "api_key",
     ]:
-        assert private_field not in sharing, private_field
+        assert private_field not in code_only, private_field
 
 
 def test_share_page_publishes_only_the_fields_we_chose(tmp_path, monkeypatch):

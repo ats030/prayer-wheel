@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import glob
 import os
 from pathlib import Path
@@ -366,7 +367,13 @@ def run(base: str, do_identify: bool) -> None:
               page.evaluate("() => getComputedStyle(document.body).backgroundColor") != before)
 
         # 結果の描画（識別を通さずに確かめる）
-        page.evaluate("data => render(data, [new Blob(['identification-photo'], {type: 'image/jpeg'}), new Blob(['identification-photo-2'], {type: 'image/jpeg'})])", SAMPLE)
+        # 中身は本物の JPEG にする。テキストの Blob だと createImageBitmap が通らず、
+        # カード用の作り直しが黙って素通しになって、検査が実物と違うものを見る
+        page.evaluate("""([sample, encoded]) => {
+            const bytes = Uint8Array.from(atob(encoded), c => c.charCodeAt(0));
+            const blob = new Blob([bytes], {type: "image/jpeg"});
+            render(sample, [blob, blob]);
+        }""", [SAMPLE, base64.b64encode(photo("a.jpg")["buffer"]).decode()])
         check("結果が描ける", page.locator(".candidate .name").count() == 1)
         check("参照リンクが並ぶ", page.locator(".sources a").count() >= 2)
         check("安全カードが出る", page.locator("#safetyCard").count() == 1)
@@ -398,7 +405,30 @@ def run(base: str, do_identify: bool) -> None:
               "セイヨウタンポポ" in result_body and "ぎざぎざした根生葉" in result_body)
         check("共有ページに観察の要約を出さない", "キク科の草本と考えられます" not in result_body)
         check("共有ページに但し書きを出す", "AI抽出・未確認" in result_body and "結果は候補です" in result_body)
-        check("共有ページの写真が配信される", page.request.get(result_url + "/photo").status == 200)
+        card_response = page.request.get(result_url + "/photo")
+        check("共有ページの写真が配信される", card_response.status == 200)
+        # 記録の写真をそのまま渡していた頃、原寸を持たない記録は一覧用の320pxが回り、
+        # 幅240でXの最小要件(300)を割ってカードに画像が出なかった
+        from io import BytesIO as _BytesIO
+
+        from PIL import Image as _Image
+
+        card_image = _Image.open(_BytesIO(card_response.body()))
+        check("共有ページの写真がXのカード寸法", card_image.size == (1200, 630), str(card_image.size))
+        check("共有ページの写真がJPEG", card_image.format == "JPEG", str(card_image.format))
+        made = page.evaluate("""async () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 240; canvas.height = 320;
+            const context = canvas.getContext("2d");
+            context.fillStyle = "#3a7"; context.fillRect(0, 0, 240, 320);
+            const small = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", .8));
+            const card = await shareCardImage(small);
+            const bitmap = await createImageBitmap(card);
+            return {width: bitmap.width, height: bitmap.height, type: card.type, bytes: card.size};
+        }""")
+        check("小さい縦長の写真でもカード寸法に作り直す",
+              made["width"] == 1200 and made["height"] == 630, str(made))
+        check("カード画像がFirestoreの上限に収まる", made["bytes"] < 700 * 1024, str(made["bytes"]))
         # 日本語は1文字が2文字ぶん。text.length で数えると上限を超えたことに気づけない
         limit_case = page.evaluate("""() => {
             const candidates = [{common_name_ja: "ながいなまえのいきもの", confidence: 60,

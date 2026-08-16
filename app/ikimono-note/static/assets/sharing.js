@@ -36,21 +36,40 @@ function shareBody(candidates){
   }
   return shareBodyText(head,chosen);
 }
-/* Xのカードは1200x628が目安。これ以上大きくしても効かず、Firestore のドキュメント上限
-   (1MiB) に近づくだけ */
-const SHARE_PAGE_MAX_EDGE=1200;
+/* カードの寸法。X は summary_large_image に 1.91:1 を想定し、300x157 を下回る画像は
+   カードに出さない */
+const SHARE_CARD_WIDTH=1200,SHARE_CARD_HEIGHT=630;
+const SHARE_CARD_BACKGROUND="#f4faf2";
 function xShareUrl(candidates,pageUrl){
   const params=new URLSearchParams({text:shareBody(candidates),url:pageUrl||location.origin+"/"});
   return "https://x.com/intent/tweet?"+params.toString();
 }
-/* 共有ページに載せる1枚。shrinkForHistory は canvas 経由なので必ず JPEG を返す。
-   X がカードに出す形式は JPEG・PNG・GIF だけで、webp のまま送ると画像の出ないカードになる */
+/* 記録の写真をそのまま渡さず、カードの寸法で作り直す。
+   縮小だけでは足りない。原寸を持たない記録は一覧用の320pxしか持っておらず、長辺1200を
+   指定しても320のまま出ていく。幅240ではXの最小要件を下回り、カードに画像が出ない。
+   縦長も同じで、1.91:1 から外れたものは想定の外にある。
+   はめ方は contain。cover にすると被写体が切れる。名前を調べた生きものが切れているカードは、
+   カードとしては整っていても用を成さない */
+async function shareCardImage(photo){
+  if(!photo)return null;
+  const bitmap=await createImageBitmap(photo);
+  const canvas=document.createElement("canvas");
+  canvas.width=SHARE_CARD_WIDTH;canvas.height=SHARE_CARD_HEIGHT;
+  const context=canvas.getContext("2d");
+  context.fillStyle=SHARE_CARD_BACKGROUND;
+  context.fillRect(0,0,SHARE_CARD_WIDTH,SHARE_CARD_HEIGHT);
+  const scale=Math.min(SHARE_CARD_WIDTH/bitmap.width,SHARE_CARD_HEIGHT/bitmap.height);
+  const width=Math.max(1,Math.round(bitmap.width*scale)),height=Math.max(1,Math.round(bitmap.height*scale));
+  context.drawImage(bitmap,Math.round((SHARE_CARD_WIDTH-width)/2),Math.round((SHARE_CARD_HEIGHT-height)/2),width,height);
+  bitmap.close();
+  /* canvas.toBlob は必ず JPEG を返す。X がカードに出すのは JPEG・PNG・GIF だけで、
+     webp のまま送ると画像の出ないカードになる */
+  return new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.82));
+}
 async function sharePageImage(photo){
   if(!photo)return null;
-  if(typeof shrinkForHistory==="function"){
-    try{const blob=await shrinkForHistory(photo,SHARE_PAGE_MAX_EDGE);if(blob)return blob}
-    catch(error){/* 縮められなければ元のまま送る。大きすぎればサーバーが断る */}
-  }
+  try{const card=await shareCardImage(photo);if(card)return card}
+  catch(error){/* 作れなければ元のまま送る。小さすぎればカードに出ないが、共有そのものは通す */}
   return photo instanceof Blob?photo:null;
 }
 function sharePageCandidates(candidates){
