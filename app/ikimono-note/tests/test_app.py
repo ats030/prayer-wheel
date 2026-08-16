@@ -3154,13 +3154,9 @@ def test_result_and_history_sharing_use_one_safe_helper():
 
     for path in ["/", "/history"]:
         assert '/assets/sharing.js' in page_source(path)
-    assert 'id="shareResult"' in index
-    assert 'class="btn share-record"' in history
+    assert index.count('class="btn x-share"') == 1
+    assert history.count('class="btn x-share"') == 1
     assert 'if(!e.candidates?.length)return' in history
-    assert "shareCandidates(data.candidates" in index
-    assert "shareCandidates(e.candidates" in history
-    assert "navigator.share(payload)" in sharing
-    assert "navigator.clipboard.writeText" in sharing
     assert 'function xShareUrl(candidates)' in sharing
     assert 'function sharePhotoForX(candidates,photo,onError)' in sharing
     assert 'navigator.canShare?.({files:[file]})' in sharing
@@ -3171,15 +3167,14 @@ def test_result_and_history_sharing_use_one_safe_helper():
     assert 'class="btn x-share"' in index
     assert 'class="btn x-share"' in history
     assert 'id="sharePhotoX"' in index
-    assert '共有画面でXを選んでください。' in index
+    assert '写真つきでXへ' in index
+    assert 'ボタンを押したあと、共有先でXを選びます。' in index
     assert "widgets.js" not in page_source("/") + page_source("/history")
     assert 'error?.name==="AbortError"' in sharing
     assert 'url:location.origin+"/"' in sharing
     assert "結果は候補です。図鑑や実物で確かめてください。" in sharing
 
-    share_body = sharing.split("function shareData(candidates){", 1)[1].split(
-        "async function shareCandidates", 1
-    )[0]
+    share_body = sharing.split("function xShareUrl", 1)[0]
     for private_field in [
         "thumbnail", "thumbnails", "coordinates", "observedDate", "userNote",
         "noteUpdatedAt", "summary", "provider", "model", "email", "api_key",

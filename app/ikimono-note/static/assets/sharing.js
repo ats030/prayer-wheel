@@ -23,16 +23,3 @@ async function sharePhotoForX(candidates,photo,onError){
   const opened=window.open(xShareUrl(candidates),"_blank","noopener,noreferrer");
   if(!opened&&onError)onError();
 }
-async function shareCandidates(candidates,button,onError){
-  const payload=shareData(candidates);
-  if(navigator.share){
-    try{await navigator.share(payload);return}
-    catch(error){if(error?.name==="AbortError")return}
-  }
-  try{
-    await navigator.clipboard.writeText(payload.text+"\n"+payload.url);
-    button.textContent="共有文をコピーしました";
-  }catch(error){
-    if(onError)onError();
-  }
-}

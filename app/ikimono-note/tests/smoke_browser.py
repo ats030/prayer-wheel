@@ -271,7 +271,7 @@ def run(base: str, do_identify: bool) -> None:
         check("緯度経度は開くまで見えない", not detail.evaluate("node => node.open") and "35.6812" not in detail.inner_text() and "139.7671" not in detail.inner_text())
         detail.locator("summary").click(); page.wait_for_timeout(300)
         check("記録の内容を開くと緯度経度を表示する", detail.evaluate("node => node.open") and "35.6812" in detail.inner_text() and "139.7671" in detail.inner_text())
-        check("記録の候補にも共有ボタンが出る", detail.locator(".share-record").count() == 1)
+        check("記録の候補に写真付きX共有ボタンが1つ出る", detail.locator(".x-share").count() == 1 and detail.locator(".share-record").count() == 0)
         check("押す前はXへ通信しない", not page.evaluate("() => performance.getEntriesByType('resource').some(entry => entry.name.includes('x.com/'))"))
         page.evaluate("""() => {
             Object.defineProperty(navigator, "canShare", {configurable: true, value: payload => Boolean(payload.files?.length)});
@@ -280,16 +280,12 @@ def run(base: str, do_identify: bool) -> None:
         detail.locator(".x-share").click()
         history_photo_share = page.evaluate("() => ({text: window.historySharedPayload?.text, files: window.historySharedPayload?.files?.length, type: window.historySharedPayload?.files?.[0]?.type})")
         check("記録から判別写真をX向け共有画面へ渡せる", history_photo_share["files"] == 1 and history_photo_share["type"] == "image/png" and "セイヨウタンポポ" in history_photo_share["text"], str(history_photo_share))
-        page.evaluate("() => { window.historySharedPayload = null; }")
-        detail.locator(".share-record").click()
-        history_shared = page.evaluate("() => window.historySharedPayload")
-        check("記録の候補を端末の共有先へ渡せる", history_shared and "セイヨウタンポポ" in history_shared["text"], str(history_shared))
-        check("記録共有に位置やAI設定を含めない", history_shared and all(
-            value not in history_shared["text"] for value in ["35.6812", "139.7671", "smoke"]
-        ), str(history_shared))
+        check("記録共有に位置やAI設定を含めない", all(
+            value not in history_photo_share["text"] for value in ["35.6812", "139.7671", "smoke"]
+        ), str(history_photo_share))
         page.set_viewport_size({"width": 390, "height": 844})
         history_share_box = detail.locator(".record-share").bounding_box()
-        history_share_button = detail.locator(".share-record").bounding_box()
+        history_share_button = detail.locator(".x-share").bounding_box()
         check("記録の共有導線がスマホ幅に収まる", bool(history_share_box) and history_share_box["x"] >= 0 and history_share_box["x"] + history_share_box["width"] <= 390, str(history_share_box))
         check("記録の共有ボタンの高さが44px以上", bool(history_share_button) and history_share_button["height"] >= 44, str(history_share_button))
         history_x_button = detail.locator(".x-share").bounding_box()
@@ -362,26 +358,10 @@ def run(base: str, do_identify: bool) -> None:
         page.locator(".share-result .x-share").click()
         photo_share = page.evaluate("() => ({text: window.sharedPayload?.text, files: window.sharedPayload?.files?.length, type: window.sharedPayload?.files?.[0]?.type})")
         check("結果から判別写真をX向け共有画面へ渡せる", photo_share["files"] == 1 and photo_share["type"] == "image/jpeg" and "セイヨウタンポポ" in photo_share["text"], str(photo_share))
-        page.evaluate("() => { window.sharedPayload = null; }")
-        page.click("#shareResult")
-        shared = page.evaluate("() => window.sharedPayload")
-        check("結果を端末の共有先へ渡せる", shared and "セイヨウタンポポ" in shared["text"], str(shared))
-        check("共有内容に写真や場所を含めない", shared and all(
-            word not in shared["text"] for word in ["thumbnail", "coordinates", "撮った場所"]
-        ), str(shared))
-        page.evaluate("""() => {
-            Object.defineProperty(navigator, "share", {configurable: true, value: undefined});
-            Object.defineProperty(navigator, "clipboard", {
-                configurable: true, value: {writeText: async text => { window.copiedShare = text; }}
-            });
-        }""")
-        page.click("#shareResult")
-        copied = page.evaluate("() => window.copiedShare")
-        check("共有非対応ブラウザでは本文をコピーする", copied and base in copied, str(copied))
         page.set_viewport_size({"width": 390, "height": 844})
         share_box = page.locator(".share-result").bounding_box()
         check("共有ボタンがスマホ幅に収まる", bool(share_box) and share_box["x"] >= 0 and share_box["x"] + share_box["width"] <= 390, str(share_box))
-        check("共有ボタンの高さが44px以上", page.locator("#shareResult").bounding_box()["height"] >= 44)
+        check("結果の共有ボタンが1つだけ", page.locator(".share-result button").count() == 1)
         check("結果のX共有ボタンの高さが44px以上", page.locator(".share-result .x-share").bounding_box()["height"] >= 44)
         page.set_viewport_size({"width": 1100, "height": 900})
         # 広告は候補ごと。商品APIが断られていても、候補ごとの検索リンクは残る
