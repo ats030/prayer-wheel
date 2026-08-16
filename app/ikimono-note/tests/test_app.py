@@ -3141,6 +3141,10 @@ def test_public_analytics_waits_for_explicit_consent(monkeypatch):
     assert 'script.src="https://www.googletagmanager.com/gtag/js?id="' in script
     assert 'ad_storage:"denied"' in script
     assert "allow_google_signals:false" in script
+    # パネルの居場所は CSS ファイルに預けない。analytics.css はファイル名で止められやすく、
+    # 落ちると position:static に戻ってページ末尾へ流れ、押しても出ないように見える
+    assert "PANEL_ANCHOR" in script and 'position:"fixed"' in script
+    assert "Object.assign(panel.style,PANEL_ANCHOR)" in script
     assert "写真、位置情報、調べた結果は送りません" in script
     privacy = client.get("/privacy").text
     # 保持期間は GA4 側で2か月に設定済み。読み手が確かめようのない「管理画面で設定されます」
