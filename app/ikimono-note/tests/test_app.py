@@ -3143,14 +3143,14 @@ def test_public_analytics_waits_for_explicit_consent(monkeypatch):
     assert "allow_google_signals:false" in script
     assert "写真、位置情報、調べた結果は送りません" in script
     privacy = client.get("/privacy").text
-    assert 'id="analytics-reset"' in privacy
     # 保持期間は GA4 側で2か月に設定済み。読み手が確かめようのない「管理画面で設定されます」
     # ではなく、実際に設定した値を書く
     assert "2か月保持したのち削除されます" in privacy
-    # 解析は公開版だけの機能。運営者用ではスクリプトを読み込まないので、
-    # ボタンを出したままにすると押しても何も起きない
-    css = client.get("/assets/privacy.css").text
-    assert 'body[data-app-mode="operator"] #analytics-reset{display:none}' in css
+    # ボタンはスクリプトが置く。HTMLに直接書くと、解析を読み込まない側や、拡張機能に
+    # このファイルを止められた画面に、押しても動かないボタンだけが残る
+    assert 'id="analytics-reset"' not in privacy
+    assert 'id="analytics-reset-slot"' in privacy
+    assert "mountAnalyticsReset" in client.get("/assets/analytics.js").text
     assert "同意しない場合はGoogleのタグを読み込みません" in privacy
 
 

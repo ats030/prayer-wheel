@@ -178,7 +178,7 @@ def run(base: str, do_identify: bool) -> None:
         # 運営者用では解析スクリプトを読まない。押しても動かないボタンを見せない
         page.goto(base + "/privacy"); page.wait_for_load_state("networkidle")
         check("運営者用でアクセス解析の設定ボタンを出さない",
-              not page.locator("#analytics-reset").is_visible())
+              page.locator("#analytics-reset").count() == 0)
         page.goto(base + "/settings"); page.wait_for_load_state("networkidle")
         check("ドライブの導線が出る", page.locator("#drive-connect").count() == 1)
 
