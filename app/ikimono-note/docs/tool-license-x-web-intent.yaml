@@ -1,4 +1,4 @@
-tool: X Web Intent (Tweet/Post composer)
+tool: Web Share API with X Web Intent fallback
 reviewed_at: 2026-08-16
 status: conditional
 cost:
@@ -9,13 +9,16 @@ license:
 conditions:
   - Open the official https://x.com/intent/tweet endpoint only after an explicit user click.
   - Do not load the X for Websites JavaScript, widgets, tracking pixels, or embedded content.
-  - Pre-fill only candidate names, confidence, the candidate disclaimer, and the public service URL.
-  - Do not send photographs, coordinates, observation dates, notes, provider or model details, API keys, or account data.
+  - On browsers that support file sharing, pass the first re-encoded identification photo to the operating-system share sheet only after an explicit user click; the user chooses X there.
+  - Check file-share support with navigator.canShare before calling navigator.share with files.
+  - If file sharing is unavailable, pre-fill only candidate names, confidence, the candidate disclaimer, and the public service URL in X Web Intent.
+  - Do not include coordinates, observation dates, notes, provider or model details, API keys, or account data.
   - Let the user review and decide whether to publish on X; the app must not post automatically.
-  - Use the text label "Xで共有" without bundling or altering X logo assets.
+  - Do not imply that the app can select X automatically from the operating-system share sheet.
 privacy:
-  decision: No request to X before the user selects the X share link.
+  decision: No request to X or photo upload occurs before the user selects a share target or opens the fallback X link.
 sources:
+  - https://www.w3.org/TR/web-share/
   - https://docs.x.com/x-for-websites/web-intents/overview
   - https://help.x.com/en/using-x/add-x-share-button
   - https://x.com/en/tos

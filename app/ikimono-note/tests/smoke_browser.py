@@ -272,13 +272,15 @@ def run(base: str, do_identify: bool) -> None:
         detail.locator("summary").click(); page.wait_for_timeout(300)
         check("記録の内容を開くと緯度経度を表示する", detail.evaluate("node => node.open") and "35.6812" in detail.inner_text() and "139.7671" in detail.inner_text())
         check("記録の候補にも共有ボタンが出る", detail.locator(".share-record").count() == 1)
-        history_x_href = detail.locator(".x-share").get_attribute("href")
-        history_x_query = page.evaluate("href => Object.fromEntries(new URL(href).searchParams)", history_x_href)
-        check("記録からXの投稿画面へ進める", history_x_href.startswith("https://x.com/intent/tweet?") and "セイヨウタンポポ" in history_x_query.get("text", "") and history_x_query.get("url") == base + "/", str(history_x_query))
         check("押す前はXへ通信しない", not page.evaluate("() => performance.getEntriesByType('resource').some(entry => entry.name.includes('x.com/'))"))
-        page.evaluate("""() => Object.defineProperty(navigator, "share", {
-            configurable: true, value: async payload => { window.historySharedPayload = payload; }
-        })""")
+        page.evaluate("""() => {
+            Object.defineProperty(navigator, "canShare", {configurable: true, value: payload => Boolean(payload.files?.length)});
+            Object.defineProperty(navigator, "share", {configurable: true, value: async payload => { window.historySharedPayload = payload; }});
+        }""")
+        detail.locator(".x-share").click()
+        history_photo_share = page.evaluate("() => ({text: window.historySharedPayload?.text, files: window.historySharedPayload?.files?.length, type: window.historySharedPayload?.files?.[0]?.type})")
+        check("記録から判別写真をX向け共有画面へ渡せる", history_photo_share["files"] == 1 and history_photo_share["type"] == "image/png" and "セイヨウタンポポ" in history_photo_share["text"], str(history_photo_share))
+        page.evaluate("() => { window.historySharedPayload = null; }")
         detail.locator(".share-record").click()
         history_shared = page.evaluate("() => window.historySharedPayload")
         check("記録の候補を端末の共有先へ渡せる", history_shared and "セイヨウタンポポ" in history_shared["text"], str(history_shared))
@@ -343,7 +345,7 @@ def run(base: str, do_identify: bool) -> None:
               page.evaluate("() => getComputedStyle(document.body).backgroundColor") != before)
 
         # 結果の描画（識別を通さずに確かめる）
-        page.evaluate("data => render(data)", SAMPLE)
+        page.evaluate("data => render(data, new Blob(['identification-photo'], {type: 'image/jpeg'}))", SAMPLE)
         check("結果が描ける", page.locator(".candidate .name").count() == 1)
         check("参照リンクが並ぶ", page.locator(".sources a").count() >= 2)
         check("安全カードが出る", page.locator("#safetyCard").count() == 1)
@@ -351,14 +353,16 @@ def run(base: str, do_identify: bool) -> None:
         check("確信度のメーターに幅が入る", widths == ["60%"], str(widths))
 
 
-        # 共有はOSの共有シートを優先し、写真・場所を含めない。非対応時はコピーする
-        x_href = page.locator(".share-result .x-share").get_attribute("href")
-        x_query = page.evaluate("href => Object.fromEntries(new URL(href).searchParams)", x_href)
-        check("結果からXの投稿画面へ進める", x_href.startswith("https://x.com/intent/tweet?") and "セイヨウタンポポ" in x_query.get("text", "") and x_query.get("url") == base + "/", str(x_query))
+        # X向けは判別写真をOSの共有画面へ渡す。一般共有は従来どおり本文だけ
         check("結果のX共有も押す前は通信しない", not page.evaluate("() => performance.getEntriesByType('resource').some(entry => entry.name.includes('x.com/'))"))
-        page.evaluate("""() => Object.defineProperty(navigator, "share", {
-            configurable: true, value: async payload => { window.sharedPayload = payload; }
-        })""")
+        page.evaluate("""() => {
+            Object.defineProperty(navigator, "canShare", {configurable: true, value: payload => Boolean(payload.files?.length)});
+            Object.defineProperty(navigator, "share", {configurable: true, value: async payload => { window.sharedPayload = payload; }});
+        }""")
+        page.locator(".share-result .x-share").click()
+        photo_share = page.evaluate("() => ({text: window.sharedPayload?.text, files: window.sharedPayload?.files?.length, type: window.sharedPayload?.files?.[0]?.type})")
+        check("結果から判別写真をX向け共有画面へ渡せる", photo_share["files"] == 1 and photo_share["type"] == "image/jpeg" and "セイヨウタンポポ" in photo_share["text"], str(photo_share))
+        page.evaluate("() => { window.sharedPayload = null; }")
         page.click("#shareResult")
         shared = page.evaluate("() => window.sharedPayload")
         check("結果を端末の共有先へ渡せる", shared and "セイヨウタンポポ" in shared["text"], str(shared))

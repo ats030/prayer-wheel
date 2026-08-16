@@ -143,7 +143,7 @@ function evidenceHtml(c){
 /* 質で弾いたときの detail は {message, problems}。文字列とオブジェクトの両方が来る */
 function errorText(detail){if(!detail)return "調べられませんでした";if(typeof detail==="string")return detail;const notes=(detail.problems||[]).map(p=>p.message).join(" ");return (detail.message||"調べられませんでした")+(notes?" "+notes:"")}
 function photoNotes(data){const notes=(data.photo_notes||[]);if(!notes.length)return "";return '<div class="photo-notes"><strong>次に撮るときは</strong><ul>'+notes.map(n=>"<li>"+esc(n.message)+"</li>").join("")+"</ul></div>"}
-function sharePanel(candidates){return '<aside class="share-result" aria-label="結果の共有"><div><strong>見つけた候補を共有</strong><span>写真や撮った場所は共有しません。</span></div><div class="share-actions"><a class="btn x-share" href="'+xShareUrl(candidates)+'" target="_blank" rel="noopener noreferrer">Xで共有</a><button class="btn" id="shareResult" type="button">ほかの方法で共有</button></div></aside>'}
+function sharePanel(candidates,photo){return '<aside class="share-result" aria-label="結果の共有"><div><strong>判別写真と候補を共有</strong><span>'+(photo?'共有画面でXを選んでください。撮った場所は共有しません。':'写真がないため、Xには候補だけを共有します。')+'</span></div><div class="share-actions"><button class="btn x-share" id="sharePhotoX" type="button">'+(photo?'写真つきで共有':'Xで共有')+'</button><button class="btn" id="shareResult" type="button">ほかの方法で共有</button></div></aside>'}
 function render(data){if(!data.candidates.length){$('results').className='';$("results").innerHTML=photoNotes(data)+`<div class="placeholder">図鑑データで確認できる候補が見つかりませんでした。全体・もよう・特徴のある部分を、別の角度から撮ってみてください。</div>${safetyHtml()}`;return}$('results').className='';$('results').innerHTML=photoNotes(data)+'<p class="summary"><strong>'+esc(data.category)+'</strong> · '+esc(data.summary)+'</p>' +data.candidates.map((c,i)=>'<article class="candidate"><div class="name-row"><div><div class="name">'+(i+1)+'. '+esc(c.common_name_ja)+'</div><div class="latin">'+esc(c.scientific_name)+'</div>'+taxonomyBadge(c)+agreementBadge(c)+'</div>'+confidenceView(c)+protectedSpeciesHtml(c)+evidenceHtml(c)+sexHtml(c,data.category)+(c.uncertainty?'<div class="uncertainty">もっと確かめたいこと：'+esc(c.uncertainty)+'</div>':'')+'<div class="sources"><a target="_blank" rel="noopener" href="'+sourceUrl(noJapaneseName(c.common_name_ja)?c.scientific_name:c.common_name_ja)+'">図鑑を検索 ↗</a>'+(wikipediaUrl(c)?'<a target="_blank" rel="noopener noreferrer" href="'+esc(wikipediaUrl(c))+'">Wikipedia ↗</a>':'')+(c.taxonomy_url?'<a target="_blank" rel="noopener" href="'+esc(c.taxonomy_url)+'">iNaturalist ↗</a>':'')+'</div>'+animalReferenceHtml(c,data.category)+affiliateProductLink(c,data.category)+'</article>').join('')+safetyHtml()+plantnetCreditHtml(data)+affiliateHtml();applyMeters();if(document.getElementById('affiliateCard'))fetch('/api/affiliate/impression',{method:'POST'}).catch(()=>{});loadAmazonProducts()}
 function historyDb(){return new Promise((resolve,reject)=>{if(!("indexedDB" in window)){reject(new Error("このブラウザでは、調べた記録を保存できません"));return}const request=indexedDB.open("species-history",1);request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("entries"))db.createObjectStore("entries",{keyPath:"id"})};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
 function requestValue(request){return new Promise((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
@@ -208,10 +208,11 @@ async function pendingPhotos(){
 function pendingToBlobs(urls){return (urls||[]).map(dataUrlToBlob).filter(Boolean)}
 
 async function finishIdentification(data,pending){
-  render(data);
+  const historyPhotos=pendingToBlobs(pending?.photos);
+  render(data,historyPhotos[0]||null);
   showStatus('似ている生きものを表示しました。実物と見くらべてください。');
   writePending(null);
-  try{await saveHistory(data,{...pending,photos:pendingToBlobs(pending?.photos)})}
+  try{await saveHistory(data,{...pending,photos:historyPhotos})}
   catch(error){showStatus("候補は表示できましたが、この端末の記録には保存できませんでした。 "+error.message,true)}
 }
 
@@ -330,10 +331,10 @@ function shootingGuide(data){
     +'</ul><div class="actions"><button class="btn primary" id="addPhotoCamera" type="button">カメラで撮って足す</button><button class="btn" id="addPhotoLibrary" type="button">写真を選んで足す</button></div>'
     +'<p class="guide-note">いま選んでいる写真はそのまま残ります（合わせて'+MAX_PHOTOS+'枚まで）。足したあと、もう一度「名前を調べる」を押してください。</p></aside>';
 }
-render=function(data){
+render=function(data,sharePhoto=null){
   renderIdentification(data);
   const guide=shootingGuide(data);
-  if(data.candidates?.length){$("results").insertAdjacentHTML("beforeend",sharePanel(data.candidates));$("shareResult").onclick=()=>shareCandidates(data.candidates,$("shareResult"),()=>showStatus("共有できませんでした。もう一度お試しください。",true))}
+  if(data.candidates?.length){$("results").insertAdjacentHTML("beforeend",sharePanel(data.candidates,sharePhoto));$("sharePhotoX").onclick=()=>sharePhotoForX(data.candidates,sharePhoto,()=>showStatus("共有できませんでした。もう一度お試しください。",true));$("shareResult").onclick=()=>shareCandidates(data.candidates,$("shareResult"),()=>showStatus("共有できませんでした。もう一度お試しください。",true))}
   if(!guide)return;
   /* 候補が1件も残らなかったときは要約がない。撮り直しを促す一文の直後に置く
      (安全カードの後ろに回すと、案内とボタンが画面の外へ出てしまう) */

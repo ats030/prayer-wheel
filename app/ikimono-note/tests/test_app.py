@@ -139,7 +139,7 @@ def test_index_saves_history_but_does_not_render_it():
         assert gone not in source, gone
     # 保存に失敗したら、隠れた要素ではなく利用者が見ている場所へ出す
     # 書き込みの失敗は、識別と同じ status 行に出す (隠れた場所へ落とさない)
-    assert 'saveHistory(data,{...pending,photos:pendingToBlobs(pending?.photos)})' in source
+    assert 'saveHistory(data,{...pending,photos:historyPhotos})' in source
     assert 'この端末の記録には保存できませんでした。' in source
     assert "この端末の記録には保存できませんでした" in source
     assert all("history" not in route.path for route in main.app.routes if route.path.startswith("/api/"))
@@ -3162,16 +3162,20 @@ def test_result_and_history_sharing_use_one_safe_helper():
     assert "navigator.share(payload)" in sharing
     assert "navigator.clipboard.writeText" in sharing
     assert 'function xShareUrl(candidates)' in sharing
+    assert 'function sharePhotoForX(candidates,photo,onError)' in sharing
+    assert 'navigator.canShare?.({files:[file]})' in sharing
+    assert 'navigator.share({...payload,files:[file]})' in sharing
+    assert 'new File([photo]' in sharing
     assert '"https://x.com/intent/tweet?"+params.toString()' in sharing
     assert "new URLSearchParams({text:payload.text,url:payload.url})" in sharing
     assert 'class="btn x-share"' in index
     assert 'class="btn x-share"' in history
-    assert 'target="_blank" rel="noopener noreferrer">Xで共有' in index
+    assert 'id="sharePhotoX"' in index
+    assert '共有画面でXを選んでください。' in index
     assert "widgets.js" not in page_source("/") + page_source("/history")
     assert 'error?.name==="AbortError"' in sharing
     assert 'url:location.origin+"/"' in sharing
     assert "結果は候補です。図鑑や実物で確かめてください。" in sharing
-    assert "写真や撮った場所、観察メモは共有しません。" in history
 
     share_body = sharing.split("function shareData(candidates){", 1)[1].split(
         "async function shareCandidates", 1

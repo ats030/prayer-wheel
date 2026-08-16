@@ -7,6 +7,22 @@ function xShareUrl(candidates){
   const params=new URLSearchParams({text:payload.text,url:payload.url});
   return "https://x.com/intent/tweet?"+params.toString();
 }
+function sharePhotoFile(photo,candidates){
+  if(!photo)return null;
+  const type=String(photo.type||"").startsWith("image/")?photo.type:"image/jpeg";
+  const extension={"image/png":"png","image/webp":"webp","image/gif":"gif"}[type]||"jpg";
+  const rawName=(candidates?.[0]?.common_name_ja||"ikimono").replace(/[\\/:*?"<>|]/g,"_");
+  return photo instanceof File?photo:new File([photo],rawName+"."+extension,{type});
+}
+async function sharePhotoForX(candidates,photo,onError){
+  const payload=shareData(candidates),file=sharePhotoFile(photo,candidates);
+  if(file&&navigator.share&&navigator.canShare?.({files:[file]})){
+    try{await navigator.share({...payload,files:[file]});return}
+    catch(error){if(error?.name==="AbortError")return}
+  }
+  const opened=window.open(xShareUrl(candidates),"_blank","noopener,noreferrer");
+  if(!opened&&onError)onError();
+}
 async function shareCandidates(candidates,button,onError){
   const payload=shareData(candidates);
   if(navigator.share){
