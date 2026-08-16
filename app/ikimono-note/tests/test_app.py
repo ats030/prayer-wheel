@@ -3147,6 +3147,10 @@ def test_public_analytics_waits_for_explicit_consent(monkeypatch):
     # 保持期間は GA4 側で2か月に設定済み。読み手が確かめようのない「管理画面で設定されます」
     # ではなく、実際に設定した値を書く
     assert "2か月保持したのち削除されます" in privacy
+    # 解析は公開版だけの機能。運営者用ではスクリプトを読み込まないので、
+    # ボタンを出したままにすると押しても何も起きない
+    css = client.get("/assets/privacy.css").text
+    assert 'body[data-app-mode="operator"] #analytics-reset{display:none}' in css
     assert "同意しない場合はGoogleのタグを読み込みません" in privacy
 
 

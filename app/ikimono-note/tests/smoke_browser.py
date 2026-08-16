@@ -174,6 +174,12 @@ def run(base: str, do_identify: bool) -> None:
               not page.locator("#message").inner_text().strip() if page.locator("#message").count() else True,
               page.locator("#message").inner_text()[:60] if page.locator("#message").count() else "")
         check("モデルの選択肢が描けている", page.locator("select[id^=model-]").count() >= 3)
+
+        # 運営者用では解析スクリプトを読まない。押しても動かないボタンを見せない
+        page.goto(base + "/privacy"); page.wait_for_load_state("networkidle")
+        check("運営者用でアクセス解析の設定ボタンを出さない",
+              not page.locator("#analytics-reset").is_visible())
+        page.goto(base + "/settings"); page.wait_for_load_state("networkidle")
         check("ドライブの導線が出る", page.locator("#drive-connect").count() == 1)
 
         # 利用者自身の観察メモ。AIの候補とは別に保存され、再読込でも残る
