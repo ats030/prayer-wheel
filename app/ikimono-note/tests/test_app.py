@@ -875,6 +875,11 @@ def test_dashboard_map_is_never_loaded_without_an_explicit_press():
     assert ".map-cursor::before{left:50%" in map_style and "transform:translateX(-50%)" in map_style
     assert ".map-cursor::after{left:-8px;top:50%" in map_style and "transform:translateY(-50%)" in map_style
     assert "function centerReadout(map)" in page
+    assert "function mapPopup(record)" in page
+    assert "record.listThumbnail||photos[0]||record.thumbnail" in page
+    assert "bindPopup(mapPopup(record),{maxWidth:220})" in page
+    assert "写真なし" in page
+    assert ".map-popup-photo" in map_style
     for value_id in ["mapLandform", "mapElevation", "mapMicroterrain", "mapLandUse", "mapVegetation"]:
         assert f'id="{value_id}"' in page
     assert "meshinfo.geojson" in page
