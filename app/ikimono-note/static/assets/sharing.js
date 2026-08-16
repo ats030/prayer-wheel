@@ -17,7 +17,7 @@ function sharePhotoFile(photo,candidates){
 async function sharePhotoForX(candidates,photo,onError){
   const payload=shareData(candidates),file=sharePhotoFile(photo,candidates);
   if(file&&navigator.share&&navigator.canShare?.({files:[file]})){
-    try{await navigator.share({...payload,files:[file]});return}
+    try{await navigator.share({files:[file]});return}
     catch(error){if(error?.name==="AbortError")return}
   }
   const opened=window.open(xShareUrl(candidates),"_blank","noopener,noreferrer");

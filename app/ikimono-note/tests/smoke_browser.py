@@ -278,11 +278,8 @@ def run(base: str, do_identify: bool) -> None:
             Object.defineProperty(navigator, "share", {configurable: true, value: async payload => { window.historySharedPayload = payload; }});
         }""")
         detail.locator(".x-share").click()
-        history_photo_share = page.evaluate("() => ({text: window.historySharedPayload?.text, files: window.historySharedPayload?.files?.length, type: window.historySharedPayload?.files?.[0]?.type})")
-        check("記録から判別写真をX向け共有画面へ渡せる", history_photo_share["files"] == 1 and history_photo_share["type"] == "image/png" and "セイヨウタンポポ" in history_photo_share["text"], str(history_photo_share))
-        check("記録共有に位置やAI設定を含めない", all(
-            value not in history_photo_share["text"] for value in ["35.6812", "139.7671", "smoke"]
-        ), str(history_photo_share))
+        history_photo_share = page.evaluate("() => ({keys: Object.keys(window.historySharedPayload || {}), files: window.historySharedPayload?.files?.length, type: window.historySharedPayload?.files?.[0]?.type})")
+        check("記録から判別写真をX向け共有画面へ渡せる", history_photo_share["keys"] == ["files"] and history_photo_share["files"] == 1 and history_photo_share["type"] == "image/png", str(history_photo_share))
         page.set_viewport_size({"width": 390, "height": 844})
         history_share_box = detail.locator(".record-share").bounding_box()
         history_share_button = detail.locator(".x-share").bounding_box()
@@ -356,8 +353,8 @@ def run(base: str, do_identify: bool) -> None:
             Object.defineProperty(navigator, "share", {configurable: true, value: async payload => { window.sharedPayload = payload; }});
         }""")
         page.locator(".share-result .x-share").click()
-        photo_share = page.evaluate("() => ({text: window.sharedPayload?.text, files: window.sharedPayload?.files?.length, type: window.sharedPayload?.files?.[0]?.type})")
-        check("結果から判別写真をX向け共有画面へ渡せる", photo_share["files"] == 1 and photo_share["type"] == "image/jpeg" and "セイヨウタンポポ" in photo_share["text"], str(photo_share))
+        photo_share = page.evaluate("() => ({keys: Object.keys(window.sharedPayload || {}), files: window.sharedPayload?.files?.length, type: window.sharedPayload?.files?.[0]?.type})")
+        check("結果から判別写真をX向け共有画面へ渡せる", photo_share["keys"] == ["files"] and photo_share["files"] == 1 and photo_share["type"] == "image/jpeg", str(photo_share))
         page.set_viewport_size({"width": 390, "height": 844})
         share_box = page.locator(".share-result").bounding_box()
         check("共有ボタンがスマホ幅に収まる", bool(share_box) and share_box["x"] >= 0 and share_box["x"] + share_box["width"] <= 390, str(share_box))

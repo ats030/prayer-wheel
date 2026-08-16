@@ -3160,7 +3160,7 @@ def test_result_and_history_sharing_use_one_safe_helper():
     assert 'function xShareUrl(candidates)' in sharing
     assert 'function sharePhotoForX(candidates,photo,onError)' in sharing
     assert 'navigator.canShare?.({files:[file]})' in sharing
-    assert 'navigator.share({...payload,files:[file]})' in sharing
+    assert 'navigator.share({files:[file]})' in sharing
     assert 'new File([photo]' in sharing
     assert '"https://x.com/intent/tweet?"+params.toString()' in sharing
     assert "new URLSearchParams({text:payload.text,url:payload.url})" in sharing
@@ -3168,7 +3168,7 @@ def test_result_and_history_sharing_use_one_safe_helper():
     assert 'class="btn x-share"' in history
     assert 'id="sharePhotoX"' in index
     assert '写真つきでXへ' in index
-    assert 'ボタンを押したあと、共有先でXを選びます。' in index
+    assert '共有先でXを選び、本文はXで入力します。' in index
     assert "widgets.js" not in page_source("/") + page_source("/history")
     assert 'error?.name==="AbortError"' in sharing
     assert 'url:location.origin+"/"' in sharing

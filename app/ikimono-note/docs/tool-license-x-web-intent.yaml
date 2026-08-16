@@ -9,7 +9,7 @@ license:
 conditions:
   - Open the official https://x.com/intent/tweet endpoint only after an explicit user click.
   - Do not load the X for Websites JavaScript, widgets, tracking pixels, or embedded content.
-  - On browsers that support file sharing, pass the first re-encoded identification photo to the operating-system share sheet only after an explicit user click; the user chooses X there.
+  - On browsers that support file sharing, pass only the first re-encoded identification photo (without text, title, or URL) to the operating-system share sheet after an explicit user click; the user chooses X there and enters post text in X.
   - Check file-share support with navigator.canShare before calling navigator.share with files.
   - If file sharing is unavailable, pre-fill only candidate names, confidence, the candidate disclaimer, and the public service URL in X Web Intent.
   - Do not include coordinates, observation dates, notes, provider or model details, API keys, or account data.
