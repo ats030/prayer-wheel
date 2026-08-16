@@ -328,6 +328,31 @@ def run(base: str, do_identify: bool) -> None:
         widths = page.eval_on_selector_all(".meter span", "els => els.map(e => e.style.width)")
         check("確信度のメーターに幅が入る", widths == ["60%"], str(widths))
 
+
+        # 共有はOSの共有シートを優先し、写真・場所を含めない。非対応時はコピーする
+        page.evaluate("""() => Object.defineProperty(navigator, "share", {
+            configurable: true, value: async payload => { window.sharedPayload = payload; }
+        })""")
+        page.click("#shareResult")
+        shared = page.evaluate("() => window.sharedPayload")
+        check("結果を端末の共有先へ渡せる", shared and "セイヨウタンポポ" in shared["text"], str(shared))
+        check("共有内容に写真や場所を含めない", shared and all(
+            word not in shared["text"] for word in ["thumbnail", "coordinates", "撮った場所"]
+        ), str(shared))
+        page.evaluate("""() => {
+            Object.defineProperty(navigator, "share", {configurable: true, value: undefined});
+            Object.defineProperty(navigator, "clipboard", {
+                configurable: true, value: {writeText: async text => { window.copiedShare = text; }}
+            });
+        }""")
+        page.click("#shareResult")
+        copied = page.evaluate("() => window.copiedShare")
+        check("共有非対応ブラウザでは本文をコピーする", copied and base in copied, str(copied))
+        page.set_viewport_size({"width": 390, "height": 844})
+        share_box = page.locator(".share-result").bounding_box()
+        check("共有ボタンがスマホ幅に収まる", bool(share_box) and share_box["x"] >= 0 and share_box["x"] + share_box["width"] <= 390, str(share_box))
+        check("共有ボタンの高さが44px以上", page.locator("#shareResult").bounding_box()["height"] >= 44)
+        page.set_viewport_size({"width": 1100, "height": 900})
         # 広告は候補ごと。商品APIが断られていても、候補ごとの検索リンクは残る
         page.evaluate("data => render(data)", THREE_CANDIDATE_SAMPLE)
         page.wait_for_timeout(2500)

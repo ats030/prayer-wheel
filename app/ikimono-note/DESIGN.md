@@ -36,6 +36,7 @@ with the subject.
   louder. Plain-language warnings replace clinical ones.
 
 ## Visual system
+- Result sharing uses the device share sheet, with clipboard fallback. It shares only candidate names, confidence, an explicit candidate disclaimer, and the public service URL; photographs, location, observation date, result summary, provider, and model stay out of the payload.
 
 - Near-white canvas with a faint green cast, white panels, hairline borders,
   and one green accent. `prefers-color-scheme: dark` swaps the same token names

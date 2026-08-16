@@ -3145,3 +3145,25 @@ def test_public_analytics_waits_for_explicit_consent(monkeypatch):
     assert 'id="analytics-reset"' in privacy
     assert "保持期間はGoogle Analyticsの管理画面で設定されます" in privacy
     assert "同意しない場合はGoogleのタグを読み込みません" in privacy
+
+
+def test_result_sharing_uses_safe_allowlist_and_clipboard_fallback():
+    script = client.get("/assets/index.js").text
+
+    assert 'id="shareResult"' in script
+    assert "navigator.share(payload)" in script
+    assert "navigator.clipboard.writeText" in script
+    assert 'error?.name==="AbortError"' in script
+    assert 'url:location.origin+"/"' in script
+    assert "結果は候補です。図鑑や実物で確かめてください。" in script
+    assert "写真や撮った場所は共有しません。" in script
+
+    share_body = script.split("function shareData(data){", 1)[1].split(
+        "async function shareResult", 1
+    )[0]
+    for private_field in [
+        "thumbnail", "thumbnails", "coordinates", "observedDate",
+        "summary", "provider", "model", "email", "api_key",
+    ]:
+        assert private_field not in share_body
+    assert "data.location" not in share_body
