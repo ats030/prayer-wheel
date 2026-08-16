@@ -1,4 +1,3 @@
-const SHARE_MAX_PHOTOS=4;/* Xの1投稿に載る画像は4枚まで。それ以上渡しても投稿側で落ちる */
 const X_WEIGHTED_LIMIT=280;/* Xの上限。かな・漢字は2文字、ラテン文字は1文字として数えられる */
 const X_URL_WEIGHT=23;/* URLは実際の長さによらず23文字ぶんとして数えられる */
 /* twitter-text の既定の重み付け。ここを素朴に text.length で数えると、日本語は
@@ -37,66 +36,68 @@ function shareBody(candidates){
   }
   return shareBodyText(head,chosen);
 }
-function shareData(candidates){
-  return {title:"生きものノートで調べました",text:shareBody(candidates),url:location.origin+"/"};
-}
-function shareText(candidates){const payload=shareData(candidates);return payload.text+"\n"+payload.url}
-function xShareUrl(candidates){
-  const payload=shareData(candidates);
-  const params=new URLSearchParams({text:payload.text,url:payload.url});
+/* Xのカードは1200x628が目安。これ以上大きくしても効かず、Firestore のドキュメント上限
+   (1MiB) に近づくだけ */
+const SHARE_PAGE_MAX_EDGE=1200;
+function xShareUrl(candidates,pageUrl){
+  const params=new URLSearchParams({text:shareBody(candidates),url:pageUrl||location.origin+"/"});
   return "https://x.com/intent/tweet?"+params.toString();
 }
-function sharePhotoFile(photo,candidates,index=0){
+/* 共有ページに載せる1枚。shrinkForHistory は canvas 経由なので必ず JPEG を返す。
+   X がカードに出す形式は JPEG・PNG・GIF だけで、webp のまま送ると画像の出ないカードになる */
+async function sharePageImage(photo){
   if(!photo)return null;
-  const type=String(photo.type||"").startsWith("image/")?photo.type:"image/jpeg";
-  const extension={"image/png":"png","image/webp":"webp","image/gif":"gif"}[type]||"jpg";
-  const rawName=(candidates?.[0]?.common_name_ja||"ikimono").replace(/[\\/:*?"<>|]/g,"_");
-  return photo instanceof File?photo:new File([photo],rawName+(index?"-"+(index+1):"")+"."+extension,{type});
-}
-function sharePhotoFiles(photos,candidates){
-  const list=Array.isArray(photos)?photos:(photos?[photos]:[]);
-  return list.filter(Boolean).slice(0,SHARE_MAX_PHOTOS).map((photo,index)=>sharePhotoFile(photo,candidates,index)).filter(Boolean);
-}
-/* 複数枚を断る端末でも1枚なら受け取ることがある。全滅と決めつけず、通る枚数まで減らして試す */
-function shareableFiles(files){
-  if(!files.length||!navigator.share||!navigator.canShare)return [];
-  for(let count=files.length;count>0;count--){
-    const subset=files.slice(0,count);
-    if(navigator.canShare({files:subset}))return subset;
+  if(typeof shrinkForHistory==="function"){
+    try{const blob=await shrinkForHistory(photo,SHARE_PAGE_MAX_EDGE);if(blob)return blob}
+    catch(error){/* 縮められなければ元のまま送る。大きすぎればサーバーが断る */}
   }
-  return [];
+  return photo instanceof Blob?photo:null;
 }
-/* 本文と写真を一度に渡すと、共有先は本文だけを受け取って写真を落とす。共有シートには写真だけを渡し、
-   本文はクリップボードへ回す。writeText はユーザー操作と同じターンで呼ぶ必要があるので await しない */
-function copyShareText(candidates){
-  if(!navigator.clipboard?.writeText)return Promise.resolve(false);
-  try{return navigator.clipboard.writeText(shareText(candidates)).then(()=>true,()=>false)}
-  catch(error){return Promise.resolve(false)}
+function sharePageCandidates(candidates){
+  return (candidates||[]).slice(0,3).map(candidate=>({
+    common_name_ja:candidate.common_name_ja||"",
+    scientific_name:candidate.scientific_name||"",
+    confidence:Number(candidate.confidence||0),
+    traits:(candidate.traits||[]).slice(0,3)}));
 }
-/* PCのブラウザは共有シートを持たず、X Web Intent には画像を渡す口がない。写真を端末へ落として
-   投稿画面を開き、添付だけをユーザーの手に委ねる */
-function downloadSharePhotos(files){
-  files.forEach(file=>{
-    const url=URL.createObjectURL(file),link=document.createElement("a");
-    link.href=url;link.download=file.name;document.body.appendChild(link);link.click();link.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),60000);
-  });
+/* 共有ボタンを押したときだけ、その記録が公開ページになる。押していない記録はここを通らない */
+async function createSharePage(candidates,photo){
+  const image=await sharePageImage(photo);
+  if(!image)throw new Error("共有できる写真がありません。");
+  const form=new FormData();
+  form.append("photo",new File([image],"share.jpg",{type:image.type||"image/jpeg"}));
+  form.append("candidates",JSON.stringify(sharePageCandidates(candidates)));
+  const response=await fetch("/api/share",{method:"POST",body:form});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.detail||"共有ページを作れませんでした。");
+  return data;
 }
-function sharedPhotoNotice(shared,total){return shared<total?"写真は"+shared+"枚だけ渡せました。":""}
-async function sharePhotoForX(candidates,photos,onError,onNotice){
-  const files=sharePhotoFiles(photos,candidates),sendable=shareableFiles(files);
-  if(sendable.length){
-    const copied=copyShareText(candidates);
-    try{
-      await navigator.share({files:sendable});
-      onNotice?.(sharedPhotoNotice(sendable.length,files.length)+(await copied?"本文をコピーしました。Xで貼り付けてください。":"本文はXで入力してください。"));
-      return;
-    }
-    catch(error){if(error?.name==="AbortError")return}
+/* 公開ページを作ってからXを開く。開くのは押した直後でないとブロックされるので、先に空の
+   タブを取っておき、URLが決まってからそこへ送る。about:blank のまま数秒待たせることになるが、
+   押し直しを求めるより短い */
+async function shareToX(candidates,photo,onError,onNotice,onShared){
+  /* 写真がなければ公開ページを作る意味がない。候補だけを本文にして投稿画面を開く */
+  if(!photo){
+    if(!window.open(xShareUrl(candidates),"_blank","noopener,noreferrer"))onError?.("Xの投稿画面を開けませんでした。");
+    return;
   }
-  const opened=window.open(xShareUrl(candidates),"_blank","noopener,noreferrer");
-  if(!opened){onError?.();return}
-  if(!files.length)return;
-  downloadSharePhotos(files);
-  onNotice?.("写真"+files.length+"枚を端末に保存しました。Xの投稿画面で添付してください。");
+  const tab=window.open("about:blank","_blank");
+  if(tab){try{tab.opener=null}catch(error){}}
+  try{
+    const shared=await createSharePage(candidates,photo);
+    onShared?.(shared);
+    const target=xShareUrl(candidates,shared.url);
+    if(tab)tab.location.replace(target);
+    else if(!window.open(target,"_blank","noopener,noreferrer"))throw new Error("Xの投稿画面を開けませんでした。");
+    onNotice?.("共有ページを作りました。写真はXのカードに出ます。");
+  }catch(error){
+    if(tab)try{tab.close()}catch(ignored){}
+    onError?.(error?.message||"共有できませんでした。もう一度お試しください。");
+  }
+}
+async function deleteSharePage(token){
+  const response=await fetch("/api/share/"+encodeURIComponent(token)+"/delete",{method:"POST"});
+  if(response.ok)return true;
+  const data=await response.json().catch(()=>({}));
+  throw new Error(data.detail||"公開を取り消せませんでした。");
 }

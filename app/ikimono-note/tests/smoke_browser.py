@@ -23,6 +23,7 @@ import contextlib
 import json
 import re
 import sys
+import tempfile
 
 from playwright.sync_api import sync_playwright
 
@@ -43,8 +44,11 @@ def app_for_checking():
     if ADMIN:
         yield ADMIN, PUBLIC or ADMIN
         return
+    # 共有ページの置き場は検査ごとに捨てる。手元の本物 (~/data) を検査で汚さない
+    share_db = Path(tempfile.mkdtemp(prefix="ikimono-smoke-")) / "shares.db"
     environment = {**os.environ, "IKIMONO_PUBLIC_MODE": "0",
-                   "IKIMONO_ALLOWED_HOSTS": "127.0.0.1,localhost"}
+                   "IKIMONO_ALLOWED_HOSTS": "127.0.0.1,localhost",
+                   "IKIMONO_SHARE_DB": str(share_db)}
     process = subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "main:app", "--host", "127.0.0.1",
          "--port", str(LOCAL_PORT), "--log-level", "warning"],
@@ -273,19 +277,37 @@ def run(base: str, do_identify: bool) -> None:
         check("記録の内容を開くと緯度経度を表示する", detail.evaluate("node => node.open") and "35.6812" in detail.inner_text() and "139.7671" in detail.inner_text())
         check("記録の候補に写真付きX共有ボタンが1つ出る", detail.locator(".x-share").count() == 1 and detail.locator(".share-record").count() == 0)
         check("押す前はXへ通信しない", not page.evaluate("() => performance.getEntriesByType('resource').some(entry => entry.name.includes('x.com/'))"))
-        check("記録の共有ボタンが渡す枚数を名乗る", "写真2枚つきでXへ" in detail.locator(".record-share").inner_text(), detail.locator(".record-share").inner_text())
+        check("公開前は取り消しボタンを出さない", detail.locator(".share-revoke").count() == 0)
+        # 開くタブは掴んでおく。about:blank のまま置き去りにすると、以後の検査が別タブを見る
         page.evaluate("""() => {
-            Object.defineProperty(navigator, "canShare", {configurable: true, value: payload => Boolean(payload.files?.length)});
-            Object.defineProperty(navigator, "share", {configurable: true, value: async payload => { window.historySharedPayload = payload; }});
-            Object.defineProperty(navigator, "clipboard", {configurable: true, value: {writeText: async text => { window.historyCopiedText = text; }}});
+            window.openedTargets = [];
+            window.open = url => { window.openedTargets.push(url);
+                return {location: {replace: target => window.openedTargets.push(target)}, close(){}, opener: null}; };
         }""")
         detail.locator(".x-share").click()
-        page.wait_for_timeout(300)
-        history_photo_share = page.evaluate("() => ({keys: Object.keys(window.historySharedPayload || {}), files: window.historySharedPayload?.files?.length, type: window.historySharedPayload?.files?.[0]?.type})")
-        check("記録の判別写真を2枚ともX向け共有画面へ渡せる", history_photo_share["keys"] == ["files"] and history_photo_share["files"] == 2 and history_photo_share["type"] == "image/png", str(history_photo_share))
-        history_copied = page.evaluate("() => window.historyCopiedText || ''")
-        check("記録の共有で本文をクリップボードへ渡す", "写真から調べた候補" in history_copied and "夕方には花が閉じていた" not in history_copied and "35.6812" not in history_copied, history_copied)
-        check("本文をコピーしたことを記録画面で知らせる", "貼り付け" in detail.locator(".share-message").inner_text(), detail.locator(".share-message").inner_text())
+        page.wait_for_function("() => document.querySelector('.share-revoke') !== null", timeout=15000)
+        opened = page.evaluate("() => window.openedTargets || []")
+        intent = next((url for url in opened if "x.com/intent/tweet" in url), "")
+        check("記録の共有がXの投稿画面を開く", bool(intent), str(opened))
+        check("投稿画面に共有ページのURLを載せる", "%2Fs%2F" in intent, intent[:160])
+        check("投稿本文に候補と特徴が入る", "%E5%80%99%E8%A3%9C" in intent, intent[:160])
+        check("投稿本文に観察メモや緯度経度を入れない",
+              "35.6812" not in intent and "%E5%A4%95%E6%96%B9" not in intent, intent[:200])
+        share_url = re.search(r"url=([^&]+)", intent)
+        share_page = page.request.get(re.sub(r"%3A", ":", re.sub(r"%2F", "/", share_url.group(1))))
+        check("共有ページが開ける", share_page.status == 200, str(share_page.status))
+        body = share_page.text()
+        check("共有ページにカード用のタグが入る", 'property="og:image"' in body and 'name="twitter:card"' in body)
+        check("共有ページを検索に載せない", 'content="noindex, nofollow"' in body)
+        check("共有ページに観察メモと緯度経度を出さない",
+              "夕方には花が閉じていた" not in body and "35.6812" not in body)
+        check("公開したら取り消しボタンが出る", detail.locator(".share-revoke").count() == 1)
+        detail.locator(".share-revoke").click()
+        page.wait_for_function("() => document.querySelector('.share-revoke') === null", timeout=15000)
+        check("取り消すと公開ページが消える",
+              page.request.get(re.sub(r"%3A", ":", re.sub(r"%2F", "/", share_url.group(1)))).status == 404)
+        check("取り消しを画面で知らせる", "取り消しました" in detail.locator(".share-message").inner_text(),
+              detail.locator(".share-message").inner_text())
         page.set_viewport_size({"width": 390, "height": 844})
         history_share_box = detail.locator(".record-share").bounding_box()
         history_share_button = detail.locator(".x-share").bounding_box()
@@ -354,20 +376,29 @@ def run(base: str, do_identify: bool) -> None:
 
         # X向けは判別写真をOSの共有画面へ渡す。一般共有は従来どおり本文だけ
         check("結果のX共有も押す前は通信しない", not page.evaluate("() => performance.getEntriesByType('resource').some(entry => entry.name.includes('x.com/'))"))
-        check("結果の共有ボタンが渡す枚数を名乗る", "写真2枚つきでXへ" in page.locator(".share-result").inner_text(), page.locator(".share-result").inner_text())
+        check("結果の共有ボタンが共有ページを作ると名乗る",
+              "共有ページを作り" in page.locator(".share-result").inner_text(),
+              page.locator(".share-result").inner_text())
         page.evaluate("""() => {
-            Object.defineProperty(navigator, "canShare", {configurable: true, value: payload => Boolean(payload.files?.length)});
-            Object.defineProperty(navigator, "share", {configurable: true, value: async payload => { window.sharedPayload = payload; }});
-            Object.defineProperty(navigator, "clipboard", {configurable: true, value: {writeText: async text => { window.copiedText = text; }}});
+            window.openedTargets = [];
+            window.open = url => { window.openedTargets.push(url);
+                return {location: {replace: target => window.openedTargets.push(target)}, close(){}, opener: null}; };
         }""")
         page.locator(".share-result .x-share").click()
-        page.wait_for_timeout(300)
-        photo_share = page.evaluate("() => ({keys: Object.keys(window.sharedPayload || {}), files: window.sharedPayload?.files?.length, type: window.sharedPayload?.files?.[0]?.type})")
-        check("結果から判別写真を2枚ともX向け共有画面へ渡せる", photo_share["keys"] == ["files"] and photo_share["files"] == 2 and photo_share["type"] == "image/jpeg", str(photo_share))
-        copied = page.evaluate("() => window.copiedText || ''")
-        check("結果の共有で本文をクリップボードへ渡す", "写真から調べた候補" in copied and "あてはまり度" in copied, copied)
-        check("共有本文に写真から見えた特徴が入る", "写真から見えた特徴" in copied and "ぎざぎざした根生葉" in copied, copied)
-        check("共有本文に観察の要約を入れない", "キク科の草本と考えられます" not in copied, copied)
+        page.wait_for_function("() => (window.openedTargets || []).some(u => u.includes('x.com/intent/tweet'))",
+                               timeout=15000)
+        intent = next(u for u in page.evaluate("() => window.openedTargets") if "x.com/intent/tweet" in u)
+        check("結果の共有がXの投稿画面を開く", bool(intent))
+        check("結果の投稿画面に共有ページのURLを載せる", "%2Fs%2F" in intent, intent[:160])
+        result_url = re.search(r"url=([^&]+)", intent).group(1).replace("%3A", ":").replace("%2F", "/")
+        result_page = page.request.get(result_url)
+        check("結果から作った共有ページが開ける", result_page.status == 200, str(result_page.status))
+        result_body = result_page.text()
+        check("共有ページに候補と特徴が出る",
+              "セイヨウタンポポ" in result_body and "ぎざぎざした根生葉" in result_body)
+        check("共有ページに観察の要約を出さない", "キク科の草本と考えられます" not in result_body)
+        check("共有ページに但し書きを出す", "AI抽出・未確認" in result_body and "結果は候補です" in result_body)
+        check("共有ページの写真が配信される", page.request.get(result_url + "/photo").status == 200)
         # 日本語は1文字が2文字ぶん。text.length で数えると上限を超えたことに気づけない
         limit_case = page.evaluate("""() => {
             const candidates = [{common_name_ja: "ながいなまえのいきもの", confidence: 60,
@@ -378,18 +409,6 @@ def run(base: str, do_identify: bool) -> None:
         }""")
         check("長い特徴でもXの上限に収まる", limit_case["weight"] <= 280, str(limit_case["weight"]))
         check("上限に収めるときも文を途中で切らない", limit_case["ends"], limit_case["text"][-40:])
-
-        # 共有シートを持たないPCでは、写真を端末へ落として投稿画面を開き、添付だけ利用者に委ねる
-        page.evaluate("""() => {
-            window.openedShareUrl = null;
-            Object.defineProperty(navigator, "canShare", {configurable: true, value: () => false});
-            window.open = url => { window.openedShareUrl = url; return {}; };
-        }""")
-        with page.expect_download() as download_info:
-            page.locator(".share-result .x-share").click()
-        check("共有シートがなくても写真を端末に保存する", download_info.value.suggested_filename.endswith(".jpg"), download_info.value.suggested_filename)
-        check("共有シートがなくてもXの投稿画面を開く", "x.com/intent/tweet" in (page.evaluate("() => window.openedShareUrl") or ""), str(page.evaluate("() => window.openedShareUrl")))
-        check("写真を保存したことを結果画面で知らせる", "添付" in page.locator("#status").inner_text(), page.locator("#status").inner_text())
         page.set_viewport_size({"width": 390, "height": 844})
         share_box = page.locator(".share-result").bounding_box()
         check("共有ボタンがスマホ幅に収まる", bool(share_box) and share_box["x"] >= 0 and share_box["x"] + share_box["width"] <= 390, str(share_box))

@@ -1,4 +1,5 @@
 import importlib
+import json
 import os
 import re
 import time
@@ -3157,36 +3158,103 @@ def test_result_and_history_sharing_use_one_safe_helper():
     assert index.count('class="btn x-share"') == 1
     assert history.count('class="btn x-share"') == 1
     assert 'if(!e.candidates?.length)return' in history
-    assert 'function xShareUrl(candidates)' in sharing
-    assert 'async function sharePhotoForX(candidates,photos,onError,onNotice)' in sharing
-    assert 'navigator.canShare({files:subset})' in sharing
-    assert 'navigator.share({files:sendable})' in sharing
-    assert 'new File([photo]' in sharing
-    # 共有シートへ渡すのは写真だけ。本文を混ぜると共有先が写真を落とすので、本文はクリップボードへ回す
-    assert 'navigator.share({text' not in sharing and 'navigator.share({title' not in sharing
-    assert 'navigator.clipboard.writeText(shareText(candidates))' in sharing
-    assert 'link.download=file.name' in sharing
+    assert 'function xShareUrl(candidates,pageUrl)' in sharing
+    assert 'async function shareToX(candidates,photo,onError,onNotice,onShared)' in sharing
+    assert 'fetch("/api/share",{method:"POST",body:form})' in sharing
     assert '"https://x.com/intent/tweet?"+params.toString()' in sharing
-    assert "new URLSearchParams({text:payload.text,url:payload.url})" in sharing
     assert 'class="btn x-share"' in index
     assert 'class="btn x-share"' in history
     assert 'id="sharePhotoX"' in index
-    assert '写真つきでXへ' in index
-    assert '共有先でXを選び、本文は貼り付けてください。' in index
+    assert 'この結果だけの共有ページを作り、そのリンクをXへ送ります。' in index
     assert "widgets.js" not in page_source("/") + page_source("/history")
-    assert 'error?.name==="AbortError"' in sharing
-    assert 'url:location.origin+"/"' in sharing
+    assert 'pageUrl||location.origin+"/"' in sharing
     assert "結果は候補です。図鑑や実物で確かめてください。" in sharing
     # 本文は識別結果の traits から組み立てる。AI を呼び直さないので共有時の通信は増えない
     assert "写真から見えた特徴：" in sharing
     assert "candidates?.[0]?.traits" in sharing
     assert "function xWeight(text)" in sharing and "X_WEIGHTED_LIMIT=280" in sharing
     assert "X_URL_WEIGHT=23" in sharing
-    assert "fetch(" not in sharing and "XMLHttpRequest" not in sharing
+    # 押した記録だけが公開ページになる。一覧や保存の経路から /api/share は呼ばない
+    assert history.count('/api/share') == 0 and index.count('/api/share') == 0
+    assert 'function deleteSharePage(token)' in sharing
+    assert '公開を取り消す' in history
+    # 取り消しの導線は公開ページ自体にもある。記録を消したあとや別の端末でも止められる
+    revoke_script = client.get("/assets/share-page.js").text
+    assert 'revokeShare' in revoke_script and '/api/share/' in revoke_script
 
-    share_body = sharing.split("function xShareUrl", 1)[0]
+    # 本文にも、公開ページへ送る中身にも、載せないと決めたものが混ざらないこと。
+    # 範囲を切らずにファイル全体で見る。送る側が増えても、ここで気づける
     for private_field in [
         "thumbnail", "thumbnails", "coordinates", "observedDate", "userNote",
         "noteUpdatedAt", "summary", "provider", "model", "email", "api_key",
     ]:
-        assert private_field not in share_body
+        assert private_field not in sharing, private_field
+
+
+def test_share_page_publishes_only_the_fields_we_chose(tmp_path, monkeypatch):
+    """公開ページに出るのは写真・候補名・あてはまり度・特徴だけ。
+
+    画面が何を送っても、載せる項目はサーバーが決める。ここを素通しにすると、画面側に
+    項目が増えた日に、載せないと決めたもの (撮影地・観察メモ・要約) が公開ページへ回る。
+    """
+    monkeypatch.setattr(main.shares, "DB_PATH", tmp_path / "shares.db")
+    candidates = [{
+        "common_name_ja": "セイヨウタンポポ", "scientific_name": "Taraxacum officinale",
+        "confidence": 60, "traits": ["ぎざぎざした根生葉"],
+        # 画面が余計に送ってきた体で入れる。これらが出たら公開の約束が壊れている
+        "summary": "キク科の草本と考えられます", "userNote": "自宅の庭で見つけた",
+        "coordinates": {"latitude": 35.6812, "longitude": 139.7671},
+        "observedDate": "2026-08-16", "provider": "gemini",
+    }]
+    created = client.post("/api/share",
+                          files={"photo": ("a.jpg", usable_photo(), "image/jpeg")},
+                          data={"candidates": json.dumps(candidates, ensure_ascii=False)})
+    assert created.status_code == 200, created.text
+    token = created.json()["token"]
+
+    page = client.get(f"/s/{token}")
+    assert page.status_code == 200
+    assert "セイヨウタンポポ" in page.text and "ぎざぎざした根生葉" in page.text
+    assert "あてはまり度 60%" in page.text
+    for leaked in ["キク科の草本と考えられます", "自宅の庭で見つけた", "35.6812", "139.7671",
+                   "2026-08-16", "gemini"]:
+        assert leaked not in page.text, leaked
+    # カードに要るタグと、検索には載せない宣言
+    assert 'property="og:image"' in page.text and 'name="twitter:card"' in page.text
+    assert 'content="noindex, nofollow"' in page.text
+    assert client.get(f"/s/{token}/photo").status_code == 200
+
+
+def test_share_can_be_revoked_and_stops_serving(tmp_path, monkeypatch):
+    monkeypatch.setattr(main.shares, "DB_PATH", tmp_path / "shares.db")
+    candidates = [{"common_name_ja": "セイヨウタンポポ", "confidence": 60, "traits": []}]
+    token = client.post("/api/share",
+                        files={"photo": ("a.jpg", usable_photo(), "image/jpeg")},
+                        data={"candidates": json.dumps(candidates, ensure_ascii=False)}
+                        ).json()["token"]
+    assert client.get(f"/s/{token}").status_code == 200
+    assert client.post(f"/api/share/{token}/delete").json() == {"deleted": True}
+    # 取り消したら、ページも写真も出さない。カードの画像だけ生き残ると取り消しにならない
+    assert client.get(f"/s/{token}").status_code == 404
+    assert client.get(f"/s/{token}/photo").status_code == 404
+    assert client.post(f"/api/share/{token}/delete").status_code == 404
+
+
+def test_share_refuses_formats_x_cannot_show(tmp_path, monkeypatch):
+    """webp は X のカードに出ない。受け取ってから画像の出ないページを作らない。"""
+    monkeypatch.setattr(main.shares, "DB_PATH", tmp_path / "shares.db")
+    buffer = io.BytesIO()
+    Image.new("RGB", (400, 300), "green").save(buffer, "WEBP")
+    candidates = [{"common_name_ja": "セイヨウタンポポ", "confidence": 60, "traits": []}]
+    refused = client.post("/api/share",
+                          files={"photo": ("a.webp", buffer.getvalue(), "image/webp")},
+                          data={"candidates": json.dumps(candidates, ensure_ascii=False)})
+    assert refused.status_code == 415
+
+
+def test_share_needs_a_candidate(tmp_path, monkeypatch):
+    monkeypatch.setattr(main.shares, "DB_PATH", tmp_path / "shares.db")
+    empty = client.post("/api/share",
+                        files={"photo": ("a.jpg", usable_photo(), "image/jpeg")},
+                        data={"candidates": "[]"})
+    assert empty.status_code == 400

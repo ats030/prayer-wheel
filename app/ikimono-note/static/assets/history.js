@@ -98,10 +98,53 @@ const NOTE_MAX_LENGTH=2000;
 function noteEditor(e){const updated=e.noteUpdatedAt?new Date(e.noteUpdatedAt).toLocaleString("ja-JP"):"";return '<section class="observation-note"><div class="note-heading">自分の観察</div><p>自分で気づいたことを書く欄です。AIが写真から読み取った内容とは別に保存します。</p><textarea class="note-input" maxlength="'+NOTE_MAX_LENGTH+'" aria-label="自分の観察" placeholder="例：葉の裏に小さな虫がいた。夕方には花が閉じていた。">'+esc(e.userNote||"")+'</textarea><div class="note-meta"><span class="note-count">'+String(e.userNote||"").length+' / '+NOTE_MAX_LENGTH+'</span><span class="note-status" role="status">'+(updated?'この端末に保存済み（'+esc(updated)+'）':'この端末に自動で保存します')+'</span></div></section>'}
 async function saveObservationNote(id,value,node){const db=await openDb(),tx=db.transaction("entries","readwrite"),store=tx.objectStore("entries"),current=await request(store.get(id));if(!current){db.close();throw new Error("記録が見つかりません")};const updated={...current,userNote:String(value).slice(0,NOTE_MAX_LENGTH),noteUpdatedAt:new Date().toISOString()};store.put(updated);await finished(tx);db.close();rerunRecords.set(String(id),updated);scheduleAutoBackup();const mark=node.querySelector(".note-mark");if(updated.userNote.trim()&&!mark){const marks=node.querySelector(".row-marks");if(marks)marks.insertAdjacentHTML("beforeend",'<span class="badge note-mark">観察メモあり</span>')}else if(!updated.userNote.trim()&&mark)mark.remove();return updated}
 function bindNoteEditor(node,e){const input=node.querySelector(".note-input"),count=node.querySelector(".note-count"),status=node.querySelector(".note-status");if(!input||!count||!status)return;let timer=null,saving=false;const save=async()=>{clearTimeout(timer);timer=null;if(saving){timer=setTimeout(save,100);return}saving=true;status.textContent="保存中…";try{const updated=await saveObservationNote(e.id,input.value,node);e.userNote=updated.userNote;e.noteUpdatedAt=updated.noteUpdatedAt;status.textContent="この端末に保存済み（"+new Date(updated.noteUpdatedAt).toLocaleString("ja-JP")+"）"}catch(error){status.textContent="保存できませんでした。もう一度入力してください";console.error("観察メモを保存できませんでした",error)}finally{saving=false}};input.addEventListener("input",()=>{count.textContent=input.value.length+" / "+NOTE_MAX_LENGTH;status.textContent="入力中…";clearTimeout(timer);timer=setTimeout(save,700)});input.addEventListener("blur",()=>{if(timer)save()})}
-function historyShareLabel(count){return count>1?'写真'+count+'枚つきでXへ':(count?'写真つきでXへ':'Xで共有')}
-function historyShare(candidates,photos){const count=(photos||[]).length,label=historyShareLabel(count);return '<aside class="record-share" aria-label="記録の共有"><div><strong>'+label+'</strong><span>'+(count?'共有先でXを選び、本文は貼り付けてください。撮った場所や観察メモは含みません。':'写真がないため、候補だけを共有します。')+'</span></div><button class="btn x-share" type="button">'+label+'</button><span class="share-message" role="status"></span></aside>'}
+function shareRevokeButton(record){return record?.shareToken?'<button class="btn share-revoke" type="button">公開を取り消す</button>':''}
+function historyShare(candidates,photos,record){const has=(photos||[]).length>0,shared=Boolean(record?.shareToken);
+  return '<aside class="record-share" aria-label="記録の共有"><div><strong>'+(shared?'この記録は公開中です':'Xで共有')+'</strong><span>'
+    +(shared?'この記録だけの共有ページが出ています。取り消すとリンク先の写真も消えます。'
+      :(has?'この記録だけの共有ページを作り、そのリンクをXへ送ります。写真はXのカードに出ます。撮った場所や観察メモは含みません。'
+          :'写真がないため、候補だけを共有します。'))
+    +'</span></div><div class="share-actions"><button class="btn x-share" type="button">'+(shared?'もう一度Xへ':'Xで共有')+'</button>'+shareRevokeButton(record)+'</div>'
+    +'<span class="share-message" role="status"></span></aside>'}
 const bindNoteEditorWithoutShare=bindNoteEditor;
-bindNoteEditor=function(node,e){bindNoteEditorWithoutShare(node,e);if(!e.candidates?.length)return;const detail=node.querySelector(".detail");if(!detail||detail.querySelector(".record-share"))return;const stored=recordPhotos(e),photos=stored.length?stored:(e.listThumbnail?[e.listThumbnail]:[]);detail.insertAdjacentHTML("beforeend",historyShare(e.candidates,photos));const xButton=detail.querySelector(".x-share"),message=detail.querySelector(".share-message");xButton.onclick=()=>sharePhotoForX(e.candidates,photos,()=>{message.textContent="共有できませんでした。もう一度お試しください。"},text=>{message.textContent=text})};
+bindNoteEditor=function(node,e){bindNoteEditorWithoutShare(node,e);if(!e.candidates?.length)return;const detail=node.querySelector(".detail");if(!detail||detail.querySelector(".record-share"))return;const stored=recordPhotos(e),photos=stored.length?stored:(e.listThumbnail?[e.listThumbnail]:[]);detail.insertAdjacentHTML("beforeend",historyShare(e.candidates,photos,e));bindShareControls(detail,e,photos[0]||null)};
+/* 共有ページを作るのも取り消すのも通信を伴う。押しっぱなしで二重に走らせないよう、
+   終わるまでボタンを止める */
+function bindShareControls(detail,record,photo){
+  const xButton=detail.querySelector(".x-share"),message=detail.querySelector(".share-message");
+  if(!xButton)return;
+  xButton.onclick=()=>{
+    /* すでに公開しているなら、そのページを使い回す。押すたびに作ると、取り消したくても
+       手元に名前が1つしか残らず、消せないページが積み上がる */
+    if(record.shareToken){
+      if(!window.open(xShareUrl(record.candidates,location.origin+"/s/"+record.shareToken),"_blank","noopener,noreferrer"))
+        message.textContent="Xの投稿画面を開けませんでした。";
+      return;
+    }
+    xButton.disabled=true;message.textContent="共有ページを作っています…";
+    shareToX(record.candidates,photo,text=>{xButton.disabled=false;message.textContent=text},
+      text=>{xButton.disabled=false;message.textContent=text},
+      async shared=>{await saveShareToken(record,shared.token);redrawShare(detail,record,photo)})};
+  const revoke=detail.querySelector(".share-revoke");
+  if(revoke)revoke.onclick=async()=>{revoke.disabled=true;message.textContent="取り消しています…";
+    try{await deleteSharePage(record.shareToken);await saveShareToken(record,"");redrawShare(detail,record,photo);
+      detail.querySelector(".share-message").textContent="公開を取り消しました。"}
+    catch(error){revoke.disabled=false;message.textContent=error.message}};
+}
+function redrawShare(detail,record,photo){
+  const box=detail.querySelector(".record-share");
+  if(!box)return;
+  box.outerHTML=historyShare(record.candidates,photo?[photo]:[],record);
+  bindShareControls(detail,record,photo);
+}
+async function saveShareToken(record,token){
+  record.shareToken=token||"";
+  const db=await openDb(),tx=db.transaction("entries","readwrite"),store=tx.objectStore("entries");
+  const current=await request(store.get(record.id));
+  if(current)store.put({...current,shareToken:record.shareToken});
+  await finished(tx);db.close();
+  rerunRecords.set(String(record.id),{...record});
+}
 
 function coordinateDetail(e){const c=e.coordinates;return c?'<div>位置：'+esc(c.latitude)+'、'+esc(c.longitude)+'（おおまかな値）</div>':""}
 function fullDetail(e){const x=e.context||{},m=e.resultMeta||{};return detailPhotos(e)+noteEditor(e)+'<div class="facts">'+(e.category?'<div>分類：'+esc(e.category)+'</div>':"")+(e.summary?'<div>'+esc(e.summary)+'</div>':"")+((e.provider||e.model)?'<div>使ったAI：'+esc([providerLabel(e.provider),e.model].filter(Boolean).join(" · "))+'</div>':"")+(x.observedDate?'<div>撮った日：'+esc(x.observedDate)+'</div>':"")+(x.size?'<div>大きさ：'+esc(x.size)+'</div>':"")+(x.location&&!coordinateLocation(x.location)?'<div>撮った場所：'+esc(x.location)+'</div>':"")+coordinateDetail(e)+(m.strictMode?'<div>まちがい防止：学名を図鑑データで自動チェック</div>':"")+(m.taxonomyChecked?'<div>学名を図鑑データで確認済み'+(m.rejectedCandidates?' · 除いた候補 '+esc(m.rejectedCandidates)+'件':"")+'</div>':"")+(m.plantnetUsed?'<div>植物の候補は <a href="https://plantnet.org/" target="_blank" rel="noopener noreferrer">Pl@ntNet recognition API</a> によるもの</div>':"")+'</div><ol>'+(e.candidates||[]).map(c=>fullCandidate(c,e.category)).join("")+'</ol>'}async function enrich(){const records=await all(),byId=new Map(records.map(e=>[String(e.id),e]));document.querySelectorAll(".entry").forEach(node=>{const e=byId.get(node.dataset.id);if(e){node.querySelector(".detail").innerHTML='<summary>記録の内容を見る</summary>'+fullDetail(e);bindNoteEditor(node,e)}});document.querySelectorAll('.meter span[data-width]').forEach(bar=>{bar.style.width=bar.dataset.width+'%'});document.querySelectorAll(".detail-photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()})}setTimeout(()=>enrich().catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);

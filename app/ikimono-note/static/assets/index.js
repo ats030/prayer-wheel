@@ -143,9 +143,20 @@ function evidenceHtml(c){
 /* 質で弾いたときの detail は {message, problems}。文字列とオブジェクトの両方が来る */
 function errorText(detail){if(!detail)return "調べられませんでした";if(typeof detail==="string")return detail;const notes=(detail.problems||[]).map(p=>p.message).join(" ");return (detail.message||"調べられませんでした")+(notes?" "+notes:"")}
 function photoNotes(data){const notes=(data.photo_notes||[]);if(!notes.length)return "";return '<div class="photo-notes"><strong>次に撮るときは</strong><ul>'+notes.map(n=>"<li>"+esc(n.message)+"</li>").join("")+"</ul></div>"}
-function shareLabel(count){return count>1?'写真'+count+'枚つきでXへ':(count?'写真つきでXへ':'Xで共有')}
-function sharePanel(candidates,photos){const count=(photos||[]).length,label=shareLabel(count);return '<aside class="share-result" aria-label="結果の共有"><div><strong>'+label+'</strong><span>'+(count?'共有先でXを選び、本文は貼り付けてください。撮った場所は含みません。':'写真がないため、候補だけを共有します。')+'</span></div><button class="btn x-share" id="sharePhotoX" type="button">'+label+'</button></aside>'}
+function sharePanel(candidates,photos){const has=(photos||[]).length>0;return '<aside class="share-result" aria-label="結果の共有"><div><strong>Xで共有</strong><span>'+(has?'この結果だけの共有ページを作り、そのリンクをXへ送ります。写真はXのカードに出ます。撮った場所や観察メモは含みません。あとから記録の画面で取り消せます。':'写真がないため、候補だけを共有します。')+'</span></div><button class="btn x-share" id="sharePhotoX" type="button">Xで共有</button></aside>'}
 function render(data){if(!data.candidates.length){$('results').className='';$("results").innerHTML=photoNotes(data)+`<div class="placeholder">図鑑データで確認できる候補が見つかりませんでした。全体・もよう・特徴のある部分を、別の角度から撮ってみてください。</div>${safetyHtml()}`;return}$('results').className='';$('results').innerHTML=photoNotes(data)+'<p class="summary"><strong>'+esc(data.category)+'</strong> · '+esc(data.summary)+'</p>' +data.candidates.map((c,i)=>'<article class="candidate"><div class="name-row"><div><div class="name">'+(i+1)+'. '+esc(c.common_name_ja)+'</div><div class="latin">'+esc(c.scientific_name)+'</div>'+taxonomyBadge(c)+agreementBadge(c)+'</div>'+confidenceView(c)+protectedSpeciesHtml(c)+evidenceHtml(c)+sexHtml(c,data.category)+(c.uncertainty?'<div class="uncertainty">もっと確かめたいこと：'+esc(c.uncertainty)+'</div>':'')+'<div class="sources"><a target="_blank" rel="noopener" href="'+sourceUrl(noJapaneseName(c.common_name_ja)?c.scientific_name:c.common_name_ja)+'">図鑑を検索 ↗</a>'+(wikipediaUrl(c)?'<a target="_blank" rel="noopener noreferrer" href="'+esc(wikipediaUrl(c))+'">Wikipedia ↗</a>':'')+(c.taxonomy_url?'<a target="_blank" rel="noopener" href="'+esc(c.taxonomy_url)+'">iNaturalist ↗</a>':'')+'</div>'+animalReferenceHtml(c,data.category)+affiliateProductLink(c,data.category)+'</article>').join('')+safetyHtml()+plantnetCreditHtml(data)+affiliateHtml();applyMeters();if(document.getElementById('affiliateCard'))fetch('/api/affiliate/impression',{method:'POST'}).catch(()=>{});loadAmazonProducts()}
+/* 共有ページを作ったら、その名前を直前に保存した記録へ書く。記録の画面から取り消せないと、
+   URLを控えていない限り、公開したものを消す手立てが無くなる */
+let lastSavedRecordId=null;
+async function rememberShareToken(token){
+  if(!lastSavedRecordId||!token)return;
+  try{
+    const db=await historyDb(),tx=db.transaction("entries","readwrite"),store=tx.objectStore("entries");
+    const current=await requestValue(store.get(lastSavedRecordId));
+    if(current)store.put({...current,shareToken:token});
+    await transactionDone(tx);db.close();
+  }catch(error){/* 書けなくても共有そのものは済んでいる。取り消しは公開ページ側からできる */}
+}
 function historyDb(){return new Promise((resolve,reject)=>{if(!("indexedDB" in window)){reject(new Error("このブラウザでは、調べた記録を保存できません"));return}const request=indexedDB.open("species-history",1);request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("entries"))db.createObjectStore("entries",{keyPath:"id"})};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
 function requestValue(request){return new Promise((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
 function transactionDone(transaction){return new Promise((resolve,reject)=>{transaction.oncomplete=resolve;transaction.onerror=()=>reject(transaction.error);transaction.onabort=()=>reject(transaction.error)})}
@@ -155,7 +166,7 @@ function transactionDone(transaction){return new Promise((resolve,reject)=>{tran
 /* 写真も撮影情報も、投げる前に控えたぶん (pending) を使う。画面を更新すると
    選んだファイルも入力欄の中身も手元から消えるので、いま画面を見て作れない */
 async function saveHistory(data,pending){const db=await historyDb();const thumbnails=pending?.photos||[];const thumbnail=thumbnails[0]||null;/* 一覧の行と、ドライブへ持ち出すぶんに使う小さい1枚。行では80pxで出す */
-let listThumbnail=null;try{if(thumbnail)listThumbnail=await shrinkForHistory(thumbnail,LIST_MAX_EDGE)}catch(e){}const metadata=data.photo_metadata||{};const coordinates=pending?.coordinates||(metadata.latitude!=null?{latitude:metadata.latitude,longitude:metadata.longitude}:null);const record={id:(crypto.randomUUID?.()||Date.now()+"-"+Math.random()),createdAt:new Date().toISOString(),category:data.category,summary:data.summary,candidates:data.candidates,provider:providerName,model:data.model||"",resultMeta:{strictMode:Boolean(data.strict_mode),taxonomyChecked:Boolean(data.taxonomy_checked),rejectedCandidates:Number(data.rejected_candidates||0),plantnetUsed:Boolean(data.plantnet_used)},context:pending?.context||{location:"",observedDate:"",size:""},coordinates,thumbnail,thumbnails,listThumbnail};let tx=db.transaction("entries","readwrite");tx.objectStore("entries").put(record);await transactionDone(tx);tx=db.transaction("entries","readonly");const all=await requestValue(tx.objectStore("entries").getAll());await transactionDone(tx);const excess=all.sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(50);if(excess.length){tx=db.transaction("entries","readwrite");excess.forEach(item=>tx.objectStore("entries").delete(item.id));await transactionDone(tx)}db.close();scheduleAutoBackup()}
+let listThumbnail=null;try{if(thumbnail)listThumbnail=await shrinkForHistory(thumbnail,LIST_MAX_EDGE)}catch(e){}const metadata=data.photo_metadata||{};const coordinates=pending?.coordinates||(metadata.latitude!=null?{latitude:metadata.latitude,longitude:metadata.longitude}:null);const record={id:(crypto.randomUUID?.()||Date.now()+"-"+Math.random()),createdAt:new Date().toISOString(),category:data.category,summary:data.summary,candidates:data.candidates,provider:providerName,model:data.model||"",resultMeta:{strictMode:Boolean(data.strict_mode),taxonomyChecked:Boolean(data.taxonomy_checked),rejectedCandidates:Number(data.rejected_candidates||0),plantnetUsed:Boolean(data.plantnet_used)},context:pending?.context||{location:"",observedDate:"",size:""},coordinates,thumbnail,thumbnails,listThumbnail};lastSavedRecordId=record.id;let tx=db.transaction("entries","readwrite");tx.objectStore("entries").put(record);await transactionDone(tx);tx=db.transaction("entries","readonly");const all=await requestValue(tx.objectStore("entries").getAll());await transactionDone(tx);const excess=all.sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(50);if(excess.length){tx=db.transaction("entries","readwrite");excess.forEach(item=>tx.objectStore("entries").delete(item.id));await transactionDone(tx)}db.close();scheduleAutoBackup()}
 /* 識別は後ろで走らせ、札 (job) を持って様子を聞きに行く。
  *
  * ブラウザが待っているあいだだけ生きる作りだと、画面を更新した瞬間に答えが行き場を
@@ -335,7 +346,11 @@ function shootingGuide(data){
 render=function(data,sharePhotos=[]){
   renderIdentification(data);
   const guide=shootingGuide(data);
-  if(data.candidates?.length){$("results").insertAdjacentHTML("beforeend",sharePanel(data.candidates,sharePhotos));$("sharePhotoX").onclick=()=>sharePhotoForX(data.candidates,sharePhotos,()=>showStatus("共有できませんでした。もう一度お試しください。",true),message=>showStatus(message))}
+  if(data.candidates?.length){$("results").insertAdjacentHTML("beforeend",sharePanel(data.candidates,sharePhotos));
+    /* 共有ページを作るあいだ待たせる。押したのに何も起きないように見えるのが一番困る */
+    $("sharePhotoX").onclick=()=>{const button=$("sharePhotoX");button.disabled=true;showStatus("共有ページを作っています…",false,true);
+      shareToX(data.candidates,sharePhotos?.[0]||null,message=>{button.disabled=false;showStatus(message,true)},message=>{button.disabled=false;showStatus(message)},
+        shared=>rememberShareToken(shared.token))}}
   if(!guide)return;
   /* 候補が1件も残らなかったときは要約がない。撮り直しを促す一文の直後に置く
      (安全カードの後ろに回すと、案内とボタンが画面の外へ出てしまう) */

@@ -7,7 +7,9 @@
 
 import asyncio
 from collections import defaultdict, deque
+import html
 from io import BytesIO
+import json
 import math
 from pathlib import Path
 import os
@@ -33,6 +35,7 @@ import image_quality
 import creators_api
 import jobs
 import pipeline
+import shares
 import vision
 
 class SettingsUpdate(BaseModel):
@@ -283,7 +286,9 @@ OPEN_PATHS = {"/login", "/auth/google", "/auth/callback", "/api/me", "/privacy",
               # クローラと、共有したときの見え方。ログインへ飛ばすと robots.txt が
               # 読めず、共有カードの画像も出ない
               "/robots.txt", "/sitemap.xml", "/ogp.png"}
-OPEN_PREFIXES = ("/assets/", "/vendor/", "/static/")
+# 共有した記録の公開ページ。ログインを求めると、受け取った人にも X のクローラにも
+# 見えない。ここが開いていないと共有そのものが成り立たない
+OPEN_PREFIXES = ("/assets/", "/vendor/", "/static/", "/s/")
 
 # 見知らぬ人が、その場で1回試せるようにするための枠。
 #
@@ -746,6 +751,152 @@ async def photo_metadata(request: Request, files: list[UploadFile] = File(defaul
         for key, value in extracted.items():
             metadata.setdefault(key, value)
     return metadata
+
+
+# ── 共有した記録の公開ページ ──────────────────────────────
+#
+# 調べた記録は端末の中にあり、ここへは来ない。共有ボタンを押したものだけが上がって
+# きて、そのときだけ公開URLができる。写真をそのまま X へ添付する道は、PC (Linux) の
+# ブラウザが Web Share を持たないため閉じている。URLを渡してカードで見せるのがこの口。
+def _share_owner(request: Request) -> str:
+    """公開した人。取り消せるのはこの人だけ。"""
+    if not PUBLIC_MODE:
+        return "operator"
+    session = auth.read_session(request.cookies.get(auth.SESSION_COOKIE))
+    return str((session or {}).get("sub") or "")
+
+
+def _share_origin(request: Request) -> str:
+    """カードに載せる絶対URL。og: は相対で書くと取り込まれない。"""
+    return (auth.PUBLIC_ORIGIN or str(request.base_url)).rstrip("/")
+
+
+def _share_payload(parsed: object) -> dict:
+    """公開してよい項目だけを取り出す。
+
+    画面から届いたものをそのまま置くと、あとで画面側が項目を足したときに、載せないと
+    決めたもの (撮影地・座標・観察メモ・要約) まで公開ページへ回る。載せる側をここで
+    数え上げておけば、画面が何を送っても勝手には出ない。
+    """
+    items = parsed if isinstance(parsed, list) else []
+    out = []
+    for item in items[:3]:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("common_name_ja") or item.get("scientific_name") or "").strip()
+        if not name:
+            continue
+        try:
+            confidence = max(0, min(100, int(item.get("confidence") or 0)))
+        except (TypeError, ValueError):
+            confidence = 0
+        traits = [str(trait).strip()[:60]
+                  for trait in list(item.get("traits") or [])[:3] if str(trait).strip()]
+        out.append({"name": name[:60],
+                    "scientific_name": str(item.get("scientific_name") or "").strip()[:80],
+                    "confidence": confidence, "traits": traits})
+    return {"candidates": out}
+
+
+@app.post("/api/share")
+async def create_share(request: Request, photo: UploadFile = File(...),
+                       candidates: str = Form(...)) -> dict[str, str]:
+    owner = _share_owner(request)
+    if PUBLIC_MODE and not owner:
+        raise HTTPException(status_code=401, detail="ログインしてください")
+    if PUBLIC_MODE:
+        _rate_limit(request, "share", 20)
+    try:
+        payload = _share_payload(json.loads(candidates))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="共有する内容を読み取れませんでした") from exc
+    if not payload["candidates"]:
+        raise HTTPException(status_code=400, detail="共有できる候補がありません")
+    raw = await photo.read(shares.MAX_PHOTO_BYTES + 1)
+    try:
+        token = await run_in_threadpool(shares.create, owner, payload, raw,
+                                        photo.content_type or "")
+    except shares.PhotoTooLarge as exc:
+        raise HTTPException(status_code=413, detail="共有する写真が大きすぎます") from exc
+    except shares.PhotoTypeNotAllowed as exc:
+        raise HTTPException(status_code=415,
+                            detail="共有できる写真はJPEG・PNG・GIFです") from exc
+    return {"token": token, "url": f"{_share_origin(request)}/s/{token}"}
+
+
+@app.post("/api/share/{token}/delete")
+async def delete_share(request: Request, token: str) -> dict[str, bool]:
+    owner = _share_owner(request)
+    if PUBLIC_MODE and not owner:
+        raise HTTPException(status_code=401, detail="ログインしてください")
+    if not await run_in_threadpool(shares.delete, token, owner):
+        raise HTTPException(status_code=404, detail="この公開は見つかりませんでした")
+    return {"deleted": True}
+
+
+def _share_body(payload: dict, token: str) -> str:
+    rows = []
+    for index, candidate in enumerate(payload["candidates"], start=1):
+        parts = [f'<div class="name">{index}. {html.escape(candidate["name"])}</div>']
+        if candidate["scientific_name"]:
+            parts.append(f'<div class="latin">{html.escape(candidate["scientific_name"])}</div>')
+        parts.append(f'<div class="rate">あてはまり度 {candidate["confidence"]}%</div>')
+        if candidate["traits"]:
+            # 画面側と同じ但し書きを付ける。カードから来た人は、この1ページしか見ない
+            parts.append('<p class="traits-label">写真から見えた特徴（AI抽出・未確認）</p>')
+            parts.append('<ul class="traits">'
+                         + "".join(f"<li>{html.escape(trait)}</li>" for trait in candidate["traits"])
+                         + "</ul>")
+        rows.append('<div class="candidate">' + "".join(parts) + "</div>")
+    return (f'<img class="share-photo" src="/s/{html.escape(token)}/photo" alt="調べた写真">'
+            + '<article class="panel">' + "".join(rows) + "</article>"
+            + '<p class="note">結果は候補です。図鑑や実物で確かめてください。'
+              '採る・触る・食べるの判断には使えません。</p>')
+
+
+@app.get("/s/{token}", include_in_schema=False)
+async def share_page(request: Request, token: str) -> HTMLResponse:
+    record = await run_in_threadpool(shares.read, token)
+    if not record:
+        raise HTTPException(status_code=404, detail="この共有は見つかりませんでした")
+    candidates = record["payload"]["candidates"]
+    origin = _share_origin(request)
+    names = "、".join(f'{c["name"]}（あてはまり度 {c["confidence"]}%）' for c in candidates)
+    description = "写真から調べた候補：" + names
+    traits = candidates[0]["traits"]
+    if traits:
+        description += " ／ 写真から見えた特徴：" + "、".join(traits)
+    page = (STATIC_DIR / "share.html").read_text(encoding="utf-8")
+    for key, value in {
+        "{{TITLE}}": f'{candidates[0]["name"]} · 生きものノートで調べました',
+        "{{HEADING}}": candidates[0]["name"],
+        "{{DESCRIPTION}}": description,
+        "{{URL}}": f"{origin}/s/{token}",
+        "{{IMAGE}}": f"{origin}/s/{token}/photo",
+    }.items():
+        page = page.replace(key, html.escape(value, quote=True))
+    # 出した本人にだけ取り消しを見せる。記録を消したあとや別の端末からでも、ここを開けば止められる
+    viewer = _share_owner(request)
+    owner_actions = ""
+    if viewer and viewer == record["owner"]:
+        owner_actions = ('<div class="panel"><p>この共有ページを出したのはあなたです。'
+                         '取り消すと、このページも写真も開けなくなります。</p>'
+                         f'<button class="back" id="revokeShare" type="button" '
+                         f'data-token="{html.escape(token, quote=True)}">公開を取り消す</button>'
+                         '<p class="meta" id="revokeMessage" role="status"></p></div>')
+    page = page.replace("{{OWNER}}", owner_actions)
+    return HTMLResponse(page.replace("{{MAIN}}", _share_body(record["payload"], token)))
+
+
+@app.get("/s/{token}/photo", include_in_schema=False)
+async def share_photo(token: str) -> Response:
+    found = await run_in_threadpool(shares.photo, token)
+    if not found:
+        raise HTTPException(status_code=404, detail="この写真は見つかりませんでした")
+    raw, content_type = found
+    # 取り消したら消えてほしいので、長くは持たせない。カードの取得には十分
+    return Response(raw, media_type=content_type,
+                    headers={"Cache-Control": "public, max-age=600"})
 
 
 _RUNNING_TASKS: set[asyncio.Task] = set()
