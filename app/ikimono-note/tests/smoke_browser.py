@@ -271,6 +271,22 @@ def run(base: str, do_identify: bool) -> None:
         check("緯度経度は開くまで見えない", not detail.evaluate("node => node.open") and "35.6812" not in detail.inner_text() and "139.7671" not in detail.inner_text())
         detail.locator("summary").click(); page.wait_for_timeout(300)
         check("記録の内容を開くと緯度経度を表示する", detail.evaluate("node => node.open") and "35.6812" in detail.inner_text() and "139.7671" in detail.inner_text())
+        check("記録の候補にも共有ボタンが出る", detail.locator(".share-record").count() == 1)
+        page.evaluate("""() => Object.defineProperty(navigator, "share", {
+            configurable: true, value: async payload => { window.historySharedPayload = payload; }
+        })""")
+        detail.locator(".share-record").click()
+        history_shared = page.evaluate("() => window.historySharedPayload")
+        check("記録の候補を端末の共有先へ渡せる", history_shared and "セイヨウタンポポ" in history_shared["text"], str(history_shared))
+        check("記録共有に位置やAI設定を含めない", history_shared and all(
+            value not in history_shared["text"] for value in ["35.6812", "139.7671", "smoke"]
+        ), str(history_shared))
+        page.set_viewport_size({"width": 390, "height": 844})
+        history_share_box = detail.locator(".record-share").bounding_box()
+        history_share_button = detail.locator(".share-record").bounding_box()
+        check("記録の共有導線がスマホ幅に収まる", bool(history_share_box) and history_share_box["x"] >= 0 and history_share_box["x"] + history_share_box["width"] <= 390, str(history_share_box))
+        check("記録の共有ボタンの高さが44px以上", bool(history_share_button) and history_share_button["height"] >= 44, str(history_share_button))
+        page.set_viewport_size({"width": 1100, "height": 900})
         rerun = page.locator('.entry[data-id="note-smoke"] .rerun-remove')
         check("調べ直す写真ごとに外すボタンが出る", rerun.count() == 2)
         check("元の記録には2枚の写真が残る", page.locator('.entry[data-id="note-smoke"] .detail-photo').count() == 2)

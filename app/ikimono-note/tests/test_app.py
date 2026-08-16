@@ -941,7 +941,7 @@ def test_pages_carry_no_inline_style_or_script():
 
 def test_page_assets_are_served_locally():
     for name in ["index.css", "index.js", "settings.css", "settings.js",
-                 "history.css", "history.js", "privacy.css", "terms.css"]:
+                 "history.css", "history.js", "sharing.js", "privacy.css", "terms.css"]:
         response = client.get(f"/assets/{name}")
         assert response.status_code == 200, name
     assert client.get("/theme.js").status_code == 200
@@ -3147,23 +3147,30 @@ def test_public_analytics_waits_for_explicit_consent(monkeypatch):
     assert "同意しない場合はGoogleのタグを読み込みません" in privacy
 
 
-def test_result_sharing_uses_safe_allowlist_and_clipboard_fallback():
-    script = client.get("/assets/index.js").text
+def test_result_and_history_sharing_use_one_safe_helper():
+    sharing = client.get("/assets/sharing.js").text
+    index = client.get("/assets/index.js").text
+    history = client.get("/assets/history.js").text
 
-    assert 'id="shareResult"' in script
-    assert "navigator.share(payload)" in script
-    assert "navigator.clipboard.writeText" in script
-    assert 'error?.name==="AbortError"' in script
-    assert 'url:location.origin+"/"' in script
-    assert "結果は候補です。図鑑や実物で確かめてください。" in script
-    assert "写真や撮った場所は共有しません。" in script
+    for path in ["/", "/history"]:
+        assert '/assets/sharing.js' in page_source(path)
+    assert 'id="shareResult"' in index
+    assert 'class="btn share-record"' in history
+    assert 'if(!e.candidates?.length)return' in history
+    assert "shareCandidates(data.candidates" in index
+    assert "shareCandidates(e.candidates" in history
+    assert "navigator.share(payload)" in sharing
+    assert "navigator.clipboard.writeText" in sharing
+    assert 'error?.name==="AbortError"' in sharing
+    assert 'url:location.origin+"/"' in sharing
+    assert "結果は候補です。図鑑や実物で確かめてください。" in sharing
+    assert "写真や撮った場所、観察メモは共有しません。" in history
 
-    share_body = script.split("function shareData(data){", 1)[1].split(
-        "async function shareResult", 1
+    share_body = sharing.split("function shareData(candidates){", 1)[1].split(
+        "async function shareCandidates", 1
     )[0]
     for private_field in [
-        "thumbnail", "thumbnails", "coordinates", "observedDate",
-        "summary", "provider", "model", "email", "api_key",
+        "thumbnail", "thumbnails", "coordinates", "observedDate", "userNote",
+        "noteUpdatedAt", "summary", "provider", "model", "email", "api_key",
     ]:
         assert private_field not in share_body
-    assert "data.location" not in share_body
