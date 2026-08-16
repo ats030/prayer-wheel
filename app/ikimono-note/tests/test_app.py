@@ -3144,6 +3144,15 @@ def test_public_analytics_waits_for_explicit_consent(monkeypatch):
     # パネルの居場所は CSS ファイルに預けない。analytics.css はファイル名で止められやすく、
     # 落ちると position:static に戻ってページ末尾へ流れ、押しても出ないように見える
     assert "PANEL_ANCHOR" in script and 'position:"fixed"' in script
+    # Cookie通知フィルタに ##.analytics-consent という汎用ルールがあり、どのサイトでも
+    # そのクラスを display:none にする。当たる名前を使うと、スクリプトもボタンも動いて
+    # いるのにパネルだけ消え、外からは「押しても何も起きない」としか見えない
+    assert 'panel.className="usage-choice"' in script
+    # 見るのはクラス名としての使用だけ。localStorage のキー
+    # (ikimono-analytics-consent) は CSS セレクタではないので当たらないし、
+    # 変えると保存済みの選択が失われる
+    assert 'className="analytics-consent"' not in script
+    assert ".analytics-consent" not in client.get("/assets/analytics.css").text
     assert "Object.assign(panel.style,PANEL_ANCHOR)" in script
     assert "写真、位置情報、調べた結果は送りません" in script
     privacy = client.get("/privacy").text
