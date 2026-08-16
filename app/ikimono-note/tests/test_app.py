@@ -3144,7 +3144,9 @@ def test_public_analytics_waits_for_explicit_consent(monkeypatch):
     assert "写真、位置情報、調べた結果は送りません" in script
     privacy = client.get("/privacy").text
     assert 'id="analytics-reset"' in privacy
-    assert "保持期間はGoogle Analyticsの管理画面で設定されます" in privacy
+    # 保持期間は GA4 側で2か月に設定済み。読み手が確かめようのない「管理画面で設定されます」
+    # ではなく、実際に設定した値を書く
+    assert "2か月保持したのち削除されます" in privacy
     assert "同意しない場合はGoogleのタグを読み込みません" in privacy
 
 
