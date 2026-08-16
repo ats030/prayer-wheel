@@ -36,7 +36,7 @@ with the subject.
   louder. Plain-language warnings replace clinical ones.
 
 ## Visual system
-- Result sharing appears after a new result and inside each saved record's expanded detail. Both screens use the same device-share helper with clipboard fallback. It shares only candidate names, confidence, an explicit candidate disclaimer, and the public service URL; photographs, location, observation date, observation notes, result summary, provider, and model stay out of the payload. Records without a candidate have nothing to share and show no action.
+- Result sharing appears after a new result and inside each saved record's expanded detail. Both screens use the same allowlisted payload for a direct X Web Intent and for the device-share helper with clipboard fallback. X receives nothing until its explicit link is pressed; no X widget or SDK loads. The payload includes only candidate names, confidence, an explicit candidate disclaimer, and the public service URL; photographs, location, observation date, observation notes, result summary, provider, and model stay out. Records without a candidate have nothing to share and show no action.
 
 - Near-white canvas with a faint green cast, white panels, hairline borders,
   and one green accent. `prefers-color-scheme: dark` swaps the same token names

@@ -71,3 +71,5 @@
 @media(max-width:520px){.note-meta{align-items:flex-start;flex-direction:column;gap:2px}.note-status{text-align:left}}
 .record-share{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 16px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}.record-share strong,.record-share span{display:block}.record-share>div span,.share-message{color:var(--muted);font-size:12px}.share-message{grid-column:1/-1}.record-share .btn{min-width:144px}
 @media(max-width:520px){.record-share{grid-template-columns:1fr}.record-share .btn{width:100%;margin-top:6px}.share-message{grid-column:1}}
+.record-share .share-actions{display:flex;gap:8px}.record-share .share-actions .btn{flex:1}
+@media(max-width:520px){.record-share .share-actions{flex-direction:column}.record-share .share-actions .btn{width:100%;margin-top:0}}

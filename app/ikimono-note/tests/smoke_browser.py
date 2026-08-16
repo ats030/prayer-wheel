@@ -272,6 +272,10 @@ def run(base: str, do_identify: bool) -> None:
         detail.locator("summary").click(); page.wait_for_timeout(300)
         check("記録の内容を開くと緯度経度を表示する", detail.evaluate("node => node.open") and "35.6812" in detail.inner_text() and "139.7671" in detail.inner_text())
         check("記録の候補にも共有ボタンが出る", detail.locator(".share-record").count() == 1)
+        history_x_href = detail.locator(".x-share").get_attribute("href")
+        history_x_query = page.evaluate("href => Object.fromEntries(new URL(href).searchParams)", history_x_href)
+        check("記録からXの投稿画面へ進める", history_x_href.startswith("https://x.com/intent/tweet?") and "セイヨウタンポポ" in history_x_query.get("text", "") and history_x_query.get("url") == base + "/", str(history_x_query))
+        check("押す前はXへ通信しない", not page.evaluate("() => performance.getEntriesByType('resource').some(entry => entry.name.includes('x.com/'))"))
         page.evaluate("""() => Object.defineProperty(navigator, "share", {
             configurable: true, value: async payload => { window.historySharedPayload = payload; }
         })""")
@@ -286,6 +290,8 @@ def run(base: str, do_identify: bool) -> None:
         history_share_button = detail.locator(".share-record").bounding_box()
         check("記録の共有導線がスマホ幅に収まる", bool(history_share_box) and history_share_box["x"] >= 0 and history_share_box["x"] + history_share_box["width"] <= 390, str(history_share_box))
         check("記録の共有ボタンの高さが44px以上", bool(history_share_button) and history_share_button["height"] >= 44, str(history_share_button))
+        history_x_button = detail.locator(".x-share").bounding_box()
+        check("記録のX共有ボタンの高さが44px以上", bool(history_x_button) and history_x_button["height"] >= 44, str(history_x_button))
         page.set_viewport_size({"width": 1100, "height": 900})
         rerun = page.locator('.entry[data-id="note-smoke"] .rerun-remove')
         check("調べ直す写真ごとに外すボタンが出る", rerun.count() == 2)
@@ -346,6 +352,10 @@ def run(base: str, do_identify: bool) -> None:
 
 
         # 共有はOSの共有シートを優先し、写真・場所を含めない。非対応時はコピーする
+        x_href = page.locator(".share-result .x-share").get_attribute("href")
+        x_query = page.evaluate("href => Object.fromEntries(new URL(href).searchParams)", x_href)
+        check("結果からXの投稿画面へ進める", x_href.startswith("https://x.com/intent/tweet?") and "セイヨウタンポポ" in x_query.get("text", "") and x_query.get("url") == base + "/", str(x_query))
+        check("結果のX共有も押す前は通信しない", not page.evaluate("() => performance.getEntriesByType('resource').some(entry => entry.name.includes('x.com/'))"))
         page.evaluate("""() => Object.defineProperty(navigator, "share", {
             configurable: true, value: async payload => { window.sharedPayload = payload; }
         })""")
@@ -368,6 +378,7 @@ def run(base: str, do_identify: bool) -> None:
         share_box = page.locator(".share-result").bounding_box()
         check("共有ボタンがスマホ幅に収まる", bool(share_box) and share_box["x"] >= 0 and share_box["x"] + share_box["width"] <= 390, str(share_box))
         check("共有ボタンの高さが44px以上", page.locator("#shareResult").bounding_box()["height"] >= 44)
+        check("結果のX共有ボタンの高さが44px以上", page.locator(".share-result .x-share").bounding_box()["height"] >= 44)
         page.set_viewport_size({"width": 1100, "height": 900})
         # 広告は候補ごと。商品APIが断られていても、候補ごとの検索リンクは残る
         page.evaluate("data => render(data)", THREE_CANDIDATE_SAMPLE)

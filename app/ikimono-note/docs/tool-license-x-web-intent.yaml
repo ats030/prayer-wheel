@@ -1,0 +1,22 @@
+tool: X Web Intent (Tweet/Post composer)
+reviewed_at: 2026-08-16
+status: conditional
+cost:
+  condition: Web Intents do not require an X developer application, API credentials, or an API plan.
+license:
+  service_terms: X Terms of Service and X for Websites documentation
+  commercial_use: allowed_as_a_user-initiated_link_under_terms
+conditions:
+  - Open the official https://x.com/intent/tweet endpoint only after an explicit user click.
+  - Do not load the X for Websites JavaScript, widgets, tracking pixels, or embedded content.
+  - Pre-fill only candidate names, confidence, the candidate disclaimer, and the public service URL.
+  - Do not send photographs, coordinates, observation dates, notes, provider or model details, API keys, or account data.
+  - Let the user review and decide whether to publish on X; the app must not post automatically.
+  - Use the text label "Xで共有" without bundling or altering X logo assets.
+privacy:
+  decision: No request to X before the user selects the X share link.
+sources:
+  - https://docs.x.com/x-for-websites/web-intents/overview
+  - https://help.x.com/en/using-x/add-x-share-button
+  - https://x.com/en/tos
+adoption: approved_only_with_the_conditions_above

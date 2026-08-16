@@ -3161,6 +3161,13 @@ def test_result_and_history_sharing_use_one_safe_helper():
     assert "shareCandidates(e.candidates" in history
     assert "navigator.share(payload)" in sharing
     assert "navigator.clipboard.writeText" in sharing
+    assert 'function xShareUrl(candidates)' in sharing
+    assert '"https://x.com/intent/tweet?"+params.toString()' in sharing
+    assert "new URLSearchParams({text:payload.text,url:payload.url})" in sharing
+    assert 'class="btn x-share"' in index
+    assert 'class="btn x-share"' in history
+    assert 'target="_blank" rel="noopener noreferrer">Xで共有' in index
+    assert "widgets.js" not in page_source("/") + page_source("/history")
     assert 'error?.name==="AbortError"' in sharing
     assert 'url:location.origin+"/"' in sharing
     assert "結果は候補です。図鑑や実物で確かめてください。" in sharing

@@ -52,3 +52,4 @@
 
 @media(max-width:390px){.top{flex-wrap:wrap}.top-actions{width:100%;justify-content:flex-start}}
 .share-result{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:20px;padding:16px 0;border-top:1px solid var(--rule)}.share-result strong,.share-result span{display:block}.share-result span{margin-top:2px;color:var(--muted);font-size:12px}.share-result .btn{flex:0 0 auto}@media(max-width:520px){.share-result{align-items:stretch;flex-direction:column}.share-result .btn{width:100%}}
+.share-result .share-actions{display:flex;gap:8px}.share-result .share-actions .btn{flex:1}@media(max-width:520px){.share-result .share-actions{flex-direction:column}}
