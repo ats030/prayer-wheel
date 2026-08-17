@@ -1,0 +1,34 @@
+tool: rss-reader が外部から取るもの (フィード / iTunes Search API / favicon)
+plan_or_version: 2026-08-17 時点の実装 (core/fetcher.py, core/detector.py)
+reviewed_at: 2026-08-17
+decision: conditional
+license: 提供元ごとの利用条件 (下記)
+commercial_use:
+  allowed: conditional
+  note: いまは自分だけが読むリーダーなので条件を満たしている。公開したり商用にするなら iTunes 側の条件が変わる。
+dependencies_checked:
+  - item: RSS / Atom フィード本文
+    result: >-
+      フィードは購読のために配信元が公開しているもので、読み取りは想定された使い方。
+      取得した本文はローカルの SQLite に保存し、上位N件を Ollama で採点するだけで、
+      外部へ再配信していない。フィードを転載する形にするなら、そのとき配信元ごとの
+      条件を見直すこと。
+  - item: iTunes Search API (Podcast の lookup と search)
+    result: >-
+      公式ドキュメントは "The Search API is limited to approximately 20 calls per minute
+      (subject to change)" と明記。商用で使う場合は Apple Services Performance Partner
+      Program への申込と契約が要る。個人が自分のリーダーのために引く現状は、その枠外。
+      Promo Content (曲やビデオのプレビュー) を出す場合は "provided courtesy of iTunes"
+      の表示が要るが、こちらは Podcast のメタデータしか使っていない。
+  - item: Google の favicon サービス (s2/favicons)
+    result: >-
+      google.com/s2/favicons を画像URLとして参照している。Google の公開ドキュメントに
+      無い非公式のエンドポイントで、利用条件も示されていない。表示できなくても実害は
+      小さい (アイコンが出ないだけ) が、条件が読めないものに依存している点は把握しておく。
+restrictions:
+  - iTunes Search API は約20回/分。まとめて引く実装を足すときは間隔を空ける。
+  - 公開版を作る、または商用にするなら、iTunes 側は Partner Program の対象になる。
+  - フィード本文を外部へ再配信する形にはしない。
+notes: >-
+  読む側の道具なので、取得そのものは想定された使い方に収まっている。効いてくるのは
+  「誰のために取るか」が変わったときで、そこは commercial_use の note に書いた。
