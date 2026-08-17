@@ -1,7 +1,10 @@
 tool: JAXA 高解像度土地利用土地被覆図 日本域 (HRLULC-Japan)
 plan_or_version: v25.04 (2020JPN / 2022JPN / 2024JPN、2025年4月リリース)
 reviewed_at: 2026-08-16
-decision: blocked
+# 2026-08-17: blocked から declined へ。blocked は「証拠が足りなくて判断できない」
+# 状態を指す語だが、ここは adoption.rationale のとおり利用条件を確かめる手前で
+# 採らないと決めている。ライセンスへの異議ではなく採否の判断なので declined。
+decision: declined
 price:
   condition: >
     データそのものの価格は未確認。ただし配布は GeoTIFF (131タイル × 3時期) のみで、

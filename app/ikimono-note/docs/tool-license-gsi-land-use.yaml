@@ -22,6 +22,12 @@ privacy:
   decision: opt-in
   detail: 地図表示ボタン押下後、利用者がこのレイヤを選んだ場合だけ、表示範囲のタイル座標が国土地理院へ送られる。写真・候補名・観察記録は送らない。
 adoption:
+  # 下の rationale と release_condition、および restrictions の「アプリは〜する」は、
+  # 採用を検討していたときに書いたもの。実装には至っていない (2026-08-17 時点で
+  # コードにこのタイルへの参照は無く、README の地図の下敷き4種にも入っていない)。
+  # decision: declined はその実態と合っている。
+  # 未記入: 採らないと決めた理由と、根拠の取得日 (evidence_retrieved)。どちらも
+  # 決めた本人にしか書けないので、ここでは埋めずに残す。
   rationale: 既存Leafletと国土地理院タイル配信元を再利用でき、依存追加なしで観察場所の過去の周辺環境を振り返れる。
   release_condition: 年代、出典、縮尺制限、任意読み込みをUIと実装で維持する。
 sources:

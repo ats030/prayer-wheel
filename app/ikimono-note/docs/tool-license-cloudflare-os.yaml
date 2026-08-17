@@ -2,7 +2,9 @@ tool: Cloudflare OS (自分の Cloudflare アカウントへ入れる自己ホ�
 plan_or_version: 2026-08-05 公開版 (github.com/cloudflare/cloudflare-os, main)
 reviewed_at: 2026-08-13
 question: 生きものノートの運営作業を載せる置き場として、課金なしで自己ホストできるか
-decision: blocked
+# 2026-08-17: blocked から declined へ。ライセンスは Apache-2.0 と確認済みで、
+# adoption.verdict も「いまは入れない」と出ている。証拠不足ではなく採否の判断。
+decision: declined
 summary: >
   お金の壁より先にアクセスの壁がある。中核の Worker Loader (Dynamic Workers) は、本番の
   Cloudflare で動かすのにクローズドβへの申し込みが要る。申し込みが通るまで、無料で入れられる
