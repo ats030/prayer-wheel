@@ -17,3 +17,15 @@ restrictions:
 adoption:
   rationale: Optional plant-only comparison experiment; existing VLM remains the fallback.
   release_condition: Keep explicit opt-in off by default, write-only BYOK storage, attribution, quota handling, and fallback.
+# 2026-08-17 追記 (ats030-mi13.6): 同じ対象の記録が ai-workflow/tool-license-registry.yaml にも
+# あり (名前は「Pl@ntNet API (植物識別)」)、そちらは commercial_use を
+# 「no (無料プランは非営利・教育・科学目的)」と書いている。判断 (conditional) は一致しており
+# 意味も同じだが、名前が違うためライセンスタブの食い違い検出をすり抜けていた。
+cross_references:
+  - record: ai-workflow/tool-license-registry.yaml
+    name_there: Pl@ntNet API (植物識別)
+    note: 帰属表示の実装 (plantnetCreditHtml) と自前計測の数値はそちらに詳しい。
+  - record: docs/tool-license-affiliate.yaml
+    note: >-
+      「商用化」の引き金は広告フラグ。そこの commercial_switch_dependencies と対で判断する。
+      同じ引き金で Tailscale Personal (非商用限定) も同時に効く。

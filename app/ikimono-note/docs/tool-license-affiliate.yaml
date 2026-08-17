@@ -27,3 +27,37 @@ candidates:
       - https://affiliate-program.amazon.com/creatorsapi/docs/en-us/onboarding/register-for-creators-api
       - https://affiliate-program.amazon.com/creatorsapi/docs/en-us/paapiv5-deprecation
     note: "廃止済みのPA-API 5.0ではなくCreators APIを採用。日本向けOAuthエンドポイントとSearchItemsを使い、Allカテゴリから候補ごとに1件だけ取得する。"
+
+# 2026-08-17 追記 (ats030-mi13.6): 広告を入れると「非商用」でなくなる。
+# 無料枠が非商用に限られる依存が同時に条件違反になりうるが、これまでレコード同士が
+# 互いを参照しておらず、片方だけ見て判断できる状態になっていた。
+decision: conditional
+commercial_switch_dependencies:
+  - tool: Tailscale (Personal プラン)
+    record: ai-workflow/tool-license-registry.yaml
+    why: >-
+      公開の基盤そのもの。Personal は "only suitable for non-commercial use" と明記されており、
+      広告を載せた状態での Funnel 公開は条件に触れうる。商用なら Standard ($8/user/月) 以上へ。
+      この依存は 2026-08-17 まで許諾レコード自体が存在しなかった。
+  - tool: Pl@ntNet API (植物識別)
+    record: docs/tool-license-plantnet-api.yaml
+    why: >-
+      無料プランが非営利・教育・科学目的に限られる。公開版は BYOK なので条件を負うのは
+      各利用者の鍵だが、運営者の鍵で使う分は運営者が負う。商用化するなら有料プラン (€1,000/年〜)。
+  - tool: Google Gemini API (無料枠)
+    record: docs/tool-license-gemini-api.yaml
+    why: 無料枠は送信内容が学習に使われる。「商用運用へ移るなら有料枠を前提にする」と記録済み。
+  - tool: iNaturalist API
+    record: docs/tool-license-inaturalist-api.yaml
+    why: commercial_use が conditional。商用化の前に条件を読み直す。
+current_state:
+  checked_at: 2026-08-17
+  funnel: 'off (tailscale funnel status / serve status とも "No serve config")'
+  public_affiliate_flag: IKIMONO_PUBLIC_AFFILIATE=0 (~/.env で明示。起動スクリプトの既定も 0)
+  operator_settings: >-
+    ~/.config/ikimono-note/settings.json は affiliate.enabled=true だが、これは運営者用 (8523) の
+    設定で、公開版 (8524) には出ない。
+  amazon: 403 AssociateNotEligible のまま。広告収益は発生していない。
+  verdict: >-
+    非公開かつ公開版の広告が止まっているため、上の依存と衝突している事実はない。
+    効いてくるのは公開を再開するときで、そのときは広告の有無とこの4件を同時に見る。
