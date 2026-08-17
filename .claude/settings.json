@@ -1,37 +1,18 @@
 {
   "cleanupPeriodDays": 365,
+  "env": {
+    "SUPERPOWERS_DISABLE_TELEMETRY": "1"
+  },
   "model": "opus",
   "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/home/ats030/.local/bin/rtk hook claude"
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "if": "Bash(bd *)",
-            "command": "$HOME/.claude/hooks/beads-restore-reorder.sh"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/warn-unpushed.sh"
+            "command": "$HOME/.claude/hooks/beads-restore-reorder.sh",
+            "if": "Bash(bd *)"
           }
         ]
       }
@@ -47,6 +28,17 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/ats030/.local/bin/rtk hook claude"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",
@@ -56,12 +48,34 @@
             "command": "bd prime"
           }
         ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/home/ats030/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/warn-unpushed.sh"
+          }
+        ]
       }
     ]
   },
   "enabledPlugins": {
     "grill-me@ai-workflow": true,
-    "thinking-workflow@ai-workflow": true
+    "thinking-workflow@ai-workflow": true,
+    "superpowers@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "ai-workflow": {
@@ -71,7 +85,7 @@
       }
     }
   },
+  "language": "japanese",
   "theme": "dark",
-  "agentPushNotifEnabled": true,
-  "language": "japanese"
+  "agentPushNotifEnabled": true
 }

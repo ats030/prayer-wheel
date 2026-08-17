@@ -22,6 +22,24 @@ bd close <id>         # Complete work
 - Run `bd prime` for detailed command reference and session close protocol
 - Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
 
+### Superpowers との優先順位
+
+`superpowers` プラグイン (公式マーケットプレース) を入れてある。スキルは自動発火し、
+セッション開始時に `using-superpowers` が注入される。そのスキル自身が
+「User instructions (CLAUDE.md) take precedence over skills」と定めているので、
+競合したらこの節が勝つ。判断を毎回やり直さないよう、3点を先に決めておく。
+
+1. **チェックリストは TodoWrite ではなく bd。** `using-superpowers` は
+   「If it has a checklist, create a todo per item」と指示するが、この環境では
+   TodoWrite を使わない。実施項目は `bd create`、セッション内の一時的な段取りは
+   応答の中で持つ。
+2. **設計レビューの入口は1タスクに1つ。** 「作るべきか」(構成・データ所有・運用契約が
+   変わる提案) は `grill-me`。「どう作るか」(spec → plan → TDD → subagent 実行) は
+   `superpowers:brainstorming` 以降。両方を同じタスクに通さない。
+3. **worktree は明示指示があるときだけ。** `using-git-worktrees` は
+   「before executing implementation plans」で発火するが、作業ディレクトリを
+   固定したセッション (バックグラウンドジョブ等) では作らない。
+
 ## Session Completion
 
 **When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
