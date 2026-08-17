@@ -1,0 +1,22 @@
+[Unit]
+Description=許諾レコードの要対応が増えたら通知する
+After=network-online.target tailscaled.service tool-inventory.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# exit 3 = 増えていない。ほとんどの日はこれになる。障害の 1 と分けないと、
+# 設計どおりの結果が failed として流れて通知が信用されなくなる。
+SuccessExitStatus=3
+WorkingDirectory=/home/ats030
+EnvironmentFile=-/home/ats030/.env
+ExecStart=/usr/bin/python3 /home/ats030/app/license-watch.py
+# 走査は pCloud 上のアプリを含み、冷えた状態だと数分かかる。スクリプト側の
+# 打ち切り (300秒) より長く取る
+TimeoutStartSec=900
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=license-watch
+
+[Install]
+WantedBy=default.target
