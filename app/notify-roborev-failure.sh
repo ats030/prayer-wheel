@@ -15,10 +15,11 @@
 #
 # set -e は使わない。これは通知経路であって、途中の一手が失敗しても残りは出す。
 
-REPO="$1"
-SHA="$2"
+REPO="${1:-(不明)}"
+SHA="${2:-(不明)}"
 JOB="$3"
-[ -n "$JOB" ] || { echo "使い方: $0 <repo> <sha> <job_id>" >&2; exit 2; }
+# 引数が欠けても打ち切らない。ここは「失敗を取りこぼさないための経路」なので、
+# 黙って死ぬ壊れ方だけは避ける。理由の取得だけ諦めて通知は出す。
 
 # 失敗理由は roborev 側から引く (コマンドラインを経由させない)。
 # 失敗ジョブにはレビュー本体が無いので roborev show では取れない。error フィールドを
@@ -26,6 +27,7 @@ JOB="$3"
 # timeout を付ける: このフックはレビュー完了処理から同期的に呼ばれるので、自分自身の
 # CLI がジョブ DB のロック待ちでブロックするとレビューパイプラインごと止まりうる。
 # 取れなければ下のフォールバック文言に落ちるだけで、通知自体は飛ぶ。
+if [ -n "$JOB" ]; then
 ERR=$(timeout 20 roborev list --json 2>/dev/null | JOB="$JOB" python3 -c '
 import json, os, sys
 try:
@@ -38,7 +40,8 @@ for j in jobs:
         print((j.get("error") or "").strip()[:1200])
         break
 ' 2>/dev/null)
-[ -n "$ERR" ] || ERR="(job $JOB の失敗理由を roborev list --json から取得できなかった)"
+fi
+[ -n "$ERR" ] || ERR="(job ${JOB:-?} の失敗理由を取得できなかった)"
 ERR_ONELINE=$(printf '%s' "$ERR" | tr '\n\t' '  ')
 
 TEXT=$(printf '⚠️ roborev のレビューが失敗しました (repo=%s sha=%s job=%s)\n再実行: `roborev review %s`\n```\n%s\n```' \
