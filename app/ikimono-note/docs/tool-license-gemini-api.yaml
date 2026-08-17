@@ -6,7 +6,13 @@ price:
   condition: Free and paid usage tiers exist; usage and rate limits vary by model and billing status.
   source: https://ai.google.dev/gemini-api/docs/pricing
 commercial_use:
-  allowed: true
+  # 規約は商用利用そのものを禁じていないが、どの枠を使うかで条件が変わるため
+  # true ではなく conditional。下の restrictions がその中身 (無料枠は入力が
+  # 製品改善と人手のレビューに使われ、有料枠では使われない)。
+  # ai-workflow/tool-license-registry.yaml の「Google Gemini API (無料枠)」と
+  # 対で読むこと。あちらは運営者が無料枠を使う場合に絞って書いてある。
+  allowed: conditional
+  note: 有料枠なら制限は無い。無料枠は入力が学習に使われるので、業務や販売物の素材には有料枠を前提にする。
   source: https://ai.google.dev/gemini-api/terms
 restrictions:
   - The API-key owner must accept the Google APIs Terms and Gemini API Additional Terms.

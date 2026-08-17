@@ -6,7 +6,11 @@ price:
   condition: Free up to 500 identification requests per day; commercial use beyond that requires a paid agreement.
   source: https://my.plantnet.org/terms_of_use
 commercial_use:
+  # 公開版は BYOK なので、どの枠を使うかは鍵の持ち主しだい。ここが両プランを
+  # 見た conditional なのはそのため。ai-workflow/tool-license-registry.yaml の
+  # 「Pl@ntNet API (植物識別)」は運営者が無料枠を使う場合に絞って書いてある。
   allowed: conditional
+  note: 無料プラン (500件/日) は非営利・教育・科学目的に限られる。商用にするなら有料プラン €1,000/年〜へ移る。
   source: https://my.plantnet.org/terms_of_use
 restrictions:
   - Requires a user-owned API key and account.
