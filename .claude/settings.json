@@ -34,7 +34,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/ats030/.local/bin/rtk hook claude"
+            "command": "python3 /home/ats030/.claude/hooks/rtk-hook-guard.py"
           }
         ]
       }
