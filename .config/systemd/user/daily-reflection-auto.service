@@ -5,6 +5,9 @@ Requires=home-ats030-pCloudDrive.mount
 
 [Service]
 Type=oneshot
+# 3 = 品質ゲートで成果物を出さなかった (設計どおり)。障害 (1) と分ける。
+# 143 は SIGTERM で、failure-policy.conf 側が受け持つ。
+SuccessExitStatus=3
 WorkingDirectory=/home/ats030/pCloudDrive/Python/daily-reflection
 EnvironmentFile=-/home/ats030/.env
 # 当機はTZ=UTC。ログの日付境界を日本時間に合わせる。
