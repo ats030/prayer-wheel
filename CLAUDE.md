@@ -91,10 +91,17 @@ git add .beads/issues.jsonl
    出ない。bd 1.0.3 の embedded Dolt モードで再現し、`no-git-ops` の
    有無には依存しない (設定していない新しいリポジトリでも同じ)。
 
-`no-git-ops: true` は外さないこと。これが抑えているのは `bd prime` の終了手順から
-git コマンドを消すことと、JSONL バックアップの git push であって、上の問題とは
-無関係である。バックアップは git remote があると自動で有効になるため、外すと bd が
-勝手にリモートへ push しうる。
+`no-git-ops: true` は外さないこと。bd 1.0.3 のリリースノートに
+`fix: no-git-ops=true now implies export.git-add=false (#3314)` とあり、これは
+2 の一因ではある (`bd config get export.git-add` は true と答えるが、実効値は
+false になる)。それでも外してはいけない理由が2つある。
+
+- 外しても直らない。no-git-ops を設定していない新しいリポジトリでも 2 は再現する。
+  別の原因が併存している (同じ 1.0.3 の
+  `fix(export): scrub git hook env and skip cross-worktree git-add (#3311)` が
+  疑わしい)。
+- 外すと JSONL バックアップの git push が有効になる。これは git remote があると
+  自動で有効になるため、bd が勝手にリモートへ push しうる。
 
 コミット後に `.beads/issues.jsonl` の差分が残るのは正常 (フックが書き直すうえ、
 行順が非決定的)。ただし **`git checkout -- .beads/issues.jsonl` で捨てる前に、
