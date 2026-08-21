@@ -43,3 +43,13 @@ dependencies = [
 dev = [
     "pytest>=9.1.1",
 ]
+
+[tool.pytest.ini_options]
+# ホーム直下で走らせると pCloudDrive (FUSE) まで収集して返ってこないので範囲を切る。
+# 除外するもの: 自前の pyproject.toml を持つアプリ (別の uv プロジェクトなので
+# それぞれのディレクトリで uv run pytest する)、および取り込みの searxng。
+testpaths = ["app"]
+norecursedirs = [
+    "pCloudDrive", ".venv", "*.egg", "node_modules", "cache", "data",
+    "searxng", "app-hub", "calendar-viewer", "writing", "x-analyzer", "x-post",
+]

@@ -22,23 +22,10 @@ bd close <id>         # Complete work
 - Run `bd prime` for detailed command reference and session close protocol
 - Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
 
-### Superpowers との優先順位
+### worktree の扱い
 
-`superpowers` プラグイン (公式マーケットプレース) を入れてある。スキルは自動発火し、
-セッション開始時に `using-superpowers` が注入される。そのスキル自身が
-「User instructions (CLAUDE.md) take precedence over skills」と定めているので、
-競合したらこの節が勝つ。判断を毎回やり直さないよう、3点を先に決めておく。
-
-1. **チェックリストは TodoWrite ではなく bd。** `using-superpowers` は
-   「If it has a checklist, create a todo per item」と指示するが、この環境では
-   TodoWrite を使わない。実施項目は `bd create`、セッション内の一時的な段取りは
-   応答の中で持つ。
-2. **設計レビューの入口は1タスクに1つ。** 「作るべきか」(構成・データ所有・運用契約が
-   変わる提案) は `grill-me`。「どう作るか」(spec → plan → TDD → subagent 実行) は
-   `superpowers:brainstorming` 以降。両方を同じタスクに通さない。
-3. **worktree は明示指示があるときだけ。** `using-git-worktrees` は
-   「before executing implementation plans」で発火するが、作業ディレクトリを
-   固定したセッション (バックグラウンドジョブ等) では作らない。
+worktree は明示指示があるときだけ作る。作業ディレクトリを固定したセッション
+(バックグラウンドジョブ等) では作らない。
 
 ## Session Completion
 
@@ -115,13 +102,23 @@ diff <(git show HEAD:.beads/issues.jsonl | sort) <(sort .beads/issues.jsonl)
 
 ## Build & Test
 
-_Add your build and test commands here_
+Python は原則ひとつの uv プロジェクト (`~/pyproject.toml`) で、各アプリは
+`app/<名前>/` に置く。ただし `app-hub` `calendar-viewer` `writing` `x-analyzer`
+`x-post` は自前の `pyproject.toml` を持つ別プロジェクト。
+
+**テストはアプリのディレクトリで走らせる。**
 
 ```bash
-# Example:
-# npm install
-# npm test
+cd app/backlog-viewer && uv run pytest -q
 ```
+
+ホーム直下からの一括実行はできない。フラット構成のアプリが同じ `main.py` を
+持つため pytest のモジュール名が衝突する (backlog-viewer と tool-inventory)。
+直すには conftest かモジュール改名が要るが、価値に見合わないのでやらない。
+`~/pyproject.toml` の `[tool.pytest.ini_options]` は、ホーム直下で誤って
+走らせたときに pCloudDrive (FUSE) を走査して固まるのを防ぐためだけに置いてある。
+
+pytest は `[dependency-groups] dev` に入っている (ats030-5iqu)。
 
 ## Architecture Overview
 
@@ -174,3 +171,32 @@ systemd から起動するバッチ (Type=oneshot) は、**業務的に何も出
 消えると戻らないデータは `~/data` に置き、`backup-data.timer` が日次で
 `pcloud:backup/ubuntu-server-app` へ送る (日付つき tar.gz、14日保持)。
 キャッシュなど再生成できるものは `~/cache` に置く (バックアップ対象外)。
+
+### 起票の粒度と優先度
+
+**その日に終わらない粒度で起票しない。P3 で起票しない。**
+
+この2つを破った週だけ残タスクが増えている。2026-08-22 時点、bd 621件の実測。
+
+クローズ済み560件のリードタイムは同日 88.2%、翌日 5.7%、2〜7日 3.8% で、
+それ以降はほぼゼロ。**この環境に「あとでやる」は存在しない。** 作成日を跨いで
+生き残った127件の最終クローズ率は次のとおりで、P3 は5回に4回やらないまま終わる。
+
+| 起票時の優先度 | 跨いだ後に閉じた割合 |
+|---|---:|
+| P1 | 72.7% |
+| P2 | 66.0% |
+| P3 | 20.5% |
+
+P3 は全作成の14%しかないのに、残件の57%を占める。週ごとの残存率は作った量とは
+無関係で、同日クローズ率と P3 割合でほぼ決まる (8/10週は最多の103件を作って
+残存2.9%、8/17週は46件で残存19.6%)。
+
+したがって:
+
+- **やらないなら作らない。** 「いつかやるかもしれない」を P3 で起票するのは、
+  記録ではなく先送りで、棚卸しの手間だけが増える。判断を保留したいなら
+  `bd defer` を使い、外部依存待ちであることを明示する
+- **1日で終わる単位に割る。** 割れないなら epic にして、最初の1日分だけを
+  task として作る。跨いだ時点で P1 でも回収率は73%に落ちる
+- 週次の状況は backlog-viewer (port 8524) で見る。日曜朝8時に Discord へ届く
