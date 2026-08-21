@@ -1,0 +1,17 @@
+[Unit]
+Description=Backlog Viewer (残タスクが収束しない理由の可視化, port 8524)
+After=network-online.target tailscaled.service home-ats030-pCloudDrive.mount
+Wants=network-online.target
+Requires=home-ats030-pCloudDrive.mount
+
+[Service]
+Type=simple
+ExecStart=/home/ats030/app/backlog-viewer.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=backlog-viewer
+
+[Install]
+WantedBy=default.target

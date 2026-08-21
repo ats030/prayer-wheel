@@ -1,0 +1,11 @@
+[Unit]
+Description=残タスクの週次サマリを Discord へ送る
+
+[Service]
+Type=oneshot
+ExecStart=/home/ats030/app/backlog-viewer-notify.sh
+# 3 = Webhook 未設定で送らなかった (設計どおり。障害ではない)
+SuccessExitStatus=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=backlog-viewer-notify
