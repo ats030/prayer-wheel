@@ -67,6 +67,44 @@ bd close <id>         # Complete work
 - If push fails, resolve and retry until it succeeds
 <!-- END BEADS INTEGRATION -->
 
+### 補足: push の前に issues.jsonl を書き出す
+
+上の手順4で `git push` する前に、必ずこれを挟む。
+
+```bash
+bd export -o .beads/issues.jsonl
+git add .beads/issues.jsonl
+```
+
+この2行は上のブロックの中に書けない。`BEGIN BEADS INTEGRATION` から
+`END BEADS INTEGRATION` までは bd が hash 付きで管理しており、bd の更新で
+書き戻されるため。
+
+理由は、`bd close` しただけでは `.beads/issues.jsonl` が更新されないから
+(2026-08-21、ats030-x91r)。二段で古くなる。
+
+1. `export.interval` が既定 60秒で、bd の write のたびには書き出さない。
+   `bd update` の直後に md5 を取っても変わらず、`bd export -o` で取った
+   live DB とだけ差が出る。この古いファイルを `git add` してしまう。
+2. pre-commit フックは export を走らせるが、その結果をステージしない。
+   `export.git-add` は既定 true なのに効かず、`git add failed` の警告も
+   出ない。bd 1.0.3 の embedded Dolt モードで再現し、`no-git-ops` の
+   有無には依存しない (設定していない新しいリポジトリでも同じ)。
+
+`no-git-ops: true` は外さないこと。これが抑えているのは `bd prime` の終了手順から
+git コマンドを消すことと、JSONL バックアップの git push であって、上の問題とは
+無関係である。バックアップは git remote があると自動で有効になるため、外すと bd が
+勝手にリモートへ push しうる。
+
+コミット後に `.beads/issues.jsonl` の差分が残るのは正常 (フックが書き直すうえ、
+行順が非決定的)。ただし **`git checkout -- .beads/issues.jsonl` で捨てる前に、
+順序だけの差か内容の差かを確かめること。** 素の `git diff` では区別できない。
+
+```bash
+diff <(git show HEAD:.beads/issues.jsonl | sort) <(sort .beads/issues.jsonl)
+```
+
+差が無ければ順序だけなので捨ててよい。差があれば HEAD 側が古い。
 
 ## Build & Test
 
