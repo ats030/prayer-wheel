@@ -15,8 +15,8 @@
 
 ```bash
 IKIMONO_EVAL_PHOTO_SIZE=original uv run python eval/fetch_dataset.py   # 元の大きさで取る
-IKIMONO_MAX_EDGE=1600 uv run python eval/run_eval.py --provider local  # 送る側の上限を振る
-IKIMONO_MAX_EDGE=2400 uv run python eval/run_eval.py --provider local
+IKIMONO_MAX_EDGE=1600 uv run python eval/run_eval.py --provider local --model gemma4:31b  # 送る側の上限を振る
+IKIMONO_MAX_EDGE=2400 uv run python eval/run_eval.py --provider local --model gemma4:31b
 ```
 
 上げれば細部は残るが、モデルによってはタイル数が増えて課金と待ち時間が伸びる
@@ -117,7 +117,7 @@ uv run python eval/compare_runs.py edge-1600 edge-1600b
 ### 複数回まわす
 
 ```bash
-uv run python eval/run_eval.py --provider local --repeat 3 --label edge-1600
+uv run python eval/run_eval.py --provider local --model gemma4:31b --repeat 3 --label edge-1600
 ```
 
 各回は `edge-1600-r1` `-r2` `-r3` として個別に保存し (途中で日次上限に当たっても
@@ -169,8 +169,8 @@ uv run --with httpx python eval/fetch_dataset.py --per-group 6
 ## 測定
 
 ```bash
-uv run --with httpx --with pillow python eval/run_eval.py --label local-baseline
-uv run --with httpx --with pillow python eval/run_eval.py --use-plantnet --label local-plantnet
+uv run --with httpx --with pillow python eval/run_eval.py --model gemma4:31b --label local-baseline
+uv run --with httpx --with pillow python eval/run_eval.py --model gemma4:31b --use-plantnet --label local-plantnet
 ```
 
 本番と同じ `pipeline.identify_all` を通す。評価だけ別の手順を組むと、測った数字が
@@ -403,5 +403,6 @@ Pl@ntNet が効くのは、植物の画像を専門に学習したモデルが�
 枠で既定にできず、精度も Flash-Lite を上回っていないモデルだからである。既定を
 3.6-flash へ動かす判断が出てきたときに測り直せばよい。
 
-教訓として、`--model` は必ず明示する。設定ストアは画面から書き換わり、アプリの既定と
-一致している保証が無い。
+再発を防ぐため、`--model` を必須にした (2026-08-21、ats030-pqr7)。省略時に設定ストアへ
+落とす経路を消してある。設定ストアは画面から書き換わり、アプリの既定と一致している
+保証が無いので、何で測ったかは呼ぶ側が明示する。鍵は引き続き設定ストアから取る。

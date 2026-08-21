@@ -3,8 +3,8 @@
 本番と同じ経路 (pipeline.identify_all) を通す。評価だけ別の手順を組むと、
 測った数字がアプリの実際の挙動と一致しなくなる。
 
-  uv run --with httpx --with pillow python eval/run_eval.py --label local-baseline
-  uv run ... python eval/run_eval.py --use-plantnet --label local-plantnet
+  uv run --with httpx --with pillow python eval/run_eval.py --model gemma4:31b --label local-baseline
+  uv run ... python eval/run_eval.py --model gemma4:31b --use-plantnet --label local-plantnet
 
 既定はOllama。外部APIは無料枠の日次上限を公開版と食い合うので、必要なときだけ
 --provider gemini のように明示する。
@@ -246,12 +246,16 @@ def run_one(args, entries, manifest, model, api_key, plantnet_key, label) -> dic
     return summary
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     # 検証はOllamaを既定にする。外部APIは無料枠の日次上限があり、評価を回すたびに
     # 公開版の利用者ぶんの枠を削ってしまう。比較で外部が要るときだけ --provider で切り替える。
     parser.add_argument("--provider", default="local", choices=["local", "openai", "anthropic", "gemini"])
-    parser.add_argument("--model", default="", help="未指定なら設定中のモデル")
+    # 設定ストアの既定に落とさない。settings.json は画面から書き換わり、アプリの既定
+    # (config_store.DEFAULT_MODELS) と一致している保証が無い。実際 models.gemini が
+    # gemini-3.6-flash になっていたため、--model を省いたランだけ4倍遅いモデルで測られ、
+    # 条件の違う数字を13日間比べていた (ats030-e4xg)。何で測ったかは呼ぶ側が明示する。
+    parser.add_argument("--model", required=True, help="測るモデル (例: gemini-3.5-flash-lite, gemma4:31b)")
     parser.add_argument("--use-plantnet", action="store_true")
     parser.add_argument("--label", default="", help="結果ファイル名。未指定なら provider から作る")
     parser.add_argument("--limit", type=int, default=0, help="先頭N件だけ試す")
@@ -278,7 +282,11 @@ def main() -> int:
                         help="標高と周辺の土地利用を撮影地域として渡す")
     parser.add_argument("--date-from-dataset", action="store_true", help="観察日を撮影日として渡す")
     parser.add_argument("--time-from-dataset", action="store_true", help="観察日時 (時刻まで) を渡す")
-    args = parser.parse_args()
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
 
     manifest = json.loads(Path(args.dataset).read_text(encoding="utf-8"))
     entries = manifest["entries"]
@@ -286,7 +294,7 @@ def main() -> int:
         entries = [e for e in entries if e["group"] == args.group]
     entries = entries[: args.limit or None]
     settings = config_store.load()
-    model = args.model or settings["models"][args.provider]
+    model = args.model
     api_key = settings["api_keys"].get(args.provider, "")
     plantnet_key = settings["api_keys"].get("plantnet", "") if args.use_plantnet else ""
     label = args.label or f"{args.provider}-{model}" + ("-plantnet" if args.use_plantnet else "")
