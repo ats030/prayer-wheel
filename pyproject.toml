@@ -38,3 +38,8 @@ dependencies = [
     "uvicorn>=0.46.0",
     "youtube-transcript-api>=1.2.4",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

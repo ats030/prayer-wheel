@@ -191,20 +191,44 @@ class CohortRow:
     week: date
     created: int
     remaining: int
+    same_day: int
+    p3: int
 
     @property
     def residual_rate(self) -> float:
         return round(self.remaining / self.created * 100, 1) if self.created else 0.0
 
+    @property
+    def same_day_rate(self) -> float:
+        """その週に作った全件のうち、作った日に閉じた割合。
+
+        母数を「閉じた件」にすると作りっぱなしの件が分母から消えて率が良く
+        見えるので、作成件数を母数にする。
+        """
+        return round(self.same_day / self.created * 100, 1) if self.created else 0.0
+
+    @property
+    def p3_share(self) -> float:
+        return round(self.p3 / self.created * 100, 1) if self.created else 0.0
+
 
 def cohort_table(issues: list[Issue], today: date) -> list[CohortRow]:
     created: dict[date, int] = {}
     remaining: dict[date, int] = {}
+    same_day: dict[date, int] = {}
+    p3: dict[date, int] = {}
     for issue in issues:
         created[issue.cohort] = created.get(issue.cohort, 0) + 1
         if issue.open_on(today):
             remaining[issue.cohort] = remaining.get(issue.cohort, 0) + 1
-    return [CohortRow(w, created[w], remaining.get(w, 0)) for w in sorted(created)]
+        if issue.closed is not None and issue.closed == issue.created:
+            same_day[issue.cohort] = same_day.get(issue.cohort, 0) + 1
+        if issue.priority >= 3:
+            p3[issue.cohort] = p3.get(issue.cohort, 0) + 1
+    return [
+        CohortRow(w, created[w], remaining.get(w, 0), same_day.get(w, 0), p3.get(w, 0))
+        for w in sorted(created)
+    ]
 
 
 @dataclass(frozen=True)
@@ -535,6 +559,8 @@ def render_page(issues: list[Issue], today: date) -> str:
         f'<td class="num">{c.created}</td>'
         f'<td class="num">{c.remaining}</td>'
         f'<td class="num">{c.residual_rate}%</td>'
+        f'<td class="num">{c.same_day_rate}%</td>'
+        f'<td class="num">{c.p3_share}%</td>'
         f'<td><span class="bar" style="width:{max(2, round(c.created / max_created * 120))}px;'
         f"opacity:{0.25 + min(c.residual_rate, 50) / 50 * 0.75:.2f}\"></span></td></tr>"
         for c in cohorts
@@ -577,8 +603,11 @@ def render_page(issues: list[Issue], today: date) -> str:
   <h2>作成週ごとの残存率</h2>
   <div class="panel scroll">
     <table><thead><tr><th>作成週</th><th class="num">作成</th><th class="num">残</th>
-    <th class="num">残存率</th><th></th></tr></thead>
+    <th class="num">残存率</th><th class="num">同日クローズ率</th><th class="num">P3の割合</th>
+    <th></th></tr></thead>
     <tbody>{cohort_html}</tbody></table>
+    <p class="note">残存率はこの2列とほぼ逆に動く。その日に閉じられなかった件と、
+    P3 で作られた件が残る。残存率が跳ねた週を見つけたら、量ではなくこの2列を見ること。</p>
   </div>
 
   <h2>残っている全 {len(rows)} 件 (滞留日数の降順)</h2>

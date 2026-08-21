@@ -276,3 +276,27 @@ class TestBdBinary:
         monkeypatch.setattr(main.shutil, "which", lambda name: None)
         monkeypatch.setattr(main, "FALLBACK_BD_PATHS", ("/nonexistent/bd",))
         assert main.bd_binary() == "bd"
+
+
+class TestCohortExplanatoryColumns:
+    def test_same_day_rate_is_share_of_the_week_closed_on_creation_day(self):
+        issues = main.parse_issues([
+            issue("a", iso(2026, 7, 27, 1), closed=iso(2026, 7, 27, 9), status="closed"),
+            issue("b", iso(2026, 7, 28), closed=iso(2026, 7, 30), status="closed"),
+            issue("c", iso(2026, 7, 29)),
+            issue("d", iso(2026, 7, 30)),
+        ])
+        row = main.cohort_table(issues, today=date(2026, 8, 21))[0]
+        # 母数はその週に作った全件。閉じた件だけを母数にすると、
+        # 「作ったまま放置」が分母から消えて率が良く見えてしまう。
+        assert row.same_day_rate == 25.0
+
+    def test_p3_share(self):
+        issues = main.parse_issues([
+            issue("a", iso(2026, 7, 27), priority=3),
+            issue("b", iso(2026, 7, 28), priority=1),
+            issue("c", iso(2026, 7, 29), priority=2),
+            issue("d", iso(2026, 7, 30), priority=3),
+        ])
+        row = main.cohort_table(issues, today=date(2026, 8, 21))[0]
+        assert row.p3_share == 50.0
