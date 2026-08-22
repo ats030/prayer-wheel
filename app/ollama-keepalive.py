@@ -10,9 +10,15 @@ opencode を開くたびにそれを待つのは実用的でない。
 keep_alive を受け付け、プロキシがそのまま通すので、こちらから固定できる。
 ただし evo-x2 側で ollama が再起動すると固定は消えるため、定期的に叩き直す。
 
+使用中のモデルは蹴らない。qwen3-coder-next (52GB) と qwen3.8:27b (17.7GB) は
+VRAM に同居できず、片方を要求するともう片方が降りる。opencode にはクライアント側
+タイムアウトが無いため、降ろされた要求は返らず TUI が固まる (2026-08-22 に15分の
+実例)。よって別のモデルがロード中なら今回は見送る。ollama は idle 5分で自然に
+降ろすので、ピンは次の周回で戻る。
+
 終了コード (~/CLAUDE.md の規約):
-  0 = 固定した
-  3 = 何もしなかった (対象が無い / 裏側に届かない) — 設計どおり
+  0 = 固定した / 既に固定されていた
+  3 = 何もしなかった (対象が無い / 裏側に届かない / 別のモデルが使用中) — 設計どおり
   1 = 障害 (設定が壊れている、固定を要求したのに反映されない)
 
 3 に「届かない」を含めるのは、15分ごとに走るこのユニットで evo-x2 の停止を
@@ -63,15 +69,27 @@ def target_model() -> str:
     return model[len(PROVIDER_PREFIX):]
 
 
-def expires_at(model: str) -> str | None:
+def loaded_models() -> dict[str, str] | None:
+    """今ロードされているモデルを {名前: expires_at} で返す。届かなければ None。"""
     try:
         with urllib.request.urlopen(BASE + "/api/ps", timeout=30) as res:
-            for entry in json.load(res).get("models", []):
-                if entry.get("name") == model:
-                    return entry.get("expires_at")
+            return {
+                entry.get("name"): entry.get("expires_at")
+                for entry in json.load(res).get("models", [])
+                if entry.get("name")
+            }
     except (urllib.error.URLError, OSError, ValueError):
         return None
-    return None
+
+
+def is_pinned(until: str | None) -> bool:
+    """keep_alive=-1 は 2318年 のような遠い未来になる。数年先なら固定できている。"""
+    if not until:
+        return False
+    try:
+        return datetime.fromisoformat(until.replace("Z", "+00:00")).year >= datetime.now().year + 1
+    except ValueError:
+        return False
 
 
 def main() -> int:
@@ -83,6 +101,26 @@ def main() -> int:
     except (OSError, ValueError) as exc:
         print(f"opencode の設定を読めない ({CONFIG}): {exc}", file=sys.stderr)
         return 1
+
+    # 使用中のモデルを蹴らない。qwen3-coder-next (52GB) と qwen3.8:27b (17.7GB) は
+    # 同居できず、片方を要求するともう片方が VRAM から降りる。opencode には
+    # クライアント側タイムアウトが無いので、降ろされた要求は返らず TUI が固まる
+    # (2026-08-22 に15分の実例)。固定を守ることより使用中を守るほうが優先。
+    # ollama は idle 5分で自然に降ろすため、ピンは次の周回で戻る。
+    loaded = loaded_models()
+    if loaded is None:
+        print("裏側に届かないので何もしない (/api/ps)", file=sys.stderr)
+        return 3
+    if model in loaded:
+        if is_pinned(loaded[model]):
+            print(f"{model} は既に固定されている (expires_at={loaded[model]})")
+            return 0
+    elif loaded:
+        print(
+            f"別のモデルが使われているので今回は見送る: {', '.join(sorted(loaded))}",
+            file=sys.stderr,
+        )
+        return 3
 
     try:
         # プロンプトを省くとロードだけが走る (done_reason: "load")。
@@ -99,17 +137,12 @@ def main() -> int:
         print(f"{model} の応答が完了していない: {result}", file=sys.stderr)
         return 1
 
-    until = expires_at(model)
+    after = loaded_models() or {}
+    until = after.get(model)
     if until is None:
         print(f"{model} を要求したが /api/ps に現れない", file=sys.stderr)
         return 1
-
-    # keep_alive=-1 は 2318年 のような遠い未来になる。数年先なら固定できている。
-    try:
-        years = datetime.fromisoformat(until.replace("Z", "+00:00")).year
-    except ValueError:
-        years = 0
-    if years < datetime.now().year + 1:
+    if not is_pinned(until):
         print(f"{model} は固定されていない (expires_at={until})", file=sys.stderr)
         return 1
 
