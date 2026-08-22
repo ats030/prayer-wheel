@@ -1,0 +1,12 @@
+[Unit]
+Description=opencode の既定 ollama モデルを保つタイマー
+
+[Timer]
+# keep_alive=-1 は無期限なので本来は一度で足りる。定期的に叩くのは
+# evo-x2 側で ollama が再起動すると固定が消えるため。
+OnBootSec=2min
+OnUnitActiveSec=15min
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

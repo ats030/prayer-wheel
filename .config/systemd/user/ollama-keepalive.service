@@ -1,0 +1,21 @@
+[Unit]
+Description=opencode の既定 ollama モデルを常時ロードに保つ
+After=network-online.target tailscaled.service ollama-openwebui-proxy.service
+Wants=network-online.target ollama-openwebui-proxy.service
+
+[Service]
+Type=oneshot
+# exit 3 = 何もしなかった (対象が無い / 裏側に届かない)。evo-x2 の停止を
+# failure にすると、止まっている間 15分おきに通知が飛び続ける。
+SuccessExitStatus=3
+WorkingDirectory=/home/ats030
+ExecStart=/usr/bin/python3 /home/ats030/app/ollama-keepalive.py
+# 52GB のコールドロードは、他の操作と競合すると数分かかることがある
+# (実測で6分40秒の例あり)。スクリプト側の打ち切り 600秒 より長く取る。
+TimeoutStartSec=900
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ollama-keepalive
+
+[Install]
+WantedBy=default.target
