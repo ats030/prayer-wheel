@@ -68,10 +68,30 @@ class Issue:
     closed: date | None
     updated: date
     started: date | None
+    # 凍結の解除予定日。bd defer --until で入る。None は「期限を決めずに伏せた」で、
+    # 期限切れを検知できないため通知に出せない (2026-08-22 に uic3/9sa が5〜8日
+    # 埋もれていたのがこれ)。凍結には必ず期限を入れる運用にした。
+    defer_until: date | None = None
+    # blocks 依存を持つか。契機が具体的にあるもの (例: X クレジット復旧待ち) は
+    # 期限ではなく依存で表現するため、期限なしでも催促しない。
+    has_blocker: bool = False
 
     @property
     def deferred(self) -> bool:
         return self.status == "deferred"
+
+    def freeze_expired(self, today: date) -> bool:
+        """凍結の期限が過ぎているか。bd は期限が来ても自動では戻さない。"""
+        return self.deferred and self.defer_until is not None and self.defer_until <= today
+
+    def freeze_undated(self) -> bool:
+        """期限も契機も無く伏せてあるもの。放っておくと二度と見ない。
+
+        blocks 依存があるものは除く。契機が具体的にあり、その issue が閉じたときに
+        戻ってくるため、期限を切る必要がない。ここを区別しないと、正しく依存で
+        表現したものまで毎週催促することになる。
+        """
+        return self.deferred and self.defer_until is None and not self.has_blocker
 
     @property
     def cohort(self) -> date:
@@ -111,6 +131,9 @@ def parse_issues(raw: list[dict]) -> list[Issue]:
                 closed=jst_date(r.get("closed_at")),
                 updated=jst_date(r.get("updated_at")) or created,
                 started=jst_date(r.get("started_at")),
+                defer_until=jst_date(r.get("defer_until")),
+                has_blocker=any(d.get("type") == "blocks"
+                                for d in (r.get("dependencies") or [])),
             )
         )
     return issues
@@ -272,6 +295,8 @@ class Metrics:
     same_day_close_rate: float
     median_age: int
     median_lead_time: int
+    freeze_expired: int
+    freeze_undated: int
 
 
 def metrics(issues: list[Issue], today: date) -> Metrics:
@@ -288,6 +313,8 @@ def metrics(issues: list[Issue], today: date) -> Metrics:
         same_day_close_rate=round(len(same_day) / len(closed) * 100, 1) if closed else 0.0,
         median_age=int(median(ages)) if ages else 0,
         median_lead_time=int(median(leads)) if leads else 0,
+        freeze_expired=sum(1 for i in remaining if i.freeze_expired(today)),
+        freeze_undated=sum(1 for i in remaining if i.freeze_undated()),
     )
 
 
@@ -678,5 +705,7 @@ def weekly_summary(issues: list[Issue], today: date) -> dict:
         "over_30_days": m.over_30_days,
         "median_age": m.median_age,
         "delta_7d": m.remaining - before,
+        "freeze_expired": m.freeze_expired,
+        "freeze_undated": m.freeze_undated,
         "oldest": rows[:5],
     }

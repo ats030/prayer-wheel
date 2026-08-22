@@ -54,11 +54,30 @@ def tailnet_ip() -> str | None:
         return None
 
 
+def is_enabled(unit: str) -> bool:
+    """systemd で有効になっているか。無効なものは監視しない。
+
+    凍結したアプリ (使わないと決めて disable したもの) を叩き続けると、接続失敗が
+    通知になり issue になる。「見ないと決めたものが通知を出す」のは矛盾なので、
+    disable を監視対象外の意思表示として扱う (2026-08-22)。
+
+    判定できないときは True を返す。監視から漏らすより、鳴らしすぎるほうが安全。
+    """
+    try:
+        out = subprocess.run(["systemctl", "--user", "is-enabled", unit],
+                             capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return True
+    return out.stdout.strip() not in ("disabled", "masked")
+
+
 def discover_targets() -> list[dict]:
     targets = []
     for f in sorted(UNIT_DIR.glob("*.service")):
         # テンプレートユニットは起動対象ではない
         if f.name.endswith("@.service"):
+            continue
+        if not is_enabled(f.name):
             continue
         try:
             desc = next((l.split("=", 1)[1].strip() for l in f.read_text(encoding="utf-8").splitlines()

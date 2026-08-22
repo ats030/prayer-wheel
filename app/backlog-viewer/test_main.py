@@ -14,8 +14,10 @@ def iso(y, m, d, h=0, mi=0):
 
 
 def issue(id_, created, closed=None, status="open", priority=3, updated=None, started=None,
-          title="t", issue_type="task"):
+          title="t", issue_type="task", defer_until=None, blocked_by=None):
     return {
+        "defer_until": defer_until,
+        "dependencies": ([{"depends_on_id": blocked_by, "type": "blocks"}] if blocked_by else []),
         "id": id_,
         "title": title,
         "status": status,
@@ -129,6 +131,46 @@ class TestBacklogRows:
         ])
         rows = main.backlog_rows(issues, today=date(2026, 8, 21))
         assert [r.id for r in rows] == ["b"]
+
+    def test_freeze_expired_is_detected(self):
+        """期限が過ぎた凍結を拾えること。bd は期限が来ても自動では戻さない"""
+        issues = main.parse_issues([
+            issue("a", iso(2026, 6, 1), status="deferred", defer_until=iso(2026, 8, 1)),
+            issue("b", iso(2026, 6, 1), status="deferred", defer_until=iso(2026, 9, 1)),
+        ])
+        today = date(2026, 8, 22)
+        assert issues[0].freeze_expired(today) is True
+        assert issues[1].freeze_expired(today) is False
+        assert main.metrics(issues, today).freeze_expired == 1
+
+    def test_freeze_without_a_date_is_counted_separately(self):
+        """期限なしは期限切れとして拾えないので別に数える"""
+        issues = main.parse_issues([issue("a", iso(2026, 6, 1), status="deferred")])
+        today = date(2026, 8, 22)
+        assert issues[0].freeze_undated() is True
+        assert issues[0].freeze_expired(today) is False
+        m = main.metrics(issues, today)
+        assert (m.freeze_expired, m.freeze_undated) == (0, 1)
+
+    def test_freeze_with_a_blocker_is_not_nagged(self):
+        """契機を依存で表現したものは期限なしでも催促しない
+
+        期限を切る目的は「二度と見ない」を防ぐこと。blocks 依存があれば、その issue が
+        閉じたときに戻ってくるので目的は満たされている。ここを区別しないと、正しく
+        表現したものまで毎週催促され、通知が信用されなくなる。
+        """
+        issues = main.parse_issues([
+            issue("a", iso(2026, 6, 1), status="deferred"),
+            issue("b", iso(2026, 6, 1), status="deferred", blocked_by="x"),
+        ])
+        assert issues[0].freeze_undated() is True
+        assert issues[1].freeze_undated() is False
+        assert main.metrics(issues, date(2026, 8, 22)).freeze_undated == 1
+
+    def test_open_issues_are_never_frozen(self):
+        issues = main.parse_issues([issue("a", iso(2026, 6, 1), status="open")])
+        assert issues[0].freeze_undated() is False
+        assert issues[0].freeze_expired(date(2026, 8, 22)) is False
 
     def test_deferred_is_included_and_flagged(self):
         issues = main.parse_issues([issue("a", iso(2026, 8, 1), status="deferred")])

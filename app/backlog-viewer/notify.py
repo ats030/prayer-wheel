@@ -36,6 +36,17 @@ def build_message(summary: dict, today) -> str:
         f"残 **{summary['remaining']}件** (先週比 {arrow}) / うち外部待ち {summary['deferred']}件",
         f"30日超 {summary['over_30_days']}件 · 滞留の中央値 {summary['median_age']}日",
     ]
+    # 凍結は bd defer で伏せるが、bd は期限が来ても自動では戻さない。ここで出さないと
+    # 期限切れが永久に埋もれる (2026-08-22 に P1 2件が5〜8日埋もれていた)。
+    expired = summary.get("freeze_expired", 0)
+    undated = summary.get("freeze_undated", 0)
+    if expired or undated:
+        parts = []
+        if expired:
+            parts.append(f"**期限切れの凍結 {expired}件** (見直す)")
+        if undated:
+            parts.append(f"期限なしの凍結 {undated}件 (期限を入れる)")
+        lines.append(" / ".join(parts))
     if summary["oldest"]:
         lines.append("")
         lines.append("滞留の長い順:")
