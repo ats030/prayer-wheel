@@ -1,8 +1,7 @@
 [Unit]
 Description=Weather Viewer (気象庁+Open-Meteo オープンデータ天気予報, port 8520)
-After=network-online.target tailscaled.service home-ats030-pCloudDrive.mount
+After=network-online.target tailscaled.service
 Wants=network-online.target
-Requires=home-ats030-pCloudDrive.mount
 
 [Service]
 Type=simple
