@@ -6,7 +6,7 @@ Wants=network-online.target home-ats030-pCloudDrive.mount
 [Service]
 Type=oneshot
 # .env はランナー内の load_dotenv が読み込むため EnvironmentFile は使わない
-WorkingDirectory=/home/ats030/pCloudDrive/Python/sales-viewer
+WorkingDirectory=/home/ats030/app/sales-viewer
 ExecStart=/home/ats030/app/sales-viewer-fetch.sh
 StandardOutput=journal
 StandardError=journal

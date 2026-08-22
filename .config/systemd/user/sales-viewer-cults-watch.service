@@ -5,7 +5,7 @@ Wants=network-online.target home-ats030-pCloudDrive.mount
 
 [Service]
 Type=oneshot
-WorkingDirectory=/home/ats030/pCloudDrive/Python/sales-viewer
+WorkingDirectory=/home/ats030/app/sales-viewer
 ExecStart=/home/ats030/app/sales-viewer-cults-watch.sh
 StandardOutput=journal
 StandardError=journal
