@@ -117,7 +117,8 @@
     "allow": [
       "$defaults",
       "Bash(bd:*)",
-      "Bash(uv run pytest:*)"
+      "Bash(uv run:*)",
+      "Bash(systemctl --user:*)"
     ],
     "soft_deny": [
       "$defaults",
