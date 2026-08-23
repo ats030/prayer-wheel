@@ -389,3 +389,21 @@ class TestBacklogRowsSplit:
         issues = main.parse_issues([issue("a", iso(2026, 8, 1))])
         live, cold = main.split_rows(main.backlog_rows(issues, date(2026, 8, 23)))
         assert len(live) == 1 and cold == []
+
+
+class TestLeadTimeLabel:
+    """0日は「計測できていない」ではなく「その日に閉じている」。
+
+    同日クローズ率が8割を超える環境では中央値が0に張り付き、タイルの「0日」は
+    欠測と誤読されやすい。
+    """
+
+    def test_same_day_reads_as_immediate(self):
+        issues = main.parse_issues([issue("a", iso(2026, 8, 1), closed=iso(2026, 8, 1))])
+        page = main.render_page(issues, date(2026, 8, 23))
+        assert "即日" in page
+        assert "リードタイム中央値" in page
+
+    def test_multi_day_still_shows_days(self):
+        issues = main.parse_issues([issue("a", iso(2026, 8, 1), closed=iso(2026, 8, 6))])
+        assert "5日" in main.render_page(issues, date(2026, 8, 23))

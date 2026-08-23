@@ -607,7 +607,11 @@ def render_page(issues: list[Issue], today: date) -> str:
         ("滞留の中央値", f"{m.median_age}日", "残っている件"),
         ("claim率", f"{m.claim_rate}%", "started_at が付いた件"),
         ("同日クローズ率", f"{m.same_day_close_rate}%", "クローズ済み全体"),
-        ("リードタイム中央値", f"{m.median_lead_time}日", "クローズ済み全体"),
+        # 0日は「計測できていない」ではなく「その日に閉じている」。同日クローズ率が
+        # 8割を超える環境では中央値が0に張り付くため、誤読しないよう言葉で出す。
+        ("リードタイム中央値",
+         "即日" if m.median_lead_time == 0 else f"{m.median_lead_time}日",
+         "クローズ済み全体 · 作成から close まで"),
     ]
     tile_html = "".join(
         f'<div class="tile"><div class="k">{html.escape(k)}</div>'
