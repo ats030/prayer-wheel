@@ -1,104 +1,28 @@
-# Project Instructions for AI Agents
+# Additional Project Instructions
 
-This file provides instructions and context for AI coding agents working on this project.
+共有ルールは `~/.claude/CLAUDE.md` が読み込む `AGENTS.md` を正本とする。
+ここには重複させず、この環境固有の補足だけを書く。
 
-<!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
-## Beads Issue Tracker
-
-This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
-
-### Quick Reference
-
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work
-bd close <id>         # Complete work
-```
-
-### Rules
-
-- Use `bd` for ALL task tracking — do NOT use TodoWrite, TaskCreate, or markdown TODO lists
-- Run `bd prime` for detailed command reference and session close protocol
-- Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
-
-### worktree の扱い
+## worktree
 
 worktree は明示指示があるときだけ作る。作業ディレクトリを固定したセッション
 (バックグラウンドジョブ等) では作らない。
 
-## Session Completion
+## beads JSONL の push
 
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
-
-**MANDATORY WORKFLOW:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd dolt push  # only if a Dolt remote is configured
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
-
-**CRITICAL RULES:**
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
-<!-- END BEADS INTEGRATION -->
-
-### 補足: push の前に issues.jsonl を書き出す
-
-上の手順4で `git push` する前に、必ずこれを挟む。
+push 前に必ず live DB を書き出してステージする (`ats030-x91r`)。
 
 ```bash
 bd export -o .beads/issues.jsonl
 git add .beads/issues.jsonl
 ```
 
-この2行は上のブロックの中に書けない。`BEGIN BEADS INTEGRATION` から
-`END BEADS INTEGRATION` までは bd が hash 付きで管理しており、bd の更新で
-書き戻されるため。
-
-理由は、`bd close` しただけでは `.beads/issues.jsonl` が更新されないから
-(2026-08-21、ats030-x91r)。二段で古くなる。
-
-1. `export.interval` が既定 60秒で、bd の write のたびには書き出さない。
-   `bd update` の直後に md5 を取っても変わらず、`bd export -o` で取った
-   live DB とだけ差が出る。この古いファイルを `git add` してしまう。
-2. pre-commit フックは export を走らせるが、その結果をステージしない。
-   `export.git-add` は既定 true なのに効かず、`git add failed` の警告も
-   出ない。bd 1.0.3 の embedded Dolt モードで再現し、`no-git-ops` の
-   有無には依存しない (設定していない新しいリポジトリでも同じ)。
-
-`no-git-ops: true` は外さないこと。bd 1.0.3 のリリースノートに
-`fix: no-git-ops=true now implies export.git-add=false (#3314)` とあり、これは
-2 の一因ではある (`bd config get export.git-add` は true と答えるが、実効値は
-false になる)。それでも外してはいけない理由が2つある。
-
-- 外しても直らない。no-git-ops を設定していない新しいリポジトリでも 2 は再現する。
-  別の原因が併存している (同じ 1.0.3 の
-  `fix(export): scrub git hook env and skip cross-worktree git-add (#3311)` が
-  疑わしい)。
-- 外すと JSONL バックアップの git push が有効になる。これは git remote があると
-  自動で有効になるため、bd が勝手にリモートへ push しうる。
-
-コミット後に `.beads/issues.jsonl` の差分が残るのは正常 (フックが書き直すうえ、
-行順が非決定的)。ただし **`git checkout -- .beads/issues.jsonl` で捨てる前に、
-順序だけの差か内容の差かを確かめること。** 素の `git diff` では区別できない。
+`no-git-ops: true` は外さない。コミット後に JSONL の差分が残った場合は、
+捨てる前に次で内容差か行順だけの差かを確認する。
 
 ```bash
 diff <(git show HEAD:.beads/issues.jsonl | sort) <(sort .beads/issues.jsonl)
 ```
-
-差が無ければ順序だけなので捨ててよい。差があれば HEAD 側が古い。
 
 ## Build & Test
 
