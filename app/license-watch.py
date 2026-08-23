@@ -96,8 +96,14 @@ def post_to_discord(text: str) -> None:
         print("DISCORD_WEBHOOK_URL が未設定のため通知は送らない", file=sys.stderr)
         return
     payload = json.dumps({"content": text[:DISCORD_LIMIT]}).encode()
+    # User-Agent は必須。Discord は Python-urllib の既定 UA を 403 で弾く
+    # (2026-08-23 実測: UA 無し 403 / UA あり 204)。ここは失敗を握りつぶすので、
+    # 付け忘れると一度も届かないまま誰も気づかない (ats030-we1i と同じ欠陥)。
     req = urllib.request.Request(
-        url, data=payload, headers={"Content-Type": "application/json"}
+        url, data=payload, headers={
+            "Content-Type": "application/json",
+            "User-Agent": "license-watch (https://github.com/ats030, 1.0)",
+        }
     )
     try:
         with urllib.request.urlopen(req, timeout=20) as resp:
