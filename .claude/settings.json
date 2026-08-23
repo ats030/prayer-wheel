@@ -73,9 +73,7 @@
     ]
   },
   "enabledPlugins": {
-    "grill-me@ai-workflow": true,
-    "thinking-workflow@ai-workflow": true,
-    "superpowers@claude-plugins-official": true
+    "grill-me@ai-workflow": true
   },
   "extraKnownMarketplaces": {
     "ai-workflow": {
@@ -86,6 +84,45 @@
     }
   },
   "language": "japanese",
+  "autoCompactWindow": 150000,
   "theme": "dark",
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "autoMode": {
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: Google Cloud (Cloud Run — ikimono-note-736831430371.asia-northeast1.run.app, ikimono-note-vcxjhzkhsa-an.a.run.app; also billingbudgets, firestore, generativelanguage, monitoring googleapis.com endpoints contacted)",
+      "**Repository visibility**: ats030/ikimono-note — PRIVATE (via gh). Second remote 'gitlab' (http://g10:8929/ats030/ubuntu-server-app.git) is a self-hosted instance on host g10 — visibility not queryable, treat as private/internal",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: Local .env file at ~/.env (0600), per CLAUDE.md — not placed under pCloudDrive-synced project dirs due to FUSE sync/chmod issues",
+      "**Default / protected branches**: Default branch unknown (origin/HEAD unset); Protected branches: none listed; Rulesets: not queryable here — treat as possibly protected via ruleset despite empty classic branch-protection list",
+      "**CI/CD deploy targets**: systemd units (via systemctl, 243× in-project / 35× shell history) and Cloud Run services (ikimono-note-*.run.app); backup timer pushes to pcloud:backup/ubuntu-server-app via rclone",
+      "**Network posture**: Tailscale mesh in use (tailscale CLI, ubuntu-server-app.tailf74832.ts.net host, 100.94.207.13); ufw firewall managed locally (61× in shell history); cloudflared tunnel present (4× in shell history)",
+      "**Source control**: This repo (ikimono-note, GitHub, private) and its remote origin; also gitlab remote at http://g10:8929/ats030/ubuntu-server-app.git (self-hosted, host g10) — no additional orgs configured",
+      "**Trusted internal domains**: g10 (self-hosted gitlab host, 42× contacted), ubuntu-server-app.tailf74832.ts.net (Tailscale host, 30× contacted), 100.94.207.13 (40× contacted, likely same Tailscale host by IP)",
+      "**Trusted cloud buckets**: None configured — 'diagon-prod-data' appears in config (7×, 5 files) but is not corroborated by transcript-mining bucket usage; not adopted",
+      "**Key internal services**: g10:8929 (gitlab), backlog-viewer (port 8524, per CLAUDE.md), rekimeshi-bot (Discord notifier service), bd (beads issue tracker), roborev (35× in-project)",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: ~/.env and .env-backup-*/ (gitignored), any file matching .env / .env.* patterns; personal/regulated data audiences limited to named+specifics clearance per default policy",
+      "**Data retention / declassification**: Backup data in ~/data backed up daily via backup-data.timer to pcloud:backup/ubuntu-server-app (dated tar.gz, 14-day retention); ~/cache is regenerable and excluded from backup",
+      "**Sensitive remote targets**: any namespace/host/container with 'prod' or 'production' as a whole word/segment (default heuristic) — note config scan found 'diagon-prod-data' bucket name (config-derived — not a confirmed upload destination; uploads of local data still require confirmation)",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries 'prod' or 'production' as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: personal/hobby software development (home-server automation, systemd services, Cloud Run app ikimono-note) — routine under ~/ prefix",
+      "**Trusted repo**: ~/ (this repo, tracked as ikimono-note on GitHub, private) and its remotes (origin=github.com/ats030/ikimono-note, gitlab=g10:8929/ats030/ubuntu-server-app) — confidential material OK to commit here given private visibility, but secrets/credentials are never cleared by visibility alone",
+      "**Org-specific CLIs**: bd (beads issue tracker, 532×), roborev (35×), rtk (24×), herdr (28×, shell history) — routine under ~/ prefix",
+      "routine under ~/ prefix: systemctl service management, bd issue tracking, uv-based Python test/build workflows (per CLAUDE.md, run per-app under app/<name>/)"
+    ],
+    "allow": [
+      "$defaults",
+      "Bash(bd:*)",
+      "Bash(uv run pytest:*)"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Bash(bd dolt push:*)",
+      "Bash(systemctl reboot:*)"
+    ]
+  }
 }
