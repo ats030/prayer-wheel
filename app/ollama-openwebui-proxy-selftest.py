@@ -10,6 +10,7 @@ opencode が同時に止まる。計測は「あると嬉しい」程度の付�
 
 1. copy_body は今までどおり素通しで、末尾を控えても本文が変わらない
 2. 壊れた応答・未知の形式でも record_usage は例外を投げない
+3. 上流が失敗しても応答は今までどおり返り、記録だけが1行増える
 
 応答の形は4通りある (native/OpenAI 互換 × ストリーム/非ストリーム)。実際に
 2026-08-23 に叩いて採った形をそのまま入れてある。
@@ -20,6 +21,11 @@ import io
 import json
 import sys
 import tempfile
+import threading
+import time
+import urllib.error
+import urllib.request
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parent / "ollama-openwebui-proxy.py"
@@ -82,6 +88,7 @@ check("model", got["model"], "qwen3.8:27b")
 check("入力", got["input"], 137)
 check("出力", got["output"], 402)
 check("実行時間 (ms)", got["duration_ms"], 4512)
+check("モデル読み込み (ms)", got["load_ms"], 61)
 
 print("2. 非ストリームの本体からも採れる")
 got = proxy.extract_usage(NDJSON_SINGLE)
@@ -93,6 +100,7 @@ got = proxy.extract_usage(SSE_STREAM)
 check("入力", got["input"], 88)
 check("出力", got["output"], 210)
 check("実行時間は取れない", got["duration_ms"], 0)
+check("読み込み時間も取れない", got["load_ms"], 0)
 
 print("4. OpenAI 互換の非ストリーム")
 got = proxy.extract_usage(OPENAI_SINGLE)
@@ -166,8 +174,9 @@ print("9. 1リクエスト1行を月次ファイルへ書く")
 with tempfile.TemporaryDirectory() as tmp:
     proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
     proxy.log_usage("/api/chat", b'{"model":"qwen3.8:27b"}', NDJSON_STREAM,
-                    "python-requests/2.32.3")
-    proxy.log_usage("/api/embed", b'{"model":"bge-m3"}', EMBED_RESPONSE, "")
+                    "python-requests/2.32.3", 200, 4600)
+    proxy.log_usage("/api/embed", b'{"model":"bge-m3"}', EMBED_RESPONSE, "",
+                    200, 31)
     files = sorted(proxy.USAGE_LOG_DIR.glob("usage-*.jsonl"))
     check("ファイルは1つ", len(files), 1)
     lines = files[0].read_text(encoding="utf-8").splitlines()
@@ -177,6 +186,10 @@ with tempfile.TemporaryDirectory() as tmp:
     check("model", first["model"], "qwen3.8:27b")
     check("output", first["output"], 402)
     check("client", first["client"], "python-requests")
+    check("読み込み時間", first["load_ms"], 61)
+    check("proxy 実測", first["elapsed_ms"], 4600)
+    check("status", first["status"], 200)
+    check("成功に error は付かない", "error" in first, False)
     second = json.loads(lines[1])
     check("埋め込みのモデル", second["model"], "bge-m3")
     check("埋め込みのトークン", second["output"], 0)
@@ -186,6 +199,83 @@ with tempfile.TemporaryDirectory() as tmp:
     body = files[0].read_text(encoding="utf-8")
     check("Authorization を含まない", "Authorization" in body, False)
     check("Bearer を含まない", "Bearer" in body, False)
+
+print("11. 上流が失敗しても応答は返り、記録は1行増える")
+
+
+class FakeUpstream(BaseHTTPRequestHandler):
+    """本物の Open WebUI の代わり。/api/generate だけ 500 を返す。"""
+
+    def do_POST(self):  # noqa: N802
+        self.rfile.read(int(self.headers.get("Content-Length", "0") or "0"))
+        if self.path.endswith("/api/generate"):
+            body = b'{"error":"model requires more system memory"}'
+            self.send_response(500)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        # 実測所要が 0ms に丸まらない程度に待つ。
+        time.sleep(0.05)
+        self.send_response(200)
+        self.send_header("Content-Type", "application/x-ndjson")
+        self.send_header("Content-Length", str(len(NDJSON_STREAM)))
+        self.end_headers()
+        self.wfile.write(NDJSON_STREAM)
+
+    def log_message(self, *args):
+        pass
+
+
+def post(base, path, payload):
+    request = urllib.request.Request(
+        base + path, data=payload, method="POST",
+        headers={"Content-Type": "application/json", "User-Agent": "selftest/1.0"})
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            return response.status, response.read()
+    except urllib.error.HTTPError as exc:
+        return exc.code, exc.read()
+
+
+def serve(handler):
+    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return server, "http://127.0.0.1:%d" % server.server_address[1]
+
+
+with tempfile.TemporaryDirectory() as tmp:
+    proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
+    upstream, proxy.TARGET_BASE_URL = serve(FakeUpstream)
+    front, base = serve(proxy.ProxyHandler)
+
+    status, body = post(base, "/api/chat", b'{"model":"qwen3.8:27b"}')
+    check("成功時の応答コード", status, 200)
+    check("成功時の本文は素通し", body, NDJSON_STREAM)
+
+    status, body = post(base, "/api/generate", b'{"model":"qwen3-coder-next"}')
+    check("上流 500 をそのまま返す", status, 500)
+    check("上流の本文もそのまま返す", b"more system memory" in body, True)
+
+    upstream.shutdown()
+    upstream.server_close()
+    status, body = post(base, "/api/chat", b'{"model":"qwen3.8:27b"}')
+    check("上流が居ないと 502", status, 502)
+    front.shutdown()
+    front.server_close()
+
+    files = sorted(proxy.USAGE_LOG_DIR.glob("usage-*.jsonl"))
+    lines = [json.loads(line)
+             for line in files[0].read_text(encoding="utf-8").splitlines()]
+    check("失敗も含めて3行", len(lines), 3)
+    check("成功の status", lines[0]["status"], 200)
+    check("成功の実測は 0 に丸まらない", lines[0]["elapsed_ms"] >= 40, True)
+    check("500 を記録する", lines[1]["status"], 500)
+    check("500 でもモデルは要求から採れる", lines[1]["model"], "qwen3-coder-next")
+    check("500 の理由", lines[1]["error"], "HTTP 500")
+    check("上流不在は status 0", lines[2]["status"], 0)
+    check("上流不在の理由が残る", bool(lines[2].get("error")), True)
 
 print()
 if failures:

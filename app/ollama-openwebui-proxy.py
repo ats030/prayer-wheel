@@ -9,6 +9,7 @@ import os
 import signal
 import sys
 import threading
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -111,8 +112,10 @@ def _usage_from_object(d: dict) -> dict | None:
             "model": d.get("model") or "",
             "input": int(d.get("prompt_eval_count") or 0),
             "output": int(d.get("eval_count") or 0),
-            # total_duration はナノ秒。load_duration (モデルの読み込み) も含む。
+            # ナノ秒。total_duration は load_duration を含む合計。
             "duration_ms": round((d.get("total_duration") or 0) / 1e6),
+            # モデルの読み込みに掛かった分。大きい行は追い出しが起きた証拠。
+            "load_ms": round((d.get("load_duration") or 0) / 1e6),
         }
     usage = d.get("usage")
     if isinstance(usage, dict) and (
@@ -124,6 +127,7 @@ def _usage_from_object(d: dict) -> dict | None:
             "output": int(usage.get("completion_tokens")
                           or usage.get("output_tokens") or 0),
             "duration_ms": 0,
+            "load_ms": 0,
         }
     return None
 
@@ -181,11 +185,15 @@ def client_label(user_agent: str) -> str:
 
 
 def log_usage(path: str, request_body: bytes | None, tail: bytes,
-              user_agent: str) -> None:
+              user_agent: str, status: int, elapsed_ms: int,
+              error: str = "") -> None:
     """1リクエスト1行で追記する。月ごとにファイルを分ける。
 
     月次にしておくと、読む側 (usage-viewer) が既存の mtime/size キャッシュを
     そのまま使えて、過去月を再パースしなくて済む。
+
+    成否によらず必ず1行残す。ローカルLLMの運用で効くのは使用量よりも
+    止まったことの方で、失敗を落とすと一番見たいものが見えなくなる。
     """
     usage = extract_usage(tail) or {}
     now = datetime.now(timezone.utc)
@@ -197,8 +205,16 @@ def log_usage(path: str, request_body: bytes | None, tail: bytes,
         "input": usage.get("input", 0),
         "output": usage.get("output", 0),
         "duration_ms": usage.get("duration_ms", 0),
+        "load_ms": usage.get("load_ms", 0),
+        # proxy から見た実測。Ollama が所要時間を申告しない経路 (OpenAI 互換)
+        # でも埋まる代わり、キュー待ちと転送時間を含むので duration_ms とは別物。
+        "elapsed_ms": elapsed_ms,
+        # 上流の応答コード。0 は応答そのものが得られなかった (切断・タイムアウト)。
+        "status": status,
         "client": client_label(user_agent),
     }
+    if error:
+        record["error"] = error[:200]
     target = USAGE_LOG_DIR / f"usage-{now:%Y-%m}.jsonl"
     line = json.dumps(record, ensure_ascii=False) + "\n"
     with _usage_lock:
@@ -270,26 +286,41 @@ class ProxyHandler(BaseHTTPRequestHandler):
             headers=self.forward_headers(),
             method=self.command,
         )
+        started = time.monotonic()
+        status = 0
+        error = ""
+        tail = b""
         try:
             with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT) as response:
+                status = response.status
                 self.send_response(response.status)
                 self.copy_response_headers(response.headers.items())
                 self.end_headers()
                 tail = self.copy_body(response, keep_tail=measure)
-            if measure:
-                self.record_usage(body, tail)
         except urllib.error.HTTPError as exc:
+            status = exc.code
+            error = f"HTTP {exc.code}"
             self.send_response(exc.code)
             self.copy_response_headers(exc.headers.items())
             self.end_headers()
             self.copy_body(exc)
         except urllib.error.URLError as exc:
+            error = str(exc.reason)
             payload = json_error(f"Upstream Ollama proxy is unavailable: {exc.reason}")
             self.send_response(502)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(payload)))
             self.end_headers()
             self.wfile.write(payload)
+        except Exception as exc:  # noqa: BLE001
+            # 依頼元が待たずに切った場合など。応答は返せないが記録は残す。
+            error = f"{type(exc).__name__}: {exc}"
+            raise
+        finally:
+            if measure:
+                self.record_usage(body, tail, status,
+                                  round((time.monotonic() - started) * 1000),
+                                  error)
 
     def read_body(self) -> bytes | None:
         length = int(self.headers.get("Content-Length", "0") or "0")
@@ -336,14 +367,17 @@ class ProxyHandler(BaseHTTPRequestHandler):
             and self.path.split("?", 1)[0] in USAGE_PATHS
         )
 
-    def record_usage(self, body: bytes | None, tail: bytes) -> None:
-        """使用量を記録する。ここで失敗しても応答は既に返し終えている。
+    def record_usage(self, body: bytes | None, tail: bytes, status: int,
+                     elapsed_ms: int, error: str) -> None:
+        """使用量を記録する。転送を終えた後 (または諦めた後) に呼ばれる。
 
         計測は付随的な機能なので、解析や書き込みが何で落ちても proxy 本来の
-        転送を巻き込ませない。原因は journal に残す。
+        転送を巻き込ませない。forward の finally から呼ぶため、ここで送出すると
+        本来の例外を差し替えてしまう。原因は journal に残す。
         """
         try:
-            log_usage(self.path, body, tail, self.headers.get("User-Agent", ""))
+            log_usage(self.path, body, tail, self.headers.get("User-Agent", ""),
+                      status, elapsed_ms, error)
         except Exception as exc:  # noqa: BLE001
             self.log_message("usage log failed: %s", exc)
 
