@@ -158,3 +158,17 @@ For more details, see README.md and docs/QUICKSTART.md.
 - If push fails, resolve and retry until it succeeds
 
 <!-- END BEADS INTEGRATION -->
+
+## Cross-Agent Context Adapters
+
+`AGENTS.md` is the canonical shared instruction file for Codex and OpenCode.
+Claude Code imports it through a generated adapter. Content changes require no
+adapter regeneration. To verify the adapters, run:
+
+```bash
+scripts/check-agent-context.sh
+```
+
+Run `scripts/sync-agent-context.sh` only for initial setup or repair.
+Do not directly edit the generated adapter content in `~/.claude/CLAUDE.md` or
+the managed `instructions` entry in `~/.config/opencode/opencode.json`.
