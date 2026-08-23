@@ -396,6 +396,24 @@ def _layer_color(layer, index: int, cohort_count: int) -> str:
     return _cohort_color(index, cohort_count)
 
 
+def _layer_label(layer, today: date) -> str:
+    """凡例と tooltip に出す層の名前。
+
+    層の色は明度で古さを表しているので、ラベルもその軸に揃えて相対週で書く。
+    絶対日付 (6/1〜) だと 10 層あるうちのどれが古いのかを読むたびに今日からの
+    引き算が要る。「12週前」なら色の暗さとそのまま対応する。絶対日付は
+    tooltip に残すので、x 軸と突き合わせたいときはそちらを見る。
+    """
+    if layer == DEFERRED_LAYER:
+        return "外部待ち"
+    weeks = (week_start(today) - layer).days // 7
+    if weeks <= 0:
+        return "今週"
+    if weeks == 1:
+        return "先週"
+    return f"{weeks}週前"
+
+
 def _nice_ceiling(value: int) -> int:
     if value <= 0:
         return 1
@@ -403,7 +421,7 @@ def _nice_ceiling(value: int) -> int:
     return ((value + step - 1) // step) * step
 
 
-def render_stacked_svg(series: Series) -> str:
+def render_stacked_svg(series: Series, today: date) -> str:
     x0, y0, x1, y1 = PLOT
     ymax = _nice_ceiling(series.peak)
     days = series.days
@@ -437,7 +455,10 @@ def render_stacked_svg(series: Series) -> str:
         top = [base[i] + series.count_on(days[i], layer) for i in range(n)]
         upper = " ".join(f"{px(i):.1f},{py(top[i]):.1f}" for i in range(n))
         lower = " ".join(f"{px(i):.1f},{py(base[i]):.1f}" for i in range(n - 1, -1, -1))
-        label = "外部待ち (deferred)" if layer == DEFERRED_LAYER else f"{layer:%-m/%-d} 週"
+        label = (
+            "外部待ち (deferred)" if layer == DEFERRED_LAYER
+            else f"{_layer_label(layer, today)} ({layer:%-m/%-d}〜)"
+        )
         parts.append(
             f'<polygon points="{upper} {lower}" fill="{color}" stroke="{color}" stroke-width="0.5">'
             f"<title>{html.escape(label)}</title></polygon>"
@@ -460,15 +481,17 @@ def render_stacked_svg(series: Series) -> str:
     return "".join(parts)
 
 
-def render_legend(series: Series) -> str:
+def render_legend(series: Series, today: date) -> str:
     cohort_layers = [l for l in series.layers if l != DEFERRED_LAYER]
     items = []
     for layer in series.layers:
         idx = cohort_layers.index(layer) if layer != DEFERRED_LAYER else 0
         color = _layer_color(layer, idx, len(cohort_layers))
-        label = "外部待ち" if layer == DEFERRED_LAYER else f"{layer:%-m/%-d}〜"
+        label = _layer_label(layer, today)
+        tip = "" if layer == DEFERRED_LAYER else f' title="{layer:%Y-%m-%d}〜 に作成"'
         items.append(
-            f'<span class="legend-item"><i style="background:{color}"></i>{html.escape(label)}</span>'
+            f'<span class="legend-item"{tip}><i style="background:{color}"></i>'
+            f"{html.escape(label)}</span>"
         )
     return "".join(items)
 
@@ -708,8 +731,8 @@ def render_page(issues: list[Issue], today: date) -> str:
 
   <h2>残件数の推移 (作成週コホート積み上げ)</h2>
   <div class="panel">
-    <div class="scroll chart">{render_stacked_svg(series)}</div>
-    <div class="legend">{render_legend(series)}</div>
+    <div class="scroll chart">{render_stacked_svg(series, today)}</div>
+    <div class="legend">{render_legend(series, today)}</div>
     <p class="note">高さの合計が残件数。色は「いつ作られた件か」を表す。層が横に伸びたままなら、
     その週に作った分が片付いていない。外部待ち (deferred) は残件から除外していないが、
     defer した日は bd に記録が残らないため updated_at で近似している。</p>

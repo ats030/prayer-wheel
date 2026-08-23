@@ -208,6 +208,28 @@ class TestMetrics:
         assert m.remaining == 2
 
 
+class TestLayerLabel:
+    """凡例は相対週で書く。色の明度 (古いほど暗い) と同じ軸に揃える。"""
+
+    def test_relative_week_labels(self):
+        today = date(2026, 8, 21)  # 金曜。週頭は 8/17
+        assert main._layer_label(date(2026, 8, 17), today) == "今週"
+        assert main._layer_label(date(2026, 8, 10), today) == "先週"
+        assert main._layer_label(date(2026, 8, 3), today) == "2週前"
+        assert main._layer_label(date(2026, 6, 1), today) == "11週前"
+
+    def test_deferred_layer_keeps_its_name(self):
+        assert main._layer_label(main.DEFERRED_LAYER, date(2026, 8, 21)) == "外部待ち"
+
+    def test_legend_keeps_the_absolute_date_in_a_tooltip(self):
+        """x 軸は絶対日付のままなので、突き合わせる術を残しておく。"""
+        issues = main.parse_issues([issue("a", iso(2026, 8, 3))])
+        series = main.daily_series(issues, today=date(2026, 8, 21))
+        legend = main.render_legend(series, today=date(2026, 8, 21))
+        assert "2週前" in legend
+        assert 'title="2026-08-03〜 に作成"' in legend
+
+
 class TestSvg:
     def test_one_polygon_per_layer(self):
         issues = main.parse_issues([
@@ -215,13 +237,13 @@ class TestSvg:
             issue("b", iso(2026, 8, 3)),
         ])
         series = main.daily_series(issues, today=date(2026, 8, 5))
-        svg = main.render_stacked_svg(series)
+        svg = main.render_stacked_svg(series, today=date(2026, 8, 5))
         assert svg.count("<polygon") == 2
         assert "viewBox" in svg
 
     def test_empty_series_does_not_crash(self):
         series = main.daily_series([], today=date(2026, 8, 5))
-        svg = main.render_stacked_svg(series)
+        svg = main.render_stacked_svg(series, today=date(2026, 8, 5))
         assert "<svg" in svg
 
 
