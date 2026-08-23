@@ -72,6 +72,7 @@ class Issue:
     # 期限切れを検知できないため通知に出せない (2026-08-22 に uic3/9sa が5〜8日
     # 埋もれていたのがこれ)。凍結には必ず期限を入れる運用にした。
     defer_until: date | None = None
+    labels: tuple[str, ...] = ()
     # blocks 依存を持つか。契機が具体的にあるもの (例: X クレジット復旧待ち) は
     # 期限ではなく依存で表現するため、期限なしでも催促しない。
     has_blocker: bool = False
@@ -79,6 +80,24 @@ class Issue:
     @property
     def deferred(self) -> bool:
         return self.status == "deferred"
+
+    @property
+    def actor(self) -> str:
+        """誰が動かせるか。owner / decision / agent。
+
+        owner はエージェントに物理的に不可能なもの (提供元へのログイン、外部への
+        問い合わせ、実機確認)。decision は技術的には可能だが判断が要るもの (価格・
+        文面・原稿の方向性)。両方付いていたら owner。物理的な不可能のほうが強い。
+
+        判定は人がラベルで付ける。題名からの推定は外れる (ats030-y9fb.5 は一見
+        実装タスクだが、起票時に「実機で確認してから判断」と決まっている)。
+        human ラベルは bd human list が使う既存の仕組みで、新しく作っていない。
+        """
+        if "human" in self.labels:
+            return "owner"
+        if "decision" in self.labels:
+            return "decision"
+        return "agent"
 
     @property
     def freeze_record(self) -> bool:
@@ -141,6 +160,7 @@ def parse_issues(raw: list[dict]) -> list[Issue]:
                 updated=jst_date(r.get("updated_at")) or created,
                 started=jst_date(r.get("started_at")),
                 defer_until=jst_date(r.get("defer_until")),
+                labels=tuple(r.get("labels") or ()),
                 has_blocker=any(d.get("type") == "blocks"
                                 for d in (r.get("dependencies") or [])),
             )
@@ -275,6 +295,7 @@ class BacklogRow:
     started: bool
     cohort: date
     freeze_record: bool = False
+    actor: str = "agent"
 
 
 def backlog_rows(issues: list[Issue], today: date) -> list[BacklogRow]:
@@ -290,6 +311,7 @@ def backlog_rows(issues: list[Issue], today: date) -> list[BacklogRow]:
             started=i.started is not None,
             cohort=i.cohort,
             freeze_record=i.freeze_record,
+            actor=i.actor,
         )
         for i in issues
         if i.open_on(today)
@@ -316,6 +338,9 @@ class Metrics:
     freeze_undated: int
     # 動かせる残件。外部待ちを除いた数。見出しはこちらを主にする。
     actionable: int
+    by_agent: int
+    by_owner: int
+    by_decision: int
     # 「〜を凍結中」の記録。タスクではない。
     freeze_records: int
 
@@ -337,6 +362,9 @@ def metrics(issues: list[Issue], today: date) -> Metrics:
         freeze_expired=sum(1 for i in remaining if i.freeze_expired(today)),
         freeze_undated=sum(1 for i in remaining if i.freeze_undated()),
         actionable=sum(1 for i in remaining if not i.deferred),
+        by_agent=sum(1 for i in remaining if not i.deferred and i.actor == "agent"),
+        by_owner=sum(1 for i in remaining if not i.deferred and i.actor == "owner"),
+        by_decision=sum(1 for i in remaining if not i.deferred and i.actor == "decision"),
         freeze_records=sum(1 for i in remaining if i.freeze_record),
     )
 
@@ -489,6 +517,8 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .chip { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 11px;
         background: rgba(124,58,237,.16); color: var(--accent-soft); }
 .chip.gray { background: rgba(161,161,170,.14); color: var(--muted); }
+.chip.owner { background: rgba(244,63,94,.16); color: #fda4af; }
+.chip.decision { background: rgba(245,158,11,.16); color: #fcd34d; }
 .hot { color: var(--danger); }
 .warn { color: var(--warning); }
 .scroll { overflow-x: auto; }
@@ -600,6 +630,11 @@ def render_page(issues: list[Issue], today: date) -> str:
         # 主指標は「動かせる残件」。残32件のうち21件が外部待ち、うち7件は凍結の記録
         # だった時期があり、分母に動かせないものが混ざると収束していないように見える
         # だけになる。全体は副次表示へ回す。
+        # さらに「誰の手番か」で割る。所有者操作 (提供元へのログイン・外部への
+        # 問い合わせ・実機確認) はエージェントには不可能で待つしかないが、要判断は
+        # 一言決まれば実装まで進む。混ざっていると打ち手が見えない (ats030-hn2k)。
+        ("エージェントが進められる", str(m.by_agent),
+         f"要判断 {m.by_decision} · 所有者 {m.by_owner} を除く"),
         ("動かせる残件", str(m.actionable),
          f"外部待ち {m.deferred} · 凍結の記録 {m.freeze_records} を除く"),
         ("残件数 (全体)", str(m.remaining), "外部待ちと凍結の記録を含む"),
@@ -645,6 +680,10 @@ def render_page(issues: list[Issue], today: date) -> str:
         f'<td class="hide-sm">{html.escape(r.issue_type)}</td>'
         f"<td>{html.escape(r.title)}"
         + ('<span class="chip gray">外部待ち</span>' if r.deferred else "")
+        + ("" if r.deferred else {
+            "owner": '<span class="chip owner">所有者</span>',
+            "decision": '<span class="chip decision">要判断</span>',
+        }.get(r.actor, ""))
         + "</td></tr>"
         )
 
@@ -770,6 +809,9 @@ def weekly_summary(issues: list[Issue], today: date) -> dict:
         "over_30_days": m.over_30_days,
         "median_age": m.median_age,
         "delta_7d": m.remaining - before,
+        "by_agent": m.by_agent,
+        "by_owner": m.by_owner,
+        "by_decision": m.by_decision,
         "freeze_expired": m.freeze_expired,
         "freeze_undated": m.freeze_undated,
         "oldest": rows[:5],

@@ -14,8 +14,9 @@ def iso(y, m, d, h=0, mi=0):
 
 
 def issue(id_, created, closed=None, status="open", priority=3, updated=None, started=None,
-          title="t", issue_type="task", defer_until=None, blocked_by=None):
+          title="t", issue_type="task", defer_until=None, blocked_by=None, labels=None):
     return {
+        "labels": labels or [],
         "defer_until": defer_until,
         "dependencies": ([{"depends_on_id": blocked_by, "type": "blocks"}] if blocked_by else []),
         "id": id_,
@@ -407,3 +408,49 @@ class TestLeadTimeLabel:
     def test_multi_day_still_shows_days(self):
         issues = main.parse_issues([issue("a", iso(2026, 8, 1), closed=iso(2026, 8, 6))])
         assert "5日" in main.render_page(issues, date(2026, 8, 23))
+
+
+class TestWhoCanAct:
+    """誰が動かせるかを分ける (ats030-hn2k)。
+
+    「動かせる残件11」には2種類が混ざっていた。エージェントには物理的に不可能なもの
+    (提供元へのログイン、外部への問い合わせ、実機確認) と、技術的には可能だが判断が
+    要るもの (価格・文面・原稿の方向性)。前者は待つしかないが、後者は一言決まれば
+    実装まで進む。混ざっていると、どちらに手を打てば動き出すのか分からない。
+
+    判定は人がラベルで付ける。題名からの推定は外れる (y9fb.5 は一見実装タスクだが、
+    起票時に「実機で確認してから判断」と決まっている)。
+    """
+
+    def test_human_label_marks_owner_only(self):
+        issues = main.parse_issues([issue("a", iso(2026, 8, 1), labels=["human"])])
+        assert issues[0].actor == "owner"
+
+    def test_decision_label_marks_judgment(self):
+        issues = main.parse_issues([issue("a", iso(2026, 8, 1), labels=["decision"])])
+        assert issues[0].actor == "decision"
+
+    def test_no_label_is_agent_work(self):
+        issues = main.parse_issues([issue("a", iso(2026, 8, 1))])
+        assert issues[0].actor == "agent"
+
+    def test_human_wins_over_decision(self):
+        """両方付いていたら owner。物理的に不可能なほうが強い制約"""
+        issues = main.parse_issues([issue("a", iso(2026, 8, 1), labels=["decision", "human"])])
+        assert issues[0].actor == "owner"
+
+    def test_metrics_split_the_actionable_count(self):
+        issues = main.parse_issues([
+            issue("a", iso(2026, 8, 1)),
+            issue("b", iso(2026, 8, 1), labels=["human"]),
+            issue("c", iso(2026, 8, 1), labels=["decision"]),
+            issue("d", iso(2026, 8, 1), status="deferred"),
+        ])
+        m = main.metrics(issues, date(2026, 8, 23))
+        assert (m.actionable, m.by_agent, m.by_owner, m.by_decision) == (3, 1, 1, 1)
+
+    def test_deferred_is_not_counted_in_the_split(self):
+        """外部待ちは誰の手番でもない"""
+        issues = main.parse_issues([issue("a", iso(2026, 8, 1), status="deferred", labels=["human"])])
+        m = main.metrics(issues, date(2026, 8, 23))
+        assert (m.actionable, m.by_owner) == (0, 0)

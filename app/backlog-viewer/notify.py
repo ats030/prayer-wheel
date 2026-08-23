@@ -80,6 +80,16 @@ def build_message(summary: dict, today, missed: str = "") -> str:
         f"残 **{summary['remaining']}件** (先週比 {arrow}) / うち外部待ち {summary['deferred']}件",
         f"30日超 {summary['over_30_days']}件 · 滞留の中央値 {summary['median_age']}日",
     ]
+    # 誰の手番かを出す。所有者操作は待つしかないが、要判断は一言決まれば実装まで
+    # 進む。画面を開かずに「自分が動かないと止まる件数」が分かるのが要点 (hn2k)。
+    owner, decision = summary.get("by_owner", 0), summary.get("by_decision", 0)
+    if owner or decision:
+        lines.append(
+            f"あなたの手番 **{owner + decision}件** "
+            f"(所有者操作 {owner} · 要判断 {decision}) / "
+            f"エージェントが進められる {summary.get('by_agent', 0)}件")
+    lines += [
+    ]
     # 凍結は bd defer で伏せるが、bd は期限が来ても自動では戻さない。ここで出さないと
     # 期限切れが永久に埋もれる (2026-08-22 に P1 2件が5〜8日埋もれていた)。
     expired = summary.get("freeze_expired", 0)

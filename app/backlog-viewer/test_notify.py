@@ -74,3 +74,29 @@ class TestMessage:
                    "delta_7d": 0, "freeze_expired": 0, "freeze_undated": 0, "oldest": []}
         msg = notify.build_message(summary, date(2026, 8, 30), missed="⚠ 前回は届かなかった")
         assert msg.splitlines()[0] == "⚠ 前回は届かなかった"
+
+
+class TestActorLineInNotification:
+    """画面を開かずに「自分が動かないと止まる件数」が分かること (ats030-hn2k)"""
+
+    def base(self, **kw):
+        d = {"remaining": 32, "deferred": 21, "over_30_days": 3, "median_age": 5,
+             "delta_7d": -29, "oldest": [], "freeze_expired": 0, "freeze_undated": 0}
+        d.update(kw)
+        return d
+
+    def test_shows_the_owner_turn(self):
+        msg = notify.build_message(
+            self.base(by_agent=0, by_owner=5, by_decision=6), date(2026, 8, 23))
+        assert "あなたの手番 **11件**" in msg
+        assert "所有者操作 5 · 要判断 6" in msg
+        assert "エージェントが進められる 0件" in msg
+
+    def test_omitted_when_nothing_needs_the_owner(self):
+        """全部エージェントで進むなら、行そのものを出さない"""
+        msg = notify.build_message(
+            self.base(by_agent=4, by_owner=0, by_decision=0), date(2026, 8, 23))
+        assert "あなたの手番" not in msg
+
+    def test_survives_a_summary_without_the_keys(self):
+        assert "あなたの手番" not in notify.build_message(self.base(), date(2026, 8, 23))
