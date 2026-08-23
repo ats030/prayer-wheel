@@ -25,6 +25,7 @@
 
 import re
 import subprocess
+import time
 import sys
 from pathlib import Path
 
@@ -37,6 +38,8 @@ MIN_BODY_CHARS = 40
 # エラー文字列が含まれていても内容として扱う (下の ERROR_MARKERS の注記を参照)
 ERROR_PAGE_MAX_CHARS = 300
 NAV_TIMEOUT_MS = 20000
+# 全ホストで落ちたときに待つ秒数。瞬間的な負荷なら空く。
+RETRY_WAIT_SEC = 5
 ERROR_MARKERS = (
     "Traceback (most recent call last)",
     "Internal Server Error",
@@ -148,21 +151,32 @@ def main() -> int:
         browser = p.chromium.launch(headless=True)
         for t in targets:
             last_error = None
-            for host in hosts:
-                try:
-                    problems = check(browser, host, t)
-                except Exception as exc:  # 到達不能。次のホストを試す
-                    last_error = f"{type(exc).__name__}"
-                    continue
-                if problems:
-                    failures.append(f"{t['unit']} (port {t['port']}): " + " / ".join(problems))
-                    print(f"NG  {t['unit']:22} {' / '.join(problems)}")
+            # 全ホストで落ちたら一度だけやり直す。1回のタイムアウトで通知を飛ばすと
+            # 誤報になる。2026-08-23 02:45 に web-clipper が TimeoutError で NG に
+            # なったが、同じ2分間にアプリ側は23リクエストを正常に処理しており、
+            # 再実行では 18/18 正常だった。落ちていたのはブラウザ側。
+            # ~/CLAUDE.md の「狼少年にしない」に従い、確度を上げてから鳴らす。
+            for attempt in (1, 2):
+                for host in hosts:
+                    try:
+                        problems = check(browser, host, t)
+                    except Exception as exc:  # 到達不能。次のホストを試す
+                        last_error = f"{type(exc).__name__}"
+                        continue
+                    if problems:
+                        failures.append(f"{t['unit']} (port {t['port']}): " + " / ".join(problems))
+                        print(f"NG  {t['unit']:22} {' / '.join(problems)}")
+                    else:
+                        note = " (再試行で成功)" if attempt == 2 else ""
+                        print(f"ok  {t['unit']:22} port={t['port']} host={host}{note}")
+                    break
                 else:
-                    print(f"ok  {t['unit']:22} port={t['port']} host={host}")
+                    if attempt == 1:
+                        time.sleep(RETRY_WAIT_SEC)
+                        continue
+                    failures.append(f"{t['unit']} (port {t['port']}): どのホストからも開けない ({last_error})")
+                    print(f"NG  {t['unit']:22} どのホストからも開けない ({last_error})")
                 break
-            else:
-                failures.append(f"{t['unit']} (port {t['port']}): どのホストからも開けない ({last_error})")
-                print(f"NG  {t['unit']:22} どのホストからも開けない ({last_error})")
         browser.close()
 
     print(f"\n{len(targets) - len(failures)}/{len(targets)} 正常")
