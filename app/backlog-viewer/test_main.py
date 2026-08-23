@@ -342,3 +342,50 @@ class TestCohortExplanatoryColumns:
         ])
         row = main.cohort_table(issues, today=date(2026, 8, 21))[0]
         assert row.p3_share == 50.0
+
+
+class TestActionable:
+    """『動かせる残件』を主指標にする (ats030-hn2k)。
+
+    残32件のうち動かせるのは11件で、21件が外部待ち、うち7件は「〜を凍結中」という
+    記録そのものだった。分母に動かせないものが混ざると、収束していないように見える
+    だけになる。このアプリの問いは「残タスクがなぜ収束しないか」なので、分けて数える。
+    """
+
+    def test_deferred_is_not_actionable(self):
+        issues = main.parse_issues([
+            issue("a", iso(2026, 8, 1)),
+            issue("b", iso(2026, 8, 1), status="deferred"),
+        ])
+        m = main.metrics(issues, date(2026, 8, 23))
+        assert (m.remaining, m.actionable, m.deferred) == (2, 1, 1)
+
+    def test_freeze_records_are_counted_apart(self):
+        """凍結の記録はタスクではない"""
+        issues = main.parse_issues([
+            issue("a", iso(2026, 8, 1), status="deferred", title="memo を凍結中 (2026-11-23 に見直す)"),
+            issue("b", iso(2026, 8, 1), status="deferred", title="ライセンス照会の返答待ち"),
+        ])
+        m = main.metrics(issues, date(2026, 8, 23))
+        assert (m.deferred, m.freeze_records) == (2, 1)
+
+    def test_in_progress_is_actionable(self):
+        issues = main.parse_issues([issue("a", iso(2026, 8, 1), status="in_progress")])
+        assert main.metrics(issues, date(2026, 8, 23)).actionable == 1
+
+
+class TestBacklogRowsSplit:
+    def test_freeze_records_are_separated(self):
+        """一覧に混ざると探しているものが埋もれる"""
+        issues = main.parse_issues([
+            issue("a", iso(2026, 8, 1), title="本当のタスク"),
+            issue("b", iso(2026, 8, 1), status="deferred", title="memo を凍結中 (2026-11-23 に見直す)"),
+        ])
+        live, cold = main.split_rows(main.backlog_rows(issues, date(2026, 8, 23)))
+        assert [r.id for r in live] == ["a"]
+        assert [r.id for r in cold] == ["b"]
+
+    def test_nothing_frozen_leaves_the_list_whole(self):
+        issues = main.parse_issues([issue("a", iso(2026, 8, 1))])
+        live, cold = main.split_rows(main.backlog_rows(issues, date(2026, 8, 23)))
+        assert len(live) == 1 and cold == []

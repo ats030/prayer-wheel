@@ -80,6 +80,15 @@ class Issue:
     def deferred(self) -> bool:
         return self.status == "deferred"
 
+    @property
+    def freeze_record(self) -> bool:
+        """「<アプリ名> を凍結中」の記録か。タスクではないので残件と分けて数える。
+
+        題名で判定する。app-portal の記録漏れ検出も同じ約束を見ており、二重管理に
+        ならない (ats030-5f0i)。
+        """
+        return "凍結中" in self.title
+
     def freeze_expired(self, today: date) -> bool:
         """凍結の期限が過ぎているか。bd は期限が来ても自動では戻さない。"""
         return self.deferred and self.defer_until is not None and self.defer_until <= today
@@ -265,6 +274,7 @@ class BacklogRow:
     deferred: bool
     started: bool
     cohort: date
+    freeze_record: bool = False
 
 
 def backlog_rows(issues: list[Issue], today: date) -> list[BacklogRow]:
@@ -279,11 +289,18 @@ def backlog_rows(issues: list[Issue], today: date) -> list[BacklogRow]:
             deferred=i.deferred,
             started=i.started is not None,
             cohort=i.cohort,
+            freeze_record=i.freeze_record,
         )
         for i in issues
         if i.open_on(today)
     ]
     return sorted(rows, key=lambda r: (-r.age_days, r.id))
+
+
+def split_rows(rows: list[BacklogRow]) -> tuple[list[BacklogRow], list[BacklogRow]]:
+    """タスクと凍結の記録に分ける。混ざると探しているものが埋もれる。"""
+    return ([r for r in rows if not r.freeze_record],
+            [r for r in rows if r.freeze_record])
 
 
 @dataclass(frozen=True)
@@ -297,6 +314,10 @@ class Metrics:
     median_lead_time: int
     freeze_expired: int
     freeze_undated: int
+    # 動かせる残件。外部待ちを除いた数。見出しはこちらを主にする。
+    actionable: int
+    # 「〜を凍結中」の記録。タスクではない。
+    freeze_records: int
 
 
 def metrics(issues: list[Issue], today: date) -> Metrics:
@@ -315,6 +336,8 @@ def metrics(issues: list[Issue], today: date) -> Metrics:
         median_lead_time=int(median(leads)) if leads else 0,
         freeze_expired=sum(1 for i in remaining if i.freeze_expired(today)),
         freeze_undated=sum(1 for i in remaining if i.freeze_undated()),
+        actionable=sum(1 for i in remaining if not i.deferred),
+        freeze_records=sum(1 for i in remaining if i.freeze_record),
     )
 
 
@@ -423,6 +446,13 @@ def render_legend(series: Series) -> str:
 
 
 CSS = """
+details.cold { margin-top: .75rem; }
+details.cold > summary { cursor: pointer; color: var(--muted); font-size: .82rem;
+  list-style: none; padding: .25rem 0; }
+details.cold > summary::before { content: "▸ "; }
+details.cold[open] > summary::before { content: "▾ "; }
+details.cold table { margin-top: .5rem; }
+
 :root {
   --bg: #08090c; --surface: #0d0f14; --raised: #12141b; --hover: #171923;
   --border: #242633; --border-strong: #343747; --text: #f4f4f5;
@@ -567,7 +597,12 @@ def render_page(issues: list[Issue], today: date) -> str:
     rows = backlog_rows(issues, today)
 
     tiles = [
-        ("残件数", str(m.remaining), f"うち外部待ち {m.deferred}"),
+        # 主指標は「動かせる残件」。残32件のうち21件が外部待ち、うち7件は凍結の記録
+        # だった時期があり、分母に動かせないものが混ざると収束していないように見える
+        # だけになる。全体は副次表示へ回す。
+        ("動かせる残件", str(m.actionable),
+         f"外部待ち {m.deferred} · 凍結の記録 {m.freeze_records} を除く"),
+        ("残件数 (全体)", str(m.remaining), "外部待ちと凍結の記録を含む"),
         ("30日超", str(m.over_30_days), "棚卸しの第一候補"),
         ("滞留の中央値", f"{m.median_age}日", "残っている件"),
         ("claim率", f"{m.claim_rate}%", "started_at が付いた件"),
@@ -593,7 +628,10 @@ def render_page(issues: list[Issue], today: date) -> str:
         for c in cohorts
     )
 
-    row_html = "".join(
+    live_rows, cold_rows = split_rows(rows)
+
+    def _row(r) -> str:
+        return (
         f"<tr>"
         f'<td><input type="checkbox" class="pick" value="{html.escape(r.id)}"></td>'
         f'<td class="id">{html.escape(r.id)}</td>'
@@ -604,7 +642,14 @@ def render_page(issues: list[Issue], today: date) -> str:
         f"<td>{html.escape(r.title)}"
         + ('<span class="chip gray">外部待ち</span>' if r.deferred else "")
         + "</td></tr>"
-        for r in rows
+        )
+
+    row_html = "".join(_row(r) for r in live_rows)
+    # 凍結の記録はタスクではない。一覧に混ざると探しているものが埋もれるので畳む。
+    cold_html = (
+        f'<details class="cold"><summary>凍結の記録 {len(cold_rows)}件</summary>'
+        f'<table><tbody>{"".join(_row(r) for r in cold_rows)}</tbody></table></details>'
+        if cold_rows else ""
     )
 
     return f"""<!doctype html>
@@ -637,14 +682,14 @@ def render_page(issues: list[Issue], today: date) -> str:
     P3 で作られた件が残る。残存率が跳ねた週を見つけたら、量ではなくこの2列を見ること。</p>
   </div>
 
-  <h2>残っている全 {len(rows)} 件 (滞留日数の降順)</h2>
+  <h2>残っているタスク {len(live_rows)} 件 (滞留日数の降順)</h2>
   <div class="panel scroll">
     <table><thead><tr>
       <th><input type="checkbox" onchange="toggleAll(this)"></th>
       <th>ID</th><th class="num">滞留</th><th class="num hide-sm">無更新</th>
       <th>P</th><th class="hide-sm">種別</th><th>タイトル</th>
     </tr></thead>
-    <tbody>{row_html}</tbody></table>
+    <tbody>{row_html}</tbody></table>{cold_html}
   </div>
 </div>
 
