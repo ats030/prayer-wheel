@@ -20,7 +20,7 @@ from statistics import median
 from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 
 JST = ZoneInfo("Asia/Tokyo")
 
@@ -610,7 +610,7 @@ def render_page(issues: list[Issue], today: date) -> str:
     return f"""<!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>backlog-viewer</title>
+<title>backlog-viewer</title><link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>{CSS}</style></head><body>
 <div class="wrap">
   <h1>残タスクはなぜ収束しないか</h1>
@@ -665,12 +665,28 @@ def render_error(message: str) -> str:
     return f"""<!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>backlog-viewer</title><style>{CSS}</style></head><body>
+<title>backlog-viewer</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><style>{CSS}</style></head><body>
 <div class="wrap"><h1>集計できなかった</h1>
 <div class="panel err"><p>bd からデータを取れなかった。</p>
 <pre style="white-space:pre-wrap;font-size:12px">{html.escape(message)}</pre>
 <p class="note">確認: <code>bd list --status=all --json --limit 0</code> が
 /home/ats030 で通るか。</p></div></div></body></html>"""
+
+
+# 画面の主題は「残タスクが減っていくか」。減っていく棒で表す。背景と紫は本体の
+# 配色に合わせた (#12141b / #7c3aed)。16px でも棒の段差が残るよう3本に絞る。
+FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<rect width="32" height="32" rx="7" fill="#12141b"/>
+<rect x="6" y="8" width="5" height="18" rx="1.5" fill="#a78bfa"/>
+<rect x="13.5" y="14" width="5" height="12" rx="1.5" fill="#7c3aed"/>
+<rect x="21" y="20" width="5" height="6" rx="1.5" fill="#7c3aed" opacity="0.55"/>
+</svg>"""
+
+
+@app.get("/favicon.svg")
+def favicon() -> Response:
+    return Response(FAVICON_SVG, media_type="image/svg+xml",
+                    headers={"Cache-Control": "public, max-age=3600"})
 
 
 @app.get("/", response_class=HTMLResponse)
