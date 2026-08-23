@@ -1,0 +1,194 @@
+#!/usr/bin/env python3
+"""ollama-openwebui-proxy.py の使用量計測が応答を壊さないことを固定する。
+
+    uv run --project ~ python app/ollama-openwebui-proxy-selftest.py
+
+なぜ必要か: この proxy はローカル LLM の全トラフィックが通る唯一の経路で、
+落ちると writing / exam-trainer / web-clipper / rss-reader / markdown-generator /
+opencode が同時に止まる。計測は「あると嬉しい」程度の付随機能なので、解析が
+どう転んでも転送を巻き込んではいけない。よって固定するのは2点。
+
+1. copy_body は今までどおり素通しで、末尾を控えても本文が変わらない
+2. 壊れた応答・未知の形式でも record_usage は例外を投げない
+
+応答の形は4通りある (native/OpenAI 互換 × ストリーム/非ストリーム)。実際に
+2026-08-23 に叩いて採った形をそのまま入れてある。
+"""
+
+import importlib.util
+import io
+import json
+import sys
+import tempfile
+from pathlib import Path
+
+SCRIPT = Path(__file__).resolve().parent / "ollama-openwebui-proxy.py"
+spec = importlib.util.spec_from_file_location("ollama_proxy", SCRIPT)
+proxy = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(proxy)
+
+failures = []
+
+
+def check(name, got, want):
+    if got == want:
+        print(f"  ok   {name}")
+    else:
+        print(f"  FAIL {name}: {got!r} (期待 {want!r})")
+        failures.append(name)
+
+
+# --- 応答サンプル -----------------------------------------------------------
+
+NDJSON_STREAM = b"".join(
+    json.dumps({"model": "qwen3.8:27b", "created_at": "2026-08-23T04:00:0%dZ" % i,
+                "response": "x", "done": False}).encode() + b"\n"
+    for i in range(5)
+) + json.dumps({
+    "model": "qwen3.8:27b", "response": "", "done": True, "done_reason": "stop",
+    "total_duration": 4_512_000_000, "load_duration": 61_000_000,
+    "prompt_eval_count": 137, "eval_count": 402,
+}).encode() + b"\n"
+
+NDJSON_SINGLE = json.dumps({
+    "model": "qwen3.8:27b", "response": "答え", "done": True,
+    "total_duration": 1_200_000_000, "load_duration": 0,
+    "prompt_eval_count": 12, "eval_count": 34,
+}).encode()
+
+SSE_STREAM = b"".join(
+    b"data: " + json.dumps({"id": "c1", "model": "qwen3.8:27b",
+                            "choices": [{"delta": {"content": "x"}}]}).encode() + b"\n\n"
+    for _ in range(3)
+) + b"data: " + json.dumps({
+    "id": "c1", "model": "qwen3.8:27b", "choices": [],
+    "usage": {"prompt_tokens": 88, "completion_tokens": 210, "total_tokens": 298},
+}).encode() + b"\n\ndata: [DONE]\n\n"
+
+OPENAI_SINGLE = json.dumps({
+    "id": "c2", "object": "chat.completion", "model": "qwen3.8:27b",
+    "choices": [{"message": {"role": "assistant", "content": "hi"}}],
+    "usage": {"prompt_tokens": 5, "completion_tokens": 7, "total_tokens": 12},
+}).encode()
+
+EMBED_RESPONSE = json.dumps({
+    "embedding": [0.1] * 8,
+}).encode()
+
+
+print("1. NDJSON ストリームの最終行からトークンを採る")
+got = proxy.extract_usage(NDJSON_STREAM)
+check("model", got["model"], "qwen3.8:27b")
+check("入力", got["input"], 137)
+check("出力", got["output"], 402)
+check("実行時間 (ms)", got["duration_ms"], 4512)
+
+print("2. 非ストリームの本体からも採れる")
+got = proxy.extract_usage(NDJSON_SINGLE)
+check("入力", got["input"], 12)
+check("出力", got["output"], 34)
+
+print("3. SSE の usage 行から採る ([DONE] を跨いで遡る)")
+got = proxy.extract_usage(SSE_STREAM)
+check("入力", got["input"], 88)
+check("出力", got["output"], 210)
+check("実行時間は取れない", got["duration_ms"], 0)
+
+print("4. OpenAI 互換の非ストリーム")
+got = proxy.extract_usage(OPENAI_SINGLE)
+check("入力", got["input"], 5)
+check("出力", got["output"], 7)
+
+print("5. 埋め込みの応答にトークン数は無い")
+check("解析結果", proxy.extract_usage(EMBED_RESPONSE), None)
+check("要求からモデルを採る",
+      proxy.request_model(b'{"model":"bge-m3","input":"x"}'), "bge-m3")
+
+print("6. 壊れた入力で例外を投げない")
+for name, payload in [("空", b""), ("途中で切れた JSON", b'{"prompt_eval_count":'),
+                      ("JSON でない", b"<html>502</html>"),
+                      ("不正な UTF-8", b"\xff\xfe{\"eval_count\":1}")]:
+    try:
+        proxy.extract_usage(payload)
+        check(name, "例外なし", "例外なし")
+    except Exception as exc:  # noqa: BLE001
+        check(name, f"{type(exc).__name__}: {exc}", "例外なし")
+
+print("7. copy_body は本文を変えずに末尾だけ控える")
+
+
+class FakeResponse:
+    def __init__(self, data):
+        self.stream = io.BytesIO(data)
+
+    def read(self, size):
+        return self.stream.read(size)
+
+
+def copy(data, keep_tail):
+    handler = object.__new__(proxy.ProxyHandler)
+    handler.wfile = io.BytesIO()
+    tail = proxy.ProxyHandler.copy_body(handler, FakeResponse(data), keep_tail=keep_tail)
+    return handler.wfile.getvalue(), tail
+
+
+# 上限を超える長さの生成。頭は捨てられるが、トークン数は最終行にあるので残る。
+filler = json.dumps({"model": "qwen3.8:27b", "response": "x" * 40,
+                     "done": False}).encode() + b"\n"
+big = filler * (proxy.USAGE_TAIL_BYTES // len(filler) + 2000) + NDJSON_SINGLE
+sent, tail = copy(big, True)
+check("転送した本文", sent, big)
+check("控えた長さは上限まで", len(tail), proxy.USAGE_TAIL_BYTES)
+check("頭は捨てられている", tail == big, False)
+check("末尾からトークンが採れる", proxy.extract_usage(tail)["input"], 12)
+
+sent, tail = copy(big, False)
+check("控えないときの転送", sent, big)
+check("控えないときは空", tail, b"")
+
+print("8. 計測するのは生成系の POST だけ")
+
+
+def measure(command, path):
+    handler = object.__new__(proxy.ProxyHandler)
+    handler.command = command
+    handler.path = path
+    return proxy.ProxyHandler.should_measure(handler)
+
+
+check("POST /api/chat", measure("POST", "/api/chat"), True)
+check("POST /v1/chat/completions", measure("POST", "/v1/chat/completions"), True)
+check("GET /api/tags", measure("GET", "/api/tags"), False)
+check("POST /api/show", measure("POST", "/api/show"), False)
+check("クエリ付き", measure("POST", "/api/generate?x=1"), True)
+
+print("9. 1リクエスト1行を月次ファイルへ書く")
+with tempfile.TemporaryDirectory() as tmp:
+    proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
+    proxy.log_usage("/api/chat", b'{"model":"qwen3.8:27b"}', NDJSON_STREAM,
+                    "python-requests/2.32.3")
+    proxy.log_usage("/api/embed", b'{"model":"bge-m3"}', EMBED_RESPONSE, "")
+    files = sorted(proxy.USAGE_LOG_DIR.glob("usage-*.jsonl"))
+    check("ファイルは1つ", len(files), 1)
+    lines = files[0].read_text(encoding="utf-8").splitlines()
+    check("行数", len(lines), 2)
+    first = json.loads(lines[0])
+    check("path", first["path"], "/api/chat")
+    check("model", first["model"], "qwen3.8:27b")
+    check("output", first["output"], 402)
+    check("client", first["client"], "python-requests")
+    second = json.loads(lines[1])
+    check("埋め込みのモデル", second["model"], "bge-m3")
+    check("埋め込みのトークン", second["output"], 0)
+    check("client 不明", second["client"], "unknown")
+
+    print("10. 秘密を記録しない")
+    body = files[0].read_text(encoding="utf-8")
+    check("Authorization を含まない", "Authorization" in body, False)
+    check("Bearer を含まない", "Bearer" in body, False)
+
+print()
+if failures:
+    print(f"失敗 {len(failures)} 件: {', '.join(failures)}")
+    sys.exit(1)
+print("全て通過")

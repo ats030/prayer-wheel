@@ -11,6 +11,7 @@ import sys
 import threading
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -67,6 +68,23 @@ ALLOWED_ORIGINS = {
     if value.strip()
 }
 
+# 使用量の記録。ローカル LLM は全アプリがこの proxy を通るので、ここが唯一の
+# 計測点になる。~/data はバックアップ対象 (~/CLAUDE.md「データの保全」)。
+# 再パースできる元ログが無いため、失うと戻らない。
+USAGE_LOG_DIR = Path(env("OLLAMA_PROXY_USAGE_DIR")
+                     or str(Path.home() / "data" / "ollama-proxy"))
+USAGE_LOG_ENABLED = env("OLLAMA_PROXY_USAGE_LOG", "1") not in ("0", "false", "no")
+# 応答の末尾だけ保持する。ストリームは最終行に、非ストリームは本体末尾に
+# トークン数が入るため、頭は要らない。転送そのものは素通しのまま。
+USAGE_TAIL_BYTES = 256 * 1024
+# 計測するのは生成と埋め込みだけ。/api/tags や /api/ps は1日1万件来るが
+# トークンを消費しないので記録しても雑音になる。
+USAGE_PATHS = frozenset({
+    "/api/generate", "/api/chat", "/api/embed", "/api/embeddings",
+    "/v1/chat/completions", "/v1/completions", "/v1/embeddings",
+})
+_usage_lock = threading.Lock()
+
 
 def require_config() -> None:
     missing = []
@@ -76,6 +94,117 @@ def require_config() -> None:
         missing.append("OPENWEBUI_API_KEY")
     if missing:
         raise SystemExit("Missing required config: " + ", ".join(missing))
+
+
+def _usage_from_object(d: dict) -> dict | None:
+    """1個の JSON オブジェクトからトークン数と実行時間を取り出す。
+
+    Ollama native (/api/generate, /api/chat) は最終オブジェクトに
+    prompt_eval_count / eval_count / total_duration(ナノ秒) を必ず入れる。
+    OpenAI 互換 (/v1/chat/completions) は usage を入れるが、ストリーム時は
+    stream_options.include_usage を送ったときだけなので取れないことがある。
+    """
+    if not isinstance(d, dict):
+        return None
+    if "prompt_eval_count" in d or "eval_count" in d:
+        return {
+            "model": d.get("model") or "",
+            "input": int(d.get("prompt_eval_count") or 0),
+            "output": int(d.get("eval_count") or 0),
+            # total_duration はナノ秒。load_duration (モデルの読み込み) も含む。
+            "duration_ms": round((d.get("total_duration") or 0) / 1e6),
+        }
+    usage = d.get("usage")
+    if isinstance(usage, dict) and (
+            "prompt_tokens" in usage or "input_tokens" in usage):
+        return {
+            "model": d.get("model") or "",
+            "input": int(usage.get("prompt_tokens")
+                         or usage.get("input_tokens") or 0),
+            "output": int(usage.get("completion_tokens")
+                          or usage.get("output_tokens") or 0),
+            "duration_ms": 0,
+        }
+    return None
+
+
+def extract_usage(payload: bytes) -> dict | None:
+    """応答の末尾からトークン数を取り出す。取れなければ None。
+
+    4通りある。NDJSON ストリーム (Ollama native) / SSE ストリーム (OpenAI 互換) /
+    それぞれの非ストリーム。いずれも欲しい値は末尾にあるので、後ろから見る。
+    """
+    if not payload:
+        return None
+    lines = payload.split(b"\n")
+    for raw in reversed(lines[-200:]):
+        line = raw.strip()
+        if line.startswith(b"data:"):
+            line = line[5:].strip()
+        if not line.startswith(b"{"):
+            continue
+        try:
+            found = _usage_from_object(json.loads(line))
+        except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+            continue
+        if found:
+            return found
+    # 非ストリームで本文に改行が入っている (整形済み JSON) 場合の保険。
+    try:
+        return _usage_from_object(json.loads(payload))
+    except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+        return None
+
+
+def request_model(body: bytes | None) -> str:
+    """要求本文の model。応答に model が無い埋め込み系のための控え。"""
+    if not body:
+        return ""
+    try:
+        d = json.loads(body)
+    except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+        return ""
+    return d.get("model") or "" if isinstance(d, dict) else ""
+
+
+def client_label(user_agent: str) -> str:
+    """User-Agent を呼び出し元の目印に縮める。
+
+    どのアプリかまでは分からない (自作アプリは大半が Python-urllib のまま)。
+    アプリの区別はモデル名の方が当てになるので、これは補助として置く。
+    """
+    ua = (user_agent or "").strip()
+    if not ua:
+        return "unknown"
+    head = ua.split()[0].split("/")[0].strip()
+    return head[:40] or "unknown"
+
+
+def log_usage(path: str, request_body: bytes | None, tail: bytes,
+              user_agent: str) -> None:
+    """1リクエスト1行で追記する。月ごとにファイルを分ける。
+
+    月次にしておくと、読む側 (usage-viewer) が既存の mtime/size キャッシュを
+    そのまま使えて、過去月を再パースしなくて済む。
+    """
+    usage = extract_usage(tail) or {}
+    now = datetime.now(timezone.utc)
+    record = {
+        "ts": now.isoformat(timespec="seconds"),
+        "path": path.split("?", 1)[0],
+        # 埋め込みの応答には model が無いので要求側から採る。
+        "model": usage.get("model") or request_model(request_body) or "unknown",
+        "input": usage.get("input", 0),
+        "output": usage.get("output", 0),
+        "duration_ms": usage.get("duration_ms", 0),
+        "client": client_label(user_agent),
+    }
+    target = USAGE_LOG_DIR / f"usage-{now:%Y-%m}.jsonl"
+    line = json.dumps(record, ensure_ascii=False) + "\n"
+    with _usage_lock:
+        USAGE_LOG_DIR.mkdir(parents=True, exist_ok=True)
+        with open(target, "a", encoding="utf-8") as fp:
+            fp.write(line)
 
 
 def json_error(message: str) -> bytes:
@@ -133,9 +262,11 @@ class ProxyHandler(BaseHTTPRequestHandler):
         if not self.request_allowed():
             return
         target_url = TARGET_BASE_URL + self.path
+        body = self.read_body()
+        measure = self.should_measure()
         request = urllib.request.Request(
             target_url,
-            data=self.read_body(),
+            data=body,
             headers=self.forward_headers(),
             method=self.command,
         )
@@ -144,7 +275,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
                 self.send_response(response.status)
                 self.copy_response_headers(response.headers.items())
                 self.end_headers()
-                self.copy_body(response)
+                tail = self.copy_body(response, keep_tail=measure)
+            if measure:
+                self.record_usage(body, tail)
         except urllib.error.HTTPError as exc:
             self.send_response(exc.code)
             self.copy_response_headers(exc.headers.items())
@@ -179,13 +312,40 @@ class ProxyHandler(BaseHTTPRequestHandler):
                 continue
             self.send_header(key, value)
 
-    def copy_body(self, response) -> None:
+    def copy_body(self, response, keep_tail: bool = False) -> bytes:
+        """上流の応答をそのまま流す。keep_tail のときだけ末尾を控える。
+
+        転送は今までどおり読んだそばから書く。控えるのは末尾 USAGE_TAIL_BYTES
+        だけなので、長い生成でもメモリは一定に収まる。
+        """
+        tail = b""
         while True:
             chunk = response.read(64 * 1024)
             if not chunk:
                 break
             self.wfile.write(chunk)
             self.wfile.flush()
+            if keep_tail:
+                tail = (tail + chunk)[-USAGE_TAIL_BYTES:]
+        return tail
+
+    def should_measure(self) -> bool:
+        return (
+            USAGE_LOG_ENABLED
+            and self.command == "POST"
+            and self.path.split("?", 1)[0] in USAGE_PATHS
+        )
+
+    def record_usage(self, body: bytes | None, tail: bytes) -> None:
+        """使用量を記録する。ここで失敗しても応答は既に返し終えている。
+
+        計測は付随的な機能なので、解析や書き込みが何で落ちても proxy 本来の
+        転送を巻き込ませない。原因は journal に残す。
+        """
+        try:
+            log_usage(self.path, body, tail, self.headers.get("User-Agent", ""))
+        except Exception as exc:  # noqa: BLE001
+            self.log_message("usage log failed: %s", exc)
 
     def log_message(self, fmt: str, *args: object) -> None:
         sys.stderr.write(
