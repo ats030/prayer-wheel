@@ -28,6 +28,18 @@
   "instructions": [
     "/home/ats030/AGENTS.md"
   ],
+  "skills": {
+    "paths": [
+      "/home/ats030/ai-workflow/plugins/grill-me/skills",
+      "/home/ats030/ai-workflow/plugins/thinking-workflow/skills",
+      "/home/ats030/ai-workflow/plugins/hallmark/skills"
+    ]
+  },
+  "permission": {
+    "skill": {
+      "*": "allow"
+    }
+  },
   "compaction": {
     "auto": true,
     "prune": true,
