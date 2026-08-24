@@ -27,6 +27,10 @@
     <span class="job-count muted"></span>
   </div>
 
+  <!-- 自動反映を見送った回の受け皿。読んでいる最中に足元を差し替えないので、
+       条件を満たさないときはここに溜めてクリックで反映する。 -->
+  <button type="button" class="update-bar" id="updateBar" hidden></button>
+
   {% block body %}{% endblock %}
 
   <div class="toast" id="toast"></div>

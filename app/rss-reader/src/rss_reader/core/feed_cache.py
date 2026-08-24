@@ -137,3 +137,27 @@ def fetched_at(url: str) -> datetime | None:
         return datetime.fromisoformat(data["fetched_at"])
     except Exception:
         return None
+
+
+def content_revision(urls: list[str]) -> tuple[str, int]:
+    """購読中フィードの記事構成を表す指紋と、その総件数。
+
+    画面の自動反映用。``save()`` は新着がゼロでも ``fetched_at`` を書き換える
+    ので、ファイルの mtime では「取得した」ことしか判らない。毎時の更新の
+    たびに一覧を差し替えるのは無駄なうえ、「新着」と言えば嘘になる。記事の
+    リンクそのものから指紋を作れば、中身が変わった回だけ拾える。
+
+    ``_read`` がメモ化しているので、2回目以降の実コストは39ファイルの stat と
+    リンク文字列のハッシュ計算だけになる。
+    """
+    h = hashlib.sha1()
+    total = 0
+    for url in sorted(urls):
+        data = _read(_path(url))
+        if data is None:
+            continue
+        for item in data.get("items", []):
+            h.update(str(item.get("link", "")).encode())
+            h.update(b"\0")
+            total += 1
+    return h.hexdigest()[:16], total

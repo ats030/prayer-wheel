@@ -329,6 +329,18 @@ def health():
     return {"ok": True, "feeds": len(saved), "failing": len(failing)}
 
 
+@app.get("/api/feed-state")
+def feed_state():
+    """開いている一覧の自動反映用。中身が変わったかだけを安く返す。
+
+    毎分ポーリングされるので、記事本体は組み立てない。指紋が前回と同じなら
+    ブラウザは何もしない（毎時の更新で新着ゼロの回はここで止まる）。
+    """
+    saved = service.feed_store.load()
+    revision, total = feed_cache.content_revision(saved)
+    return {"revision": revision, "items": total}
+
+
 @app.get("/api/jobs/{job_id}")
 def job_status(job_id: str):
     job = jobs.get(job_id)

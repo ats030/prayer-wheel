@@ -454,3 +454,84 @@ if (weightForm) {
     catch (err) { toast(`失敗しました: ${err.message}`); }
   });
 }
+
+// --- 新着の自動反映 ------------------------------------------------------
+//
+// rss-reader-refresh.timer が毎時フィードを更新しても、開いたままの画面は
+// リロードするまで新着が出なかった。一覧の指紋 (/api/feed-state) を定期的に
+// 見て、変わっていたら差し替える。
+//
+// ただし読んでいる最中に足元が入れ替わるのは害なので、黙って差し替えるのは
+// 「一覧の先頭を見ていて本文をどれも開いておらず、ジョブも走っていない」ときだけ。
+// それ以外はバーに溜めて、押されたときに反映する。
+
+const POLL_MS = 60000;
+const updateBar = $('#updateBar');
+
+if (updateBar && wrap && $('#list')) {
+  let known = null;     // 画面に反映済みの指紋。最初のポーリングで確定する
+  let knownItems = 0;
+  let timer = null;
+
+  // 差し替えても読み手の邪魔にならない状態か
+  const quiet = () => window.scrollY < 120
+    && !document.querySelector('.article-body:not([hidden])')
+    && (!jobBar || jobBar.hidden);
+
+  async function applyState(revision, items) {
+    known = revision;
+    knownItems = items;
+    updateBar.hidden = true;
+    await reloadList(false);
+  }
+
+  async function fetchState() {
+    const res = await fetch('/api/feed-state', { cache: 'no-store' });
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    return res.json();
+  }
+
+  async function check() {
+    let state;
+    try {
+      state = await fetchState();
+    } catch {
+      return;  // 一時的な失敗。次のポーリングで拾えるので黙って見送る
+    }
+    // 初回は画面に描かれている内容が指紋の正体なので、比較せず控えるだけ
+    if (known === null) { known = state.revision; knownItems = state.items; return; }
+    if (state.revision === known) { updateBar.hidden = true; return; }
+    if (quiet()) { await applyState(state.revision, state.items); return; }
+    const added = state.items - knownItems;
+    updateBar.textContent = added > 0 ? `新着 ${added}件 — 読み込む` : '更新があります — 読み込む';
+    updateBar.hidden = false;
+  }
+
+  updateBar.addEventListener('click', async () => {
+    updateBar.classList.add('busy');
+    try {
+      // 溜めている間にさらに増えていることがあるので、押した時点で取り直す
+      const state = await fetchState();
+      await applyState(state.revision, state.items);
+      window.scrollTo({ top: 0 });
+    } catch (err) {
+      toast(`一覧を更新できませんでした: ${err.message}`);
+    } finally {
+      updateBar.classList.remove('busy');
+    }
+  });
+
+  // 裏に回っている間は止める。復帰したら間隔を待たずに1回見る
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearInterval(timer);
+      timer = null;
+    } else if (timer === null) {
+      timer = setInterval(check, POLL_MS);
+      check();
+    }
+  });
+
+  if (!document.hidden) timer = setInterval(check, POLL_MS);
+  check();
+}

@@ -415,3 +415,23 @@ code { font-family: var(--mono); font-size: 12px; color: var(--ink-muted); }
 .job-fill { display: block; height: 100%; width: 0; background: var(--primary); transition: width 0.2s ease; }
 .job-count { font-variant-numeric: tabular-nums; }
 .btn.busy { opacity: 0.6; pointer-events: none; }
+
+/* 新着の自動反映を見送った回だけ出る。読んでいる位置を動かさずに知らせたい
+   ので一覧には触れず、ナビ (z-index 10) の下に重ねて固定する。 */
+.update-bar {
+  position: fixed;
+  top: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11;
+  padding: 7px 14px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-md);
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+.update-bar:hover { background: var(--primary-hover); }
+.update-bar.busy { opacity: 0.6; pointer-events: none; }
