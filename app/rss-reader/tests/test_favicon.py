@@ -16,7 +16,8 @@ def test_favicon_is_dedicated_rss_svg():
     assert "<text" not in svg
     assert "📡" not in svg
     assert 'stroke="#464a52"' in svg
-    assert 'stroke="#7c3aed"' in svg
+    assert 'stroke="#f97316"' in svg
+    assert 'fill="#f97316"' in svg
     assert svg.count("A") == 2
 
 
