@@ -296,6 +296,7 @@ class BacklogRow:
     cohort: date
     freeze_record: bool = False
     actor: str = "agent"
+    defer_until: date | None = None
 
 
 def backlog_rows(issues: list[Issue], today: date) -> list[BacklogRow]:
@@ -312,6 +313,7 @@ def backlog_rows(issues: list[Issue], today: date) -> list[BacklogRow]:
             cohort=i.cohort,
             freeze_record=i.freeze_record,
             actor=i.actor,
+            defer_until=i.defer_until,
         )
         for i in issues
         if i.open_on(today)
@@ -343,6 +345,26 @@ class Metrics:
     by_decision: int
     # 「〜を凍結中」の記録。タスクではない。
     freeze_records: int
+    # 外部待ちが最も多く戻ってくる日と、その日の件数。(日付, 件数) か None。
+    # 「次の日」ではなく最大の山を出す。8/24 時点で次の復帰日は 8/30 の1件だが、
+    # 本当に効くのは 11/23 の19件で、これが戻ると動かせる残件は 8 から 27 になる。
+    # 早い順に見ていると山を見落とす (ats030-4nw7)。
+    peak_return: tuple[date, int] | None = None
+
+
+def _peak_return(remaining: list[Issue], today: date) -> tuple[date, int] | None:
+    """外部待ちが最も多く戻ってくる日と件数。期限切れは別に数えるので含めない。
+
+    同数なら早い日を採る。まとめて defer した日の3ヶ月後に山ができるため、
+    一度に何件戻るかが判らないと、その日に棚卸しが一気に必要になる。
+    """
+    days = [i.defer_until for i in remaining
+            if i.deferred and i.defer_until is not None and i.defer_until > today]
+    if not days:
+        return None
+    counts = {d: days.count(d) for d in set(days)}
+    peak = max(counts, key=lambda d: (counts[d], -d.toordinal()))
+    return peak, counts[peak]
 
 
 def metrics(issues: list[Issue], today: date) -> Metrics:
@@ -366,6 +388,7 @@ def metrics(issues: list[Issue], today: date) -> Metrics:
         by_owner=sum(1 for i in remaining if not i.deferred and i.actor == "owner"),
         by_decision=sum(1 for i in remaining if not i.deferred and i.actor == "decision"),
         freeze_records=sum(1 for i in remaining if i.freeze_record),
+        peak_return=_peak_return(remaining, today),
     )
 
 
@@ -662,6 +685,24 @@ def _priority_chip(p: int) -> str:
     return f'<span class="{cls}">P{p}</span>'
 
 
+def _return_note(m: "Metrics") -> str:
+    if m.peak_return is None:
+        return "期限つきの復帰予定なし"
+    day, count = m.peak_return
+    return f"最大の復帰は {day:%-m/%-d} の {count}件"
+
+
+def _return_cell(row: "BacklogRow", today: date) -> str:
+    """外部待ちが戻ってくる日。タスクとして動かせる日でもある。"""
+    if not row.deferred:
+        return ""
+    if row.defer_until is None:
+        # 期限も契機も無いものは、戻る日が来ないので放置と同じ。
+        return '<span class="warn">未設定</span>'
+    cls = "hot" if row.defer_until <= today else ""
+    return f'<span class="{cls}">{row.defer_until:%-m/%-d}</span>'
+
+
 def _age_cell(days: int) -> str:
     cls = "hot" if days > 30 else ("warn" if days > 14 else "")
     return f'<span class="{cls}">{days}</span>'
@@ -686,6 +727,10 @@ def render_page(issues: list[Issue], today: date) -> str:
          f"外部待ち {m.deferred} · 凍結の記録 {m.freeze_records} を除く"),
         ("残件数 (全体)", str(m.remaining), "外部待ちと凍結の記録を含む"),
         ("30日超", str(m.over_30_days), "棚卸しの第一候補"),
+        # 外部待ちは戻ってくる日まで見ないと健康か判らない。期限切れは既に戻す
+        # べき日を過ぎたもの、補足は次にまとめて戻ってくる日。defer が P3 の
+        # 代わりの先送り置き場になっていないかはこの2つで判る (ats030-4nw7)。
+        ("期限切れの外部待ち", str(m.freeze_expired), _return_note(m)),
         ("滞留の中央値", f"{m.median_age}日", "残っている件"),
         ("claim率", f"{m.claim_rate}%", "started_at が付いた件"),
         ("同日クローズ率", f"{m.same_day_close_rate}%", "クローズ済み全体"),
@@ -723,6 +768,7 @@ def render_page(issues: list[Issue], today: date) -> str:
         f'<td class="id">{html.escape(r.id)}</td>'
         f'<td class="num">{_age_cell(r.age_days)}</td>'
         f'<td class="num hide-sm">{r.idle_days}</td>'
+        f'<td class="num">{_return_cell(r, today)}</td>'
         f"<td>{_priority_chip(r.priority)}</td>"
         f'<td class="hide-sm">{html.escape(r.issue_type)}</td>'
         f"<td>{html.escape(r.title)}"
@@ -778,7 +824,7 @@ def render_page(issues: list[Issue], today: date) -> str:
     <table><thead><tr>
       <th><input type="checkbox" onchange="toggleAll(this)"></th>
       <th>ID</th><th class="num">滞留</th><th class="num hide-sm">無更新</th>
-      <th>P</th><th class="hide-sm">種別</th><th>タイトル</th>
+      <th class="num">復帰</th><th>P</th><th class="hide-sm">種別</th><th>タイトル</th>
     </tr></thead>
     <tbody>{row_html}</tbody></table>{cold_html}
   </div>

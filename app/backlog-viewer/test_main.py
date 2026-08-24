@@ -208,6 +208,66 @@ class TestMetrics:
         assert m.remaining == 2
 
 
+class TestPeakReturn:
+    """外部待ちが戻ってくる日。早い順に見ると山を見落とす。"""
+
+    def _deferred(self, id_, until):
+        return issue(id_, iso(2026, 8, 1), status="deferred", defer_until=until)
+
+    def test_returns_the_day_with_the_most_items_not_the_earliest(self):
+        issues = main.parse_issues([
+            self._deferred("a", iso(2026, 8, 30)),
+            self._deferred("b", iso(2026, 11, 23)),
+            self._deferred("c", iso(2026, 11, 23)),
+        ])
+        m = main.metrics(issues, today=date(2026, 8, 24))
+        assert m.peak_return == (date(2026, 11, 23), 2)
+
+    def test_ties_pick_the_earlier_day(self):
+        issues = main.parse_issues([
+            self._deferred("a", iso(2026, 9, 1)),
+            self._deferred("b", iso(2026, 11, 23)),
+        ])
+        m = main.metrics(issues, today=date(2026, 8, 24))
+        assert m.peak_return == (date(2026, 9, 1), 1)
+
+    def test_expired_items_are_excluded(self):
+        # 期限切れは freeze_expired が数える。ここに混ぜると二重に警告する。
+        issues = main.parse_issues([self._deferred("a", iso(2026, 8, 14))])
+        m = main.metrics(issues, today=date(2026, 8, 24))
+        assert m.peak_return is None
+        assert m.freeze_expired == 1
+
+    def test_none_when_nothing_has_a_deadline(self):
+        issues = main.parse_issues([
+            issue("a", iso(2026, 8, 1), status="deferred"),
+            issue("b", iso(2026, 8, 1)),
+        ])
+        assert main.metrics(issues, today=date(2026, 8, 24)).peak_return is None
+
+
+class TestReturnCell:
+    def _row(self, **kw):
+        issues = main.parse_issues([issue("a", iso(2026, 8, 1), **kw)])
+        return main.backlog_rows(issues, today=date(2026, 8, 24))[0]
+
+    def test_blank_when_not_deferred(self):
+        assert main._return_cell(self._row(), date(2026, 8, 24)) == ""
+
+    def test_shows_the_date_when_it_is_still_ahead(self):
+        row = self._row(status="deferred", defer_until=iso(2026, 11, 23))
+        assert "11/23" in main._return_cell(row, date(2026, 8, 24))
+
+    def test_expired_date_is_marked(self):
+        row = self._row(status="deferred", defer_until=iso(2026, 8, 14))
+        cell = main._return_cell(row, date(2026, 8, 24))
+        assert "8/14" in cell and 'class="hot"' in cell
+
+    def test_missing_deadline_is_marked(self):
+        row = self._row(status="deferred")
+        assert "未設定" in main._return_cell(row, date(2026, 8, 24))
+
+
 class TestLayerLabel:
     """凡例は相対週で書く。色の明度 (古いほど暗い) と同じ軸に揃える。"""
 
@@ -265,6 +325,22 @@ class TestPage:
         assert "<svg" in body
         # クローズ済みは一覧に出ない
         assert "ats030-bbbb" not in body
+
+    def test_deferred_deadline_is_visible_on_the_page(self, monkeypatch):
+        from fastapi.testclient import TestClient
+
+        raw = [
+            issue("ats030-cccc", iso(2026, 8, 1), status="deferred",
+                  defer_until=iso(2026, 11, 23), title="外部待ち"),
+            issue("ats030-dddd", iso(2026, 8, 1), status="deferred",
+                  defer_until=iso(2026, 8, 14), title="期限切れ"),
+        ]
+        monkeypatch.setattr(main, "load_raw_issues", lambda: raw)
+        body = TestClient(main.app).get("/").text
+        assert "期限切れの外部待ち" in body
+        # 戻ってくる日が一覧と補足の両方から読める
+        assert "11/23" in body
+        assert "復帰" in body
 
     def test_index_survives_bd_failure(self, monkeypatch):
         from fastapi.testclient import TestClient
