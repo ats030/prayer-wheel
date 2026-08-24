@@ -47,7 +47,8 @@
   },
   "agent": {
     "build": {
-      "steps": 30
+      "steps": 30,
+      "temperature": 0.2
     }
   }
 }
