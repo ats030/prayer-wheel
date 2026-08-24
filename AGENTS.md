@@ -2,16 +2,6 @@
 
 This project uses **bd** (beads) for issue tracking. Use the quick reference below; run `bd prime` only when Beads context is missing or stale.
 
-## Quick Reference
-
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work atomically
-bd close <id>         # Complete work
-bd dolt push          # Optional: push beads data only if a Dolt remote is configured
-```
-
 ## Non-Interactive Shell Commands
 
 **ALWAYS use non-interactive flags** with file operations to avoid hanging on confirmation prompts.
