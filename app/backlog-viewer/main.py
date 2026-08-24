@@ -873,11 +873,11 @@ def render_error(message: str) -> str:
 
 # 画面の主題は「残タスクが減っていくか」。減っていく棒で表す。背景と紫は本体の
 # 配色に合わせた (#12141b / #7c3aed)。16px でも棒の段差が残るよう3本に絞る。
-FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-<rect width="32" height="32" rx="7" fill="#12141b"/>
-<rect x="6" y="8" width="5" height="18" rx="1.5" fill="#a78bfa"/>
-<rect x="13.5" y="14" width="5" height="12" rx="1.5" fill="#7c3aed"/>
-<rect x="21" y="20" width="5" height="6" rx="1.5" fill="#7c3aed" opacity="0.55"/>
+FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" data-favicon-size="84" data-outline-color="#464a52" data-outline-width="5">
+<rect x="10" y="10" width="80" height="80" rx="18" fill="#12141b" stroke="#464a52" stroke-width="5"/>
+<rect x="20" y="25" width="14" height="55" rx="4" fill="#a78bfa"/>
+<rect x="43" y="43" width="14" height="37" rx="4" fill="#7c3aed"/>
+<rect x="66" y="61" width="14" height="19" rx="4" fill="#7c3aed" opacity="0.55"/>
 </svg>"""
 
 
