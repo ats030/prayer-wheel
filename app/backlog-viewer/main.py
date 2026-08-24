@@ -375,7 +375,9 @@ def metrics(issues: list[Issue], today: date) -> Metrics:
 # ライセンス確認と更新追従が新しい運用タスクになる。
 
 SVG_W, SVG_H = 960, 300
-PLOT = (46, 12, 950, 262)  # x0, y0, x1, y1
+# 右に余白を残すのは、狭い画面で右端 (直近) までスクロールしたときにも
+# y 軸の値を読めるよう、目盛ラベルを左右の両方に置くため。
+PLOT = (46, 12, 906, 262)  # x0, y0, x1, y1
 
 
 def _cohort_color(index: int, total: int) -> str:
@@ -434,7 +436,10 @@ def render_stacked_svg(series: Series, today: date) -> str:
         return y1 - (v / ymax) * (y1 - y0)
 
     parts = [
-        f'<svg viewBox="0 0 {SVG_W} {SVG_H}" width="100%" role="img" '
+        # width/height を属性で持たせる。viewBox だけだと intrinsic size が
+        # 確定せず、高さを 150px と解釈するブラウザ (Safari) でグラフが潰れる。
+        # 実際の寸法は CSS (.chart svg) 側で決める。
+        f'<svg viewBox="0 0 {SVG_W} {SVG_H}" width="{SVG_W}" height="{SVG_H}" role="img" '
         f'aria-label="残件数の推移 (作成週コホート積み上げ)">'
     ]
 
@@ -443,9 +448,11 @@ def render_stacked_svg(series: Series, today: date) -> str:
         v = ymax * t / 4
         y = py(v)
         parts.append(f'<line x1="{x0}" y1="{y:.1f}" x2="{x1}" y2="{y:.1f}" stroke="#242633" stroke-width="1"/>')
-        parts.append(
-            f'<text x="{x0 - 8}" y="{y + 4:.1f}" text-anchor="end" fill="#71717a" font-size="11">{v:.0f}</text>'
-        )
+        for tx, anchor in ((x0 - 8, "end"), (x1 + 8, "start")):
+            parts.append(
+                f'<text x="{tx}" y="{y + 4:.1f}" text-anchor="{anchor}" '
+                f'fill="#71717a" font-size="11">{v:.0f}</text>'
+            )
 
     cohort_layers = [l for l in series.layers if l != DEFERRED_LAYER]
     base = [0.0] * n
@@ -546,8 +553,12 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .warn { color: var(--warning); }
 .scroll { overflow-x: auto; }
 /* 狭い画面で SVG を潰すと軸ラベルが 4px 相当になって読めない。
-   縮小させずに .scroll の中で横スクロールさせる。 */
-.chart svg { min-width: 720px; }
+   縮小させずに .scroll の中で横スクロールさせる。height:auto と
+   width/height 属性の組みでアスペクト比を保つ。 */
+.chart svg { display: block; width: 100%; min-width: 720px; height: auto; }
+/* 横スクロールが起きた画面にだけ出す。JS が .chart に .scrollable を付ける。 */
+.scroll-hint { display: none; color: var(--subtle); font-size: 11px; margin: 8px 0 0; }
+.chart.scrollable ~ .scroll-hint { display: block; }
 .bar { display: inline-block; height: 8px; border-radius: 2px; background: var(--accent); vertical-align: middle; }
 input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
 .dock {
@@ -622,7 +633,20 @@ function toggleAll(source) {
   document.querySelectorAll('.pick').forEach(e => { e.checked = source.checked; });
   refresh();
 }
+// 狭い画面ではグラフが横スクロールになる。左端は最も古い週で、残件が
+// 立ち上がっている直近が画面外に出るため、初期位置を右端に寄せる。
+function chartToLatest(move) {
+  document.querySelectorAll('.chart').forEach(el => {
+    const scrollable = el.scrollWidth > el.clientWidth + 1;
+    el.classList.toggle('scrollable', scrollable);
+    // 位置を動かすのは初回だけ。resize のたびに戻すと、古い週を見ている
+    // 最中に画面を回しただけで右端へ飛ばされる。
+    if (scrollable && move) el.scrollLeft = el.scrollWidth;
+  });
+}
 document.addEventListener('DOMContentLoaded', () => {
+  chartToLatest(true);
+  window.addEventListener('resize', () => chartToLatest(false));
   document.querySelectorAll('.pick').forEach(e => e.addEventListener('change', refresh));
   document.querySelectorAll('.copy').forEach(b => {
     b.dataset.label = b.textContent;
@@ -733,6 +757,7 @@ def render_page(issues: list[Issue], today: date) -> str:
   <div class="panel">
     <div class="scroll chart">{render_stacked_svg(series, today)}</div>
     <div class="legend">{render_legend(series, today)}</div>
+    <p class="scroll-hint">グラフは右端 (直近) を表示している。左へスクロールすると古い週が見える。</p>
     <p class="note">高さの合計が残件数。色は「いつ作られた件か」を表す。層が横に伸びたままなら、
     その週に作った分が片付いていない。外部待ち (deferred) は残件から除外していないが、
     defer した日は bd に記録が残らないため updated_at で近似している。</p>
