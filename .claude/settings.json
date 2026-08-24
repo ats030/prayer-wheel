@@ -5,18 +5,6 @@
   },
   "model": "opus",
   "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/beads-restore-reorder.sh",
-            "if": "Bash(bd *)"
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
         "matcher": "Bash",

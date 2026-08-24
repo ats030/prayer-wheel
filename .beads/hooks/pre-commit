@@ -1,24 +1,25 @@
-#!/usr/bin/env sh
-# --- BEGIN BEADS INTEGRATION v1.0.3 ---
-# This section is managed by beads. Do not remove these markers.
-if command -v bd >/dev/null 2>&1; then
-  export BD_GIT_HOOK=1
-  _bd_timeout=${BEADS_HOOK_TIMEOUT:-300}
-  if command -v timeout >/dev/null 2>&1; then
-    timeout "$_bd_timeout" bd hooks run pre-commit "$@"
-    _bd_exit=$?
-    if [ $_bd_exit -eq 124 ]; then
-      echo >&2 "beads: hook 'pre-commit' timed out after ${_bd_timeout}s — continuing without beads"
-      _bd_exit=0
-    fi
-  else
-    bd hooks run pre-commit "$@"
-    _bd_exit=$?
-  fi
-  if [ $_bd_exit -eq 3 ]; then
-    echo >&2 "beads: database not initialized — skipping hook 'pre-commit'"
-    _bd_exit=0
-  fi
-  if [ $_bd_exit -ne 0 ]; then exit $_bd_exit; fi
+#!/bin/sh
+# Deterministic Beads export shared by Claude, Codex, and OpenCode.
+# The stock `bd hooks run pre-commit` uses BD_GIT_HOOK=1; with embedded Dolt 1.0.3
+# it can export a stale snapshot and emits non-deterministic JSONL line order.
+set -eu
+
+if ! command -v bd >/dev/null 2>&1; then
+  exit 0
 fi
-# --- END BEADS INTEGRATION v1.0.3 ---
+
+repo_root=$(git rev-parse --show-toplevel)
+jsonl="$repo_root/.beads/issues.jsonl"
+raw="$repo_root/.beads/issues.jsonl.pre-commit.raw"
+sorted="$repo_root/.beads/issues.jsonl.pre-commit.sorted"
+trap 'rm -f "$raw" "$sorted"' EXIT HUP INT TERM
+
+timeout_seconds=${BEADS_HOOK_TIMEOUT:-30}
+if command -v timeout >/dev/null 2>&1; then
+  timeout "$timeout_seconds" bd export -o "$raw"
+else
+  bd export -o "$raw"
+fi
+LC_ALL=C /usr/bin/sort -o "$sorted" "$raw"
+cp -f "$sorted" "$jsonl"
+git add -- "$jsonl"
