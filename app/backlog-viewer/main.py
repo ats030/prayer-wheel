@@ -807,8 +807,8 @@ def render_page(issues: list[Issue], today: date) -> str:
 <title>backlog-viewer</title><link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>{CSS}</style></head><body>
 <div class="wrap">
-  <h1>残タスクはなぜ収束しないか</h1>
-  <p class="sub">{today:%Y-%m-%d} 時点 (JST) · bd から直接読んでいる · この画面は書き込まない</p>
+  <h1>backlog-viewer</h1>
+  <p class="sub">残タスクはなぜ収束しないか · {today:%Y-%m-%d} 時点 (JST) · bd から直接読んでいる · この画面は書き込まない</p>
 
   <div class="tiles">{tile_html}</div>
 

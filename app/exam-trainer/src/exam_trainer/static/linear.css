@@ -64,7 +64,6 @@ a:hover { text-decoration: underline; }
   z-index: 10;
 }
 .nav .brand { font-weight: 600; letter-spacing: -0.4px; }
-.nav .brand .dot { color: var(--primary); }
 .nav-links { display: flex; align-items: center; gap: 4px; }
 .nav-links a {
   color: var(--ink-subtle);
