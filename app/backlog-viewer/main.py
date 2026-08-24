@@ -245,6 +245,10 @@ class CohortRow:
     remaining: int
     same_day: int
     p3: int
+    # 残の内訳。残が減っても、閉じたのか外部待ちへ送っただけなのかで意味が
+    # 逆になる。8/22-23 は両方が同時に起きて、画面からは区別できなかった。
+    closed: int = 0
+    deferred: int = 0
 
     @property
     def residual_rate(self) -> float:
@@ -269,16 +273,23 @@ def cohort_table(issues: list[Issue], today: date) -> list[CohortRow]:
     remaining: dict[date, int] = {}
     same_day: dict[date, int] = {}
     p3: dict[date, int] = {}
+    closed: dict[date, int] = {}
+    deferred: dict[date, int] = {}
     for issue in issues:
         created[issue.cohort] = created.get(issue.cohort, 0) + 1
         if issue.open_on(today):
             remaining[issue.cohort] = remaining.get(issue.cohort, 0) + 1
+            if issue.deferred:
+                deferred[issue.cohort] = deferred.get(issue.cohort, 0) + 1
+        if issue.closed is not None:
+            closed[issue.cohort] = closed.get(issue.cohort, 0) + 1
         if issue.closed is not None and issue.closed == issue.created:
             same_day[issue.cohort] = same_day.get(issue.cohort, 0) + 1
         if issue.priority >= 3:
             p3[issue.cohort] = p3.get(issue.cohort, 0) + 1
     return [
-        CohortRow(w, created[w], remaining.get(w, 0), same_day.get(w, 0), p3.get(w, 0))
+        CohortRow(w, created[w], remaining.get(w, 0), same_day.get(w, 0), p3.get(w, 0),
+                  closed.get(w, 0), deferred.get(w, 0))
         for w in sorted(created)
     ]
 
@@ -750,7 +761,9 @@ def render_page(issues: list[Issue], today: date) -> str:
     cohort_html = "".join(
         f"<tr><td>{c.week:%Y-%m-%d}〜</td>"
         f'<td class="num">{c.created}</td>'
+        f'<td class="num">{c.closed}</td>'
         f'<td class="num">{c.remaining}</td>'
+        f'<td class="num">{c.deferred or ""}</td>'
         f'<td class="num">{c.residual_rate}%</td>'
         f'<td class="num">{c.same_day_rate}%</td>'
         f'<td class="num">{c.p3_share}%</td>'
@@ -811,12 +824,15 @@ def render_page(issues: list[Issue], today: date) -> str:
 
   <h2>作成週ごとの残存率</h2>
   <div class="panel scroll">
-    <table><thead><tr><th>作成週</th><th class="num">作成</th><th class="num">残</th>
+    <table><thead><tr><th>作成週</th><th class="num">作成</th><th class="num">閉</th>
+    <th class="num">残</th><th class="num">うち外部待ち</th>
     <th class="num">残存率</th><th class="num">同日クローズ率</th><th class="num">P3の割合</th>
     <th></th></tr></thead>
     <tbody>{cohort_html}</tbody></table>
     <p class="note">残存率はこの2列とほぼ逆に動く。その日に閉じられなかった件と、
-    P3 で作られた件が残る。残存率が跳ねた週を見つけたら、量ではなくこの2列を見ること。</p>
+    P3 で作られた件が残る。残存率が跳ねた週を見つけたら、量ではなくこの2列を見ること。
+    「うち外部待ち」が残の大半を占める週は、片付いたのではなく先へ送っただけ。
+    残存率だけを見ていると収束したように読める。</p>
   </div>
 
   <h2>残っているタスク {len(live_rows)} 件 (滞留日数の降順)</h2>

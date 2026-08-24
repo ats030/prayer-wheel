@@ -552,3 +552,32 @@ class TestWhoCanAct:
         issues = main.parse_issues([issue("a", iso(2026, 8, 1), status="deferred", labels=["human"])])
         m = main.metrics(issues, date(2026, 8, 23))
         assert (m.actionable, m.by_owner) == (0, 0)
+
+
+class TestCohortFlow:
+    """残が減ったとき、閉じたのか外部待ちへ送っただけなのかを分ける。
+
+    8/22-23 に両方が同時に起きた (68→33 の一括クローズと、28件の defer)。
+    残存率だけを見ていると、送っただけの週も収束したように読める。
+    """
+
+    def _week(self):
+        return main.parse_issues([
+            issue("a", iso(2026, 8, 17), closed=iso(2026, 8, 18), status="closed"),
+            issue("b", iso(2026, 8, 18), closed=iso(2026, 8, 18), status="closed"),
+            issue("c", iso(2026, 8, 19), status="deferred", defer_until=iso(2026, 11, 23)),
+            issue("d", iso(2026, 8, 20)),
+        ])
+
+    def test_closed_and_deferred_are_counted_separately(self):
+        row = main.cohort_table(self._week(), today=date(2026, 8, 24))[0]
+        assert (row.created, row.closed, row.remaining, row.deferred) == (4, 2, 2, 1)
+
+    def test_closed_counts_every_close_not_only_same_day(self):
+        # 同日クローズは1件だけだが、閉じたのは2件。
+        row = main.cohort_table(self._week(), today=date(2026, 8, 24))[0]
+        assert (row.same_day, row.closed) == (1, 2)
+
+    def test_page_shows_the_deferred_share_of_the_remainder(self):
+        page = main.render_page(self._week(), date(2026, 8, 24))
+        assert "うち外部待ち" in page
