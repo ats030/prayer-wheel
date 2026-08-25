@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "playwright": "^1.62.1",
+    "http-server": "^14.1.1"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "start": "npx http-server -p 8525"
+  }
+}

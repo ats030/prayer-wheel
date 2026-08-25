@@ -1,0 +1,14 @@
+[Unit]
+Description=Dekita (できた！static game, port 8525)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ats030
+ExecStart=/home/ats030/app/dekita.sh
+Restart=on-failure
+RestartSec=10
+SuccessExitStatus=143
+
+[Install]
+WantedBy=default.target
