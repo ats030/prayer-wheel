@@ -52,7 +52,7 @@
     }
   },
   "language": "japanese",
-  "autoCompactWindow": 150000,
+  "autoCompactWindow": 120000,
   "theme": "dark",
   "agentPushNotifEnabled": true,
   "autoMode": {

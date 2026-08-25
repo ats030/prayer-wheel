@@ -149,6 +149,11 @@ For more details, see README.md and docs/QUICKSTART.md.
 
 <!-- END BEADS INTEGRATION -->
 
+## Agent Input Budget
+
+- Exclude regenerated trackers, lockfiles, build output, indexes, and minified assets from routine diff review unless the task concerns them.
+- For a narrow question, locate the symbol with `rg` and read only the relevant range. Read a large file in full only when its overall structure is required.
+
 ## Cross-Agent Context Adapters
 
 `AGENTS.md` is the canonical shared instruction file for Codex and OpenCode.
