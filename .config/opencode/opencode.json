@@ -13,7 +13,11 @@
       },
       "models": {
         "qwen3.8:27b": {
-          "name": "Qwen 3.8 27B"
+          "name": "Qwen 3.8 27B (32k)",
+          "limit": {
+            "context": 32768,
+            "output": 4096
+          }
         },
         "qwen3-coder-next:latest": {
           "name": "Qwen3 Coder Next 80B (16k)",
