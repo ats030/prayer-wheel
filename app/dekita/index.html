@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>できた！</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="style.css">
@@ -14,7 +14,12 @@
     </header>
     
     <div id="title-screen" class="screen">
-      <button id="start-btn" class="game-btn">スタート</button>
+      <div class="mode-buttons">
+        <button id="start-btn" class="game-btn">🔢 すうじ</button>
+        <button id="color-start-btn" class="game-btn">🎨 いろ</button>
+        <button id="animal-start-btn" class="game-btn">🐶 どうぶつ</button>
+        <button id="maze-start-btn" class="game-btn">🛤️ めいろ</button>
+      </div>
     </div>
     
     <div id="number-select-screen" class="screen hidden">
@@ -24,12 +29,16 @@
     
     <div id="game-screen" class="screen hidden">
       <div class="score-board">
-        <span>スコア: <span id="score">0</span></span>
-        <button id="reset-btn" class="reset-btn">リセット</button>
+        <div class="score-info">
+          <span>スコア: <span id="score">0</span></span>
+          <span id="progress-text" class="progress-text"></span>
+        </div>
+        <button id="reset-btn" class="reset-btn">もどる</button>
       </div>
       
       <div id="question-area" class="question-area">
         <div id="picture-area" class="picture-area"></div>
+        <canvas id="maze-canvas" class="hidden"></canvas>
         <p id="question-text" class="question-text">なにが いくつ?</p>
         <div id="answer-buttons" class="answer-buttons"></div>
       </div>
@@ -37,6 +46,16 @@
       <div id="feedback-area" class="feedback-area hidden">
         <p id="feedback-text" class="feedback-text">せいかい!</p>
         <button id="next-btn" class="next-btn">つぎへ</button>
+      </div>
+    </div>
+    
+    <div id="maze-theme-select-screen" class="screen hidden">
+      <h2>めいろのテーマ</h2>
+      <div id="maze-theme-buttons" class="mode-buttons">
+        <button class="maze-theme-btn" data-theme="0">🐝 はちさん</button>
+        <button class="maze-theme-btn" data-theme="1">🐰 うさぎさん</button>
+        <button class="maze-theme-btn" data-theme="2">🐱 ねこさん</button>
+        <button class="maze-theme-btn" data-theme="3">🐵 さるさん</button>
       </div>
     </div>
     
