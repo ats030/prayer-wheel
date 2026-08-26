@@ -69,6 +69,40 @@ def app_for_checking():
     finally:
         process.terminate()
         process.wait(timeout=15)
+
+
+@contextlib.contextmanager
+def public_app_for_checking():
+    """公開版 (BYOK) を1つ起こす。APIキーはサーバーに置かず、この端末にだけ残る。
+
+    運営者用とは画面の出し分けも設定の保存先も違う。本番 (Cloud Run) は
+    こちらなので、公開版でしか起きない壊れ方はここでしか捕まえられない。
+    """
+    port = LOCAL_PORT + 1
+    base = f"http://127.0.0.1:{port}"
+    share_db = Path(tempfile.mkdtemp(prefix="ikimono-smoke-public-")) / "shares.db"
+    environment = {**os.environ, "IKIMONO_PUBLIC_MODE": "1", "IKIMONO_PUBLIC_LOCAL": "0",
+                   "IKIMONO_BACKGROUND_JOBS": "0",
+                   "IKIMONO_ALLOWED_HOSTS": "127.0.0.1,localhost",
+                   "IKIMONO_SHARE_DB": str(share_db)}
+    process = subprocess.Popen(
+        [sys.executable, "-m", "uvicorn", "main:app", "--host", "127.0.0.1",
+         "--port", str(port), "--log-level", "warning"],
+        cwd=str(Path(__file__).resolve().parent.parent), env=environment,
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        for _ in range(60):
+            try:
+                if httpx.get(base + "/health", timeout=2).status_code == 200:
+                    break
+            except httpx.HTTPError:
+                time.sleep(0.5)
+        else:
+            raise SystemExit("検査用の公開版が起動しませんでした")
+        yield base
+    finally:
+        process.terminate()
+        process.wait(timeout=15)
 SAMPLE = {
     "category": "植物", "summary": "キク科の草本と考えられます。", "plantnet_used": False,
     "candidates": [{
@@ -533,6 +567,47 @@ def run(base: str, do_identify: bool) -> None:
         context.close(); browser.close()
 
 
+def run_key_saving(base: str) -> None:
+    """公開版で、APIキーを入れて保存を押すと本当に保存されるか。
+
+    公開版のサーバーは Ollama URL を空で返す。既定の Gemini を選んでいる間、
+    その入力欄は display:none で隠れるが、隠れても required は効いたままで、
+    ブラウザが submit を黙って止めていた。画面には成功も失敗も出ず、押しても
+    何も起きないように見える。押して localStorage を覗くまで分からない。
+    """
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=True)
+        context = browser.new_context(viewport={"width": 1100, "height": 900})
+        page = context.new_page()
+        errors = page_errors(page)
+
+        page.goto(base + "/settings")
+        page.wait_for_load_state("networkidle")
+        page.locator("[name=provider][value=gemini]").check()
+        page.fill("#key-gemini", "smoke-key-abcdef")
+        check("隠れた必須欄が保存を止めない",
+              page.evaluate("() => document.getElementById('settingsForm').checkValidity()") is True,
+              page.evaluate("""() => [...document.querySelectorAll('#settingsForm :invalid')]
+                                       .map(el => el.id).join(',')"""))
+        page.click("#save-button")
+        page.wait_for_timeout(800)
+        check("APIキーがこの端末に保存される",
+              bool(page.evaluate("""() => sessionStorage.getItem('species-key-gemini')
+                                       || localStorage.getItem('species-key-gemini')""")))
+        check("保存したことが画面に出る", "保存" in page.locator("#message").inner_text(),
+              page.locator("#message").inner_text()[:60])
+        check("保存後にキー欄を残さない", page.input_value("#key-gemini") == "")
+
+        # 検証を外すのは選んでいない provider だけ。Ollama を選べば URL は必須に戻る
+        page.locator("[name=provider][value=local]").check()
+        page.fill("#local-llm-url", "")
+        check("Ollamaを選べばURLは必須に戻る",
+              page.evaluate("() => document.getElementById('settingsForm').checkValidity()") is False)
+
+        check("公開版の設定画面がJSエラーを出さない", not errors, "; ".join(errors[:2]))
+        context.close(); browser.close()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", default="", help="確かめる入口 (既定: この場で1つ起こす)")
@@ -543,6 +618,11 @@ def main() -> int:
         base = args.base or (public if args.public else admin)
         print(f"■ {base}")
         run(base, args.identify)
+    if not args.base and not ADMIN:
+        # 公開版でしか起きない壊れ方 (APIキーが黙って保存されない) を見る
+        with public_app_for_checking() as public_base:
+            print(f"■ {public_base} (公開版)")
+            run_key_saving(public_base)
     if failures:
         print(f"\n{len(failures)}件だめでした: {', '.join(failures)}")
         return 1
