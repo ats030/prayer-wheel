@@ -326,6 +326,21 @@ class TestPage:
         # クローズ済みは一覧に出ない
         assert "ats030-bbbb" not in body
 
+    def test_workbench_prioritizes_actionable_tasks_and_three_metrics(self):
+        issues = main.parse_issues([
+            issue("action-now", iso(2026, 8, 20), title="いま判断"),
+            issue("wait-later", iso(2026, 8, 1), status="deferred",
+                  defer_until=iso(2026, 11, 23), title="外部待ち"),
+        ])
+        page = main.render_page(issues, date(2026, 8, 24))
+        assert page.count('class="tile"') == 3
+        assert page.index("いま判断するタスク") < page.index("傾向を分析する")
+        assert "<strong>外部待ち</strong>" in page
+        assert "dock-actions" in page and "dock-output" in page
+
+    def test_select_all_is_scoped_to_its_own_table(self):
+        assert "source.closest('table').querySelectorAll('.pick')" in main.JS
+
     def test_deferred_deadline_is_visible_on_the_page(self, monkeypatch):
         from fastapi.testclient import TestClient
 

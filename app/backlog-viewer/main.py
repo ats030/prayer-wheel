@@ -538,87 +538,110 @@ def render_legend(series: Series, today: date) -> str:
 
 
 CSS = """
-details.cold { margin-top: .75rem; }
-details.cold > summary { cursor: pointer; color: var(--muted); font-size: .82rem;
-  list-style: none; padding: .25rem 0; }
-details.cold > summary::before { content: "▸ "; }
-details.cold[open] > summary::before { content: "▾ "; }
-details.cold table { margin-top: .5rem; }
-
+/* Hallmark · pre-emit critique: P5 H5 E4 S5 R5 V4 */
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench · design-system: DESIGN.md · designed-as-app */
 :root {
   --bg: #08090c; --surface: #0d0f14; --raised: #12141b; --hover: #171923;
   --border: #242633; --border-strong: #343747; --text: #f4f4f5;
   --muted: #a1a1aa; --subtle: #71717a; --accent: #7c3aed; --accent-soft: #a78bfa;
   --success: #34d399; --warning: #fbbf24; --danger: #fb7185;
+  --accent-hover: #6d28d9; --accent-wash: rgba(124,58,237,.16);
+  --muted-wash: rgba(161,161,170,.14); --owner-wash: rgba(244,63,94,.16);
+  --owner-text: #fda4af; --decision-wash: rgba(245,158,11,.16);
+  --decision-text: #fcd34d; --on-accent: #fff;
+  --font-body: Inter, "SF Pro", "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 * { box-sizing: border-box; }
+html, body { overflow-x: clip; }
 body {
   margin: 0; background: var(--bg); color: var(--text);
-  font-family: Inter, "SF Pro", "Segoe UI", Helvetica, Arial, sans-serif;
-  font-size: 14px; line-height: 1.6;
+  font-family: var(--font-body); font-size: 14px; line-height: 1.6;
 }
-.wrap { max-width: 1200px; margin: 0 auto; padding: 24px 24px 220px; }
-h1 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
-h2 { font-size: 14px; font-weight: 600; margin: 32px 0 12px; color: var(--muted); }
-.sub { color: var(--subtle); font-size: 12px; margin: 0 0 24px; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 24px 24px 88px; }
+body.has-selection .wrap { padding-bottom: 220px; }
+h1 { font-size: 18px; font-weight: 600; font-style: normal; margin: 0 0 2px;
+  overflow-wrap: anywhere; min-width: 0; }
+h2 { font-size: 14px; font-weight: 600; font-style: normal; margin: 0; color: var(--text); }
+.sub { color: var(--subtle); font-size: 12px; margin: 0 0 16px; }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 20px; }
 .tile { background: var(--raised); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
 .tile .v { font-size: 22px; font-weight: 600; }
 .tile .k { color: var(--subtle); font-size: 12px; }
 .tile .n { color: var(--subtle); font-size: 11px; margin-top: 2px; }
 .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+.fold-body > .panel + .panel { margin-top: 8px; }
+.section-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin: 20px 0 8px; }
+.section-count { color: var(--subtle); font-size: 12px; font-variant-numeric: tabular-nums; }
+.fold { border-top: 1px solid var(--border); margin-top: 24px; }
+.fold > summary { cursor: pointer; list-style: none; display: flex; align-items: baseline;
+  justify-content: space-between; gap: 12px; padding: 14px 0; color: var(--muted); }
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary::before { content: "›"; color: var(--subtle); font-size: 18px; line-height: 1; }
+.fold[open] > summary::before { transform: rotate(90deg); }
+.fold > summary strong { color: var(--text); font-size: 14px; font-weight: 600; margin-right: auto; }
+.fold-body { padding-bottom: 8px; }
 .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
 .legend-item { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
 .legend-item i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
 .note { color: var(--subtle); font-size: 11px; margin-top: 10px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { text-align: left; font-weight: 500; color: var(--subtle); font-size: 12px;
-     border-bottom: 1px solid var(--border); padding: 6px 8px; }
+  border-bottom: 1px solid var(--border); padding: 6px 8px; }
 td { border-bottom: 1px solid var(--border); padding: 6px 8px; vertical-align: top; }
 tbody tr:hover { background: var(--hover); }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-.id { color: var(--accent-soft); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+.id { color: var(--accent-soft); font-family: var(--font-mono); font-size: 12px; }
 .chip { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 11px;
-        background: rgba(124,58,237,.16); color: var(--accent-soft); }
-.chip.gray { background: rgba(161,161,170,.14); color: var(--muted); }
-.chip.owner { background: rgba(244,63,94,.16); color: #fda4af; }
-.chip.decision { background: rgba(245,158,11,.16); color: #fcd34d; }
+  background: var(--accent-wash); color: var(--accent-soft); margin-left: 6px; }
+.chip.gray { background: var(--muted-wash); color: var(--muted); }
+.chip.owner { background: var(--owner-wash); color: var(--owner-text); }
+.chip.decision { background: var(--decision-wash); color: var(--decision-text); }
 .hot { color: var(--danger); }
 .warn { color: var(--warning); }
 .scroll { overflow-x: auto; }
-/* 狭い画面で SVG を潰すと軸ラベルが 4px 相当になって読めない。
-   縮小させずに .scroll の中で横スクロールさせる。height:auto と
-   width/height 属性の組みでアスペクト比を保つ。 */
 .chart svg { display: block; width: 100%; min-width: 720px; height: auto; }
-/* 横スクロールが起きた画面にだけ出す。JS が .chart に .scrollable を付ける。 */
 .scroll-hint { display: none; color: var(--subtle); font-size: 11px; margin: 8px 0 0; }
 .chart.scrollable ~ .scroll-hint { display: block; }
 .bar { display: inline-block; height: 8px; border-radius: 2px; background: var(--accent); vertical-align: middle; }
 input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
 .dock {
   position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface);
-  border-top: 1px solid var(--border-strong); padding: 12px 24px;
+  border-top: 1px solid var(--border-strong); padding: 10px 24px;
 }
 .dock-inner { max-width: 1200px; margin: 0 auto; }
-.dock-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.dock-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.dock-actions { display: none; gap: 8px; margin-left: auto; }
+.dock.active .dock-actions { display: flex; }
+.dock-output { display: none; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin-top: 8px; }
+.dock.active .dock-output { display: grid; }
 button {
   background: var(--raised); color: var(--text); border: 1px solid var(--border-strong);
-  border-radius: 6px; padding: 5px 12px; font-size: 13px; cursor: pointer; font-family: inherit;
+  border-radius: 6px; padding: 5px 12px; font-size: 13px; cursor: pointer;
+  font-family: var(--font-body); white-space: nowrap;
 }
 button:hover { background: var(--hover); }
-button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-button.primary:hover { background: #6d28d9; }
-button:disabled { opacity: .4; cursor: default; }
+button:focus-visible, summary:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent-soft); outline-offset: 2px;
+}
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+button.primary:hover { background: var(--accent-hover); }
+button:disabled { opacity: .55; cursor: not-allowed; }
 textarea {
   width: 100%; background: var(--raised); color: var(--text); border: 1px solid var(--border);
-  border-radius: 6px; padding: 8px 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  border-radius: 6px; padding: 8px 10px; font-family: var(--font-mono);
   font-size: 12px; resize: vertical; min-height: 62px;
 }
-textarea:focus { outline: none; border-color: var(--accent); }
+textarea:focus { outline: 2px solid var(--accent-soft); outline-offset: 1px; border-color: var(--accent); }
 .count { color: var(--subtle); font-size: 12px; }
 .err { border-color: var(--danger); color: var(--danger); }
 @media (max-width: 640px) {
-  .wrap { padding: 16px 12px 240px; }
+  .wrap { padding: 16px 12px 76px; }
+  body.has-selection .wrap { padding-bottom: 260px; }
+  .tiles { grid-template-columns: 1fr; }
+  .section-head { align-items: flex-start; }
+  .dock { padding: 8px 12px; }
+  .dock-output { grid-template-columns: 1fr; }
   .hide-sm { display: none; }
 }
 """
@@ -640,15 +663,15 @@ function refresh() {
   const ids = picked();
   document.getElementById('cmd-close').value = build('close', ids);
   document.getElementById('cmd-defer').value = build('defer', ids);
-  document.getElementById('count').textContent = ids.length ? ids.length + ' 件を選択中' : '未選択';
+  document.getElementById('count').textContent = ids.length ? ids.length + ' 件を選択中' : 'タスクを選択';
   document.querySelectorAll('.copy').forEach(b => { b.disabled = ids.length === 0; });
+  document.getElementById('dock').classList.toggle('active', ids.length > 0);
+  document.body.classList.toggle('has-selection', ids.length > 0);
 }
 async function copyFrom(id, button) {
   const el = document.getElementById(id);
   if (!el.value) return;
   let ok = false;
-  // Tailnet の http:// は secure context ではないので navigator.clipboard が無い。
-  // その場合は execCommand にフォールバックする。
   try {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(el.value);
@@ -664,17 +687,13 @@ async function copyFrom(id, button) {
   setTimeout(() => { button.textContent = original; }, 1600);
 }
 function toggleAll(source) {
-  document.querySelectorAll('.pick').forEach(e => { e.checked = source.checked; });
+  source.closest('table').querySelectorAll('.pick').forEach(e => { e.checked = source.checked; });
   refresh();
 }
-// 狭い画面ではグラフが横スクロールになる。左端は最も古い週で、残件が
-// 立ち上がっている直近が画面外に出るため、初期位置を右端に寄せる。
 function chartToLatest(move) {
   document.querySelectorAll('.chart').forEach(el => {
     const scrollable = el.scrollWidth > el.clientWidth + 1;
     el.classList.toggle('scrollable', scrollable);
-    // 位置を動かすのは初回だけ。resize のたびに戻すと、古い週を見ている
-    // 最中に画面を回しただけで右端へ飛ばされる。
     if (scrollable && move) el.scrollLeft = el.scrollWidth;
   });
 }
@@ -725,31 +744,12 @@ def render_page(issues: list[Issue], today: date) -> str:
     cohorts = cohort_table(issues, today)
     rows = backlog_rows(issues, today)
 
+    # 初期画面には、棚卸し判断へ直接つながる3指標だけを置く。
     tiles = [
-        # 主指標は「動かせる残件」。残32件のうち21件が外部待ち、うち7件は凍結の記録
-        # だった時期があり、分母に動かせないものが混ざると収束していないように見える
-        # だけになる。全体は副次表示へ回す。
-        # さらに「誰の手番か」で割る。所有者操作 (提供元へのログイン・外部への
-        # 問い合わせ・実機確認) はエージェントには不可能で待つしかないが、要判断は
-        # 一言決まれば実装まで進む。混ざっていると打ち手が見えない (ats030-hn2k)。
         ("エージェントが進められる", str(m.by_agent),
-         f"要判断 {m.by_decision} · 所有者 {m.by_owner} を除く"),
-        ("動かせる残件", str(m.actionable),
-         f"外部待ち {m.deferred} · 凍結の記録 {m.freeze_records} を除く"),
-        ("残件数 (全体)", str(m.remaining), "外部待ちと凍結の記録を含む"),
-        ("30日超", str(m.over_30_days), "棚卸しの第一候補"),
-        # 外部待ちは戻ってくる日まで見ないと健康か判らない。期限切れは既に戻す
-        # べき日を過ぎたもの、補足は次にまとめて戻ってくる日。defer が P3 の
-        # 代わりの先送り置き場になっていないかはこの2つで判る (ats030-4nw7)。
+         f"要判断 {m.by_decision} · 所有者 {m.by_owner}"),
+        ("30日超", str(m.over_30_days), "打ち切りを先に検討"),
         ("期限切れの外部待ち", str(m.freeze_expired), _return_note(m)),
-        ("滞留の中央値", f"{m.median_age}日", "残っている件"),
-        ("claim率", f"{m.claim_rate}%", "started_at が付いた件"),
-        ("同日クローズ率", f"{m.same_day_close_rate}%", "クローズ済み全体"),
-        # 0日は「計測できていない」ではなく「その日に閉じている」。同日クローズ率が
-        # 8割を超える環境では中央値が0に張り付くため、誤読しないよう言葉で出す。
-        ("リードタイム中央値",
-         "即日" if m.median_lead_time == 0 else f"{m.median_lead_time}日",
-         "クローズ済み全体 · 作成から close まで"),
     ]
     tile_html = "".join(
         f'<div class="tile"><div class="k">{html.escape(k)}</div>'
@@ -768,37 +768,49 @@ def render_page(issues: list[Issue], today: date) -> str:
         f'<td class="num">{c.same_day_rate}%</td>'
         f'<td class="num">{c.p3_share}%</td>'
         f'<td><span class="bar" style="width:{max(2, round(c.created / max_created * 120))}px;'
-        f"opacity:{0.25 + min(c.residual_rate, 50) / 50 * 0.75:.2f}\"></span></td></tr>"
+        f'opacity:{0.25 + min(c.residual_rate, 50) / 50 * 0.75:.2f}"></span></td></tr>'
         for c in cohorts
     )
 
     live_rows, cold_rows = split_rows(rows)
+    action_rows = [r for r in live_rows if not r.deferred]
+    deferred_rows = [r for r in live_rows if r.deferred]
 
     def _row(r) -> str:
-        return (
-        f"<tr>"
-        f'<td><input type="checkbox" class="pick" value="{html.escape(r.id)}"></td>'
-        f'<td class="id">{html.escape(r.id)}</td>'
-        f'<td class="num">{_age_cell(r.age_days)}</td>'
-        f'<td class="num hide-sm">{r.idle_days}</td>'
-        f'<td class="num">{_return_cell(r, today)}</td>'
-        f"<td>{_priority_chip(r.priority)}</td>"
-        f'<td class="hide-sm">{html.escape(r.issue_type)}</td>'
-        f"<td>{html.escape(r.title)}"
-        + ('<span class="chip gray">外部待ち</span>' if r.deferred else "")
-        + ("" if r.deferred else {
+        actor_chip = "" if r.deferred else {
             "owner": '<span class="chip owner">所有者</span>',
             "decision": '<span class="chip decision">要判断</span>',
-        }.get(r.actor, ""))
-        + "</td></tr>"
+        }.get(r.actor, "")
+        wait_chip = '<span class="chip gray">外部待ち</span>' if r.deferred else ""
+        return (
+            "<tr>"
+            f'<td><input type="checkbox" class="pick" value="{html.escape(r.id)}" '
+            f'aria-label="{html.escape(r.id)} を選択"></td>'
+            f'<td class="id">{html.escape(r.id)}</td>'
+            f'<td class="num">{_age_cell(r.age_days)}</td>'
+            f'<td class="num hide-sm">{r.idle_days}</td>'
+            f'<td class="num">{_return_cell(r, today)}</td>'
+            f"<td>{_priority_chip(r.priority)}</td>"
+            f'<td class="hide-sm">{html.escape(r.issue_type)}</td>'
+            f"<td>{html.escape(r.title)}{wait_chip}{actor_chip}</td></tr>"
         )
 
-    row_html = "".join(_row(r) for r in live_rows)
-    # 凍結の記録はタスクではない。一覧に混ざると探しているものが埋もれるので畳む。
-    cold_html = (
-        f'<details class="cold"><summary>凍結の記録 {len(cold_rows)}件</summary>'
-        f'<table><tbody>{"".join(_row(r) for r in cold_rows)}</tbody></table></details>'
-        if cold_rows else ""
+    def _table(table_rows) -> str:
+        if not table_rows:
+            return '<div class="panel"><p class="note">該当するタスクはない。</p></div>'
+        return (
+            '<div class="panel scroll"><table><thead><tr>'
+            '<th><input type="checkbox" onchange="toggleAll(this)" aria-label="この一覧をすべて選択"></th>'
+            '<th>ID</th><th class="num">滞留</th><th class="num hide-sm">無更新</th>'
+            '<th class="num">復帰</th><th>P</th><th class="hide-sm">種別</th><th>タイトル</th>'
+            f'</tr></thead><tbody>{"".join(_row(r) for r in table_rows)}</tbody></table></div>'
+        )
+
+    analysis_note = (
+        f"全体 {m.remaining}件 · 動かせる {m.actionable}件 · 外部待ち {m.deferred}件 · "
+        f"滞留中央値 {m.median_age}日 · claim率 {m.claim_rate}% · "
+        f"同日クローズ率 {m.same_day_close_rate}% · リードタイム中央値 "
+        + ("即日" if m.median_lead_time == 0 else f"{m.median_lead_time}日")
     )
 
     return f"""<!doctype html>
@@ -808,52 +820,58 @@ def render_page(issues: list[Issue], today: date) -> str:
 <style>{CSS}</style></head><body>
 <div class="wrap">
   <h1>backlog-viewer</h1>
-  <p class="sub">残タスクはなぜ収束しないか · {today:%Y-%m-%d} 時点 (JST) · bd から直接読んでいる · この画面は書き込まない</p>
+  <p class="sub">{today:%Y-%m-%d} (JST) · bdを直接参照 · 読み取り専用</p>
 
   <div class="tiles">{tile_html}</div>
 
-  <h2>残件数の推移 (作成週コホート積み上げ)</h2>
-  <div class="panel">
-    <div class="scroll chart">{render_stacked_svg(series, today)}</div>
-    <div class="legend">{render_legend(series, today)}</div>
-    <p class="scroll-hint">グラフは右端 (直近) を表示している。左へスクロールすると古い週が見える。</p>
-    <p class="note">高さの合計が残件数。色は「いつ作られた件か」を表す。層が横に伸びたままなら、
-    その週に作った分が片付いていない。外部待ち (deferred) は残件から除外していないが、
-    defer した日は bd に記録が残らないため updated_at で近似している。</p>
+  <div class="section-head">
+    <h2>いま判断するタスク</h2>
+    <span class="section-count">{len(action_rows)}件 · 滞留順</span>
   </div>
+  {_table(action_rows)}
 
-  <h2>作成週ごとの残存率</h2>
-  <div class="panel scroll">
-    <table><thead><tr><th>作成週</th><th class="num">作成</th><th class="num">閉</th>
-    <th class="num">残</th><th class="num">うち外部待ち</th>
-    <th class="num">残存率</th><th class="num">同日クローズ率</th><th class="num">P3の割合</th>
-    <th></th></tr></thead>
-    <tbody>{cohort_html}</tbody></table>
-    <p class="note">残存率はこの2列とほぼ逆に動く。その日に閉じられなかった件と、
-    P3 で作られた件が残る。残存率が跳ねた週を見つけたら、量ではなくこの2列を見ること。
-    「うち外部待ち」が残の大半を占める週は、片付いたのではなく先へ送っただけ。
-    残存率だけを見ていると収束したように読める。</p>
-  </div>
+  <details class="fold">
+    <summary><strong>外部待ち</strong><span>{len(deferred_rows)}件 · 期限切れ {m.freeze_expired}件</span></summary>
+    <div class="fold-body">{_table(deferred_rows)}</div>
+  </details>
 
-  <h2>残っているタスク {len(live_rows)} 件 (滞留日数の降順)</h2>
-  <div class="panel scroll">
-    <table><thead><tr>
-      <th><input type="checkbox" onchange="toggleAll(this)"></th>
-      <th>ID</th><th class="num">滞留</th><th class="num hide-sm">無更新</th>
-      <th class="num">復帰</th><th>P</th><th class="hide-sm">種別</th><th>タイトル</th>
-    </tr></thead>
-    <tbody>{row_html}</tbody></table>{cold_html}
-  </div>
+  <details class="fold">
+    <summary><strong>凍結の記録</strong><span>{len(cold_rows)}件</span></summary>
+    <div class="fold-body">{_table(cold_rows)}</div>
+  </details>
+
+  <details class="fold">
+    <summary><strong>傾向を分析する</strong><span>推移と作成週コホート</span></summary>
+    <div class="fold-body">
+      <p class="note">{analysis_note}</p>
+      <div class="panel">
+        <div class="scroll chart">{render_stacked_svg(series, today)}</div>
+        <div class="legend">{render_legend(series, today)}</div>
+        <p class="scroll-hint">右端が直近。左へスクロールすると古い週が見える。</p>
+        <p class="note">高さは残件数、色は作成週。外部待ちは無彩色で示す。</p>
+      </div>
+      <div class="panel scroll">
+        <table><thead><tr><th>作成週</th><th class="num">作成</th><th class="num">閉</th>
+        <th class="num">残</th><th class="num">うち外部待ち</th>
+        <th class="num">残存率</th><th class="num">同日クローズ率</th><th class="num">P3の割合</th>
+        <th></th></tr></thead><tbody>{cohort_html}</tbody></table>
+      </div>
+    </div>
+  </details>
 </div>
 
-<div class="dock"><div class="dock-inner">
+<div class="dock" id="dock"><div class="dock-inner">
   <div class="dock-row">
-    <strong>棚卸し</strong><span class="count" id="count">未選択</span>
-    <button class="copy" data-target="cmd-close">close をコピー</button>
-    <button class="copy primary" data-target="cmd-defer">defer をコピー</button>
+    <strong>棚卸し</strong><span class="count" id="count">タスクを選択</span>
+    <div class="dock-actions">
+      <button class="copy primary" data-target="cmd-close">打ち切りをコピー</button>
+      <button class="copy" data-target="cmd-defer">外部待ちへ送る</button>
+    </div>
   </div>
-  <textarea id="cmd-close" readonly placeholder="打ち切る件をチェックすると bd close の1行が出る"></textarea>
-  <textarea id="cmd-defer" readonly placeholder="外部待ちに退避する件をチェックすると bd defer の1行が出る"></textarea>
+  <div class="dock-output">
+    <textarea id="cmd-close" readonly aria-label="bd close コマンド"></textarea>
+    <textarea id="cmd-defer" readonly aria-label="bd defer コマンド"></textarea>
+  </div>
 </div></div>
 <script>{JS.replace("__TODAY__", today.isoformat())}</script>
 </body></html>"""
