@@ -105,11 +105,8 @@ function showScreen(screenId) {
   const newScreen = document.getElementById(screenId);
   newScreen.classList.remove('hidden');
   
-  // アニメーションを無効化して即時表示（反応速度向上）
-  newScreen.style.animation = 'none';
-  
   // 強制再描画（画面遷移の安定化）
-  newScreen.offsetHeight;
+  void newScreen.offsetWidth;
 }
 
 function init() {
@@ -190,7 +187,7 @@ function renderNumberGrid() {
     btn.addEventListener('click', () => {
       playPopSound();
       currentNumber = i;
-      startGame();
+      startGameWithNumber(i);
     });
     grid.appendChild(btn);
   }
@@ -200,6 +197,11 @@ function startGame() {
   score = 0;
   questionsAnswered = 0;
   updateScore();
+  showScreen('number-select-screen');
+}
+
+function startGameWithNumber(number) {
+  currentNumber = number;
   showScreen('game-screen');
   generateQuestion();
 }

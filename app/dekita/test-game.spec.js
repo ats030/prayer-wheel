@@ -53,10 +53,12 @@ test.describe('できた！全機能テスト', () => {
 
   test('4. ゲーム開始: 5問生成・表示され4択ボタンが描画されること', async ({ page }) => {
     await page.click('#start-btn');
-    await expect(page.locator('#number-select-screen')).toBeVisible();
+    await expect(page.locator('#number-select-screen')).toBeVisible({ timeout: 5000 });
 
+    await page.waitForTimeout(300);
     await page.click('.number-btn:text("5")');
-    await expect(page.locator('#game-screen')).toBeVisible();
+    await page.waitForTimeout(300);
+    await expect(page.locator('#game-screen')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('#score')).toHaveText('0');
 
     const questionText = await page.locator('#question-text');
