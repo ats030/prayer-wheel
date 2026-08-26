@@ -816,7 +816,7 @@ def render_page(issues: list[Issue], today: date) -> str:
     return f"""<!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>backlog-viewer</title><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>backlog-viewer</title><link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
 <style>{CSS}</style></head><body>
 <div class="wrap">
   <h1>backlog-viewer</h1>
@@ -881,7 +881,7 @@ def render_error(message: str) -> str:
     return f"""<!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>backlog-viewer</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><style>{CSS}</style></head><body>
+<title>backlog-viewer</title><link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml"><style>{CSS}</style></head><body>
 <div class="wrap"><h1>集計できなかった</h1>
 <div class="panel err"><p>bd からデータを取れなかった。</p>
 <pre style="white-space:pre-wrap;font-size:12px">{html.escape(message)}</pre>
@@ -889,13 +889,18 @@ def render_error(message: str) -> str:
 /home/ats030 で通るか。</p></div></div></body></html>"""
 
 
-# 画面の主題は「残タスクが減っていくか」。減っていく棒で表す。背景と紫は本体の
-# 配色に合わせた (#12141b / #7c3aed)。16px でも棒の段差が残るよう3本に絞る。
-FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" data-favicon-size="84" data-outline-color="#464a52" data-outline-width="5">
-<rect x="10" y="10" width="80" height="80" rx="18" fill="#12141b" stroke="#464a52" stroke-width="5"/>
-<rect x="20" y="25" width="14" height="55" rx="4" fill="#a78bfa"/>
-<rect x="43" y="43" width="14" height="37" rx="4" fill="#7c3aed"/>
-<rect x="66" y="61" width="14" height="19" rx="4" fill="#7c3aed" opacity="0.55"/>
+# 棚卸しの主役は、一覧から対象を選んで判断すること。3行のうち1行を紫で
+# 選択済みにし、16pxでも「チェックされたリスト」と読める太さに絞る。
+FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="棚卸しリスト">
+<title>棚卸しリスト</title>
+<rect x="8" y="8" width="84" height="84" rx="19" fill="#12141b" stroke="#343747" stroke-width="5"/>
+<rect x="21" y="23" width="18" height="18" rx="5" fill="#7c3aed"/>
+<path d="M25 32l4 4 7-9" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="47" y="27" width="32" height="9" rx="4.5" fill="#a78bfa"/>
+<rect x="21" y="47" width="18" height="18" rx="5" fill="#242633"/>
+<rect x="47" y="51" width="27" height="9" rx="4.5" fill="#71717a"/>
+<rect x="21" y="71" width="18" height="9" rx="4.5" fill="#242633"/>
+<rect x="47" y="71" width="20" height="9" rx="4.5" fill="#343747"/>
 </svg>"""
 
 

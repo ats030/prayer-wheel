@@ -370,6 +370,21 @@ class TestPage:
         assert "bd" in res.text
 
 
+class TestFavicon:
+    def test_favicon_matches_the_triage_workbench(self):
+        from fastapi.testclient import TestClient
+
+        res = TestClient(main.app).get("/favicon.svg")
+        assert res.status_code == 200
+        assert res.headers["content-type"].startswith("image/svg+xml")
+        assert 'aria-label="棚卸しリスト"' in res.text
+        assert "<path" in res.text
+        assert res.text.count("<rect") == 7
+
+    def test_page_cache_busts_the_updated_favicon(self):
+        assert 'href="/favicon.svg?v=2"' in main.render_page([], date(2026, 8, 24))
+
+
 class TestWeeklySummary:
     def test_delta_compares_with_seven_days_ago(self):
         issues = main.parse_issues([
