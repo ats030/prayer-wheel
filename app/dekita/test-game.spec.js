@@ -51,7 +51,7 @@ test.describe('できた！全機能テスト', () => {
     });
   });
 
-  test('4. ゲーム開始: 10問生成・表示され4択ボタンが描画されること', async ({ page }) => {
+  test('4. ゲーム開始: 5問生成・表示され4択ボタンが描画されること', async ({ page }) => {
     await page.click('#start-btn');
     await expect(page.locator('#number-select-screen')).toBeVisible();
 
@@ -75,7 +75,7 @@ test.describe('できた！全機能テスト', () => {
     
     const firstQuestionAnswer = await page.evaluate(() => {
       const answerBtns = Array.from(document.querySelectorAll('.answer-btn'));
-      return answerBtns.find(btn => btn.textContent === '2')?.textContent || answerBtns[0].textContent;
+      return answerBtns.find(btn => btn.textContent === '3')?.textContent || answerBtns[0].textContent;
     });
 
     await page.click(`.answer-btn:text("${firstQuestionAnswer}")`);
@@ -100,35 +100,35 @@ test.describe('できた！全機能テスト', () => {
       await page.click(`.answer-btn:text("${firstAnswer}")`);
 
     await expect(page.locator('#feedback-area')).toBeVisible();
-    await expect(page.locator('#feedback-text')).toHaveText('ざんねん...');
-    await expect(page.locator('#feedback-text')).toHaveCSS('color', 'rgb(255, 51, 51)');
+    await expect(page.locator('#feedback-text')).toHaveText('ちょんぼ…');
+    await expect(page.locator('#feedback-text')).toHaveCSS('color', 'rgb(229, 115, 115)');
   });
 
-  test('7. 10問進んだら結果画面が表示され、最高スコアがlocalStorageに保存されること', async ({ page }) => {
-    await page.evaluate(() => localStorage.removeItem('gakushuGameHighScore'));
-    
-    await page.click('#start-btn');
-    await page.click('.number-btn:text("10")');
+  test('7. 5問進んだら結果画面が表示され、最高スコアがlocalStorageに保存されること', async ({ page }) => {
+     await page.evaluate(() => localStorage.removeItem('gakushuGameHighScore'));
+     
+     await page.click('#start-btn');
+     await page.click('.number-btn:text("5")');
 
-    for (let i = 0; i < 10; i++) {
-      await page.waitForTimeout(100);
-      
-      const firstAnswer = await page.evaluate(() => {
-        const answerBtns = Array.from(document.querySelectorAll('.answer-btn'));
-        return answerBtns[0].textContent;
-      });
-      
-      await page.click(`.answer-btn:text("${firstAnswer}")`);
-      await page.click('#next-btn');
-    }
+     for (let i = 0; i < 5; i++) {
+       await page.waitForTimeout(100);
+       
+       const firstAnswer = await page.evaluate(() => {
+         const answerBtns = Array.from(document.querySelectorAll('.answer-btn'));
+         return answerBtns[0].textContent;
+       });
+       
+       await page.click(`.answer-btn:text("${firstAnswer}")`);
+       await page.click('#next-btn');
+     }
 
     await expect(page.locator('#result-screen')).toBeVisible();
     await expect(page.locator('#final-score')).toBeVisible();
     
-    await page.click('#replay-btn');
-    await page.click('.number-btn:text("10")');
+     await page.click('#replay-btn');
+     await page.click('.number-btn:text("5")');
 
-    for (let i = 0; i < 5; i++) {
+     for (let i = 0; i < 2; i++) {
       await page.click(`.answer-btn`, { clickCount: 1 });
       await page.click('#next-btn');
     }
@@ -141,14 +141,14 @@ test.describe('できた！全機能テスト', () => {
       await page.click(`.answer-btn:text("${correctAnswer}")`);
     }
     
-    await expect(page.locator('#feedback-text')).toContainText('せいかい');
-  });
+     await expect(page.locator('#feedback-text')).toContainText('せいかい');
+   });
 
-  test('8. 10問目終了時に結果画面が正しく表示されること', async ({ page }) => {
-    await page.click('#start-btn');
-    await page.click('.number-btn:text("3")');
+   test('8. 5問目終了時に結果画面が正しく表示されること', async ({ page }) => {
+     await page.click('#start-btn');
+     await page.click('.number-btn:text("3")');
 
-    for (let i = 0; i < 9; i++) {
+     for (let i = 0; i < 4; i++) {
       await page.click(`.answer-btn`, { timeout: 5000 });
       await page.click('#next-btn');
     }
@@ -159,24 +159,24 @@ test.describe('できた！全機能テスト', () => {
     await expect(page.locator('#result-screen')).toBeVisible({ timeout: 10000 });
   });
 
-  test('9. クイズ種類（加算・減算・乗算・除算）がランダムに表示されること', async ({ page }) => {
-    await page.click('#start-btn');
-    await page.click('.number-btn:text("10")');
+   test('9. クイズがランダムに表示されること', async ({ page }) => {
+     await page.click('#start-btn');
+     await page.click('.number-btn:text("5")');
 
-    const questionTypes = [];
-    for (let i = 0; i < 10; i++) {
-      const question = await page.locator('#question-text').textContent();
-      questionTypes.push(question);
-      await page.click(`.answer-btn`, { timeout: 5000 });
-      await page.click('#next-btn', { timeout: 5000 });
-    }
+     const questionTypes = [];
+     for (let i = 0; i < 5; i++) {
+       const question = await page.locator('#question-text').textContent();
+       questionTypes.push(question);
+       await page.click(`.answer-btn`, { timeout: 5000 });
+       await page.click('#next-btn', { timeout: 5000 });
+     }
 
-    expect(questionTypes.length).toBe(10);
-  });
+     expect(questionTypes.length).toBe(5);
+   });
 
-  test('10. リセットボタンでタイトル画面に戻ること', async ({ page }) => {
-    await page.click('#start-btn');
-    await page.click('.number-btn:text("5")');
+   test('10. リセットボタンでタイトル画面に戻ること', async ({ page }) => {
+     await page.click('#start-btn');
+     await page.click('.number-btn:text("3")');
     await expect(page.locator('#game-screen')).toBeVisible();
 
     await page.click('#reset-btn');
@@ -192,6 +192,92 @@ test.describe('できた！全機能テスト', () => {
     if (firstQuestion.includes('なんこの')) {
       await page.click(`.answer-btn`, { clickCount: 1, timeout: 5000 });
     }
+  });
+});
+
+test.describe('できた！色当てゲームテスト', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('http://localhost:8525/index.html');
+  });
+
+  test('12. タイトル画面に「すうじ」と「いろ」ボタンが表示されること', async ({ page }) => {
+    await expect(page.locator('#title-screen')).toBeVisible();
+    await expect(page.locator('#start-btn')).toHaveText('すうじ');
+    await expect(page.locator('#color-start-btn')).toHaveText('いろ');
+  });
+
+  test('13. いろボタンでゲーム画面に移り、色サンプルと4択の色名ボタンが表示されること', async ({ page }) => {
+    await page.click('#color-start-btn');
+    await expect(page.locator('#game-screen')).toBeVisible();
+    await expect(page.locator('#score')).toHaveText('0');
+    await expect(page.locator('#question-text')).toHaveText('これ なん の いろ?');
+
+    const swatch = page.locator('.color-swatch');
+    await expect(swatch).toBeVisible();
+
+    const answerButtons = page.locator('.color-answer-btn');
+    await expect(answerButtons).toHaveCount(4);
+    const names = await answerButtons.allTextContents();
+    expect(names.sort()).toEqual(['あお', 'あか', 'きいろ', 'みどり']);
+  });
+
+  test('14. 色当てで正解したときに+10点加算されること', async ({ page }) => {
+    await page.click('#color-start-btn');
+
+    const correctName = await page.evaluate(() => {
+      const map = { 'rgb(255, 51, 51)': 'あか', 'rgb(51, 51, 255)': 'あお', 'rgb(255, 255, 51)': 'きいろ', 'rgb(51, 255, 51)': 'みどり' };
+      const bg = getComputedStyle(document.querySelector('.color-swatch')).backgroundColor;
+      return map[bg];
+    });
+
+     await page.click(`.color-answer-btn:text("${correctName}")`);
+
+     await expect(page.locator('#feedback-text')).toHaveText('せいかい！すごいね！');
+     await expect(page.locator('#score')).toHaveText('10');
+  });
+
+  test('15. 色当てで不正解したときに「ざんねん...」が表示されポイント加算されないこと', async ({ page }) => {
+    await page.click('#color-start-btn');
+
+    const correctName = await page.evaluate(() => {
+      const map = { 'rgb(255, 51, 51)': 'あか', 'rgb(51, 51, 255)': 'あお', 'rgb(255, 255, 51)': 'きいろ', 'rgb(51, 255, 51)': 'みどり' };
+      const bg = getComputedStyle(document.querySelector('.color-swatch')).backgroundColor;
+      return map[bg];
+    });
+    const allNames = ['あか', 'あお', 'きいろ', 'みどり'];
+    const wrongName = allNames.find(n => n !== correctName);
+
+     await page.click(`.color-answer-btn:text("${wrongName}")`);
+
+     await expect(page.locator('#feedback-text')).toHaveText('ちょんぼ…');
+     await expect(page.locator('#score')).toHaveText('0');
+  });
+
+  test('16. 色当てを10問進んだら結果画面が表示されること', async ({ page }) => {
+    await page.click('#color-start-btn');
+
+    for (let i = 0; i < 9; i++) {
+      await page.click(`.color-answer-btn`, { timeout: 5000 });
+      await page.click('#next-btn');
+    }
+
+    await page.click(`.color-answer-btn`, { timeout: 5000 });
+    await expect(page.locator('#result-screen')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#final-score')).toBeVisible();
+  });
+
+  test('17. 色当てゲームのリセットでタイトル画面に戻り、いろボタンが再び使えること', async ({ page }) => {
+    await page.click('#color-start-btn');
+    await expect(page.locator('#game-screen')).toBeVisible();
+
+    await page.click('#reset-btn');
+    await expect(page.locator('#title-screen')).toBeVisible();
+
+    await page.click('#color-start-btn');
+    await expect(page.locator('#game-screen')).toBeVisible();
+    const answerButtons = page.locator('.color-answer-btn');
+    await expect(answerButtons).toHaveCount(4);
   });
 });
 
