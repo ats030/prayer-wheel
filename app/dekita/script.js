@@ -149,6 +149,11 @@ function init() {
     playPopSound();
     resetGame();
   });
+  document.getElementById('color-reset-btn').addEventListener('click', () => {
+    initAudioContext();
+    playPopSound();
+    resetGame();
+  });
   document.getElementById('replay-btn').addEventListener('click', () => {
     initAudioContext();
     playPopSound();
@@ -223,6 +228,11 @@ function resetGame() {
   mazeGoal = { x: 0, y: 0 };
   mazePath = [];
   mazeCurrentTheme = null;
+  
+  // 色当てゲーム用
+  if (window.currentQuestion) {
+    window.currentQuestion = null;
+  }
 }
 
 function startAnimalGame() {
@@ -741,40 +751,45 @@ function generateColorQuestion() {
      type: 'color',
      emoji: randomEmoji
    };
-   document.getElementById('question-text').textContent = currentQuestion.questionText;
-  const pictureArea = document.getElementById('picture-area');
+   document.getElementById('color-question-text').textContent = currentQuestion.questionText;
+  const pictureArea = document.getElementById('color-swatch');
   pictureArea.innerHTML = '';
   const emojiSpan = document.createElement('span');
-  emojiSpan.className = 'picture-item';
-  emojiSpan.style.fontSize = '120px'; // 色当てクイズなので大きく表示
+  emojiSpan.className = 'color-swatch';
+  emojiSpan.style.fontSize = '120px';
   emojiSpan.textContent = randomEmoji;
   pictureArea.appendChild(emojiSpan);
+  window.correctAnswer = colorName;
   renderColorAnswerButtons();
   
-  // 問題文を読み上げ
   speak(currentQuestion.questionText);
 }
 
 function renderColorAnswerButtons() {
-  const container = document.getElementById('answer-buttons');
+  const container = document.getElementById('color-answer-buttons');
   container.innerHTML = '';
   COLORS.forEach(c => {
     const btn = document.createElement('button');
     btn.className = 'answer-btn color-answer-btn';
     btn.textContent = c.name;
     btn.style.backgroundColor = c.hex;
-    // 色に合わせて文字色を調整
     btn.style.color = (c.name === 'きいろ') ? '#5D4037' : 'white';
+    if (c.name === window.correctAnswer) {
+      btn.setAttribute('data-correct', 'true');
+    } else {
+      btn.setAttribute('data-correct', 'false');
+    }
     btn.onclick = () => checkAnswer(c.name);
     container.appendChild(btn);
   });
 }
 
 function startColorGame() {
+  gameMode = 'color';
   score = 0;
   questionsAnswered = 0;
   updateScore();
-  showScreen('game-screen');
+  showScreen('color-game-screen');
   generateColorQuestion();
 }
 
@@ -839,20 +854,23 @@ function renderAnswerButtons() {
   }
   
    const answersArray = Array.from(answers);
+   const originalCorrectValue = correctAnswer;
    shuffleArray(answersArray);
    
    answersArray.forEach(a => {
     const btn = document.createElement('button');
     btn.className = 'answer-btn';
     btn.textContent = a;
+    btn.setAttribute('data-correct', a === originalCorrectValue ? 'true' : 'false');
     btn.onclick = () => checkAnswer(a);
     container.appendChild(btn);
   });
 }
 
 function checkAnswer(selected) {
-  const feedbackArea = document.getElementById('feedback-area');
-  const feedbackText = document.getElementById('feedback-text');
+  const isColorGame = gameMode === 'color';
+  const feedbackArea = document.getElementById(isColorGame ? 'color-feedback-area' : 'feedback-area');
+  const feedbackText = document.getElementById(isColorGame ? 'color-feedback-text' : 'feedback-text');
   
   const q = currentQuestion;
   currentQuestion = null;
@@ -866,9 +884,10 @@ function checkAnswer(selected) {
   if (answerValue === selectedValue) {
     score += 10;
     updateScore();
-    feedbackText.textContent = 'せいかい！すごいね！';
+    feedbackText.textContent = 'せいかい！すごいね！＋10てん';
     feedbackText.style.color = '#4CAF50';
     speak('せいかい！すごいね！');
+    playPopSound();
   } else {
     feedbackText.textContent = 'ちょんぼ… 💦';
     feedbackText.style.color = '#E57373';
@@ -876,7 +895,7 @@ function checkAnswer(selected) {
   }
   
   setTimeout(() => {
-    document.getElementById('feedback-area').classList.add('hidden');
+    document.getElementById(isColorGame ? 'color-feedback-area' : 'feedback-area').classList.add('hidden');
     nextQuestion();
   }, 2000);
 }
@@ -884,12 +903,17 @@ function checkAnswer(selected) {
 function nextQuestion() {
   questionsAnswered++;
   updateScore();
-  document.getElementById('feedback-area').classList.add('hidden');
+  const isColorGame = gameMode === 'color';
+  document.getElementById(isColorGame ? 'color-feedback-area' : 'feedback-area').classList.add('hidden');
   
   if (questionsAnswered >= TOTAL_QUESTIONS) {
     endGame();
   } else {
-    generateQuestion();
+    if (isColorGame) {
+      generateColorQuestion();
+    } else {
+      generateQuestion();
+    }
   }
 }
 
@@ -902,8 +926,13 @@ function endGame() {
 }
 
 function updateScore() {
-  document.getElementById('score').textContent = score;
-  document.getElementById('progress-text').textContent = `${questionsAnswered + 1}/${TOTAL_QUESTIONS} 問`;
+  const isColorGame = gameMode === 'color';
+  if (isColorGame) {
+    document.getElementById('color-score').textContent = score;
+  } else {
+    document.getElementById('score').textContent = score;
+    document.getElementById('progress-text').textContent = `${questionsAnswered + 1}/${TOTAL_QUESTIONS} 問`;
+  }
 }
 
 function getHighScore() {
