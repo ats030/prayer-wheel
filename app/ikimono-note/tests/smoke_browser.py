@@ -185,7 +185,8 @@ def run(base: str, do_identify: bool) -> None:
 
         for path, marker in [("/", "#identify"), ("/dashboard", "#showMap"),
                              ("/history", "#historyList"), ("/settings", "#settingsForm"),
-                             ("/privacy", ".panel"), ("/terms", ".panel")]:
+                             ("/privacy", ".panel"), ("/terms", ".panel"),
+                             ("/changelog", ".release")]:
             page.goto(base + path)
             page.wait_for_load_state("networkidle")
             check(f"{path} が開く", page.locator(marker).count() > 0)

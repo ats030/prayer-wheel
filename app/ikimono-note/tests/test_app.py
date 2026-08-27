@@ -713,6 +713,26 @@ def test_every_user_page_links_to_legal_pages():
         assert page.status_code == 200
         assert 'href="/privacy"' in page.text
         assert 'href="/terms"' in page.text
+        assert 'href="/changelog"' in page.text
+
+
+def test_changelog_lists_updates_from_the_launch_day_onward():
+    """更新履歴は利用者から見た変化を新しい順に並べる。
+
+    公開前の開発期は利用者にとって存在しない期間なので載せない。起点は
+    プライバシーポリシーと利用規約の制定日（＝公開日）に揃える。
+    """
+    page = client.get("/changelog")
+    assert page.status_code == 200
+    dates = re.findall(r"<h2>(\d{4})年(\d{1,2})月(\d{1,2})日</h2>", page.text)
+    assert len(dates) >= 2
+    keys = [tuple(int(part) for part in row) for row in dates]
+    assert keys == sorted(keys, reverse=True)      # 新しい順
+    assert keys[-1] == (2026, 8, 14)               # 起点は公開日
+    assert "生きものノートを公開しました" in page.text
+    # 内部の言葉をそのまま出さない。読む相手は利用者
+    for jargon in ["commit", "refactor", "リファクタ", "テスト追加", "main.py"]:
+        assert jargon not in page.text, jargon
 
 
 def test_public_beta_forces_affiliate_features_off(monkeypatch):
@@ -739,7 +759,7 @@ def test_private_mode_keeps_operator_affiliate_configuration(monkeypatch):
 
 
 def test_all_pages_use_light_first_theme_with_dark_fallback():
-    for path in ["/", "/settings", "/history", "/dashboard", "/privacy", "/terms"]:
+    for path in ["/", "/settings", "/history", "/dashboard", "/privacy", "/terms", "/changelog"]:
         page = page_source(path)
         assert "color-scheme:light dark" in page, path
         assert "@media(prefers-color-scheme:dark)" in page, path
@@ -780,7 +800,7 @@ def test_theme_toggle_is_available_on_every_page():
     assert 'localStorage.getItem("species-theme")' in script or 'var KEY = "species-theme"' in script
     assert 'root.removeAttribute("data-theme")' in script
     assert 'root.setAttribute("data-theme", mode)' in script
-    for path in ["/", "/settings", "/history", "/dashboard", "/privacy", "/terms"]:
+    for path in ["/", "/settings", "/history", "/dashboard", "/privacy", "/terms", "/changelog"]:
         page = page_source(path)
         assert '<script src="/theme.js"></script>' in page, path
         assert 'id="themeToggle"' in page, path
@@ -789,7 +809,7 @@ def test_theme_toggle_is_available_on_every_page():
 
 
 def test_theme_script_loads_before_the_page_body():
-    for path in ["/", "/settings", "/history", "/dashboard", "/privacy", "/terms"]:
+    for path in ["/", "/settings", "/history", "/dashboard", "/privacy", "/terms", "/changelog"]:
         page = page_source(path)
         tag_start = page.index('<script src="/theme.js">')
         assert tag_start < page.index("<body"), path
@@ -906,7 +926,7 @@ def test_dashboard_map_is_never_loaded_without_an_explicit_press():
     assert "BSD 2-Clause" in client.get("/vendor/leaflet/LICENSE").text
 
 
-PAGES = ["/", "/settings", "/history", "/dashboard", "/privacy", "/terms"]
+PAGES = ["/", "/settings", "/history", "/dashboard", "/privacy", "/terms", "/changelog"]
 
 
 def test_csp_is_sent_without_unsafe_keywords():
@@ -942,7 +962,8 @@ def test_pages_carry_no_inline_style_or_script():
 
 def test_page_assets_are_served_locally():
     for name in ["index.css", "index.js", "settings.css", "settings.js",
-                 "history.css", "history.js", "sharing.js", "privacy.css", "terms.css"]:
+                 "history.css", "history.js", "sharing.js", "privacy.css", "terms.css",
+                 "changelog.css"]:
         response = client.get(f"/assets/{name}")
         assert response.status_code == 200, name
     assert client.get("/theme.js").status_code == 200
@@ -1070,6 +1091,9 @@ def test_capture_and_history_screens_use_one_word_per_concept():
     for path in ["/", "/history"]:
         source = page_source(path)
         visible = source.replace('href="/history"', "")
+        # 「更新履歴」はアプリの更新のことで、観察の記録とは別のもの。ここで
+        # 禁じているのは、観察の記録を「履歴」とも呼んでしまう言い換え。
+        visible = visible.replace('<a href="/changelog">更新履歴</a>', "")
         for banned, instead in [("履歴", "記録"), ("精度", "誤差"),
                                 ("図鑑データベース", "図鑑データ"), ("ローカルLLM", "Ollama"),
                                 ("ローカルAI", "Ollama")]:
@@ -1274,7 +1298,7 @@ def test_old_records_are_shown_with_the_current_wording():
 def test_pages_and_assets_are_revalidated_not_guessed():
     """Cache-Control が無いと、ブラウザが Last-Modified から新鮮期間を推測して
     再検証せずに古い CSS/JS を使う。HTML が古いと新しい <script> タグごと消える。"""
-    for path in ["/", "/settings", "/history", "/privacy", "/terms",
+    for path in ["/", "/settings", "/history", "/privacy", "/terms", "/changelog",
                  "/assets/index.js", "/assets/species-links.js", "/assets/index.css", "/theme.js"]:
         assert client.get(path).headers.get("cache-control") == "no-cache", path
     # 同梱ライブラリはバージョン固定なので長期キャッシュしてよい
@@ -1336,7 +1360,8 @@ def test_every_page_carries_the_app_name():
     for path, title in [("/", APP_NAME), ("/settings", f"設定 · {APP_NAME}"),
                         ("/history", f"調べた記録 · {APP_NAME}"),
                         ("/privacy", f"プライバシーポリシー · {APP_NAME}"),
-                        ("/terms", f"利用規約 · {APP_NAME}")]:
+                        ("/terms", f"利用規約 · {APP_NAME}"),
+                        ("/changelog", f"更新履歴 · {APP_NAME}")]:
         page = client.get(path).text
         assert f"<title>{title}</title>" in page, path
         assert "Species Explorer" not in page, path
@@ -1696,7 +1721,7 @@ def test_login_is_not_demanded_before_it_is_configured():
     source = (Path(__file__).parents[1] / "main.py").read_text()
     assert "if (not PUBLIC_MODE or not auth.configured()" in source
     # 読んでから決めるための文書と、画面の部品は開けておく
-    for path in ["/login", "/privacy", "/terms", "/api/me"]:
+    for path in ["/login", "/privacy", "/terms", "/changelog", "/api/me"]:
         assert f'"{path}"' in source.split("OPEN_PATHS")[1].split("\n\n")[0], path
     assert '"/assets/"' in source.split("OPEN_PREFIXES")[1].split("\n")[0]
 
@@ -1718,7 +1743,7 @@ def test_login_page_states_what_is_kept():
     page = client.get("/login").text
     assert "パスワードは本サービスでは預かりません" in page
     assert "アカウントの識別子とメールアドレスだけ" in page
-    assert "/privacy" in page and "/terms" in page
+    assert "/privacy" in page and "/terms" in page and "/changelog" in page
 
 
 def test_privacy_matches_what_we_actually_keep():
@@ -2866,15 +2891,15 @@ def test_the_public_pages_can_be_shared_and_found():
     assert sitemap.status_code == 200
     # 表紙は / 。未ログインでも転送せずに入口が出る (所有権確認が転送を嫌う)
     assert "run.app/</loc>" in sitemap.text
-    for path in ("/privacy", "/terms"):
+    for path in ("/privacy", "/terms", "/changelog"):
         assert f"run.app{path}</loc>" in sitemap.text
 
     assert client.get("/ogp.png").status_code == 200
 
 
 def test_every_public_page_has_a_sharing_card():
-    """3ページとも、貼られたときに何のページか分かるようにする。"""
-    for path in ("/login", "/privacy", "/terms"):
+    """ログイン前に読める全ページを、貼られたときに何のページか分かるようにする。"""
+    for path in ("/login", "/privacy", "/terms", "/changelog"):
         page = client.get(path).text
         for tag in ('property="og:title"', 'property="og:description"',
                     'property="og:image"', 'name="twitter:card"', 'name="description"'):
