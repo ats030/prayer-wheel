@@ -16,21 +16,21 @@ const TEXTS = {
   end: 'おわった!',
   score: 'スコア',
   progress: '{current}/{total} 問',
-  wrong: 'ちょんぼ… 💦',
-  correct: 'せいかい！すごいね！',
-  wrongMaze: 'まちがい… 💦',
-  correctMaze: 'できた！すごーい！ 🎉',
-  wrongText: 'ちょんぼ… 💦',
-  correctText: 'せいかい！すごいね！',
-  wrongAnimal: 'まちがい… 💦',
-  correctAnimal: 'せいかい！すごいね！',
-  wrongColor: 'まちがい… 💦',
-  correctColor: 'せいかい！すごいね！',
-  wrongMaze2: 'まちがい… 💦',
-  correctMaze2: 'できた！すごーい！ 🎉',
-  tryAgain: 'もういっかい やってみよう！',
-  nextQuestion: 'つぎはなんですか？',
-  correctMaze3: 'できた！すごーい！',
+  wrong: 'だいじょうぶ！もういっこ！',
+  correct: 'やったー！',
+  wrongMaze: 'だいじょうぶ！もういっこ！',
+  correctMaze: 'やったー！',
+  wrongText: 'だいじょうぶ！もういっこ！',
+  correctText: 'やったー！',
+  wrongAnimal: 'だいじょうぶ！もういっこ！',
+  correctAnimal: 'やったー！',
+  wrongColor: 'だいじょうぶ！もういっこ！',
+  correctColor: 'やったー！',
+  wrongMaze2: 'だいじょうぶ！もういっこ！',
+  correctMaze2: 'やったー！',
+  tryAgain: 'もういっこ！',
+  nextQuestion: 'つぎのしつもん！',
+  correctMaze3: 'やったー！',
   welcome: 'welcome'
 };
 
@@ -696,9 +696,9 @@ function handleMazeFail() {
   }
   
   document.getElementById('feedback-area').classList.remove('hidden');
-  document.getElementById('feedback-text').textContent = 'まちがい… 💦';
+  document.getElementById('feedback-text').textContent = 'だいじょうぶ！もういっこ！';
   document.getElementById('feedback-text').style.color = '#E57373';
-  speak('まちがい。つぎはなんですか？');
+  speak('まちがい。つぎのしつもん！');
   
   updateScore();
   
@@ -719,9 +719,9 @@ function handleMazeWin() {
   score += 10;
   updateScore();
   document.getElementById('feedback-area').classList.remove('hidden');
-  document.getElementById('feedback-text').textContent = 'できた！すごーい！ 🎉';
+  document.getElementById('feedback-text').textContent = 'やったー！';
   document.getElementById('feedback-text').style.color = '#4CAF50';
-  speak('できた！すごーい！');
+  speak('やったー！');
   
   setTimeout(() => {
     document.getElementById('feedback-area').classList.add('hidden');
@@ -780,11 +780,12 @@ function generateColorQuestion() {
       emoji: randomEmoji
     };
     document.getElementById('color-question-text').textContent = currentQuestion.questionText;
-  const pictureArea = document.getElementById('color-swatch');
-  const emojiSpan = document.createElement('span');
-  emojiSpan.textContent = randomEmoji;
-  emojiSpan.style.fontSize = 'clamp(70px, 22dvw, 140px)';
-  pictureArea.appendChild(emojiSpan);
+    const pictureArea = document.getElementById('color-swatch');
+    pictureArea.innerHTML = '';
+    const emojiSpan = document.createElement('span');
+    emojiSpan.textContent = randomEmoji;
+    emojiSpan.style.fontSize = 'clamp(70px, 22dvw, 140px)';
+    pictureArea.appendChild(emojiSpan);
   window.correctAnswer = colorName;
   renderColorAnswerButtons();
   
@@ -910,14 +911,14 @@ function checkAnswer(selected) {
   if (answerValue === selectedValue) {
     score += 10;
     updateScore();
-    feedbackText.textContent = 'せいかい！すごいね！＋10てん';
+    feedbackText.textContent = 'やったー！＋10てん';
     feedbackText.style.color = '#4CAF50';
-    speak('せいかい！すごいね！');
+    speak('やったー！');
     playPopSound();
   } else {
-    feedbackText.textContent = 'ちょんぼ… 💦';
+    feedbackText.textContent = 'だいじょうぶ！もういっこ！';
     feedbackText.style.color = '#E57373';
-    speak('ちょんぼ。もういっかい やってみよう！');
+    speak('ちょんぼ。もういっこ！');
   }
   
   setTimeout(() => {
