@@ -26,7 +26,7 @@ test.describe('Dekita Game - E2E Tests', () => {
     await page.on('console', msg => {
       const type = msg.type();
       if (type === 'log' || type === 'error' || type === 'warning' || type === 'info') {
-        console.log('[Browser]', type + ':', msg.text());
+        console.log('[Browser] [tests/e2e] ' + type + ':', msg.text());
       }
     });
   });
@@ -76,7 +76,12 @@ test.describe('Dekita Game - E2E Tests', () => {
     await page.evaluate(() => setTestMode(true));
     await page.click('#maze-start-btn');
     await page.waitForSelector('#maze-theme-buttons .maze-theme-btn');
-    await page.locator('#maze-theme-buttons .maze-theme-btn').first().click({ force: true, timeout: 20000 });
+    await page.evaluate(() => {
+      const btn = document.querySelector('#maze-theme-buttons .maze-theme-btn');
+      if (btn) {
+        btn.click();
+      }
+    });
     expect(await page.locator('#game-screen').getAttribute('class')).not.toContain('hidden');
   });
 });

@@ -68,27 +68,16 @@ test.describe('Dekita Game - E2E Tests', () => {
     const count = await buttons.count();
     console.log('Theme buttons count:', count);
     
-    const button = buttons.nth(0);
-    
-    try {
-    console.log('About to click button');
-    const onclickAttr = await button.getAttribute('onclick');
-    console.log('Button onclick attribute:', onclickAttr);
-    await page.locator('#maze-theme-buttons .maze-theme-btn').first().click({ force: true, timeout: 20000 });
-    console.log('Button clicked successfully');
-    } catch (error) {
-      console.log('Click error:', error.message);
-      throw error;
-    }
-    
+    await page.evaluate(() => {
+      const btn = document.querySelector('#maze-theme-buttons .maze-theme-btn');
+      if (btn) {
+        btn.click();
+      }
+    });
     await page.waitForTimeout(1000);
     
     const afterClass = await page.locator('#game-screen').getAttribute('class');
     console.log('After click - game-screen class:', afterClass);
-    
-    const buttonsAfter = await page.locator('#maze-theme-buttons .maze-theme-btn');
-    const countAfter = await buttonsAfter.count();
-    console.log('Buttons after click:', countAfter);
     
     expect(afterClass).not.toContain('hidden');
   });

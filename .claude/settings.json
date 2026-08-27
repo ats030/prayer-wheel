@@ -41,7 +41,8 @@
     ]
   },
   "enabledPlugins": {
-    "grill-me@ai-workflow": true
+    "grill-me@ai-workflow": true,
+    "hallmark@ai-workflow": true
   },
   "extraKnownMarketplaces": {
     "ai-workflow": {
@@ -60,7 +61,9 @@
       "$defaults",
       "Bash(bd:*)",
       "Bash(uv run:*)",
-      "Bash(systemctl --user:*)"
+      "Bash(systemctl --user:*)",
+      "Bash(./deploy-cloudrun.sh:*)",
+      "Bash(/home/ats030/app/ikimono-note/deploy-cloudrun.sh:*)"
     ],
     "soft_deny": [
       "$defaults",

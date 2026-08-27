@@ -214,7 +214,7 @@ h2 {
   padding: 12px;
   margin-bottom: 10px;
   box-shadow: 0 10px 20px rgba(0,0,0,0.05), inset 0 0 0 8px #B3E5FC;
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -270,11 +270,16 @@ h2 {
 
 .color-swatch {
   width: clamp(100px, 25dvw, 180px);
-  height: clamp(60px, 15dvw, 120px);
+  height: clamp(80px, 20dvw, 140px);
+  padding: 12px;
   margin: 0 auto;
   border-radius: 20px;
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  border: 8px solid white;
+  border: 6px solid white;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* --- 回答ボタン --- */
@@ -286,7 +291,7 @@ h2 {
   width: 100%;
   max-width: 100%;
   flex: 0 0 auto;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .answer-btn {
@@ -304,9 +309,9 @@ h2 {
   text-align: center;
   aspect-ratio: 3 / 2;
   flex: 0 0 auto;
-  overflow: hidden;
+  overflow: visible;
   white-space: nowrap;
-  text-overflow: ellipsis;
+  text-overflow: clip;
   width: 100%;
 }
 
@@ -327,7 +332,6 @@ h2 {
   margin-top: clamp(5px, 2dvw, 15px);
   box-shadow: 0 10px 20px rgba(0,0,0,0.05);
   border: 4px dashed #81D4FA;
-  overflow: hidden;
 }
 
 .feedback-text {

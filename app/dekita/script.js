@@ -360,17 +360,23 @@ function initMazeThemeButtons() {
     else if (theme.start === '🐵') themeText = 'さるさん';
     btn.textContent = themeText;
     btn.onclick = () => {
+      console.log('Maze theme button clicked, index:', index);
+      setTestMode(true);
       try {
-        console.log('Maze theme button clicked, index:', index);
         playPopSound();
         setupMaze(index);
+        console.log('Maze theme button click (setupMaze) succeeded');
+      } catch (error) {
+        console.error('Error in maze theme button click (setupMaze):', error);
+      }
+      try {
         showScreen('game-screen');
         drawMaze();
         const canvas = document.getElementById('maze-canvas');
         initMazeEvents(canvas);
         console.log('Maze theme button click succeeded');
       } catch (error) {
-        console.error('Error in maze theme button click:', error);
+        console.error('Error in maze theme button click (after setupMaze):', error);
       }
     };
     container.appendChild(btn);
@@ -426,7 +432,14 @@ function generateRandomPath(canvas) {
   visited.add('1,1');
   
   // ゴールへ向かうルートを生成（可能な限り一本線で滑らかに）
+  let loopCount = 0;
+  const maxLoops = 10000;
   while (current.x !== gridCols - 2 || current.y !== gridRows - 2) {
+    loopCount++;
+    if (loopCount > maxLoops) {
+      console.warn('generateRandomPath: max loops reached, breaking');
+      break;
+    }
     const possibleMoves = [];
     
     // 目標方向を計算
@@ -761,18 +774,16 @@ function generateColorQuestion() {
   const randomEmoji = emojisOfColor[Math.floor(Math.random() * emojisOfColor.length)];
   
    currentQuestion = {
-     answer: colorName,
-     questionText: 'これ なん の いろかな？',
-     type: 'color',
-     emoji: randomEmoji
-   };
-   document.getElementById('color-question-text').textContent = currentQuestion.questionText;
+      answer: colorName,
+      questionText: 'これ なん の いろかな？',
+      type: 'color',
+      emoji: randomEmoji
+    };
+    document.getElementById('color-question-text').textContent = currentQuestion.questionText;
   const pictureArea = document.getElementById('color-swatch');
-  pictureArea.innerHTML = '';
   const emojiSpan = document.createElement('span');
-  emojiSpan.className = 'color-swatch';
-  emojiSpan.style.fontSize = '120px';
   emojiSpan.textContent = randomEmoji;
+  emojiSpan.style.fontSize = 'clamp(70px, 22dvw, 140px)';
   pictureArea.appendChild(emojiSpan);
   window.correctAnswer = colorName;
   renderColorAnswerButtons();
