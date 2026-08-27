@@ -305,7 +305,7 @@ h2 {
   transition: all 0.2s ease;
   border: none;
   text-align: center;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 2;
   flex: 0 0 auto;
   overflow: visible;
   white-space: nowrap;
