@@ -211,8 +211,8 @@ h2 {
 .question-area {
   background-color: #fff;
   border-radius: 30px;
-  padding: 12px;
-  margin-bottom: 10px;
+  padding: clamp(10px, 4dvw, 20px);
+  margin-bottom: clamp(10px, 4dvw, 15px);
   box-shadow: 0 10px 20px rgba(0,0,0,0.05), inset 0 0 0 8px #B3E5FC;
   flex: 0 0 auto;
   display: flex;
@@ -220,7 +220,7 @@ h2 {
   justify-content: center;
   align-items: center;
   position: relative;
-  gap: 8px;
+  gap: clamp(8px, 3dvw, 20px);
 }
 
 #maze-canvas {
@@ -236,14 +236,14 @@ h2 {
 }
 
 .question-text {
-  font-size: 16px;
-  margin-bottom: 4px;
+  font-size: clamp(16px, 4dvw, 24px);
+  margin-bottom: clamp(4px, 2dvw, 12px);
   color: #455A64;
   font-weight: bold;
   white-space: normal;
   word-break: break-word;
   max-width: 100%;
-  min-height: 24px;
+  min-height: 32px;
 }
 
 .picture-area {
@@ -268,15 +268,13 @@ h2 {
 }
 
 .color-swatch {
-  width: clamp(100px, 25dvw, 180px);
-  height: auto;
-  min-height: 60px;
+  width: clamp(80px, 20dvw, 140px);
+  height: clamp(80px, 20dvw, 140px);
   padding: 8px;
   margin: 0 auto 8px;
   border-radius: 20px;
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
   border: 6px solid white;
-  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;
