@@ -220,8 +220,7 @@ h2 {
   justify-content: center;
   align-items: center;
   position: relative;
-  overflow-x: auto;
-  overflow-y: visible;
+  gap: 8px;
 }
 
 #maze-canvas {
@@ -238,13 +237,13 @@ h2 {
 
 .question-text {
   font-size: 16px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   color: #455A64;
   font-weight: bold;
   white-space: normal;
   word-break: break-word;
   max-width: 100%;
-  min-height: 36px;
+  min-height: 24px;
 }
 
 .picture-area {
@@ -270,9 +269,10 @@ h2 {
 
 .color-swatch {
   width: clamp(100px, 25dvw, 180px);
-  height: clamp(80px, 20dvw, 140px);
-  padding: 12px;
-  margin: 0 auto;
+  height: auto;
+  min-height: 60px;
+  padding: 8px;
+  margin: 0 auto 8px;
   border-radius: 20px;
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
   border: 6px solid white;
