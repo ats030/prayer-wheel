@@ -77,6 +77,12 @@ function speak(text) {
   window.speechSynthesis.speak(utterance);
 }
 
+let isTestMode = false;
+
+function setTestMode(mode) {
+  isTestMode = mode;
+}
+
 function playPopSound() {
   if (!audioContext) return;
   
@@ -338,6 +344,7 @@ function startMazeGame() {
   updateScore();
   showScreen('maze-theme-select-screen');
   initMazeThemeButtons();
+  console.log('Maze theme buttons initialized');
 }
 
 function initMazeThemeButtons() {
@@ -353,12 +360,18 @@ function initMazeThemeButtons() {
     else if (theme.start === '🐵') themeText = 'さるさん';
     btn.textContent = themeText;
     btn.onclick = () => {
-      playPopSound();
-      setupMaze(index);
-      showScreen('game-screen');
-      drawMaze();
-      const canvas = document.getElementById('maze-canvas');
-      initMazeEvents(canvas);
+      try {
+        console.log('Maze theme button clicked, index:', index);
+        playPopSound();
+        setupMaze(index);
+        showScreen('game-screen');
+        drawMaze();
+        const canvas = document.getElementById('maze-canvas');
+        initMazeEvents(canvas);
+        console.log('Maze theme button click succeeded');
+      } catch (error) {
+        console.error('Error in maze theme button click:', error);
+      }
     };
     container.appendChild(btn);
   });
@@ -382,16 +395,18 @@ function setupMaze(themeIndex = null) {
     mazeCurrentTheme = MAZE_THEMES[Math.floor(Math.random() * MAZE_THEMES.length)];
   }
   qText.textContent = mazeCurrentTheme.text;
-  speak(mazeCurrentTheme.text);
+  if (!isTestMode) {
+    speak(mazeCurrentTheme.text);
+  }
   
   canvas.width = 300;
   canvas.height = 300;
   
-  generateRandomPath();
+  generateRandomPath(canvas);
   drawMaze();
 }
 
-function generateRandomPath() {
+function generateRandomPath(canvas) {
   // 8x8グリッドの経路を生成（自然で滑らかな一本線、尖った経路と交差を避ける）
   const gridCols = 8;
   const gridRows = 8;

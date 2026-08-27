@@ -71,12 +71,7 @@
     
     <div id="maze-theme-select-screen" class="screen hidden">
       <h2>めいろのテーマ</h2>
-      <div id="maze-theme-buttons" class="mode-buttons">
-        <button class="maze-theme-btn" data-theme="0">🐝 はちさん</button>
-        <button class="maze-theme-btn" data-theme="1">🐰 うさぎさん</button>
-        <button class="maze-theme-btn" data-theme="2">🐱 ねこさん</button>
-        <button class="maze-theme-btn" data-theme="3">🐵 さるさん</button>
-      </div>
+      <div id="maze-theme-buttons" class="mode-buttons"></div>
     </div>
     
     <div id="result-screen" class="screen hidden">
@@ -87,5 +82,11 @@
   </div>
   
   <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      init();
+      initAudioContext();
+    });
+  </script>
 </body>
 </html>
