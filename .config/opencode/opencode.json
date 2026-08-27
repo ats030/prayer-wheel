@@ -17,7 +17,7 @@
           "limit": {
             "context": 98304,
             "input": 98304,
-            "output": 4096
+            "output": 8192
           }
         },
         "qwen3.8:27b": {
@@ -25,7 +25,7 @@
           "limit": {
             "context": 65536,
             "input": 65536,
-            "output": 4096
+            "output": 8192
           }
         },
         "qwen3-coder-next:q4_K_M": {
@@ -33,7 +33,7 @@
           "limit": {
             "context": 65536,
             "input": 65536,
-            "output": 4096
+            "output": 8192
           }
         },
         "qwen3-coder:30b": {
@@ -41,7 +41,7 @@
           "limit": {
             "context": 65536,
             "input": 65536,
-            "output": 4096
+            "output": 8192
           }
         }
       }
@@ -76,7 +76,6 @@
   },
   "agent": {
     "build": {
-      "steps": 30,
       "temperature": 0.2
     },
     "plan": {
