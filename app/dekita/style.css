@@ -273,20 +273,13 @@ h2 {
   to { transform: translateY(-10px); }
 }
 
-.color-swatch {
-  width: clamp(80px, 20dvw, 140px);
-  height: clamp(80px, 20dvw, 140px);
-  padding: 8px;
-  margin: 0 auto 8px;
-  border-radius: 20px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  border: 6px solid white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.color-emoji-display {
+  font-size: clamp(48px, 20dvw, 80px);
+  text-align: center;
+  margin: 16px auto;
+  line-height: 1;
 }
 
-/* --- 回答ボタン --- */
 .answer-buttons {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -301,7 +294,7 @@ h2 {
 .answer-btn {
   font-family: inherit;
   font-weight: bold;
-  font-size: clamp(18px, 5dvw, 32px);
+  font-size: clamp(18px, 5dvw, 28px);
   background-color: #FFF176;
   color: #5D4037;
   padding: 12px;

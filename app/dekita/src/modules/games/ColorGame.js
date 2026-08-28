@@ -58,38 +58,33 @@ export class ColorGame {
     const correctEmoji = correct.emoji[Math.floor(Math.random() * correct.emoji.length)];
     const otherColors = colors.filter(c => c !== correct);
     
+    const emojiDisplay = this.root.getElementById('color-emoji-display');
+    emojiDisplay.textContent = correctEmoji;
+    
     const answerButtons = this.root.getElementById('color-answer-buttons');
     answerButtons.innerHTML = '';
-
-    const options = [correct, ...otherColors.sort(() => Math.random() - 0.5).slice(0, 3)];
-    options.sort(() => Math.random() - 0.5);
-
-    options.forEach(color => {
+    
+    const colorOptions = [
+      { hex: '#ff3333', name: 'あか' },
+      { hex: '#3333ff', name: 'あお' },
+      { hex: '#ffff33', name: 'きいろ' },
+      { hex: '#33ff33', name: 'みどり' }
+    ];
+    
+    colorOptions.forEach(color => {
       const btn = document.createElement('button');
       btn.className = 'answer-btn color-answer-btn';
-      const contentSpan = document.createElement('span');
-      contentSpan.textContent = correctEmoji;
-      btn.appendChild(contentSpan);
-      btn.onclick = () => this.checkAnswer(color, correct);
+      btn.textContent = color.name;
+      btn.onclick = () => this.checkAnswerByName(color, correct);
       answerButtons.appendChild(btn);
     });
 
-    const swatch = this.root.getElementById('color-swatch');
-    swatch.style.backgroundColor = correct.hex;
-    swatch.style.border = `4px solid #fff`;
-    swatch.style.width = '120px';
-    swatch.style.height = '120px';
-    swatch.style.borderRadius = '50%';
-    swatch.style.margin = '20px auto';
-
-    const questionText = this.root.getElementById('color-question-text');
-    questionText.textContent = 'これ なん の いろかな？';
-
-    this.audio.speak('これ なん の いろかな？');
+    this.updateScore();
+    this.root.getElementById('color-feedback-area').classList.add('hidden');
   }
 
-  checkAnswer(selected, correct) {
-    if (selected === correct) {
+  checkAnswerByName(selected, correct) {
+    if (selected.name === correct.name) {
       this.state.addScore(10);
       this.playCorrectFeedback();
     } else {
