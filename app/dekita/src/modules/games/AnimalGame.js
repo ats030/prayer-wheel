@@ -1,12 +1,13 @@
 /* 
  * dekita - Preschool Edition Animal Sound Game Module
+ * For 3-year-olds: visual learning, no reading required
  */
 
 export class AnimalGame {
-  constructor() {
-    this.state = window.gameState;
-    this.audio = window.audioManager;
-    this.screen = window.screenManager;
+  constructor(gameState, audio, screen) {
+    this.state = gameState;
+    this.audio = audio;
+    this.screen = screen;
   }
 
   init(rootElement) {
@@ -47,21 +48,34 @@ export class AnimalGame {
     }
 
     const animals = [
-      { name: 'いぬ', emoji: '🐶', sound: 'ワンワン！' },
-      { name: 'ねこ', emoji: '🐱', sound: 'ニャー！' },
-      { name: 'うし', emoji: '🐮', sound: 'モー！' },
-      { name: 'ぶた', emoji: '🐷', sound: 'ブヒブヒ！' },
-      { name: 'とり', emoji: '🐦', sound: 'ピーピー！' },
-      { name: 'らいおん', emoji: '🦁', sound: 'ガオー！' },
-      { name: 'ぞう', emoji: '🐘', sound: 'パオーン！' },
-      { name: 'さる', emoji: '🐒', sound: 'ウキキ！' }
+      { name: '犬', emoji: '🐶', sound: 'ワンワン！' },
+      { name: '猫', emoji: '🐱', sound: 'ニャー！' },
+      { name: '牛', emoji: '🐮', sound: 'モー！' },
+      { name: '猪', emoji: '🐷', sound: 'ブヒブヒ！' },
+      { name: '鳥', emoji: '🐦', sound: 'ピーピー！' },
+      { name: 'ライオン', emoji: '🦁', sound: 'ガオー！' },
+      { name: '象', emoji: '🐘', sound: 'パオーン！' },
+      { name: '猿', emoji: '🐒', sound: 'ウキキ！' }
     ];
 
     const correct = animals[Math.floor(Math.random() * animals.length)];
     const incorrect = animals.filter(a => a !== correct);
 
-    this.root.getElementById('picture-area').innerHTML = `<span class="picture-item" style="font-size: 80px;">${correct.emoji}</span>`;
+    const pictureArea = this.root.getElementById('picture-area');
+    pictureArea.innerHTML = '';
     
+    const emojiSpan = document.createElement('span');
+    emojiSpan.className = 'picture-item';
+    emojiSpan.textContent = correct.emoji;
+    emojiSpan.style.fontSize = '96px';
+    pictureArea.appendChild(emojiSpan);
+    
+    const audioSpan = document.createElement('span');
+    audioSpan.textContent = '🔊';
+    audioSpan.style.fontSize = '48px';
+    audioSpan.style.marginLeft = '10px';
+    pictureArea.appendChild(audioSpan);
+
     const answerButtons = this.root.getElementById('answer-buttons');
     answerButtons.innerHTML = '';
 
@@ -71,15 +85,24 @@ export class AnimalGame {
     options.forEach(animal => {
       const btn = document.createElement('button');
       btn.className = 'answer-btn';
-      btn.textContent = animal.name;
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = animal.name;
+      nameSpan.style.fontSize = '48px';
+      btn.style.display = 'flex';
+      btn.style.justifyContent = 'center';
+      btn.style.alignItems = 'center';
+      btn.style.flexDirection = 'column';
+      btn.style.gap = '5px';
+      btn.style.margin = '10px';
       btn.onclick = () => this.checkAnswer(animal, correct);
+      btn.appendChild(nameSpan);
       answerButtons.appendChild(btn);
     });
 
-    this.audio.speak('これは どんな こえかな？');
+    this.audio.speak('いいつけろ！（ピロピロピロ…）');
     setTimeout(() => {
       this.audio.speak(correct.sound);
-    }, 500);
+    }, 1000);
   }
 
   checkAnswer(selected, correct) {
@@ -91,21 +114,30 @@ export class AnimalGame {
     }
 
     this.updateScore();
+
+    setTimeout(() => {
+      this.root.getElementById('feedback-area').classList.add('hidden');
+      this.nextQuestion();
+    }, 2000);
   }
 
   playCorrectFeedback() {
-    this.root.getElementById('feedback-area').classList.remove('hidden');
-    this.root.getElementById('feedback-text').textContent = 'やったー！＋10てん';
-    this.root.getElementById('feedback-text').style.color = '#4CAF50';
-    this.audio.speak('やったー！');
+    const area = this.root.getElementById('feedback-area');
+    const text = this.root.getElementById('feedback-text');
+    area.classList.remove('hidden');
+    text.textContent = 'できた! すごい!';
+    text.style.color = '#4CAF50';
+    this.audio.speak('できた! すごい!');
     this.audio.playPopSound();
   }
 
   playWrongFeedback() {
-    this.root.getElementById('feedback-area').classList.remove('hidden');
-    this.root.getElementById('feedback-text').textContent = 'だいじょうぶ！もういっこ！';
-    this.root.getElementById('feedback-text').style.color = '#E57373';
-    this.audio.speak('まちがい。もういっこ！');
+    const area = this.root.getElementById('feedback-area');
+    const text = this.root.getElementById('feedback-text');
+    area.classList.remove('hidden');
+    text.textContent = 'いいね! またやろう!';
+    text.style.color = '#E57373';
+    this.audio.speak('いいね! またやろう!');
   }
 
   nextQuestion() {
@@ -121,13 +153,14 @@ export class AnimalGame {
   }
 
   updateScore() {
-    document.getElementById('score').textContent = this.state.score;
+    document.getElementById('score').textContent = '⭐️' + this.state.score;
   }
 
   endGame() {
     this.screen.showResult();
-    document.getElementById('final-score').textContent = this.state.score;
+    document.getElementById('final-score').textContent = '⭐️' + this.state.score;
     this.state.saveScore();
+    this.audio.speak('おわった! おめでとう!');
   }
 
   resetGame() {

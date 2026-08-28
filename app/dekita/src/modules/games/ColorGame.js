@@ -1,12 +1,13 @@
 /* 
- * dekita - Preschool Edition Game Modules
+ * dekita - Preschool Edition Color Game Module
+ * For 3-year-olds: visual learning, no reading required
  */
 
 export class ColorGame {
-  constructor() {
-    this.state = window.gameState;
-    this.audio = window.audioManager;
-    this.screen = window.screenManager;
+  constructor(gameState, audio, screen) {
+    this.state = gameState;
+    this.audio = audio;
+    this.screen = screen;
   }
 
   init(rootElement) {
@@ -24,6 +25,10 @@ export class ColorGame {
 
     this.root.getElementById('color-reset-btn').addEventListener('click', () => {
       this.resetGame();
+    });
+
+    this.root.getElementById('color-next-btn').addEventListener('click', () => {
+      this.nextQuestion();
     });
   }
 
@@ -43,10 +48,10 @@ export class ColorGame {
     }
 
     const colors = [
-      { name: 'あか', hex: '#ff3333' },
-      { name: 'あお', hex: '#3333ff' },
-      { name: 'きいろ', hex: '#ffff33' },
-      { name: 'みどり', hex: '#33ff33' }
+      { name: '赤', hex: '#ff3333' },
+      { name: '青', hex: '#3333ff' },
+      { name: '黄', hex: '#ffff33' },
+      { name: '緑', hex: '#33ff33' }
     ];
 
     const correct = colors[Math.floor(Math.random() * colors.length)];
@@ -61,18 +66,26 @@ export class ColorGame {
     options.forEach(color => {
       const btn = document.createElement('button');
       btn.className = 'answer-btn';
-      btn.textContent = color.name;
-      btn.onclick = () => this.checkAnswer(color, correct);
-      answerButtons.appendChild(btn);
+      const colorBtn = document.createElement('div');
+      colorBtn.style.width = '60px';
+      colorBtn.style.height = '60px';
+      colorBtn.style.borderRadius = '50%';
+      colorBtn.style.backgroundColor = color.hex;
+      colorBtn.style.border = '3px solid #fff';
+      colorBtn.style.margin = '5px';
+      colorBtn.onclick = () => this.checkAnswer(color, correct);
+      answerButtons.appendChild(colorBtn);
     });
 
     const swatch = this.root.getElementById('color-swatch');
     swatch.style.backgroundColor = correct.hex;
-    swatch.style.border = `3px solid ${correct.hex}`;
+    swatch.style.border = `4px solid #fff`;
+    swatch.style.width = '100px';
+    swatch.style.height = '100px';
+    swatch.style.borderRadius = '50%';
+    swatch.style.margin = '20px auto';
 
-    const text = `これ なん の いろかな？`;
-    this.root.getElementById('color-question-text').textContent = text;
-    this.audio.speak(text);
+    this.audio.speak('なにいろかな？');
   }
 
   checkAnswer(selected, correct) {
@@ -95,9 +108,9 @@ export class ColorGame {
     const area = this.root.getElementById('color-feedback-area');
     const text = this.root.getElementById('color-feedback-text');
     area.classList.remove('hidden');
-    text.textContent = 'やったー！＋10てん';
+    text.textContent = 'できた! すごい!';
     text.style.color = '#4CAF50';
-    this.audio.speak('やったー！');
+    this.audio.speak('できた! すごい!');
     this.audio.playPopSound();
   }
 
@@ -105,9 +118,9 @@ export class ColorGame {
     const area = this.root.getElementById('color-feedback-area');
     const text = this.root.getElementById('color-feedback-text');
     area.classList.remove('hidden');
-    text.textContent = 'だいじょうぶ！もういっこ！';
+    text.textContent = 'いいね! またやろう!';
     text.style.color = '#E57373';
-    this.audio.speak('ちょんぼ。もういっこ！');
+    this.audio.speak('いいね! またやろう!');
   }
 
   nextQuestion() {
@@ -123,13 +136,14 @@ export class ColorGame {
   }
 
   updateScore() {
-    document.getElementById('color-score').textContent = this.state.score;
+    document.getElementById('color-score').textContent = '⭐️' + this.state.score;
   }
 
   endGame() {
     this.screen.showResult();
-    document.getElementById('final-score').textContent = this.state.score;
+    document.getElementById('final-score').textContent = '⭐️' + this.state.score;
     this.state.saveScore();
+    this.audio.speak('おわった! おめでとう!');
   }
 
   resetGame() {

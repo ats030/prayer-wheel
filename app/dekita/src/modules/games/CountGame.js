@@ -1,12 +1,13 @@
 /* 
  * dekita - Preschool Edition Count Game Module
+ * For 3-year-olds: visual learning, no reading required
  */
 
 export class CountGame {
-  constructor() {
-    this.state = window.gameState;
-    this.audio = window.audioManager;
-    this.screen = window.screenManager;
+  constructor(gameState, audio, screen) {
+    this.state = gameState;
+    this.audio = audio;
+    this.screen = screen;
   }
 
   init(rootElement) {
@@ -21,13 +22,16 @@ export class CountGame {
       this.audio.playPopSound();
       this.start();
     });
+
+    this.root.getElementById('reset-btn').addEventListener('click', () => {
+      this.resetGame();
+    });
   }
 
   start() {
     this.state.resetScore();
     this.state.resetQuestionsAnswered();
-    this.screen.showNumberSelect();
-    this.loadScore();
+    this.state.gameMode = 'number';
     this.renderNumberGrid();
   }
 
@@ -68,13 +72,10 @@ export class CountGame {
 
     const emoji = this.getRandomPicture();
     const emojiCount = Math.floor(Math.random() * 5) + 1;
-    const answer = emojiCount;
-    const questionText = `${emoji}はいくつあるかな？`;
+    this.state.currentAnswer = emojiCount;
 
-    this.state.currentQuestion = { answer, questionText };
-    this.renderQuestion(questionText, emoji, emojiCount);
-    
-    this.audio.speak(questionText);
+    this.state.currentQuestion = { emoji, emojiCount };
+    this.renderQuestion(emoji, emojiCount);
   }
 
   getRandomPicture() {
@@ -82,10 +83,9 @@ export class CountGame {
     return pictures[Math.floor(Math.random() * pictures.length)];
   }
 
-  renderQuestion(questionText, emoji, emojiCount) {
+  renderQuestion(emoji, emojiCount) {
     const questionArea = this.root.getElementById('question-area');
     const pictureArea = this.root.getElementById('picture-area');
-    const questionTextEl = this.root.getElementById('question-text');
     const answerButtons = this.root.getElementById('answer-buttons');
 
     pictureArea.innerHTML = '';
@@ -93,31 +93,40 @@ export class CountGame {
       const span = document.createElement('span');
       span.className = 'picture-item';
       span.textContent = emoji;
+      span.style.fontSize = '48px';
+      span.style.margin = '5px';
       pictureArea.appendChild(span);
     }
 
-    questionTextEl.textContent = questionText;
-    
-    const answers = [answer];
+    const answers = this.generateAnswers(emojiCount);
+    answers.forEach(a => {
+      const btn = document.createElement('button');
+      btn.className = 'answer-btn';
+      btn.textContent = a;
+      btn.style.fontSize = '64px';
+      btn.style.width = '80px';
+      btn.style.height = '80px';
+      btn.onclick = () => this.checkAnswer(a);
+      answerButtons.appendChild(btn);
+    });
+
+    this.audio.speak('いくつあるかな？');
+  }
+
+  generateAnswers(correct) {
+    const answers = [correct];
     while (answers.length < 4) {
-      const wrong = Math.floor(Math.random() * 6);
+      const wrong = Math.floor(Math.random() * 6) + 1;
       if (!answers.includes(wrong)) {
         answers.push(wrong);
       }
     }
     answers.sort(() => Math.random() - 0.5);
-    
-    answers.forEach(a => {
-      const btn = document.createElement('button');
-      btn.className = 'answer-btn';
-      btn.textContent = a;
-      btn.onclick = () => this.checkAnswer(a);
-      answerButtons.appendChild(btn);
-    });
+    return answers;
   }
 
   checkAnswer(selected) {
-    const correct = this.state.currentQuestion.answer;
+    const correct = this.state.currentAnswer;
     
     if (correct === selected) {
       this.state.addScore(10);
@@ -136,17 +145,19 @@ export class CountGame {
 
   playCorrectFeedback() {
     document.getElementById('feedback-area').classList.remove('hidden');
-    document.getElementById('feedback-text').textContent = 'やったー！＋10てん';
-    document.getElementById('feedback-text').style.color = '#4CAF50';
-    this.audio.speak('やったー！');
+    const text = document.getElementById('feedback-text');
+    text.textContent = 'できた! おめでとう!';
+    text.style.color = '#4CAF50';
+    this.audio.speak('できた! おめでとう!');
     this.audio.playPopSound();
   }
 
   playWrongFeedback() {
     document.getElementById('feedback-area').classList.remove('hidden');
-    document.getElementById('feedback-text').textContent = 'だいじょうぶ！もういっこ！';
-    document.getElementById('feedback-text').style.color = '#E57373';
-    this.audio.speak('ちょんぼ。もういっこ！');
+    const text = document.getElementById('feedback-text');
+    text.textContent = 'いいね! こえでかく';
+    text.style.color = '#E57373';
+    this.audio.speak('いーて! こえでかく');
   }
 
   nextQuestion() {
@@ -163,18 +174,19 @@ export class CountGame {
   }
 
   updateScore() {
-    document.getElementById('score').textContent = this.state.score;
+    document.getElementById('score').textContent = '⭐️' + this.state.score;
   }
 
   updateProgress() {
     document.getElementById('progress-text').textContent = 
-      `${this.state.questionsAnswered + 1}/${this.state.questionsTotal} 問`;
+      `${this.state.questionsAnswered + 1}/${this.state.questionsTotal}`;
   }
 
   endGame() {
     this.screen.showResult();
-    document.getElementById('final-score').textContent = this.state.score;
+    document.getElementById('final-score').textContent = '⭐️' + this.state.score;
     this.state.saveScore();
+    this.audio.speak('おわった! おめでとう!');
   }
 
   resetGame() {

@@ -72,14 +72,37 @@
       <p class="final-score">スコア: <span id="final-score">0</span></p>
       <button id="replay-btn" class="game-btn">もういっかい!</button>
     </div>
+
+    <div id="maze-theme-select-screen" class="screen hidden">
+      <p>どのテーマでめいろをとく？</p>
+      <div class="mode-buttons">
+        <button id="maze-theme-0" class="game-btn maze-theme-btn" data-theme="0">🐝 はち</button>
+        <button id="maze-theme-1" class="game-btn maze-theme-btn" data-theme="1">🐰 うさぎ</button>
+        <button id="maze-theme-2" class="game-btn maze-theme-btn" data-theme="2">🐱 ねこ</button>
+        <button id="maze-theme-3" class="game-btn maze-theme-btn" data-theme="3">🐒 さる</button>
+      </div>
+    </div>
+    
+    <div id="maze-play-screen" class="screen hidden">
+      <div class="score-board">
+        <div class="score-info">
+          <span>スコア: <span id="maze-score">0</span></span>
+          <span id="maze-progress-text" class="progress-text"></span>
+        </div>
+        <button id="maze-reset-btn" class="reset-btn">もどる</button>
+      </div>
+      
+      <div class="maze-area">
+        <canvas id="maze-canvas" class="maze-canvas"></canvas>
+      </div>
+      
+      <div id="maze-feedback-area" class="feedback-area hidden">
+        <p id="maze-feedback-text" class="feedback-text"></p>
+        <button id="maze-next-btn" class="next-btn">つぎへ</button>
+      </div>
+    </div>
   </div>
   
-  <script src="script.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      init();
-      initAudioContext();
-    });
-  </script>
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>
