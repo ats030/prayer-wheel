@@ -48,10 +48,10 @@ export class ColorGame {
     }
 
     const colors = [
-      { name: 'あか', hex: '#ff3333', emoji: ['🍎', '🍒', '❤️', '🔥'] },
-      { name: 'あお', hex: '#3333ff', emoji: ['🪿', '🌊', '💙', '🐳'] },
-      { name: 'きいろ', hex: '#ffff33', emoji: ['🌽', '🌻', '💛', '⭐️'] },
-      { name: 'みどり', hex: '#33ff33', emoji: ['🥦', '🌲', '💚', '🟢'] }
+      { name: 'あか', hex: '#ff3333', emoji: ['🍎', '🍒', '🍓', '🍅'] },
+      { name: 'あお', hex: '#3333ff', emoji: ['🪿', '🐋', '🐬', '🐠'] },
+      { name: 'きいろ', hex: '#ffff33', emoji: ['🌽', '🌻', '🍋', '🐔'] },
+      { name: 'みどり', hex: '#33ff33', emoji: ['🥦', '🌲', '🍀', '🐢'] }
     ];
 
     const correct = colors[Math.floor(Math.random() * colors.length)];
