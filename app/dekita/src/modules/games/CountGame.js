@@ -33,6 +33,15 @@ export class CountGame {
         this.resetGame();
       });
     }
+
+    const replayBtn = this.root.getElementById('replay-btn');
+    if (replayBtn) {
+      replayBtn.addEventListener('click', () => {
+        this.audio.init();
+        this.audio.playPopSound();
+        this.start();
+      });
+    }
   }
 
   start() {
