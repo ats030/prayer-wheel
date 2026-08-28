@@ -48,10 +48,10 @@ export class ColorGame {
     }
 
     const colors = [
-      { name: '赤', hex: '#ff3333' },
-      { name: '青', hex: '#3333ff' },
-      { name: '黄', hex: '#ffff33' },
-      { name: '緑', hex: '#33ff33' }
+      { name: 'あか', hex: '#ff3333' },
+      { name: 'あお', hex: '#3333ff' },
+      { name: 'きいろ', hex: '#ffff33' },
+      { name: 'みどり', hex: '#33ff33' }
     ];
 
     const correct = colors[Math.floor(Math.random() * colors.length)];
@@ -67,12 +67,12 @@ export class ColorGame {
       const btn = document.createElement('button');
       btn.className = 'answer-btn';
       const colorBtn = document.createElement('div');
-      colorBtn.style.width = '60px';
-      colorBtn.style.height = '60px';
+      colorBtn.style.width = '80px';
+      colorBtn.style.height = '80px';
       colorBtn.style.borderRadius = '50%';
       colorBtn.style.backgroundColor = color.hex;
       colorBtn.style.border = '3px solid #fff';
-      colorBtn.style.margin = '5px';
+      colorBtn.style.margin = '10px';
       colorBtn.onclick = () => this.checkAnswer(color, correct);
       answerButtons.appendChild(colorBtn);
     });
@@ -80,12 +80,15 @@ export class ColorGame {
     const swatch = this.root.getElementById('color-swatch');
     swatch.style.backgroundColor = correct.hex;
     swatch.style.border = `4px solid #fff`;
-    swatch.style.width = '100px';
-    swatch.style.height = '100px';
+    swatch.style.width = '120px';
+    swatch.style.height = '120px';
     swatch.style.borderRadius = '50%';
     swatch.style.margin = '20px auto';
 
-    this.audio.speak('なにいろかな？');
+    const questionText = this.root.getElementById('color-question-text');
+    questionText.textContent = 'これ なん の いろかな？';
+
+    this.audio.speak('これ なん の いろかな？');
   }
 
   checkAnswer(selected, correct) {
@@ -108,9 +111,9 @@ export class ColorGame {
     const area = this.root.getElementById('color-feedback-area');
     const text = this.root.getElementById('color-feedback-text');
     area.classList.remove('hidden');
-    text.textContent = 'できた! すごい!';
+    text.textContent = 'やったー！＋10てん';
     text.style.color = '#4CAF50';
-    this.audio.speak('できた! すごい!');
+    this.audio.speak('やったー！');
     this.audio.playPopSound();
   }
 
@@ -118,9 +121,9 @@ export class ColorGame {
     const area = this.root.getElementById('color-feedback-area');
     const text = this.root.getElementById('color-feedback-text');
     area.classList.remove('hidden');
-    text.textContent = 'いいね! またやろう!';
+    text.textContent = 'だいじょうぶ！もういっこ！';
     text.style.color = '#E57373';
-    this.audio.speak('いいね! またやろう!');
+    this.audio.speak('だいじょうぶ！もういっこ！');
   }
 
   nextQuestion() {

@@ -48,14 +48,14 @@ export class AnimalGame {
     }
 
     const animals = [
-      { name: '犬', emoji: '🐶', sound: 'ワンワン！' },
-      { name: '猫', emoji: '🐱', sound: 'ニャー！' },
-      { name: '牛', emoji: '🐮', sound: 'モー！' },
-      { name: '猪', emoji: '🐷', sound: 'ブヒブヒ！' },
-      { name: '鳥', emoji: '🐦', sound: 'ピーピー！' },
-      { name: 'ライオン', emoji: '🦁', sound: 'ガオー！' },
-      { name: '象', emoji: '🐘', sound: 'パオーン！' },
-      { name: '猿', emoji: '🐒', sound: 'ウキキ！' }
+      { name: 'いぬ', emoji: '🐶', sound: 'ワンワン！' },
+      { name: 'ねこ', emoji: '🐱', sound: 'ニャー！' },
+      { name: 'うし', emoji: '🐮', sound: 'モー！' },
+      { name: 'ぶた', emoji: '🐷', sound: 'ブヒブヒ！' },
+      { name: 'とり', emoji: '🐦', sound: 'ピーピー！' },
+      { name: 'らいおん', emoji: '🦁', sound: 'ガオー！' },
+      { name: 'ぞう', emoji: '🐘', sound: 'パオーン！' },
+      { name: 'さる', emoji: '🐒', sound: 'ウキキ！' }
     ];
 
     const correct = animals[Math.floor(Math.random() * animals.length)];
@@ -64,45 +64,40 @@ export class AnimalGame {
     const pictureArea = this.root.getElementById('picture-area');
     pictureArea.innerHTML = '';
     
-    const emojiSpan = document.createElement('span');
-    emojiSpan.className = 'picture-item';
-    emojiSpan.textContent = correct.emoji;
-    emojiSpan.style.fontSize = '96px';
-    pictureArea.appendChild(emojiSpan);
-    
-    const audioSpan = document.createElement('span');
-    audioSpan.textContent = '🔊';
-    audioSpan.style.fontSize = '48px';
-    audioSpan.style.marginLeft = '10px';
-    pictureArea.appendChild(audioSpan);
+    const soundIcon = document.createElement('div');
+    soundIcon.className = 'sound-icon';
+    soundIcon.textContent = '🔊';
+    soundIcon.style.fontSize = '80px';
+    pictureArea.appendChild(soundIcon);
+
+    const questionText = this.root.getElementById('question-text');
+    questionText.textContent = 'だれの こえかな？';
 
     const answerButtons = this.root.getElementById('answer-buttons');
     answerButtons.innerHTML = '';
 
+    // 回答ボタンを表示：emoji + 日本語名
     const options = [correct, ...incorrect.sort(() => Math.random() - 0.5).slice(0, 3)];
     options.sort(() => Math.random() - 0.5);
 
     options.forEach(animal => {
       const btn = document.createElement('button');
       btn.className = 'answer-btn';
-      const nameSpan = document.createElement('span');
-      nameSpan.textContent = animal.name;
-      nameSpan.style.fontSize = '48px';
-      btn.style.display = 'flex';
-      btn.style.justifyContent = 'center';
-      btn.style.alignItems = 'center';
-      btn.style.flexDirection = 'column';
-      btn.style.gap = '5px';
-      btn.style.margin = '10px';
+      const contentSpan = document.createElement('span');
+      contentSpan.textContent = `${animal.emoji} ${animal.name}`;
+      contentSpan.style.fontSize = '48px';
+      btn.style.fontSize = '48px';
+      btn.style.padding = '20px';
+      btn.style.width = '160px';
       btn.onclick = () => this.checkAnswer(animal, correct);
-      btn.appendChild(nameSpan);
+      btn.appendChild(contentSpan);
       answerButtons.appendChild(btn);
     });
 
-    this.audio.speak('いいつけろ！（ピロピロピロ…）');
+    this.audio.speak('だれの こえかな？');
     setTimeout(() => {
       this.audio.speak(correct.sound);
-    }, 1000);
+    }, 1500);
   }
 
   checkAnswer(selected, correct) {
@@ -125,9 +120,9 @@ export class AnimalGame {
     const area = this.root.getElementById('feedback-area');
     const text = this.root.getElementById('feedback-text');
     area.classList.remove('hidden');
-    text.textContent = 'できた! すごい!';
+    text.textContent = 'やったー！';
     text.style.color = '#4CAF50';
-    this.audio.speak('できた! すごい!');
+    this.audio.speak('やったー！');
     this.audio.playPopSound();
   }
 
@@ -135,9 +130,9 @@ export class AnimalGame {
     const area = this.root.getElementById('feedback-area');
     const text = this.root.getElementById('feedback-text');
     area.classList.remove('hidden');
-    text.textContent = 'いいね! またやろう!';
+    text.textContent = 'だいじょうぶ！もういっこ！';
     text.style.color = '#E57373';
-    this.audio.speak('いいね! またやろう!');
+    this.audio.speak('だいじょうぶ！もういっこ！');
   }
 
   nextQuestion() {

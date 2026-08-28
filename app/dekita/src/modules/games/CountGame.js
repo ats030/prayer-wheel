@@ -87,14 +87,18 @@ export class CountGame {
     const questionArea = this.root.getElementById('question-area');
     const pictureArea = this.root.getElementById('picture-area');
     const answerButtons = this.root.getElementById('answer-buttons');
+    const questionText = this.root.getElementById('question-text');
+
+    // エモジと問題文を表示
+    questionText.textContent = `${emoji}はいくつあるかな？`;
 
     pictureArea.innerHTML = '';
     for (let i = 0; i < emojiCount; i++) {
       const span = document.createElement('span');
       span.className = 'picture-item';
       span.textContent = emoji;
-      span.style.fontSize = '48px';
-      span.style.margin = '5px';
+      span.style.fontSize = '64px';
+      span.style.margin = '10px';
       pictureArea.appendChild(span);
     }
 
@@ -104,8 +108,8 @@ export class CountGame {
       btn.className = 'answer-btn';
       btn.textContent = a;
       btn.style.fontSize = '64px';
-      btn.style.width = '80px';
-      btn.style.height = '80px';
+      btn.style.width = '100px';
+      btn.style.height = '100px';
       btn.onclick = () => this.checkAnswer(a);
       answerButtons.appendChild(btn);
     });
@@ -144,20 +148,22 @@ export class CountGame {
   }
 
   playCorrectFeedback() {
-    document.getElementById('feedback-area').classList.remove('hidden');
-    const text = document.getElementById('feedback-text');
-    text.textContent = 'できた! おめでとう!';
+    const area = this.root.getElementById('feedback-area');
+    const text = this.root.getElementById('feedback-text');
+    area.classList.remove('hidden');
+    text.textContent = 'やったー！＋10てん';
     text.style.color = '#4CAF50';
-    this.audio.speak('できた! おめでとう!');
+    this.audio.speak('やったー！');
     this.audio.playPopSound();
   }
 
   playWrongFeedback() {
-    document.getElementById('feedback-area').classList.remove('hidden');
-    const text = document.getElementById('feedback-text');
-    text.textContent = 'いいね! こえでかく';
+    const area = this.root.getElementById('feedback-area');
+    const text = this.root.getElementById('feedback-text');
+    area.classList.remove('hidden');
+    text.textContent = 'だいじょうぶ！もういっこ！';
     text.style.color = '#E57373';
-    this.audio.speak('いーて! こえでかく');
+    this.audio.speak('だいじょうぶ！もういっこ！');
   }
 
   nextQuestion() {

@@ -3,11 +3,14 @@
  * For 3-year-olds: tap-to-move, visual learning, no reading required
  */
 
+import { PathGenerator } from '../utils/maze/PathGenerator.js';
+
 export class MazeGame {
   constructor(gameState, audio, screen) {
     this.state = gameState;
     this.audio = audio;
     this.screen = screen;
+    this.pathGenerator = new PathGenerator();
   }
 
   init(rootElement) {
@@ -34,8 +37,8 @@ export class MazeGame {
     const themeButtons = this.root.querySelectorAll('.maze-theme-btn');
     themeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        const theme = parseInt(btn.dataset.theme, 10);
-        this.startMazeGame(theme);
+        const themeIndex = parseInt(btn.dataset.theme, 10);
+        this.startMazeGame(themeIndex);
       });
     });
   }
@@ -44,103 +47,79 @@ export class MazeGame {
     this.screen.showMazeThemeSelect();
   }
 
-  startMazeGame(theme) {
-    this.state.currentTheme = theme;
+  startMazeGame(themeIndex) {
     this.state.questionsAnswered = 0;
     this.state.questionsTotal = 5;
     this.state.score = 0;
     this.state.mazeActive = true;
     
-    const mazeSize = 7;
-    this.state.mazePlayer = { x: 1, y: 1 };
-    this.state.mazeGoal = { x: mazeSize - 2, y: mazeSize - 2 };
-    
-    this.screen.showMazeGame();
-    this.renderMazeCanvas();
-    this.updateScore();
-  }
-
-  renderMazeCanvas() {
-    const canvas = this.root.getElementById('maze-canvas');
-    const ctx = canvas.getContext('2d');
-    
-    const tileSize = 50;
-    const margin = 10;
-    const size = 7;
-    
-    canvas.width = size * tileSize + 2 * margin;
-    canvas.height = size * tileSize + 2 * margin;
-    
+    // テーマ設定
     const themes = [
-      { name: 'Mite', color: '#FFD700' },
-      { name: 'Uzuki', color: '#FFFFFF' },
-      { name: 'Neko', color: '#FF69B4' },
-      { name: 'Saru', color: '#8B4513' }
+      { start: '🐝', end: '🌸', text: 'はちさんが おはなまで いけるかな?' },
+      { start: '🐰', end: '🥕', text: 'うさぎさんが にんじんまで いけるかな?' },
+      { start: '🐱', end: '🐟', text: 'ねこさんが おさかなまで いけるかな?' },
+      { start: '🐵', end: '🍌', text: 'さるさんが バナナまで いけるかな?' }
     ];
     
-    const theme = themes[this.state.currentTheme] || themes[0];
+    this.state.mazeCurrentTheme = themes[themeIndex] || themes[0];
+    this.state.themeEmojiStart = this.state.mazeCurrentTheme.start;
+    this.state.themeEmojiEnd = this.state.mazeCurrentTheme.end;
+    this.state.mazeQuestionText = this.state.mazeCurrentTheme.text;
     
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        const isWall = (x % 2 === 0 || y % 2 === 0) || (x === size - 1 && y === size - 1);
-        ctx.fillStyle = isWall ? '#444' : theme.color;
-        ctx.fillRect(margin + x * tileSize, margin + y * tileSize, tileSize, tileSize);
-      }
-    }
+    this.updateQuestionText();
     
-    ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath();
-    ctx.arc(
-      margin + this.state.mazePlayer.x * tileSize + tileSize / 2,
-      margin + this.state.mazePlayer.y * tileSize + tileSize / 2,
-      tileSize / 3, 0, Math.PI * 2
-    );
-    ctx.fill();
+    const canvas = this.root.getElementById('maze-canvas');
+    canvas.width = 300;
+    canvas.height = 300;
     
-    ctx.fillStyle = '#00FF00';
-    ctx.beginPath();
-    ctx.arc(
-      margin + this.state.mazeGoal.x * tileSize + tileSize / 2,
-      margin + this.state.mazeGoal.y * tileSize + tileSize / 2,
-      tileSize / 2, 0, Math.PI * 2
-    );
-    ctx.fill();
+    // 経路生成
+    const result = this.pathGenerator.generate(canvas.width, canvas.height);
+    this.state.mazePath = result.path;
+    this.state.mazePlayer = { x: result.player.x, y: result.player.y };
+    this.state.mazeGoal = { x: result.goal.x, y: result.goal.y };
     
-    canvas.onclick = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left - margin) / tileSize);
-      const y = Math.floor((e.clientY - rect.top - margin) / tileSize);
-      this.movePlayer(x, y);
-    };
+    this.screen.showMazeGame();
+    this.drawMaze();
+    this.updateScore();
+    
+    // 音声ガイド
+    this.audio.speak(this.state.mazeQuestionText);
   }
 
-  movePlayer(x, y) {
-    if (x < 0 || y < 0 || x >= 7 || y >= 7) return;
-    
-    const dx = Math.abs(x - this.state.mazePlayer.x);
-    const dy = Math.abs(y - this.state.mazePlayer.y);
-    
-    if ((dx === 1 && dy === 0) || (dx === 0 && dy === 1)) {
-      this.state.mazePlayer.x = x;
-      this.state.mazePlayer.y = y;
-      this.renderMazeCanvas();
+  updateQuestionText() {
+    const questionText = this.root.getElementById('question-text');
+    if (questionText) {
+      questionText.textContent = this.state.mazeQuestionText;
     }
+  }
+
+  drawMaze() {
+    const canvas = this.root.getElementById('maze-canvas');
+    if (!canvas) return;
     
-    if (this.state.mazePlayer.x === this.state.mazeGoal.x && this.state.mazePlayer.y === this.state.mazeGoal.y) {
-      this.state.addScore(20);
-      this.playCorrectFeedback();
-    }
+    const ctx = canvas.getContext('2d');
+    this.pathGenerator.draw(ctx, canvas.width, canvas.height, this.state.themeEmojiStart, this.state.themeEmojiEnd);
     
-    this.updateScore();
+    // プレイヤーの位置を更新
+    const playerSize = 32;
+    ctx.font = `${playerSize}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(this.state.themeEmojiStart, this.state.mazePlayer.x, this.state.mazePlayer.y);
+  }
+
+  resetGame() {
+    this.state.gameMode = 'maze';
+    this.screen.showTitle();
   }
 
   playCorrectFeedback() {
     const area = this.root.getElementById('maze-feedback-area');
     const text = this.root.getElementById('maze-feedback-text');
     area.classList.remove('hidden');
-    text.textContent = 'できた! すごーい!';
+    text.textContent = 'やったー！';
     text.style.color = '#4CAF50';
-    this.audio.speak('できた! すごーい!');
+    this.audio.speak('やったー！');
     this.audio.playPopSound();
   }
 
@@ -151,10 +130,18 @@ export class MazeGame {
     if (this.state.questionsAnswered >= this.state.questionsTotal) {
       this.endGame();
     } else {
-      const mazeSize = 7;
-      this.state.mazePlayer = { x: 1, y: 1 };
-      this.state.mazeGoal = { x: mazeSize - 2, y: mazeSize - 2 };
-      this.renderMazeCanvas();
+      const canvas = this.root.getElementById('maze-canvas');
+      canvas.width = 300;
+      canvas.height = 300;
+      
+      // 新しい経路生成
+      const result = this.pathGenerator.generate(canvas.width, canvas.height);
+      this.state.mazePath = result.path;
+      this.state.mazePlayer = { x: result.player.x, y: result.player.y };
+      this.state.mazeGoal = { x: result.goal.x, y: result.goal.y };
+      
+      this.drawMaze();
+      this.updateScore();
     }
   }
 
@@ -167,33 +154,5 @@ export class MazeGame {
     document.getElementById('final-score').textContent = '⭐️' + this.state.score;
     this.state.saveScore();
     this.audio.speak('おわった! おめでとう!');
-  }
-  resetGame() {
-    this.state.gameMode = 'maze';
-    this.screen.showTitle();
-  }
-
-  handleCanvasClick(x, y) {
-    const margin = 10;
-    const tileSize = 50;
-    const mazeSize = 7;
-    
-    if (x < 0 || y < 0 || x >= mazeSize || y >= mazeSize) return;
-    
-    const dx = Math.abs(x - this.state.mazePlayer.x);
-    const dy = Math.abs(y - this.state.mazePlayer.y);
-    
-    if ((dx === 1 && dy === 0) || (dx === 0 && dy === 1)) {
-      this.state.mazePlayer.x = x;
-      this.state.mazePlayer.y = y;
-      this.renderMazeCanvas();
-    }
-    
-    if (this.state.mazePlayer.x === this.state.mazeGoal.x && this.state.mazePlayer.y === this.state.mazeGoal.y) {
-      this.state.addScore(20);
-      this.playCorrectFeedback();
-    }
-    
-    this.updateScore();
   }
 }
