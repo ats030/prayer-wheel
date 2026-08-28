@@ -139,7 +139,7 @@ export class CountGame {
   generateAnswers(correct) {
     const answers = [correct];
     while (answers.length < 4) {
-      const wrong = Math.floor(Math.random() * 5) + 1;
+      const wrong = Math.floor(Math.random() * 10) + 1;
       if (!answers.includes(wrong)) {
         answers.push(wrong);
       }
@@ -205,7 +205,7 @@ export class CountGame {
     }
 
     const emoji = this.getRandomPicture();
-    const emojiCount = Math.floor(Math.random() * 5) + 1;
+    const emojiCount = Math.floor(Math.random() * 10) + 1;
     this.state.currentAnswer = emojiCount;
     this.state.currentQuestion = { emoji, emojiCount };
     this.renderQuestion(emoji, emojiCount);

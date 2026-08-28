@@ -1,8 +1,3 @@
-/* 
- * dekita - Preschool Edition GameState
- * Centralized state management
- */
-
 export class GameState {
   constructor() {
     this.score = 0;
@@ -11,13 +6,14 @@ export class GameState {
     this.gameMode = 'number';
     this.questionsAnswered = 0;
     this.questionsTotal = 10;
-    this.maxNumber = 5;
+    this.maxNumber = 10;
     
     this.mazeActive = false;
     this.mazePlayer = { x: 0, y: 0 };
     this.mazeGoal = { x: 0, y: 0 };
     this.mazePath = [];
     this.mazeCurrentTheme = null;
+    this._testMode = false;
     
     this.highScore = parseInt(localStorage.getItem('gakushuGameHighScore') || '0');
   }
