@@ -28,7 +28,7 @@ export class MazeGame {
     this.root.getElementById('maze-start-btn').addEventListener('click', () => {
       this.audio.init();
       this.audio.playPopSound();
-      this.showThemeSelect();
+      this.startMazeGame(0);
     });
 
     this.root.getElementById('maze-reset-btn').addEventListener('click', () => {
@@ -38,28 +38,6 @@ export class MazeGame {
     this.root.getElementById('maze-next-btn').addEventListener('click', () => {
       this.nextTurn();
     });
-
-    const themeButtons = this.root.querySelectorAll('.maze-theme-btn');
-    themeButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const themeIndex = parseInt(btn.dataset.theme, 10);
-        this.startMazeGame(themeIndex);
-      });
-    });
-  }
-
-  initMazeEvents() {
-    const themeButtons = this.root.querySelectorAll('.maze-theme-btn');
-    themeButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const themeIndex = parseInt(btn.dataset.theme, 10);
-        this.startMazeGame(themeIndex);
-      });
-    });
-  }
-
-  showThemeSelect() {
-    this.screen.showMazeThemeSelect();
   }
 
   startMazeGame(themeIndex) {

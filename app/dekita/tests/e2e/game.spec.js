@@ -81,21 +81,16 @@ test.describe('Dekita Game - E2E Tests', () => {
     expect(screenClass).not.toContain('hidden');
   });
 
-  test('should start maze game with theme select screen first', async ({ page }) => {
+  test('should start maze game directly without theme select screen', async ({ page }) => {
     await page.goto('http://localhost:8525/index.html');
     await page.click('#maze-start-btn');
-    await page.waitForSelector('#maze-theme-select-screen:not(.hidden)', { timeout: 60000 });
-    expect(await page.locator('#maze-theme-select-screen').getAttribute('class')).not.toContain('hidden');
+    await page.waitForSelector('#maze-play-screen:not(.hidden)', { timeout: 60000 });
+    expect(await page.locator('#maze-play-screen').getAttribute('class')).not.toContain('hidden');
   });
 
   test('should update score during maze game', async ({ page }) => {
     await page.goto('http://localhost:8525/index.html');
     await page.click('#maze-start-btn');
-    await page.waitForSelector('#maze-theme-select-screen:not(.hidden)', { timeout: 60000 });
-    const themeButtons = await page.$$('.maze-theme-btn');
-    console.log('theme buttons:', themeButtons.length);
-    await page.click('#maze-theme-0');
-    console.log('theme clicked');
     await page.waitForSelector('#maze-play-screen:not(.hidden)', { timeout: 60000 });
     console.log('maze play screen visible');
     await page.waitForSelector('#maze-canvas.maze-canvas', { timeout: 60000 });
@@ -108,8 +103,6 @@ test.describe('Dekita Game - E2E Tests', () => {
 test('should show correct feedback after clicking wrong canvas area', async ({ page }) => {
   await page.goto('http://localhost:8525/index.html');
   await page.click('#maze-start-btn');
-  await page.waitForSelector('#maze-theme-select-screen:not(.hidden)', { timeout: 60000 });
-  await page.click('#maze-theme-0');
   await page.waitForSelector('#maze-play-screen:not(.hidden)', { timeout: 60000 });
   await page.waitForSelector('#maze-canvas.maze-canvas', { timeout: 60000 });
   await new Promise(resolve => setTimeout(resolve, 1000));

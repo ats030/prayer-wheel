@@ -1,4 +1,4 @@
-/* 
+/**
  * dekita - Preschool Edition Screen Manager
  */
 
@@ -38,7 +38,6 @@ export class ScreenManager {
   }
 
   showMazeThemeSelect() {
-    this.show('maze-theme-select-screen');
   }
 
   showGame() {
