@@ -1,4 +1,4 @@
-/* 
+/**
  * dekita - Preschool Edition Color Game Module
  * For 3-year-olds: visual learning, no reading required
  */
@@ -48,10 +48,10 @@ export class ColorGame {
     }
 
     const colors = [
-      { name: 'あか', hex: '#ff3333' },
-      { name: 'あお', hex: '#3333ff' },
-      { name: 'きいろ', hex: '#ffff33' },
-      { name: 'みどり', hex: '#33ff33' }
+      { name: 'あか', hex: '#ff3333', emoji: '❤️' },
+      { name: 'あお', hex: '#3333ff', emoji: '💙' },
+      { name: 'きいろ', hex: '#ffff33', emoji: '💛' },
+      { name: 'みどり', hex: '#33ff33', emoji: '💚' }
     ];
 
     const correct = colors[Math.floor(Math.random() * colors.length)];
@@ -65,16 +65,12 @@ export class ColorGame {
 
     options.forEach(color => {
       const btn = document.createElement('button');
-      btn.className = 'answer-btn';
-      const colorBtn = document.createElement('div');
-      colorBtn.style.width = '80px';
-      colorBtn.style.height = '80px';
-      colorBtn.style.borderRadius = '50%';
-      colorBtn.style.backgroundColor = color.hex;
-      colorBtn.style.border = '3px solid #fff';
-      colorBtn.style.margin = '10px';
-      colorBtn.onclick = () => this.checkAnswer(color, correct);
-      answerButtons.appendChild(colorBtn);
+      btn.className = 'answer-btn color-answer-btn';
+      const contentSpan = document.createElement('span');
+      contentSpan.textContent = color.emoji;
+      btn.appendChild(contentSpan);
+      btn.onclick = () => this.checkAnswer(color, correct);
+      answerButtons.appendChild(btn);
     });
 
     const swatch = this.root.getElementById('color-swatch');
