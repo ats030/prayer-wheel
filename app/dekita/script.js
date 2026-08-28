@@ -953,6 +953,7 @@ function updateScore() {
   const isColorGame = gameMode === 'color';
   if (isColorGame) {
     document.getElementById('color-score').textContent = score;
+    document.getElementById('color-progress-text').textContent = `${questionsAnswered + 1}/${TOTAL_QUESTIONS} 問`;
   } else {
     document.getElementById('score').textContent = score;
     document.getElementById('progress-text').textContent = `${questionsAnswered + 1}/${TOTAL_QUESTIONS} 問`;
