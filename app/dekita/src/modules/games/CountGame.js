@@ -1,4 +1,4 @@
-/* 
+/**
  * dekita - Preschool Edition Count Game Module
  * For 3-year-olds: visual learning, no reading required
  */
@@ -13,25 +13,34 @@ export class CountGame {
   init(rootElement) {
     this.root = rootElement;
     this.registerEventListeners();
+    this.renderNumberGrid();
+    this.updateScore();
     this.state.gameMode = 'number';
   }
 
   registerEventListeners() {
-    this.root.getElementById('start-btn').addEventListener('click', () => {
-      this.audio.init();
-      this.audio.playPopSound();
-      this.start();
-    });
+    const startBtn = this.root.getElementById('start-btn');
+    if (startBtn) {
+      startBtn.addEventListener('click', () => {
+        this.audio.init();
+        this.audio.playPopSound();
+        this.start();
+      });
+    }
 
-    this.root.getElementById('reset-btn').addEventListener('click', () => {
-      this.resetGame();
-    });
+    const resetBtn = this.root.getElementById('reset-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        this.resetGame();
+      });
+    }
   }
 
   start() {
     this.state.resetScore();
     this.state.resetQuestionsAnswered();
     this.state.gameMode = 'number';
+    this.screen.showGame();
     this.renderNumberGrid();
   }
 
@@ -44,17 +53,19 @@ export class CountGame {
 
   renderNumberGrid() {
     const grid = this.root.getElementById('number-grid');
-    grid.innerHTML = '';
-    for (let i = 1; i <= this.state.maxNumber; i++) {
-      const btn = document.createElement('button');
-      btn.className = 'number-btn';
-      btn.textContent = i;
-      btn.addEventListener('click', () => {
-        this.audio.playPopSound();
-        this.state.currentNumber = i;
-        this.startGameWithNumber(i);
-      });
-      grid.appendChild(btn);
+    if (grid) {
+      grid.innerHTML = '';
+      for (let i = 1; i <= this.state.maxNumber; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'number-btn';
+        btn.textContent = i;
+        btn.addEventListener('click', () => {
+          this.audio.playPopSound();
+          this.state.currentNumber = i;
+          this.startGameWithNumber(i);
+        });
+        grid.appendChild(btn);
+      }
     }
   }
 

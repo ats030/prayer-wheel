@@ -1,4 +1,4 @@
-/* 
+/**
  * dekita - Preschool Edition Maze Game Module
  * For 3-year-olds: tap-to-move, visual learning, no reading required
  */
@@ -13,9 +13,14 @@ export class MazeGame {
     this.pathGenerator = new PathGenerator();
   }
 
+  setTestMode(enabled) {
+    this.state._testMode = enabled;
+  }
+
   init(rootElement) {
     this.root = rootElement;
     this.registerEventListeners();
+    this.initMazeEvents();
     this.state.gameMode = 'maze';
   }
 
@@ -34,6 +39,16 @@ export class MazeGame {
       this.nextTurn();
     });
 
+    const themeButtons = this.root.querySelectorAll('.maze-theme-btn');
+    themeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const themeIndex = parseInt(btn.dataset.theme, 10);
+        this.startMazeGame(themeIndex);
+      });
+    });
+  }
+
+  initMazeEvents() {
     const themeButtons = this.root.querySelectorAll('.maze-theme-btn');
     themeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -146,7 +161,118 @@ export class MazeGame {
   }
 
   updateScore() {
-    document.getElementById('maze-score').textContent = '⭐️' + this.state.score;
+    const scoreEl = this.root.getElementById('maze-score');
+    if (scoreEl) {
+      scoreEl.textContent = '⭐️' + this.state.score;
+    }
+  }
+
+  initMazeEvents() {
+    const canvas = this.root.getElementById('maze-canvas');
+    if (!canvas) return;
+
+    canvas.addEventListener('click', (e) => {
+      if (!this.state.mazeActive) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      const clickX = (e.clientX - rect.left) * scaleX;
+      const clickY = (e.clientY - rect.top) * scaleY;
+
+      this.movePlayerTo(clickX, clickY);
+    });
+  }
+
+  isPath(x, y) {
+    if (!this.state.mazePath || this.state.mazePath.length < 2) return true;
+
+    let onPath = false;
+    for (let i = 0; i < this.state.mazePath.length - 1; i++) {
+      const p1 = this.state.mazePath[i];
+      const p2 = this.state.mazePath[i + 1];
+
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const lenSq = dx * dx + dy * dy;
+
+      if (lenSq === 0) continue;
+
+      const t = ((x - p1.x) * dx + (y - p1.y) * dy) / lenSq;
+      const clampedT = Math.max(0, Math.min(1, t));
+
+      const closestX = p1.x + clampedT * dx;
+      const closestY = p1.y + clampedT * dy;
+
+      const distSq = (x - closestX) * (x - closestX) + (y - closestY) * (y - closestY);
+
+      if (distSq < 400) {
+        onPath = true;
+        break;
+      }
+    }
+
+    return onPath;
+  }
+
+  movePlayerTo(targetX, targetY) {
+    if (!this.isPath(targetX, targetY)) {
+      this.failMaze();
+      return;
+    }
+
+    const goal = this.state.mazeGoal;
+    const dx = targetX - goal.x;
+    const dy = targetY - goal.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < 30) {
+      this.winMaze(targetX, targetY);
+    } else {
+      this.state.mazePlayer.x = targetX;
+      this.state.mazePlayer.y = targetY;
+      this.drawMaze();
+    }
+  }
+
+  failMaze() {
+    console.log('failMaze() called');
+    this.state.mazeActive = false;
+    const area = this.root.getElementById('maze-feedback-area');
+    const text = this.root.getElementById('maze-feedback-text');
+    console.log('area:', area, 'text:', text);
+    if (area && text) {
+      area.classList.remove('hidden');
+      text.textContent = 'だいじょうぶ！もういっこ！';
+      text.style.color = '#FF9800';
+      this.audio.speak('だいじょうぶ！もういっこ！');
+      this.audio.playPopSound();
+    }
+  }
+
+  winMaze(x, y) {
+    this.state.mazeActive = false;
+    this.state.mazePlayer.x = x;
+    this.state.mazePlayer.y = y;
+    this.drawMaze();
+
+    const area = this.root.getElementById('maze-feedback-area');
+    const text = this.root.getElementById('maze-feedback-text');
+
+    if (area && text) {
+      area.classList.remove('hidden');
+      text.textContent = 'やったー！＋10てん';
+      text.style.color = '#4CAF50';
+      this.state.score += 10;
+      this.updateScore();
+      this.audio.speak('やったー！10てん！');
+      this.audio.playPopSound();
+
+      setTimeout(() => {
+        this.nextTurn();
+      }, 1500);
+    }
   }
 
   endGame() {
@@ -154,5 +280,9 @@ export class MazeGame {
     document.getElementById('final-score').textContent = '⭐️' + this.state.score;
     this.state.saveScore();
     this.audio.speak('おわった! おめでとう!');
+  }
+
+  setTestMode(enabled) {
+    this.state._testMode = enabled;
   }
 }

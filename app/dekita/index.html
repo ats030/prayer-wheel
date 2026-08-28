@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>できた！</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="style.css">
+   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="game-container">
@@ -83,7 +83,7 @@
       </div>
     </div>
     
-    <div id="maze-play-screen" class="screen hidden">
+      <div id="maze-play-screen" class="screen hidden" style="pointer-events: auto;">
       <div class="score-board">
         <div class="score-info">
           <span>スコア: <span id="maze-score">0</span></span>
@@ -92,7 +92,7 @@
         <button id="maze-reset-btn" class="reset-btn">もどる</button>
       </div>
       
-      <div class="maze-area">
+      <div class="maze-area" style="position: relative; z-index: 10; width: 300px; margin: 0 auto; pointer-events: auto;">
         <canvas id="maze-canvas" class="maze-canvas"></canvas>
       </div>
       

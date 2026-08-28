@@ -26,6 +26,7 @@ body {
   box-sizing: border-box;
   position: relative;
   width: 100%;
+  pointer-events: none;
 }
 
 /* --- レイアウト --- */
@@ -40,6 +41,11 @@ body {
   box-sizing: border-box;
   padding: 0;
   position: relative;
+  pointer-events: none;
+}
+
+.game-container > .screen {
+  pointer-events: auto;
 }
 
 header {
@@ -319,6 +325,11 @@ h2 {
 }
 
 .color-answer-btn {
+  font-family: inherit;
+  font-weight: bold;
+  font-size: 48px;
+  width: 120px;
+  aspect-ratio: 1 / 1;
   box-shadow: 0 8px 0 rgba(0,0,0,0.2);
 }
 
@@ -384,5 +395,6 @@ h2 {
 
 /* --- 迷路テーマ選択画面 --- */
 #maze-theme-select-screen {
+  display: flex;
   justify-content: center;
 }
