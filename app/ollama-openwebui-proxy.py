@@ -132,6 +132,28 @@ def _usage_from_object(d: dict) -> dict | None:
     return None
 
 
+def _response_metadata(d: dict) -> dict:
+    """応答本文を保存せず、終了理由とtool-callかどうかだけを採る。"""
+    if not isinstance(d, dict):
+        return {}
+    reason = d.get("done_reason") or ""
+    tool_call = False
+    for choice in d.get("choices") or []:
+        reason = choice.get("finish_reason") or reason
+        message = choice.get("message") or choice.get("delta") or {}
+        tool_call = tool_call or bool(message.get("tool_calls"))
+    if reason == "tool_calls":
+        tool_call = True
+    result = {}
+    if reason:
+        result["finish_reason"] = str(reason)[:40]
+    if tool_call:
+        result["response_kind"] = "tool_call"
+    elif reason:
+        result["response_kind"] = "text"
+    return result
+
+
 def extract_usage(payload: bytes) -> dict | None:
     """応答の末尾からトークン数を取り出す。取れなければ None。
 
@@ -141,6 +163,8 @@ def extract_usage(payload: bytes) -> dict | None:
     if not payload:
         return None
     lines = payload.split(b"\n")
+    usage = None
+    metadata = {}
     for raw in reversed(lines[-200:]):
         line = raw.strip()
         if line.startswith(b"data:"):
@@ -148,14 +172,24 @@ def extract_usage(payload: bytes) -> dict | None:
         if not line.startswith(b"{"):
             continue
         try:
-            found = _usage_from_object(json.loads(line))
+            obj = json.loads(line)
         except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
             continue
-        if found:
-            return found
+        if usage is None:
+            usage = _usage_from_object(obj)
+        # SSE の usage 最終チャンクは choices: []。終了理由はその前の
+        # チャンクにあるため、usage を見つけた後も末尾から遡る。
+        if not metadata:
+            metadata = _response_metadata(obj)
+        if usage is not None and metadata:
+            return {**usage, **metadata}
+    if usage is not None:
+        return usage
     # 非ストリームで本文に改行が入っている (整形済み JSON) 場合の保険。
     try:
-        return _usage_from_object(json.loads(payload))
+        obj = json.loads(payload)
+        usage = _usage_from_object(obj)
+        return {**usage, **_response_metadata(obj)} if usage else None
     except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
         return None
 
@@ -213,6 +247,9 @@ def log_usage(path: str, request_body: bytes | None, tail: bytes,
         "status": status,
         "client": client_label(user_agent),
     }
+    for key in ("finish_reason", "response_kind"):
+        if usage.get(key):
+            record[key] = usage[key]
     if error:
         record["error"] = error[:200]
     target = USAGE_LOG_DIR / f"usage-{now:%Y-%m}.jsonl"

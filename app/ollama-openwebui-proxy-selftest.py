@@ -67,6 +67,10 @@ SSE_STREAM = b"".join(
                             "choices": [{"delta": {"content": "x"}}]}).encode() + b"\n\n"
     for _ in range(3)
 ) + b"data: " + json.dumps({
+    "id": "c1", "model": "qwen3.8:27b",
+    "choices": [{"delta": {"tool_calls": [{"index": 0}]},
+                 "finish_reason": "tool_calls"}],
+}).encode() + b"\n\n" + b"data: " + json.dumps({
     "id": "c1", "model": "qwen3.8:27b", "choices": [],
     "usage": {"prompt_tokens": 88, "completion_tokens": 210, "total_tokens": 298},
 }).encode() + b"\n\ndata: [DONE]\n\n"
@@ -101,6 +105,8 @@ check("入力", got["input"], 88)
 check("出力", got["output"], 210)
 check("実行時間は取れない", got["duration_ms"], 0)
 check("読み込み時間も取れない", got["load_ms"], 0)
+check("終了理由", got["finish_reason"], "tool_calls")
+check("応答分類", got["response_kind"], "tool_call")
 
 print("4. OpenAI 互換の非ストリーム")
 got = proxy.extract_usage(OPENAI_SINGLE)
@@ -189,6 +195,8 @@ with tempfile.TemporaryDirectory() as tmp:
     check("読み込み時間", first["load_ms"], 61)
     check("proxy 実測", first["elapsed_ms"], 4600)
     check("status", first["status"], 200)
+    check("native の終了理由", first["finish_reason"], "stop")
+    check("native の応答分類", first["response_kind"], "text")
     check("成功に error は付かない", "error" in first, False)
     second = json.loads(lines[1])
     check("埋め込みのモデル", second["model"], "bge-m3")
