@@ -13,9 +13,8 @@ export class CountGame {
   init(rootElement) {
     this.root = rootElement;
     this.registerEventListeners();
-    this.renderNumberGrid();
-    this.updateScore();
     this.state.gameMode = 'number';
+    this.updateScore();
   }
 
   registerEventListeners() {
@@ -41,7 +40,7 @@ export class CountGame {
     this.state.resetQuestionsAnswered();
     this.state.gameMode = 'number';
     this.screen.showGame();
-    this.renderNumberGrid();
+    this.generateQuestion();
   }
 
   loadScore() {
@@ -188,19 +187,31 @@ export class CountGame {
       this.generateQuestion();
     }
   }
+  
+  generateQuestion() {
+    if (this.state.isGameOver()) {
+      this.endGame();
+      return;
+    }
+
+    const emoji = this.getRandomPicture();
+    this.state.currentAnswer = 1;
+    this.state.currentQuestion = { emoji, emojiCount: 1 };
+    this.renderQuestion(emoji, 1);
+  }
 
   updateScore() {
-    document.getElementById('score').textContent = '⭐️' + this.state.score;
+    this.root.getElementById('score').textContent = '⭐️' + this.state.score;
   }
 
   updateProgress() {
-    document.getElementById('progress-text').textContent = 
+    this.root.getElementById('progress-text').textContent = 
       `${this.state.questionsAnswered + 1}/${this.state.questionsTotal}`;
   }
 
   endGame() {
     this.screen.showResult();
-    document.getElementById('final-score').textContent = '⭐️' + this.state.score;
+    this.root.getElementById('final-score').textContent = '⭐️' + this.state.score;
     this.state.saveScore();
     this.audio.speak('おわった! おめでとう!');
   }
