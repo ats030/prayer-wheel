@@ -163,35 +163,38 @@ export class MazeGame {
     });
   }
 
-  isPath(x, y) {
+   isPath(x, y) {
     if (!this.state.mazePath || this.state.mazePath.length < 2) return true;
 
-    let onPath = false;
+    const cellSize = 37.5;
+    const margin = cellSize / 2 + 15;
+
     for (let i = 0; i < this.state.mazePath.length - 1; i++) {
       const p1 = this.state.mazePath[i];
       const p2 = this.state.mazePath[i + 1];
 
-      const dx = p2.x - p1.x;
-      const dy = p2.y - p1.y;
-      const lenSq = dx * dx + dy * dy;
+      if (p1.x === p2.x) {
+        const minX = Math.min(p1.x, p2.x) - margin;
+        const maxX = Math.max(p1.x, p2.x) + margin;
+        const minY = Math.min(p1.y, p2.y) - margin;
+        const maxY = Math.max(p1.y, p2.y) + margin;
 
-      if (lenSq === 0) continue;
+        if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
+          return true;
+        }
+      } else if (p1.y === p2.y) {
+        const minY = Math.min(p1.y, p2.y) - margin;
+        const maxY = Math.max(p1.y, p2.y) + margin;
+        const minX = Math.min(p1.x, p2.x) - margin;
+        const maxX = Math.max(p1.x, p2.x) + margin;
 
-      const t = ((x - p1.x) * dx + (y - p1.y) * dy) / lenSq;
-      const clampedT = Math.max(0, Math.min(1, t));
-
-      const closestX = p1.x + clampedT * dx;
-      const closestY = p1.y + clampedT * dy;
-
-      const distSq = (x - closestX) * (x - closestX) + (y - closestY) * (y - closestY);
-
-      if (distSq < 400) {
-        onPath = true;
-        break;
+        if (y >= minY && y <= maxY && x >= minX && x <= maxX) {
+          return true;
+        }
       }
     }
 
-    return onPath;
+    return false;
   }
 
   movePlayerTo(targetX, targetY) {
