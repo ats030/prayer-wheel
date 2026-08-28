@@ -15,6 +15,7 @@ export class CountGame {
     this.registerEventListeners();
     this.state.gameMode = 'number';
     this.updateScore();
+    this.generateQuestion();
   }
 
   registerEventListeners() {
@@ -138,7 +139,7 @@ export class CountGame {
   generateAnswers(correct) {
     const answers = [correct];
     while (answers.length < 4) {
-      const wrong = Math.floor(Math.random() * 6) + 1;
+      const wrong = Math.floor(Math.random() * 5) + 1;
       if (!answers.includes(wrong)) {
         answers.push(wrong);
       }
@@ -204,9 +205,10 @@ export class CountGame {
     }
 
     const emoji = this.getRandomPicture();
-    this.state.currentAnswer = 1;
-    this.state.currentQuestion = { emoji, emojiCount: 1 };
-    this.renderQuestion(emoji, 1);
+    const emojiCount = Math.floor(Math.random() * 5) + 1;
+    this.state.currentAnswer = emojiCount;
+    this.state.currentQuestion = { emoji, emojiCount };
+    this.renderQuestion(emoji, emojiCount);
   }
 
   updateScore() {
