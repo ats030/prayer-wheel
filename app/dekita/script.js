@@ -207,18 +207,13 @@ function renderNumberGrid() {
 function startGame() {
   score = 0;
   questionsAnswered = 0;
+  currentNumber = 5;
   updateScore();
-  showScreen('number-select-screen');
-}
-
-function startGameWithNumber(number) {
-  currentNumber = number;
   showScreen('game-screen');
   generateQuestion();
 }
 
 function selectNumber() {
-  showScreen('number-select-screen');
 }
 
 function resetGame() {

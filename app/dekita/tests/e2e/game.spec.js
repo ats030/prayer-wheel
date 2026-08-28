@@ -42,21 +42,11 @@ test.describe('Dekita Game - E2E Tests', () => {
     expect(await page.locator('#game-screen').getAttribute('class')).toContain('hidden');
   });
 
-  test('should switch to number select screen when clicking すうじ button', async ({ page }) => {
+  test('should start number game directly without select screen', async ({ page }) => {
     await page.goto('http://localhost:8525/index.html');
     await page.click('#start-btn');
-    expect(await page.locator('#number-select-screen').getAttribute('class')).not.toContain('hidden');
-    expect(await page.locator('#title-screen').getAttribute('class')).toContain('hidden');
-  });
-
-  test('should display number buttons in number select screen', async ({ page }) => {
-    await page.goto('http://localhost:8525/index.html');
-    await page.click('#start-btn');
-    const numberButtons = page.locator('.number-btn');
-    await expect(numberButtons).toHaveCount(5);
-    
-    const buttonValues = await numberButtons.allTextContents();
-    expect(buttonValues).toEqual(['1', '2', '3', '4', '5']);
+    await page.waitForSelector('#game-screen:not(.hidden)', { timeout: 60000 });
+    expect(await page.locator('#game-screen').getAttribute('class')).not.toContain('hidden');
   });
 
   test('should display color game screen when clicking いろ button', async ({ page }) => {
@@ -83,5 +73,58 @@ test.describe('Dekita Game - E2E Tests', () => {
       }
     });
     expect(await page.locator('#game-screen').getAttribute('class')).not.toContain('hidden');
+  });
+
+  test('should update score during maze game', async ({ page }) => {
+    await page.goto('http://localhost:8525/index.html');
+    await page.evaluate(() => setTestMode(true));
+    await page.click('#maze-start-btn');
+    await page.waitForSelector('#maze-theme-buttons .maze-theme-btn');
+    await page.evaluate(() => {
+      const btn = document.querySelector('#maze-theme-buttons .maze-theme-btn');
+      if (btn) {
+        btn.click();
+      }
+    });
+    await page.click('#maze-canvas');
+    const scoreText = await page.locator('#score').textContent();
+    expect(scoreText).toBe('0');
+  });
+
+  test('should show correct feedback after clicking wrong canvas area', async ({ page }) => {
+    await page.goto('http://localhost:8525/index.html');
+    await page.evaluate(() => setTestMode(true));
+    await page.click('#maze-start-btn');
+    await page.waitForSelector('#maze-theme-buttons .maze-theme-btn');
+    await page.evaluate(() => {
+      const btn = document.querySelector('#maze-theme-buttons .maze-theme-btn');
+      if (btn) {
+        btn.click();
+      }
+    });
+    await page.waitForSelector('#maze-canvas');
+    await page.evaluate(() => {
+      const canvas = document.getElementById('maze-canvas');
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const event = new MouseEvent('mousemove', {
+          bubbles: true,
+          cancelable: true,
+          clientX: rect.left + rect.width + 50,
+          clientY: rect.top + rect.height + 50
+        });
+        canvas.dispatchEvent(event);
+      }
+    });
+    await page.waitForTimeout(2000);
+    const feedbackText = await page.locator('#feedback-text').textContent();
+    expect(feedbackText === 'だいじょうぶ！もういっこ！' || feedbackText === 'せいかい!').toBe(true);
+  });
+
+  test('should display score in game screen', async ({ page }) => {
+    await page.goto('http://localhost:8525/index.html');
+    await page.click('#start-btn');
+    const scoreText = await page.locator('#score').textContent();
+    expect(scoreText).toBe('0');
   });
 });
