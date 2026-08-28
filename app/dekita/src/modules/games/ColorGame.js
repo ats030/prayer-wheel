@@ -68,7 +68,7 @@ export class ColorGame {
       const btn = document.createElement('button');
       btn.className = 'answer-btn color-answer-btn';
       const contentSpan = document.createElement('span');
-      contentSpan.textContent = color.emoji[Math.floor(Math.random() * color.emoji.length)];
+      contentSpan.textContent = correctEmoji;
       btn.appendChild(contentSpan);
       btn.onclick = () => this.checkAnswer(color, correct);
       answerButtons.appendChild(btn);
