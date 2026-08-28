@@ -8,7 +8,7 @@
       "name": "Ollama",
       "options": {
         "baseURL": "http://localhost:11434/v1",
-        "timeout": 1200000,
+        "timeout": 600000,
         "chunkTimeout": 300000
       },
       "models": {
