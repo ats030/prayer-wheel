@@ -48,13 +48,14 @@ export class ColorGame {
     }
 
     const colors = [
-      { name: 'あか', hex: '#ff3333', emoji: '🍎' },
-      { name: 'あお', hex: '#3333ff', emoji: '🪿' },
-      { name: 'きいろ', hex: '#ffff33', emoji: '🌽' },
-      { name: 'みどり', hex: '#33ff33', emoji: '🥦' }
+      { name: 'あか', hex: '#ff3333', emoji: ['🍎', '🍒', '❤️', '🔥'] },
+      { name: 'あお', hex: '#3333ff', emoji: ['🪿', '🌊', '💙', '🐳'] },
+      { name: 'きいろ', hex: '#ffff33', emoji: ['🌽', '🌻', '💛', '⭐️'] },
+      { name: 'みどり', hex: '#33ff33', emoji: ['🥦', '🌲', '💚', '🟢'] }
     ];
 
     const correct = colors[Math.floor(Math.random() * colors.length)];
+    const correctEmoji = correct.emoji[Math.floor(Math.random() * correct.emoji.length)];
     const otherColors = colors.filter(c => c !== correct);
     
     const answerButtons = this.root.getElementById('color-answer-buttons');
@@ -67,7 +68,7 @@ export class ColorGame {
       const btn = document.createElement('button');
       btn.className = 'answer-btn color-answer-btn';
       const contentSpan = document.createElement('span');
-      contentSpan.textContent = color.emoji;
+      contentSpan.textContent = color.emoji[Math.floor(Math.random() * color.emoji.length)];
       btn.appendChild(contentSpan);
       btn.onclick = () => this.checkAnswer(color, correct);
       answerButtons.appendChild(btn);
