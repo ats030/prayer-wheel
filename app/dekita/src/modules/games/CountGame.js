@@ -61,21 +61,20 @@ export class CountGame {
   startGameWithNumber(number) {
     this.state.currentNumber = number;
     this.screen.showGame();
-    this.generateQuestion();
+    this.generateQuestionForNumber(number);
   }
 
-  generateQuestion() {
+  generateQuestionForNumber(number) {
     if (this.state.isGameOver()) {
       this.endGame();
       return;
     }
 
     const emoji = this.getRandomPicture();
-    const emojiCount = Math.floor(Math.random() * 5) + 1;
-    this.state.currentAnswer = emojiCount;
+    this.state.currentAnswer = number;
 
-    this.state.currentQuestion = { emoji, emojiCount };
-    this.renderQuestion(emoji, emojiCount);
+    this.state.currentQuestion = { emoji, emojiCount: number };
+    this.renderQuestion(emoji, number);
   }
 
   getRandomPicture() {
