@@ -264,7 +264,7 @@ def run(base: str, do_identify: bool) -> None:
         page.wait_for_function("() => document.getElementById('mapLocationState').textContent.includes('移動しました')")
         current_center = page.evaluate("() => { const c=mapInstance.getCenter(); return {lat:c.lat,lng:c.lng} }")
         check("現在地へカーソルを合わせる", abs(current_center["lat"]-35.681236)<0.0001 and abs(current_center["lng"]-139.767125)<0.0001, str(current_center))
-        page.wait_for_function("() => [\'mapLandform\',\'mapElevation\',\'mapMicroterrain\',\'mapLandUse\'].every(id => ![\'\',\'調べています…\'].includes(document.getElementById(id).textContent))")
+        page.wait_for_function("() => [\'mapLandform\',\'mapElevation\',\'mapMicroterrain\',\'mapLandUse\',\'mapVegetation\'].every(id => ![\'\',\'調べています…\'].includes(document.getElementById(id).textContent))")
         check("中央地点の5種の土地情報を同時表示する", all(page.locator("#"+value_id).inner_text() not in ["", "調べています…"] for value_id in ["mapLandform", "mapElevation", "mapMicroterrain", "mapLandUse", "mapVegetation"]))
         layer_labels = page.locator(".leaflet-control-layers label")
         labels = layer_labels.all_inner_texts()
