@@ -337,9 +337,11 @@ function startMazeGame() {
   score = 0;
   questionsAnswered = 0;
   updateScore();
-  showScreen('maze-theme-select-screen');
-  initMazeThemeButtons();
-  console.log('Maze theme buttons initialized');
+  showScreen('game-screen');
+  setupMaze();
+  const canvas = document.getElementById('maze-canvas');
+  initMazeEvents(canvas);
+  console.log('Maze game started directly');
 }
 
 function initMazeThemeButtons() {
