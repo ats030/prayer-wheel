@@ -145,7 +145,7 @@ export class CountGame {
       }
     }
     answers.sort(() => Math.random() - 0.5);
-    return answers;
+    return answers.slice(0, 4);
   }
 
   checkAnswer(selected) {
