@@ -962,8 +962,7 @@ def test_pages_carry_no_inline_style_or_script():
 
 def test_page_assets_are_served_locally():
     for name in ["index.css", "index.js", "settings.css", "settings.js",
-                 "history.css", "history.js", "sharing.js", "privacy.css", "terms.css",
-                 "changelog.css"]:
+                 "history.css", "history.js", "sharing.js", "legal.css"]:
         response = client.get(f"/assets/{name}")
         assert response.status_code == 200, name
     assert client.get("/theme.js").status_code == 200
