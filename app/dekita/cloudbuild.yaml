@@ -1,13 +1,31 @@
 # Cloud Build configuration for dekita
 # Deploys to Cloud Run in Asia Northeast1 region
+
+# Step 1: Create Dockerfile (workaround for .gcloudignore exclusion)
 steps:
+  - name: 'ubuntu'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        cat > Dockerfile << 'EOF'
+        FROM nginx:alpine
+        COPY index.html /usr/share/nginx/html/
+        COPY style.css /usr/share/nginx/html/
+        COPY favicon.svg /usr/share/nginx/html/
+        COPY src /usr/share/nginx/html/src/
+        COPY nginx.conf /usr/share/nginx/html/nginx.conf
+        RUN rm /etc/nginx/conf.d/default.conf
+        COPY nginx.conf /etc/nginx/conf.d/default.conf
+        EXPOSE 8080
+        CMD ["nginx", "-g", "daemon off;"]
+        EOF
+
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
-      - '-f'
-      - 'Dockerfile'
       - '.'
 
   - name: 'gcr.io/cloud-builders/docker'
@@ -38,5 +56,3 @@ images:
 
 options:
   logging: CLOUD_LOGGING_ONLY
-  # Disable .gcloudignore to include Dockerfile
-  ignoreFile: ''
