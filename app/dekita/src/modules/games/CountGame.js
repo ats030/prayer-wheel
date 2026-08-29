@@ -108,6 +108,9 @@ export class CountGame {
     const answerButtons = this.root.getElementById('answer-buttons');
     const questionText = this.root.getElementById('question-text');
 
+    answerButtons.innerHTML = '';
+    pictureArea.innerHTML = '';
+
     // エモジと問題文を表示
     questionText.textContent = `${emoji}はいくつあるかな？`;
 

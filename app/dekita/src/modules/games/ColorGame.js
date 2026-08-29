@@ -14,6 +14,7 @@ export class ColorGame {
     this.root = rootElement;
     this.registerEventListeners();
     this.state.gameMode = 'color';
+    this.state.questionsTotal = 10;
   }
 
   registerEventListeners() {
