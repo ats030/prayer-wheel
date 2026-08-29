@@ -75,6 +75,22 @@ SSE_STREAM = b"".join(
     "usage": {"prompt_tokens": 88, "completion_tokens": 210, "total_tokens": 298},
 }).encode() + b"\n\ndata: [DONE]\n\n"
 
+# 実応答では 1 チャンクが data 行と空行の 2 行を使うので、行数は出力トークン
+# 数の倍近くになる。遡り幅を縮めたときに終了理由から落ちるのを見つけるため、
+# 遡り幅を超える長さのストリームを 1 本置いておく。
+SSE_LONG = b"".join(
+    b"data: " + json.dumps({"id": "c3", "model": "qwen3.8:27b",
+                            "choices": [{"delta": {"content": "x"},
+                                         "finish_reason": None}]}).encode()
+    + b"\n\n" for _ in range(150)
+) + b"data: " + json.dumps({
+    "id": "c3", "model": "qwen3.8:27b",
+    "choices": [{"delta": {}, "finish_reason": "stop"}],
+}).encode() + b"\n\ndata: " + json.dumps({
+    "id": "c3", "model": "qwen3.8:27b", "choices": [],
+    "usage": {"prompt_tokens": 22, "completion_tokens": 132, "total_tokens": 154},
+}).encode() + b"\n\ndata: [DONE]\n\n"
+
 OPENAI_SINGLE = json.dumps({
     "id": "c2", "object": "chat.completion", "model": "qwen3.8:27b",
     "choices": [{"message": {"role": "assistant", "content": "hi"}}],
@@ -107,6 +123,12 @@ check("実行時間は取れない", got["duration_ms"], 0)
 check("読み込み時間も取れない", got["load_ms"], 0)
 check("終了理由", got["finish_reason"], "tool_calls")
 check("応答分類", got["response_kind"], "tool_call")
+
+got = proxy.extract_usage(SSE_LONG)
+check("遡り幅より長くても終了理由が採れる", got["finish_reason"], "stop")
+check("遡り幅より長くても応答分類が採れる", got["response_kind"], "text")
+check("遡り幅より長くても入力が採れる", got["input"], 22)
+check("遡り幅より長くても出力が採れる", got["output"], 132)
 
 print("4. OpenAI 互換の非ストリーム")
 got = proxy.extract_usage(OPENAI_SINGLE)
