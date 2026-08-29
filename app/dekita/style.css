@@ -46,19 +46,25 @@ body {
   pointer-events: auto;
 }
 
-/* 迷画面のスクロールを許可 */
+/* 迷画面の上寄せとスクロール */
 #maze-play-screen {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
   overflow-y: auto;
   touch-action: auto;
-  flex: 1 1 auto;
 }
 
 #maze-play-screen .score-board {
   flex-shrink: 0;
+  margin-bottom: 8px;
 }
 
 #maze-play-screen .question-area {
   flex-shrink: 0;
+  margin-bottom: 8px;
 }
 
 #maze-play-screen .feedback-area {
