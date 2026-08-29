@@ -286,7 +286,7 @@ h2 {
   gap: 12px;
   margin-top: 12px;
   width: 100%;
-  max-width: 100%;
+  max-width: 500px;
   flex: 0 0 auto;
   overflow: visible;
 }
@@ -294,21 +294,21 @@ h2 {
 .answer-btn {
   font-family: inherit;
   font-weight: bold;
-  font-size: clamp(18px, 5dvw, 28px);
+  font-size: clamp(18px, 5dvw, 32px);
   background-color: #FFF176;
   color: #5D4037;
-  padding: 12px;
+  padding: 12px 16px;
   border-radius: 20px;
   box-shadow: 0 8px 0 rgba(0,0,0,0.1);
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
   text-align: center;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: auto;
   flex: 0 0 auto;
-  overflow: visible;
-  white-space: nowrap;
-  text-overflow: clip;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
   width: 100%;
 }
 
@@ -317,12 +317,17 @@ h2 {
   box-shadow: 0 2px 0 rgba(0,0,0,0.1);
 }
 
+.color-answer-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+}
+
 .color-answer-btn {
   font-family: inherit;
   font-weight: bold;
-  font-size: 48px;
-  width: 120px;
-  aspect-ratio: 1 / 1;
+  font-size: clamp(14px, 4dvw, 28px);
+  padding: 12px 20px;
+  aspect-ratio: auto;
   box-shadow: 0 8px 0 rgba(0,0,0,0.2);
 }
 
@@ -363,6 +368,7 @@ h2 {
 @media (max-width: 600px) {
   .answer-buttons {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
   header h1 {
     font-size: clamp(24px, 6dvw, 36px);
