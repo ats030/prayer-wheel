@@ -63,23 +63,23 @@ steps:
       - 'push'
       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
 
-   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-     entrypoint: gcloud
-     args:
-       - 'run'
-       - 'deploy'
-       - 'dekita-app'
-       - '--image'
-       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
-       - '--region'
-       - 'asia-northeast1'
-       - '--allow-unauthenticated'
-       - '--platform'
-       - 'managed'
-       - '--port'
-       - '8080'
-       - '--memory'
-       - '512Mi'
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'dekita-app'
+      - '--image'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
+      - '--region'
+      - 'asia-northeast1'
+      - '--allow-unauthenticated'
+      - '--platform'
+      - 'managed'
+      - '--port'
+      - '8080'
+      - '--memory'
+      - '512Mi'
 
 images:
   - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
