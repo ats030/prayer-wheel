@@ -105,7 +105,6 @@ export class ColorGame {
 
     setTimeout(() => {
       this.state.isAnswering = false;
-      this.root.getElementById('color-feedback-area').classList.add('hidden');
       this.nextQuestion();
     }, 2000);
   }

@@ -117,7 +117,6 @@ export class AnimalGame {
 
     setTimeout(() => {
       this.state.isAnswering = false;
-      this.root.getElementById('feedback-area').classList.add('hidden');
       this.nextQuestion();
     }, 2000);
   }

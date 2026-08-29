@@ -167,7 +167,6 @@ export class CountGame {
     
     setTimeout(() => {
       this.state.isAnswering = false;
-      this.root.getElementById('feedback-area').classList.add('hidden');
       this.nextQuestion();
     }, 2000);
   }
