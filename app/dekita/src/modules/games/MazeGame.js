@@ -120,6 +120,8 @@ export class MazeGame {
 
   nextTurn() {
     this.root.getElementById('maze-feedback-area').classList.add('hidden');
+    this.state.mazeActive = true;
+    this.isDragging = false;
     this.state.questionsAnswered++;
     
     if (this.state.questionsAnswered >= this.state.questionsTotal) {
