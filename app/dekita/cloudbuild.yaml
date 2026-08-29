@@ -6,6 +6,8 @@ steps:
       - 'build'
       - '-t'
       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
+      - '-f'
+      - 'Dockerfile'
       - '.'
 
   - name: 'gcr.io/cloud-builders/docker'
@@ -36,3 +38,5 @@ images:
 
 options:
   logging: CLOUD_LOGGING_ONLY
+  # Disable .gcloudignore to include Dockerfile
+  ignoreFile: ''
