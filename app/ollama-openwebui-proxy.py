@@ -183,8 +183,10 @@ def extract_usage(payload: bytes) -> dict | None:
             metadata = _response_metadata(obj)
         if usage is not None and metadata:
             return {**usage, **metadata}
-    if usage is not None:
-        return usage
+    if usage is not None or metadata:
+        # usage が取れなくても終了理由だけは残す。計測不能な往復と、
+        # 上流が途中で切った往復を後から見分けるのに要る。
+        return {**(usage or {}), **metadata}
     # 非ストリームで本文に改行が入っている (整形済み JSON) 場合の保険。
     try:
         obj = json.loads(payload)
@@ -330,6 +332,12 @@ class ProxyHandler(BaseHTTPRequestHandler):
         try:
             with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT) as response:
                 status = response.status
+                if measure:
+                    # identity を要求しても上流が圧縮して返すことはある。
+                    # 本文はそのまま流し、計測できなかった理由だけ残す。
+                    encoding = (response.headers.get("Content-Encoding") or "").lower()
+                    if encoding and encoding != "identity":
+                        error = f"unmeasured: content-encoding {encoding}"
                 self.send_response(response.status)
                 self.copy_response_headers(response.headers.items())
                 self.end_headers()
@@ -371,6 +379,13 @@ class ProxyHandler(BaseHTTPRequestHandler):
         }
         headers["Authorization"] = f"Bearer {OPENWEBUI_API_KEY}"
         headers.setdefault("Accept", "application/json")
+        if self.should_measure():
+            # 計測する経路だけ非圧縮を要求する。依頼元 (httpx は既定で
+            # zstd を要求する) の指定をそのまま通すと上流が圧縮して返し、
+            # 控えた末尾が圧縮バイナリになってトークン数を取り出せない。
+            for key in [k for k in headers if k.lower() == "accept-encoding"]:
+                del headers[key]
+            headers["Accept-Encoding"] = "identity"
         return headers
 
     def copy_response_headers(self, items) -> None:
