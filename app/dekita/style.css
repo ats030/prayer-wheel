@@ -50,6 +50,7 @@ body {
 #maze-play-screen {
   overflow-y: auto;
   touch-action: auto;
+  flex: 1 1 auto;
 }
 
 #maze-play-screen {
