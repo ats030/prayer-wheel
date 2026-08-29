@@ -131,4 +131,22 @@ test('should show correct feedback after clicking wrong canvas area', async ({ p
     console.log('score text:', scoreText);
     expect(scoreText).toBe('⭐️0');
   });
+
+  test('should display 4 answer buttons for number game', async ({ page }) => {
+    await page.goto('http://localhost:8525/index.html');
+    await page.click('#start-btn');
+    await page.waitForSelector('#answer-buttons', { timeout: 60000 });
+    const buttons = await page.$$('#answer-buttons button');
+    console.log('number of answer buttons:', buttons.length);
+    expect(buttons.length).toBe(4);
+  });
+
+  test('should display 6 answer buttons for color game', async ({ page }) => {
+    await page.goto('http://localhost:8525/index.html');
+    await page.click('#color-start-btn');
+    await page.waitForSelector('#color-answer-buttons', { timeout: 60000 });
+    const buttons = await page.$$('#color-answer-buttons button');
+    console.log('number of color answer buttons:', buttons.length);
+    expect(buttons.length).toBe(6);
+  });
 });

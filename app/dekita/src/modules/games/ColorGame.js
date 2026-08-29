@@ -52,7 +52,9 @@ export class ColorGame {
       { name: 'あか', hex: '#ff3333', emoji: ['🍎', '🍒', '🍓', '🍅'] },
       { name: 'あお', hex: '#3333ff', emoji: ['🌎', '🐋', '🐬', '💧'] },
       { name: 'きいろ', hex: '#ffff33', emoji: ['🌽', '🌻', '🍋', '🐤'] },
-      { name: 'みどり', hex: '#33ff33', emoji: ['🥦', '🌲', '🍀', '🐢'] }
+      { name: 'みどり', hex: '#33ff33', emoji: ['🥦', '🌲', '🍀', '🐢'] },
+      { name: 'だいだい', hex: '#FF8C00', emoji: ['🍊', 'persimon', ' carrots'] },
+      { name: 'むらさき', hex: '#9370DB', emoji: ['🍇', '🍆', '🫐'] }
     ];
 
     const correct = colors[Math.floor(Math.random() * colors.length)];
@@ -69,7 +71,9 @@ export class ColorGame {
       { hex: '#ff3333', name: 'あか' },
       { hex: '#3333ff', name: 'あお' },
       { hex: '#ffff33', name: 'きいろ' },
-      { hex: '#33ff33', name: 'みどり' }
+      { hex: '#33ff33', name: 'みどり' },
+      { hex: '#FF8C00', name: 'だいだい' },
+      { hex: '#9370DB', name: 'むらさき' }
     ];
     
     colorOptions.forEach(color => {
