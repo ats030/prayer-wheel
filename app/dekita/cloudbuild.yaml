@@ -1,8 +1,15 @@
 # Cloud Build configuration for dekita
 # Deploys to Cloud Run in Asia Northeast1 region
 
-# Step 1: Create Dockerfile (workaround for .gcloudignore exclusion)
+# Step 1: Authenticate Docker with Artifact Registry
 steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud auth configure-docker asia-northeast1-docker.pkg.dev --quiet
+
   - name: 'ubuntu'
     entrypoint: 'bash'
     args:
