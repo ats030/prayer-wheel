@@ -61,17 +61,17 @@ steps:
         }
         NGINXEOF
 
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'build'
-      - '-t'
-      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
-      - '.'
+   - name: 'gcr.io/cloud-builders/docker'
+     args:
+       - 'build'
+       - '-t'
+       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
+       - '.'
 
    - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
+     args:
+       - 'push'
+       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
 
    - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
      entrypoint: gcloud
