@@ -156,81 +156,51 @@ export class PathGenerator {
   }
 
   draw(ctx, canvasWidth, canvasHeight, themeEmojiStart, themeEmojiEnd) {
+    console.log('PathGenerator.draw called:');
+    console.log('  canvasWidth:', canvasWidth);
+    console.log('  canvasHeight:', canvasHeight);
+    console.log('  themeEmojiStart:', themeEmojiStart);
+    console.log('  themeEmojiEnd:', themeEmojiEnd);
+    console.log('  this.path.length:', this.path.length);
+    
     const gridCols = 8;
     const cellSize = canvasWidth / gridCols;
-    
+
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    
-    // 経路を太線で描画（直線と曲線を組み合わせる）
+
+    // 経路を描画
     ctx.beginPath();
-    ctx.lineWidth = 20;
+    ctx.lineWidth = 10;
     ctx.strokeStyle = '#81D4FA';
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    
+
     if (this.path.length > 0) {
       ctx.moveTo(this.path[0].x, this.path[0].y);
-      
+
       for (let i = 1; i < this.path.length; i++) {
-        const prev = this.path[i - 1];
-        const curr = this.path[i];
-        
-        // 最後の点は直線で結ぶ
-        if (i === this.path.length - 1) {
-          ctx.lineTo(curr.x, curr.y);
-          continue;
-        }
-        
-        const next = this.path[i + 1];
-        
-        // 方向ベクトルを計算
-        const dx1 = curr.x - prev.x;
-        const dy1 = curr.y - prev.y;
-        const dx2 = next.x - curr.x;
-        const dy2 = next.y - curr.y;
-        
-        // 同じ方向（直線）
-        if ((dx1 === 0 && dx2 === 0) || (dy1 === 0 && dy2 === 0)) {
-          ctx.lineTo(curr.x, curr.y);
-        } else {
-          // 曲線（90度の転換）- 曲率半径は2マス以上
-          const controlRadius = cellSize * 2.5; // 2マス以上の半径
-          
-          // 前の点への制御点
-          const prevCtrlX = curr.x - (dx1 ? dx1 * controlRadius / Math.abs(dx1) : 0);
-          const prevCtrlY = curr.y - (dy1 ? dy1 * controlRadius / Math.abs(dy1) : 0);
-          
-          // 次の点への制御点
-          const nextCtrlX = curr.x + (dx2 ? dx2 * controlRadius / Math.abs(dx2) : 0);
-          const nextCtrlY = curr.y + (dy2 ? dy2 * controlRadius / Math.abs(dy2) : 0);
-          
-          ctx.bezierCurveTo(prevCtrlX, prevCtrlY, nextCtrlX, nextCtrlY, curr.x, curr.y);
-        }
+        ctx.lineTo(this.path[i].x, this.path[i].y);
       }
     }
     ctx.stroke();
-    
+
     // ゴール地点の絵文字
     ctx.font = '36px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(themeEmojiEnd, this.path[this.path.length - 1].x, this.path[this.path.length - 1].y);
 
-    // プレイヤーの絵文字
-    ctx.font = '32px serif';
-    ctx.fillText(themeEmojiStart, this.path[0].x, this.path[0].y);
-    
-    // 経路外の境界線（失敗判定用） - 簡略化
+    // 経路外の境界線（失敗判定用）
     ctx.beginPath();
     ctx.lineWidth = 2;
     ctx.strokeStyle = '#E57373';
     for (let x = 0; x <= 8; x++) {
-      ctx.moveTo(x * (canvasWidth / 8), 0);
-      ctx.lineTo(x * (canvasWidth / 8), canvasHeight);
+      ctx.moveTo(x * cellSize, 0);
+      ctx.lineTo(x * cellSize, canvasHeight);
     }
     for (let y = 0; y <= 8; y++) {
-      ctx.moveTo(0, y * (canvasHeight / 8));
-      ctx.lineTo(canvasWidth, y * (canvasHeight / 8));
+      ctx.moveTo(0, y * cellSize);
+      ctx.lineTo(canvasWidth, y * cellSize);
     }
     ctx.stroke();
   }

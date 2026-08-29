@@ -57,15 +57,16 @@ export class MazeGame {
     this.state.mazeCurrentTheme = themes[themeIndex] || themes[0];
     this.state.themeEmojiStart = this.state.mazeCurrentTheme.start;
     this.state.themeEmojiEnd = this.state.mazeCurrentTheme.end;
-    this.state.mazeQuestionText = this.state.mazeCurrentTheme.text;
     
-    this.updateQuestionText();
+    console.log('startMazeGame called:', themeIndex);
+    console.log('themes[0]:', themes[0]);
+    console.log('this.state.themeEmojiStart:', this.state.themeEmojiStart);
+    console.log('this.state.themeEmojiEnd:', this.state.themeEmojiEnd);
     
     const canvas = this.root.getElementById('maze-canvas');
     canvas.width = 300;
     canvas.height = 300;
     
-    // 経路生成
     const result = this.pathGenerator.generate(canvas.width, canvas.height);
     this.state.mazePath = result.path;
     this.state.mazePlayer = { x: result.player.x, y: result.player.y };
@@ -74,16 +75,9 @@ export class MazeGame {
     this.screen.showMazeGame();
     this.drawMaze();
     this.updateScore();
-    
-    // 音声ガイド
-    this.audio.speak(this.state.mazeQuestionText);
   }
 
   updateQuestionText() {
-    const questionText = this.root.getElementById('question-text');
-    if (questionText) {
-      questionText.textContent = this.state.mazeQuestionText;
-    }
   }
 
   drawMaze() {
@@ -91,9 +85,16 @@ export class MazeGame {
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
+    console.log('drawMaze called:');
+    console.log('  canvas.width:', canvas.width);
+    console.log('  canvas.height:', canvas.height);
+    console.log('  ctx:', ctx);
+    console.log('  themeEmojiStart:', this.state.themeEmojiStart);
+    console.log('  themeEmojiEnd:', this.state.themeEmojiEnd);
+    console.log('  mazePath length:', this.state.mazePath.length);
+    
     this.pathGenerator.draw(ctx, canvas.width, canvas.height, this.state.themeEmojiStart, this.state.themeEmojiEnd);
     
-    // プレイヤーの位置を更新
     const playerSize = 32;
     ctx.font = `${playerSize}px serif`;
     ctx.textAlign = 'center';
@@ -258,9 +259,8 @@ export class MazeGame {
 
   endGame() {
     this.screen.showResult();
-    document.getElementById('final-score').textContent = '⭐️' + this.state.score;
+    this.root.getElementById('final-score').textContent = '⭐️' + this.state.score;
     this.state.saveScore();
-    this.audio.speak('おわった! おめでとう!');
   }
 
   setTestMode(enabled) {
