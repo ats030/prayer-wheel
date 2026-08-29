@@ -5,13 +5,13 @@ steps:
     args:
       - 'build'
       - '-t'
-      - '$_REGION-docker.pkg.dev/$PROJECT_ID/dekita/app:$COMMIT_SHA'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:$COMMIT_SHA'
       - '.'
 
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - '$_REGION-docker.pkg.dev/$PROJECT_ID/dekita/app:$COMMIT_SHA'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:$COMMIT_SHA'
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
@@ -20,9 +20,9 @@ steps:
       - 'deploy'
       - 'dekita-app'
       - '--image'
-      - '$_REGION-docker.pkg.dev/$PROJECT_ID/dekita/app:$COMMIT_SHA'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:$COMMIT_SHA'
       - '--region'
-      - '$_REGION'
+      - 'asia-northeast1'
       - '--allow-unauthenticated'
       - '--platform'
       - 'managed'
@@ -32,10 +32,7 @@ steps:
       - '512Mi'
 
 images:
-  - '$_REGION-docker.pkg.dev/$PROJECT_ID/dekita/app:$COMMIT_SHA'
-
-substitutions:
-  _REGION: 'asia-northeast1'
+  - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:$COMMIT_SHA'
 
 options:
   logging: CLOUD_LOGGING_ONLY
