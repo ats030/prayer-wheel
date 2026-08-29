@@ -111,8 +111,8 @@ export class MazeGame {
   playCorrectFeedback() {
     const area = this.root.getElementById('maze-feedback-area');
     const text = this.root.getElementById('maze-feedback-text');
-    area.classList.remove('hidden');
-    text.textContent = 'やったー！';
+    area.style.display = 'block';
+    text.textContent = 'やったー！＋10てん';
     text.style.color = '#4CAF50';
     this.audio.speak('やったー！');
     this.audio.playPopSound();
@@ -332,7 +332,7 @@ export class MazeGame {
     const text = this.root.getElementById('maze-feedback-text');
     console.log('area:', area, 'text:', text);
     if (area && text) {
-      area.classList.remove('hidden');
+      area.style.display = 'block';
       text.textContent = 'だいじょうぶ！もういっこ！';
       text.style.color = '#FF9800';
       this.audio.speak('だいじょうぶ！もういっこ！');
@@ -350,7 +350,7 @@ export class MazeGame {
     const text = this.root.getElementById('maze-feedback-text');
 
     if (area && text) {
-      area.classList.remove('hidden');
+      area.style.display = 'block';
       text.textContent = 'やったー！＋10てん';
       text.style.color = '#4CAF50';
       this.state.score += 10;

@@ -42,7 +42,7 @@ export class GameBase {
   }
 
   playCorrectFeedback() {
-    document.getElementById('feedback-area').classList.remove('hidden');
+    document.getElementById('feedback-area').style.display = 'block';
     document.getElementById('feedback-text').textContent = 'やったー！＋10てん';
     document.getElementById('feedback-text').style.color = '#4CAF50';
     this.audio.speak('やったー！');
@@ -50,13 +50,13 @@ export class GameBase {
   }
 
   playWrongFeedback() {
-    document.getElementById('feedback-area').classList.remove('hidden');
+    document.getElementById('feedback-area').style.display = 'block';
     document.getElementById('feedback-text').textContent = 'だいじょうぶ！もういっこ！';
     document.getElementById('feedback-text').style.color = '#E57373';
     this.audio.speak('ちょんぼ。もういっこ！');
   }
 
   hideFeedback() {
-    document.getElementById('feedback-area').classList.add('hidden');
+    document.getElementById('feedback-area').style.display = 'none';
   }
 }

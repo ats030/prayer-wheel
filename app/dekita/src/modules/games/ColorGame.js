@@ -112,7 +112,7 @@ export class ColorGame {
   playCorrectFeedback() {
     const area = this.root.getElementById('color-feedback-area');
     const text = this.root.getElementById('color-feedback-text');
-    area.classList.remove('hidden');
+    area.style.display = 'block';
     text.textContent = 'やったー！＋10てん';
     text.style.color = '#4CAF50';
     this.audio.speak('やったー！');
@@ -122,7 +122,7 @@ export class ColorGame {
   playWrongFeedback() {
     const area = this.root.getElementById('color-feedback-area');
     const text = this.root.getElementById('color-feedback-text');
-    area.classList.remove('hidden');
+    area.style.display = 'block';
     text.textContent = 'だいじょうぶ！もういっこ！';
     text.style.color = '#E57373';
     this.audio.speak('だいじょうぶ！もういっこ！');

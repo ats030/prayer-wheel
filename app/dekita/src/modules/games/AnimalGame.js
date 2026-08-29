@@ -124,7 +124,7 @@ export class AnimalGame {
   playCorrectFeedback() {
     const area = this.root.getElementById('feedback-area');
     const text = this.root.getElementById('feedback-text');
-    area.classList.remove('hidden');
+    area.style.display = 'block';
     text.textContent = 'やったー！';
     text.style.color = '#4CAF50';
     this.audio.speak('やったー！');
@@ -134,7 +134,7 @@ export class AnimalGame {
   playWrongFeedback() {
     const area = this.root.getElementById('feedback-area');
     const text = this.root.getElementById('feedback-text');
-    area.classList.remove('hidden');
+    area.style.display = 'block';
     text.textContent = 'だいじょうぶ！もういっこ！';
     text.style.color = '#E57373';
     this.audio.speak('だいじょうぶ！もういっこ！');
