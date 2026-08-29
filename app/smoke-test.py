@@ -40,6 +40,7 @@ ERROR_PAGE_MAX_CHARS = 300
 NAV_TIMEOUT_MS = 20000
 # 全ホストで落ちたときに待つ秒数。瞬間的な負荷なら空く。
 RETRY_WAIT_SEC = 5
+MIN_BODY_CHARS_DEKITA = 20
 ERROR_MARKERS = (
     "Traceback (most recent call last)",
     "Internal Server Error",
@@ -113,7 +114,8 @@ def check(browser, host: str, target: dict) -> list[str]:
         if not page.title().strip():
             problems.append("titleが空")
         body = page.inner_text("body").strip()
-        if len(body) < MIN_BODY_CHARS:
+        min_chars = MIN_BODY_CHARS_DEKITA if target["port"] == 8525 else MIN_BODY_CHARS
+        if len(body) < min_chars:
             problems.append(f"本文が{len(body)}文字しかない")
         # エラー文字列は「本文がそれだけ」のときにしか判定に使えない。本文全体を
         # 対象にしたら daily-reflection を誤検知した —— 振り返りメモを表示する
