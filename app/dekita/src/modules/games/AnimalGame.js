@@ -1,4 +1,4 @@
-/* 
+/**
  * dekita - Preschool Edition Animal Sound Game Module
  * For 3-year-olds: visual learning, no reading required
  */
@@ -68,6 +68,8 @@ export class AnimalGame {
     soundIcon.className = 'sound-icon';
     soundIcon.textContent = '🔊';
     soundIcon.style.fontSize = '80px';
+    soundIcon.style.cursor = 'pointer';
+    soundIcon.onclick = () => this.replaySound(correct.sound);
     pictureArea.appendChild(soundIcon);
 
     const questionText = this.root.getElementById('question-text');
@@ -161,5 +163,10 @@ export class AnimalGame {
   resetGame() {
     this.state.gameMode = 'animal';
     this.screen.showTitle();
+  }
+
+  replaySound(soundText) {
+    this.audio.playPopSound();
+    this.audio.speak(soundText);
   }
 }
