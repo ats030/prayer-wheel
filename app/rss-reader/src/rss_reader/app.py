@@ -349,6 +349,11 @@ def job_status(job_id: str):
     return job.as_dict()
 
 
+@app.get("/api/jobs")
+def list_jobs():
+    return [job.as_dict() for job in jobs.running_jobs()]
+
+
 @app.post("/api/feeds/detect")
 def detect_feed(body: UrlBody):
     url = body.url.strip()

@@ -64,6 +64,12 @@ def active(kind: str) -> Job | None:
     return job if job and job.status == "running" else None
 
 
+def running_jobs() -> list[Job]:
+    """Return all running jobs."""
+    with _lock:
+        return [j for j in _jobs.values() if j.status == "running"]
+
+
 def start(kind: str, fn, *, total: int = 0, message: str = "") -> Job:
     """Run ``fn(job)`` on a worker thread. Returns the running job if one exists."""
     existing = active(kind)

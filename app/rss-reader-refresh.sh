@@ -14,6 +14,13 @@ BASE="http://127.0.0.1:8505"
 POLL_INTERVAL=5
 MAX_WAIT=1800  # 39フィード＋上位50件の採点で、実測3〜5分。余裕を見て30分で打ち切る
 
+# 前回のジョブがまだrunningなら、新規投入せずやることなし（exit 3）
+running_kinds=$(curl -sS -m 10 "$BASE/api/jobs" 2>/dev/null | jq -r '.[] | select(.status == "running") | .kind' 2>/dev/null) || true
+if [ -n "$running_kinds" ]; then
+  echo "前回のジョブがまだ実行中: $running_kinds"
+  exit 3
+fi
+
 # ジョブを起動し、完了するまで待つ。$1=ラベル, $2=パス, $3=JSONボディ
 run_job() {
   label=$1
