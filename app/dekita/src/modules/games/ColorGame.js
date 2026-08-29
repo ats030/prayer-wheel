@@ -149,7 +149,6 @@ export class ColorGame {
   }
 
   resetGame() {
-    this.state.gameMode = 'color';
     this.screen.showTitle();
   }
 }

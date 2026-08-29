@@ -104,7 +104,6 @@ export class MazeGame {
   }
 
   resetGame() {
-    this.state.gameMode = 'maze';
     this.screen.showTitle();
   }
 

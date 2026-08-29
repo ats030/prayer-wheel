@@ -230,7 +230,6 @@ export class CountGame {
   }
 
   resetGame() {
-    this.state.gameMode = 'number';
     this.screen.showTitle();
   }
 }

@@ -161,7 +161,6 @@ export class AnimalGame {
   }
 
   resetGame() {
-    this.state.gameMode = 'animal';
     this.screen.showTitle();
   }
 

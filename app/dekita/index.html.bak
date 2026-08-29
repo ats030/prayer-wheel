@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>できた！</title>
+   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+   <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game-container">
+    <header>
+      <h1>できた！</h1>
+    </header>
+    
+    <div id="title-screen" class="screen">
+      <div class="mode-buttons">
+        <button id="start-btn" class="game-btn">🔢 すうじ</button>
+        <button id="color-start-btn" class="game-btn">🎨 いろ</button>
+        <button id="animal-start-btn" class="game-btn">🐶 どうぶつ</button>
+        <button id="maze-start-btn" class="game-btn">🛤️ めいろ</button>
+      </div>
+    </div>
+    
+    <div id="color-game-screen" class="screen hidden">
+      <div class="score-board">
+        <div class="score-info">
+          <span>スコア: <span id="color-score">0</span></span>
+          <span id="color-progress-text" class="progress-text"></span>
+        </div>
+        <button id="color-reset-btn" class="reset-btn">もどる</button>
+      </div>
+      
+      <div id="color-question-area" class="question-area">
+        <p id="color-question-text" class="question-text">これ なん の いろかな？</p>
+        <div id="color-emoji-display" class="color-emoji-display"></div>
+        <div id="color-answer-buttons" class="answer-buttons"></div>
+      </div>
+      
+      <div id="color-feedback-area" class="feedback-area hidden">
+        <p id="color-feedback-text" class="feedback-text">せいかい!</p>
+        <button id="color-next-btn" class="next-btn">つぎへ</button>
+      </div>
+    </div>
+    
+    <div id="game-screen" class="screen hidden">
+      <div class="score-board">
+        <div class="score-info">
+          <span>スコア: <span id="score">0</span></span>
+          <span id="progress-text" class="progress-text"></span>
+        </div>
+        <button id="reset-btn" class="reset-btn">もどる</button>
+      </div>
+      
+      <div id="question-area" class="question-area">
+        <div id="picture-area" class="picture-area"></div>
+        <canvas id="maze-canvas" class="hidden"></canvas>
+        <p id="question-text" class="question-text">なにが いくつ?</p>
+        <div id="answer-buttons" class="answer-buttons"></div>
+      </div>
+      
+      <div id="feedback-area" class="feedback-area hidden">
+        <p id="feedback-text" class="feedback-text">せいかい!</p>
+        <button id="next-btn" class="next-btn">つぎへ</button>
+      </div>
+    </div>
+    
+
+    
+    <div id="result-screen" class="screen hidden">
+      <h2>おわった!</h2>
+      <p class="final-score">スコア: <span id="final-score">0</span></p>
+      <button id="replay-btn" class="game-btn">もういっかい!</button>
+    </div>
+
+
+    
+      <div id="maze-play-screen" class="screen hidden" style="pointer-events: auto;">
+      <div class="score-board">
+        <div class="score-info">
+          <span>スコア: <span id="maze-score">0</span></span>
+          <span id="maze-progress-text" class="progress-text"></span>
+        </div>
+        <button id="maze-reset-btn" class="reset-btn">もどる</button>
+      </div>
+      
+      <div class="question-area" style="position: relative; z-index: 10; width: 300px; margin: 0 auto; pointer-events: auto;">
+        <canvas id="maze-canvas" class="maze-canvas"></canvas>
+      </div>
+      
+      <div id="maze-feedback-area" class="feedback-area hidden">
+        <p id="maze-feedback-text" class="feedback-text"></p>
+        <button id="maze-next-btn" class="next-btn">つぎへ</button>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
