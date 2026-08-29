@@ -87,10 +87,10 @@ export class AnimalGame {
       btn.className = 'answer-btn';
       const contentSpan = document.createElement('span');
       contentSpan.textContent = `${animal.emoji} ${animal.name}`;
-      contentSpan.style.fontSize = '48px';
-      btn.style.fontSize = '48px';
-      btn.style.padding = '20px';
-      btn.style.width = '160px';
+      contentSpan.style.fontSize = 'clamp(14px, 5dvw, 28px)';
+      btn.style.fontSize = 'clamp(14px, 5dvw, 28px)';
+      btn.style.padding = '12px 16px';
+      btn.style.width = 'auto';
       btn.onclick = () => this.checkAnswer(animal, correct);
       btn.appendChild(contentSpan);
       answerButtons.appendChild(btn);

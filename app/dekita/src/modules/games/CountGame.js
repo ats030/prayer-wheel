@@ -129,9 +129,8 @@ export class CountGame {
       const btn = document.createElement('button');
       btn.className = 'answer-btn';
       btn.textContent = a;
-      btn.style.fontSize = '64px';
-      btn.style.width = '100px';
-      btn.style.height = '100px';
+      btn.style.fontSize = 'clamp(24px, 6dvw, 48px)';
+      btn.style.width = 'auto';
       btn.onclick = () => this.checkAnswer(a);
       answerButtons.appendChild(btn);
     });
