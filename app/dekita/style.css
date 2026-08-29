@@ -26,7 +26,6 @@ body {
   box-sizing: border-box;
   position: relative;
   width: 100%;
-  pointer-events: none;
 }
 
 /* --- レイアウト --- */
@@ -41,11 +40,32 @@ body {
   box-sizing: border-box;
   padding: 0;
   position: relative;
-  pointer-events: none;
 }
 
 .game-container > .screen {
   pointer-events: auto;
+}
+
+/* 迷画面のスクロールを許可 */
+#maze-play-screen {
+  overflow-y: auto;
+  touch-action: auto;
+}
+
+#maze-play-screen {
+  max-height: 100vh;
+}
+
+#maze-play-screen .score-board {
+  flex-shrink: 0;
+}
+
+#maze-play-screen .maze-area {
+  flex-shrink: 0;
+}
+
+#maze-play-screen .feedback-area {
+  flex-shrink: 0;
 }
 
 header {
