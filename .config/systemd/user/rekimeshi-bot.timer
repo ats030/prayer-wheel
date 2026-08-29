@@ -1,0 +1,25 @@
+[Unit]
+Description=Rekimeshi Bot Posting Timer (Every 2 hours)
+Documentation=https://github.com/anthropics/claude-code
+
+[Timer]
+# 毎日2時間おき（6:00-22:00 JST、9回/日）
+# 当機はTZ=UTCのため Asia/Tokyo を明示し、日本時間で発火させる
+OnCalendar=*-*-* 06:00:00 Asia/Tokyo
+OnCalendar=*-*-* 08:00:00 Asia/Tokyo
+OnCalendar=*-*-* 10:00:00 Asia/Tokyo
+OnCalendar=*-*-* 12:00:00 Asia/Tokyo
+OnCalendar=*-*-* 14:00:00 Asia/Tokyo
+OnCalendar=*-*-* 16:00:00 Asia/Tokyo
+OnCalendar=*-*-* 18:00:00 Asia/Tokyo
+OnCalendar=*-*-* 20:00:00 Asia/Tokyo
+OnCalendar=*-*-* 22:00:00 Asia/Tokyo
+
+# システム再起動後も自動復帰
+Persistent=true
+
+# 指定時刻から数分遅れた場合でも実行
+AccuracySec=5min
+
+[Install]
+WantedBy=timers.target

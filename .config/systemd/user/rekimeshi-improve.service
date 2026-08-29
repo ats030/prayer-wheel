@@ -1,0 +1,18 @@
+[Unit]
+Description=Rekimeshi 自己改善ループ - 投稿ログ分析と多様性ヒント更新
+# pCloudDrive(FUSE)マウント完了とネットワーク確立を待つ
+After=network-online.target home-ats030-pCloudDrive.mount
+Wants=network-online.target home-ats030-pCloudDrive.mount
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ats030/pCloudDrive/Python/rekimeshi
+
+# uv 専用venv (~/.venv/rekimeshi) 経由で分析スクリプトを実行。
+# x_improvement_prompt.md / x_improvement_report.md を更新する (LLMジャッジなし・安価)。
+ExecStart=/home/ats030/app/rekimeshi-improve.sh
+
+StandardOutput=journal
+StandardError=journal
+
+# このサービスは rekimeshi-improve.timer から起動される (起動時自動実行はしない)。

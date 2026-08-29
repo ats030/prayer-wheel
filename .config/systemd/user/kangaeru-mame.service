@@ -1,0 +1,18 @@
+[Unit]
+Description=考える豆 (俗物ずんだもんの哲学チャンネル 制作UI, port 8511)
+After=network-online.target home-ats030-pCloudDrive.mount
+Requires=home-ats030-pCloudDrive.mount
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ats030
+EnvironmentFile=-/home/ats030/.env
+ExecStart=/home/ats030/app/kangaeru-mame.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=kangaeru-mame
+
+[Install]
+WantedBy=default.target

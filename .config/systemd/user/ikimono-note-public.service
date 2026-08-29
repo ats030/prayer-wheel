@@ -1,0 +1,17 @@
+[Unit]
+Description=生きものノート 公開版 (BYOK, Tailscale Funnel の向け先, ループバック 8524 で待受)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ats030
+EnvironmentFile=-/home/ats030/.env
+ExecStart=/home/ats030/app/ikimono-note-public.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ikimono-note-public
+
+[Install]
+WantedBy=default.target

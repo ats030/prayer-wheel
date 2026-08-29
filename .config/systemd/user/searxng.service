@@ -1,0 +1,20 @@
+[Unit]
+Description=SearXNG local metasearch for writing context
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ats030/app/searxng
+EnvironmentFile=-/home/ats030/.env
+Environment=SEARXNG_SETTINGS_PATH=/home/ats030/.config/searxng/settings.yml
+Environment=SEARXNG_BIND_ADDRESS=127.0.0.1
+Environment=SEARXNG_PORT=8081
+ExecStart=/home/ats030/.venv/searxng/bin/granian --interface wsgi --host 127.0.0.1 --port 8081 --workers 1 --blocking-threads 4 searx.webapp:app
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

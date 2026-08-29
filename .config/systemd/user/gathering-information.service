@@ -1,0 +1,18 @@
+[Unit]
+Description=Gathering Information (port 8508)
+After=network-online.target home-ats030-pCloudDrive.mount
+Requires=home-ats030-pCloudDrive.mount
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ats030
+EnvironmentFile=-/home/ats030/.env
+ExecStart=/home/ats030/app/gathering-information.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=gathering-information
+
+[Install]
+WantedBy=default.target

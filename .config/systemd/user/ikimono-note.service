@@ -1,0 +1,17 @@
+[Unit]
+Description=生きものノート 運営者用 (設定の保存が可能, port 8523)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ats030
+EnvironmentFile=-/home/ats030/.env
+ExecStart=/home/ats030/app/ikimono-note.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ikimono-note
+
+[Install]
+WantedBy=default.target

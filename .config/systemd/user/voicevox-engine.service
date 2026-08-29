@@ -1,0 +1,17 @@
+[Unit]
+Description=VOICEVOX Engine (CPU, localhost:50021)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/voicevox/extracted/linux-cpu-x64
+ExecStart=%h/voicevox/extracted/linux-cpu-x64/run --host 127.0.0.1 --port 50021
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=voicevox-engine
+
+[Install]
+WantedBy=default.target
+
