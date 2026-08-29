@@ -75,6 +75,8 @@ export class ColorGame {
     colorOptions.forEach(color => {
       const btn = document.createElement('button');
       btn.className = 'answer-btn color-answer-btn';
+      btn.style.backgroundColor = color.hex;
+      btn.style.color = '#ffffff';
       btn.textContent = color.name;
       btn.onclick = () => this.checkAnswerByName(color, correct);
       answerButtons.appendChild(btn);
