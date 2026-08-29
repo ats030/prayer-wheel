@@ -91,6 +91,9 @@ export class ColorGame {
   }
 
   checkAnswerByName(selected, correct) {
+    if (this.state.isAnswering) return;
+    this.state.isAnswering = true;
+    
     if (selected.name === correct.name) {
       this.state.addScore(10);
       this.playCorrectFeedback();
@@ -101,6 +104,7 @@ export class ColorGame {
     this.updateScore();
 
     setTimeout(() => {
+      this.state.isAnswering = false;
       this.root.getElementById('color-feedback-area').classList.add('hidden');
       this.nextQuestion();
     }, 2000);

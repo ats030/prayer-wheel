@@ -153,6 +153,9 @@ export class CountGame {
   checkAnswer(selected) {
     const correct = this.state.currentAnswer;
     
+    if (this.state.isAnswering) return;
+    this.state.isAnswering = true;
+    
     if (correct === selected) {
       this.state.addScore(10);
       this.playCorrectFeedback();
@@ -163,6 +166,7 @@ export class CountGame {
     this.updateScore();
     
     setTimeout(() => {
+      this.state.isAnswering = false;
       this.root.getElementById('feedback-area').classList.add('hidden');
       this.nextQuestion();
     }, 2000);

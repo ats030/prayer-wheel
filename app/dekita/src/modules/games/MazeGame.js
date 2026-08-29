@@ -46,6 +46,7 @@ export class MazeGame {
     this.state.questionsTotal = 5;
     this.state.score = 0;
     this.state.mazeActive = true;
+    this.state.isAnswering = false;
     
     // テーマ設定
     const themes = [
@@ -292,6 +293,7 @@ export class MazeGame {
   }
 
   dragPlayer(x, y) {
+    if (this.state.isAnswering) return;
     if (!this.isPath(x, y)) {
       this.failMaze();
       return;
@@ -303,6 +305,7 @@ export class MazeGame {
   }
 
   releasePlayer(x, y) {
+    if (this.state.isAnswering) return;
     if (!this.isPath(x, y)) {
       this.failMaze();
       return;
@@ -314,6 +317,7 @@ export class MazeGame {
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     if (distance < 30) {
+      this.state.isAnswering = true;
       this.winMaze(x, y);
     } else {
       this.state.mazePlayer.x = x;

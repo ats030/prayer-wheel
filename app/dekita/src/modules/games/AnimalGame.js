@@ -103,6 +103,9 @@ export class AnimalGame {
   }
 
   checkAnswer(selected, correct) {
+    if (this.state.isAnswering) return;
+    this.state.isAnswering = true;
+    
     if (selected === correct) {
       this.state.addScore(10);
       this.playCorrectFeedback();
@@ -113,6 +116,7 @@ export class AnimalGame {
     this.updateScore();
 
     setTimeout(() => {
+      this.state.isAnswering = false;
       this.root.getElementById('feedback-area').classList.add('hidden');
       this.nextQuestion();
     }, 2000);
