@@ -4,27 +4,18 @@ This project uses **bd** (beads) for issue tracking. Use the quick reference bel
 
 ## Non-Interactive Shell Commands
 
-**ALWAYS use non-interactive flags** with file operations to avoid hanging on confirmation prompts.
+Always use non-interactive forms: `cp -f`, `mv -f`, `rm -f`/`rm -rf`,
+`scp -o BatchMode=yes`, `ssh -o BatchMode=yes`, `apt-get -y`, and
+`HOMEBREW_NO_AUTO_UPDATE=1 brew ...`.
 
-Shell commands like `cp`, `mv`, and `rm` may be aliased to include `-i` (interactive) mode on some systems, causing the agent to hang indefinitely waiting for y/n input.
+## Efficient High-Quality Workflow
 
-**Use these forms instead:**
-```bash
-# Force overwrite without prompting
-cp -f source dest           # NOT: cp source dest
-mv -f source dest           # NOT: mv source dest
-rm -f file                  # NOT: rm file
-
-# For recursive operations
-rm -rf directory            # NOT: rm -r directory
-cp -rf source dest          # NOT: cp -r source dest
-```
-
-**Other commands that may prompt:**
-- `scp` - use `-o BatchMode=yes` for non-interactive
-- `ssh` - use `-o BatchMode=yes` to fail instead of prompting
-- `apt-get` - use `-y` flag
-- `brew` - use `HOMEBREW_NO_AUTO_UPDATE=1` env var
+- Keep one issue per session; restart when the objective changes.
+- Before editing, derive outcome, checks, and scope from the issue or repository.
+- For narrow work, use `rg` and relevant ranges. Skip generated trackers, lockfiles, build output, indexes, minified assets, and full logs unless relevant.
+- Prefer targeted tests, `git diff --check`, API/HTTP responses, service state over prose.
+- Offer at most three alternatives; recommend first with reason and drawback. Bound tool output and inspect the first causal error before widening.
+- Improve context and validation before changing model, context, compaction, or reasoning settings.
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:full hash:f65d5d33 -->
 ## Issue Tracking with bd (beads)
