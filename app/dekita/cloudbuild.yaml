@@ -1,9 +1,5 @@
 # Cloud Build configuration for dekita
 # Deploys to Cloud Run in Asia Northeast1 region
-# Uses default Cloud Build service account with IAM roles:
-# - roles/run.developer
-# - roles/artifactregistry.repositoryAdmin
-
 steps:
   - name: 'ubuntu'
     entrypoint: 'bash'
@@ -27,32 +23,26 @@ steps:
         server {
             listen 8080;
             server_name _;
-
             root /usr/share/nginx/html;
             index index.html;
-
             location / {
                 try_files $uri $uri/ /index.html =404;
             }
-
             location /src/ {
                 add_header Cache-Control "no-cache, no-store, must-revalidate";
                 add_header X-Content-Type-Options "nosniff";
                 add_header X-Frame-Options "DENY";
             }
-
             location = /index.html {
                 add_header Cache-Control "no-cache, no-store, must-revalidate";
                 add_header X-Content-Type-Options "nosniff";
                 add_header X-Frame-Options "DENY";
             }
-
             location = /style.css {
                 add_header Cache-Control "no-cache, no-store, must-revalidate";
                 add_header X-Content-Type-Options "nosniff";
                 add_header X-Frame-Options "DENY";
             }
-
             location = /favicon.svg {
                 add_header Cache-Control "max-age=31536000, immutable";
                 add_header X-Content-Type-Options "nosniff";
@@ -61,34 +51,34 @@ steps:
         }
         NGINXEOF
 
-   - name: 'gcr.io/cloud-builders/docker'
-     args:
-       - 'build'
-       - '-t'
-       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
-       - '.'
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
+      - '.'
 
-   - name: 'gcr.io/cloud-builders/docker'
-     args:
-       - 'push'
-       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
 
-   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-     entrypoint: gcloud
-     args:
-       - 'run'
-       - 'deploy'
-       - 'dekita-app'
-       - '--image'
-       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
-       - '--region'
-       - 'asia-northeast1'
-       - '--platform'
-       - 'managed'
-       - '--port'
-       - '8080'
-       - '--memory'
-       - '512Mi'
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'dekita-app'
+      - '--image'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
+      - '--region'
+      - 'asia-northeast1'
+      - '--platform'
+      - 'managed'
+      - '--port'
+      - '8080'
+      - '--memory'
+      - '512Mi'
 
 images:
   - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
