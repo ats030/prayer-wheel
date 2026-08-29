@@ -11,6 +11,7 @@ export class MazeGame {
     this.audio = audio;
     this.screen = screen;
     this.pathGenerator = new PathGenerator();
+    this.isDragging = false;
   }
 
   setTestMode(enabled) {
@@ -150,21 +151,92 @@ export class MazeGame {
     const canvas = this.root.getElementById('maze-canvas');
     if (!canvas) return;
 
-    canvas.addEventListener('click', (e) => {
+    // マウスイベント
+    canvas.addEventListener('mousedown', (e) => {
       if (!this.state.mazeActive) return;
+      this.isDragging = true;
+      e.preventDefault();
+    }, { passive: false });
 
+    canvas.addEventListener('mousemove', (e) => {
+      if (!this.state.mazeActive || !this.isDragging) return;
+      e.preventDefault();
+      
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
+      
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+      
+      this.dragPlayer(x, y);
+    }, { passive: false });
 
-      const clickX = (e.clientX - rect.left) * scaleX;
-      const clickY = (e.clientY - rect.top) * scaleY;
+    canvas.addEventListener('mouseup', (e) => {
+      if (!this.state.mazeActive || !this.isDragging) return;
+      this.isDragging = false;
+      
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+      
+      this.releasePlayer(x, y);
+    });
 
-      this.movePlayerTo(clickX, clickY);
+    canvas.addEventListener('mouseleave', () => {
+      if (this.isDragging) {
+        this.isDragging = false;
+      }
+    });
+
+    // タッチイベント
+    canvas.addEventListener('touchstart', (e) => {
+      if (!this.state.mazeActive) return;
+      this.isDragging = true;
+      e.preventDefault();
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (!this.state.mazeActive || !this.isDragging) return;
+      e.preventDefault();
+      
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      
+      const touch = e.touches[0];
+      const x = (touch.clientX - rect.left) * scaleX;
+      const y = (touch.clientY - rect.top) * scaleY;
+      
+      this.dragPlayer(x, y);
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', (e) => {
+      if (!this.state.mazeActive || !this.isDragging) return;
+      this.isDragging = false;
+      
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      
+      const touch = e.changedTouches[0];
+      const x = (touch.clientX - rect.left) * scaleX;
+      const y = (touch.clientY - rect.top) * scaleY;
+      
+      this.releasePlayer(x, y);
+    });
+
+    canvas.addEventListener('touchcancel', () => {
+      if (this.isDragging) {
+        this.isDragging = false;
+      }
     });
   }
 
-   isPath(x, y) {
+  isPath(x, y) {
     if (!this.state.mazePath || this.state.mazePath.length < 2) return true;
 
     const cellSize = 37.5;
@@ -214,6 +286,37 @@ export class MazeGame {
     } else {
       this.state.mazePlayer.x = targetX;
       this.state.mazePlayer.y = targetY;
+      this.drawMaze();
+    }
+  }
+
+  dragPlayer(x, y) {
+    if (!this.isPath(x, y)) {
+      this.failMaze();
+      return;
+    }
+    
+    this.state.mazePlayer.x = x;
+    this.state.mazePlayer.y = y;
+    this.drawMaze();
+  }
+
+  releasePlayer(x, y) {
+    if (!this.isPath(x, y)) {
+      this.failMaze();
+      return;
+    }
+
+    const goal = this.state.mazeGoal;
+    const dx = x - goal.x;
+    const dy = y - goal.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < 30) {
+      this.winMaze(x, y);
+    } else {
+      this.state.mazePlayer.x = x;
+      this.state.mazePlayer.y = y;
       this.drawMaze();
     }
   }
