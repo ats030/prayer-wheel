@@ -53,10 +53,6 @@ body {
   flex: 1 1 auto;
 }
 
-#maze-play-screen {
-  max-height: 100vh;
-}
-
 #maze-play-screen .score-board {
   flex-shrink: 0;
 }
