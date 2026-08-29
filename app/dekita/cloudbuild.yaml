@@ -1,15 +1,10 @@
 # Cloud Build configuration for dekita
 # Deploys to Cloud Run in Asia Northeast1 region
+# Uses default Cloud Build service account with IAM roles:
+# - roles/run.developer
+# - roles/artifactregistry.repositoryAdmin
 
-# Step 1: Authenticate Docker with Artifact Registry
 steps:
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud auth configure-docker asia-northeast1-docker.pkg.dev --quiet
-
   - name: 'ubuntu'
     entrypoint: 'bash'
     args:
@@ -72,11 +67,6 @@ steps:
       - '-t'
       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
       - '.'
-
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
