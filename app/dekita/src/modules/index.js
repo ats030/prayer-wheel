@@ -6,12 +6,12 @@
 import { GameState } from './core/GameState.js';
 import { AudioManager } from './core/AudioManager.js';
 import { ScreenManager } from './core/ScreenManager.js';
-import { CountGame } from './games/CountGame.js';
-import { ColorGame } from './games/ColorGame.js';
-import { AnimalGame } from './games/AnimalGame.js';
-import { MazeGame } from './games/MazeGame.js';
-import { MatchGame } from './games/MatchGame.js';
-import { PuzzleGame } from './games/PuzzleGame.js';
+import { CountGame } from './modules/games/CountGame.js';
+import { ColorGame } from './modules/games/ColorGame.js';
+import { AnimalGame } from './modules/games/AnimalGame.js';
+import { MazeGame } from './modules/games/MazeGame.js';
+import { MatchGame } from './modules/games/MatchGame.js';
+import { PuzzleGame } from './modules/games/PuzzleGame.js';
 
 export function init() {
   const gameState = new GameState();

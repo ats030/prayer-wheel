@@ -403,37 +403,12 @@ h2 {
 /* --- パズル画面 --- */
 .puzzle-grid {
   display: grid;
-  grid-template-columns: repeat(3, 80px);
-  grid-template-rows: repeat(3, 80px);
-  gap: 4px;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 8px;
   margin: 0 auto;
 }
 
-.puzzle-piece {
-  font-size: 48px;
-  background-color: #f0f0f0;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.puzzle-piece.selected {
-  background-color: #FFD54F;
-  transform: scale(1.1);
-  box-shadow: 0 0 10px rgba(255, 213, 79, 0.8);
-}
-
-.puzzle-piece.correct {
-  background-color: #4CAF50;
-  color: #fff;
-  border-color: #2E7D32;
-}
-
-/* --- シルエットパズル画面用 --- */
 .puzzle-silhouette {
   font-size: 48px;
   background-color: rgba(200, 200, 200, 0.3);
@@ -443,6 +418,7 @@ h2 {
   justify-content: center;
   align-items: center;
   transition: all 0.3s ease;
+  user-select: none;
 }
 
 .puzzle-piece {
@@ -462,60 +438,10 @@ h2 {
   cursor: grabbing;
 }
 
-.puzzle-silhouette {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.3s ease;
-}
-
-.puzzle-silhouette[data-shape="circle"] {
-  width: 80px;
-  height: 80px;
-  background-color: rgba(200, 200, 200, 0.3);
-  border: 2px dashed #aaa;
-  border-radius: 50%;
-}
-
-.puzzle-silhouette[data-shape="rect"] {
-  width: 80px;
-  height: 80px;
-  background-color: rgba(200, 200, 200, 0.3);
-  border: 2px dashed #aaa;
-  border-radius: 12px;
-}
-
-.puzzle-silhouette[data-shape="vrect"] {
-  width: 60px;
-  height: 100px;
-  background-color: rgba(200, 200, 200, 0.3);
-  border: 2px dashed #aaa;
-  border-radius: 12px;
-}
-
-.puzzle-silhouette[data-shape="hrect"] {
-  width: 100px;
-  height: 60px;
-  background-color: rgba(200, 200, 200, 0.3);
-  border: 2px dashed #aaa;
-  border-radius: 12px;
-}
-
-.puzzle-silhouette.highlight-shape {
+.puzzle-silhouette.revealed {
   opacity: 1.0;
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(255, 255, 0, 0.6);
-}
-
-.puzzle-silhouette.correct-shape {
-  background-color: rgba(76, 175, 80, 0.3);
-  border-color: #4CAF50;
-  box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
-}
-
-.puzzle-silhouette.wrong-shape {
-  background-color: rgba(255, 87, 34, 0.3);
-  border-color: #FF5722;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 2px solid #4CAF50;
 }
 
 /* --- リザルト画面 --- */

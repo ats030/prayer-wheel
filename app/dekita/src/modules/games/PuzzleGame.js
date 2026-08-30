@@ -1,6 +1,8 @@
 /**
  * dekita - Preschool Edition Puzzle Game Module
  * For 3-year-olds: Drag and drop puzzle with silhouette matching
+ * 3x3 grid with different emojis as silhouettes (30% opacity)
+ * Drag the correct emoji to match the silhouette
  */
 
 export class PuzzleGame {
@@ -9,12 +11,14 @@ export class PuzzleGame {
     this.audio = audio;
     this.screen = screen;
     this.gridSize = 3;
-    this.grid = [];
     this.draggedPiece = null;
     this.score = 0;
     this.moves = 0;
     this.gameOver = false;
     this.theme = null;
+    this.silhouettes = [];
+    this.correctIndex = 0;
+    this.correctEmoji = '';
     this.emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨'];
   }
 
@@ -73,29 +77,10 @@ export class PuzzleGame {
     ];
     
     this.theme = themes[Math.floor(Math.random() * themes.length)];
-    this.targetEmoji = this.theme.emojis[Math.floor(Math.random() * this.theme.emojis.length)];
-    
-    this.grid = [];
+    const shuffledEmojis = [...this.theme.emojis].sort(() => Math.random() - 0.5);
+    this.silhouettes = shuffledEmojis.slice(0, 9);
     this.correctIndex = Math.floor(Math.random() * 9);
-    
-    for (let i = 0; i < 9; i++) {
-      const piece = document.createElement('div');
-      piece.className = 'puzzle-piece';
-      piece.textContent = this.targetEmoji;
-      piece.draggable = true;
-      piece.dataset.shape = 'emoji';
-
-      piece.addEventListener('dragstart', (e) => this.handleDragStart(e, i));
-      piece.addEventListener('dragover', (e) => e.preventDefault());
-      piece.addEventListener('drop', (e) => this.handleDrop(e, i));
-      piece.addEventListener('dragenter', (e) => e.preventDefault());
-      piece.addEventListener('dragleave', (e) => e.preventDefault());
-
-      this.grid.push({
-        element: piece,
-        shape: 'emoji'
-      });
-    }
+    this.correctEmoji = this.silhouettes[this.correctIndex];
     
     this.createGrid();
   }
@@ -115,38 +100,42 @@ export class PuzzleGame {
       const slot = document.createElement('div');
       slot.className = 'puzzle-silhouette';
       slot.dataset.index = i;
-      slot.textContent = this.targetEmoji;
+      slot.dataset.emoji = this.silhouettes[i];
+      slot.textContent = this.silhouettes[i];
+      slot.style.opacity = '0.3';
       gridArea.appendChild(slot);
     }
 
-    for (let i = 0; i < 9; i++) {
-      gridArea.appendChild(this.grid[i].element);
-    }
+    const correctSlot = gridArea.children[this.correctIndex];
+    correctSlot.classList.remove('puzzle-silhouette');
+    correctSlot.classList.add('puzzle-piece');
+    correctSlot.style.opacity = '1.0';
+    correctSlot.draggable = true;
+    correctSlot.dataset.draggable = 'true';
 
-    const silhouettes = gridArea.querySelectorAll('.puzzle-silhouette');
-    if (silhouettes[this.correctIndex]) {
-      silhouettes[this.correctIndex].dataset.shape = 'highlight';
-      silhouettes[this.correctIndex].classList.add('highlight-shape');
-    }
+    correctSlot.addEventListener('dragstart', (e) => this.handleDragStart(e));
+    correctSlot.addEventListener('dragover', (e) => e.preventDefault());
+    correctSlot.addEventListener('drop', (e) => this.handleDrop(e));
+    correctSlot.addEventListener('dragenter', (e) => e.preventDefault());
+    correctSlot.addEventListener('dragleave', (e) => e.preventDefault());
 
     this.updateProgress();
   }
 
-  handleDragStart(e, index) {
-    this.draggedPiece = this.silhouettes[index];
+  handleDragStart(e) {
+    this.draggedPiece = this.correctEmoji;
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', index.toString());
+    e.dataTransfer.setData('text/plain', this.correctEmoji);
     setTimeout(() => e.target.style.opacity = '0.5', 0);
   }
 
-  handleDrop(e, targetIndex) {
+  handleDrop(e) {
     e.preventDefault();
-    if (this.draggedPiece) {
-      e.target.style.opacity = '1';
-    }
+    e.target.style.opacity = '1';
+
     this.moves++;
     
-    if (targetIndex === this.correctIndex) {
+    if (e.target.dataset.emoji === this.correctEmoji) {
       this.checkWin();
     } else {
       this.audio.playErrorSound();
@@ -162,6 +151,13 @@ export class PuzzleGame {
   }
 
   checkWin() {
+    const gridArea = this.getGridArea();
+    if (gridArea && gridArea.children[this.correctIndex]) {
+      gridArea.children[this.correctIndex].style.opacity = '1.0';
+      gridArea.children[this.correctIndex].classList.remove('puzzle-piece');
+      gridArea.children[this.correctIndex].classList.add('puzzle-silhouette', 'revealed');
+    }
+
     this.state.addScore(20);
     this.playCorrectFeedback();
     

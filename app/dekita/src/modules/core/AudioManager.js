@@ -111,15 +111,15 @@ export class AudioManager {
     const gain = ctx.createGain();
     
     osc.frequency.value = 220;
-    osc.type = 'square';
+    osc.type = 'sawtooth';
     osc.connect(gain);
     gain.connect(ctx.destination);
     
     gain.gain.setValueAtTime(0.3 * this.volume, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
     
     osc.start(now);
-    osc.stop(now + 0.4);
+    osc.stop(now + 0.3);
   }
 
   setEnabled(enabled) {
