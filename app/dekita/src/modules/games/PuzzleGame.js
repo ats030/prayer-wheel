@@ -76,14 +76,13 @@ export class PuzzleGame {
       { name: 'のりもの', emojis: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒'] }
     ];
     
-    this.theme = themes[Math.floor(Math.random() * themes.length)];
-    
-    // 1種類の絵文字をランダムに選択
     this.targetEmoji = this.theme.emojis[Math.floor(Math.random() * this.theme.emojis.length)];
     
-    // シルエット：外形が同じ（丸い）シルエットを1つ、違うものを8つ
-    // 外形の種類（例：丸系、四角系、縦長系、横長系）
-    const shapes = ['circle', 'rect', 'vrect', 'hrect'];
+    // 外形シルエット（線画：透かした絵文字）を1つ、違う外形を8つ
+    const emojiShapes = [];
+    for (let i = 0; i < 9; i++) {
+      emojiShapes.push(i === 0 ? 'circle' : this.getDifferentShape('circle') );
+    }
     
     this.grid = [];
     let correctIndex = Math.floor(Math.random() * 9);
@@ -93,8 +92,7 @@ export class PuzzleGame {
       piece.className = 'puzzle-piece';
       piece.textContent = this.targetEmoji;
       piece.draggable = true;
-      piece.dataset.index = i;
-      piece.dataset.shape = i === correctIndex ? 'circle' : shapes[i % 4];
+      piece.dataset.shape = emojiShapes[i];
 
       piece.addEventListener('dragstart', (e) => this.handleDragStart(e, i));
       piece.addEventListener('dragover', (e) => e.preventDefault());
