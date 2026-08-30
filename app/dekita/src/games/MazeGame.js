@@ -164,12 +164,10 @@ export class MazeGame {
     canvas.addEventListener('mousedown', (e) => {
       if (!this.state.mazeActive) return;
       this.isDragging = true;
-      e.preventDefault();
     }, { passive: false });
 
     canvas.addEventListener('mousemove', (e) => {
       if (!this.state.mazeActive || !this.isDragging) return;
-      e.preventDefault();
       
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -205,12 +203,10 @@ export class MazeGame {
     canvas.addEventListener('touchstart', (e) => {
       if (!this.state.mazeActive) return;
       this.isDragging = true;
-      e.preventDefault();
     }, { passive: false });
 
     canvas.addEventListener('touchmove', (e) => {
       if (!this.state.mazeActive || !this.isDragging) return;
-      e.preventDefault();
       
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
