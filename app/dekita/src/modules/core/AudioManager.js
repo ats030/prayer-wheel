@@ -33,25 +33,25 @@ export class AudioManager {
      window.speechSynthesis.speak(utterance);
    }
 
-  playPopSound() {
-    if (!this.enabled || !this.audioContext) return;
-    
-    const oscillator = this.audioContext.createOscillator();
-    const gainNode = this.audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(this.audioContext.destination);
-    
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(400, this.audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(800, this.audioContext.currentTime + 0.08);
-    
-    gainNode.gain.setValueAtTime(0.3 * this.volume, this.audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.08);
-    
-    oscillator.start();
-    oscillator.stop(this.audioContext.currentTime + 0.08);
-  }
+   playPopSound() {
+     if (!this.enabled || !this.audioContext) return;
+     
+     const oscillator = this.audioContext.createOscillator();
+     const gainNode = this.audioContext.createGain();
+     
+     oscillator.connect(gainNode);
+     gainNode.connect(this.audioContext.destination);
+     
+     oscillator.type = 'sine';
+     oscillator.frequency.setValueAtTime(400, this.audioContext.currentTime);
+     oscillator.frequency.linearRampToValueAtTime(800, this.audioContext.currentTime + 0.08);
+     
+     gainNode.gain.setValueAtTime(0.3 * this.volume, this.audioContext.currentTime);
+     gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.08);
+     
+     oscillator.start();
+     oscillator.stop(this.audioContext.currentTime + 0.08);
+   }
 
   playCorrectSound() {
     if (!this.enabled || !this.audioContext) return;
