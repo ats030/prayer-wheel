@@ -106,12 +106,12 @@ export class PuzzleGame {
       slot.dataset.index = i;
       slot.dataset.emoji = this.silhouettes[i];
       slot.textContent = this.silhouettes[i];
-      slot.style.opacity = '0.2';
+      slot.style.filter = 'brightness(20%)';
       gridArea.appendChild(slot);
     }
 
     const targetSlot = gridArea.children[this.correctIndex];
-    targetSlot.style.opacity = '0.2';
+    targetSlot.style.filter = 'brightness(20%)';
 
     targetSlot.addEventListener('dragover', (e) => this.handleDragOver(e));
     targetSlot.addEventListener('drop', (e) => this.handleDrop(e));
