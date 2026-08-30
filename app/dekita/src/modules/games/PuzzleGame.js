@@ -133,7 +133,7 @@ export class PuzzleGame {
   }
 
   handleDragStart(e, index) {
-    this.draggedPiece = this.grid[index];
+    this.draggedPiece = this.silhouettes[index];
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', index.toString());
     setTimeout(() => e.target.style.opacity = '0.5', 0);
@@ -142,25 +142,22 @@ export class PuzzleGame {
   handleDrop(e, targetIndex) {
     e.preventDefault();
     if (this.draggedPiece) {
-      this.draggedPiece.element.style.opacity = '1';
+      e.target.style.opacity = '1';
     }
-
-    if (this.draggedPiece) {
-      this.moves++;
-      
-      if (targetIndex === this.correctIndex) {
-        this.checkWin();
-      } else {
-        this.audio.playErrorSound();
-        const area = this.root.getElementById('puzzle-feedback-area');
-        const text = this.root.getElementById('puzzle-feedback-text');
-        area.style.display = 'block';
-        text.textContent = '違うかも...';
-        text.style.color = '#FF5722';
-        setTimeout(() => {
-          area.style.display = 'none';
-        }, 1000);
-      }
+    this.moves++;
+    
+    if (targetIndex === this.correctIndex) {
+      this.checkWin();
+    } else {
+      this.audio.playErrorSound();
+      const area = this.root.getElementById('puzzle-feedback-area');
+      const text = this.root.getElementById('puzzle-feedback-text');
+      area.style.display = 'block';
+      text.textContent = '違うかも...';
+      text.style.color = '#FF5722';
+      setTimeout(() => {
+        area.style.display = 'none';
+      }, 1000);
     }
   }
 

@@ -101,6 +101,27 @@ export class AudioManager {
     osc.stop(now + 0.3);
   }
 
+  playErrorSound() {
+    if (!this.enabled || !this.audioContext) return;
+    
+    const ctx = this.audioContext;
+    const now = ctx.currentTime;
+    
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.frequency.value = 220;
+    osc.type = 'square';
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    gain.gain.setValueAtTime(0.3 * this.volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+    
+    osc.start(now);
+    osc.stop(now + 0.4);
+  }
+
   setEnabled(enabled) {
     this.enabled = enabled;
   }
