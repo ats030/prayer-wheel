@@ -19,6 +19,7 @@
         <button id="color-start-btn" class="game-btn">🎨 いろ</button>
         <button id="animal-start-btn" class="game-btn">🐶 どうぶつ</button>
         <button id="maze-start-btn" class="game-btn">🛤️ めいろ</button>
+        <button id="match-start-btn" class="game-btn">🃏 おなじ</button>
       </div>
     </div>
     
@@ -64,14 +65,30 @@
       </div>
     </div>
     
-
+    <div id="match-game-screen" class="screen hidden">
+      <div class="score-board">
+        <div class="score-info">
+          <span>スコア: <span id="match-score">0</span></span>
+          <span id="match-progress-text" class="progress-text"></span>
+        </div>
+        <button id="match-reset-btn" class="reset-btn">もどる</button>
+      </div>
+      
+      <div id="match-grid-area" class="question-area">
+        <div id="match-grid" class="match-grid"></div>
+      </div>
+      
+      <div id="match-feedback-area" class="feedback-area" style="display: none;">
+        <p id="match-feedback-text" class="feedback-text">せいかい!</p>
+        <button id="match-next-btn" class="next-btn">もういっこ</button>
+      </div>
+    </div>
     
     <div id="result-screen" class="screen hidden">
       <h2>おわった!</h2>
       <p class="final-score">スコア: <span id="final-score">0</span></p>
       <button id="replay-btn" class="game-btn">もういっかい!</button>
     </div>
-
 
     
       <div id="maze-play-screen" class="screen hidden" style="pointer-events: auto;">

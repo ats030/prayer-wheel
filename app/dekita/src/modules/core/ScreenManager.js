@@ -48,6 +48,10 @@ export class ScreenManager {
     this.show('maze-play-screen');
   }
 
+  showMatchGame() {
+    this.show('match-game-screen');
+  }
+
   showResult() {
     this.show('result-screen');
   }

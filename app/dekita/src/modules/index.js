@@ -10,6 +10,7 @@ import { CountGame } from './games/CountGame.js';
 import { ColorGame } from './games/ColorGame.js';
 import { AnimalGame } from './games/AnimalGame.js';
 import { MazeGame } from './games/MazeGame.js';
+import { MatchGame } from './games/MatchGame.js';
 
 export function init() {
   const gameState = new GameState();
@@ -26,10 +27,13 @@ export function init() {
   
   const mazeGame = new MazeGame(gameState, audioManager, screenManager);
   
+  const matchGame = new MatchGame(gameState, audioManager, screenManager);
+  
   countGame.init(document);
   colorGame.init(document);
   animalGame.init(document);
   mazeGame.init(document);
+  matchGame.init(document);
   
   return {
     gameState,
@@ -38,6 +42,7 @@ export function init() {
     countGame,
     colorGame,
     animalGame,
-    mazeGame
+    mazeGame,
+    matchGame
   };
 }
