@@ -106,6 +106,7 @@ export class PuzzleGame {
       slot.dataset.index = i;
       slot.dataset.emoji = this.silhouettes[i];
       slot.textContent = '';
+      slot.style.filter = 'brightness(20%)';
       gridArea.appendChild(slot);
     }
 
@@ -116,6 +117,14 @@ export class PuzzleGame {
     targetSlot.addEventListener('drop', (e) => this.handleDrop(e));
     targetSlot.addEventListener('dragenter', (e) => e.preventDefault());
     targetSlot.addEventListener('dragleave', (e) => e.preventDefault());
+    
+    for (let i = 0; i < 9; i++) {
+      const slot = gridArea.children[i];
+      slot.removeEventListener('dragover', (e) => this.handleDragOver(e));
+      slot.removeEventListener('drop', (e) => this.handleDrop(e));
+      slot.removeEventListener('dragenter', (e) => e.preventDefault());
+      slot.removeEventListener('dragleave', (e) => e.preventDefault());
+    }
   }
 
   updateDragEmoji() {
@@ -125,11 +134,11 @@ export class PuzzleGame {
       dragArea.style.opacity = '1.0';
       dragArea.draggable = true;
       
-      const dragStartHandler = (e) => this.handleDragStart(e);
-      const dragEndHandler = (e) => this.handleDragEnd(e);
+      dragArea.removeEventListener('dragstart', this.handleDragStart.bind(this));
+      dragArea.removeEventListener('dragend', this.handleDragEnd.bind(this));
       
-      dragArea.addEventListener('dragstart', dragStartHandler);
-      dragArea.addEventListener('dragend', dragEndHandler);
+      dragArea.addEventListener('dragstart', (e) => this.handleDragStart(e));
+      dragArea.addEventListener('dragend', (e) => this.handleDragEnd(e));
     }
   }
 
