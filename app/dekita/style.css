@@ -433,6 +433,35 @@ h2 {
   border-color: #2E7D32;
 }
 
+/* --- シルエットパズル画面用 --- */
+.puzzle-silhouette {
+  font-size: 48px;
+  background-color: rgba(200, 200, 200, 0.3);
+  border: 2px dashed #aaa;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.puzzle-piece {
+  font-size: 48px;
+  background-color: #f0f0f0;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.puzzle-piece:active {
+  cursor: grabbing;
+}
+
 /* --- リザルト画面 --- */
 .final-score {
   font-size: clamp(24px, 5dvw, 32px);
