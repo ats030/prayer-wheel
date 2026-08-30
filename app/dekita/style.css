@@ -501,6 +501,12 @@ h2 {
   border-radius: 12px;
 }
 
+.puzzle-silhouette.highlight-shape {
+  opacity: 1.0;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 255, 0, 0.6);
+}
+
 .puzzle-silhouette.correct-shape {
   background-color: rgba(76, 175, 80, 0.3);
   border-color: #4CAF50;

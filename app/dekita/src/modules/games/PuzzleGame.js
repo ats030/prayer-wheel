@@ -16,10 +16,6 @@ export class PuzzleGame {
     this.gameOver = false;
     this.theme = null;
     this.emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨'];
-    this.shapeData = {
-      '🐶': 'circle', '🐱': 'circle', '🐭': 'circle', '🐹': 'circle', '🐰': 'circle',
-      '🦊': 'circle', '🐻': 'circle', '🐼': 'circle', '🐨': 'circle'
-    };
   }
 
   init(rootElement) {
@@ -76,23 +72,18 @@ export class PuzzleGame {
       { name: 'のりもの', emojis: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒'] }
     ];
     
+    this.theme = themes[Math.floor(Math.random() * themes.length)];
     this.targetEmoji = this.theme.emojis[Math.floor(Math.random() * this.theme.emojis.length)];
     
-    // 外形シルエット（線画：透かした絵文字）を1つ、違う外形を8つ
-    const emojiShapes = [];
-    for (let i = 0; i < 9; i++) {
-      emojiShapes.push(i === 0 ? 'circle' : this.getDifferentShape('circle') );
-    }
-    
     this.grid = [];
-    let correctIndex = Math.floor(Math.random() * 9);
+    this.correctIndex = Math.floor(Math.random() * 9);
     
     for (let i = 0; i < 9; i++) {
       const piece = document.createElement('div');
       piece.className = 'puzzle-piece';
       piece.textContent = this.targetEmoji;
       piece.draggable = true;
-      piece.dataset.shape = emojiShapes[i];
+      piece.dataset.shape = 'emoji';
 
       piece.addEventListener('dragstart', (e) => this.handleDragStart(e, i));
       piece.addEventListener('dragover', (e) => e.preventDefault());
@@ -102,11 +93,9 @@ export class PuzzleGame {
 
       this.grid.push({
         element: piece,
-        shape: piece.dataset.shape
+        shape: 'emoji'
       });
     }
-    
-    this.correctIndex = correctIndex;
     
     this.createGrid();
   }
@@ -126,12 +115,18 @@ export class PuzzleGame {
       const slot = document.createElement('div');
       slot.className = 'puzzle-silhouette';
       slot.dataset.index = i;
-      slot.dataset.shape = this.grid[i].shape;
+      slot.textContent = this.targetEmoji;
       gridArea.appendChild(slot);
     }
 
     for (let i = 0; i < 9; i++) {
       gridArea.appendChild(this.grid[i].element);
+    }
+
+    const silhouettes = gridArea.querySelectorAll('.puzzle-silhouette');
+    if (silhouettes[this.correctIndex]) {
+      silhouettes[this.correctIndex].dataset.shape = 'highlight';
+      silhouettes[this.correctIndex].classList.add('highlight-shape');
     }
 
     this.updateProgress();
