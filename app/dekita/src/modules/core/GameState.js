@@ -22,9 +22,10 @@ export class GameState {
     this.questionsAnswered++;
   }
 
-  resetQuestionsAnswered() {
-    this.questionsAnswered = 0;
-  }
+   resetQuestionsAnswered() {
+     this.questionsAnswered = 0;
+     this.isAnswering = false;
+   }
 
   addScore(points) {
     this.score += points;
