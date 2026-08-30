@@ -106,14 +106,13 @@ export class PuzzleGame {
       slot.dataset.index = i;
       slot.dataset.emoji = this.silhouettes[i];
       slot.textContent = this.silhouettes[i];
-      slot.style.opacity = '0.3';
+      slot.style.opacity = '0.2';
       gridArea.appendChild(slot);
     }
 
     const targetSlot = gridArea.children[this.correctIndex];
-    targetSlot.style.opacity = '0.3';
-    targetSlot.style.border = '2px dashed #aaa';
-    targetSlot.style.fontWeight = 'normal';
+    targetSlot.style.opacity = '0.8';
+    targetSlot.style.fontWeight = 'bold';
 
     targetSlot.addEventListener('dragover', (e) => this.handleDragOver(e));
     targetSlot.addEventListener('drop', (e) => this.handleDrop(e));
