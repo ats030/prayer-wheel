@@ -8,6 +8,10 @@ export class PathGenerator {
     this.gridSize = 5;
   }
 
+  generate() {
+    return this.generatePath();
+  }
+
   generatePath() {
     // Simple path generation for 5x5 grid
     // Returns an array of coordinates for the maze path
