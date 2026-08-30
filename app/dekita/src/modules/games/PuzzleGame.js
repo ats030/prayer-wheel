@@ -73,12 +73,38 @@ export class PuzzleGame {
     ];
     
     this.theme = themes[Math.floor(Math.random() * themes.length)];
-    this.pieces = [...this.theme.emojis];
     
-    for (let i = this.pieces.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [this.pieces[i], this.pieces[j]] = [this.pieces[j], this.pieces[i]];
+    // 1種類の絵文字をランダムに選択
+    this.targetEmoji = this.theme.emojis[Math.floor(Math.random() * this.theme.emojis.length)];
+    
+    // シルエット：外形が同じ（丸い）シルエットを1つ、違うものを8つ
+    // 外形の種類（例：丸系、四角系、縦長系、横長系）
+    const shapes = ['circle', 'rect', 'vrect', 'hrect'];
+    
+    this.grid = [];
+    let correctIndex = Math.floor(Math.random() * 9);
+    
+    for (let i = 0; i < 9; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'puzzle-piece';
+      piece.textContent = this.targetEmoji;
+      piece.draggable = true;
+      piece.dataset.index = i;
+      piece.dataset.shape = i === correctIndex ? 'circle' : shapes[i % 4];
+
+      piece.addEventListener('dragstart', (e) => this.handleDragStart(e, i));
+      piece.addEventListener('dragover', (e) => e.preventDefault());
+      piece.addEventListener('drop', (e) => this.handleDrop(e, i));
+      piece.addEventListener('dragenter', (e) => e.preventDefault());
+      piece.addEventListener('dragleave', (e) => e.preventDefault());
+
+      this.grid.push({
+        element: piece,
+        shape: piece.dataset.shape
+      });
     }
+    
+    this.correctIndex = correctIndex;
     
     this.createGrid();
   }
@@ -94,35 +120,16 @@ export class PuzzleGame {
     gridArea.style.gap = '8px';
     gridArea.style.margin = '0 auto';
 
-    for (let i = 0; i < this.gridSize * this.gridSize; i++) {
+    for (let i = 0; i < 9; i++) {
       const slot = document.createElement('div');
       slot.className = 'puzzle-silhouette';
       slot.dataset.index = i;
-      slot.dataset.correctEmoji = this.theme.emojis[i];
+      slot.dataset.shape = this.grid[i].shape;
       gridArea.appendChild(slot);
     }
 
-    this.grid = [];
-    for (let i = 0; i < this.gridSize * this.gridSize; i++) {
-      const piece = document.createElement('div');
-      piece.className = 'puzzle-piece';
-      piece.textContent = this.pieces[i];
-      piece.draggable = true;
-      piece.dataset.index = i;
-
-      piece.addEventListener('dragstart', (e) => this.handleDragStart(e, i));
-      piece.addEventListener('dragover', (e) => e.preventDefault());
-      piece.addEventListener('drop', (e) => this.handleDrop(e, i));
-      piece.addEventListener('dragenter', (e) => e.preventDefault());
-      piece.addEventListener('dragleave', (e) => e.preventDefault());
-
-      gridArea.appendChild(piece);
-      
-      this.grid.push({
-        element: piece,
-        correctEmoji: this.theme.emojis[i],
-        currentEmoji: this.pieces[i]
-      });
+    for (let i = 0; i < 9; i++) {
+      gridArea.appendChild(this.grid[i].element);
     }
 
     this.updateProgress();
@@ -141,33 +148,33 @@ export class PuzzleGame {
       this.draggedPiece.element.style.opacity = '1';
     }
 
-    const targetSlot = this.grid[targetIndex];
-    
-    if (this.draggedPiece && this.draggedPiece !== targetSlot) {
-      const tempEmoji = targetSlot.currentEmoji;
-      targetSlot.element.textContent = this.draggedPiece.currentEmoji;
-      targetSlot.currentEmoji = this.draggedPiece.currentEmoji;
-      
-      this.draggedPiece.element.textContent = tempEmoji;
-      this.draggedPiece.currentEmoji = tempEmoji;
-
+    if (this.draggedPiece) {
       this.moves++;
-      this.checkWin();
+      
+      if (targetIndex === this.correctIndex) {
+        this.checkWin();
+      } else {
+        this.audio.playErrorSound();
+        const area = this.root.getElementById('puzzle-feedback-area');
+        const text = this.root.getElementById('puzzle-feedback-text');
+        area.style.display = 'block';
+        text.textContent = '違うかも...';
+        text.style.color = '#FF5722';
+        setTimeout(() => {
+          area.style.display = 'none';
+        }, 1000);
+      }
     }
   }
 
   checkWin() {
-    const isWin = this.grid.every((cell) => cell.correctEmoji === cell.currentEmoji);
+    this.state.addScore(20);
+    this.playCorrectFeedback();
     
-    if (isWin) {
-      this.state.addScore(20);
-      this.playCorrectFeedback();
-      
-      if (this.state.isGameOver()) {
-        setTimeout(() => this.endGame(), 2000);
-      } else {
-        setTimeout(() => this.nextQuestion(), 2000);
-      }
+    if (this.state.isGameOver()) {
+      setTimeout(() => this.endGame(), 2000);
+    } else {
+      setTimeout(() => this.nextQuestion(), 2000);
     }
   }
 
