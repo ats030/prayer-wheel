@@ -106,7 +106,6 @@ export class PuzzleGame {
       slot.dataset.index = i;
       slot.dataset.emoji = this.silhouettes[i];
       slot.textContent = '';
-      slot.style.filter = 'brightness(20%)';
       gridArea.appendChild(slot);
     }
 
