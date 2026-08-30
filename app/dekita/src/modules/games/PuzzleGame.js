@@ -16,6 +16,10 @@ export class PuzzleGame {
     this.gameOver = false;
     this.theme = null;
     this.emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨'];
+    this.shapeData = {
+      '🐶': 'circle', '🐱': 'circle', '🐭': 'circle', '🐹': 'circle', '🐰': 'circle',
+      '🦊': 'circle', '🐻': 'circle', '🐼': 'circle', '🐨': 'circle'
+    };
   }
 
   init(rootElement) {
