@@ -444,6 +444,53 @@ h2 {
   border: 2px solid #4CAF50;
 }
 
+/* --- パズル画面：Drag Emoji --- */
+.puzzle-emoji-area {
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.puzzle-instruction {
+  font-size: 16px;
+  color: #666;
+}
+
+.puzzle-drag-emoji {
+  font-size: 64px;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #FFF8E1;
+  border: 3px solid #FFA000;
+  border-radius: 16px;
+  cursor: grab;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  user-select: none;
+}
+
+.puzzle-drag-emoji:active {
+  cursor: grabbing;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 160, 0, 0.3);
+}
+
+.puzzle-drag-emoji[draggable="true"] {
+  cursor: grab;
+}
+
+.puzzle-drag-emoji:active {
+  cursor: grabbing;
+}
+
+.puzzle-drag-emoji.dragging {
+  opacity: 0.5;
+}
+
 /* --- リザルト画面 --- */
 .final-score {
   font-size: clamp(24px, 5dvw, 32px);

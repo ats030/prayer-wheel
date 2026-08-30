@@ -1,8 +1,7 @@
 /**
  * dekita - Preschool Edition Puzzle Game Module
  * For 3-year-olds: Drag and drop puzzle with silhouette matching
- * 3x3 grid with different emojis as silhouettes (30% opacity)
- * Drag the correct emoji to match the silhouette
+ * 3x3 grid with silhouettes, drag the correct emoji from outside to match
  */
 
 export class PuzzleGame {
@@ -11,7 +10,7 @@ export class PuzzleGame {
     this.audio = audio;
     this.screen = screen;
     this.gridSize = 3;
-    this.draggedPiece = null;
+    this.draggedEmoji = null;
     this.score = 0;
     this.moves = 0;
     this.gameOver = false;
@@ -58,7 +57,7 @@ export class PuzzleGame {
     this.score = 0;
     this.moves = 0;
     this.gameOver = false;
-    this.draggedPiece = null;
+    this.draggedEmoji = null;
     this.state.questionsAnswered = 0;
     this.state.questionsTotal = 5;
     this.screen.showPuzzleGame();
@@ -67,6 +66,10 @@ export class PuzzleGame {
 
   getGridArea() {
     return this.root.getElementById('puzzle-grid');
+  }
+
+  getDragEmojiArea() {
+    return this.root.getElementById('puzzle-drag-emoji');
   }
 
   generatePuzzle() {
@@ -83,6 +86,7 @@ export class PuzzleGame {
     this.correctEmoji = this.silhouettes[this.correctIndex];
     
     this.createGrid();
+    this.updateDragEmoji();
   }
 
   createGrid() {
@@ -106,48 +110,55 @@ export class PuzzleGame {
       gridArea.appendChild(slot);
     }
 
-    const correctSlot = gridArea.children[this.correctIndex];
-    correctSlot.classList.remove('puzzle-silhouette');
-    correctSlot.classList.add('puzzle-piece');
-    correctSlot.style.opacity = '1.0';
-    correctSlot.draggable = true;
-    correctSlot.dataset.draggable = 'true';
+    const targetSlot = gridArea.children[this.correctIndex];
+    targetSlot.style.opacity = '1.0';
+    targetSlot.style.fontWeight = 'bold';
+    targetSlot.style.borderColor = '#4CAF50';
+    targetSlot.style.border = '3px solid #4CAF50';
 
-    correctSlot.addEventListener('dragstart', (e) => this.handleDragStart(e));
-    correctSlot.addEventListener('dragover', (e) => this.handleDragOver(e));
-    correctSlot.addEventListener('drop', (e) => this.handleDrop(e));
-    correctSlot.addEventListener('dragenter', (e) => e.preventDefault());
-    correctSlot.addEventListener('dragleave', (e) => e.preventDefault());
+    targetSlot.addEventListener('dragover', (e) => this.handleDragOver(e));
+    targetSlot.addEventListener('drop', (e) => this.handleDrop(e));
+    targetSlot.addEventListener('dragenter', (e) => e.preventDefault());
+    targetSlot.addEventListener('dragleave', (e) => e.preventDefault());
+  }
 
-    this.updateProgress();
+  updateDragEmoji() {
+    const dragArea = this.getDragEmojiArea();
+    if (dragArea) {
+      dragArea.textContent = this.correctEmoji;
+      dragArea.style.opacity = '1.0';
+      dragArea.draggable = true;
+      
+      dragArea.addEventListener('dragstart', (e) => this.handleDragStart(e));
+      dragArea.addEventListener('dragend', (e) => this.handleDragEnd(e));
+    }
   }
 
   handleDragStart(e) {
-    this.draggedPiece = this.correctEmoji;
-    e.dataTransfer.effectAllowed = 'move';
+    this.draggedEmoji = this.correctEmoji;
+    e.dataTransfer.effectAllowed = 'copy';
     e.dataTransfer.setData('text/plain', this.correctEmoji);
-    e.target.dataset.dragging = 'true';
-    setTimeout(() => e.target.style.opacity = '0.5', 0);
+    e.target.style.opacity = '0.5';
+  }
+
+  handleDragEnd(e) {
+    e.target.style.opacity = '1.0';
+    this.draggedEmoji = null;
   }
 
   handleDragOver(e) {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.dropEffect = 'copy';
   }
 
   handleDrop(e) {
     e.preventDefault();
     
     const targetSlot = e.target.closest('.puzzle-silhouette');
-    if (!targetSlot || !e.target.dataset.dragging) {
+    if (!targetSlot) {
       return;
     }
 
-    e.target.style.opacity = '1';
-    delete e.target.dataset.dragging;
-
-    this.moves++;
-    
     const targetIndex = parseInt(targetSlot.dataset.index, 10);
     
     if (targetIndex === this.correctIndex) {
@@ -167,8 +178,9 @@ export class PuzzleGame {
 
   checkWin(targetSlot) {
     targetSlot.style.opacity = '1.0';
-    targetSlot.classList.remove('puzzle-piece');
-    targetSlot.classList.add('puzzle-silhouette', 'revealed');
+    targetSlot.style.borderColor = '#4CAF50';
+    targetSlot.classList.remove('puzzle-silhouette');
+    targetSlot.classList.add('revealed');
 
     this.state.addScore(20);
     this.playCorrectFeedback();
