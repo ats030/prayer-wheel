@@ -9,7 +9,7 @@ export class MatchGame {
     this.audio = audio;
     this.screen = screen;
     this.gridSize = 4;
-    this.emojis = ['🐶', '🐱', '🐭', '🐹'];
+    this.emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
     this.grid = [];
     this.score = 0;
     this.moves = 0;
