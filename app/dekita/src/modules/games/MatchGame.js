@@ -125,7 +125,7 @@ export class MatchGame {
         card.style.border = '2px solid #4CAF50';
         card.style.borderRadius = '8px';
         card.style.background = 'linear-gradient(135deg, #e8f5e9, #c8e6c9)';
-         card.textContent = '🟫';
+         card.textContent = '❓';
         
         card.addEventListener('click', () => this.handleCardClick(x, y));
         gridArea.appendChild(card);
@@ -195,11 +195,11 @@ export class MatchGame {
         const btn1 = this.getCardButton(cell1.x, cell1.y);
         const btn2 = this.getCardButton(cell2.x, cell2.y);
         if (btn1) {
-            btn1.textContent = '🟫';
+            btn1.textContent = '❓';
           btn1.style.background = 'linear-gradient(135deg, #e8f5e9, #c8e6c9)';
         }
         if (btn2) {
-            btn2.textContent = '🟫';
+            btn2.textContent = '❓';
           btn2.style.background = 'linear-gradient(135deg, #e8f5e9, #c8e6c9)';
         }
         this.selectedCells = [];
