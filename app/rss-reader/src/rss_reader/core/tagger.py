@@ -1,6 +1,9 @@
 import json
+import logging
 import os
 import re
+
+logger = logging.getLogger(__name__)
 
 _STOPWORDS_JA = {
     "について", "から", "まで", "という", "として", "ため", "こと", "もの",
@@ -165,7 +168,11 @@ def _ollama_tags(
             tags = _parse_response(text)
             if tags:
                 return tags
-        except Exception:
+        except Exception as exc:
+            # 上流の 5xx を黙って捨てると、キーワード抽出へ降格したことに気付けない
+            # (ats030-bnrg)。降格自体は仕様どおりなので継続はする。
+            status = getattr(getattr(exc, "response", None), "status_code", None)
+            logger.warning("tagger: %s failed (%s)", model, status or exc)
             continue
 
     return []

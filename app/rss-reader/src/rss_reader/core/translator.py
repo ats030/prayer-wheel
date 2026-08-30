@@ -1,9 +1,12 @@
 import json
+import logging
 import os
 import re
 from hashlib import sha256
 
 from ..config import CACHE_DIR
+
+logger = logging.getLogger(__name__)
 
 _cache = None
 
@@ -59,7 +62,13 @@ def translate_items_to_japanese(items: list[tuple[str, str]]) -> list[tuple[str,
     for chunk in _chunks(pending, 10):
         translated = _request_translation(model, chunk)
         for idx, original_title, original_summary in chunk:
-            title, summary = translated.get(idx, (original_title, original_summary))
+            if idx not in translated:
+                # 上流が落ちているときに原文をそのまま 30 日キャッシュすると、
+                # 復旧後も未翻訳のまま固定される (ats030-bnrg)。失敗は残さず、
+                # 次回の呼び出しでやり直させる。
+                results[idx] = (original_title, original_summary)
+                continue
+            title, summary = translated[idx]
             results[idx] = (title, summary)
             cache.set(
                 _cache_key(original_title, original_summary),
@@ -125,7 +134,9 @@ def _request_translation(
         )
         resp.raise_for_status()
         return _parse_response(resp.json().get("response", ""))
-    except Exception:
+    except Exception as exc:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        logger.warning("translator: %s failed (%s)", model, status or exc)
         return {}
 
 

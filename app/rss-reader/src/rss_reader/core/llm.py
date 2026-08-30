@@ -73,7 +73,15 @@ def ask(
         resp.raise_for_status()
         return (resp.json().get("response") or "").strip()
     except Exception as exc:  # noqa: BLE001 — 採点は落ちてよい機能
-        logger.info("ollama call failed: %s", exc)
+        # 上流 (Open WebUI / ollama) が返す 5xx は info だと埋もれる。実際
+        # 08-24..08-28 は /api/generate の半数が 502/503 だったのに誰も気付けず、
+        # 採点がまるごと空振りしていた (ats030-bnrg)。落ちてよい機能のままだが、
+        # 上流障害だけは warning で残す。
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        if status is not None:
+            logger.warning("ollama call failed: HTTP %s (model=%s)", status, model)
+        else:
+            logger.info("ollama call failed: %s", exc)
         return ""
 
 
