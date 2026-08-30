@@ -102,8 +102,8 @@ export class PuzzleGame {
     for (let i = 0; i < this.gridSize * this.gridSize; i++) {
       const cell = {
         index: i,
-        correctIndex: i, // 正解位置
-        value: this.theme.emojis[i],
+        correctValue: this.theme.emojis[i], // 正解の絵文字
+        currentValue: this.themeEmojis[i], // 現在の絵文字
         element: null
       };
       this.grid.push(cell);
@@ -111,7 +111,7 @@ export class PuzzleGame {
       const piece = document.createElement('button');
       piece.className = 'puzzle-piece';
       piece.dataset.index = i;
-      piece.textContent = cell.value;
+      piece.textContent = cell.currentValue;
       piece.style.fontSize = '48px';
       piece.style.width = '80px';
       piece.style.height = '80px';
@@ -161,7 +161,7 @@ export class PuzzleGame {
     const cell2 = this.grid[idx2];
 
     // 交換
-    [cell1.value, cell2.value] = [cell2.value, cell1.value];
+    [cell1.currentValue, cell2.currentValue] = [cell2.currentValue, cell1.currentValue];
     [cell1.element.textContent, cell2.element.textContent] = [cell2.element.textContent, cell1.element.textContent];
 
     this.moves++;
@@ -169,7 +169,7 @@ export class PuzzleGame {
   }
 
   checkWin() {
-    const isWin = this.grid.every((cell, index) => cell.correctIndex === index);
+    const isWin = this.grid.every((cell, index) => cell.correctValue === cell.currentValue);
     
     if (isWin) {
       this.state.addScore(10);
