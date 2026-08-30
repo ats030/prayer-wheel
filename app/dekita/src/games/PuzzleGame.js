@@ -210,16 +210,19 @@ export class PuzzleGame {
     this.audio.playPopSound();
   }
 
-  nextQuestion() {
-    this.state.incrementQuestionsAnswered();
-    this.root.getElementById('puzzle-feedback-area').classList.add('hidden');
-    
-    if (this.state.isGameOver()) {
-      this.endGame();
-    } else {
-      this.generatePuzzle();
-    }
-  }
+   nextQuestion() {
+     this.state.incrementQuestionsAnswered();
+     const area = this.root.getElementById('puzzle-feedback-area');
+     const text = this.root.getElementById('puzzle-feedback-text');
+     area.classList.add('hidden');
+     text.textContent = '';
+     
+     if (this.state.isGameOver()) {
+       this.endGame();
+     } else {
+       this.generatePuzzle();
+     }
+   }
 
   nextRound() {
     this.screen.showTitle();
