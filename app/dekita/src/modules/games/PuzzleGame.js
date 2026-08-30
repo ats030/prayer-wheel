@@ -1,6 +1,6 @@
 /**
  * dekita - Preschool Edition Puzzle Game Module
- * For 3-year-olds: 3x3 picture puzzle (shuffle and arrange)
+ * For 3-year-olds: Drag and drop puzzle with silhouette matching
  */
 
 export class PuzzleGame {
@@ -10,19 +10,18 @@ export class PuzzleGame {
     this.screen = screen;
     this.gridSize = 3;
     this.grid = [];
-    this.selectedIndex = null;
+    this.draggedPiece = null;
     this.score = 0;
     this.moves = 0;
     this.gameOver = false;
     this.theme = null;
-    this.emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔'];
+    this.emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨'];
   }
 
   init(rootElement) {
     this.root = rootElement;
     this.registerEventListeners();
     this.state.gameMode = 'puzzle';
-    this.style = this.getRootStyle();
   }
 
   registerEventListeners() {
@@ -55,19 +54,18 @@ export class PuzzleGame {
     this.score = 0;
     this.moves = 0;
     this.gameOver = false;
-    this.selectedIndex = null;
+    this.draggedPiece = null;
     this.state.questionsAnswered = 0;
     this.state.questionsTotal = 5;
     this.screen.showPuzzleGame();
     this.generatePuzzle();
   }
 
-  getRootStyle() {
+  getGridArea() {
     return this.root.getElementById('puzzle-grid');
   }
 
   generatePuzzle() {
-    // テーマ選択（動物、果物、乗り物など）
     const themes = [
       { name: 'どうぶつ', emojis: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨'] },
       { name: 'かみもの', emojis: ['🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍒'] },
@@ -75,104 +73,94 @@ export class PuzzleGame {
     ];
     
     this.theme = themes[Math.floor(Math.random() * themes.length)];
-    this.themeEmojis = [...this.theme.emojis]; // スプレッドでコピー
+    this.pieces = [...this.theme.emojis];
     
-    // シャッフル
-    for (let i = this.themeEmojis.length - 1; i > 0; i--) {
+    for (let i = this.pieces.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [this.themeEmojis[i], this.themeEmojis[j]] = [this.themeEmojis[j], this.themeEmojis[i]];
+      [this.pieces[i], this.pieces[j]] = [this.pieces[j], this.pieces[i]];
     }
     
     this.createGrid();
   }
 
   createGrid() {
-    const gridArea = this.root.getElementById('puzzle-grid');
+    const gridArea = this.getGridArea();
     if (!gridArea) return;
 
     gridArea.innerHTML = '';
     gridArea.style.display = 'grid';
-    gridArea.style.gridTemplateColumns = `repeat(${this.gridSize}, 80px)`;
-    gridArea.style.gridTemplateRows = `repeat(${this.gridSize}, 80px)`;
-    gridArea.style.gap = '4px';
+    gridArea.style.gridTemplateColumns = `repeat(${this.gridSize}, 100px)`;
+    gridArea.style.gridTemplateRows = `repeat(${this.gridSize}, 100px)`;
+    gridArea.style.gap = '8px';
     gridArea.style.margin = '0 auto';
 
-    this.grid = [];
-    
     for (let i = 0; i < this.gridSize * this.gridSize; i++) {
-      const cell = {
-        index: i,
-        correctValue: this.theme.emojis[i], // 正解の絵文字
-        currentValue: this.themeEmojis[i], // 現在の絵文字
-        element: null
-      };
-      this.grid.push(cell);
+      const slot = document.createElement('div');
+      slot.className = 'puzzle-silhouette';
+      slot.dataset.index = i;
+      slot.dataset.correctEmoji = this.theme.emojis[i];
+      gridArea.appendChild(slot);
+    }
 
-      const piece = document.createElement('button');
+    this.grid = [];
+    for (let i = 0; i < this.gridSize * this.gridSize; i++) {
+      const piece = document.createElement('div');
       piece.className = 'puzzle-piece';
+      piece.textContent = this.pieces[i];
+      piece.draggable = true;
       piece.dataset.index = i;
-      piece.textContent = cell.currentValue;
-      piece.style.fontSize = '48px';
-      piece.style.width = '80px';
-      piece.style.height = '80px';
-      piece.style.background = '#f0f0f0';
-      piece.style.border = '2px solid #ccc';
-      piece.style.borderRadius = '8px';
-      piece.style.display = 'flex';
-      piece.style.justifyContent = 'center';
-      piece.style.alignItems = 'center';
-      piece.style.cursor = 'pointer';
-      piece.style.transition = 'all 0.2s';
 
-      piece.addEventListener('click', () => this.handlePieceClick(i));
+      piece.addEventListener('dragstart', (e) => this.handleDragStart(e, i));
+      piece.addEventListener('dragover', (e) => e.preventDefault());
+      piece.addEventListener('drop', (e) => this.handleDrop(e, i));
+      piece.addEventListener('dragenter', (e) => e.preventDefault());
+      piece.addEventListener('dragleave', (e) => e.preventDefault());
+
       gridArea.appendChild(piece);
-      cell.element = piece;
+      
+      this.grid.push({
+        element: piece,
+        correctEmoji: this.theme.emojis[i],
+        currentEmoji: this.pieces[i]
+      });
     }
 
     this.updateProgress();
   }
 
-  handlePieceClick(index) {
-    if (this.gameOver) return;
+  handleDragStart(e, index) {
+    this.draggedPiece = this.grid[index];
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+    setTimeout(() => e.target.style.opacity = '0.5', 0);
+  }
 
-    const cell = this.grid[index];
+  handleDrop(e, targetIndex) {
+    e.preventDefault();
+    if (this.draggedPiece) {
+      this.draggedPiece.element.style.opacity = '1';
+    }
+
+    const targetSlot = this.grid[targetIndex];
     
-    if (this.selectedIndex === null) {
-      // 初回選択
-      this.selectedIndex = index;
-      cell.element.style.background = '#FFD54F';
-      cell.element.style.transform = 'scale(1.1)';
-      cell.element.style.boxShadow = '0 0 10px rgba(255, 213, 79, 0.8)';
-    } else if (this.selectedIndex === index) {
-      // 同一ピース選択→解除
-      cell.element.style.background = '#f0f0f0';
-      cell.element.style.transform = 'none';
-      cell.element.style.boxShadow = 'none';
-      this.selectedIndex = null;
-    } else {
-      // 交換処理
-      this.swapPieces(this.selectedIndex, index);
-      this.selectedIndex = null;
+    if (this.draggedPiece && this.draggedPiece !== targetSlot) {
+      const tempEmoji = targetSlot.currentEmoji;
+      targetSlot.element.textContent = this.draggedPiece.currentEmoji;
+      targetSlot.currentEmoji = this.draggedPiece.currentEmoji;
+      
+      this.draggedPiece.element.textContent = tempEmoji;
+      this.draggedPiece.currentEmoji = tempEmoji;
+
+      this.moves++;
+      this.checkWin();
     }
   }
 
-  swapPieces(idx1, idx2) {
-    const cell1 = this.grid[idx1];
-    const cell2 = this.grid[idx2];
-
-    // 交換
-    [cell1.currentValue, cell2.currentValue] = [cell2.currentValue, cell1.currentValue];
-    [cell1.element.textContent, cell2.element.textContent] = [cell2.element.textContent, cell1.element.textContent];
-
-    this.moves++;
-    this.checkWin();
-  }
-
   checkWin() {
-    const isWin = this.grid.every((cell, index) => cell.correctValue === cell.currentValue);
+    const isWin = this.grid.every((cell) => cell.correctEmoji === cell.currentEmoji);
     
     if (isWin) {
-      this.state.addScore(10);
+      this.state.addScore(20);
       this.playCorrectFeedback();
       
       if (this.state.isGameOver()) {
@@ -187,7 +175,7 @@ export class PuzzleGame {
     const area = this.root.getElementById('puzzle-feedback-area');
     const text = this.root.getElementById('puzzle-feedback-text');
     area.style.display = 'block';
-    text.textContent = 'やったー！＋10てん';
+    text.textContent = 'やったー！＋20てん';
     text.style.color = '#4CAF50';
     this.audio.speak('やったー！');
     this.audio.playPopSound();
@@ -215,7 +203,7 @@ export class PuzzleGame {
   updateProgress() {
     const progressElement = this.root.getElementById('puzzle-progress-text');
     if (progressElement) {
-      progressElement.textContent = `${this.state.questionsAnswered + 1}/${this.state.questionsTotal} 枚`;
+      progressElement.textContent = `${this.state.questionsAnswered + 1}/${this.state.questionsTotal} 問`;
     }
   }
 
