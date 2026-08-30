@@ -240,7 +240,7 @@ export class MazeGame {
   isPath(x, y) {
     if (!this.state.mazePath || this.state.mazePath.length < 2) return true;
 
-    const cellSize = 37.5;
+    const cellSize = 60;
     const margin = cellSize / 2 + 15;
 
     for (let i = 0; i < this.state.mazePath.length - 1; i++) {
