@@ -22,15 +22,16 @@ export class AudioManager {
     this.state = state;
   }
 
-  speak(text) {
-    if (!this.enabled || !window.speechSynthesis) return;
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ja-JP';
-    utterance.pitch = this.pitch;
-    utterance.rate = this.rate;
-    window.speechSynthesis.speak(utterance);
-  }
+   speak(text) {
+     if (!this.enabled || !window.speechSynthesis) return;
+     
+     window.speechSynthesis.cancel();
+     const utterance = new SpeechSynthesisUtterance(text);
+     utterance.lang = 'ja-JP';
+     utterance.pitch = this.pitch;
+     utterance.rate = this.rate;
+     window.speechSynthesis.speak(utterance);
+   }
 
   playPopSound() {
     if (!this.enabled || !this.audioContext) return;
