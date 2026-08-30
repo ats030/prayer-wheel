@@ -185,6 +185,11 @@ h2 {
   box-shadow: 0 8px 0 #7B1FA2;
 }
 
+#puzzle-start-btn {
+  background-color: #FFD54F;
+  box-shadow: 0 8px 0 #FBC02D;
+}
+
 /* --- 数字選択グリッド --- */
 .number-grid {
   display: grid;
@@ -393,6 +398,39 @@ h2 {
   border-radius: 25px;
   box-shadow: 0 8px 0 #81C784;
   flex: 0 0 auto;
+}
+
+/* --- パズル画面 --- */
+.puzzle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  grid-template-rows: repeat(3, 80px);
+  gap: 4px;
+  margin: 0 auto;
+}
+
+.puzzle-piece {
+  font-size: 48px;
+  background-color: #f0f0f0;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.puzzle-piece.selected {
+  background-color: #FFD54F;
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(255, 213, 79, 0.8);
+}
+
+.puzzle-piece.correct {
+  background-color: #4CAF50;
+  color: #fff;
+  border-color: #2E7D32;
 }
 
 /* --- リザルト画面 --- */

@@ -20,6 +20,7 @@
         <button id="animal-start-btn" class="game-btn">🐶 どうぶつ</button>
         <button id="maze-start-btn" class="game-btn">🛤️ めいろ</button>
         <button id="match-start-btn" class="game-btn">💭 おなじ</button>
+        <button id="puzzle-start-btn" class="game-btn">🧩 パズル</button>
       </div>
     </div>
     
@@ -91,7 +92,26 @@
     </div>
 
     
-      <div id="maze-play-screen" class="screen hidden" style="pointer-events: auto;">
+      <div id="puzzle-game-screen" class="screen hidden">
+      <div class="score-board">
+        <div class="score-info">
+          <span>スコア: <span id="puzzle-score">0</span></span>
+          <span id="puzzle-progress-text" class="progress-text"></span>
+        </div>
+        <button id="puzzle-reset-btn" class="reset-btn">もどる</button>
+      </div>
+      
+      <div class="question-area">
+        <div id="puzzle-grid" class="puzzle-grid"></div>
+      </div>
+      
+      <div id="puzzle-feedback-area" class="feedback-area" style="display: none;">
+        <p id="puzzle-feedback-text" class="feedback-text">せいかい！</p>
+        <button id="puzzle-next-btn" class="next-btn">つぎへ</button>
+      </div>
+    </div>
+    
+    <div id="maze-play-screen" class="screen hidden" style="pointer-events: auto;">
       <div class="score-board">
         <div class="score-info">
           <span>スコア: <span id="maze-score">0</span></span>
