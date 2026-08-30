@@ -12,10 +12,6 @@ export class MazeGame {
     this.screen = screen;
     this.pathGenerator = new PathGenerator();
     this.isDragging = false;
-    this.dragTargetX = null;
-    this.dragTargetY = null;
-    this.cellSize = 60;
-    this.margin = 45;
   }
 
   setTestMode(enabled) {
@@ -73,10 +69,8 @@ export class MazeGame {
     canvas.width = 300;
     canvas.height = 300;
     
-    this.pathGenerator.setPath(null);
     const result = this.pathGenerator.generate(canvas.width, canvas.height);
     this.state.mazePath = result.path;
-    this.pathGenerator.setPath(result.path);
     this.state.mazePlayer = { x: result.player.x, y: result.player.y };
     this.state.mazeGoal = { x: result.goal.x, y: result.goal.y };
     
@@ -137,10 +131,8 @@ export class MazeGame {
       canvas.height = 300;
       
       // 新しい経路生成
-      this.pathGenerator.setPath(null);
       const result = this.pathGenerator.generate(canvas.width, canvas.height);
       this.state.mazePath = result.path;
-      this.pathGenerator.setPath(result.path);
       this.state.mazePlayer = { x: result.player.x, y: result.player.y };
       this.state.mazeGoal = { x: result.goal.x, y: result.goal.y };
       
@@ -164,10 +156,12 @@ export class MazeGame {
     canvas.addEventListener('mousedown', (e) => {
       if (!this.state.mazeActive) return;
       this.isDragging = true;
+      e.preventDefault();
     }, { passive: false });
 
     canvas.addEventListener('mousemove', (e) => {
       if (!this.state.mazeActive || !this.isDragging) return;
+      e.preventDefault();
       
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -203,10 +197,12 @@ export class MazeGame {
     canvas.addEventListener('touchstart', (e) => {
       if (!this.state.mazeActive) return;
       this.isDragging = true;
+      e.preventDefault();
     }, { passive: false });
 
     canvas.addEventListener('touchmove', (e) => {
       if (!this.state.mazeActive || !this.isDragging) return;
+      e.preventDefault();
       
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -244,24 +240,27 @@ export class MazeGame {
   isPath(x, y) {
     if (!this.state.mazePath || this.state.mazePath.length < 2) return true;
 
+    const cellSize = 60;
+    const margin = cellSize / 2 + 15;
+
     for (let i = 0; i < this.state.mazePath.length - 1; i++) {
       const p1 = this.state.mazePath[i];
       const p2 = this.state.mazePath[i + 1];
 
       if (p1.x === p2.x) {
-        const minX = p1.x - this.margin;
-        const maxX = p1.x + this.margin;
-        const minY = Math.min(p1.y, p2.y);
-        const maxY = Math.max(p1.y, p2.y);
+        const minX = Math.min(p1.x, p2.x) - margin;
+        const maxX = Math.max(p1.x, p2.x) + margin;
+        const minY = Math.min(p1.y, p2.y) - margin;
+        const maxY = Math.max(p1.y, p2.y) + margin;
 
         if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
           return true;
         }
       } else if (p1.y === p2.y) {
-        const minY = p1.y - this.margin;
-        const maxY = p1.y + this.margin;
-        const minX = Math.min(p1.x, p2.x);
-        const maxX = Math.max(p1.x, p2.x);
+        const minY = Math.min(p1.y, p2.y) - margin;
+        const maxY = Math.max(p1.y, p2.y) + margin;
+        const minX = Math.min(p1.x, p2.x) - margin;
+        const maxX = Math.max(p1.x, p2.x) + margin;
 
         if (y >= minY && y <= maxY && x >= minX && x <= maxX) {
           return true;
