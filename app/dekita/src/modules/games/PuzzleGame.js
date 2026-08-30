@@ -58,7 +58,7 @@ export class PuzzleGame {
     this.selectedIndex = null;
     this.state.questionsAnswered = 0;
     this.state.questionsTotal = 5;
-    this.screen.showGame();
+    this.screen.showPuzzleGame();
     this.generatePuzzle();
   }
 

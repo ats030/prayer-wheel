@@ -52,6 +52,10 @@ export class ScreenManager {
     this.show('match-game-screen');
   }
 
+  showPuzzleGame() {
+    this.show('puzzle-game-screen');
+  }
+
   showResult() {
     this.show('result-screen');
   }
