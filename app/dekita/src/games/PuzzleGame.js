@@ -114,7 +114,7 @@ export class PuzzleGame {
     correctSlot.dataset.draggable = 'true';
 
     correctSlot.addEventListener('dragstart', (e) => this.handleDragStart(e));
-    correctSlot.addEventListener('dragover', (e) => e.preventDefault());
+    correctSlot.addEventListener('dragover', (e) => this.handleDragOver(e));
     correctSlot.addEventListener('drop', (e) => this.handleDrop(e));
     correctSlot.addEventListener('dragenter', (e) => e.preventDefault());
     correctSlot.addEventListener('dragleave', (e) => e.preventDefault());
@@ -126,17 +126,32 @@ export class PuzzleGame {
     this.draggedPiece = this.correctEmoji;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', this.correctEmoji);
+    e.target.dataset.dragging = 'true';
     setTimeout(() => e.target.style.opacity = '0.5', 0);
+  }
+
+  handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
   }
 
   handleDrop(e) {
     e.preventDefault();
+    
+    const targetSlot = e.target.closest('.puzzle-silhouette');
+    if (!targetSlot || !e.target.dataset.dragging) {
+      return;
+    }
+
     e.target.style.opacity = '1';
+    delete e.target.dataset.dragging;
 
     this.moves++;
     
-    if (e.target.dataset.emoji === this.correctEmoji) {
-      this.checkWin();
+    const targetIndex = parseInt(targetSlot.dataset.index, 10);
+    
+    if (targetIndex === this.correctIndex) {
+      this.checkWin(targetSlot);
     } else {
       this.audio.playErrorSound();
       const area = this.root.getElementById('puzzle-feedback-area');
@@ -150,13 +165,10 @@ export class PuzzleGame {
     }
   }
 
-  checkWin() {
-    const gridArea = this.getGridArea();
-    if (gridArea && gridArea.children[this.correctIndex]) {
-      gridArea.children[this.correctIndex].style.opacity = '1.0';
-      gridArea.children[this.correctIndex].classList.remove('puzzle-piece');
-      gridArea.children[this.correctIndex].classList.add('puzzle-silhouette', 'revealed');
-    }
+  checkWin(targetSlot) {
+    targetSlot.style.opacity = '1.0';
+    targetSlot.classList.remove('puzzle-piece');
+    targetSlot.classList.add('puzzle-silhouette', 'revealed');
 
     this.state.addScore(20);
     this.playCorrectFeedback();
