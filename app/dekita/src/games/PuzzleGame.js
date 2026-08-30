@@ -111,10 +111,9 @@ export class PuzzleGame {
     }
 
     const targetSlot = gridArea.children[this.correctIndex];
-    targetSlot.style.opacity = '0.7';
-    targetSlot.style.fontWeight = 'bold';
-    targetSlot.style.borderColor = '#4CAF50';
-    targetSlot.style.border = '2px solid #4CAF50';
+    targetSlot.style.opacity = '0.3';
+    targetSlot.style.border = '2px dashed #aaa';
+    targetSlot.style.fontWeight = 'normal';
 
     targetSlot.addEventListener('dragover', (e) => this.handleDragOver(e));
     targetSlot.addEventListener('drop', (e) => this.handleDrop(e));
