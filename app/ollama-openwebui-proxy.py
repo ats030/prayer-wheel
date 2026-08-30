@@ -207,12 +207,14 @@ def request_model(body: bytes | None) -> str:
     return d.get("model") or "" if isinstance(d, dict) else ""
 
 
-def client_label(user_agent: str) -> str:
+def client_label(user_agent: str, x_client_app: str | None = None) -> str:
     """User-Agent を呼び出し元の目印に縮める。
 
-    どのアプリかまでは分からない (自作アプリは大半が Python-urllib のまま)。
+    X-Client-App ヘッダがあればそれを優先して使う。
     アプリの区別はモデル名の方が当てになるので、これは補助として置く。
     """
+    if x_client_app and x_client_app.strip():
+        return x_client_app.strip()[:40]
     ua = (user_agent or "").strip()
     if not ua:
         return "unknown"
@@ -222,7 +224,7 @@ def client_label(user_agent: str) -> str:
 
 def log_usage(path: str, request_body: bytes | None, tail: bytes,
               user_agent: str, status: int, elapsed_ms: int,
-              error: str = "") -> None:
+              error: str = "", client_app: str | None = None) -> None:
     """1リクエスト1行で追記する。月ごとにファイルを分ける。
 
     月次にしておくと、読む側 (usage-viewer) が既存の mtime/size キャッシュを
@@ -247,7 +249,7 @@ def log_usage(path: str, request_body: bytes | None, tail: bytes,
         "elapsed_ms": elapsed_ms,
         # 上流の応答コード。0 は応答そのものが得られなかった (切断・タイムアウト)。
         "status": status,
-        "client": client_label(user_agent),
+        "client": client_label(user_agent, client_app),
     }
     for key in ("finish_reason", "response_kind"):
         if usage.get(key):
@@ -428,8 +430,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
         本来の例外を差し替えてしまう。原因は journal に残す。
         """
         try:
+            client_app = self.headers.get("X-Client-App")
             log_usage(self.path, body, tail, self.headers.get("User-Agent", ""),
-                      status, elapsed_ms, error)
+                      status, elapsed_ms, error, client_app)
         except Exception as exc:  # noqa: BLE001
             self.log_message("usage log failed: %s", exc)
 

@@ -28,6 +28,7 @@ run_job() {
   body=$3
 
   response=$(curl -sS -m 30 -X POST -H 'Content-Type: application/json' \
+    -H 'X-Client-App: rss-reader' \
     -d "$body" "$BASE$path") || {
     echo "$label: リクエストに失敗しました" >&2
     return 1
