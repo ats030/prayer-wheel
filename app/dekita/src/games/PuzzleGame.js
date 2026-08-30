@@ -105,7 +105,7 @@ export class PuzzleGame {
       slot.className = 'puzzle-silhouette';
       slot.dataset.index = i;
       slot.dataset.emoji = this.silhouettes[i];
-      slot.textContent = this.silhouettes[i];
+      slot.textContent = '';
       slot.style.filter = 'brightness(20%)';
       gridArea.appendChild(slot);
     }
