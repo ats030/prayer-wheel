@@ -462,6 +462,56 @@ h2 {
   cursor: grabbing;
 }
 
+.puzzle-silhouette {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.puzzle-silhouette[data-shape="circle"] {
+  width: 80px;
+  height: 80px;
+  background-color: rgba(200, 200, 200, 0.3);
+  border: 2px dashed #aaa;
+  border-radius: 50%;
+}
+
+.puzzle-silhouette[data-shape="rect"] {
+  width: 80px;
+  height: 80px;
+  background-color: rgba(200, 200, 200, 0.3);
+  border: 2px dashed #aaa;
+  border-radius: 12px;
+}
+
+.puzzle-silhouette[data-shape="vrect"] {
+  width: 60px;
+  height: 100px;
+  background-color: rgba(200, 200, 200, 0.3);
+  border: 2px dashed #aaa;
+  border-radius: 12px;
+}
+
+.puzzle-silhouette[data-shape="hrect"] {
+  width: 100px;
+  height: 60px;
+  background-color: rgba(200, 200, 200, 0.3);
+  border: 2px dashed #aaa;
+  border-radius: 12px;
+}
+
+.puzzle-silhouette.correct-shape {
+  background-color: rgba(76, 175, 80, 0.3);
+  border-color: #4CAF50;
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+}
+
+.puzzle-silhouette.wrong-shape {
+  background-color: rgba(255, 87, 34, 0.3);
+  border-color: #FF5722;
+}
+
 /* --- リザルト画面 --- */
 .final-score {
   font-size: clamp(24px, 5dvw, 32px);
