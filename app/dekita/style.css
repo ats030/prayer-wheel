@@ -166,8 +166,23 @@ h2 {
 }
 
 #color-start-btn {
+  background-color: #FFD54F;
+  box-shadow: 0 8px 0 #FBC02D;
+}
+
+#animal-start-btn {
   background-color: #81C784;
   box-shadow: 0 8px 0 #388E3C;
+}
+
+#maze-start-btn {
+  background-color: #81D4FA;
+  box-shadow: 0 8px 0 #0288D1;
+}
+
+#match-start-btn {
+  background-color: #B39DDB;
+  box-shadow: 0 8px 0 #7B1FA2;
 }
 
 /* --- 数字選択グリッド --- */
