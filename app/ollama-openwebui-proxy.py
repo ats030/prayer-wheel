@@ -63,6 +63,11 @@ ALLOWED_NETWORKS = tuple(
     for value in env("OLLAMA_PROXY_ALLOWED_NETWORKS", "127.0.0.0/8").split(",")
     if value.strip()
 )
+TRUSTED_NETWORKS = tuple(
+    ipaddress.ip_network(value.strip())
+    for value in env("OLLAMA_PROXY_TRUSTED_NETWORKS", "127.0.0.0/8").split(",")
+    if value.strip()
+)
 ALLOWED_ORIGINS = {
     value.strip()
     for value in env("OLLAMA_PROXY_ALLOWED_ORIGINS").split(",")
@@ -303,6 +308,10 @@ class ProxyHandler(BaseHTTPRequestHandler):
         if not any(client in network for network in ALLOWED_NETWORKS):
             self.send_error(403, "Client network is not allowed")
             return False
+        # Open WebUI はコンテナ内のサーバーから接続するため Origin を送らない。
+        # 明示したサーバー間ネットワークだけはブラウザ向け CORS 制約の対象外にする。
+        if any(client in network for network in TRUSTED_NETWORKS):
+            return True
         if origin and origin not in ALLOWED_ORIGINS:
             self.send_error(403, "Origin is not allowed")
             return False

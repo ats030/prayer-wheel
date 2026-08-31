@@ -44,6 +44,40 @@ def check(name, got, want):
         failures.append(name)
 
 
+class AccessProbe:
+    """request_allowed だけを実行するための最小ハンドラ。"""
+
+    request_allowed = proxy.ProxyHandler.request_allowed
+
+    def __init__(self, address, origin="", command="GET", path="/api/tags"):
+        self.client_address = (address, 12345)
+        self.headers = {"Origin": origin} if origin else {}
+        self.command = command
+        self.path = path
+        self.error = None
+
+    def send_error(self, status, message):
+        self.error = (status, message)
+
+
+print("0. 信頼済みサーバー間ネットワークは Origin なしで通す")
+old_allowed, old_trusted = proxy.ALLOWED_NETWORKS, proxy.TRUSTED_NETWORKS
+proxy.ALLOWED_NETWORKS = (
+    proxy.ipaddress.ip_network("127.0.0.0/8"),
+    proxy.ipaddress.ip_network("172.19.0.0/16"),
+    proxy.ipaddress.ip_network("192.168.11.0/24"),
+)
+proxy.TRUSTED_NETWORKS = (
+    proxy.ipaddress.ip_network("127.0.0.0/8"),
+    proxy.ipaddress.ip_network("172.19.0.0/16"),
+)
+check("Open WebUI コンテナ", AccessProbe("172.19.0.6").request_allowed(), True)
+lan = AccessProbe("192.168.11.13")
+check("LAN は Origin なしを拒否", lan.request_allowed(), False)
+check("LAN の拒否理由", lan.error, (403, "Browser origin is required from LAN"))
+proxy.ALLOWED_NETWORKS, proxy.TRUSTED_NETWORKS = old_allowed, old_trusted
+
+
 # --- 応答サンプル -----------------------------------------------------------
 
 NDJSON_STREAM = b"".join(
