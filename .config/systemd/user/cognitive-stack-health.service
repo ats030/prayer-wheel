@@ -1,6 +1,6 @@
 [Unit]
 Description=cognitive-stack health dashboard (read-only :8504)
-After=network-online.target home-ats030-pCloudDrive.mount cognitive-stack-api.service
+After=network-online.target home-ats030-pCloudDrive.mount
 Requires=home-ats030-pCloudDrive.mount
 
 [Service]
