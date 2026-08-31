@@ -26,9 +26,15 @@ VRAM に同居できず、片方を要求するともう片方が降りる。ope
 実例)。よって別のモデルがロード中なら今回は見送る。ollama は idle 5分で自然に
 降ろすので、ピンは次の周回で戻る。
 
+「使用中でない」の判定は /api/ps を二度見る。/api/ps は VRAM の中身しか見えず
+待ち行列は見えないため、入れ替えの谷間の数秒を「暇」と誤読すると、他所の生成の
+直後に 52GB のロードを割り込ませてしまう (confirm_idle のコメントに実例)。
+同じ理由で固定要求は 120秒で打ち切る。長く待つのは順番待ちの証拠でしかない。
+
 終了コード (~/CLAUDE.md の規約):
   0 = 固定した / 既に固定されていた
-  3 = 何もしなかった (対象が無い / 裏側に届かない / 別のモデルが使用中) — 設計どおり
+  3 = 何もしなかった (対象が無い / 裏側に届かない / 別のモデルが使用中 /
+      入れ替えの谷間だった / 順番待ちで打ち切った) — 設計どおり
   1 = 障害 (設定が壊れている、固定を要求したのに反映されない)
 
 3 に「届かない」を含めるのは、15分ごとに走るこのユニットで evo-x2 の停止を
@@ -40,6 +46,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime
@@ -48,7 +55,13 @@ from pathlib import Path
 CONFIG = Path.home() / ".config" / "opencode" / "opencode.json"
 BASE = "http://127.0.0.1:11434"
 PROVIDER_PREFIX = "ollama/"
-TIMEOUT = 600
+# ロードだけの要求は、GPU が空いていれば 52GB でも十数秒で返る (実測 13.7秒)。
+# それ以上待たされるのは順番待ちをしている証拠で、待てば待つほど他所の生成の
+# 後ろに 52GB のロードを押し込むことになる。空いていないと分かった時点で降りる。
+TIMEOUT = 120
+
+# /api/ps が空でも「入れ替えの谷間」かもしれないので、少し置いて二度見る。
+IDLE_RECHECK_SECONDS = 5
 
 
 def post(path: str, payload: dict) -> dict:
@@ -102,6 +115,30 @@ def is_pinned(until: str | None) -> bool:
         return False
 
 
+def confirm_idle() -> bool:
+    """/api/ps が空なのが本当に暇なのか、入れ替えの谷間なのかを見分ける。
+
+    /api/ps は VRAM に載っているモデルしか見えず、**待ち行列は見えない**。
+    ひとつ降ろして次を載せる数秒だけ空になるため、その瞬間を「暇」と読むと
+    52GB のロードを他所の要求の直後に割り込ませてしまう。
+    2026-08-31 の実例: 12:40:12 と 13:05:12 の2回だけこのすり抜けが起き、
+    直後の image-generator の gemma4:31b がそれぞれ 463秒 / 411秒の
+    コールドロードを払った (他の周回は正しく見送っていた)。
+    """
+    time.sleep(IDLE_RECHECK_SECONDS)
+    again = loaded_models()
+    if again is None:
+        print("裏側に届かないので何もしない (/api/ps 再確認)", file=sys.stderr)
+        return False
+    if again:
+        print(
+            f"入れ替えの谷間だった。今回は見送る: {', '.join(sorted(again))}",
+            file=sys.stderr,
+        )
+        return False
+    return True
+
+
 def main() -> int:
     try:
         model = target_model()
@@ -131,6 +168,8 @@ def main() -> int:
             file=sys.stderr,
         )
         return 3
+    elif not confirm_idle():
+        return 3
 
     try:
         # プロンプトを省くとロードだけが走る (done_reason: "load")。
@@ -138,6 +177,13 @@ def main() -> int:
     except urllib.error.URLError as exc:
         # プロキシ未起動、evo-x2 停止、経路断。次回の起動時に拾えばよい。
         print(f"裏側に届かないので何もしない: {exc.reason}", file=sys.stderr)
+        return 3
+    except TimeoutError:
+        # 順番待ち。障害ではないので failure 通知を出さない (2分後にまた来る)。
+        print(
+            f"{TIMEOUT}秒で返らないので順番待ちと判断して降りる ({model})",
+            file=sys.stderr,
+        )
         return 3
     except (OSError, ValueError) as exc:
         print(f"{model} の固定に失敗した: {exc}", file=sys.stderr)
