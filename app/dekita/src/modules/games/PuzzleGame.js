@@ -103,15 +103,17 @@ export class PuzzleGame {
       slot.dataset.emoji = this.silhouettes[i];
       slot.textContent = this.silhouettes[i];
       slot.style.opacity = '0.3';
+      if (i === this.correctIndex) {
+        slot.draggable = true;
+        slot.dataset.draggable = 'true';
+        slot.addEventListener('dragstart', (e) => this.handleDragStart(e));
+        slot.addEventListener('dragover', (e) => e.preventDefault());
+        slot.addEventListener('drop', (e) => this.handleDrop(e));
+        slot.addEventListener('dragenter', (e) => e.preventDefault());
+        slot.addEventListener('dragleave', (e) => e.preventDefault());
+      }
       gridArea.appendChild(slot);
     }
-
-    const correctSlot = gridArea.children[this.correctIndex];
-    correctSlot.classList.remove('puzzle-silhouette');
-    correctSlot.classList.add('puzzle-piece');
-    correctSlot.style.opacity = '1.0';
-    correctSlot.draggable = true;
-    correctSlot.dataset.draggable = 'true';
 
     correctSlot.addEventListener('dragstart', (e) => this.handleDragStart(e));
     correctSlot.addEventListener('dragover', (e) => e.preventDefault());
@@ -126,13 +128,10 @@ export class PuzzleGame {
     this.draggedPiece = this.correctEmoji;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', this.correctEmoji);
-    setTimeout(() => e.target.style.opacity = '0.5', 0);
   }
 
   handleDrop(e) {
     e.preventDefault();
-    e.target.style.opacity = '1';
-
     this.moves++;
     
     if (e.target.dataset.emoji === this.correctEmoji) {
@@ -153,7 +152,6 @@ export class PuzzleGame {
   checkWin() {
     const gridArea = this.getGridArea();
     if (gridArea && gridArea.children[this.correctIndex]) {
-      gridArea.children[this.correctIndex].style.opacity = '1.0';
       gridArea.children[this.correctIndex].classList.remove('puzzle-piece');
       gridArea.children[this.correctIndex].classList.add('puzzle-silhouette', 'revealed');
     }

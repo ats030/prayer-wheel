@@ -411,27 +411,29 @@ h2 {
 
 .puzzle-silhouette {
   font-size: 48px;
-  background-color: rgba(200, 200, 200, 0.3);
-  border: 2px dashed #aaa;
+  background-color: rgba(230, 230, 230, 0.4);
+  border: 2px dashed #888;
   border-radius: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
   transition: all 0.3s ease;
   user-select: none;
+  opacity: 0.3;
 }
 
 .puzzle-piece {
   font-size: 48px;
-  background-color: #f0f0f0;
-  border: 2px solid #ccc;
-  border-radius: 8px;
+  background-color: rgba(230, 230, 230, 0.4);
+  border: 2px dashed #888;
+  border-radius: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: grab;
   transition: all 0.2s ease;
   user-select: none;
+  opacity: 0.3;
 }
 
 .puzzle-piece:active {
@@ -439,9 +441,9 @@ h2 {
 }
 
 .puzzle-silhouette.revealed {
-  opacity: 1.0;
-  background-color: rgba(255, 255, 255, 0.8);
-  border: 2px solid #4CAF50;
+  opacity: 0.3;
+  background-color: rgba(230, 230, 230, 0.3);
+  border: 2px dashed #888;
 }
 
 /* --- パズル画面：Drag Emoji --- */
