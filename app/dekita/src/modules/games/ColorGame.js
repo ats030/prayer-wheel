@@ -88,6 +88,7 @@ export class ColorGame {
 
     this.updateScore();
     this.root.getElementById('color-feedback-area').classList.add('hidden');
+    this.audio.speak('これ なん の いろかな？');
   }
 
   checkAnswerByName(selected, correct) {

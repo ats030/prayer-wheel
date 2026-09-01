@@ -62,6 +62,7 @@ export class MatchGame {
     
     this.screen.showMatchGame();
     this.initGrid();
+    this.audio.speak('ペアを見つけてね');
     this.updateScore();
   }
 

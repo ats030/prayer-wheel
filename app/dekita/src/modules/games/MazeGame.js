@@ -76,6 +76,7 @@ export class MazeGame {
     
     this.screen.showMazeGame();
     this.drawMaze();
+    this.audio.speak(this.state.mazeCurrentTheme.text);
     this.updateScore();
   }
 
