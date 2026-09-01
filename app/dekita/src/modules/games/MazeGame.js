@@ -165,8 +165,8 @@ export class MazeGame {
       e.preventDefault();
       
       const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
+      const scaleX = rect.width / canvas.width;
+      const scaleY = rect.height / canvas.height;
       
       const x = (e.clientX - rect.left) * scaleX;
       const y = (e.clientY - rect.top) * scaleY;
@@ -179,8 +179,8 @@ export class MazeGame {
       this.isDragging = false;
       
       const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
+      const scaleX = rect.width / canvas.width;
+      const scaleY = rect.height / canvas.height;
       
       const x = (e.clientX - rect.left) * scaleX;
       const y = (e.clientY - rect.top) * scaleY;
@@ -206,8 +206,8 @@ export class MazeGame {
       e.preventDefault();
       
       const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
+      const scaleX = rect.width / canvas.width;
+      const scaleY = rect.height / canvas.height;
       
       const touch = e.touches[0];
       const x = (touch.clientX - rect.left) * scaleX;
@@ -221,8 +221,8 @@ export class MazeGame {
       this.isDragging = false;
       
       const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
+      const scaleX = rect.width / canvas.width;
+      const scaleY = rect.height / canvas.height;
       
       const touch = e.changedTouches[0];
       const x = (touch.clientX - rect.left) * scaleX;
@@ -241,14 +241,14 @@ export class MazeGame {
   isPath(x, y) {
     if (!this.state.mazePath || this.state.mazePath.length < 2) return true;
 
-    const cellSize = 37.5;
+    const cellSize = this.state.mazePath.length > 0 ? (300 / 8) : 37.5;
     const margin = cellSize / 2 + 15;
 
     for (let i = 0; i < this.state.mazePath.length - 1; i++) {
       const p1 = this.state.mazePath[i];
       const p2 = this.state.mazePath[i + 1];
 
-      if (p1.x === p2.x) {
+      if (Math.abs(p1.x - p2.x) < 1e-10) {
         const minX = Math.min(p1.x, p2.x) - margin;
         const maxX = Math.max(p1.x, p2.x) + margin;
         const minY = Math.min(p1.y, p2.y) - margin;
@@ -257,7 +257,7 @@ export class MazeGame {
         if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
           return true;
         }
-      } else if (p1.y === p2.y) {
+      } else if (Math.abs(p1.y - p2.y) < 1e-10) {
         const minY = Math.min(p1.y, p2.y) - margin;
         const maxY = Math.max(p1.y, p2.y) + margin;
         const minX = Math.min(p1.x, p2.x) - margin;
