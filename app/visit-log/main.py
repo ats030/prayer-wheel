@@ -379,6 +379,24 @@ async def api_summary(days: int = 30, bots: int = 0):
     return JSONResponse(summarize(days, include_bots=bool(bots)), headers=NO_STORE)
 
 
+@app.get("/api/log")
+async def api_log(site: str, limit: int = 50, days: int = 30):
+    """1サイト分の生ログを新しい順に返す。集計テーブルでは見えない
+    個々のアクセス (いつ・どのパスに・どこ経由で来たか) を診断用に見るための実験的なAPI。
+    vid・IP・UAは含めない。"""
+    if not SITE_RE.match(site):
+        return JSONResponse({"error": "サイト名が不正です"}, status_code=400, headers=NO_STORE)
+    limit = max(1, min(limit, 500))
+    days = max(1, min(days, 400))
+    events = [e for e in load_events(days) if e.get("site") == site]
+    events.sort(key=lambda e: e.get("ts", ""), reverse=True)
+    rows = [
+        {"ts": e.get("ts"), "path": e.get("path"), "ref": e.get("ref"), "dev": e.get("dev")}
+        for e in events[:limit]
+    ]
+    return JSONResponse(rows, headers=NO_STORE)
+
+
 @app.get("/health")
 async def health():
     return JSONResponse({"status": "ok", "port": PORT}, headers=NO_STORE)
