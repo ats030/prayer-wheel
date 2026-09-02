@@ -18,6 +18,10 @@ export class MazeGame {
     this.state._testMode = enabled;
   }
 
+  cleanup() {
+    this.isDragging = false;
+  }
+
   init(rootElement) {
     this.root = rootElement;
     this.registerEventListeners();

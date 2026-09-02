@@ -30,6 +30,15 @@ export function init() {
   
   const puzzleGame = new PuzzleGame(gameState, audioManager, screenManager);
   
+  // ゲームモジュールを ScreenManager に設定
+  screenManager.setGameModules({
+    countGame,
+    colorGame,
+    mazeGame,
+    matchGame,
+    puzzleGame
+  });
+  
   countGame.init(document);
   colorGame.init(document);
   mazeGame.init(document);

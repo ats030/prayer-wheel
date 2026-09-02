@@ -5,6 +5,11 @@
 export class ScreenManager {
   constructor() {
     this.currentScreen = null;
+    this.gameModules = {};
+  }
+
+  setGameModules(gameModules) {
+    this.gameModules = gameModules;
   }
 
   show(screenId) {
@@ -16,6 +21,13 @@ export class ScreenManager {
       newScreen.classList.remove('hidden');
       this.currentScreen = screenId;
     }
+    
+    // 各ゲームモジュールの cleanup を呼び出す
+    Object.values(this.gameModules).forEach(game => {
+      if (game && typeof game.cleanup === 'function') {
+        game.cleanup();
+      }
+    });
   }
 
   hide(screenId) {
