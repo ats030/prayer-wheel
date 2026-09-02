@@ -113,8 +113,6 @@ export class CountGame {
 
     // エモジと問題文を表示
     questionText.textContent = `${emoji}はいくつあるかな？`;
-
-    pictureArea.innerHTML = '';
     for (let i = 0; i < emojiCount; i++) {
       const span = document.createElement('span');
       span.className = 'picture-item';

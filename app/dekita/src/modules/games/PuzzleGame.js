@@ -115,12 +115,6 @@ export class PuzzleGame {
       gridArea.appendChild(slot);
     }
 
-    correctSlot.addEventListener('dragstart', (e) => this.handleDragStart(e));
-    correctSlot.addEventListener('dragover', (e) => e.preventDefault());
-    correctSlot.addEventListener('drop', (e) => this.handleDrop(e));
-    correctSlot.addEventListener('dragenter', (e) => e.preventDefault());
-    correctSlot.addEventListener('dragleave', (e) => e.preventDefault());
-
     this.updateProgress();
   }
 

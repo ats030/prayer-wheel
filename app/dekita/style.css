@@ -528,6 +528,73 @@ h2 {
   margin: 4px;
 }
 
+.match-card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  font-size: 32px;
+  width: 64px;
+  height: 64px;
+  border: 2px solid #4CAF50;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+}
+
+.match-card:active {
+  transform: scale(0.95);
+}
+
+.match-card.revealed {
+  background: #fff;
+}
+
+.match-card.matched {
+  background: #4CAF50;
+  color: #fff;
+}
+
+.puzzle-silhouette {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 48px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  cursor: grab;
+  user-select: none;
+}
+
+.puzzle-silhouette:active {
+  cursor: grabbing;
+}
+
+.puzzle-drag-emoji {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 64px;
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+  margin-bottom: 16px;
+}
+
+.puzzle-drag-emoji:active {
+  cursor: grabbing;
+}
+
+.puzzle-instruction {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+
 /* --- 迷路テーマ選択画面 --- */
 #maze-theme-select-screen {
   display: flex;
