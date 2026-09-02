@@ -7,6 +7,7 @@ export class GameState {
     this.questionsAnswered = 0;
     this.questionsTotal = 10;
     this.maxNumber = 10;
+    this.isAnswering = false;
     
     this.mazeActive = false;
     this.mazePlayer = { x: 0, y: 0 };
@@ -22,10 +23,9 @@ export class GameState {
     this.questionsAnswered++;
   }
 
-   resetQuestionsAnswered() {
-     this.questionsAnswered = 0;
-     this.isAnswering = false;
-   }
+    resetQuestionsAnswered() {
+      this.questionsAnswered = 0;
+    }
 
   addScore(points) {
     this.score += points;
