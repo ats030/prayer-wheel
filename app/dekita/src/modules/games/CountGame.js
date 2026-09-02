@@ -11,6 +11,7 @@ export class CountGame {
   }
 
   init(rootElement) {
+    console.log('[CountGame] init called');
     this.root = rootElement;
     this.registerEventListeners();
     this.state.gameMode = 'number';
@@ -19,13 +20,19 @@ export class CountGame {
   }
 
   registerEventListeners() {
+    console.log('[CountGame] registerEventListeners called');
     const startBtn = this.root.getElementById('start-btn');
+    console.log('startBtn element:', startBtn);
     if (startBtn) {
       startBtn.addEventListener('click', () => {
+        console.log('[CountGame] start-btn clicked - event triggered');
         this.audio.init();
         this.audio.playPopSound();
         this.start();
       });
+      console.log('click event listener attached');
+    } else {
+      console.error('start-btn not found!');
     }
 
     const resetBtn = this.root.getElementById('reset-btn');
@@ -46,6 +53,7 @@ export class CountGame {
   }
 
   start() {
+    console.log('[CountGame] start called');
     this.state.resetScore();
     this.state.resetQuestionsAnswered();
     this.state.gameMode = 'number';
@@ -150,19 +158,19 @@ export class CountGame {
 
   checkAnswer(selected) {
     const correct = this.state.currentAnswer;
-    
+
     if (this.state.isAnswering) return;
     this.state.isAnswering = true;
-    
+
     if (correct === selected) {
       this.state.addScore(10);
       this.playCorrectFeedback();
     } else {
       this.playWrongFeedback();
     }
-    
+
     this.updateScore();
-    
+
     setTimeout(() => {
       this.state.isAnswering = false;
       this.nextQuestion();
@@ -193,14 +201,14 @@ export class CountGame {
     this.updateScore();
     this.updateProgress();
     this.root.getElementById('feedback-area').classList.add('hidden');
-    
+
     if (this.state.isGameOver()) {
       this.endGame();
     } else {
       this.generateQuestion();
     }
   }
-  
+
   generateQuestion() {
     if (this.state.isGameOver()) {
       this.endGame();
@@ -219,7 +227,7 @@ export class CountGame {
   }
 
   updateProgress() {
-    this.root.getElementById('progress-text').textContent = 
+    this.root.getElementById('progress-text').textContent =
       `${this.state.questionsAnswered + 1}/${this.state.questionsTotal}`;
   }
 
