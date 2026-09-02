@@ -36,5 +36,8 @@
   <div class="toast" id="toast"></div>
   <script src="/static/app.js?v={{ static_version }}"></script>
   {% block scripts %}{% endblock %}
+  <!-- 閲覧数の計測 (visit-log, port 8526)。外部へは何も送らず、集計は手元だけに残る。
+       visit-log が落ちていても img が 1 つ失敗するだけでページは動く。 -->
+  <script src="http://ubuntu-server-app:8526/v.js" data-site="rss-reader" defer></script>
 </body>
 </html>
