@@ -233,4 +233,8 @@ export class CountGame {
   resetGame() {
     this.screen.showTitle();
   }
+
+  cleanup() {
+    this.state.isAnswering = false;
+  }
 }

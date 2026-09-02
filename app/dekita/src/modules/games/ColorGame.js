@@ -155,4 +155,8 @@ export class ColorGame {
   resetGame() {
     this.screen.showTitle();
   }
+
+  cleanup() {
+    this.state.isAnswering = false;
+  }
 }

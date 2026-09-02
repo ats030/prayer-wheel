@@ -230,4 +230,10 @@ export class MatchGame {
     feedbackText.textContent = `せいかい！ スコア：${this.score}`;
     this.audio.playPopSound();
   }
+
+  cleanup() {
+    this.selectedCells = [];
+    this.matchedIndices = new Set();
+    this.gameOver = false;
+  }
 }

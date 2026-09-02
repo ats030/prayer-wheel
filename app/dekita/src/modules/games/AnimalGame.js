@@ -171,4 +171,8 @@ export class AnimalGame {
     this.audio.playPopSound();
     this.audio.speak(soundText);
   }
+
+  cleanup() {
+    this.state.isAnswering = false;
+  }
 }

@@ -206,4 +206,9 @@ export class PuzzleGame {
     this.state.saveScore();
     this.audio.speak('おわった! おめでとう!');
   }
+
+  cleanup() {
+    this.draggedPiece = null;
+    this.gameOver = false;
+  }
 }
