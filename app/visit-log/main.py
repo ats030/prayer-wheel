@@ -46,8 +46,16 @@ MAX_SITE = 64
 MAX_PATH = 300
 MAX_REF = 300
 SITE_RE = re.compile(r"^[A-Za-z0-9._-]{1,%d}$" % MAX_SITE)
+# 計測対象として登録した URL の一覧。イベントが 1 件も来ていないサイトも
+# 「登録したのに届いていない」として画面に出したいので、イベントとは別に持つ。
+SITES_PATH = DATA_DIR / "sites.json"
+MAX_URL = 300
+MAX_NOTE = 120
+URL_RE = re.compile(r"^https?://[^\s/?#]+")
 
 _lock = threading.Lock()
+# 登録簿は読んで書き戻すので、同時登録で片方が消えないよう別ロックで囲う。
+_sites_lock = threading.Lock()
 _salt: str | None = None
 _cache: dict = {"mtimes": {}, "events": []}
 
@@ -107,6 +115,24 @@ def ref_host(ref: str) -> str:
     """リファラはホストだけ残す。パスやクエリには他サイトの個人情報が乗りうる。"""
     m = re.match(r"^https?://([^/?#]+)", ref or "")
     return m.group(1)[:100] if m else ""
+
+
+def load_sites() -> list[dict]:
+    if not SITES_PATH.exists():
+        return []
+    try:
+        data = json.loads(SITES_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return []
+    return [r for r in data if isinstance(r, dict) and r.get("name")] if isinstance(data, list) else []
+
+
+def save_sites(sites: list[dict]) -> None:
+    """書き込み中に読まれても壊れないよう、別名に書いてから置き換える。"""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = SITES_PATH.with_name("sites.json.tmp")
+    tmp.write_text(json.dumps(sites, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(SITES_PATH)
 
 
 def log_path(dt: datetime) -> Path:
@@ -184,6 +210,7 @@ def summarize(days: int, include_bots: bool) -> dict:
     refs = defaultdict(int)
     devs = defaultdict(int)
     hours = defaultdict(int)
+    last_seen: dict[str, str] = {}
 
     for e in events:
         day = e.get("ts", "")[:10]
@@ -198,6 +225,11 @@ def summarize(days: int, include_bots: bool) -> dict:
             refs[e["ref"]] += 1
         devs[e.get("dev", "unknown")] += 1
         hours[e.get("ts", "")[11:13]] += 1
+        ts = e.get("ts", "")
+        if ts > last_seen.get(site, ""):
+            last_seen[site] = ts
+
+    registered = {r["name"]: r for r in load_sites()}
 
     def top(counter, limit=20):
         items = sorted(counter.items(), key=lambda kv: -kv[1])[:limit]
@@ -211,12 +243,22 @@ def summarize(days: int, include_bots: bool) -> dict:
             {"date": d, "views": v["views"], "visitors": len(v["vids"])}
             for d, v in sorted(daily.items())
         ],
+        # 登録済みで未計測のサイトは 0 件として残す。届いていないこと自体が
+        # 見たい情報 (タグの入れ忘れか、そのページに誰も来ていないか) なので消さない。
         "sites": sorted(
             (
-                {"key": s, "views": v["views"], "visitors": len(v["vids"])}
-                for s, v in sites.items()
+                {
+                    "key": name,
+                    "views": sites[name]["views"] if name in sites else 0,
+                    "visitors": len(sites[name]["vids"]) if name in sites else 0,
+                    "url": registered.get(name, {}).get("url", ""),
+                    "note": registered.get(name, {}).get("note", ""),
+                    "registered": name in registered,
+                    "last_seen": last_seen.get(name, ""),
+                }
+                for name in set(sites) | set(registered)
             ),
-            key=lambda r: -r["views"],
+            key=lambda r: (-r["views"], r["key"]),
         ),
         "paths": top(paths),
         "refs": top(refs),
@@ -275,6 +317,62 @@ async def tag():
     )
 
 
+@app.get("/api/sites")
+async def api_sites_list():
+    return JSONResponse(load_sites(), headers=NO_STORE)
+
+
+@app.post("/api/sites")
+async def api_sites_add(request: Request):
+    # クロスサイトの単純フォーム送信は application/json を名乗れない。
+    # Tailnet 内の別ページから勝手に登録されるのをここで止める。
+    if "application/json" not in request.headers.get("content-type", ""):
+        return JSONResponse({"error": "JSON で送ってください"}, status_code=415, headers=NO_STORE)
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "JSON を読めませんでした"}, status_code=400, headers=NO_STORE)
+    if not isinstance(body, dict):
+        return JSONResponse({"error": "JSON を読めませんでした"}, status_code=400, headers=NO_STORE)
+
+    name = clean(str(body.get("name", "")), MAX_SITE)
+    url = clean(str(body.get("url", "")), MAX_URL)
+    note = clean(str(body.get("note", "")), MAX_NOTE)
+    if not SITE_RE.match(name):
+        return JSONResponse(
+            {"error": "名前は英数字と . _ - だけで 64 文字までです"}, status_code=400, headers=NO_STORE
+        )
+    if not URL_RE.match(url):
+        return JSONResponse(
+            {"error": "URL は http:// か https:// で始めてください"}, status_code=400, headers=NO_STORE
+        )
+
+    row = {"name": name, "url": url, "note": note, "added": datetime.now(TZ).isoformat(timespec="seconds")}
+    with _sites_lock:
+        sites = load_sites()
+        for i, r in enumerate(sites):
+            if r.get("name") == name:
+                row["added"] = r.get("added", row["added"])  # 同じ名前は上書き。登録日は残す
+                sites[i] = row
+                break
+        else:
+            sites.append(row)
+        save_sites(sites)
+    return JSONResponse(row, headers=NO_STORE)
+
+
+@app.delete("/api/sites/{name}")
+async def api_sites_delete(name: str):
+    """登録簿から外すだけで、記録済みのイベントは消さない。"""
+    with _sites_lock:
+        sites = load_sites()
+        kept = [r for r in sites if r.get("name") != name]
+        if len(kept) == len(sites):
+            return JSONResponse({"error": "登録されていません"}, status_code=404, headers=NO_STORE)
+        save_sites(kept)
+    return JSONResponse({"deleted": name}, headers=NO_STORE)
+
+
 @app.get("/api/summary")
 async def api_summary(days: int = 30, bots: int = 0):
     days = max(1, min(days, 400))
@@ -324,6 +422,14 @@ td.n,th.n{text-align:right}
 .empty{color:var(--mut);padding:8px 0}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
 code{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:12px}
+a{color:var(--acc)}
+.reg{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.reg input{font:inherit;padding:5px 10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;flex:1;min-width:150px}
+.msg{padding:6px 10px;border-radius:6px;margin-bottom:10px;font-size:13px;background:var(--bg);border:1px solid var(--line)}
+.msg.err{color:#b3261e;border-color:#b3261e}
+@media(prefers-color-scheme:dark){.msg.err{color:#ff8a80;border-color:#8c3b34}}
+button.link{border:none;background:none;color:var(--acc);padding:2px 6px;text-decoration:underline;border-radius:0}
+.badge{font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:0 6px;margin-left:6px}
 </style></head><body><div class="wrap">
 <h1>visit-log</h1>
 <p class="sub">自作アプリのアクセス集計。外部へは何も送らず、生ログは <code>~/data/visit-log/</code> だけに残ります。</p>
@@ -335,30 +441,34 @@ code{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding
 </div>
 <div class="kpis" id="kpis"></div>
 <div class="card"><h2>日次 ページビュー</h2><div class="chart" id="chart"></div><div id="range" style="color:var(--mut);font-size:12px;display:flex;justify-content:space-between;margin-top:6px"></div></div>
+<div class="card"><h2>計測対象</h2>
+<p style="margin:0 0 10px;color:var(--mut)">登録しておくと、まだ 1 件も届いていないサイトも一覧に残ります (タグの入れ忘れに気づけます)。</p>
+<form class="reg" id="reg">
+  <input id="f-name" placeholder="名前 (例 rss-reader)" maxlength="64" required>
+  <input id="f-url" placeholder="https://..." maxlength="300" required>
+  <input id="f-note" placeholder="メモ (任意)" maxlength="120">
+  <button type="submit">登録</button>
+</form>
+<div id="reg-msg" class="msg" hidden></div>
+<div id="sites"></div>
+<p style="margin:14px 0 8px;color:var(--mut)">計測したいページの <code>&lt;/body&gt;</code> の直前に1行入れます。行の「タグ」を押すとそのサイト用に切り替わります。</p>
+<code id="snippet"></code></div>
 <div class="grid2">
-  <div class="card"><h2>サイト別</h2><div id="sites"></div></div>
   <div class="card"><h2>時間帯</h2><div class="chart" id="hours"></div></div>
   <div class="card"><h2>ページ</h2><div id="paths"></div></div>
   <div class="card"><h2>参照元</h2><div id="refs"></div></div>
   <div class="card"><h2>デバイス</h2><div id="devices"></div></div>
 </div>
-<div class="card"><h2>計測タグ</h2>
-<p style="margin:0 0 8px;color:var(--mut)">計測したいページの <code>&lt;/body&gt;</code> の直前に1行入れます。<code>data-site</code> がこの一覧での名前になります。</p>
-<code id="snippet"></code></div>
 </div>
 <script>
 let days = 30, bots = 0;
 const num = n => n.toLocaleString("ja-JP");
 
-function table(rows, label, withVisitors) {
+function table(rows, label) {
   if (!rows.length) return '<div class="empty">まだ記録がありません</div>';
-  const head = withVisitors
-    ? `<tr><th>${label}</th><th class="n">PV</th><th class="n">訪問者</th></tr>`
-    : `<tr><th>${label}</th><th class="n">PV</th></tr>`;
-  const body = rows.map(r => withVisitors
-    ? `<tr><td class="k">${esc(r.key)}</td><td class="n">${num(r.views)}</td><td class="n">${num(r.visitors)}</td></tr>`
-    : `<tr><td class="k">${esc(r.key)}</td><td class="n">${num(r.views)}</td></tr>`).join("");
-  return `<table>${head}${body}</table>`;
+  const body = rows.map(r =>
+    `<tr><td class="k">${esc(r.key)}</td><td class="n">${num(r.views)}</td></tr>`).join("");
+  return `<table><tr><th>${label}</th><th class="n">PV</th></tr>${body}</table>`;
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -367,6 +477,60 @@ function bars(el, rows, labelFn) {
   el.innerHTML = rows.map(r =>
     `<div style="height:${(r.views / max * 100).toFixed(1)}%" title="${esc(labelFn(r))}: ${num(r.views)}"></div>`).join("");
 }
+
+function sitesTable(rows) {
+  if (!rows.length) return '<div class="empty">まだ登録も記録もありません</div>';
+  const body = rows.map(r => `<tr>
+    <td class="k">${esc(r.key)}${r.registered ? "" : '<span class="badge">未登録</span>'}</td>
+    <td class="k">${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.url)}</a>` : ""}`
+    + `${r.note ? `<div style="color:var(--mut);font-size:12px">${esc(r.note)}</div>` : ""}</td>
+    <td class="n">${num(r.views)}</td>
+    <td class="n">${num(r.visitors)}</td>
+    <td class="k" style="color:var(--mut);font-size:12px">${r.last_seen ? esc(r.last_seen.slice(0, 16).replace("T", " ")) : "未着"}</td>
+    <td class="n"><button class="link" data-tag="${esc(r.key)}">タグ</button>`
+    + `${r.registered ? `<button class="link" data-del="${esc(r.key)}">削除</button>` : ""}</td></tr>`).join("");
+  return `<table><tr><th>名前</th><th>URL / メモ</th><th class="n">PV</th><th class="n">訪問者</th><th>最終記録</th><th></th></tr>${body}</table>`;
+}
+
+const showTag = name =>
+  document.getElementById("snippet").textContent =
+    `<script src="${location.origin}/v.js" data-site="${name}" defer><\\/script>`;
+
+function msg(text, isErr) {
+  const el = document.getElementById("reg-msg");
+  el.textContent = text;
+  el.className = isErr ? "msg err" : "msg";
+  el.hidden = false;
+}
+
+const val = id => document.getElementById(id).value.trim();
+
+document.getElementById("reg").onsubmit = async e => {
+  e.preventDefault();
+  const r = await fetch("/api/sites", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ name: val("f-name"), url: val("f-url"), note: val("f-note") }),
+  });
+  const d = await r.json();
+  if (!r.ok) return msg(d.error || "登録できませんでした", true);
+  ["f-name", "f-url", "f-note"].forEach(id => document.getElementById(id).value = "");
+  msg(`${d.name} を登録しました。下のタグをページに貼ってください。`, false);
+  showTag(d.name);
+  load();
+};
+
+// 一覧は load() ごとに作り直すので、行ではなく入れ物にハンドラを付ける。
+document.getElementById("sites").onclick = async e => {
+  const name = e.target.dataset.tag, del = e.target.dataset.del;
+  if (name) return showTag(name);
+  if (!del) return;
+  if (!confirm(`${del} を登録簿から外します。記録済みのログは消えません。`)) return;
+  const r = await fetch("/api/sites/" + encodeURIComponent(del), { method: "DELETE" });
+  const d = await r.json();
+  msg(r.ok ? `${del} を外しました` : (d.error || "削除できませんでした"), !r.ok);
+  load();
+};
 
 async function load() {
   const d = await (await fetch(`/api/summary?days=${days}&bots=${bots}`)).json();
@@ -379,10 +543,10 @@ async function load() {
   const rg = document.getElementById("range");
   rg.innerHTML = d.daily.length ? `<span>${d.daily[0].date}</span><span>${d.daily.at(-1).date}</span>` : "";
   bars(document.getElementById("hours"), d.hours, r => r.key + "時");
-  document.getElementById("sites").innerHTML = table(d.sites, "サイト", true);
-  document.getElementById("paths").innerHTML = table(d.paths, "パス", false);
-  document.getElementById("refs").innerHTML = table(d.refs, "ホスト", false);
-  document.getElementById("devices").innerHTML = table(d.devices, "種別", false);
+  document.getElementById("sites").innerHTML = sitesTable(d.sites);
+  document.getElementById("paths").innerHTML = table(d.paths, "パス");
+  document.getElementById("refs").innerHTML = table(d.refs, "ホスト");
+  document.getElementById("devices").innerHTML = table(d.devices, "種別");
 }
 
 document.querySelectorAll("[data-d]").forEach(b => b.onclick = () => {
@@ -395,8 +559,7 @@ document.getElementById("bots").onclick = e => {
   e.target.classList.toggle("on", !!bots);
   load();
 };
-document.getElementById("snippet").textContent =
-  `<script src="${location.origin}/v.js" data-site="myapp" defer><\\/script>`;
+showTag("myapp");
 load();
 </script></body></html>"""
 
