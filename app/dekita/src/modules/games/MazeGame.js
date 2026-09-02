@@ -69,7 +69,7 @@ export class MazeGame {
     canvas.width = 300;
     canvas.height = 300;
     
-    const result = this.pathGenerator.generate(canvas.width, canvas.height);
+    const result = new PathGenerator().generate(canvas.width, canvas.height);
     this.state.mazePath = result.path;
     this.state.mazePlayer = { x: result.player.x, y: result.player.y };
     this.state.mazeGoal = { x: result.goal.x, y: result.goal.y };
@@ -96,7 +96,7 @@ export class MazeGame {
     console.log('  themeEmojiEnd:', this.state.themeEmojiEnd);
     console.log('  mazePath length:', this.state.mazePath.length);
     
-    this.pathGenerator.draw(ctx, canvas.width, canvas.height, this.state.themeEmojiStart, this.state.themeEmojiEnd);
+    new PathGenerator().draw(ctx, canvas.width, canvas.height, this.state.themeEmojiStart, this.state.themeEmojiEnd);
     
     const playerSize = 32;
     ctx.font = `${playerSize}px serif`;
@@ -132,7 +132,7 @@ export class MazeGame {
       canvas.height = 300;
       
       // 新しい経路生成
-      const result = this.pathGenerator.generate(canvas.width, canvas.height);
+      const result = new PathGenerator().generate(canvas.width, canvas.height);
       this.state.mazePath = result.path;
       this.state.mazePlayer = { x: result.player.x, y: result.player.y };
       this.state.mazeGoal = { x: result.goal.x, y: result.goal.y };
@@ -141,6 +141,7 @@ export class MazeGame {
       this.updateScore();
       this.audio.speak(this.state.mazeCurrentTheme.text);
     }
+  }
   }
 
   updateScore() {
