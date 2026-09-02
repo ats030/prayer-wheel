@@ -39,11 +39,41 @@ export function init() {
     puzzleGame
   });
   
-  countGame.init(document);
-  colorGame.init(document);
-  mazeGame.init(document);
-  matchGame.init(document);
-  puzzleGame.init(document);
+  // 各ゲームモジュールの初期化をtry-catchで囲む
+  try {
+    countGame.init(document);
+    console.log('[gameApp] CountGame initialized');
+  } catch (err) {
+    console.error('[gameApp] CountGame init error:', err);
+  }
+  
+  try {
+    colorGame.init(document);
+    console.log('[gameApp] ColorGame initialized');
+  } catch (err) {
+    console.error('[gameApp] ColorGame init error:', err);
+  }
+  
+  try {
+    mazeGame.init(document);
+    console.log('[gameApp] MazeGame initialized');
+  } catch (err) {
+    console.error('[gameApp] MazeGame init error:', err);
+  }
+  
+  try {
+    matchGame.init(document);
+    console.log('[gameApp] MatchGame initialized');
+  } catch (err) {
+    console.error('[gameApp] MatchGame init error:', err);
+  }
+  
+  try {
+    puzzleGame.init(document);
+    console.log('[gameApp] PuzzleGame initialized');
+  } catch (err) {
+    console.error('[gameApp] PuzzleGame init error:', err);
+  }
   
   return {
     gameState,
