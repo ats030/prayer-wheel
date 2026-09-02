@@ -185,8 +185,6 @@ export class MazeGame {
       this.audio.speak(this.state.mazeCurrentTheme.text);
     }
   }
-  }
-
   updateScore() {
     const scoreEl = this.root.getElementById('maze-score');
     if (scoreEl) {
