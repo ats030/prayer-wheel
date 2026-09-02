@@ -1,5 +1,6 @@
 # Cloud Build configuration for dekita
 # Deploys to Cloud Run in Asia Northeast1 region
+# Project: dekita-507214
 steps:
   - name: 'ubuntu'
     entrypoint: 'bash'
