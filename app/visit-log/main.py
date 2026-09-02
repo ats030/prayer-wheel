@@ -276,11 +276,10 @@ NO_STORE = {
 }
 
 
-FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-<rect width="32" height="32" rx="8" fill="#2f6f4f"/>
-<rect x="7" y="17" width="5" height="10" rx="1.5" fill="#fff"/>
-<rect x="14" y="11" width="5" height="16" rx="1.5" fill="#fff"/>
-<rect x="21" y="6" width="5" height="21" rx="1.5" fill="#fff"/>
+FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" data-favicon-size="84" data-outline-color="#464a52" data-outline-width="5">
+<rect x="16" y="16" width="68" height="68" rx="12" fill="#f7f8f8" stroke="#464a52" stroke-width="5"/>
+<path d="M28 66L44 50L56 58L74 34" fill="none" stroke="#8a8f98" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="74" cy="34" r="7" fill="#58a96b" stroke="#464a52" stroke-width="3"/>
 </svg>"""
 
 
