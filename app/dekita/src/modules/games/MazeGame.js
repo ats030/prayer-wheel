@@ -415,8 +415,4 @@ export class MazeGame {
     this.root.getElementById('final-score').textContent = '⭐️' + this.state.score;
     this.state.saveScore();
   }
-
-  setTestMode(enabled) {
-    this.state._testMode = enabled;
-  }
 }
