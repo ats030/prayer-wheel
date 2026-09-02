@@ -96,8 +96,47 @@ export class MazeGame {
     console.log('  themeEmojiEnd:', this.state.themeEmojiEnd);
     console.log('  mazePath length:', this.state.mazePath.length);
     
-    new PathGenerator().draw(ctx, canvas.width, canvas.height, this.state.themeEmojiStart, this.state.themeEmojiEnd);
-    
+    const gridCols = 8;
+    const cellSize = canvas.width / gridCols;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 経路を描画
+    ctx.beginPath();
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = '#81D4FA';
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    if (this.state.mazePath.length > 0) {
+      ctx.moveTo(this.state.mazePath[0].x, this.state.mazePath[0].y);
+
+      for (let i = 1; i < this.state.mazePath.length; i++) {
+        ctx.lineTo(this.state.mazePath[i].x, this.state.mazePath[i].y);
+      }
+    }
+    ctx.stroke();
+
+    // ゴール地点の絵文字
+    ctx.font = '36px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(this.state.themeEmojiEnd, this.state.mazeGoal.x, this.state.mazeGoal.y);
+
+    // 経路外の境界線（失敗判定用）
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#E57373';
+    for (let x = 0; x <= 8; x++) {
+      ctx.moveTo(x * cellSize, 0);
+      ctx.lineTo(x * cellSize, canvas.height);
+    }
+    for (let y = 0; y <= 8; y++) {
+      ctx.moveTo(0, y * cellSize);
+      ctx.lineTo(canvas.width, y * cellSize);
+    }
+    ctx.stroke();
+
     const playerSize = 32;
     ctx.font = `${playerSize}px serif`;
     ctx.textAlign = 'center';
