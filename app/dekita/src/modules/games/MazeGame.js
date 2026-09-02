@@ -139,6 +139,7 @@ export class MazeGame {
       
       this.drawMaze();
       this.updateScore();
+      this.audio.speak(this.state.mazeCurrentTheme.text);
     }
   }
 
