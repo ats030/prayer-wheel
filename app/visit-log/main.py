@@ -276,6 +276,23 @@ NO_STORE = {
 }
 
 
+FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<rect width="32" height="32" rx="8" fill="#2f6f4f"/>
+<rect x="7" y="17" width="5" height="10" rx="1.5" fill="#fff"/>
+<rect x="14" y="11" width="5" height="16" rx="1.5" fill="#fff"/>
+<rect x="21" y="6" width="5" height="21" rx="1.5" fill="#fff"/>
+</svg>"""
+
+
+@app.get("/favicon.svg")
+async def favicon():
+    return Response(
+        content=FAVICON_SVG,
+        media_type="image/svg+xml",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
+
+
 @app.get("/px.gif")
 async def pixel(request: Request, s: str = "", p: str = "/", r: str = ""):
     """画像ビーコン。img で読ませるのでクロスオリジンでも CORS が要らない。"""
@@ -412,6 +429,7 @@ INDEX_HTML = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>visit-log</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
 :root{--bg:#fbfbfa;--fg:#1c1c1a;--mut:#6b6b66;--line:#e2e2dd;--card:#fff;--acc:#2f6f4f}
 @media(prefers-color-scheme:dark){:root{--bg:#16171a;--fg:#e8e8e4;--mut:#9a9a94;--line:#2c2e33;--card:#1e2024;--acc:#6bbf8f}}
