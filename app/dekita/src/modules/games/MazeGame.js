@@ -3,7 +3,7 @@
  * For 3-year-olds: tap-to-move, visual learning, no reading required
  */
 
-import { PathGenerator } from '../utils/maze/PathGenerator.js';
+import { PathGenerator } from '../modules/utils/maze/PathGenerator.js';
 
 export class MazeGame {
   constructor(gameState, audio, screen) {
