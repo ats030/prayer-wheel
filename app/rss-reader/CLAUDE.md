@@ -12,6 +12,22 @@ systemctl --user start rss-reader-refresh.service  # 全更新＋LLM採点を手
 
 `PYTHONPATH=$HOME/app/rss-reader/src` を通したうえで `uv run uvicorn rss_reader.app:app` を実行する。
 依存パッケージは `~/pyproject.toml`（`uv sync`）で管理する — このリポジトリに `requirements.txt` は置かない。
+正本はあくまで `~/pyproject.toml` で、このアプリが実際に使うのは次の13個（参照用。ここを見て
+`uv add` する必要はない）:
+
+- Web: `fastapi` `uvicorn` `jinja2`（`Jinja2Templates` 経由。import 文には現れない）
+- 取得・解析: `httpx` `requests` `feedparser` `beautifulsoup4`(bs4) `readability-lxml` `trafilatura`
+- その他: `pydantic` `diskcache` `dotenv`、テストに `pytest`
+
+`ollama` は入っていない。LLM 呼び出しは `core/llm.py` が Open WebUI / ollama の HTTP API を
+`httpx` で直叩きしているため、クライアントライブラリを使わない。
+
+テストも起動と同じく `PYTHONPATH` が要る（通さないと `rss_reader` が見つからず収集時に落ちる）:
+
+```bash
+cd ~/app/rss-reader
+PYTHONPATH=$HOME/app/rss-reader/src uv run --project ~ pytest tests -q
+```
 
 環境変数は `~/.env` から読む（`rss_reader/__init__.py` の `load_dotenv`。config.py が import 時に
 環境変数を読むため、パッケージ初期化で先に読み込む必要がある）。systemd 側も `EnvironmentFile` で
