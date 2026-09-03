@@ -244,7 +244,6 @@ export class CountGame extends GameBase {
   }
 
   cleanup() {
-    super.cleanup();
     this.state.isAnswering = false;
   }
 }

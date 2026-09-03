@@ -75,4 +75,8 @@ export class GameBase {
       feedbackEl.style.display = 'none';
     }
   }
+
+  cleanup() {
+    // 空実装 - 各ゲームモジュールで必要に応じてオーバーライド
+  }
 }
