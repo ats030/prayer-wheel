@@ -58,6 +58,8 @@ TARGET_BASE_URL = env("OLLAMA_PROXY_TARGET_URL") or (
 )
 TARGET_BASE_URL = TARGET_BASE_URL.rstrip("/")
 REQUEST_TIMEOUT = int(env("OLLAMA_PROXY_TIMEOUT", "600"))
+GENERATION_QUEUE_TIMEOUT = float(env("OLLAMA_PROXY_QUEUE_TIMEOUT", "5"))
+GENERATION_RETRY_AFTER = int(env("OLLAMA_PROXY_RETRY_AFTER", "30"))
 ALLOWED_NETWORKS = tuple(
     ipaddress.ip_network(value.strip())
     for value in env("OLLAMA_PROXY_ALLOWED_NETWORKS", "127.0.0.0/8").split(",")
@@ -80,11 +82,16 @@ USAGE_LOG_ENABLED = env("OLLAMA_PROXY_USAGE_LOG", "1") not in ("0", "false", "no
 USAGE_TAIL_BYTES = 256 * 1024
 # 計測するのは生成と埋め込みだけ。/api/tags や /api/ps は1日1万件来るが
 # トークンを消費しないので記録しても雑音になる。
-USAGE_PATHS = frozenset({
+GENERATION_PATHS = frozenset({
     "/api/generate", "/api/chat", "/api/embed", "/api/embeddings",
     "/v1/chat/completions", "/v1/completions", "/v1/embeddings",
 })
+USAGE_PATHS = GENERATION_PATHS
 _usage_lock = threading.Lock()
+# Ollama は単一 GPU 上で別モデルの要求を内部キューへ積む。依頼元の timeout
+# より上流 timeout が長いと、切断済みの生成が何本も残るため proxy の入口で
+# 生成系だけを1本に制限する。tags/ps/show 等の管理 API は塞がない。
+_generation_gate = threading.Lock()
 
 
 def require_config() -> None:
@@ -331,7 +338,23 @@ class ProxyHandler(BaseHTTPRequestHandler):
         status = 0
         error = ""
         tail = b""
+        gate_acquired = False
         try:
+            if self.is_generation_request():
+                gate_acquired = _generation_gate.acquire(
+                    timeout=GENERATION_QUEUE_TIMEOUT)
+                if not gate_acquired:
+                    status = 503
+                    error = "generation queue busy"
+                    payload = json_error(
+                        "Ollama generation queue is busy; retry later")
+                    self.send_response(status)
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.send_header("Content-Length", str(len(payload)))
+                    self.send_header("Retry-After", str(GENERATION_RETRY_AFTER))
+                    self.end_headers()
+                    self.wfile.write(payload)
+                    return
             with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT) as response:
                 status = response.status
                 if measure:
@@ -364,6 +387,8 @@ class ProxyHandler(BaseHTTPRequestHandler):
             error = f"{type(exc).__name__}: {exc}"
             raise
         finally:
+            if gate_acquired:
+                _generation_gate.release()
             if measure:
                 self.record_usage(body, tail, status,
                                   round((time.monotonic() - started) * 1000),
@@ -419,6 +444,12 @@ class ProxyHandler(BaseHTTPRequestHandler):
             USAGE_LOG_ENABLED
             and self.command == "POST"
             and self.path.split("?", 1)[0] in USAGE_PATHS
+        )
+
+    def is_generation_request(self) -> bool:
+        return (
+            self.command == "POST"
+            and self.path.split("?", 1)[0] in GENERATION_PATHS
         )
 
     def record_usage(self, body: bytes | None, tail: bytes, status: int,

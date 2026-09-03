@@ -236,6 +236,10 @@ print("11. 上流が失敗しても応答は返り、記録は1行増える")
 class FakeUpstream(BaseHTTPRequestHandler):
     """本物の Open WebUI の代わり。/api/generate だけ 500 を返す。"""
 
+    active = 0
+    max_active = 0
+    active_lock = threading.Lock()
+
     def do_POST(self):  # noqa: N802
         self.rfile.read(int(self.headers.get("Content-Length", "0") or "0"))
         if self.path.endswith("/api/generate"):
@@ -246,13 +250,20 @@ class FakeUpstream(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
             return
-        # 実測所要が 0ms に丸まらない程度に待つ。
-        time.sleep(0.05)
-        self.send_response(200)
-        self.send_header("Content-Type", "application/x-ndjson")
-        self.send_header("Content-Length", str(len(NDJSON_STREAM)))
-        self.end_headers()
-        self.wfile.write(NDJSON_STREAM)
+        with self.active_lock:
+            type(self).active += 1
+            type(self).max_active = max(type(self).max_active, type(self).active)
+        try:
+            # 実測所要が 0ms に丸まらない程度に待つ。
+            time.sleep(0.05)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/x-ndjson")
+            self.send_header("Content-Length", str(len(NDJSON_STREAM)))
+            self.end_headers()
+            self.wfile.write(NDJSON_STREAM)
+        finally:
+            with self.active_lock:
+                type(self).active -= 1
 
     def log_message(self, *args):
         pass
@@ -306,6 +317,42 @@ with tempfile.TemporaryDirectory() as tmp:
     check("500 の理由", lines[1]["error"], "HTTP 500")
     check("上流不在は status 0", lines[2]["status"], 0)
     check("上流不在の理由が残る", bool(lines[2].get("error")), True)
+
+print("12. 生成は同時に1本だけ通し、後続は Retry-After 付き503にする")
+with tempfile.TemporaryDirectory() as tmp:
+    proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
+    proxy.GENERATION_QUEUE_TIMEOUT = 0.01
+    FakeUpstream.max_active = 0
+    upstream, proxy.TARGET_BASE_URL = serve(FakeUpstream)
+    front, base = serve(proxy.ProxyHandler)
+    results = []
+
+    def concurrent_post():
+        request = urllib.request.Request(
+            base + "/api/chat", data=b'{"model":"qwen3.8:27b"}',
+            method="POST", headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(request, timeout=10) as response:
+                results.append((response.status, response.headers.get("Retry-After")))
+        except urllib.error.HTTPError as exc:
+            results.append((exc.code, exc.headers.get("Retry-After")))
+
+    workers = [threading.Thread(target=concurrent_post) for _ in range(2)]
+    for worker in workers:
+        worker.start()
+    for worker in workers:
+        worker.join()
+    front.shutdown()
+    front.server_close()
+    upstream.shutdown()
+    upstream.server_close()
+
+    check("応答は成功1件とbusy1件", sorted(code for code, _ in results),
+          [200, 503])
+    retry_headers = [value for code, value in results if code == 503]
+    check("503にRetry-After", retry_headers,
+          [str(proxy.GENERATION_RETRY_AFTER)])
+    check("上流の最大同時生成数", FakeUpstream.max_active, 1)
 
 print()
 if failures:
