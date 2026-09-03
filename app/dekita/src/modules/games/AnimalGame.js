@@ -13,8 +13,11 @@ export class AnimalGame extends GameBase {
 
   registerEventListeners() {
     this.root.getElementById('animal-start-btn').addEventListener('click', () => {
+      console.log('[AnimalGame] Start button clicked');
       this.audio.init();
+      console.log('[AnimalGame] audioContext state:', this.audio.audioContext.state);
       this.audio.playPopSound();
+      console.log('[AnimalGame] Playing start sound');
       this.start();
     });
 
