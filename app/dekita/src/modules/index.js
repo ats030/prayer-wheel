@@ -30,13 +30,16 @@ export function init() {
   
   const puzzleGame = new PuzzleGame(gameState, audioManager, screenManager);
   
+  const animalGame = new AnimalGame(gameState, audioManager, screenManager);
+  
   // ゲームモジュールを ScreenManager に設定
   screenManager.setGameModules({
     countGame,
     colorGame,
     mazeGame,
     matchGame,
-    puzzleGame
+    puzzleGame,
+    animalGame
   });
   
   // 各ゲームモジュールの初期化をtry-catchで囲む
@@ -75,6 +78,13 @@ export function init() {
     console.error('[gameApp] PuzzleGame init error:', err);
   }
   
+  try {
+    animalGame.init(document);
+    console.log('[gameApp] AnimalGame initialized');
+  } catch (err) {
+    console.error('[gameApp] AnimalGame init error:', err);
+  }
+  
   return {
     gameState,
     audioManager,
@@ -83,6 +93,7 @@ export function init() {
     colorGame,
     mazeGame,
     matchGame,
-    puzzleGame
+    puzzleGame,
+    animalGame
   };
 }
