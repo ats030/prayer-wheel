@@ -50,6 +50,7 @@ SITE_RE = re.compile(r"^[A-Za-z0-9._-]{1,%d}$" % MAX_SITE)
 # 計測対象として登録した URL の一覧。イベントが 1 件も来ていないサイトも
 # 「登録したのに届いていない」として画面に出したいので、イベントとは別に持つ。
 SITES_PATH = DATA_DIR / "sites.json"
+EXTERNAL_STATS_PATH = DATA_DIR / "external-stats.json"
 MAX_URL = 300
 MAX_NOTE = 120
 URL_RE = re.compile(r"^https?://[^\s/?#]+")
@@ -57,6 +58,7 @@ URL_RE = re.compile(r"^https?://[^\s/?#]+")
 _lock = threading.Lock()
 # 登録簿は読んで書き戻すので、同時登録で片方が消えないよう別ロックで囲う。
 _sites_lock = threading.Lock()
+_external_stats_lock = threading.Lock()
 _salt: str | None = None
 _cache: dict = {"mtimes": {}, "events": []}
 
@@ -134,6 +136,24 @@ def save_sites(sites: list[dict]) -> None:
     tmp = SITES_PATH.with_name("sites.json.tmp")
     tmp.write_text(json.dumps(sites, ensure_ascii=False, indent=2), encoding="utf-8")
     tmp.replace(SITES_PATH)
+
+
+def load_external_stats() -> list[dict]:
+    """外部サービス側の公式値。内部PVや送客クリックには加算しない。"""
+    if not EXTERNAL_STATS_PATH.exists():
+        return []
+    try:
+        data = json.loads(EXTERNAL_STATS_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return []
+    return [r for r in data if isinstance(r, dict) and r.get("site")] if isinstance(data, list) else []
+
+
+def save_external_stats(rows: list[dict]) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = EXTERNAL_STATS_PATH.with_name("external-stats.json.tmp")
+    tmp.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(EXTERNAL_STATS_PATH)
 
 
 def log_path(dt: datetime) -> Path:
@@ -330,6 +350,7 @@ def summarize(days: int, include_bots: bool) -> dict:
             ),
             key=lambda row: (-row["clicks"], row["key"]),
         ),
+        "external_stats": sorted(load_external_stats(), key=lambda row: row.get("site", "")),
     }
 
 
@@ -454,6 +475,32 @@ async def api_sites_delete(name: str):
         save_sites(kept)
     return JSONResponse({"deleted": name}, headers=NO_STORE)
 
+@app.post("/api/external-stats")
+async def api_external_stats_update(request: Request):
+    """公式ダッシュボードから転記した累計値を登録・訂正する。"""
+    if "application/json" not in request.headers.get("content-type", ""):
+        return JSONResponse({"error": "JSON で送ってください"}, status_code=415, headers=NO_STORE)
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "JSON を読めませんでした"}, status_code=400, headers=NO_STORE)
+    site = clean(str(body.get("site", "")), MAX_SITE)
+    if not SITE_RE.match(site):
+        return JSONResponse({"error": "サイト名が不正です"}, status_code=400, headers=NO_STORE)
+    try:
+        value = int(body.get("value"))
+    except (TypeError, ValueError):
+        return JSONResponse({"error": "値は0以上の整数にしてください"}, status_code=400, headers=NO_STORE)
+    if value < 0 or value > 10**12:
+        return JSONResponse({"error": "値は0以上の整数にしてください"}, status_code=400, headers=NO_STORE)
+    metric = clean(str(body.get("metric", "公式ビュー")), 40) or "公式ビュー"
+    row = {"site": site, "value": value, "metric": metric, "source": "manual",
+           "observed_at": datetime.now(TZ).isoformat(timespec="seconds"), "status": "ok"}
+    with _external_stats_lock:
+        rows = [r for r in load_external_stats() if r.get("site") != site]
+        rows.append(row)
+        save_external_stats(rows)
+    return JSONResponse(row, headers=NO_STORE)
 
 @app.get("/go/{name}")
 async def outbound_redirect(request: Request, name: str):
@@ -554,6 +601,15 @@ button.link{border:none;background:none;color:var(--acc);padding:2px 6px;text-de
 <div class="card"><h2>外部サービスへの送客クリック</h2>
 <p style="margin:0 0 10px;color:var(--mut)">外部サービス全体のPVではなく、この画面の計測リンクから送ったクリックだけです。</p>
 <div id="outbound"></div></div>
+<div class="card"><h2>外部サービス公式統計</h2>
+<p style="margin:0 0 10px;color:var(--mut)">内部PVには加算しません。Cloud RunはHTTPリクエスト数、その他は公式画面から転記した値です。</p>
+<form class="reg" id="stats-reg">
+  <input id="s-site" placeholder="サービス名 (例 note)" maxlength="64" required>
+  <input id="s-value" type="number" min="0" step="1" placeholder="累計値" required>
+  <input id="s-metric" placeholder="指標名 (例 全体ビュー)" maxlength="40" value="公式ビュー">
+  <button type="submit">記録</button>
+</form>
+<div id="stats-msg" class="msg" hidden></div><div id="external-stats"></div></div>
 <div class="card"><h2>計測対象</h2>
 <p style="margin:0 0 10px;color:var(--mut)">登録しておくと、まだ 1 件も届いていないサイトも一覧に残ります (タグの入れ忘れに気づけます)。</p>
 <form class="reg" id="reg">
@@ -618,6 +674,15 @@ function msg(text, isErr) {
 
 const val = id => document.getElementById(id).value.trim();
 
+function statsTable(rows) {
+  if (!rows.length) return '<div class="empty">まだ公式統計がありません</div>';
+  const body = rows.map(r => '<tr><td class="k">' + esc(r.site) + '</td><td>' + esc(r.metric)
+    + '</td><td class="n">' + num(r.value) + '</td><td>' + (r.source === "cloud-monitoring" ? "自動" : "手入力")
+    + '</td><td class="k" style="color:var(--mut);font-size:12px">' + esc((r.observed_at || "").slice(0, 16).replace("T", " "))
+    + (r.status && r.status !== "ok" ? " / " + esc(r.status) : "") + '</td></tr>').join("");
+  return '<table><tr><th>サービス</th><th>指標</th><th class="n">累計</th><th>取得</th><th>確認時刻</th></tr>' + body + '</table>';
+}
+
 document.getElementById("reg").onsubmit = async e => {
   e.preventDefault();
   const r = await fetch("/api/sites", {
@@ -631,6 +696,18 @@ document.getElementById("reg").onsubmit = async e => {
   msg(`${d.name} を登録しました。下のタグをページに貼ってください。`, false);
   showTag(d.name);
   load();
+};
+
+document.getElementById("stats-reg").onsubmit = async e => {
+  e.preventDefault();
+  const r = await fetch("/api/external-stats", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({site: val("s-site"), value: val("s-value"), metric: val("s-metric")}),
+  });
+  const d = await r.json(), el = document.getElementById("stats-msg");
+  el.textContent = r.ok ? d.site + " の公式統計を記録しました" : (d.error || "記録できませんでした");
+  el.className = r.ok ? "msg" : "msg err"; el.hidden = false;
+  if (r.ok) { document.getElementById("s-value").value = ""; load(); }
 };
 
 // 一覧は load() ごとに作り直すので、行ではなく入れ物にハンドラを付ける。
@@ -664,6 +741,7 @@ async function load() {
     ? `<table><tr><th>外部サービス</th><th class="n">クリック</th><th class="n">訪問者</th></tr>${d.outbound.map(r =>
         `<tr><td class="k">${esc(r.key)}</td><td class="n">${num(r.clicks)}</td><td class="n">${num(r.visitors)}</td></tr>`).join("")}</table>`
     : '<div class="empty">まだ送客クリックがありません</div>';
+  document.getElementById("external-stats").innerHTML = statsTable(d.external_stats);
 }
 
 document.querySelectorAll("[data-d]").forEach(b => b.onclick = () => {

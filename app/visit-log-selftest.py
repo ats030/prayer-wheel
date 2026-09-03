@@ -12,12 +12,18 @@ spec = importlib.util.spec_from_file_location("visit_log_main", MODULE_PATH)
 visit_log = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(visit_log)
 
+FETCH_PATH = MODULE_PATH.with_name("fetch-cloud-run-stats.py")
+fetch_spec = importlib.util.spec_from_file_location("visit_log_cloud_stats", FETCH_PATH)
+cloud_stats = importlib.util.module_from_spec(fetch_spec)
+fetch_spec.loader.exec_module(cloud_stats)
+
 
 with tempfile.TemporaryDirectory() as tmp:
     data = Path(tmp)
     visit_log.DATA_DIR = data
     visit_log.SALT_PATH = data / "salt"
     visit_log.SITES_PATH = data / "sites.json"
+    visit_log.EXTERNAL_STATS_PATH = data / "external-stats.json"
     visit_log._salt = None
     visit_log.save_sites([
         {"name": "note", "url": "https://note.example/user", "note": ""},
@@ -43,6 +49,18 @@ with tempfile.TemporaryDirectory() as tmp:
     sites = {row["key"]: row for row in summary["sites"]}
     assert sites["note"]["tracked_url"] == "/go/note"
     assert sites["local"]["tracked_url"] == ""
+    assert summary["external_stats"] == []
+
+    response = client.post("/api/external-stats", json={
+        "site": "note", "value": 123, "metric": "全体ビュー",
+    })
+    assert response.status_code == 200
+    summary = client.get("/api/summary?days=30").json()
+    assert summary["external_stats"] == [{
+        "site": "note", "value": 123, "metric": "全体ビュー", "source": "manual",
+        "observed_at": response.json()["observed_at"], "status": "ok",
+    }]
+    assert client.post("/api/external-stats", json={"site": "note", "value": -1}).status_code == 400
 
     raw = next(data.glob("outbound-*.jsonl")).read_text(encoding="utf-8")
     row = json.loads(raw)
@@ -53,4 +71,13 @@ with tempfile.TemporaryDirectory() as tmp:
     client.get("/go/note", headers={"dnt": "1"}, follow_redirects=False)
     assert len(next(data.glob("outbound-*.jsonl")).read_text().splitlines()) == 1
 
-print("OK: outbound click tracking")
+    cloud_stats.access_token = lambda _: "test-token"
+    totals = {"ikimono-note": 25, "dekita": 12}
+    cloud_stats.request_total = lambda target, _: totals[target["site"]]
+    rows = cloud_stats.update(visit_log.EXTERNAL_STATS_PATH, "unused-gcloud")
+    by_site = {row["site"]: row for row in rows}
+    assert by_site["note"]["value"] == 123
+    assert by_site["ikimono-note"]["value"] == 25
+    assert by_site["dekita"]["source"] == "cloud-monitoring"
+
+print("OK: outbound click tracking and external official stats")

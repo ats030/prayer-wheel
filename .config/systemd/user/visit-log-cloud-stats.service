@@ -1,0 +1,12 @@
+[Unit]
+Description=visit-log - Cloud Run公式リクエスト数取得
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ats030
+ExecStart=/home/ats030/.venv/bin/python /home/ats030/app/visit-log/fetch-cloud-run-stats.py
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=visit-log-cloud-stats
