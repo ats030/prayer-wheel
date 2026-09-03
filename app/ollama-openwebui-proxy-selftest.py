@@ -354,6 +354,104 @@ with tempfile.TemporaryDirectory() as tmp:
           [str(proxy.GENERATION_RETRY_AFTER)])
     check("上流の最大同時生成数", FakeUpstream.max_active, 1)
 
+print("13. X-Client-Appのバッチはゲート取得後に別の常駐モデルをkeep_alive=0で降ろす")
+
+
+class EvictionUpstream(BaseHTTPRequestHandler):
+    """/api/ps を返し、/api/generate への keep_alive 退避要求を記録する。"""
+
+    resident = []
+    generate_calls = []
+    ps_fails = False
+
+    def do_GET(self):  # noqa: N802
+        if self.path.endswith("/api/ps"):
+            if type(self).ps_fails:
+                self.send_response(500)
+                self.end_headers()
+                return
+            body = json.dumps({"models": type(self).resident}).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        self.send_response(404)
+        self.end_headers()
+
+    def do_POST(self):  # noqa: N802
+        length = int(self.headers.get("Content-Length", "0") or "0")
+        raw = self.rfile.read(length)
+        if self.path.endswith("/api/generate"):
+            payload = json.loads(raw) if raw else {}
+            type(self).generate_calls.append(
+                (payload.get("model"), payload.get("keep_alive")))
+            body = b'{"done": true}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", "application/x-ndjson")
+        self.send_header("Content-Length", str(len(NDJSON_STREAM)))
+        self.end_headers()
+        self.wfile.write(NDJSON_STREAM)
+
+    def log_message(self, *args):
+        pass
+
+
+def post_with_headers(base, path, payload, headers=None):
+    all_headers = {"Content-Type": "application/json", "User-Agent": "selftest/1.0"}
+    if headers:
+        all_headers.update(headers)
+    request = urllib.request.Request(
+        base + path, data=payload, method="POST", headers=all_headers)
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            return response.status, response.read()
+    except urllib.error.HTTPError as exc:
+        return exc.code, exc.read()
+
+
+with tempfile.TemporaryDirectory() as tmp:
+    proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
+    EvictionUpstream.resident = [
+        {"name": "qwen3-coder-next:q4_K_M"}, {"name": "qwen3.8:27b"},
+    ]
+    EvictionUpstream.generate_calls = []
+    EvictionUpstream.ps_fails = False
+    upstream, proxy.TARGET_BASE_URL = serve(EvictionUpstream)
+    front, base = serve(proxy.ProxyHandler)
+
+    status, _ = post_with_headers(base, "/api/chat", b'{"model":"qwen3.8:27b"}',
+                                  {"X-Client-App": "daily-reflection"})
+    check("X-Client-App付きの応答コード", status, 200)
+    check("対象モデル自身は退避しない",
+          [c for c in EvictionUpstream.generate_calls if c[0] == "qwen3.8:27b"], [])
+    check("別モデルをkeep_alive=0で退避", EvictionUpstream.generate_calls,
+          [("qwen3-coder-next:q4_K_M", 0)])
+
+    EvictionUpstream.generate_calls = []
+    status, _ = post_with_headers(base, "/api/chat", b'{"model":"qwen3.8:27b"}')
+    check("X-Client-App無しの応答コード", status, 200)
+    check("X-Client-App無しでは退避しない", EvictionUpstream.generate_calls, [])
+
+    EvictionUpstream.generate_calls = []
+    EvictionUpstream.ps_fails = True
+    status, _ = post_with_headers(base, "/api/chat", b'{"model":"qwen3.8:27b"}',
+                                  {"X-Client-App": "daily-reflection"})
+    check("ps失敗時も応答コードは正常", status, 200)
+    check("ps失敗時は退避もしない", EvictionUpstream.generate_calls, [])
+
+    front.shutdown()
+    front.server_close()
+    upstream.shutdown()
+    upstream.server_close()
+
 print()
 if failures:
     print(f"失敗 {len(failures)} 件: {', '.join(failures)}")

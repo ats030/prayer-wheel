@@ -60,6 +60,14 @@ TARGET_BASE_URL = TARGET_BASE_URL.rstrip("/")
 REQUEST_TIMEOUT = int(env("OLLAMA_PROXY_TIMEOUT", "600"))
 GENERATION_QUEUE_TIMEOUT = float(env("OLLAMA_PROXY_QUEUE_TIMEOUT", "5"))
 GENERATION_RETRY_AFTER = int(env("OLLAMA_PROXY_RETRY_AFTER", "30"))
+# X-Client-App を名乗るバッチ要求だけ、ゲート取得後に他の常駐モデルを
+# keep_alive=0 で退避させる (ats030-pe2x)。_generation_gate は生成要求を
+# 1本に絞るため、ここに到達した時点で他の生成要求 (opencodeの対話要求も
+# 同じproxyを通る) はこのproxyを通っていない。よって /api/ps に映る
+# モデルは使用中ではなく、安全に退避できる。本番で問題が出た場合に
+# 再デプロイ無しで切れるよう既定で有効にしておく。
+EVICT_COMPETITORS_ENABLED = env("OLLAMA_PROXY_EVICT_COMPETITORS", "1") not in ("0", "false", "no")
+EVICT_TIMEOUT = float(env("OLLAMA_PROXY_EVICT_TIMEOUT", "10"))
 ALLOWED_NETWORKS = tuple(
     ipaddress.ip_network(value.strip())
     for value in env("OLLAMA_PROXY_ALLOWED_NETWORKS", "127.0.0.0/8").split(",")
@@ -214,6 +222,52 @@ def request_model(body: bytes | None) -> str:
     return d.get("model") or "" if isinstance(d, dict) else ""
 
 
+def evict_idle_competitors(target_model: str) -> None:
+    """X-Client-Appを名乗るバッチのために、他の常駐モデルをkeep_alive=0で降ろす。
+
+    呼び出し元は _generation_gate を取得済みであること。ゲートが生成要求を
+    1本に絞っているため、この時点で /api/ps に映るモデルはこのproxyを通した
+    生成には使われていない (opencodeの対話要求も同じproxyを通る)。
+
+    keep_alive を渡すのは /api/generate (ネイティブ) だけにする。
+    /v1/chat/completions (OpenAI互換) に送ると即アンロードになる
+    (ollama-keepalive.py の実測。2026-08-22)。-1 (恒久) は使わない。
+
+    失敗は個々に握りつぶし、他のモデルの退避や本来の転送を妨げない。
+    """
+    try:
+        request = urllib.request.Request(
+            TARGET_BASE_URL + "/api/ps",
+            headers={
+                "Authorization": f"Bearer {OPENWEBUI_API_KEY}",
+                "Accept": "application/json",
+            },
+        )
+        with urllib.request.urlopen(request, timeout=EVICT_TIMEOUT) as response:
+            models = json.load(response).get("models") or []
+    except Exception:  # noqa: BLE001
+        return
+    for model in models:
+        name = model.get("name")
+        if not name or name == target_model:
+            continue
+        try:
+            payload = json.dumps({"model": name, "keep_alive": 0}).encode("utf-8")
+            evict_request = urllib.request.Request(
+                TARGET_BASE_URL + "/api/generate",
+                data=payload,
+                headers={
+                    "Authorization": f"Bearer {OPENWEBUI_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                method="POST",
+            )
+            with urllib.request.urlopen(evict_request, timeout=EVICT_TIMEOUT):
+                pass
+        except Exception:  # noqa: BLE001
+            continue
+
+
 def client_label(user_agent: str, x_client_app: str | None = None) -> str:
     """User-Agent を呼び出し元の目印に縮める。
 
@@ -355,6 +409,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(payload)
                     return
+                client_app = self.headers.get("X-Client-App")
+                if EVICT_COMPETITORS_ENABLED and client_app and client_app.strip():
+                    evict_idle_competitors(request_model(body))
             with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT) as response:
                 status = response.status
                 if measure:
