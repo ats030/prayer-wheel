@@ -22,6 +22,18 @@ UNIT="$NAME.service"
 BODY_FILE=$(mktemp)
 trap 'rm -f "$BODY_FILE"' EXIT
 
+register_visit_log_site() {
+    site_url="http://ubuntu-server-app:$PORT/"
+    payload=$(printf '{"name":"%s","url":"%s","note":"app/deploy.sh auto"}' \
+        "$NAME" "$site_url")
+    if ! curl -fsS -H 'Content-Type: application/json' \
+        --data "$payload" http://ubuntu-server-app:8526/api/sites >/dev/null; then
+        echo "visit-log へのサイト登録に失敗: $NAME" >&2
+        return 1
+    fi
+    echo "visit-log 登録を確認: $NAME ($site_url)"
+}
+
 [ -d "$CHECKOUT/.git" ] || { echo "ローカルチェックアウトがない: $CHECKOUT" >&2; exit 1; }
 
 echo "更新中: $CHECKOUT"
@@ -62,6 +74,7 @@ while [ "$i" -lt 30 ]; do
                     echo "例外にする場合: VISIT_LOG_EXEMPT_REASON='理由' app/deploy.sh $NAME" >&2
                     exit 1
                 fi
+                register_visit_log_site
             fi
             echo "応答を確認 (HTTP $code, port $PORT)"
             exit 0
