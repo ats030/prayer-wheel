@@ -3,16 +3,16 @@
  * For 3-year-olds: visual learning, no reading required
  */
 
-export class CountGame {
+import { GameBase } from '../core/GameBase.js';
+
+export class CountGame extends GameBase {
   constructor(gameState, audio, screen) {
-    this.state = gameState;
-    this.audio = audio;
-    this.screen = screen;
+    super(gameState, audio, screen);
   }
 
   init(rootElement) {
     console.log('[CountGame] init called');
-    this.root = rootElement;
+    super.init(rootElement);
     this.registerEventListeners();
     this.state.gameMode = 'number';
     this.updateScore();
@@ -54,8 +54,7 @@ export class CountGame {
 
   start() {
     console.log('[CountGame] start called');
-    this.state.resetScore();
-    this.state.resetQuestionsAnswered();
+    super.start();
     this.state.gameMode = 'number';
     this.screen.showGame();
     this.generateQuestion();
@@ -178,29 +177,23 @@ export class CountGame {
   }
 
   playCorrectFeedback() {
-    const area = this.root.getElementById('feedback-area');
-    const text = this.root.getElementById('feedback-text');
-    area.style.display = 'block';
-    text.textContent = 'やったー！＋10てん';
-    text.style.color = '#4CAF50';
+    super.playCorrectFeedback();
     this.audio.speak('やったー！');
     this.audio.playPopSound();
   }
 
   playWrongFeedback() {
-    const area = this.root.getElementById('feedback-area');
-    const text = this.root.getElementById('feedback-text');
-    area.style.display = 'block';
-    text.textContent = 'だいじょうぶ！もういっこ！';
-    text.style.color = '#E57373';
+    super.playWrongFeedback();
     this.audio.speak('だいじょうぶ！もういっこ！');
   }
 
   nextQuestion() {
     this.state.incrementQuestionsAnswered();
-    this.updateScore();
-    this.updateProgress();
-    this.root.getElementById('feedback-area').classList.add('hidden');
+    super.updateScore();
+    super.updateProgress();
+    if (this.root) {
+      this.root.getElementById('feedback-area').classList.add('hidden');
+    }
 
     if (this.state.isGameOver()) {
       this.endGame();
@@ -223,17 +216,25 @@ export class CountGame {
   }
 
   updateScore() {
-    this.root.getElementById('score').textContent = '⭐️' + this.state.score;
+    super.updateScore();
+    if (this.root) {
+      this.root.getElementById('score').textContent = '⭐️' + this.state.score;
+    }
   }
 
   updateProgress() {
-    this.root.getElementById('progress-text').textContent =
-      `${this.state.questionsAnswered + 1}/${this.state.questionsTotal}`;
+    super.updateProgress();
+    if (this.root) {
+      this.root.getElementById('progress-text').textContent =
+        `${this.state.questionsAnswered + 1}/${this.state.questionsTotal}`;
+    }
   }
 
   endGame() {
-    this.screen.showResult();
-    this.root.getElementById('final-score').textContent = '⭐️' + this.state.score;
+    super.endGame();
+    if (this.root) {
+      this.root.getElementById('final-score').textContent = '⭐️' + this.state.score;
+    }
     this.state.saveScore();
     this.audio.speak('おわった! おめでとう!');
   }
@@ -243,6 +244,7 @@ export class CountGame {
   }
 
   cleanup() {
+    super.cleanup();
     this.state.isAnswering = false;
   }
 }

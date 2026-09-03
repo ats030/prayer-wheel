@@ -3,11 +3,11 @@
  * Memory card matching game (grid layout)
  */
 
-export class MatchGame {
+import { GameBase } from '../core/GameBase.js';
+
+export class MatchGame extends GameBase {
   constructor(gameState, audio, screen) {
-    this.gameState = gameState;
-    this.audio = audio;
-    this.screen = screen;
+    super(gameState, audio, screen);
     this.gridSize = 4;
     this.emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
     this.grid = [];
@@ -63,7 +63,7 @@ export class MatchGame {
     this.screen.showMatchGame();
     this.initGrid();
     this.audio.speak('ペアを見つけてね');
-    this.updateScore();
+    super.updateScore();
   }
 
   initGrid() {
@@ -209,9 +209,11 @@ export class MatchGame {
   }
 
   updateScore() {
-    this.root.getElementById('match-score').textContent = '⭐️' + this.score;
-    this.root.getElementById('match-progress-text').textContent = 
-      `${this.matchesFound}/${this.maxMatches} ペア`;
+    if (this.root) {
+      this.root.getElementById('match-score').textContent = '⭐️' + this.score;
+      this.root.getElementById('match-progress-text').textContent = 
+        `${this.matchesFound}/${this.maxMatches} ペア`;
+    }
   }
 
   nextRound() {
@@ -223,11 +225,16 @@ export class MatchGame {
   }
 
   endGame() {
+    super.endGame();
     this.gameOver = true;
-    const feedbackArea = this.root.getElementById('match-feedback-area');
-    const feedbackText = this.root.getElementById('match-feedback-text');
-    feedbackArea.style.display = 'block';
-    feedbackText.textContent = `せいかい！ スコア：${this.score}`;
+    if (this.root) {
+      const feedbackArea = this.root.getElementById('match-feedback-area');
+      const feedbackText = this.root.getElementById('match-feedback-text');
+      if (feedbackArea && feedbackText) {
+        feedbackArea.style.display = 'block';
+        feedbackText.textContent = `せいかい！ スコア：${this.score}`;
+      }
+    }
     this.audio.playPopSound();
   }
 

@@ -1,13 +1,8 @@
-/**
- * dekita - Preschool Edition Color Game Module
- * For 3-year-olds: visual learning, no reading required
- */
+import { GameBase } from '../core/GameBase.js';
 
-export class ColorGame {
+export class ColorGame extends GameBase {
   constructor(gameState, audio, screen) {
-    this.state = gameState;
-    this.audio = audio;
-    this.screen = screen;
+    super(gameState, audio, screen);
   }
 
   init(rootElement) {
@@ -34,8 +29,7 @@ export class ColorGame {
   }
 
   start() {
-    this.state.resetScore();
-    this.state.resetQuestionsAnswered();
+    super.start();
     this.screen.showColorGame();
     this.state.questionsTotal = 10;
     this.updateScore();
@@ -97,9 +91,9 @@ export class ColorGame {
     
     if (selected.name === correct.name) {
       this.state.addScore(10);
-      this.playCorrectFeedback();
+      super.playCorrectFeedback();
     } else {
-      this.playWrongFeedback();
+      super.playWrongFeedback();
     }
 
     this.updateScore();
@@ -111,27 +105,16 @@ export class ColorGame {
   }
 
   playCorrectFeedback() {
-    const area = this.root.getElementById('color-feedback-area');
-    const text = this.root.getElementById('color-feedback-text');
-    area.style.display = 'block';
-    text.textContent = 'やったー！＋10てん';
-    text.style.color = '#4CAF50';
-    this.audio.speak('やったー！');
-    this.audio.playPopSound();
+    super.playCorrectFeedback();
   }
 
   playWrongFeedback() {
-    const area = this.root.getElementById('color-feedback-area');
-    const text = this.root.getElementById('color-feedback-text');
-    area.style.display = 'block';
-    text.textContent = 'だいじょうぶ！もういっこ！';
-    text.style.color = '#E57373';
-    this.audio.speak('だいじょうぶ！もういっこ！');
+    super.playWrongFeedback();
   }
 
   nextQuestion() {
     this.state.incrementQuestionsAnswered();
-    this.updateScore();
+    super.updateScore();
     this.root.getElementById('color-feedback-area').classList.add('hidden');
 
     if (this.state.isGameOver()) {
@@ -142,14 +125,13 @@ export class ColorGame {
   }
 
   updateScore() {
-    document.getElementById('color-score').textContent = '⭐️' + this.state.score;
+    if (this.root) {
+      this.root.getElementById('color-score').textContent = '⭐️' + this.state.score;
+    }
   }
 
   endGame() {
-    this.screen.showResult();
-    document.getElementById('final-score').textContent = '⭐️' + this.state.score;
-    this.state.saveScore();
-    this.audio.speak('おわった! おめでとう!');
+    super.endGame();
   }
 
   resetGame() {

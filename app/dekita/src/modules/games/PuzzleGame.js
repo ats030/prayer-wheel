@@ -5,11 +5,11 @@
  * Drag the correct emoji to match the silhouette
  */
 
-export class PuzzleGame {
+import { GameBase } from '../core/GameBase.js';
+
+export class PuzzleGame extends GameBase {
   constructor(gameState, audio, screen) {
-    this.state = gameState;
-    this.audio = audio;
-    this.screen = screen;
+    super(gameState, audio, screen);
     this.gridSize = 3;
     this.draggedPiece = null;
     this.score = 0;
@@ -55,6 +55,7 @@ export class PuzzleGame {
   }
 
   start() {
+    super.start();
     this.score = 0;
     this.moves = 0;
     this.gameOver = false;
@@ -161,11 +162,13 @@ export class PuzzleGame {
   }
 
   playCorrectFeedback() {
-    const area = this.root.getElementById('puzzle-feedback-area');
-    const text = this.root.getElementById('puzzle-feedback-text');
-    area.style.display = 'block';
-    text.textContent = 'やったー！＋20てん';
-    text.style.color = '#4CAF50';
+    super.playCorrectFeedback();
+    if (this.root) {
+      const text = this.root.getElementById('puzzle-feedback-text');
+      if (text) {
+        text.textContent = 'やったー！＋20てん';
+      }
+    }
     this.audio.speak('やったー！');
     this.audio.playPopSound();
   }
@@ -190,18 +193,24 @@ export class PuzzleGame {
   }
 
   updateProgress() {
-    const progressElement = this.root.getElementById('puzzle-progress-text');
-    if (progressElement) {
-      progressElement.textContent = `${this.state.questionsAnswered + 1}/${this.state.questionsTotal} 問`;
+    super.updateProgress();
+    if (this.root) {
+      this.root.getElementById('puzzle-progress-text').textContent = 
+        `${this.state.questionsAnswered + 1}/${this.state.questionsTotal} 問`;
     }
   }
 
   endGame() {
+    super.endGame();
     this.gameOver = true;
-    const area = this.root.getElementById('puzzle-feedback-area');
-    const text = this.root.getElementById('puzzle-feedback-text');
-    area.style.display = 'block';
-    text.textContent = `せいかい！ スコア：${this.state.score}`;
+    if (this.root) {
+      const area = this.root.getElementById('puzzle-feedback-area');
+      const text = this.root.getElementById('puzzle-feedback-text');
+      if (area && text) {
+        area.style.display = 'block';
+        text.textContent = `せいかい！ スコア：${this.state.score}`;
+      }
+    }
     this.audio.playPopSound();
     this.state.saveScore();
     this.audio.speak('おわった! おめでとう!');
