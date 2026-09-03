@@ -3,7 +3,6 @@
   "env": {
     "SUPERPOWERS_DISABLE_TELEMETRY": "1"
   },
-  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {

@@ -174,7 +174,6 @@ export class MazeGame {
       canvas.width = 300;
       canvas.height = 300;
       
-      // 新しい経路生成
       const result = new PathGenerator().generate(canvas.width, canvas.height);
       this.state.mazePath = result.path;
       this.state.mazePlayer = { x: result.player.x, y: result.player.y };

@@ -1,6 +1,0 @@
-node_modules/
-test-results/
-playwright-report/
-Dockerfile
-nginx.conf
-cloudbuild.yaml
