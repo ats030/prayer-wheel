@@ -30,7 +30,7 @@ export class AnimalGame extends GameBase {
   start() {
     super.start();
     this.state.questionsTotal = 8;
-    this.screen.showGame();
+    this.screen.showAnimalGame();
     this.updateScore();
     this.generateQuestion();
   }
@@ -55,7 +55,7 @@ export class AnimalGame extends GameBase {
     const correct = animals[Math.floor(Math.random() * animals.length)];
     const incorrect = animals.filter(a => a !== correct);
 
-    const pictureArea = this.root.getElementById('picture-area');
+    const pictureArea = this.root.getElementById('animal-picture-area');
     pictureArea.innerHTML = '';
     
     const soundIcon = document.createElement('div');
@@ -66,10 +66,10 @@ export class AnimalGame extends GameBase {
     soundIcon.onclick = () => this.replaySound(correct.sound);
     pictureArea.appendChild(soundIcon);
 
-    const questionText = this.root.getElementById('question-text');
+    const questionText = this.root.getElementById('animal-question-text');
     questionText.textContent = 'だれの こえかな？';
 
-    const answerButtons = this.root.getElementById('answer-buttons');
+    const answerButtons = this.root.getElementById('animal-answer-buttons');
     answerButtons.innerHTML = '';
 
     const options = [correct, ...incorrect.sort(() => Math.random() - 0.5).slice(0, 3)];
@@ -129,7 +129,7 @@ export class AnimalGame extends GameBase {
     this.state.incrementQuestionsAnswered();
     super.updateScore();
     if (this.root) {
-      this.root.getElementById('feedback-area').classList.add('hidden');
+      this.root.getElementById('animal-feedback-area').classList.add('hidden');
     }
 
     if (this.state.isGameOver()) {
@@ -141,7 +141,7 @@ export class AnimalGame extends GameBase {
 
   updateScore() {
     if (this.root) {
-      this.root.getElementById('score').textContent = '⭐️' + this.state.score;
+      this.root.getElementById('animal-score').textContent = '⭐️' + this.state.score;
     }
   }
 
