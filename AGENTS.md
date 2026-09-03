@@ -145,6 +145,13 @@ For more details, see README.md and docs/QUICKSTART.md.
 - Exclude regenerated trackers, lockfiles, build output, indexes, and minified assets from routine diff review unless the task concerns them.
 - For a narrow question, locate the symbol with `rg` and read only the relevant range. Read a large file in full only when its overall structure is required.
 
+## visit-log
+
+- New self-hosted web apps must include this tag in every HTML entry point, with the service/repository name as `data-site`:
+  `<script src="http://ubuntu-server-app:8526/v.js" data-site="SERVICE_NAME" defer></script>`
+- `app/deploy.sh` verifies the rendered HTML after restart and rejects an untagged deployment.
+- Do not weaken CSP or inject code into generated output to satisfy the check. For a non-HTML app or a deliberate CSP/public-network exception, deploy with a non-empty `VISIT_LOG_EXEMPT_REASON` and record the reason in its issue.
+
 ## Cross-Agent Context Adapters
 
 `AGENTS.md` is the canonical shared instruction file for Codex and OpenCode.

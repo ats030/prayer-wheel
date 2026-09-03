@@ -19,6 +19,8 @@ NAME="$1"
 
 CHECKOUT="$HOME/app/$NAME"
 UNIT="$NAME.service"
+BODY_FILE=$(mktemp)
+trap 'rm -f "$BODY_FILE"' EXIT
 
 [ -d "$CHECKOUT/.git" ] || { echo "ローカルチェックアウトがない: $CHECKOUT" >&2; exit 1; }
 
@@ -46,9 +48,25 @@ fi
 i=0
 while [ "$i" -lt 30 ]; do
     # 503 は「起動しているが依存先が落ちている」= サービス自体は生きている
-    code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:$PORT/" 2>/dev/null || true)
+    code=$(curl -s -L --max-redirs 5 -o "$BODY_FILE" -w '%{http_code}' \
+        "http://localhost:$PORT/" 2>/dev/null || true)
     case "$code" in
-        2*|3*|401|403|503) echo "応答を確認 (HTTP $code, port $PORT)"; exit 0 ;;
+        2*)
+            if grep -Eiq '<!doctype html|<html([ >]|$)' "$BODY_FILE"; then
+                if [ -n "${VISIT_LOG_EXEMPT_REASON:-}" ]; then
+                    echo "visit-log 除外: $VISIT_LOG_EXEMPT_REASON"
+                elif ! grep -Fq 'http://ubuntu-server-app:8526/v.js' "$BODY_FILE" ||
+                     ! grep -Fq "data-site=\"$NAME\"" "$BODY_FILE"; then
+                    echo "visit-log タグがない: $NAME (port $PORT)" >&2
+                    echo "追加: <script src=\"http://ubuntu-server-app:8526/v.js\" data-site=\"$NAME\" defer></script>" >&2
+                    echo "例外にする場合: VISIT_LOG_EXEMPT_REASON='理由' app/deploy.sh $NAME" >&2
+                    exit 1
+                fi
+            fi
+            echo "応答を確認 (HTTP $code, port $PORT)"
+            exit 0
+            ;;
+        3*|401|403|503) echo "応答を確認 (HTTP $code, port $PORT)"; exit 0 ;;
     esac
     i=$((i + 1))
     sleep 1
