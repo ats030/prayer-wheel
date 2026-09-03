@@ -24,10 +24,11 @@ import threading
 from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
+from urllib.parse import quote, urlparse
 from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 
 TZ = ZoneInfo("Asia/Tokyo")
 DATA_DIR = Path.home() / "data" / "visit-log"
@@ -139,6 +140,10 @@ def log_path(dt: datetime) -> Path:
     return DATA_DIR / f"events-{dt:%Y-%m}.jsonl"
 
 
+def outbound_path(dt: datetime) -> Path:
+    return DATA_DIR / f"outbound-{dt:%Y-%m}.jsonl"
+
+
 def record(request: Request, site: str, path: str, ref: str) -> None:
     if request.headers.get("dnt") == "1" or request.headers.get("sec-gpc") == "1":
         return
@@ -159,6 +164,44 @@ def record(request: Request, site: str, path: str, ref: str) -> None:
     with _lock:
         with log_path(now).open("a", encoding="utf-8") as fh:
             fh.write(line)
+
+
+def record_outbound(request: Request, site: str) -> None:
+    """外部サービスへの送客。PVとは別ログにして意味を混ぜない。"""
+    if request.headers.get("dnt") == "1" or request.headers.get("sec-gpc") == "1":
+        return
+    now = datetime.now(TZ)
+    ua = request.headers.get("user-agent", "")
+    row = {
+        "ts": now.isoformat(timespec="seconds"),
+        "site": site,
+        "ref": ref_host(request.headers.get("referer", "")),
+        "vid": visitor_id(client_ip(request), ua, f"{now:%Y-%m-%d}"),
+        "dev": device_class(ua),
+    }
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with _lock:
+        with outbound_path(now).open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
+def load_outbound(days: int) -> list[dict]:
+    now = datetime.now(TZ)
+    since = now - timedelta(days=days)
+    rows: list[dict] = []
+    cur = since.replace(day=1)
+    while cur <= now:
+        fp = DATA_DIR / f"outbound-{cur:%Y-%m}.jsonl"
+        if fp.exists():
+            for line in fp.read_text(encoding="utf-8").splitlines():
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if row.get("ts", "") >= since.isoformat(timespec="seconds"):
+                    rows.append(row)
+        cur = (cur.replace(day=28) + timedelta(days=4)).replace(day=1)
+    return rows
 
 
 def load_events(days: int) -> list[dict]:
@@ -230,6 +273,14 @@ def summarize(days: int, include_bots: bool) -> dict:
             last_seen[site] = ts
 
     registered = {r["name"]: r for r in load_sites()}
+    outbound = load_outbound(days)
+    if not include_bots:
+        outbound = [e for e in outbound if e.get("dev") != "bot"]
+    outbound_sites = defaultdict(lambda: {"clicks": 0, "vids": set()})
+    for event in outbound:
+        row = outbound_sites[event.get("site", "?")]
+        row["clicks"] += 1
+        row["vids"].add(event.get("vid", ""))
 
     def top(counter, limit=20):
         items = sorted(counter.items(), key=lambda kv: -kv[1])[:limit]
@@ -255,6 +306,13 @@ def summarize(days: int, include_bots: bool) -> dict:
                     "note": registered.get(name, {}).get("note", ""),
                     "registered": name in registered,
                     "last_seen": last_seen.get(name, ""),
+                    "tracked_url": (
+                        f"/go/{quote(name, safe='')}"
+                        if registered.get(name, {}).get("url", "")
+                        and urlparse(registered[name]["url"]).hostname
+                        not in {"ubuntu-server-app", "100.94.207.13", "127.0.0.1", "localhost"}
+                        else ""
+                    ),
                 }
                 for name in set(sites) | set(registered)
             ),
@@ -264,6 +322,14 @@ def summarize(days: int, include_bots: bool) -> dict:
         "refs": top(refs),
         "devices": top(devs, 10),
         "hours": [{"key": f"{h:02d}", "views": hours.get(f"{h:02d}", 0)} for h in range(24)],
+        "total_outbound": len(outbound),
+        "outbound": sorted(
+            (
+                {"key": name, "clicks": row["clicks"], "visitors": len(row["vids"])}
+                for name, row in outbound_sites.items()
+            ),
+            key=lambda row: (-row["clicks"], row["key"]),
+        ),
     }
 
 
@@ -389,6 +455,15 @@ async def api_sites_delete(name: str):
     return JSONResponse({"deleted": name}, headers=NO_STORE)
 
 
+@app.get("/go/{name}")
+async def outbound_redirect(request: Request, name: str):
+    target = next((r.get("url", "") for r in load_sites() if r.get("name") == name), "")
+    if not URL_RE.match(target):
+        return JSONResponse({"error": "登録されていません"}, status_code=404, headers=NO_STORE)
+    record_outbound(request, name)
+    return RedirectResponse(target, status_code=302, headers=NO_STORE)
+
+
 @app.get("/api/summary")
 async def api_summary(days: int = 30, bots: int = 0):
     days = max(1, min(days, 400))
@@ -476,6 +551,9 @@ button.link{border:none;background:none;color:var(--acc);padding:2px 6px;text-de
 </div>
 <div class="kpis" id="kpis"></div>
 <div class="card"><h2>日次 ページビュー</h2><div class="chart" id="chart"></div><div id="range" style="color:var(--mut);font-size:12px;display:flex;justify-content:space-between;margin-top:6px"></div></div>
+<div class="card"><h2>外部サービスへの送客クリック</h2>
+<p style="margin:0 0 10px;color:var(--mut)">外部サービス全体のPVではなく、この画面の計測リンクから送ったクリックだけです。</p>
+<div id="outbound"></div></div>
 <div class="card"><h2>計測対象</h2>
 <p style="margin:0 0 10px;color:var(--mut)">登録しておくと、まだ 1 件も届いていないサイトも一覧に残ります (タグの入れ忘れに気づけます)。</p>
 <form class="reg" id="reg">
@@ -517,7 +595,7 @@ function sitesTable(rows) {
   if (!rows.length) return '<div class="empty">まだ登録も記録もありません</div>';
   const body = rows.map(r => `<tr>
     <td class="k">${esc(r.key)}${r.registered ? "" : '<span class="badge">未登録</span>'}</td>
-    <td class="k">${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.url)}</a>` : ""}`
+    <td class="k">${r.url ? `<a href="${esc(r.tracked_url || r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.url)}</a>` : ""}`
     + `${r.note ? `<div style="color:var(--mut);font-size:12px">${esc(r.note)}</div>` : ""}</td>
     <td class="n">${num(r.views)}</td>
     <td class="n">${num(r.visitors)}</td>
@@ -573,7 +651,7 @@ async function load() {
     <div class="kpi"><div class="n">${num(d.total_views)}</div><div class="l">ページビュー</div></div>
     <div class="kpi"><div class="n">${num(d.total_visitors)}</div><div class="l">訪問者 (日次ユニークの延べ)</div></div>
     <div class="kpi"><div class="n">${num(d.sites.length)}</div><div class="l">サイト</div></div>
-    <div class="kpi"><div class="n">${d.daily.length ? (d.total_views / d.daily.length).toFixed(1) : "0"}</div><div class="l">1日あたりPV</div></div>`;
+    <div class="kpi"><div class="n">${num(d.total_outbound)}</div><div class="l">外部送客クリック</div></div>`;
   bars(document.getElementById("chart"), d.daily.map(r => ({ views: r.views, key: r.date })), r => r.key);
   const rg = document.getElementById("range");
   rg.innerHTML = d.daily.length ? `<span>${d.daily[0].date}</span><span>${d.daily.at(-1).date}</span>` : "";
@@ -582,6 +660,10 @@ async function load() {
   document.getElementById("paths").innerHTML = table(d.paths, "パス");
   document.getElementById("refs").innerHTML = table(d.refs, "ホスト");
   document.getElementById("devices").innerHTML = table(d.devices, "種別");
+  document.getElementById("outbound").innerHTML = d.outbound.length
+    ? `<table><tr><th>外部サービス</th><th class="n">クリック</th><th class="n">訪問者</th></tr>${d.outbound.map(r =>
+        `<tr><td class="k">${esc(r.key)}</td><td class="n">${num(r.clicks)}</td><td class="n">${num(r.visitors)}</td></tr>`).join("")}</table>`
+    : '<div class="empty">まだ送客クリックがありません</div>';
 }
 
 document.querySelectorAll("[data-d]").forEach(b => b.onclick = () => {
