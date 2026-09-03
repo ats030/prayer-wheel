@@ -1,0 +1,11 @@
+{
+  "visit_log_base": "http://100.94.207.13:8526",
+  "sites": [
+    {
+      "name": "searxng-test",
+      "listen_host": "127.0.0.1",
+      "listen_port": 8082,
+      "target_base": "http://127.0.0.1:8081"
+    }
+  ]
+}
