@@ -817,7 +817,7 @@ def render_page(issues: list[Issue], today: date) -> str:
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>backlog-viewer</title><link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
-<style>{CSS}</style></head><body>
+<style>{CSS}</style><script src="http://ubuntu-server-app:8526/v.js" data-site="backlog-viewer" defer></script></head><body>
 <div class="wrap">
   <h1>backlog-viewer</h1>
   <p class="sub">{today:%Y-%m-%d} (JST) · bdを直接参照 · 読み取り専用</p>
@@ -881,7 +881,7 @@ def render_error(message: str) -> str:
     return f"""<!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>backlog-viewer</title><link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml"><style>{CSS}</style></head><body>
+<title>backlog-viewer</title><link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml"><style>{CSS}</style><script src="http://ubuntu-server-app:8526/v.js" data-site="backlog-viewer" defer></script></head><body>
 <div class="wrap"><h1>集計できなかった</h1>
 <div class="panel err"><p>bd からデータを取れなかった。</p>
 <pre style="white-space:pre-wrap;font-size:12px">{html.escape(message)}</pre>
