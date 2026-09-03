@@ -18,11 +18,11 @@ export class AnimalGame extends GameBase {
       this.start();
     });
 
-    this.root.getElementById('reset-btn').addEventListener('click', () => {
+    this.root.getElementById('animal-reset-btn').addEventListener('click', () => {
       this.resetGame();
     });
 
-    this.root.getElementById('next-btn').addEventListener('click', () => {
+    this.root.getElementById('animal-next-btn').addEventListener('click', () => {
       this.nextQuestion();
     });
   }

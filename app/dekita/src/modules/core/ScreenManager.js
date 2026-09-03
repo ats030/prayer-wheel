@@ -56,6 +56,10 @@ export class ScreenManager {
     this.show('game-screen');
   }
 
+  showAnimalGame() {
+    this.show('animal-game-screen');
+  }
+
   showMazeGame() {
     this.show('maze-play-screen');
   }

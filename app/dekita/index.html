@@ -135,6 +135,27 @@
         <button id="maze-next-btn" class="next-btn">つぎへ</button>
       </div>
     </div>
+    
+    <div id="animal-game-screen" class="screen hidden">
+      <div class="score-board">
+        <div class="score-info">
+          <span>スコア: <span id="animal-score">0</span></span>
+          <span id="animal-progress-text" class="progress-text"></span>
+        </div>
+        <button id="animal-reset-btn" class="reset-btn">もどる</button>
+      </div>
+      
+      <div id="animal-question-area" class="question-area">
+        <div id="animal-picture-area" class="picture-area"></div>
+        <p id="animal-question-text" class="question-text">だれの こえかな？</p>
+        <div id="animal-answer-buttons" class="answer-buttons"></div>
+      </div>
+      
+      <div id="animal-feedback-area" class="feedback-area" style="display: none;">
+        <p id="animal-feedback-text" class="feedback-text">せいかい!</p>
+        <button id="animal-next-btn" class="next-btn">つぎへ</button>
+      </div>
+    </div>
   </div>
   
   <script type="module" src="./src/main.js"></script>
