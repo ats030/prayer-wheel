@@ -40,12 +40,7 @@ export class AudioManager {
         this.audioContext.resume();
       }
       
-      // Resume audioContext if it's suspended (browser policy requirement)
-      if (this.audioContext.state === 'suspended') {
-        this.audioContext.resume();
-      }
-     
-     const oscillator = this.audioContext.createOscillator();
+      const oscillator = this.audioContext.createOscillator();
      const gainNode = this.audioContext.createGain();
      
      oscillator.connect(gainNode);
@@ -62,15 +57,14 @@ export class AudioManager {
      oscillator.stop(this.audioContext.currentTime + 0.08);
    }
 
-  playCorrectSound() {
-    if (!this.enabled || !this.audioContext) return;
-      
-      // Resume audioContext if it's suspended (browser policy requirement)
-      if (this.audioContext.state === 'suspended') {
-        this.audioContext.resume();
-      }
-    
-    const ctx = this.audioContext;
+   playCorrectSound() {
+     if (!this.enabled || !this.audioContext) return;
+     // Resume audioContext if it's suspended (browser policy requirement)
+     if (this.audioContext.state === 'suspended') {
+       this.audioContext.resume();
+     }
+     
+     const ctx = this.audioContext;
     const now = ctx.currentTime;
     
     const osc1 = ctx.createOscillator();
@@ -95,15 +89,14 @@ export class AudioManager {
     osc2.stop(now + 0.2);
   }
 
-  playWrongSound() {
-    if (!this.enabled || !this.audioContext) return;
-      
-      // Resume audioContext if it's suspended (browser policy requirement)
-      if (this.audioContext.state === 'suspended') {
-        this.audioContext.resume();
-      }
-    
-    const ctx = this.audioContext;
+   playWrongSound() {
+     if (!this.enabled || !this.audioContext) return;
+     // Resume audioContext if it's suspended (browser policy requirement)
+     if (this.audioContext.state === 'suspended') {
+       this.audioContext.resume();
+     }
+     
+     const ctx = this.audioContext;
     const now = ctx.currentTime;
     
     const osc = ctx.createOscillator();
@@ -121,15 +114,14 @@ export class AudioManager {
     osc.stop(now + 0.3);
   }
 
-  playErrorSound() {
-    if (!this.enabled || !this.audioContext) return;
-      
-      // Resume audioContext if it's suspended (browser policy requirement)
-      if (this.audioContext.state === 'suspended') {
-        this.audioContext.resume();
-      }
-    
-    const ctx = this.audioContext;
+   playErrorSound() {
+     if (!this.enabled || !this.audioContext) return;
+     // Resume audioContext if it's suspended (browser policy requirement)
+     if (this.audioContext.state === 'suspended') {
+       this.audioContext.resume();
+     }
+     
+     const ctx = this.audioContext;
     const now = ctx.currentTime;
     
     const osc = ctx.createOscillator();
