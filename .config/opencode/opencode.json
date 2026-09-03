@@ -36,14 +36,6 @@
             "input": 65536,
             "output": 8192
           }
-        },
-        "qwen3-coder:30b": {
-          "name": "Qwen3 Coder 30B Q4_K_M (64k)",
-          "limit": {
-            "context": 65536,
-            "input": 65536,
-            "output": 8192
-          }
         }
       }
     }
