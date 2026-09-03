@@ -33,8 +33,17 @@ export class AudioManager {
      window.speechSynthesis.speak(utterance);
    }
 
-   playPopSound() {
-     if (!this.enabled || !this.audioContext) return;
+    playPopSound() {
+      if (!this.enabled || !this.audioContext) return;
+      // Resume audioContext if it's suspended (browser policy requirement)
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume();
+      }
+      
+      // Resume audioContext if it's suspended (browser policy requirement)
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume();
+      }
      
      const oscillator = this.audioContext.createOscillator();
      const gainNode = this.audioContext.createGain();
@@ -55,6 +64,11 @@ export class AudioManager {
 
   playCorrectSound() {
     if (!this.enabled || !this.audioContext) return;
+      
+      // Resume audioContext if it's suspended (browser policy requirement)
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume();
+      }
     
     const ctx = this.audioContext;
     const now = ctx.currentTime;
@@ -83,6 +97,11 @@ export class AudioManager {
 
   playWrongSound() {
     if (!this.enabled || !this.audioContext) return;
+      
+      // Resume audioContext if it's suspended (browser policy requirement)
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume();
+      }
     
     const ctx = this.audioContext;
     const now = ctx.currentTime;
@@ -104,6 +123,11 @@ export class AudioManager {
 
   playErrorSound() {
     if (!this.enabled || !this.audioContext) return;
+      
+      // Resume audioContext if it's suspended (browser policy requirement)
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume();
+      }
     
     const ctx = this.audioContext;
     const now = ctx.currentTime;
