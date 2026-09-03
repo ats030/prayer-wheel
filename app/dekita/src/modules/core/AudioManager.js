@@ -16,6 +16,7 @@ export class AudioManager {
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
+    return this.audioContext;
   }
 
   setGameState(state) {
