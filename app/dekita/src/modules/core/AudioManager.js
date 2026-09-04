@@ -16,6 +16,10 @@ export class AudioManager {
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
+    // Resume audioContext if it's suspended
+    if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
     return this.audioContext;
   }
 
@@ -25,6 +29,11 @@ export class AudioManager {
 
    speak(text) {
      if (!this.enabled || !window.speechSynthesis) return;
+     
+     // Resume audioContext if it's suspended (needed for speechSynthesis)
+     if (this.audioContext && this.audioContext.state === 'suspended') {
+       this.audioContext.resume();
+     }
      
      window.speechSynthesis.cancel();
      
@@ -37,6 +46,9 @@ export class AudioManager {
      // Error handler - MUST be set before calling speak()
      utterance.onerror = (e) => {
        console.error('[AudioManager] SpeechSynthesis error:', e.error, 'text:', text);
+       if (e.error === 'synthesis-failed' && this.audioContext) {
+         console.error('[AudioManager] audioContext state:', this.audioContext.state);
+       }
      };
      
      utterance.onend = () => {
