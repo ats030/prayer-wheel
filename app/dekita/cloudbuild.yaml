@@ -104,6 +104,10 @@ steps:
       - '512Mi'
       - '--revision-suffix'
       - 'stable'
+      - '--region'
+      - 'asia-northeast1'
+      - '--project'
+      - 'ikimono-note-12205'
 
 images:
   - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
