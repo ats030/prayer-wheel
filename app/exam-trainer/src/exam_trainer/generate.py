@@ -18,6 +18,7 @@ from __future__ import annotations
 import logging
 import math
 import re
+import time
 
 from . import bank, checks, ollama_client
 from .config import settings
@@ -28,6 +29,14 @@ logger = logging.getLogger(__name__)
 # Chosen empirically: paraphrases of one definition land around 0.95, while
 # genuinely different questions about the same term sit near 0.75.
 DUPLICATE_THRESHOLD = 0.92
+
+# Ollama call failures here used to be retried on the very next passage or
+# candidate with no delay, hammering the shared generation gate at the same
+# cadence as its own queue timeout whenever another app held it. This floor
+# keeps a failed batch run from adding to that storm (ats030 usage-log
+# investigation, 2026-09).
+_OLLAMA_BACKOFF_SECONDS = 5.0
+
 # A generated question must reuse this much of its own quoted evidence from the
 # passage, otherwise the "evidence" was invented.
 EVIDENCE_MIN_CHARS = 20
@@ -153,6 +162,7 @@ def is_duplicate(stem: str, existing_stems: list[str], embed=None) -> bool:
                 return True
     except Exception as exc:  # embeddings are an optimisation, never a blocker
         logger.warning("duplicate check degraded to exact match: %s", exc)
+        time.sleep(_OLLAMA_BACKOFF_SECONDS)
     return False
 
 
@@ -173,6 +183,7 @@ def verify(
             model=model or settings.model,
         )
     except ollama_client.OllamaError as exc:
+        time.sleep(_OLLAMA_BACKOFF_SECONDS)
         return False, f"検証を実行できませんでした: {exc}"
     if not isinstance(data, dict):
         return False, "検証の応答を解釈できませんでした"
@@ -335,6 +346,7 @@ def generate_for_node(
                 )
             except ollama_client.OllamaError as exc:
                 summary["reasons"].append(f"生成に失敗: {exc}")
+                time.sleep(_OLLAMA_BACKOFF_SECONDS)
                 continue
 
             for candidate in candidates:
