@@ -197,23 +197,15 @@ export class AudioManager {
       };
 
       audio.onended = playNext;
-
-      audio.onerror = (err) => {
-        console.error('[AudioManager] Audio error:', queue[index], err);
-        this.currentAudio = null;
-        setTimeout(() => {
-          this.playAudioQueue(queue, index + 1);
-        }, 100);
-      };
-
-      audio.play().catch(err => {
-        console.error('[AudioManager] Failed to play audio:', queue[index], err);
-        this.currentAudio = null;
-        setTimeout(() => {
-          this.playAudioQueue(queue, index + 1);
-        }, 100);
-      });
     };
+
+    audio.play().catch(err => {
+      console.error('[AudioManager] Failed to play audio:', queue[index], err);
+      this.currentAudio = null;
+      setTimeout(() => {
+        this.playAudioQueue(queue, index + 1);
+      }, 100);
+    });
   }
 
   saveScore(score) {
