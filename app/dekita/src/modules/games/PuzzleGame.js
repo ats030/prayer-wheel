@@ -108,10 +108,11 @@ export class PuzzleGame extends GameBase {
         slot.draggable = true;
         slot.dataset.draggable = 'true';
         slot.addEventListener('dragstart', (e) => this.handleDragStart(e));
-        slot.addEventListener('dragover', (e) => e.preventDefault());
-        slot.addEventListener('drop', (e) => this.handleDrop(e));
-        slot.addEventListener('dragenter', (e) => e.preventDefault());
-        slot.addEventListener('dragleave', (e) => e.preventDefault());
+      }
+      slot.addEventListener('dragover', (e) => e.preventDefault());
+      slot.addEventListener('drop', (e) => this.handleDrop(e));
+      slot.addEventListener('dragenter', (e) => e.preventDefault());
+      slot.addEventListener('dragleave', (e) => e.preventDefault());
       }
       gridArea.appendChild(slot);
     }
@@ -132,7 +133,10 @@ export class PuzzleGame extends GameBase {
     e.preventDefault();
     this.moves++;
     
-    if (e.target.dataset.emoji === this.correctEmoji) {
+    const slot = e.target.closest('[data-emoji]');
+    if (!slot) return;
+    
+    if (slot.dataset.emoji === this.correctEmoji) {
       this.checkWin();
     } else {
       this.audio.playErrorSound();
