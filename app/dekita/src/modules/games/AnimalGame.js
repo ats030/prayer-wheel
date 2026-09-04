@@ -12,22 +12,33 @@ export class AnimalGame extends GameBase {
   }
 
   registerEventListeners() {
-    this.root.getElementById('animal-start-btn').addEventListener('click', () => {
-      console.log('[AnimalGame] Start button clicked');
-      this.audio.init();
-      console.log('[AnimalGame] audioContext state:', this.audio.audioContext.state);
-      this.audio.playPopSound();
-      console.log('[AnimalGame] Playing start sound');
-      this.start();
-    });
+    const startBtn = this.root.getElementById('animal-start-btn');
+    if (startBtn) {
+      startBtn.addEventListener('click', () => {
+        console.log('[AnimalGame] Start button clicked');
+        this.audio.init();
+        console.log('[AnimalGame] audioContext state:', this.audio.audioContext.state);
+        this.audio.playPopSound();
+        console.log('[AnimalGame] Playing start sound');
+        this.start();
+      });
+    } else {
+      console.error('[AnimalGame] animal-start-btn not found!');
+    }
 
-    this.root.getElementById('animal-reset-btn').addEventListener('click', () => {
-      this.resetGame();
-    });
+    const resetBtn = this.root.getElementById('animal-reset-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        this.resetGame();
+      });
+    }
 
-    this.root.getElementById('animal-next-btn').addEventListener('click', () => {
-      this.nextQuestion();
-    });
+    const nextBtn = this.root.getElementById('animal-next-btn');
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        this.nextQuestion();
+      });
+    }
   }
 
   start() {
