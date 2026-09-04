@@ -14,13 +14,28 @@ const OUTPUT_DIR = '/home/ats030/app/dekita/audio';
 
 // Audio configurations
 const AUDIO_FILES = [
-  { filename: 'color-question.mp3', text: 'これ なん の いろかな？', speaker: 0 },
-  { filename: 'match-instruction.mp3', text: 'ペアを見つけてね', speaker: 0 },
-  { filename: 'maze-hachi.mp3', text: 'はちさんが おはなまで いけるかな？', speaker: 0 },
-  { filename: 'maze-usagi.mp3', text: 'うさぎさんが にんじんまで いけるかな？', speaker: 0 },
-  { filename: 'maze-neko.mp3', text: 'ねこさんが おさかなまで いけるかな？', speaker: 0 },
-  { filename: 'maze-saru.mp3', text: 'さるさんが バナナまで いけるかな？', speaker: 0 },
-  { filename: 'maze-win10.mp3', text: 'やったー！10てん！', speaker: 0 },
+  { filename: 'animal-question.mp3', text: 'だれの こえかな？', speaker: 3 },
+  { filename: 'bird-sound.mp3', text: 'ピーピー！', speaker: 3 },
+  { filename: 'cat-sound.mp3', text: 'ニャー！', speaker: 3 },
+  { filename: 'correct-feedback.mp3', text: 'せいかい!', speaker: 3 },
+  { filename: 'correct.mp3', text: 'やったー！', speaker: 3 },
+  { filename: 'cow-sound.mp3', text: 'モー！', speaker: 3 },
+  { filename: 'dog-sound.mp3', text: 'ワンワン！', speaker: 3 },
+  { filename: 'elephant-sound.mp3', text: 'パオーン！', speaker: 3 },
+  { filename: 'game-over.mp3', text: 'おわった! おめでとう!', speaker: 3 },
+  { filename: 'incorrect.mp3', text: 'いいえ', speaker: 3 },
+  { filename: 'lion-sound.mp3', text: 'ガオー！', speaker: 3 },
+  { filename: 'monkey-sound.mp3', text: 'ウキキ！', speaker: 3 },
+  { filename: 'pig-sound.mp3', text: 'ブヒブヒ！', speaker: 3 },
+  { filename: 'wrong.mp3', text: 'だいじょうぶ！もういっこ！', speaker: 3 },
+  { filename: 'count-question.mp3', text: 'これ なん の もんなの？', speaker: 3 },
+  { filename: 'color-question.mp3', text: 'これ なん の いろかな？', speaker: 3 },
+  { filename: 'match-instruction.mp3', text: 'ペアを見つけてね', speaker: 3 },
+  { filename: 'maze-hachi.mp3', text: 'はちさんが おはなまで いけるかな？', speaker: 3 },
+  { filename: 'maze-usagi.mp3', text: 'うさぎさんが にんじんまで いけるかな？', speaker: 3 },
+  { filename: 'maze-neko.mp3', text: 'ねこさんが おさかなまで いけるかな？', speaker: 3 },
+  { filename: 'maze-saru.mp3', text: 'さるさんが バナナまで いけるかな？', speaker: 3 },
+  { filename: 'maze-win10.mp3', text: '10てん！', speaker: 3 },
 ];
 
 // Retry configuration
