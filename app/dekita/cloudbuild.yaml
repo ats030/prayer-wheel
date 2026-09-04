@@ -16,6 +16,7 @@ steps:
         COPY style.css /usr/share/nginx/html/
         COPY favicon.svg /usr/share/nginx/html/
         COPY src /usr/share/nginx/html/src/
+        COPY audio /usr/share/nginx/html/audio/
         EXPOSE 8080
         CMD ["nginx", "-g", "daemon off;"]
         EOF
