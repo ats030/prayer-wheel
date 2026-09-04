@@ -133,7 +133,10 @@ export class PuzzleGame extends GameBase {
     e.preventDefault();
     this.moves++;
     
-    const slot = e.target.closest('[data-emoji]');
+    let slot = e.target.closest('[data-emoji]');
+    if (!slot) {
+      slot = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-emoji]');
+    }
     if (!slot) return;
     
     if (slot.dataset.emoji === this.correctEmoji) {
