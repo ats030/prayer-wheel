@@ -156,6 +156,14 @@ export class AudioManager {
     this.interAudioDelay = delay;
   }
 
+  setVolume(volume) {
+    if (volume >= 0 && volume <= 1) {
+      this.volume = volume;
+    } else {
+      console.warn('[AudioManager] Volume must be between 0 and 1');
+    }
+  }
+
   playSequence(texts) {
     if (!this.enabled || !texts || texts.length === 0) return;
     
