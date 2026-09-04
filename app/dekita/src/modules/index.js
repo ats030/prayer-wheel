@@ -84,15 +84,6 @@ export function init() {
   } catch (err) {
     console.error('[gameApp] AnimalGame init error:', err);
   }
-
-  // Debug: Log all registered event listeners for animal-start-btn
-  const btn = document.getElementById('animal-start-btn');
-  if (btn) {
-    const listeners = getEventListeners(btn);
-    console.log('[gameApp] animal-start-btn listeners:', listeners);
-  } else {
-    console.error('[gameApp] animal-start-btn not found!');
-  }
   
   return {
     gameState,

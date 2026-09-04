@@ -27,12 +27,14 @@ export class AudioManager {
      if (!this.enabled || !window.speechSynthesis) return;
      
      window.speechSynthesis.cancel();
+     
      const utterance = new SpeechSynthesisUtterance(text);
      utterance.lang = 'ja-JP';
      utterance.pitch = this.pitch;
      utterance.rate = this.rate;
+     utterance.volume = this.volume;
      
-     // Error handler
+     // Error handler - MUST be set before calling speak()
      utterance.onerror = (e) => {
        console.error('[AudioManager] SpeechSynthesis error:', e.error, 'text:', text);
      };
@@ -49,126 +51,126 @@ export class AudioManager {
    }
 
 
-    playPopSound() {
-      if (!this.enabled || !this.audioContext) return;
-      // Resume audioContext if it's suspended (browser policy requirement)
-      if (this.audioContext.state === 'suspended') {
-        this.audioContext.resume();
-      }
+     playPopSound() {
+       if (!this.enabled || !this.audioContext) return;
+       // Resume audioContext if it's suspended (browser policy requirement)
+       if (this.audioContext.state === 'suspended') {
+         this.audioContext.resume();
+       }
+       
+       const oscillator = this.audioContext.createOscillator();
+      const gainNode = this.audioContext.createGain();
       
-      const oscillator = this.audioContext.createOscillator();
-     const gainNode = this.audioContext.createGain();
-     
-     oscillator.connect(gainNode);
-     gainNode.connect(this.audioContext.destination);
-     
-     oscillator.type = 'sine';
-     oscillator.frequency.setValueAtTime(400, this.audioContext.currentTime);
-     oscillator.frequency.linearRampToValueAtTime(800, this.audioContext.currentTime + 0.08);
-     
-     gainNode.gain.setValueAtTime(0.3 * this.volume, this.audioContext.currentTime);
-     gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.08);
-     
-     oscillator.start();
-     oscillator.stop(this.audioContext.currentTime + 0.08);
-   }
-
-   playCorrectSound() {
-     if (!this.enabled || !this.audioContext) return;
-     // Resume audioContext if it's suspended (browser policy requirement)
-     if (this.audioContext.state === 'suspended') {
-       this.audioContext.resume();
-     }
-     
-     const ctx = this.audioContext;
-    const now = ctx.currentTime;
-    
-    const osc1 = ctx.createOscillator();
-    const osc2 = ctx.createOscillator();
-    const gain = ctx.createGain();
-    
-    osc1.frequency.value = 440;
-    osc2.frequency.value = 550;
-    osc1.type = 'sine';
-    osc2.type = 'sine';
-    
-    osc1.connect(gain);
-    osc2.connect(gain);
-    gain.connect(ctx.destination);
-    
-    gain.gain.setValueAtTime(0.3 * this.volume, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-    
-    osc1.start(now);
-    osc2.start(now);
-    osc1.stop(now + 0.2);
-    osc2.stop(now + 0.2);
-  }
-
-   playWrongSound() {
-     if (!this.enabled || !this.audioContext) return;
-     // Resume audioContext if it's suspended (browser policy requirement)
-     if (this.audioContext.state === 'suspended') {
-       this.audioContext.resume();
-     }
-     
-     const ctx = this.audioContext;
-    const now = ctx.currentTime;
-    
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    
-    osc.frequency.value = 330;
-    osc.type = 'sawtooth';
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    
-    gain.gain.setValueAtTime(0.3 * this.volume, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-    
-    osc.start(now);
-    osc.stop(now + 0.3);
-  }
-
-   playErrorSound() {
-     if (!this.enabled || !this.audioContext) return;
-     // Resume audioContext if it's suspended (browser policy requirement)
-     if (this.audioContext.state === 'suspended') {
-       this.audioContext.resume();
-     }
-     
-     const ctx = this.audioContext;
-    const now = ctx.currentTime;
-    
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    
-    osc.frequency.value = 220;
-    osc.type = 'sawtooth';
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    
-    gain.gain.setValueAtTime(0.3 * this.volume, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-    
-    osc.start(now);
-    osc.stop(now + 0.3);
-  }
-
-  setEnabled(enabled) {
-    this.enabled = enabled;
-  }
-
-  saveScore(score) {
-    if (score > this.state.highScore) {
-      localStorage.setItem('gakushuGameHighScore', score);
+      oscillator.connect(gainNode);
+      gainNode.connect(this.audioContext.destination);
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(400, this.audioContext.currentTime);
+      oscillator.frequency.linearRampToValueAtTime(800, this.audioContext.currentTime + 0.08);
+      
+      gainNode.gain.setValueAtTime(0.3 * this.volume, this.audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.08);
+      
+      oscillator.start();
+      oscillator.stop(this.audioContext.currentTime + 0.08);
     }
-  }
 
-  cleanup() {
-    if (this.audioContext) {
-      this.audioContext.close();
-      this.audioContext = null;
+     playCorrectSound() {
+       if (!this.enabled || !this.audioContext) return;
+       // Resume audioContext if it's suspended (browser policy requirement)
+       if (this.audioContext.state === 'suspended') {
+         this.audioContext.resume();
+       }
+       
+       const ctx = this.audioContext;
+      const now = ctx.currentTime;
+      
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc1.frequency.value = 440;
+      osc2.frequency.value = 550;
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+      
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+      
+      gain.gain.setValueAtTime(0.3 * this.volume, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+      
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 0.2);
+      osc2.stop(now + 0.2);
     }
-  }
+
+     playWrongSound() {
+       if (!this.enabled || !this.audioContext) return;
+       // Resume audioContext if it's suspended (browser policy requirement)
+       if (this.audioContext.state === 'suspended') {
+         this.audioContext.resume();
+       }
+       
+       const ctx = this.audioContext;
+      const now = ctx.currentTime;
+      
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.frequency.value = 330;
+      osc.type = 'sawtooth';
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      gain.gain.setValueAtTime(0.3 * this.volume, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+      
+      osc.start(now);
+      osc.stop(now + 0.3);
+    }
+
+     playErrorSound() {
+       if (!this.enabled || !this.audioContext) return;
+       // Resume audioContext if it's suspended (browser policy requirement)
+       if (this.audioContext.state === 'suspended') {
+         this.audioContext.resume();
+       }
+       
+       const ctx = this.audioContext;
+      const now = ctx.currentTime;
+      
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.frequency.value = 220;
+      osc.type = 'sawtooth';
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      gain.gain.setValueAtTime(0.3 * this.volume, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+      
+      osc.start(now);
+      osc.stop(now + 0.3);
+    }
+
+    setEnabled(enabled) {
+      this.enabled = enabled;
+    }
+
+    saveScore(score) {
+      if (score > this.state.highScore) {
+        localStorage.setItem('gakushuGameHighScore', score);
+      }
+    }
+
+    cleanup() {
+      if (this.audioContext) {
+        this.audioContext.close();
+        this.audioContext = null;
+      }
+    }
 }
