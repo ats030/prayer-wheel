@@ -31,8 +31,23 @@ export class AudioManager {
      utterance.lang = 'ja-JP';
      utterance.pitch = this.pitch;
      utterance.rate = this.rate;
-     window.speechSynthesis.speak(utterance);
+     
+     // Error handler
+     utterance.onerror = (e) => {
+       console.error('[AudioManager] SpeechSynthesis error:', e.error, 'text:', text);
+     };
+     
+     utterance.onend = () => {
+       console.log('[AudioManager] Speech ended for:', text);
+     };
+     
+     try {
+       window.speechSynthesis.speak(utterance);
+     } catch (err) {
+       console.error('[AudioManager] Failed to call speechSynthesis.speak:', err);
+     }
    }
+
 
     playPopSound() {
       if (!this.enabled || !this.audioContext) return;
