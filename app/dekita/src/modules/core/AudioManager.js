@@ -8,6 +8,10 @@ export class AudioManager {
     this.volume = 1.0;
     this.audioContext = null;
     this.state = null;
+    this.interAudioDelay = 300;
+    this.isPlaying = false;
+    this.playbackQueue = [];
+    this.currentAudio = null;
   }
 
   init() {
@@ -137,10 +141,67 @@ export class AudioManager {
     this.enabled = enabled;
   }
 
+  setInterAudioDelay(delay) {
+    this.interAudioDelay = delay;
+  }
+
+  playSequence(texts) {
+    if (!this.enabled || !texts || texts.length === 0) return;
+    
+    const queue = texts.map(text => this.getAudioFilePath(text)).filter(path => path !== null);
+    
+    if (queue.length === 0) return;
+    
+    this.isPlaying = true;
+    this.playAudioQueue(queue, 0);
+  }
+
+  playAudioQueue(queue, index) {
+    if (index >= queue.length) {
+      this.isPlaying = false;
+      this.currentAudio = null;
+      return;
+    }
+
+    const audio = new Audio(queue[index]);
+    audio.volume = this.volume;
+    this.currentAudio = audio;
+
+    const playNext = () => {
+      this.currentAudio = null;
+      setTimeout(() => {
+        this.playAudioQueue(queue, index + 1);
+      }, this.interAudioDelay);
+    };
+
+    audio.onended = playNext;
+
+    audio.onerror = (err) => {
+      console.error('[AudioManager] Audio error:', queue[index], err);
+      this.currentAudio = null;
+      playNext();
+    };
+
+    audio.play().catch(err => {
+      console.error('[AudioManager] Failed to play audio:', queue[index], err);
+      this.currentAudio = null;
+      playNext();
+    });
+  }
+
   saveScore(score) {
     if (score > this.state.highScore) {
       localStorage.setItem('gakushuGameHighScore', score);
     }
+  }
+
+  stop() {
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio = null;
+    }
+    this.isPlaying = false;
+    this.playbackQueue = [];
   }
 
   cleanup() {

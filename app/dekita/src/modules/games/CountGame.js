@@ -27,6 +27,7 @@ export class CountGame extends GameBase {
       startBtn.addEventListener('click', () => {
         console.log('[CountGame] start-btn clicked - event triggered');
         this.audio.init();
+        this.audio.setInterAudioDelay(300);
         this.audio.playPopSound();
         this.start();
       });
@@ -46,6 +47,7 @@ export class CountGame extends GameBase {
     if (replayBtn) {
       replayBtn.addEventListener('click', () => {
         this.audio.init();
+        this.audio.setInterAudioDelay(300);
         this.audio.playPopSound();
         this.start();
       });
@@ -102,6 +104,15 @@ export class CountGame extends GameBase {
 
     this.state.currentQuestion = { emoji, emojiCount: number };
     this.renderQuestion(emoji, number);
+  }
+
+  playQuestionSequence(number) {
+    this.audio.init();
+    const isEven = number % 2 === 0;
+    const texts = isEven 
+      ? ['いくつあるかな？', `やったー！`]
+      : ['いくつあるかな？', 'いいえ'];
+    this.audio.playSequence(texts);
   }
 
   getRandomPicture() {
@@ -178,13 +189,17 @@ export class CountGame extends GameBase {
 
   playCorrectFeedback() {
     super.playCorrectFeedback();
-    this.audio.speak('やったー！');
+    this.audio.init();
+    this.audio.setInterAudioDelay(300);
+    this.audio.playSequence(['やったー！', 'いいえ']);
     this.audio.playPopSound();
   }
 
   playWrongFeedback() {
     super.playWrongFeedback();
-    this.audio.speak('だいじょうぶ！もういっこ！');
+    this.audio.init();
+    this.audio.setInterAudioDelay(300);
+    this.audio.playSequence(['だいじょうぶ！もういっこ！']);
   }
 
   nextQuestion() {
@@ -196,8 +211,12 @@ export class CountGame extends GameBase {
     }
 
     if (this.state.isGameOver()) {
+      this.audio.init();
+      this.audio.playSequence(['おわった! おめでとう!']);
       this.endGame();
     } else {
+      this.audio.init();
+      this.audio.setInterAudioDelay(300);
       this.generateQuestion();
     }
   }
@@ -236,7 +255,7 @@ export class CountGame extends GameBase {
       this.root.getElementById('final-score').textContent = '⭐️' + this.state.score;
     }
     this.state.saveScore();
-    this.audio.speak('おわった! おめでとう!');
+    this.audio.playSequence(['おわった! おめでとう!']);
   }
 
   resetGame() {

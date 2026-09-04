@@ -9,6 +9,8 @@ export class AnimalGame extends GameBase {
     this.root = rootElement;
     this.registerEventListeners();
     this.state.gameMode = 'animal';
+    this.audio.init();
+    this.audio.setInterAudioDelay(400);
   }
 
   registerEventListeners() {
@@ -80,6 +82,10 @@ export class AnimalGame extends GameBase {
     soundIcon.onclick = () => this.replaySound(correct.sound);
     pictureArea.appendChild(soundIcon);
 
+    this.audio.init();
+    this.audio.setInterAudioDelay(400);
+    this.audio.playSequence(['だれの こえかな？', correct.sound]);
+
     const questionText = this.root.getElementById('animal-question-text');
     questionText.textContent = 'だれの こえかな？';
 
@@ -104,9 +110,6 @@ export class AnimalGame extends GameBase {
     });
 
     this.audio.speak('だれの こえかな？');
-    setTimeout(() => {
-      this.audio.speak(correct.sound);
-    }, 1500);
   }
 
   checkAnswer(selected, correct) {
@@ -130,13 +133,17 @@ export class AnimalGame extends GameBase {
 
   playCorrectFeedback() {
     super.playCorrectFeedback();
-    this.audio.speak('やったー！');
+    this.audio.init();
+    this.audio.setInterAudioDelay(300);
+    this.audio.playSequence(['やったー！']);
     this.audio.playPopSound();
   }
 
   playWrongFeedback() {
     super.playWrongFeedback();
-    this.audio.speak('だいじょうぶ！もういっこ！');
+    this.audio.init();
+    this.audio.setInterAudioDelay(300);
+    this.audio.playSequence(['だいじょうぶ！もういっこ！']);
   }
 
   nextQuestion() {
@@ -147,8 +154,12 @@ export class AnimalGame extends GameBase {
     }
 
     if (this.state.isGameOver()) {
+      this.audio.init();
+      this.audio.playSequence(['おわった! おめでとう!']);
       this.endGame();
     } else {
+      this.audio.init();
+      this.audio.setInterAudioDelay(400);
       this.generateQuestion();
     }
   }
@@ -165,7 +176,7 @@ export class AnimalGame extends GameBase {
       this.root.getElementById('final-score').textContent = '⭐️' + this.state.score;
     }
     this.state.saveScore();
-    this.audio.speak('おわった! おめでとう!');
+    this.audio.playSequence(['おわった! おめでとう!']);
   }
 
   resetGame() {
@@ -173,8 +184,9 @@ export class AnimalGame extends GameBase {
   }
 
   replaySound(soundText) {
-    this.audio.playPopSound();
-    this.audio.speak(soundText);
+    this.audio.init();
+    this.audio.setInterAudioDelay(300);
+    this.audio.playSequence(['だれの こえかな？', soundText]);
   }
 
   cleanup() {
