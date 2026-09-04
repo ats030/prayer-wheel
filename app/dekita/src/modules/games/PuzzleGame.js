@@ -116,6 +116,9 @@ export class PuzzleGame extends GameBase {
       gridArea.appendChild(slot);
     }
 
+    this.audio.init();
+    this.audio.setInterAudioDelay(300);
+    this.audio.playSequence(['これ なん の もの？']);
     this.updateProgress();
   }
 
@@ -136,7 +139,7 @@ export class PuzzleGame extends GameBase {
       const area = this.root.getElementById('puzzle-feedback-area');
       const text = this.root.getElementById('puzzle-feedback-text');
       area.style.display = 'block';
-      text.textContent = '違うかも...';
+      text.textContent = 'ちがいます';
       text.style.color = '#FF5722';
       setTimeout(() => {
         area.style.display = 'none';
@@ -169,7 +172,9 @@ export class PuzzleGame extends GameBase {
         text.textContent = 'やったー！＋20てん';
       }
     }
-    this.audio.speak('やったー！');
+    this.audio.init();
+    this.audio.setInterAudioDelay(300);
+    this.audio.playSequence(['やったー！']);
     this.audio.playPopSound();
   }
 
@@ -211,9 +216,9 @@ export class PuzzleGame extends GameBase {
         text.textContent = `せいかい！ スコア：${this.state.score}`;
       }
     }
+    this.audio.init();
+    this.audio.playSequence(['おわった！']);
     this.audio.playPopSound();
-    this.state.saveScore();
-    this.audio.speak('おわった! おめでとう!');
   }
 
   cleanup() {
