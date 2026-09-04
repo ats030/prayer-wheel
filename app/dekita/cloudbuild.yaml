@@ -1,6 +1,6 @@
 # Cloud Build configuration for dekita
 # Deploys to Cloud Run in Asia Northeast1 region
-# Project: dekita-507214
+# Project: ikimono-note-12205
 steps:
   - name: 'ubuntu'
     entrypoint: 'bash'
@@ -60,6 +60,7 @@ steps:
       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
       - '.'
 
+
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'run'
@@ -91,7 +92,7 @@ steps:
       - 'config'
       - 'set'
       - 'project'
-      - 'dekita-507214'
+      - 'ikimono-note-12205'
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
@@ -116,3 +117,7 @@ images:
 
 options:
   logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _DEPLOY_REGION: 'asia-northeast1'
+  _SERVICE_NAME: 'dekita-app'
