@@ -5,8 +5,6 @@
 export class AudioManager {
   constructor() {
     this.enabled = true;
-    this.pitch = 1.3;
-    this.rate = 0.9;
     this.volume = 1.0;
     this.audioContext = null;
     this.state = null;
@@ -16,7 +14,7 @@ export class AudioManager {
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
-    // Resume audioContext if it's suspended
+    // Resume audioContext if it's suspended (browser policy requirement)
     if (this.audioContext.state === 'suspended') {
       this.audioContext.resume();
     }
@@ -27,154 +25,113 @@ export class AudioManager {
     this.state = state;
   }
 
-   speak(text) {
-     if (!this.enabled || !window.speechSynthesis) return;
-     
-     // Resume audioContext if it's suspended (needed for speechSynthesis)
-     if (this.audioContext && this.audioContext.state === 'suspended') {
-       this.audioContext.resume();
-     }
-     
-     window.speechSynthesis.cancel();
-     
-     const utterance = new SpeechSynthesisUtterance(text);
-     utterance.lang = 'ja-JP';
-     utterance.pitch = this.pitch;
-     utterance.rate = this.rate;
-     utterance.volume = this.volume;
-     
-     // Error handler - MUST be set before calling speak()
-     utterance.onerror = (e) => {
-       console.error('[AudioManager] SpeechSynthesis error:', e.error, 'text:', text);
-       if (e.error === 'synthesis-failed' && this.audioContext) {
-         console.error('[AudioManager] audioContext state:', this.audioContext.state);
-       }
-     };
-     
-     utterance.onend = () => {
-       console.log('[AudioManager] Speech ended for:', text);
-     };
-     
-     try {
-       window.speechSynthesis.speak(utterance);
-     } catch (err) {
-       console.error('[AudioManager] Failed to call speechSynthesis.speak:', err);
-     }
-   }
+  getAudioFilePath(text) {
+    const audioMap = {
+      'いくつあるかな？': 'audio/count-question.mp3',
+      'だれの こえかな？': 'audio/animal-question.mp3',
+      'ワンワン！': 'audio/dog-sound.mp3',
+      'ニャー！': 'audio/cat-sound.mp3',
+      'モー！': 'audio/cow-sound.mp3',
+      'ブヒブヒ！': 'audio/pig-sound.mp3',
+      'ピーピー！': 'audio/bird-sound.mp3',
+      'ガオー！': 'audio/lion-sound.mp3',
+      'パオーン！': 'audio/elephant-sound.mp3',
+      'ウキキ！': 'audio/monkey-sound.mp3',
+      'やったー！': 'audio/correct.mp3',
+      'だいじょうぶ！もういっこ！': 'audio/wrong.mp3',
+      'いいえ': 'audio/incorrect.mp3',
+      'おわった! おめでとう!': 'audio/game-over.mp3',
+      'せいかい!': 'audio/correct-feedback.mp3'
+    };
+    return audioMap[text] || null;
+  }
 
-   playPopSound() {
-     if (!this.enabled || !this.audioContext) return;
-     
-     // Resume audioContext if it's suspended (browser policy requirement)
-     if (this.audioContext.state === 'suspended') {
-       this.audioContext.resume();
-     }
-     
-     // Play pop sound using Web Audio API oscillator
-     const oscillator = this.audioContext.createOscillator();
-     const gainNode = this.audioContext.createGain();
-     
-     oscillator.connect(gainNode);
-     gainNode.connect(this.audioContext.destination);
-     
-     oscillator.type = 'sine';
-     oscillator.frequency.setValueAtTime(400, this.audioContext.currentTime);
-     oscillator.frequency.linearRampToValueAtTime(800, this.audioContext.currentTime + 0.08);
-     
-     gainNode.gain.setValueAtTime(0.3 * this.volume, this.audioContext.currentTime);
-     gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.08);
-     
-     oscillator.start();
-     oscillator.stop(this.audioContext.currentTime + 0.08);
-   }
+  speak(text) {
+    if (!this.enabled) return;
+    
+    // Map text to audio file path
+    const audioFile = this.getAudioFilePath(text);
+    if (!audioFile) {
+      console.warn('[AudioManager] No audio file for text:', text);
+      return;
+    }
+    
+    // Resume audioContext if it's suspended (browser policy requirement)
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
+    
+    // Play audio file
+    const audio = new Audio(audioFile);
+    audio.volume = this.volume;
+    audio.play().catch(err => {
+      console.error('[AudioManager] Failed to play audio:', audioFile, 'error:', err);
+    });
+  }
 
-   playCorrectSound() {
-     if (!this.enabled || !this.audioContext) return;
-     
-     // Resume audioContext if it's suspended (browser policy requirement)
-     if (this.audioContext.state === 'suspended') {
-       this.audioContext.resume();
-     }
-     
-     // Play correct sound using Web Audio API
-     const ctx = this.audioContext;
-     const now = ctx.currentTime;
-     
-     const osc1 = ctx.createOscillator();
-     const osc2 = ctx.createOscillator();
-     const gain = ctx.createGain();
-     
-     osc1.frequency.value = 440;
-     osc2.frequency.value = 550;
-     osc1.type = 'sine';
-     osc2.type = 'sine';
-     
-     osc1.connect(gain);
-     osc2.connect(gain);
-     gain.connect(ctx.destination);
-     
-     gain.gain.setValueAtTime(0.3 * this.volume, now);
-     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-     
-     osc1.start(now);
-     osc2.start(now);
-     osc1.stop(now + 0.2);
-     osc2.stop(now + 0.2);
-   }
+  playPopSound() {
+    if (!this.enabled) return;
+    
+    // Resume audioContext if it's suspended (browser policy requirement)
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
+    
+    // Play pop sound using audio file
+    const audio = new Audio('audio/pop.mp3');
+    audio.volume = this.volume;
+    audio.play().catch(err => {
+      console.error('[AudioManager] Failed to play pop sound:', err);
+    });
+  }
 
-   playWrongSound() {
-     if (!this.enabled || !this.audioContext) return;
-     
-     // Resume audioContext if it's suspended (browser policy requirement)
-     if (this.audioContext.state === 'suspended') {
-       this.audioContext.resume();
-     }
-     
-     // Play wrong sound using Web Audio API
-     const ctx = this.audioContext;
-     const now = ctx.currentTime;
-     
-     const osc = ctx.createOscillator();
-     const gain = ctx.createGain();
-     
-     osc.frequency.value = 330;
-     osc.type = 'sawtooth';
-     osc.connect(gain);
-     gain.connect(ctx.destination);
-     
-     gain.gain.setValueAtTime(0.3 * this.volume, now);
-     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-     
-     osc.start(now);
-     osc.stop(now + 0.3);
-   }
+  playCorrectSound() {
+    if (!this.enabled) return;
+    
+    // Resume audioContext if it's suspended (browser policy requirement)
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
+    
+    // Play correct sound using audio file
+    const audio = new Audio('audio/correct.mp3');
+    audio.volume = this.volume;
+    audio.play().catch(err => {
+      console.error('[AudioManager] Failed to play correct sound:', err);
+    });
+  }
 
-   playErrorSound() {
-     if (!this.enabled || !this.audioContext) return;
-     
-     // Resume audioContext if it's suspended (browser policy requirement)
-     if (this.audioContext.state === 'suspended') {
-       this.audioContext.resume();
-     }
-     
-     // Play error sound using Web Audio API
-     const ctx = this.audioContext;
-     const now = ctx.currentTime;
-     
-     const osc = ctx.createOscillator();
-     const gain = ctx.createGain();
-     
-     osc.frequency.value = 220;
-     osc.type = 'sawtooth';
-     osc.connect(gain);
-     gain.connect(ctx.destination);
-     
-     gain.gain.setValueAtTime(0.3 * this.volume, now);
-     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-     
-     osc.start(now);
-     osc.stop(now + 0.3);
-   }
+  playWrongSound() {
+    if (!this.enabled) return;
+    
+    // Resume audioContext if it's suspended (browser policy requirement)
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
+    
+    // Play wrong sound using audio file
+    const audio = new Audio('audio/wrong.mp3');
+    audio.volume = this.volume;
+    audio.play().catch(err => {
+      console.error('[AudioManager] Failed to play wrong sound:', err);
+    });
+  }
+
+  playErrorSound() {
+    if (!this.enabled) return;
+    
+    // Resume audioContext if it's suspended (browser policy requirement)
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
+    
+    // Play error sound using audio file
+    const audio = new Audio('audio/error.mp3');
+    audio.volume = this.volume;
+    audio.play().catch(err => {
+      console.error('[AudioManager] Failed to play error sound:', err);
+    });
+  }
 
   setEnabled(enabled) {
     this.enabled = enabled;
