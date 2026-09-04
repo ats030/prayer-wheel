@@ -1,6 +1,9 @@
 /* 
  * dekita - Preschool Edition Audio Manager
- */
+   * playAudioQueue(queue, index) - Play audio files in sequence with natural delays
+   * Now calculates delay based on audio.duration + natural delay buffer (150ms)
+   * For errors, uses minimal delay (100ms) to keep the sequence moving
+   */
 
 export class AudioManager {
   constructor() {
@@ -45,7 +48,15 @@ export class AudioManager {
       'だいじょうぶ！もういっこ！': 'audio/wrong.mp3',
       'いいえ': 'audio/incorrect.mp3',
       'おわった! おめでとう!': 'audio/game-over.mp3',
-      'せいかい!': 'audio/correct-feedback.mp3'
+      'せいかい!': 'audio/correct-feedback.mp3',
+      'これ なん の いろかな？': 'audio/color-question.mp3',
+      'ペアを見つけてね': 'audio/match-instruction.mp3',
+      'これ なん の もんなの？': 'audio/count-question.mp3',
+      'はちさんが おはなまで いけるかな?': 'audio/maze-hachi.mp3',
+      'うさぎさんが にんじんまで いけるかな?': 'audio/maze-usagi.mp3',
+      'ねこさんが おさかなまで いけるかな?': 'audio/maze-neko.mp3',
+      'さるさんが バナナまで いけるかな?': 'audio/maze-saru.mp3',
+      '10てん！': 'audio/maze-win10.mp3'
     };
     return audioMap[text] || null;
   }
@@ -156,6 +167,11 @@ export class AudioManager {
     this.playAudioQueue(queue, 0);
   }
 
+  /**
+   * playAudioQueue(queue, index) - Play audio files in sequence with natural delays
+   * Calculates delay based on audio.duration + natural delay buffer (150ms)
+   * For errors, uses minimal delay (100ms) to keep the sequence moving
+   */
   playAudioQueue(queue, index) {
     if (index >= queue.length) {
       this.isPlaying = false;
@@ -167,26 +183,37 @@ export class AudioManager {
     audio.volume = this.volume;
     this.currentAudio = audio;
 
-    const playNext = () => {
-      this.currentAudio = null;
-      setTimeout(() => {
-        this.playAudioQueue(queue, index + 1);
-      }, this.interAudioDelay);
+    const naturalDelayBuffer = 150;
+
+    audio.onloadedmetadata = () => {
+      const audioDurationMs = audio.duration * 1000;
+      const naturalDelay = audioDurationMs + naturalDelayBuffer;
+
+      const playNext = () => {
+        this.currentAudio = null;
+        setTimeout(() => {
+          this.playAudioQueue(queue, index + 1);
+        }, naturalDelay);
+      };
+
+      audio.onended = playNext;
+
+      audio.onerror = (err) => {
+        console.error('[AudioManager] Audio error:', queue[index], err);
+        this.currentAudio = null;
+        setTimeout(() => {
+          this.playAudioQueue(queue, index + 1);
+        }, 100);
+      };
+
+      audio.play().catch(err => {
+        console.error('[AudioManager] Failed to play audio:', queue[index], err);
+        this.currentAudio = null;
+        setTimeout(() => {
+          this.playAudioQueue(queue, index + 1);
+        }, 100);
+      });
     };
-
-    audio.onended = playNext;
-
-    audio.onerror = (err) => {
-      console.error('[AudioManager] Audio error:', queue[index], err);
-      this.currentAudio = null;
-      playNext();
-    };
-
-    audio.play().catch(err => {
-      console.error('[AudioManager] Failed to play audio:', queue[index], err);
-      this.currentAudio = null;
-      playNext();
-    });
   }
 
   saveScore(score) {
