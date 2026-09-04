@@ -59,6 +59,11 @@ TARGET_BASE_URL = env("OLLAMA_PROXY_TARGET_URL") or (
 TARGET_BASE_URL = TARGET_BASE_URL.rstrip("/")
 REQUEST_TIMEOUT = int(env("OLLAMA_PROXY_TIMEOUT", "600"))
 GENERATION_QUEUE_TIMEOUT = float(env("OLLAMA_PROXY_QUEUE_TIMEOUT", "5"))
+# X-Client-App を名乗るバッチ要求 (daily-reflection 等) 向けの待機上限。
+# opencode の対話要求は応答性を保つため既定の短い GENERATION_QUEUE_TIMEOUT
+# のまま。バッチ側は起動時刻がずれて opencode の長時間生成 (実測60秒超) と
+# 競合しても、ゲート取得自体で 503 にならないよう長めに確保する (ats030-pe2x)。
+GENERATION_QUEUE_TIMEOUT_BATCH = float(env("OLLAMA_PROXY_QUEUE_TIMEOUT_BATCH", "120"))
 GENERATION_RETRY_AFTER = int(env("OLLAMA_PROXY_RETRY_AFTER", "30"))
 # X-Client-App を名乗るバッチ要求だけ、ゲート取得後に他の常駐モデルを
 # keep_alive=0 で退避させる (ats030-pe2x)。_generation_gate は生成要求を
@@ -395,8 +400,16 @@ class ProxyHandler(BaseHTTPRequestHandler):
         gate_acquired = False
         try:
             if self.is_generation_request():
-                gate_acquired = _generation_gate.acquire(
-                    timeout=GENERATION_QUEUE_TIMEOUT)
+                client_app = self.headers.get("X-Client-App")
+                is_batch_client = bool(client_app and client_app.strip())
+                # バッチクライアントは opencode の長時間生成 (実測60秒超) と
+                # 起動時刻がずれて競合しても、ゲート取得自体で 503 にならない
+                # よう長めに待たせる。opencode 側の対話応答性は既定の短い
+                # タイムアウトのまま維持する (ats030-pe2x)。
+                queue_timeout = (
+                    GENERATION_QUEUE_TIMEOUT_BATCH if is_batch_client
+                    else GENERATION_QUEUE_TIMEOUT)
+                gate_acquired = _generation_gate.acquire(timeout=queue_timeout)
                 if not gate_acquired:
                     status = 503
                     error = "generation queue busy"
@@ -409,8 +422,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(payload)
                     return
-                client_app = self.headers.get("X-Client-App")
-                if EVICT_COMPETITORS_ENABLED and client_app and client_app.strip():
+                if EVICT_COMPETITORS_ENABLED and is_batch_client:
                     evict_idle_competitors(request_model(body))
             with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT) as response:
                 status = response.status
