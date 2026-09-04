@@ -93,17 +93,18 @@ steps:
       - 'set'
       - 'project'
       - 'ikimono-note-12205'
+      - '--quiet'
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       - 'run'
       - 'deploy'
-      - 'dekita-app'
+      - '$_SERVICE_NAME'
       - '--image'
       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
       - '--region'
-      - 'asia-northeast1'
+      - '$_DEPLOY_REGION'
       - '--allow-unauthenticated'
       - '--platform'
       - 'managed'
@@ -111,6 +112,7 @@ steps:
       - '8080'
       - '--memory'
       - '512Mi'
+      - '--quiet'
 
 images:
   - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/dekita/app:latest'
