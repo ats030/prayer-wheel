@@ -41,16 +41,15 @@ export class PuzzleGame extends GameBase {
     const puzzleResetBtn = this.root.getElementById('puzzle-reset-btn');
     if (puzzleResetBtn) {
       puzzleResetBtn.addEventListener('click', () => {
-        this.resetGame();
+        this.screen.showTitle();
       });
     }
 
     const puzzleNextBtn = this.root.getElementById('puzzle-next-btn');
     if (puzzleNextBtn) {
       puzzleNextBtn.addEventListener('click', () => {
-        this.audio.init();
         this.audio.playPopSound();
-        this.nextRound();
+        this.nextQuestion();
       });
     }
   }
@@ -64,7 +63,6 @@ export class PuzzleGame extends GameBase {
     this.state.questionsAnswered = 0;
     this.state.questionsTotal = 5;
     this.screen.showPuzzleGame();
-    this.setupDragSource();
     this.generatePuzzle();
     this.audio.setInterAudioDelay(300);
     this.audio.playSequence(['これ なん の もの？']);
@@ -72,16 +70,6 @@ export class PuzzleGame extends GameBase {
 
   getGridArea() {
     return this.root.getElementById('puzzle-grid');
-  }
-
-  setupDragSource() {
-    const dragSource = this.root.getElementById('puzzle-drag-emoji');
-    if (dragSource) {
-      dragSource.addEventListener('dragstart', (e) => {
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', this.correctEmoji);
-      });
-    }
   }
 
   generatePuzzle() {
@@ -100,7 +88,6 @@ export class PuzzleGame extends GameBase {
     console.log('[Puzzle] Correct emoji:', this.correctEmoji, 'at index:', this.correctIndex);
     console.log('[Puzzle] All silhouettes:', this.silhouettes);
     
-    this.setupDragSource();
     this.createGrid();
   }
 
@@ -231,32 +218,12 @@ export class PuzzleGame extends GameBase {
     this.screen.showTitle();
   }
 
-  resetGame() {
-    this.screen.showTitle();
-  }
-
-  updateProgress() {
-    super.updateProgress();
-    if (this.root) {
-      this.root.getElementById('puzzle-progress-text').textContent = 
-        `${this.state.questionsAnswered + 1}/${this.state.questionsTotal} 問`;
-    }
-  }
-
   endGame() {
-    super.endGame();
-    this.gameOver = true;
-    if (this.root) {
-      const area = this.root.getElementById('puzzle-feedback-area');
-      const text = this.root.getElementById('puzzle-feedback-text');
-      if (area && text) {
-        area.style.display = 'block';
-        text.textContent = `せいかい！ スコア：${this.state.score}`;
-      }
+    this.screen.showResult();
+    const finalScoreEl = this.root ? this.root.getElementById('final-score') : document.getElementById('final-score');
+    if (finalScoreEl) {
+      finalScoreEl.textContent = '⭐️' + this.state.score;
     }
-    this.audio.init();
-    this.audio.playSequence(['おわった！']);
-    this.audio.playPopSound();
   }
 
   cleanup() {
