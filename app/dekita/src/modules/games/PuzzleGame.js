@@ -113,7 +113,6 @@ export class PuzzleGame extends GameBase {
       slot.addEventListener('drop', (e) => this.handleDrop(e));
       slot.addEventListener('dragenter', (e) => e.preventDefault());
       slot.addEventListener('dragleave', (e) => e.preventDefault());
-      }
       gridArea.appendChild(slot);
     }
 
