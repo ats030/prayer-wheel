@@ -1,0 +1,2138 @@
+[
+  {
+    "qid": "Q82113",
+    "label_ja": "広島国際アニメーションフェスティバル",
+    "label_en": "Hiroshima International Animation Festival",
+    "prefecture": "広島県",
+    "latitude": 34.38525,
+    "longitude": 132.45531
+  },
+  {
+    "qid": "Q114712",
+    "label_ja": "長崎くんち",
+    "label_en": "Nagasaki Kunchi",
+    "prefecture": "長崎県",
+    "latitude": 32.754125,
+    "longitude": 129.88211111
+  },
+  {
+    "qid": "Q862407",
+    "label_ja": "青森ねぶた",
+    "label_en": "Aomori Nebuta Matsuri",
+    "prefecture": "青森県",
+    "latitude": 40.822342,
+    "longitude": 140.74739
+  },
+  {
+    "qid": "Q929531",
+    "label_ja": "さっぽろ雪まつり",
+    "label_en": "Sapporo Snow Festival",
+    "prefecture": "北海道",
+    "latitude": 43.061047,
+    "longitude": 141.35638
+  },
+  {
+    "qid": "Q888184",
+    "label_ja": "日前神宮・國懸神宮",
+    "label_en": "Hinokuma Jingū",
+    "prefecture": "和歌山県",
+    "latitude": 34.228398,
+    "longitude": 135.201993
+  },
+  {
+    "qid": "Q911345",
+    "label_ja": "CON-CANムービーフェスティバル",
+    "label_en": "CON-CAN Movie Festival",
+    "prefecture": "千葉県",
+    "latitude": 35.67659,
+    "longitude": 139.70793
+  },
+  {
+    "qid": "Q903645",
+    "label_ja": "国際花と緑の博覧会",
+    "label_en": "Expo '90",
+    "prefecture": "大阪府",
+    "latitude": 34.71216667,
+    "longitude": 135.57416667
+  },
+  {
+    "qid": "Q912124",
+    "label_ja": "時代祭",
+    "label_en": "Jidai Matsuri",
+    "prefecture": "京都府",
+    "latitude": 35.011635,
+    "longitude": 135.76804
+  },
+  {
+    "qid": "Q11487216",
+    "label_ja": "弘前城菊と紅葉まつり",
+    "label_en": "Hirosaki Castle Chrysanthemum and Autumn Foliage Festival",
+    "prefecture": "青森県",
+    "latitude": 40.6039,
+    "longitude": 140.4649
+  },
+  {
+    "qid": "Q11487199",
+    "label_ja": "弘前さくらまつり",
+    "label_en": "Hirosaki Cherry Blossom Festival",
+    "prefecture": "青森県",
+    "latitude": 40.6039,
+    "longitude": 140.4649
+  },
+  {
+    "qid": "Q11487218",
+    "label_ja": "弘前城雪燈籠まつり",
+    "label_en": "Hirosaki Castle Snow Lantern Festival",
+    "prefecture": "青森県",
+    "latitude": 40.6039,
+    "longitude": 140.4649
+  },
+  {
+    "qid": "Q11487200",
+    "label_ja": "弘前ねぷた",
+    "label_en": "Hirosaki Neputa",
+    "prefecture": "青森県",
+    "latitude": 40.6039,
+    "longitude": 140.4649
+  },
+  {
+    "qid": "Q1046742",
+    "label_ja": "コミックマーケット",
+    "label_en": "Comiket",
+    "prefecture": "東京都",
+    "latitude": 35.630833333,
+    "longitude": 139.796666666
+  },
+  {
+    "qid": "Q10869430",
+    "label_ja": "東京高円寺阿波おどり",
+    "label_en": "Kōenji Awa Odori",
+    "prefecture": "東京都",
+    "latitude": 35.7038,
+    "longitude": 139.65
+  },
+  {
+    "qid": "Q1043431",
+    "label_ja": "東京国際映画祭",
+    "label_en": "Tokyo International Film Festival",
+    "prefecture": "東京都",
+    "latitude": 35.6894,
+    "longitude": 139.6917
+  },
+  {
+    "qid": "Q493695",
+    "label_ja": "唐津くんち",
+    "label_en": "Karatsu Kunchi",
+    "prefecture": "佐賀県",
+    "latitude": 33.445171292,
+    "longitude": 129.967403864
+  },
+  {
+    "qid": "Q21653307",
+    "label_ja": "しろんご祭り",
+    "label_en": "Shirongo Matsuri",
+    "prefecture": "三重県",
+    "latitude": 34.5025,
+    "longitude": 136.906388888
+  },
+  {
+    "qid": "Q30924149",
+    "label_ja": "豊年祭",
+    "label_en": "Hōnen Matsuri",
+    "prefecture": "愛知県",
+    "latitude": 35.315833333,
+    "longitude": 136.941111111
+  },
+  {
+    "qid": "Q5288609",
+    "label_ja": "土居太鼓祭り",
+    "label_en": "Doi taikomatsuri",
+    "prefecture": "愛媛県",
+    "latitude": 33.965,
+    "longitude": 133.43
+  },
+  {
+    "qid": "Q5332426",
+    "label_ja": "大地の芸術祭 越後妻有アートトリエンナーレ",
+    "label_en": "Echigo-Tsumari Art Triennial",
+    "prefecture": "新潟県",
+    "latitude": 37.016666666,
+    "longitude": 138.6
+  },
+  {
+    "qid": "Q3698846",
+    "label_ja": "御柱祭",
+    "label_en": "Onbashira",
+    "prefecture": "長野県",
+    "latitude": 36.075277777,
+    "longitude": 138.091388888
+  },
+  {
+    "qid": "Q4701224",
+    "label_ja": "竿燈",
+    "label_en": "Akita Kantō",
+    "prefecture": "秋田県",
+    "latitude": 39.71847222,
+    "longitude": 140.11319444
+  },
+  {
+    "qid": "Q1749262",
+    "label_ja": "博多祇園山笠",
+    "label_en": "Hakata Gion Yamakasa Festival",
+    "prefecture": "福岡県",
+    "latitude": 33.59297,
+    "longitude": 130.41045
+  },
+  {
+    "qid": "Q1151186",
+    "label_ja": "フジロックフェスティバル",
+    "label_en": "Fuji Rock Festival",
+    "prefecture": "新潟県",
+    "latitude": 36.799,
+    "longitude": 138.78359167
+  },
+  {
+    "qid": "Q6663968",
+    "label_ja": "足立の花火",
+    "label_en": "Adachi Fireworks",
+    "prefecture": "東京都",
+    "latitude": 35.75869444,
+    "longitude": 139.79783333
+  },
+  {
+    "qid": "Q9385159",
+    "label_ja": "仙台七夕",
+    "label_en": "Sendai Tanabata",
+    "prefecture": "宮城県",
+    "latitude": 38.26049722,
+    "longitude": 140.87196944
+  },
+  {
+    "qid": "Q6663970",
+    "label_ja": "高岡御車山祭",
+    "label_en": "Takaoka Mikurumayama Festival",
+    "prefecture": "富山県",
+    "latitude": 36.747556,
+    "longitude": 137.012056
+  },
+  {
+    "qid": "Q11261730",
+    "label_ja": "おたる潮まつり",
+    "label_en": "Otaru Ushio Matsuri",
+    "prefecture": "北海道",
+    "latitude": 43.202940261,
+    "longitude": 141.007523346
+  },
+  {
+    "qid": "Q11274443",
+    "label_ja": "なにわ淀川花火大会",
+    "label_en": "Naniwa Yodogawa Fireworks Festival",
+    "prefecture": "大阪府",
+    "latitude": 34.709939,
+    "longitude": 135.478978
+  },
+  {
+    "qid": "Q11265785",
+    "label_ja": "ぐず焼き祭り",
+    "label_en": "Guzuyaki Festival",
+    "prefecture": "石川県",
+    "latitude": 36.325416666,
+    "longitude": 136.388638888
+  },
+  {
+    "qid": "Q7813900",
+    "label_ja": "東京国際レズビアン&ゲイ映画祭",
+    "label_en": "Rainbow Reel Tokyo",
+    "prefecture": "東京都",
+    "latitude": 35.683333333,
+    "longitude": 139.766666666
+  },
+  {
+    "qid": "Q7398902",
+    "label_ja": "佐賀インターナショナルバルーンフェスタ",
+    "label_en": "Saga International Balloon Fiesta",
+    "prefecture": "佐賀県",
+    "latitude": 33.255555555,
+    "longitude": 130.244444444
+  },
+  {
+    "qid": "Q120776905",
+    "label_ja": "LuckyFes",
+    "label_en": "LuckyFes",
+    "prefecture": "茨城県",
+    "latitude": 36.400555555,
+    "longitude": 140.591388888
+  },
+  {
+    "qid": "Q6920834",
+    "label_ja": "マウント・フジ・ジャズ・フェスティバル",
+    "label_en": "Mount Fuji Jazz Festival",
+    "prefecture": "山梨県",
+    "latitude": 35.4192899,
+    "longitude": 138.9014125
+  },
+  {
+    "qid": "Q8054630",
+    "label_ja": null,
+    "label_en": "Yokohama Jazz Festival",
+    "prefecture": "神奈川県",
+    "latitude": 35.3794,
+    "longitude": 139.647
+  },
+  {
+    "qid": "Q11404276",
+    "label_ja": "北野天神社",
+    "label_en": "Kitano Tenjinsha",
+    "prefecture": "埼玉県",
+    "latitude": 35.790695,
+    "longitude": 139.428834
+  },
+  {
+    "qid": "Q11402390",
+    "label_ja": "北海へそ祭り",
+    "label_en": "Hokkaido Belly Button Festival",
+    "prefecture": "北海道",
+    "latitude": 43.347434358,
+    "longitude": 142.388015401
+  },
+  {
+    "qid": "Q11386340",
+    "label_ja": "修正鬼会",
+    "label_en": null,
+    "prefecture": "大分県",
+    "latitude": 33.578744,
+    "longitude": 131.541622
+  },
+  {
+    "qid": "Q11402392",
+    "label_ja": "北海ソーラン祭り",
+    "label_en": "Hokkai Soran Matsuri",
+    "prefecture": "北海道",
+    "latitude": 43.188471862,
+    "longitude": 140.794824782
+  },
+  {
+    "qid": "Q11381803",
+    "label_ja": "住吉大社 御田植神事",
+    "label_en": "Otaue Shinto Service",
+    "prefecture": "大阪府",
+    "latitude": 34.61135,
+    "longitude": 135.492453
+  },
+  {
+    "qid": "Q11280396",
+    "label_ja": "やつしろ全国花火競技大会",
+    "label_en": null,
+    "prefecture": "熊本県",
+    "latitude": 32.4876083,
+    "longitude": 130.6267719
+  },
+  {
+    "qid": "Q11353501",
+    "label_ja": "七尾祇園祭",
+    "label_en": "Nanao Gion Matsuri",
+    "prefecture": "石川県",
+    "latitude": 37.04312,
+    "longitude": 136.96747
+  },
+  {
+    "qid": "Q11285021",
+    "label_ja": "アメッコ市",
+    "label_en": "Odate Amekko-ichi",
+    "prefecture": "秋田県",
+    "latitude": 40.270611111,
+    "longitude": 140.558722222
+  },
+  {
+    "qid": "Q11362874",
+    "label_ja": "中之条ビエンナーレ",
+    "label_en": "Nakanojo Biennnale",
+    "prefecture": "群馬県",
+    "latitude": 36.589893,
+    "longitude": 138.84099
+  },
+  {
+    "qid": "Q11360688",
+    "label_ja": "下呂の田の神祭",
+    "label_en": "Gero Ta-no-Kami Festival",
+    "prefecture": "岐阜県",
+    "latitude": 35.807214,
+    "longitude": 137.243953
+  },
+  {
+    "qid": "Q11432381",
+    "label_ja": "大依羅神社",
+    "label_en": "Ōyosami Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.594833,
+    "longitude": 135.518163
+  },
+  {
+    "qid": "Q11413521",
+    "label_ja": "吉田の火祭",
+    "label_en": "Yoshida Fire Festival",
+    "prefecture": "山梨県",
+    "latitude": 35.478194,
+    "longitude": 138.794139
+  },
+  {
+    "qid": "Q11425954",
+    "label_ja": "城下町新発田ふるさとまつり",
+    "label_en": null,
+    "prefecture": "新潟県",
+    "latitude": 38.002293,
+    "longitude": 139.37245
+  },
+  {
+    "qid": "Q11433065",
+    "label_ja": "大前神社",
+    "label_en": "Ōsaki Shrine",
+    "prefecture": "栃木県",
+    "latitude": 36.449393,
+    "longitude": 140.026004
+  },
+  {
+    "qid": "Q121294996",
+    "label_ja": "狛江・多摩川花火大会",
+    "label_en": "Komae Tamagawa Fireworks Festival",
+    "prefecture": "東京都",
+    "latitude": 35.623,
+    "longitude": 139.572
+  },
+  {
+    "qid": "Q124363255",
+    "label_ja": "山留め",
+    "label_en": "Yamadome",
+    "prefecture": "福岡県",
+    "latitude": 33.593427777,
+    "longitude": 130.4109
+  },
+  {
+    "qid": "Q116056816",
+    "label_ja": "2027年国際園芸博覧会",
+    "label_en": "International Horticultural Expo 2027",
+    "prefecture": "神奈川県",
+    "latitude": 35.486388888,
+    "longitude": 139.490277777
+  },
+  {
+    "qid": "Q115680256",
+    "label_ja": "横手の雪まつり",
+    "label_en": "Yokote’s Winter Festival",
+    "prefecture": "秋田県",
+    "latitude": 39.31395,
+    "longitude": 140.565816666
+  },
+  {
+    "qid": "Q122231583",
+    "label_ja": "つきがた夏まつり",
+    "label_en": null,
+    "prefecture": "北海道",
+    "latitude": 43.339333333,
+    "longitude": 141.684472222
+  },
+  {
+    "qid": "Q130753581",
+    "label_ja": "松戸まつり",
+    "label_en": "Matsudo Festival",
+    "prefecture": "千葉県",
+    "latitude": 35.784442,
+    "longitude": 139.899967
+  },
+  {
+    "qid": "Q127789312",
+    "label_ja": "小金井桜まつり",
+    "label_en": "KOGANEI SAKURA FESTIVAL",
+    "prefecture": "東京都",
+    "latitude": 35.71491473,
+    "longitude": 139.51247871
+  },
+  {
+    "qid": "Q125959947",
+    "label_ja": "荒処の沼入り梵天",
+    "label_en": "Numa-iri Bonden",
+    "prefecture": "秋田県",
+    "latitude": 39.282638888,
+    "longitude": 140.528027777
+  },
+  {
+    "qid": "Q127415167",
+    "label_ja": "常盤平さくらまつり",
+    "label_en": "Tokiwadaira Sakura Festival",
+    "prefecture": "千葉県",
+    "latitude": 35.80251,
+    "longitude": 139.95079
+  },
+  {
+    "qid": "Q21654329",
+    "label_ja": "平筒沼ふれあい公園桜まつり",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.61635556,
+    "longitude": 141.23637778
+  },
+  {
+    "qid": "Q21653297",
+    "label_ja": "湘南台七夕まつり",
+    "label_en": null,
+    "prefecture": "神奈川県",
+    "latitude": 35.39623889,
+    "longitude": 139.46644722
+  },
+  {
+    "qid": "Q21652715",
+    "label_ja": "おもしぇがらきてけさin富谷",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.40008333,
+    "longitude": 140.89122222
+  },
+  {
+    "qid": "Q21652985",
+    "label_ja": "くりこま山車まつり",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.831125,
+    "longitude": 140.99074722
+  },
+  {
+    "qid": "Q21015433",
+    "label_ja": "多賀城跡あやめまつり",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.3037,
+    "longitude": 140.99158611
+  },
+  {
+    "qid": "Q20045025",
+    "label_ja": "深大寺鬼燈まつり",
+    "label_en": "Jindai-ji Hōzuki Festival",
+    "prefecture": "東京都",
+    "latitude": 35.66752778,
+    "longitude": 139.55047222
+  },
+  {
+    "qid": "Q17228250",
+    "label_ja": "きたむら田舎フェスティバル",
+    "label_en": null,
+    "prefecture": "北海道",
+    "latitude": 43.2598015,
+    "longitude": 141.695370278
+  },
+  {
+    "qid": "Q21653176",
+    "label_ja": "サザンビーチちがさき花火大会",
+    "label_en": null,
+    "prefecture": "神奈川県",
+    "latitude": 35.313225,
+    "longitude": 139.399525
+  },
+  {
+    "qid": "Q21652352",
+    "label_ja": "浅舞公園あやめまつり",
+    "label_en": null,
+    "prefecture": "秋田県",
+    "latitude": 39.25941111,
+    "longitude": 140.49343611
+  },
+  {
+    "qid": "Q20044069",
+    "label_ja": "くりはら万葉祭",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.78097222,
+    "longitude": 140.95719444
+  },
+  {
+    "qid": "Q21654380",
+    "label_ja": "深谷まつり",
+    "label_en": "Fukaya Festival",
+    "prefecture": "埼玉県",
+    "latitude": 36.19263333,
+    "longitude": 139.28098056
+  },
+  {
+    "qid": "Q21653223",
+    "label_ja": "山王史跡公園あやめ祭り",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.74200278,
+    "longitude": 140.94965556
+  },
+  {
+    "qid": "Q21019044",
+    "label_ja": "下町七夕まつり",
+    "label_en": "Shitamachi Tanabata Festival",
+    "prefecture": "東京都",
+    "latitude": 35.71480278,
+    "longitude": 139.78726944
+  },
+  {
+    "qid": "Q21653791",
+    "label_ja": "とみやマーチングフェスティバル",
+    "label_en": "Tomiya Marching Festival",
+    "prefecture": "宮城県",
+    "latitude": 38.40329722,
+    "longitude": 140.88143611
+  },
+  {
+    "qid": "Q17226795",
+    "label_ja": "佐那神社",
+    "label_en": "Sana Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.480942,
+    "longitude": 136.546151
+  },
+  {
+    "qid": "Q21652311",
+    "label_ja": "辻堂諏訪神社例大祭",
+    "label_en": null,
+    "prefecture": "神奈川県",
+    "latitude": 35.33148056,
+    "longitude": 139.45256667
+  },
+  {
+    "qid": "Q21652951",
+    "label_ja": "京都ヒストリカ国際映画祭",
+    "label_en": "Kyoto HISTORICA International Film Festival",
+    "prefecture": "京都府",
+    "latitude": 35.009388888,
+    "longitude": 135.762333333
+  },
+  {
+    "qid": "Q21652662",
+    "label_ja": "小川町七夕まつり",
+    "label_en": null,
+    "prefecture": "埼玉県",
+    "latitude": 36.056025,
+    "longitude": 139.26064167
+  },
+  {
+    "qid": "Q20043629",
+    "label_ja": "加護坊桜まつり",
+    "label_en": "Kagobo Cherry Blossom Festival",
+    "prefecture": "宮城県",
+    "latitude": 38.590175,
+    "longitude": 141.10646111
+  },
+  {
+    "qid": "Q21653201",
+    "label_ja": "佐沼夏まつり",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.69113889,
+    "longitude": 141.18870833
+  },
+  {
+    "qid": "Q21654455",
+    "label_ja": "ふじさわ江の島花火大会",
+    "label_en": null,
+    "prefecture": "神奈川県",
+    "latitude": 35.31055278,
+    "longitude": 139.47810833
+  },
+  {
+    "qid": "Q21653623",
+    "label_ja": "つきだて七夕まつり",
+    "label_en": "Tsukidate Tanabata Matsuri",
+    "prefecture": "宮城県",
+    "latitude": 38.73322222,
+    "longitude": 141.02709167
+  },
+  {
+    "qid": "Q21654085",
+    "label_ja": "日本一はっとフェスティバル",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.69114167,
+    "longitude": 141.18868333
+  },
+  {
+    "qid": "Q20043614",
+    "label_ja": "かくだ菜の花まつり",
+    "label_en": "Kakuda Canola Flower Festival",
+    "prefecture": "宮城県",
+    "latitude": 37.97621389,
+    "longitude": 140.80483611
+  },
+  {
+    "qid": "Q21653987",
+    "label_ja": "なとり夏まつり",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.15824444,
+    "longitude": 140.91026389
+  },
+  {
+    "qid": "Q21653325",
+    "label_ja": "水郷佐原あやめ祭り",
+    "label_en": "Suigō Sawara Ayame Festival",
+    "prefecture": "千葉県",
+    "latitude": 35.92801944,
+    "longitude": 140.52430833
+  },
+  {
+    "qid": "Q21653682",
+    "label_ja": "天空のゆりガーデン",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.41873056,
+    "longitude": 140.72306111
+  },
+  {
+    "qid": "Q21652456",
+    "label_ja": "一宮七夕まつり",
+    "label_en": "Ichinomiya Tanabata Festival",
+    "prefecture": "愛知県",
+    "latitude": 35.30346111,
+    "longitude": 136.80104444
+  },
+  {
+    "qid": "Q72727981",
+    "label_ja": "長幡部神社",
+    "label_en": "Nagahatabe Shrine",
+    "prefecture": "埼玉県",
+    "latitude": 36.243305555,
+    "longitude": 139.110777777
+  },
+  {
+    "qid": "Q110191727",
+    "label_ja": "佐倉の秋祭り",
+    "label_en": null,
+    "prefecture": "千葉県",
+    "latitude": 35.7193,
+    "longitude": 140.226794
+  },
+  {
+    "qid": "Q110915859",
+    "label_ja": "御笏神社",
+    "label_en": "Oshaku Shrine",
+    "prefecture": "東京都",
+    "latitude": 34.119994,
+    "longitude": 139.522254
+  },
+  {
+    "qid": "Q114884345",
+    "label_ja": "大鳥美波比神社",
+    "label_en": "Danjiri Matsuri at Ōtori-taisha",
+    "prefecture": "大阪府",
+    "latitude": 34.536222222,
+    "longitude": 135.461583333
+  },
+  {
+    "qid": "Q114045450",
+    "label_ja": "送り盆まつり",
+    "label_en": "Okuribon Festival",
+    "prefecture": "秋田県",
+    "latitude": 39.317611111,
+    "longitude": 140.565221944
+  },
+  {
+    "qid": "Q97310832",
+    "label_ja": "大窪八幡宮秋祭り",
+    "label_en": null,
+    "prefecture": "兵庫県",
+    "latitude": 34.691205,
+    "longitude": 134.943901
+  },
+  {
+    "qid": "Q135041067",
+    "label_ja": "同社大穴持神社",
+    "label_en": "Oanamochi Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.283976,
+    "longitude": 132.634246
+  },
+  {
+    "qid": "Q135040069",
+    "label_ja": "合祀：新鞍神社",
+    "label_en": "Kohakino Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.399151,
+    "longitude": 135.481622
+  },
+  {
+    "qid": "Q135039309",
+    "label_ja": "合祀：畠田神社",
+    "label_en": "Ironouheno Shrine",
+    "prefecture": "愛知県",
+    "latitude": 34.586721,
+    "longitude": 136.619543
+  },
+  {
+    "qid": "Q135039147",
+    "label_ja": "合祀：辛国神社",
+    "label_en": "Nakanono Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.569419,
+    "longitude": 135.59366
+  },
+  {
+    "qid": "Q135039297",
+    "label_ja": "合祀：畠田神社",
+    "label_en": "Sakikurusuno Shrine co-EnShrinement",
+    "prefecture": "愛知県",
+    "latitude": 34.586722,
+    "longitude": 136.619545
+  },
+  {
+    "qid": "Q135041278",
+    "label_ja": "麻為比売神社",
+    "label_en": "Tsuwada Tenman-gu Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.222123,
+    "longitude": 135.203507
+  },
+  {
+    "qid": "Q135040253",
+    "label_ja": "高向神社",
+    "label_en": "Takamukuno Shrine",
+    "prefecture": "石川県",
+    "latitude": 36.121221,
+    "longitude": 136.283128
+  },
+  {
+    "qid": "Q135039159",
+    "label_ja": "合祀：大鳥美波比神社",
+    "label_en": "Woshihakeno Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.536216,
+    "longitude": 135.461493
+  },
+  {
+    "qid": "Q135039294",
+    "label_ja": "畠田神社",
+    "label_en": "Hatada Shrine",
+    "prefecture": "愛知県",
+    "latitude": 34.586694444,
+    "longitude": 136.6195
+  },
+  {
+    "qid": "Q132860355",
+    "label_ja": "松戸花火大会",
+    "label_en": "Matsudo Fireworks Festival",
+    "prefecture": "千葉県",
+    "latitude": 35.80247,
+    "longitude": 139.89385
+  },
+  {
+    "qid": "Q135039171",
+    "label_ja": "合祀：等乃伎神社",
+    "label_en": "Ohotoshino Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.521167,
+    "longitude": 135.456489
+  },
+  {
+    "qid": "Q135040625",
+    "label_ja": "合祀：浅間神社",
+    "label_en": "Kutsuno Shrine",
+    "prefecture": "京都府",
+    "latitude": 35.440748,
+    "longitude": 134.804007
+  },
+  {
+    "qid": "Q135039284",
+    "label_ja": "合祀：鳥墓神社",
+    "label_en": "Unino Shrine",
+    "prefecture": "愛知県",
+    "latitude": 34.519035,
+    "longitude": 136.630193
+  },
+  {
+    "qid": "Q135039310",
+    "label_ja": "豊原神社",
+    "label_en": "Ohokushino Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.525194444,
+    "longitude": 136.569611111
+  },
+  {
+    "qid": "Q135040900",
+    "label_ja": "坐波夜都武自和気神社",
+    "label_en": "Hayatsumushiwakeno Shrine",
+    "prefecture": "鳥取県",
+    "latitude": 35.436823,
+    "longitude": 133.16584
+  },
+  {
+    "qid": "Q135039250",
+    "label_ja": "（参）神戸神社",
+    "label_en": "Hichino Shrine",
+    "prefecture": "兵庫県",
+    "latitude": 34.691263,
+    "longitude": 136.150832
+  },
+  {
+    "qid": "Q135039254",
+    "label_ja": "猪田神社",
+    "label_en": "Ida Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.712064,
+    "longitude": 136.145751
+  },
+  {
+    "qid": "Q135039258",
+    "label_ja": "猪田神社",
+    "label_en": "Sakatono Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.712064,
+    "longitude": 136.145751
+  },
+  {
+    "qid": "Q135040120",
+    "label_ja": "合祀：利椋八幡神社",
+    "label_en": "Asomurano- Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.722973,
+    "longitude": 136.098252
+  },
+  {
+    "qid": "Q135039316",
+    "label_ja": "物部神社",
+    "label_en": "Mononoheno Shrine Co-Enshrinement",
+    "prefecture": "三重県",
+    "latitude": 34.568929,
+    "longitude": 136.473318
+  },
+  {
+    "qid": "Q132658851",
+    "label_ja": "関神社",
+    "label_en": "Seki Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.853525,
+    "longitude": 136.396002777
+  },
+  {
+    "qid": "Q135039303",
+    "label_ja": "合祀：明星神社",
+    "label_en": "Unino Shrine",
+    "prefecture": "愛知県",
+    "latitude": 34.525866,
+    "longitude": 136.636639
+  },
+  {
+    "qid": "Q135040911",
+    "label_ja": "坐御訳神社",
+    "label_en": "Miwosano Shrine",
+    "prefecture": "鳥取県",
+    "latitude": 35.394325,
+    "longitude": 133.222797
+  },
+  {
+    "qid": "Q135039306",
+    "label_ja": "合祀：相生神社",
+    "label_en": "Ohowakeno Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.515842,
+    "longitude": 136.562179
+  },
+  {
+    "qid": "Q135039452",
+    "label_ja": "合祀：北桑名神社",
+    "label_en": "Nakatomino Shrine",
+    "prefecture": "愛知県",
+    "latitude": 35.065484,
+    "longitude": 136.694441
+  },
+  {
+    "qid": "Q135039361",
+    "label_ja": "合祀：亀山神社",
+    "label_en": "Makiwono Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.856641,
+    "longitude": 136.449781
+  },
+  {
+    "qid": "Q135041087",
+    "label_ja": "合祀：塩冶神社",
+    "label_en": "Kanmusuhitamano- Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.352363,
+    "longitude": 132.764298
+  },
+  {
+    "qid": "Q135041082",
+    "label_ja": "合祀：塩冶神社",
+    "label_en": "Yamuyahikono Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.352363,
+    "longitude": 132.764298
+  },
+  {
+    "qid": "Q135041083",
+    "label_ja": "合祀：塩冶神社",
+    "label_en": "Yamuyahikomayumino Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.352363,
+    "longitude": 132.764298
+  },
+  {
+    "qid": "Q135039320",
+    "label_ja": "堀坂神社",
+    "label_en": "Horisakano Shrine Co-Enshrinement",
+    "prefecture": "三重県",
+    "latitude": 34.568929,
+    "longitude": 136.473318
+  },
+  {
+    "qid": "Q135069198",
+    "label_ja": "清水神社",
+    "label_en": "Shimizu Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.559409,
+    "longitude": 136.58936
+  },
+  {
+    "qid": "Q135040968",
+    "label_ja": "伊佐我神社",
+    "label_en": "Isakano Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.3991905,
+    "longitude": 132.7156544
+  },
+  {
+    "qid": "Q135040961",
+    "label_ja": "天若日子神社",
+    "label_en": "Amewakahikono Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.3991905,
+    "longitude": 132.7156544
+  },
+  {
+    "qid": "Q135040970",
+    "label_ja": "天若日子神社",
+    "label_en": "Amewakahikono Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.3991905,
+    "longitude": 132.7156544
+  },
+  {
+    "qid": "Q135040967",
+    "label_ja": "神阿麻能比奈等理神社",
+    "label_en": "Amanohinatorino Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.3991905,
+    "longitude": 132.7156544
+  },
+  {
+    "qid": "Q135040960",
+    "label_ja": "神韓国伊太弖神社",
+    "label_en": "Karakuniitateno Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.3991905,
+    "longitude": 132.7156544
+  },
+  {
+    "qid": "Q135040966",
+    "label_ja": "神伊佐那伎神社",
+    "label_en": "Kanisanakino Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.3991905,
+    "longitude": 132.7156544
+  },
+  {
+    "qid": "Q135040964",
+    "label_ja": "神魂意保刀自神社",
+    "label_en": "Kantamaihotoshino Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.3991905,
+    "longitude": 132.7156544
+  },
+  {
+    "qid": "Q135040965",
+    "label_ja": "神阿須伎神社",
+    "label_en": "Kanasukino Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.3991905,
+    "longitude": 132.7156544
+  },
+  {
+    "qid": "Q135040969",
+    "label_ja": "阿遅須伎神社",
+    "label_en": "Achisukino Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.3991905,
+    "longitude": 132.7156544
+  },
+  {
+    "qid": "Q135040962",
+    "label_ja": "須佐袁神社",
+    "label_en": "Susanowono Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.3991905,
+    "longitude": 132.7156544
+  },
+  {
+    "qid": "Q135039173",
+    "label_ja": "合祀：大津神社",
+    "label_en": "Ahano Shrine",
+    "prefecture": "滋賀県",
+    "latitude": 34.505104,
+    "longitude": 135.405036
+  },
+  {
+    "qid": "Q135039315",
+    "label_ja": "大神社",
+    "label_en": "Ohomuwano Shrine Co-Enshrinement",
+    "prefecture": "三重県",
+    "latitude": 34.568929,
+    "longitude": 136.473318
+  },
+  {
+    "qid": "Q135039177",
+    "label_ja": "合祀：春日神社",
+    "label_en": "Hokurano Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.450608,
+    "longitude": 135.482758
+  },
+  {
+    "qid": "Q135040712",
+    "label_ja": "合祀：黒野神社",
+    "label_en": "Shitsumino Shrine",
+    "prefecture": "兵庫県",
+    "latitude": 35.544659,
+    "longitude": 134.565775
+  },
+  {
+    "qid": "Q135040761",
+    "label_ja": "合祀：稲田神社",
+    "label_en": "Sakino Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.373641,
+    "longitude": 133.070207
+  },
+  {
+    "qid": "Q135039190",
+    "label_ja": "合祀：高靇神社",
+    "label_en": "Kamusakino Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.442953,
+    "longitude": 135.344483
+  },
+  {
+    "qid": "Q135040766",
+    "label_ja": "合祀：伊邪那美神社",
+    "label_en": "Hayatamano Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.373246,
+    "longitude": 133.069981
+  },
+  {
+    "qid": "Q135040763",
+    "label_ja": "合祀：伊邪那美神社",
+    "label_en": "Tanakano Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.373246,
+    "longitude": 133.069981
+  },
+  {
+    "qid": "Q135040764",
+    "label_ja": "合祀：伊邪那美神社",
+    "label_en": "Tatewino Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.373246,
+    "longitude": 133.069981
+  },
+  {
+    "qid": "Q135039161",
+    "label_ja": "陶荒田神社",
+    "label_en": "Kaden Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.510422,
+    "longitude": 135.52253
+  },
+  {
+    "qid": "Q135039157",
+    "label_ja": "合祀：櫻井神社",
+    "label_en": "Yamanowino Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.485457,
+    "longitude": 135.506207
+  },
+  {
+    "qid": "Q132858753",
+    "label_ja": "松戸宿坂川献灯まつり",
+    "label_en": null,
+    "prefecture": "千葉県",
+    "latitude": 35.782116,
+    "longitude": 139.897877
+  },
+  {
+    "qid": "Q135039308",
+    "label_ja": "合祀：相鹿上神社",
+    "label_en": "Isonokamino Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.504313,
+    "longitude": 136.541722
+  },
+  {
+    "qid": "Q135038739",
+    "label_ja": "石作神社",
+    "label_en": "Ishitsukurino Shrine",
+    "prefecture": "京都府",
+    "latitude": 34.950857,
+    "longitude": 135.666323
+  },
+  {
+    "qid": "Q134928742",
+    "label_ja": "二十五柱神社",
+    "label_en": "Nijugohashira Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.589722222,
+    "longitude": 136.599722222
+  },
+  {
+    "qid": "Q135039443",
+    "label_ja": "合祀：北桑名神社",
+    "label_en": "Sanofuno Shrine",
+    "prefecture": "愛知県",
+    "latitude": 35.067824,
+    "longitude": 136.688545
+  },
+  {
+    "qid": "Q135040906",
+    "label_ja": "同社坐大穴持御子神社",
+    "label_en": "Ohonamochimiko Shrine",
+    "prefecture": "鳥取県",
+    "latitude": 35.399483,
+    "longitude": 133.218419
+  },
+  {
+    "qid": "Q135040905",
+    "label_ja": "坐大穴持神社",
+    "label_en": "Ohonamochi Shrine",
+    "prefecture": "鳥取県",
+    "latitude": 35.399483,
+    "longitude": 133.218419
+  },
+  {
+    "qid": "Q135193370",
+    "label_ja": "長幡部神社 旧社地",
+    "label_en": "Nagahatabe Shrine former site",
+    "prefecture": "群馬県",
+    "latitude": 36.240195,
+    "longitude": 139.102104
+  },
+  {
+    "qid": "Q135186732",
+    "label_ja": "須伎神社に合祀",
+    "label_en": "Co-Enshrinement of Ohokino Shrine Ronsha 2",
+    "prefecture": "愛知県",
+    "latitude": 34.891227,
+    "longitude": 136.625274
+  },
+  {
+    "qid": "Q135193681",
+    "label_ja": "（合祀）八幡神社",
+    "label_en": "Co-Enshrinement of Tsuhakino Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.613771,
+    "longitude": 136.174032
+  },
+  {
+    "qid": "Q135186398",
+    "label_ja": "根倉神社跡",
+    "label_en": "Nekura Shrine Site",
+    "prefecture": "愛知県",
+    "latitude": 34.574763,
+    "longitude": 136.635438
+  },
+  {
+    "qid": "Q135098896",
+    "label_ja": "努能太比売命神社",
+    "label_en": "Nunotahimeno- Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.596304,
+    "longitude": 135.506565
+  },
+  {
+    "qid": "Q135186776",
+    "label_ja": "（論社Bを合祀する）福王神社",
+    "label_en": "Co-Enshrinement of Hotsumino Shrine",
+    "prefecture": "三重県",
+    "latitude": 35.084257,
+    "longitude": 136.476883
+  },
+  {
+    "qid": "Q135186783",
+    "label_ja": "志氐神社に合祀",
+    "label_en": "Co-Enshrinement of Haseno Shrine",
+    "prefecture": "愛知県",
+    "latitude": 34.990927,
+    "longitude": 136.632934
+  },
+  {
+    "qid": "Q135194564",
+    "label_ja": "八幡神社",
+    "label_en": "Hachiman Shrine",
+    "prefecture": "福井県",
+    "latitude": 36.047072,
+    "longitude": 136.168088
+  },
+  {
+    "qid": "Q135194562",
+    "label_ja": "舟津神社（合祀）",
+    "label_en": "Co-Enshrinement of Ohoyamamitano Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.938846,
+    "longitude": 136.186046
+  },
+  {
+    "qid": "Q135194566",
+    "label_ja": "神明神社（合祀）",
+    "label_en": "Co-Enshrinement of Ohoyamamitano Shrine Ronsha 5",
+    "prefecture": "福井県",
+    "latitude": 35.892729,
+    "longitude": 136.166683
+  },
+  {
+    "qid": "Q135186645",
+    "label_ja": "能褒野神社に合祀",
+    "label_en": "Nobono Shrine Co-Enshrinement",
+    "prefecture": "三重県",
+    "latitude": 34.885622,
+    "longitude": 136.483248
+  },
+  {
+    "qid": "Q135185682",
+    "label_ja": "粟神社跡地",
+    "label_en": "Awa Shrine Site",
+    "prefecture": "大阪府",
+    "latitude": 34.497144,
+    "longitude": 135.401041
+  },
+  {
+    "qid": "Q135098886",
+    "label_ja": "長柄神社",
+    "label_en": "Nakarano Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.618659,
+    "longitude": 135.607567
+  },
+  {
+    "qid": "Q135186400",
+    "label_ja": "（論社Aを合祀する）畠田神社",
+    "label_en": "Co-Enshrinement of Hitsukurano Shrine",
+    "prefecture": "愛知県",
+    "latitude": 34.586721,
+    "longitude": 136.619543
+  },
+  {
+    "qid": "Q135185436",
+    "label_ja": "（合祀）玉祖神社",
+    "label_en": "Co-Enshrinement in Tamanoya Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.634823,
+    "longitude": 135.65267
+  },
+  {
+    "qid": "Q135070084",
+    "label_ja": "伊邪那美神社",
+    "label_en": "Izanami Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.373246,
+    "longitude": 133.069981
+  },
+  {
+    "qid": "Q135186212",
+    "label_ja": "佐那神社（合祀）",
+    "label_en": "Moruyamano Shrine Co-EnShrinement",
+    "prefecture": "三重県",
+    "latitude": 34.480942,
+    "longitude": 136.546151
+  },
+  {
+    "qid": "Q135186709",
+    "label_ja": "関神社に合祀",
+    "label_en": "Co-Enshrinement of Katayama Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.853898,
+    "longitude": 136.395964
+  },
+  {
+    "qid": "Q135194563",
+    "label_ja": "春日神社",
+    "label_en": "Kasuga Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.944325,
+    "longitude": 136.167443
+  },
+  {
+    "qid": "Q135070135",
+    "label_ja": "宇能遅神社",
+    "label_en": "Unochi Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.343832,
+    "longitude": 132.903573
+  },
+  {
+    "qid": "Q135186693",
+    "label_ja": "石神社",
+    "label_en": "Ishigami Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.827874,
+    "longitude": 136.461192
+  },
+  {
+    "qid": "Q135186780",
+    "label_ja": "長倉神社に合祀",
+    "label_en": "Co-Enshrinement of Sakurano Shrine",
+    "prefecture": "愛知県",
+    "latitude": 35.017257,
+    "longitude": 136.632293
+  },
+  {
+    "qid": "Q135070197",
+    "label_ja": "大和神社",
+    "label_en": "Yamato Shrine",
+    "prefecture": "岡山県",
+    "latitude": 34.797305555,
+    "longitude": 133.702111111
+  },
+  {
+    "qid": "Q135070151",
+    "label_ja": "五十猛神社",
+    "label_en": "Itakeru Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.192998,
+    "longitude": 132.444542
+  },
+  {
+    "qid": "Q135098868",
+    "label_ja": "感古佐備神社",
+    "label_en": "Kankosahino Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.462749,
+    "longitude": 135.59777
+  },
+  {
+    "qid": "Q135186331",
+    "label_ja": "合祀：畠田神社 旧社地",
+    "label_en": "Sakikurusuno Shrine former site",
+    "prefecture": "愛知県",
+    "latitude": 34.575436,
+    "longitude": 136.614326
+  },
+  {
+    "qid": "Q135186194",
+    "label_ja": "相鹿上神社（合祀）",
+    "label_en": "Co-Enshrinement of Afukamuyamano Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.504265,
+    "longitude": 136.541816
+  },
+  {
+    "qid": "Q135186660",
+    "label_ja": "庄内神社",
+    "label_en": "Shonai Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.922742,
+    "longitude": 136.461487
+  },
+  {
+    "qid": "Q135186407",
+    "label_ja": "合祀：畠田神社 旧社地",
+    "label_en": "Ironouheno Shrine former site",
+    "prefecture": "愛知県",
+    "latitude": 34.582222,
+    "longitude": 136.639055
+  },
+  {
+    "qid": "Q135099013",
+    "label_ja": "出雲岡神社",
+    "label_en": "Izumowokano Shrine",
+    "prefecture": "島根県",
+    "latitude": 33.851268,
+    "longitude": 132.786913
+  },
+  {
+    "qid": "Q135186324",
+    "label_ja": "二十五柱神社（合祀）",
+    "label_en": "Co-Enshrinement of Hichino Shrine Ronsha 6",
+    "prefecture": "三重県",
+    "latitude": 34.589994,
+    "longitude": 136.599754
+  },
+  {
+    "qid": "Q135186646",
+    "label_ja": "那久志里神社古社地",
+    "label_en": "Nakushirino Shrine Site",
+    "prefecture": "三重県",
+    "latitude": 34.883499,
+    "longitude": 136.487255
+  },
+  {
+    "qid": "Q135186137",
+    "label_ja": "（合祀）大口神社（論社を合祀）",
+    "label_en": "Co-Enshrinement of Kawara Shrine",
+    "prefecture": "愛知県",
+    "latitude": 34.508107,
+    "longitude": 136.732284
+  },
+  {
+    "qid": "Q135186284",
+    "label_ja": "幸神社（合祀）",
+    "label_en": "Co-Enshrinement of Afukakotano Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.471545,
+    "longitude": 136.596947
+  },
+  {
+    "qid": "Q135186320",
+    "label_ja": "竹神社（合祀）",
+    "label_en": "Co-Enshrinement of Hichino Shrine",
+    "prefecture": "愛知県",
+    "latitude": 34.537286,
+    "longitude": 136.61869
+  },
+  {
+    "qid": "Q135194345",
+    "label_ja": "（合祀先）若宮八幡神社境内摂社敷玉早御玉神社",
+    "label_en": "Co-Enshrinement of Shikitamahayamitamano Shrine",
+    "prefecture": "宮城県",
+    "latitude": 38.527956,
+    "longitude": 140.920428
+  },
+  {
+    "qid": "Q135069866",
+    "label_ja": "月山神社に",
+    "label_en": "Co-Enshrinement at Gassan Shrine",
+    "prefecture": "山形県",
+    "latitude": 38.548694444,
+    "longitude": 140.027
+  },
+  {
+    "qid": "Q135186661",
+    "label_ja": "天一鍬田神社古社地",
+    "label_en": "Amanohitokuhatano Shrine Site",
+    "prefecture": "三重県",
+    "latitude": 34.910859,
+    "longitude": 136.461631
+  },
+  {
+    "qid": "Q135099507",
+    "label_ja": "久須須美神社",
+    "label_en": "Kusumi Shrine",
+    "prefecture": "京都府",
+    "latitude": 34.841804,
+    "longitude": 135.667679
+  },
+  {
+    "qid": "Q135099001",
+    "label_ja": "小虫神社",
+    "label_en": "Womushino Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.901023,
+    "longitude": 136.126535
+  },
+  {
+    "qid": "Q135069908",
+    "label_ja": "雨夜神社",
+    "label_en": "Amayo Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.983175,
+    "longitude": 136.123191
+  },
+  {
+    "qid": "Q135186668",
+    "label_ja": "（論社Aを合祀する）関神社",
+    "label_en": "Co-Enshrinement in Seki Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.853898,
+    "longitude": 136.395964
+  },
+  {
+    "qid": "Q135069910",
+    "label_ja": "岡太神社",
+    "label_en": "Okata Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.897779,
+    "longitude": 136.148348
+  },
+  {
+    "qid": "Q135194539",
+    "label_ja": "雨夜神社 旧社地",
+    "label_en": "Amayono Shrine former site",
+    "prefecture": "福井県",
+    "latitude": 35.978615,
+    "longitude": 136.120326
+  },
+  {
+    "qid": "Q135186413",
+    "label_ja": "牛庭神社 旧社地",
+    "label_en": "Ushinihano Shrine former site",
+    "prefecture": "三重県",
+    "latitude": 34.583141,
+    "longitude": 136.597376
+  },
+  {
+    "qid": "Q135193750",
+    "label_ja": "日枝神社（合祀）",
+    "label_en": "Co-Enshrinement of Machino Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.466922,
+    "longitude": 136.043191
+  },
+  {
+    "qid": "Q135098806",
+    "label_ja": "御諸神社",
+    "label_en": "Mimorono Shrine",
+    "prefecture": "京都府",
+    "latitude": 34.967202,
+    "longitude": 135.773386
+  },
+  {
+    "qid": "Q135098926",
+    "label_ja": "流田上神社 （流田上社神社）",
+    "label_en": "Nakaretanouheno Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.589994,
+    "longitude": 136.599754
+  },
+  {
+    "qid": "Q135185533",
+    "label_ja": "久須須美神社 旧社地",
+    "label_en": "Kusumi Shrine former site",
+    "prefecture": "京都府",
+    "latitude": 34.83844,
+    "longitude": 135.673216
+  },
+  {
+    "qid": "Q135098974",
+    "label_ja": "須波若御子神社",
+    "label_en": "Sunami Wakamiko Shrine",
+    "prefecture": "静岡県",
+    "latitude": 34.727717,
+    "longitude": 137.857118
+  },
+  {
+    "qid": "Q135098903",
+    "label_ja": "幣久良神社",
+    "label_en": "Mitekurano Shrine",
+    "prefecture": "京都府",
+    "latitude": 34.854146,
+    "longitude": 135.563052
+  },
+  {
+    "qid": "Q135069907",
+    "label_ja": "大虫神社",
+    "label_en": "Omushi Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.901079,
+    "longitude": 136.126531
+  },
+  {
+    "qid": "Q135186167",
+    "label_ja": "佐那神社（合祀）",
+    "label_en": "Sumaromeno Shrine Co-Enshrinement",
+    "prefecture": "三重県",
+    "latitude": 34.480942,
+    "longitude": 136.546151
+  },
+  {
+    "qid": "Q135186214",
+    "label_ja": "畠田神社（合祀）",
+    "label_en": "Hatada Shrine co-EnShrinement",
+    "prefecture": "愛知県",
+    "latitude": 34.586722,
+    "longitude": 136.619545
+  },
+  {
+    "qid": "Q135194567",
+    "label_ja": "神明神社",
+    "label_en": "Shinmei Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.888249,
+    "longitude": 136.157017
+  },
+  {
+    "qid": "Q135070196",
+    "label_ja": "池田神社",
+    "label_en": "Ikeda Shrine",
+    "prefecture": "岡山県",
+    "latitude": 34.749694444,
+    "longitude": 133.714805555
+  },
+  {
+    "qid": "Q135186734",
+    "label_ja": "津萩大木神社（飯野神社に合祀）",
+    "label_en": "Co-Enshrinement of Ohokino Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.896835,
+    "longitude": 136.623672
+  },
+  {
+    "qid": "Q135070295",
+    "label_ja": "敷島神社",
+    "label_en": "Shikishima Shrine",
+    "prefecture": "徳島県",
+    "latitude": 34.057927,
+    "longitude": 134.338716
+  },
+  {
+    "qid": "Q135194508",
+    "label_ja": "合祀：利椋八幡神社 旧社地",
+    "label_en": "Asomurano- Shrine former site",
+    "prefecture": "福井県",
+    "latitude": 35.726018,
+    "longitude": 136.116181
+  },
+  {
+    "qid": "Q135098951",
+    "label_ja": "県主神社",
+    "label_en": "Akatanushino Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.885593,
+    "longitude": 136.483298
+  },
+  {
+    "qid": "Q135069242",
+    "label_ja": "神館飯野高市神社",
+    "label_en": "Kandate Iino Takaichi Shrine  Co-Enshrinement",
+    "prefecture": "三重県",
+    "latitude": 34.881929,
+    "longitude": 136.579081
+  },
+  {
+    "qid": "Q135070273",
+    "label_ja": "八幡神社",
+    "label_en": "Hachiman Shrine",
+    "prefecture": "徳島県",
+    "latitude": 34.036271,
+    "longitude": 133.948991
+  },
+  {
+    "qid": "Q55524579",
+    "label_ja": "古河桃まつり",
+    "label_en": "Koga Peach Festival",
+    "prefecture": "茨城県",
+    "latitude": 36.17777778,
+    "longitude": 139.70047222
+  },
+  {
+    "qid": "Q30925534",
+    "label_ja": "伊甘神社",
+    "label_en": "Ikan Shrine",
+    "prefecture": "島根県",
+    "latitude": 34.929829,
+    "longitude": 132.110461
+  },
+  {
+    "qid": "Q56010148",
+    "label_ja": "猪名川花火大会",
+    "label_en": null,
+    "prefecture": "兵庫県",
+    "latitude": 34.820722222,
+    "longitude": 135.417361111
+  },
+  {
+    "qid": "Q48748728",
+    "label_ja": "江差かもめ島祭り",
+    "label_en": "Esashi Kamomejima Festival",
+    "prefecture": "北海道",
+    "latitude": 41.866013833,
+    "longitude": 140.118369833
+  },
+  {
+    "qid": "Q48758315",
+    "label_ja": "羽浦神社",
+    "label_en": "Hanoura Shrine",
+    "prefecture": "徳島県",
+    "latitude": 33.964836,
+    "longitude": 134.629643
+  },
+  {
+    "qid": "Q56026191",
+    "label_ja": "吉野川市納涼花火大会",
+    "label_en": null,
+    "prefecture": "徳島県",
+    "latitude": 34.084833333,
+    "longitude": 134.349916666
+  },
+  {
+    "qid": "Q65262484",
+    "label_ja": "富津市民花火大会",
+    "label_en": null,
+    "prefecture": "千葉県",
+    "latitude": 35.306111111,
+    "longitude": 139.813611111
+  },
+  {
+    "qid": "Q48743940",
+    "label_ja": "国府宮はだか祭",
+    "label_en": "Konomiya Hadaka Matsuri",
+    "prefecture": "愛知県",
+    "latitude": 35.256111,
+    "longitude": 136.805139
+  },
+  {
+    "qid": "Q135195174",
+    "label_ja": "多岐神社（合祀）",
+    "label_en": "Co-Enshrinement of Takino Shrine",
+    "prefecture": "新潟県",
+    "latitude": 38.184118,
+    "longitude": 139.499643
+  },
+  {
+    "qid": "Q135195110",
+    "label_ja": "中山神社（合祀）",
+    "label_en": "Co-Enshrinement of Utsurahashino Shrine",
+    "prefecture": "新潟県",
+    "latitude": 37.730386,
+    "longitude": 139.133407
+  },
+  {
+    "qid": "Q135197944",
+    "label_ja": "（合祀）御崎神社",
+    "label_en": "Co-Enshrinement of Kamishimano Shrine",
+    "prefecture": "岡山県",
+    "latitude": 34.471092,
+    "longitude": 133.526716
+  },
+  {
+    "qid": "Q135194565",
+    "label_ja": "大洗磯崎神社",
+    "label_en": "Oarai Isozaki Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.989453,
+    "longitude": 136.137926
+  },
+  {
+    "qid": "Q135197934",
+    "label_ja": "（合祀）大和神社",
+    "label_en": "Nomatano Shrine Co-EnShrinement",
+    "prefecture": "岡山県",
+    "latitude": 34.797334,
+    "longitude": 133.702072
+  },
+  {
+    "qid": "Q135194683",
+    "label_ja": "（参考）足羽神社（合祀）",
+    "label_en": "Co-Enshrinement of Tsuchinowano Shrine",
+    "prefecture": "石川県",
+    "latitude": 36.058409,
+    "longitude": 136.209573
+  },
+  {
+    "qid": "Q135194742",
+    "label_ja": "（合祀）牧岡神社（足羽神社境内）",
+    "label_en": "Co-Enshrinement of Hirawoka Shrine",
+    "prefecture": "石川県",
+    "latitude": 36.058409,
+    "longitude": 136.209573
+  },
+  {
+    "qid": "Q135206688",
+    "label_ja": "旧鎮座地",
+    "label_en": "Kaden Shrine Former Site",
+    "prefecture": "大阪府",
+    "latitude": 34.521771,
+    "longitude": 135.526366
+  },
+  {
+    "qid": "Q135194703",
+    "label_ja": "清瀧神社（合祀）",
+    "label_en": "Co-Enshrinement of Kuninariohonono Shrine",
+    "prefecture": "岐阜県",
+    "latitude": 35.981848,
+    "longitude": 136.480389
+  },
+  {
+    "qid": "Q135194598",
+    "label_ja": "大虫神社相殿（合祀）",
+    "label_en": "Co-Enshrinement of Ikatsuchi Shrine",
+    "prefecture": "福井県",
+    "latitude": 35.901049,
+    "longitude": 136.126531
+  },
+  {
+    "qid": "Q135194736",
+    "label_ja": "春日神社（合祀）",
+    "label_en": "Co-Enshrinement of Katakishino Shrine",
+    "prefecture": "福井県",
+    "latitude": 36.206842,
+    "longitude": 136.143334
+  },
+  {
+    "qid": "Q135195111",
+    "label_ja": "五泉八幡宮（合祀）",
+    "label_en": "Co-Enshrinement of Utsurahashino Shrine Ronsha 2",
+    "prefecture": "新潟県",
+    "latitude": 37.741771,
+    "longitude": 139.173709
+  },
+  {
+    "qid": "Q135206826",
+    "label_ja": "幣久良神社 旧社地",
+    "label_en": "Mitekurano Shrine former site",
+    "prefecture": "京都府",
+    "latitude": 34.841295,
+    "longitude": 135.55893
+  },
+  {
+    "qid": "Q135194764",
+    "label_ja": "（参考）神明宮（市ノ瀬神社に合祀）",
+    "label_en": "Co-Enshrinement of Ketamikono Shrine",
+    "prefecture": "岐阜県",
+    "latitude": 36.294888,
+    "longitude": 136.363491
+  },
+  {
+    "qid": "Q135195244",
+    "label_ja": "（合祀）大虫神社",
+    "label_en": "Omushi Shrine",
+    "prefecture": "京都府",
+    "latitude": 35.493501,
+    "longitude": 135.117324
+  },
+  {
+    "qid": "Q135195293",
+    "label_ja": "（合祀）溝谷神社",
+    "label_en": "Co-Enshrinement of Nakuno Shrine",
+    "prefecture": "京都府",
+    "latitude": 35.655239,
+    "longitude": 135.111312
+  },
+  {
+    "qid": "Q11477022",
+    "label_ja": "島立裸まつり",
+    "label_en": "Shimadachi Hadaka Matsuri",
+    "prefecture": "長野県",
+    "latitude": 36.2310354,
+    "longitude": 137.9440724
+  },
+  {
+    "qid": "Q11450469",
+    "label_ja": "安城七夕まつり",
+    "label_en": "Anjo Tanabata Festival",
+    "prefecture": "愛知県",
+    "latitude": 34.959986,
+    "longitude": 137.08716
+  },
+  {
+    "qid": "Q11465749",
+    "label_ja": "層雲峡氷瀑まつり",
+    "label_en": "Sōunkyō Icefall Festival",
+    "prefecture": "北海道",
+    "latitude": 43.727138888,
+    "longitude": 142.948777777
+  },
+  {
+    "qid": "Q11447740",
+    "label_ja": "婿投げ・墨塗り",
+    "label_en": "Mukonage and Suminuri",
+    "prefecture": "新潟県",
+    "latitude": 37.0642688,
+    "longitude": 138.5967298
+  },
+  {
+    "qid": "Q24877085",
+    "label_ja": "梅宮神社の甘酒祭り",
+    "label_en": null,
+    "prefecture": "埼玉県",
+    "latitude": 35.87416667,
+    "longitude": 139.41944444
+  },
+  {
+    "qid": "Q22120521",
+    "label_ja": "三宅神社",
+    "label_en": "Miyake Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.854431,
+    "longitude": 136.507187
+  },
+  {
+    "qid": "Q21654535",
+    "label_ja": "古川まつり",
+    "label_en": "Furukawa Matsuri",
+    "prefecture": "宮城県",
+    "latitude": 38.57514167,
+    "longitude": 140.95970556
+  },
+  {
+    "qid": "Q24887619",
+    "label_ja": "入谷朝顔まつり",
+    "label_en": "Iriya Asagao festival",
+    "prefecture": "東京都",
+    "latitude": 35.71988889,
+    "longitude": 139.78268889
+  },
+  {
+    "qid": "Q28691636",
+    "label_ja": "まめからさん祭り",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.58311111,
+    "longitude": 141.25416667
+  },
+  {
+    "qid": "Q21654826",
+    "label_ja": "みなみかた花菖蒲まつり",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.668375,
+    "longitude": 141.14053611
+  },
+  {
+    "qid": "Q21654718",
+    "label_ja": "まほろば夏まつり",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.44202778,
+    "longitude": 140.88121389
+  },
+  {
+    "qid": "Q21655120",
+    "label_ja": "YOSAKOI&ねぷたinとよさと",
+    "label_en": null,
+    "prefecture": "宮城県",
+    "latitude": 38.58228333,
+    "longitude": 141.24588889
+  },
+  {
+    "qid": "Q11513690",
+    "label_ja": "春日若宮おん祭",
+    "label_en": "Kasuga Wakamiya On-Matsuri Festival",
+    "prefecture": "奈良県",
+    "latitude": 34.680203,
+    "longitude": 135.849128
+  },
+  {
+    "qid": "Q11511700",
+    "label_ja": "旭川冬まつり",
+    "label_en": "Asahikawa Winter Festival",
+    "prefecture": "北海道",
+    "latitude": 43.778333333,
+    "longitude": 142.36
+  },
+  {
+    "qid": "Q11502083",
+    "label_ja": "新川市まつり",
+    "label_en": "Shinkawa-ichi Festival",
+    "prefecture": "山口県",
+    "latitude": 33.95153,
+    "longitude": 131.24677
+  },
+  {
+    "qid": "Q11529737",
+    "label_ja": "松山まつり",
+    "label_en": null,
+    "prefecture": "愛媛県",
+    "latitude": 33.83676,
+    "longitude": 132.77014
+  },
+  {
+    "qid": "Q11530803",
+    "label_ja": "松本ぼんぼん",
+    "label_en": "Matsumoto-Bonbon Festival",
+    "prefecture": "長野県",
+    "latitude": 36.234425,
+    "longitude": 137.96922
+  },
+  {
+    "qid": "Q11547768",
+    "label_ja": "毛馬内の盆踊",
+    "label_en": "Kemanai no Bon-odori",
+    "prefecture": "秋田県",
+    "latitude": 40.2715,
+    "longitude": 140.766667
+  },
+  {
+    "qid": "Q11572451",
+    "label_ja": "玉名納涼花火大会",
+    "label_en": null,
+    "prefecture": "熊本県",
+    "latitude": 32.926456,
+    "longitude": 130.56609
+  },
+  {
+    "qid": "Q11571727",
+    "label_ja": "狭山入間川七夕まつり",
+    "label_en": null,
+    "prefecture": "埼玉県",
+    "latitude": 35.85810833,
+    "longitude": 139.40801111
+  },
+  {
+    "qid": "Q11549314",
+    "label_ja": "水郷潮来あやめまつり",
+    "label_en": "Suigō Itako Iris Festival",
+    "prefecture": "茨城県",
+    "latitude": 35.9366,
+    "longitude": 140.5461
+  },
+  {
+    "qid": "Q11580598",
+    "label_ja": "白鳥神社",
+    "label_en": "Shiratori Shrine",
+    "prefecture": "大阪府",
+    "latitude": 34.553777777,
+    "longitude": 135.609416666
+  },
+  {
+    "qid": "Q11612066",
+    "label_ja": "能褒野神社",
+    "label_en": "Nobono Shrine",
+    "prefecture": "三重県",
+    "latitude": 34.886111,
+    "longitude": 136.482778
+  },
+  {
+    "qid": "Q11621139",
+    "label_ja": "葦稲葉神社",
+    "label_en": "Ashiinaba Shrine",
+    "prefecture": "徳島県",
+    "latitude": 34.130276,
+    "longitude": 134.412463
+  },
+  {
+    "qid": "Q11580506",
+    "label_ja": "白鬚神社の田楽",
+    "label_en": null,
+    "prefecture": "佐賀県",
+    "latitude": 33.332142,
+    "longitude": 130.325536
+  },
+  {
+    "qid": "Q11582264",
+    "label_ja": "相生ペーロン祭",
+    "label_en": "Aioi Peron Matsuri",
+    "prefecture": "兵庫県",
+    "latitude": 34.7822598,
+    "longitude": 134.4710824
+  },
+  {
+    "qid": "Q11620954",
+    "label_ja": "葛木坐火雷神社",
+    "label_en": "Katsuraki ni Imasu Honoikaduchi Shrine",
+    "prefecture": "奈良県",
+    "latitude": 34.47164,
+    "longitude": 135.710049
+  },
+  {
+    "qid": "Q11630000",
+    "label_ja": "西馬音内の盆踊",
+    "label_en": "Nishimonai no Bon-odori",
+    "prefecture": "秋田県",
+    "latitude": 39.199556,
+    "longitude": 140.403222
+  },
+  {
+    "qid": "Q11642725",
+    "label_ja": "那売佐神社",
+    "label_en": "Namesa Shrine",
+    "prefecture": "島根県",
+    "latitude": 35.314364,
+    "longitude": 132.699845
+  },
+  {
+    "qid": "Q11631901",
+    "label_ja": "諏訪湖祭湖上花火大会",
+    "label_en": "Lake Suwa Fireworks Festival",
+    "prefecture": "長野県",
+    "latitude": 36.049167,
+    "longitude": 138.085278
+  }
+]
