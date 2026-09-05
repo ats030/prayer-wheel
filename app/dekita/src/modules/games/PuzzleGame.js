@@ -94,6 +94,7 @@ export class PuzzleGame extends GameBase {
     this.correctIndex = Math.floor(Math.random() * 9);
     this.correctEmoji = this.silhouettes[this.correctIndex];
     
+    this.setupDragSource();
     this.createGrid();
   }
 
@@ -115,16 +116,18 @@ export class PuzzleGame extends GameBase {
       slot.dataset.emoji = this.silhouettes[i];
       slot.textContent = this.silhouettes[i];
       slot.style.opacity = '0.3';
-      if (i === this.correctIndex) {
-        slot.draggable = true;
-        slot.dataset.draggable = 'true';
-        slot.addEventListener('dragstart', (e) => this.handleDragStart(e));
-      }
+      slot.setAttribute('draggable', 'false');
       slot.addEventListener('dragover', (e) => e.preventDefault());
       slot.addEventListener('drop', (e) => this.handleDrop(e));
       slot.addEventListener('dragenter', (e) => e.preventDefault());
       slot.addEventListener('dragleave', (e) => e.preventDefault());
       gridArea.appendChild(slot);
+    }
+
+    const correctSlot = gridArea.children[this.correctIndex];
+    if (correctSlot) {
+      correctSlot.setAttribute('draggable', 'true');
+      correctSlot.addEventListener('dragstart', (e) => this.handleDragStart(e));
     }
 
     this.audio.init();
