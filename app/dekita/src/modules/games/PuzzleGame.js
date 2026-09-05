@@ -48,6 +48,7 @@ export class PuzzleGame extends GameBase {
     const puzzleNextBtn = this.root.getElementById('puzzle-next-btn');
     if (puzzleNextBtn) {
       puzzleNextBtn.addEventListener('click', () => {
+        this.audio.init();
         this.audio.playPopSound();
         this.nextRound();
       });
@@ -136,9 +137,6 @@ export class PuzzleGame extends GameBase {
       console.warn('[Puzzle] Correct slot not found at index:', this.correctIndex);
     }
 
-    this.audio.init();
-    this.audio.setInterAudioDelay(300);
-    this.audio.playSequence(['これ なん の もの？']);
     this.updateProgress();
   }
 
