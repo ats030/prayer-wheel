@@ -143,6 +143,7 @@ export class PuzzleGame extends GameBase {
   }
 
   handleDragStart(e) {
+    console.log('[Puzzle] Drag start:', this.correctEmoji);
     this.draggedPiece = this.correctEmoji;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', this.correctEmoji);
@@ -165,6 +166,7 @@ export class PuzzleGame extends GameBase {
     console.log('[Puzzle] Drop on emoji:', slotEmoji, 'Expected:', this.correctEmoji);
     
     if (slotEmoji === this.correctEmoji) {
+      console.log('[Puzzle] Check win!');
       this.checkWin();
     } else {
       this.audio.playErrorSound();
@@ -180,10 +182,14 @@ export class PuzzleGame extends GameBase {
   }
 
   checkWin() {
+    console.log('[Puzzle] Check win! Grid index:', this.correctIndex);
     const gridArea = this.getGridArea();
     if (gridArea && gridArea.children[this.correctIndex]) {
-      gridArea.children[this.correctIndex].classList.remove('puzzle-piece');
-      gridArea.children[this.correctIndex].classList.add('puzzle-silhouette', 'revealed');
+      const correctSlot = gridArea.children[this.correctIndex];
+      correctSlot.classList.remove('puzzle-piece');
+      correctSlot.classList.add('puzzle-silhouette', 'revealed');
+      correctSlot.style.opacity = '1';
+      console.log('[Puzzle] Slot revealed:', correctSlot.dataset.emoji);
     }
 
     this.state.addScore(20);
