@@ -21,6 +21,12 @@ git add .beads/issues.jsonl
 
 テストは対象アプリのディレクトリで実行する。ホーム直下の一括 pytest は、同名モジュールの衝突と pCloudDrive 走査を招くため実行しない。Python は原則 `uv` を使う。
 
+## マルチホスト同期(ローカル / evo-x2)
+
+- リモートは `origin`(GitHub)と `gitlab`(社内)の2本。Session Completion の push は両方に対して行う。
+- 作業開始時に `git fetch --all` し、`git log HEAD..origin/master` / `HEAD..gitlab/master` が非空なら、作業前に `git pull --ff-only` で追従してから着手する。
+- `~/.config/systemd/user/` 配下の有効化状態(`default.target.wants/` 等のシンボリックリンク)は git 管理外。ユニット定義を新規追加・変更した側が、もう一方のホストでも `systemctl --user daemon-reload && systemctl --user enable --now <unit>` を実施したか確認する。
+
 ## Runtime Safeguards
 
 - systemd の oneshot は、成果物ありを終了コード0、設計どおり成果物なしを3、本物の障害を1に分ける。
