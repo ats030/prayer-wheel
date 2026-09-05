@@ -63,11 +63,22 @@ export class PuzzleGame extends GameBase {
     this.state.questionsAnswered = 0;
     this.state.questionsTotal = 5;
     this.screen.showPuzzleGame();
+    this.setupDragSource();
     this.generatePuzzle();
   }
 
   getGridArea() {
     return this.root.getElementById('puzzle-grid');
+  }
+
+  setupDragSource() {
+    const dragSource = this.root.getElementById('puzzle-drag-emoji');
+    if (dragSource) {
+      dragSource.addEventListener('dragstart', (e) => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', this.correctEmoji);
+      });
+    }
   }
 
   generatePuzzle() {
