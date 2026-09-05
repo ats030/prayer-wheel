@@ -66,6 +66,8 @@ export class PuzzleGame extends GameBase {
     this.screen.showPuzzleGame();
     this.setupDragSource();
     this.generatePuzzle();
+    this.audio.setInterAudioDelay(300);
+    this.audio.playSequence(['これ なん の もの？']);
   }
 
   getGridArea() {
