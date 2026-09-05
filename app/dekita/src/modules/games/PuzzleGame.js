@@ -94,6 +94,9 @@ export class PuzzleGame extends GameBase {
     this.correctIndex = Math.floor(Math.random() * 9);
     this.correctEmoji = this.silhouettes[this.correctIndex];
     
+    console.log('[Puzzle] Correct emoji:', this.correctEmoji, 'at index:', this.correctIndex);
+    console.log('[Puzzle] All silhouettes:', this.silhouettes);
+    
     this.setupDragSource();
     this.createGrid();
   }
@@ -128,6 +131,9 @@ export class PuzzleGame extends GameBase {
     if (correctSlot) {
       correctSlot.setAttribute('draggable', 'true');
       correctSlot.addEventListener('dragstart', (e) => this.handleDragStart(e));
+      console.log('[Puzzle] Set correct slot draggable:', correctSlot.dataset.emoji, 'at index:', this.correctIndex);
+    } else {
+      console.warn('[Puzzle] Correct slot not found at index:', this.correctIndex);
     }
 
     this.audio.init();
@@ -150,9 +156,15 @@ export class PuzzleGame extends GameBase {
     if (!slot) {
       slot = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-emoji]');
     }
-    if (!slot) return;
+    if (!slot) {
+      console.log('[Puzzle] No slot found for drop');
+      return;
+    }
     
-    if (slot.dataset.emoji === this.correctEmoji) {
+    const slotEmoji = slot.dataset.emoji;
+    console.log('[Puzzle] Drop on emoji:', slotEmoji, 'Expected:', this.correctEmoji);
+    
+    if (slotEmoji === this.correctEmoji) {
       this.checkWin();
     } else {
       this.audio.playErrorSound();
