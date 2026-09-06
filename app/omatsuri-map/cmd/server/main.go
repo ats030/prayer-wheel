@@ -15,7 +15,7 @@ import (
 
 func main() {
 	// Initialize service
-	service, err := services.NewFestivalService("data/festivals.json")
+	service, err := services.NewFestivalService("data/festivals-with-date.json")
 	if err != nil {
 		fmt.Printf("Failed to load festivals: %v\n", err)
 		os.Exit(1)

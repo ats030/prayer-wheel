@@ -186,3 +186,21 @@ func TestFileExists(t *testing.T) {
 	
 	t.Logf("Data file size: %d bytes", info.Size())
 }
+func TestDateFieldPresent(t *testing.T) {
+	dataDir := "/home/ats030/app/omatsuri-map/data"
+	service, err := NewFestivalService(dataDir + "/festivals-with-date.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	
+	festivals := service.GetAll()
+	
+	for i, f := range festivals {
+		if f.Date == "" {
+			t.Errorf("Festival %d (QID: %s) has empty date field", i, f.QID)
+		}
+	}
+	
+	t.Logf("All %d festivals have date field", len(festivals))
+}
+

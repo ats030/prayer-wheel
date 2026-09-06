@@ -13,6 +13,7 @@ type Festival struct {
 	Prefecture string  `json:"prefecture"`
 	Latitude   float64 `json:"latitude"`
 	Longitude  float64 `json:"longitude"`
+	Date       string  `json:"date"`
 }
 
 type FestivalService struct {
