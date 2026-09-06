@@ -147,22 +147,7 @@
 
         window.renderMapMarkers = renderMarkers;
 
-        // Listen for messages from calendar iframe
-        window.addEventListener('message', (event) => {
-            if (event.data && event.data.type === 'calendarState') {
-                console.log('Received calendar state:', event.data.state);
-                const state = event.data.state;
-                if (state.filterMode === 'today' && state.currentDate) {
-                    const date = new Date(state.currentDate);
-                    renderMarkers(festivalsData, date);
-                } else if (state.filterMode === 'date' && state.selectedDate) {
-                    const date = new Date(state.selectedDate);
-                    renderMarkers(festivalsData, date);
-                } else {
-                    renderMarkers(festivalsData, null);
-                }
-            }
-        });
+
     </script>
 </body>
 </html>
