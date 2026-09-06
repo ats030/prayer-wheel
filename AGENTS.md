@@ -16,6 +16,9 @@ Always use non-interactive forms: `cp -f`, `mv -f`, `rm -f`/`rm -rf`,
 - Prefer targeted tests, `git diff --check`, API/HTTP responses, service state over prose.
 - Offer at most three alternatives; recommend first with reason and drawback. Bound tool output and inspect the first causal error before widening.
 - Improve context and validation before changing model, context, compaction, or reasoning settings.
+- Before reporting work complete, run `git diff --stat` and confirm every changed file is in scope; drop or revert anything that isn't.
+- Notice an unrequested improvement mid-task? Don't fix it inline — file it via `bd create --deps discovered-from:<id>` and keep going on the original issue.
+- After a non-trivial implementation, run `/code-review` (medium) before declaring the task done.
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:full hash:f65d5d33 -->
 ## Issue Tracking with bd (beads)
