@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omatsuri Map & Calendar</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <script src="http://ubuntu-server-app:8526/v.js" data-site="omatsuri-map" defer></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { display: flex; margin: 0; height: 100vh; }
+        #map-container { flex: 7; height: 100%; width: 100%; }  /* 70% */
+        #calendar { flex: 3; height: 100%; }  /* 30% */
+        #map { width: 100%; height: 100%; }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            #map-container { flex: 1; }
+            #calendar { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+    <iframe id="calendar" src="http://localhost:8500/" title="Calendar Viewer"></iframe>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        // Initialize map
+        var map = L.map('map').setView([35.68, 139.69], 5);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+    </script>
+</body>
+</html>
