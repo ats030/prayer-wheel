@@ -109,7 +109,13 @@
             markers.forEach(marker => map.removeLayer(marker));
             markers = [];
 
-            const filtered = festivals.filter(f => isFestivalActive(f, targetDate));
+            const filtered = festivals.filter(f => {
+                if (targetDate === null) {
+                    const { start, end } = parseDateRange(f.date);
+                    return start !== null && end !== null;
+                }
+                return isFestivalActive(f, targetDate);
+            });
 
             filtered.forEach(festival => {
                 const marker = L.marker([festival.latitude, festival.longitude]).addTo(map);
