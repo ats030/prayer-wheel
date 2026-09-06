@@ -204,3 +204,28 @@ func TestDateFieldPresent(t *testing.T) {
 	t.Logf("All %d festivals have date field", len(festivals))
 }
 
+func TestQIDDuplicate(t *testing.T) {
+	// Create a test data file with duplicate QIDs
+	testData := `[
+		{"qid": "Q1", "label_ja": "Test 1", "label_en": "Test 1", "prefecture": "東京都", "latitude": 35.68, "longitude": 139.69, "date": "日付未定"},
+		{"qid": "Q1", "label_ja": "Test 2", "label_en": "Test 2", "prefecture": "大阪府", "latitude": 34.69, "longitude": 135.50, "date": "日付未定"}
+	]`
+	
+	// Temporarily replace festivals-with-date.json with test data
+	import (
+		"os"
+		"path/filepath"
+	)
+	
+	testPath := "/tmp/test-festivals.json"
+	if err := os.WriteFile(testPath, []byte(testData), 0644); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(testPath)
+	
+	_, err := NewFestivalService(testPath)
+	if err == nil {
+		t.Error("Expected error for duplicate QIDs, but got nil")
+	}
+}
+

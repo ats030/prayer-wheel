@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -30,6 +31,15 @@ func NewFestivalService(dataPath string) (*FestivalService, error) {
 	err = json.Unmarshal(data, &festivals)
 	if err != nil {
 		return nil, err
+	}
+
+	// Check for duplicate QIDs
+	qidSet := make(map[string]bool)
+	for _, f := range festivals {
+		if qidSet[f.QID] {
+			return nil, fmt.Errorf("duplicate QID found: %s", f.QID)
+		}
+		qidSet[f.QID] = true
 	}
 
 	return &FestivalService{festivals: festivals}, nil
