@@ -2,7 +2,6 @@ package services
 
 import (
 	"os"
-	"path/filepath"
 	"testing"
 )
 
@@ -10,7 +9,7 @@ func TestNewFestivalService(t *testing.T) {
 	// Use the test data directory
 	dataDir := "/home/ats030/app/omatsuri-map/data"
 	
-	service, err := NewFestivalService(dataDir)
+	service, err := NewFestivalService(dataDir + "/festivals.json")
 	if err != nil {
 		t.Fatalf("Failed to create festival service: %v", err)
 	}
@@ -30,7 +29,7 @@ func TestNewFestivalService(t *testing.T) {
 
 func TestGetAll(t *testing.T) {
 	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir)
+	service, err := NewFestivalService(dataDir + "/festivals.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +59,7 @@ func TestGetAll(t *testing.T) {
 
 func TestGetByPrefecture(t *testing.T) {
 	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir)
+	service, err := NewFestivalService(dataDir + "/festivals.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +80,7 @@ func TestGetByPrefecture(t *testing.T) {
 
 func TestGetByID(t *testing.T) {
 	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir)
+	service, err := NewFestivalService(dataDir + "/festivals.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,11 +92,7 @@ func TestGetByID(t *testing.T) {
 	}
 	
 	qid := festivals[0].QID
-	f, err := service.GetByID(qid)
-	if err != nil {
-		t.Errorf("GetByID failed for %s: %v", qid, err)
-	}
-	
+	f := service.GetByID(qid)
 	if f == nil {
 		t.Errorf("GetByID returned nil for %s", qid)
 	} else if f.QID != qid {
@@ -107,20 +102,20 @@ func TestGetByID(t *testing.T) {
 
 func TestGetByIDNotFound(t *testing.T) {
 	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir)
+	service, err := NewFestivalService(dataDir + "/festivals.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 	
-	_, err = service.GetByID("NONEXISTENT")
-	if err != nil {
-		t.Errorf("GetByID should return nil, not error for non-existent ID")
+	f := service.GetByID("NONEXISTENT")
+	if f != nil {
+		t.Errorf("GetByID should return nil for non-existent ID")
 	}
 }
 
 func TestPrefectureCoverage(t *testing.T) {
 	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir)
+	service, err := NewFestivalService(dataDir + "/festivals.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,7 +138,7 @@ func TestPrefectureCoverage(t *testing.T) {
 
 func TestDataIntegrity(t *testing.T) {
 	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir)
+	service, err := NewFestivalService(dataDir + "/festivals.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,7 +158,7 @@ func TestDataIntegrity(t *testing.T) {
 		if f.Latitude < -90 || f.Latitude > 90 {
 			t.Errorf("Festival %d (QID: %s) has invalid latitude: %f", i, f.QID, f.Latitude)
 		}
-		if f.Longitude < -180 || f.Longitude > 180 {
+		if f.Longitude < -180 || f.Longitude > 153 {
 			t.Errorf("Festival %d (QID: %s) has invalid longitude: %f", i, f.QID, f.Longitude)
 		}
 		// Verify coordinates are for Japan (roughly 24-45 lat, 122-153 lon)
