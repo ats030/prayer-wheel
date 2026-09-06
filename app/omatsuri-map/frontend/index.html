@@ -68,12 +68,14 @@
 
         // Festival markers
         var markers = [];
+        var festivalsData = [];
 
         // Fetch festival data
         fetch('festivals-with-date.json')
             .then(response => response.json())
             .then(data => {
-                renderMarkers(data);
+                festivalsData = data;
+                renderMarkers(data, null);
             })
             .catch(err => {
                 console.error('Error loading festivals:', err);
@@ -109,10 +111,10 @@
             markers = [];
 
             const filtered = festivals.filter(f => {
-                const { start, end } = parseDateRange(f.date);
                 if (targetDate === null) {
-                    return start === null && end === null;
+                    return true;
                 }
+                const { start, end } = parseDateRange(f.date);
                 if (!start || !end) return false;
                 return targetDate >= start && targetDate <= end;
             });
