@@ -110,11 +110,12 @@
             markers = [];
 
             const filtered = festivals.filter(f => {
+                const { start, end } = parseDateRange(f.date);
                 if (targetDate === null) {
-                    const { start, end } = parseDateRange(f.date);
                     return start !== null && end !== null;
                 }
-                return isFestivalActive(f, targetDate);
+                if (!start || !end) return false;
+                return targetDate >= start && targetDate <= end;
             });
 
             filtered.forEach(festival => {
