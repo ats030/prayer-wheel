@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omatsuri Calendar</title>
+    <script src="http://ubuntu-server-app:8526/v.js" data-site="omatsuri-calendar" defer></script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f0f2f5; padding: 1rem; }
+        .calendar-container { max-width: 800px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .date-display { font-size: 1.5rem; font-weight: bold; color: #333; }
+        .nav-buttons { display: flex; gap: 0.5rem; }
+        .nav-btn { padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+        .nav-btn:hover { background: #0056b3; }
+        .events-section { padding: 0.5rem; }
+        .events-section h2 { font-size: 1.2rem; margin-bottom: 1rem; color: #333; }
+        .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+        .event-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; transition: transform 0.2s, box-shadow 0.2s; }
+        .event-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .event-title { font-weight: bold; font-size: 1rem; margin-bottom: 0.5rem; color: #2c3e50; }
+        .event-meta { font-size: 0.9rem; color: #7f8c8d; }
+        .no-events { text-align: center; padding: 2rem; color: #95a5a6; }
+        .date-select { padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="calendar-container">
+        <div class="header">
+            <div class="date-display" id="currentDate">--月--日</div>
+            <div class="nav-buttons">
+                <button class="nav-btn" id="prevDay">前日</button>
+                <button class="nav-btn" id="today">今日</button>
+                <button class="nav-btn" id="nextDay">翌日</button>
+            </div>
+        </div>
+        <div class="events-section">
+            <h2>今日の祭り</h2>
+            <div class="events-grid" id="eventsGrid"></div>
+        </div>
+    </div>
+    <script>
+        let calendarDataRaw = [
+            { "qid": "Q929531", "label_ja": "さっぽろ雪まつり", "label_en": "Sapporo Snow Festival", "prefecture": "北海道", "date": "日付未定" },
+            { "qid": "Q862407", "label_ja": "青森ねぶた", "label_en": "Aomori Nebuta Matsuri", "prefecture": "青森県", "date": "日付未定" },
+            { "qid": "Q114712", "label_ja": "長崎くんち", "label_en": "Nagasaki Kunchi", "prefecture": "長崎県", "date": "日付未定" }
+        ];
+
+        fetch('festivals-with-date.json')
+            .then(response => response.json())
+            .then(data => {
+                calendarDataRaw = data;
+                updateDisplay();
+            })
+            .catch(err => {
+                console.log(" festiv");
+                updateDisplay();
+            });
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function parseDateRange(dateStr) {
+            if (dateStr === "日付未定") return { start: null, end: null };
+            const parts = dateStr.split("〜");
+            return {
+                start: parts[0] ? new Date(parts[0] + "T00:00:00") : null,
+                end: parts[1] ? new Date(parts[1] + "T00:00:00") : null
+            };
+        }
+
+        function getEventsForDate(events, targetDate) {
+            const targetStr = formatDate(targetDate);
+            return events.filter(festival => {
+                const { start, end } = parseDateRange(festival.date);
+                if (!start || !end) return false;
+                return targetDate >= start && targetDate <= end;
+            });
+        }
+
+        function renderEvents(events) {
+            const grid = document.getElementById("eventsGrid");
+            if (events.length === 0) {
+                grid.innerHTML = '<div class="no-events">今日開催の祭りはありません</div>';
+                return;
+            }
+            grid.innerHTML = events.map(festival => `
+                <div class="event-card">
+                    <div class="event-title">${festival.label_ja}</div>
+                    <div class="event-meta">${festival.prefecture}</div>
+                    <div class="event-meta" style="margin-top:0.25rem">${festival.label_en}</div>
+                </div>
+            `).join("");
+        }
+
+        let currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+
+        function updateDisplay() {
+            const dateStr = formatDate(currentDate);
+            const dateElem = document.getElementById("currentDate");
+            dateElem.textContent = `${currentDate.getMonth() + 1}月${currentDate.getDate()}日`;
+
+            const events = getEventsForDate(calendarDataRaw, currentDate);
+            renderEvents(events);
+        }
+
+        document.getElementById("prevDay").addEventListener("click", () => {
+            currentDate.setDate(currentDate.getDate() - 1);
+            updateDisplay();
+        });
+
+        document.getElementById("nextDay").addEventListener("click", () => {
+            currentDate.setDate(currentDate.getDate() + 1);
+            updateDisplay();
+        });
+
+        document.getElementById("today").addEventListener("click", () => {
+            currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+            updateDisplay();
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>

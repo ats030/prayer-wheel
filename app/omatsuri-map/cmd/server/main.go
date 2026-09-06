@@ -1,32 +1,45 @@
+// omatsuri-map: 神社・お祭りマップ表示アプリ (port 8527)
+// Go言語のREST APIサーバー
+// 開発・デモ用に簡易HTML/JSマップページを含む
+
 package main
 
 import (
-	"log"
+	"fmt"
 	"net/http"
+	"os"
 
 	"omatsuri-map/internal/handlers"
 	"omatsuri-map/internal/services"
 )
 
 func main() {
-	// Initialize the festival service
-	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := services.NewFestivalService(dataDir)
+	// Initialize service
+	service, err := services.NewFestivalService("data/festivals.json")
 	if err != nil {
-		log.Fatalf("Failed to initialize festival service: %v", err)
+		fmt.Printf("Failed to load festivals: %v\n", err)
+		os.Exit(1)
 	}
 
-	// Create handlers
+	// Initialize handler
 	handler := handlers.NewFestivalHandler(service)
 
-	// Set up routes
-	http.HandleFunc("/api/festivals", handler.HandleFestivals)
-	http.HandleFunc("/api/festivals/prefecture/", handler.HandleFestivalsByPrefecture)
-	http.HandleFunc("/api/festivals/", handler.HandleFestivalByID)
+	// Create mux
+	mux := http.NewServeMux()
+
+	// API routes
+	mux.HandleFunc("/api/festivals/prefecture/", handler.GetFestivalsByPrefecture)
+	mux.HandleFunc("/api/festivals/", handler.GetAllFestivals)
+	mux.HandleFunc("/api/festivals", handler.GetAllFestivals)
+
+	// Static file server for frontend
+	fs := http.FileServer(http.Dir("frontend"))
+	mux.Handle("/", fs)
 
 	// Start server
-	log.Println("Starting server on :8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatalf("Server failed: %v", err)
+	fmt.Println("Starting server on :8527")
+	if err := http.ListenAndServe(":8527", mux); err != nil {
+		fmt.Printf("Server error: %v\n", err)
+		os.Exit(1)
 	}
 }
