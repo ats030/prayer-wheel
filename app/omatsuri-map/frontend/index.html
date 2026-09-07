@@ -142,8 +142,8 @@
                     <p>${festival.date}</p>
                     ${festival.description ? `<div class="description">${festival.description}</div>` : ''}
                     <div class="links">
-                        <a href="${wikidataUrl}" target="_blank">Wikidata</a> | 
-                        <a href="${wikipediaUrl}" target="_blank">Wikipedia</a>
+                        <a href="${wikidataUrl}" onclick="window.open(this.href, '_blank'); return false;">Wikidata</a> | 
+                        <a href="${wikipediaUrl}" onclick="window.open(this.href, '_blank'); return false;">Wikipedia</a>
                     </div>
                 </div>
             `;
@@ -199,8 +199,8 @@
                         <p style="margin: 0 0 5px 0; color: #666;">${festival.prefecture}</p>
                         <p style="margin: 0 0 5px 0; color: #666;">${festival.date}</p>
                         <div style="margin-top: 8px; font-size: 12px;">
-                            <a href="${wikidataUrl}" target="_blank">Wikidata</a> | 
-                            <a href="${wikipediaUrl}" target="_blank">Wikipedia</a>
+                            <a href="${wikidataUrl}" onclick="window.open(this.href, '_blank'); return false;">Wikidata</a> | 
+                            <a href="${wikipediaUrl}" onclick="window.open(this.href, '_blank'); return false;">Wikipedia</a>
                         </div>
                     </div>
                 `;
