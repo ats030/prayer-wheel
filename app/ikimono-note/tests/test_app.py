@@ -2861,14 +2861,18 @@ def test_the_entrance_still_warns_the_grown_ups():
 
 
 def test_the_entrance_uses_styles_that_exist():
-    """以前の入口は .wrap .lead .notes を使っていたが、どれも定義が無く素の見た目で出ていた。"""
+    """以前の入口は .wrap .lead .notes を使っていたが、どれも定義が無く素の見た目で出ていた。
+
+    ヘッダーの共通ボタン (.control) は login.css ではなく control.css で定義する。
+    """
     page = client.get("/login").text
-    css = client.get("/assets/login.css").text
+    css = (client.get("/assets/login.css").text
+           + client.get("/assets/control.css").text)
     import re
     used = set(re.findall(r'class="([^"]+)"', page))
     names = {c for group in used for c in group.split()}
     for name in names:
-        assert f".{name}" in css, f"{name} に対応する定義が login.css に無い"
+        assert f".{name}" in css, f"{name} に対応する定義が login.css/control.css に無い"
 
 
 def test_the_public_pages_can_be_shared_and_found():

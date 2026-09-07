@@ -21,7 +21,7 @@ function mountAnalyticsReset(){
   const slot=document.getElementById("analytics-reset-slot");
   if(!slot||slot.querySelector("button"))return;
   const button=document.createElement("button");
-  button.className="back";button.id="analytics-reset";button.type="button";
+  button.className="control";button.id="analytics-reset";button.type="button";
   button.textContent="アクセス解析の設定を変更";
   button.onclick=resetAnalyticsChoice;
   slot.append(button);

@@ -887,7 +887,7 @@ async def share_page(request: Request, token: str) -> HTMLResponse:
     if viewer and viewer == record["owner"]:
         owner_actions = ('<div class="panel"><p>この共有ページを出したのはあなたです。'
                          '取り消すと、このページも写真も開けなくなります。</p>'
-                         f'<button class="back" id="revokeShare" type="button" '
+                         f'<button class="control" id="revokeShare" type="button" '
                          f'data-token="{html.escape(token, quote=True)}">公開を取り消す</button>'
                          '<p class="meta" id="revokeMessage" role="status"></p></div>')
     page = page.replace("{{OWNER}}", owner_actions)
