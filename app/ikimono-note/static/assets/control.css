@@ -36,4 +36,5 @@
 .control:hover{border-color:var(--control-line-hover)}
 .control:active{transform:translateY(1px)}
 .control:focus-visible{outline:2px solid var(--control-focus);outline-offset:2px}
+@media(prefers-reduced-motion:no-preference){.control{transition:border-color .15s ease,background-color .15s ease,transform .08s ease}}
 .theme-toggle{min-width:84px;gap:6px}
