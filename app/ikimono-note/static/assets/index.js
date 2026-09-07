@@ -1,8 +1,8 @@
 function animalReferenceHtml(c,category){const ref=animalReference(c,category);return ref?'<div class="animal-references"><span>オス・メスの違いを調べる資料（外部サイト）</span><a target="_blank" rel="noopener noreferrer" href="'+esc(ref.url)+'">'+esc(ref.label)+' ↗</a></div>':""}
 const $=id=>document.getElementById(id);let plantnetReady=false;let affiliate=null;let provider="local";let providerName="Ollama";let selected=[];let gps=null;let locationAutoFilled=false;
-/* 写真の EXIF 問い合わせと端末 GPS の取得はどちらも非同期で、選択直後から
-   「名前を調べる」は押せる。この完了を待たずに押されると、gps がまだ null の
-   まま座標が確定し、EXIF に GPS が無い写真では地図に一切残らなくなる。
+/* 写真の EXIF 問い合わせは非同期で、選択直後から「名前を調べる」は押せる。
+   この完了を待たずに押されると、gps がまだ null のまま座標が確定し、
+   EXIF に GPS が無い写真では地図に一切残らなくなる。
    identify 側はこの Promise を待ってから座標を確定する */
 let locationReady=Promise.resolve();
 const drop=$("drop"),status=$("status"),previews=$("previews"),identify=$("identify");
@@ -58,11 +58,10 @@ function addFiles(files){
   showStatus("写真を足して"+selected.length+"枚になりました"+overflow+"。もう一度「名前を調べる」を押すと、足した写真も合わせて調べます。");
   identify.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
 }
-function applyPhotoMetadata(data){const found=[];if(data.observed_date&&!$("observedDate").value){$("observedDate").value=data.observed_date;found.push("撮った日")}if(data.location){/* 座標は場所欄の入力状況に関わらず常に写真のEXIFを最優先で使う。
+function applyPhotoMetadata(data){const found=[];if(data.observed_date&&!$("observedDate").value){$("observedDate").value=data.observed_date;found.push("撮った日")}if(data.location){/* 座標は場所欄の入力状況に関わらず常に写真のEXIFを使う。
    場所欄は、まだユーザーが手で書き換えていない（＝前の写真からの自動入力のままか空の）
-   ときだけ、選び直した写真のGPSで上書きする。手入力は上書きしない。
-   写真にGPSがある場合、デバイスの現在地取得は行わないため、取得ボタンも無効化する */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;$("gpsButton").disabled=true;if(!$("location").value||locationAutoFilled){$("location").value=data.location;locationAutoFilled=true;found.push("撮った場所")}}else if(locationAutoFilled){$("location").value="";locationAutoFilled=false}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
-async function readPhotoMetadata(files){const fd=new FormData();files.forEach(file=>fd.append("files",file));try{const r=await fetch("/api/photo-metadata",{method:"POST",body:fd});if(!r.ok)throw new Error();const data=await r.json();if(selected[0]===files[0]){applyPhotoMetadata(data);if(gps?.source!=="exif")await requestCurrentLocation(true)}}catch(e){if(selected[0]===files[0]){showStatus("写真を選びました。撮った日や場所の情報は読み取れませんでした。");await requestCurrentLocation(true)}}}
+   ときだけ、選び直した写真のGPSで上書きする。手入力は上書きしない */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;if(!$("location").value||locationAutoFilled){$("location").value=data.location;locationAutoFilled=true;found.push("撮った場所")}}else{gps=null;$("gpsStatus").textContent="この写真には位置情報が残っていませんでした。位置情報なしでも使えます。";if(locationAutoFilled){$("location").value="";locationAutoFilled=false}}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
+async function readPhotoMetadata(files){const fd=new FormData();files.forEach(file=>fd.append("files",file));try{const r=await fetch("/api/photo-metadata",{method:"POST",body:fd});if(!r.ok)throw new Error();const data=await r.json();if(selected[0]===files[0])applyPhotoMetadata(data)}catch(e){if(selected[0]===files[0]){gps=null;$("gpsStatus").textContent="この写真には位置情報が残っていませんでした。位置情報なしでも使えます。";showStatus("写真を選びました。撮った日や場所の情報は読み取れませんでした。")}}}
 function showStatus(text,error=false,busy=false){status.className='status'+(error?' error':'');status.innerHTML=(busy?'<span class="spinner"></span>':'')+text}
 /* 「選びなおす」と「足す」で入力欄を分ける。1つの入力を旗で切り替えると、
    #library はドロップ領域の <label> の中にあるため .click() が label まで
@@ -72,13 +71,6 @@ $('libraryBtn').onclick=()=> $('library').click();$('cameraBtn').onclick=()=> $(
 /* 場所欄をユーザーが自分で書き換えたら、以後は写真を選び直してもGPSで
    上書きしない（.value への代入はinputイベントを発火しないので、自動入力とは衝突しない） */
 $("location").addEventListener("input",()=>{locationAutoFilled=false});
-/* 写真のEXIFにも端末の現在地にも位置情報が無いと、coordinates も context.location も
-   空のまま保存され、あとから履歴を見て「場所の記録なし」になる。原因が写真になかったのか
-   取得に失敗したのかが分からないと混乱するので、自動取得 (automatic) が失敗した経路だけ、
-   目立つ status 行にも「場所は保存されない」ことをはっきり出す */
-function noLocationWillBeSaved(reason){showStatus("写真にも現在地にも位置情報が見つからなかったため、この記録には場所が保存されません。"+reason+"あとから「場所」欄に手入力できます。")}
-function requestCurrentLocation(automatic=false){if(gps?.source==="exif")return Promise.resolve();if(!navigator.geolocation){$("gpsStatus").textContent="このブラウザでは現在地を取得できません。位置情報なしでも使えます。";if(automatic)noLocationWillBeSaved("");return Promise.resolve()}$("gpsButton").disabled=true;$("gpsStatus").textContent=automatic?"写真を選んだので、現在地を確認しています…":"現在地を確認しなおしています…";return new Promise(resolve=>{navigator.geolocation.getCurrentPosition(position=>{if(gps?.source!=="exif"){gps={latitude:position.coords.latitude,longitude:position.coords.longitude,accuracy:position.coords.accuracy,source:"current"};$("gpsStatus").textContent=`現在地を取得しました（誤差 約${Math.round(gps.accuracy)}m、緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）。AIへは送らず、調べたあとにおおまかな位置にしてこの端末の記録だけに保存します。`}$("gpsButton").disabled=false;resolve()},error=>{if(gps?.source!=="exif"){const reason=error.code===1?"位置情報の利用が許可されませんでした。":"現在地を取得できませんでした。";$("gpsStatus").textContent=reason+"位置情報なしでも使えます。";if(automatic)noLocationWillBeSaved(reason)}$("gpsButton").disabled=false;resolve()},{enableHighAccuracy:true,timeout:10000,maximumAge:0})})}
-$("gpsButton").onclick=()=>{locationReady=requestCurrentLocation(false)};
 function esc(v){const d=document.createElement('div');d.textContent=v??'';return d.innerHTML}
 function agreementBadge(c){if(c.evidence_status==="corroborated")return "<span class=\"taxonomy verified\">2つの調べ方で同じ答え</span>";if(c.evidence_status==="specialist_only")return "<span class=\"taxonomy\">植物のサービスだけが答えた</span>";if(c.evidence_status==="taxonomy_only")return "<span class=\"taxonomy\">名前は図鑑にあります</span>";if(c.evidence_status==="uncertain")return "<span class=\"taxonomy\">決め手なし · 名前は図鑑にあります</span>";return ""}
 function meterBar(c){/* 幅は style 属性ではなく CSSOM で入れる (CSP: style-src 'self') */return "</div><div class=\"meter\"><span data-width=\""+Number(c.confidence||0)+"\"></span></div>"}
@@ -281,7 +273,7 @@ async function pollIdentification(pending){
 identify.onclick=async()=>{
   if(!selected.length)return;
   identify.disabled=true;
-  /* EXIF問い合わせと端末GPSの取得はまだ終わっていないことがある。ここで待たずに
+  /* EXIF問い合わせがまだ終わっていないことがある。ここで待たずに
      coordinates を組み立てると gps が null のまま確定し、EXIFに位置が無い写真では
      地図に反映される座標が消えてしまう */
   await locationReady;

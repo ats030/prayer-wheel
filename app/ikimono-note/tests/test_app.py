@@ -207,11 +207,11 @@ def test_settings_page_enables_all_providers():
     assert "position:sticky" not in page_source("/")
     assert 'id="reset-affiliate-visibility"' not in response.text
     index = page_source("/")
-    assert 'id="gpsButton"' in index
-    assert "requestCurrentLocation(true)" in index
-    assert 'gps?.source!=="exif"' in index
-    assert 'source:"current"' in index
-    assert "写真を選ぶと現在地を取得します" in index
+    assert 'id="gpsButton"' not in index
+    assert "requestCurrentLocation" not in index
+    assert 'source:"current"' not in index
+    assert "navigator.geolocation" not in index
+    assert '写真に位置情報が残っていれば' in index
     assert "AIへは送らず" in index
     assert "持ち帰ってよいか：確認が必要" in index
     assert "食べられるか：判定しません" in index
