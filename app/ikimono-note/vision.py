@@ -13,6 +13,11 @@ from typing import Any
 
 import httpx
 from PIL import Image, ImageOps
+from pillow_heif import register_heif_opener
+
+# iPhoneカメラの既定形式(HEIC/HEIF)をバニラPillowは開けない。登録すると
+# Image.open が透過的にHEIC/HEIFも扱えるようになる (EXIF読み取り含む)。
+register_heif_opener()
 
 MODEL = os.getenv("IKIMONO_MODEL", "gemma4:12b")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434").rstrip("/")

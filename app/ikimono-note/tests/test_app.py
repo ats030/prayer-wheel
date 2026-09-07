@@ -1849,7 +1849,7 @@ def test_the_container_carries_only_what_it_needs():
     # コメントに書いた「streamlit など」に反応しないよう、実際の行だけを見る
     lines = [line.split("#")[0].strip() for line in (root / "requirements.txt").read_text().splitlines()]
     packages = {re.split(r"[=<>~\[]", line)[0] for line in lines if line}
-    assert packages == {"fastapi", "uvicorn", "httpx", "pillow", "python-multipart"}, packages
+    assert packages == {"fastapi", "uvicorn", "httpx", "pillow", "pillow-heif", "python-multipart"}, packages
     dockerfile = (root / "Dockerfile").read_text()
     assert "${PORT}" in dockerfile          # Cloud Run が渡すポートに従う
     assert "USER app" in dockerfile         # root で動かさない
