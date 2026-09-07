@@ -159,13 +159,13 @@
         }
 
         function applyFilterToMap() {
-            if (window.renderMapMarkers) {
+            if (parent.renderMapMarkers) {
                 if (filterMode === 'today') {
-                    window.renderMapMarkers(calendarDataRaw, currentDate);
+                    parent.renderMapMarkers(calendarDataRaw, currentDate);
                 } else if (filterMode === 'date') {
-                    window.renderMapMarkers(calendarDataRaw, selectedDate);
+                    parent.renderMapMarkers(calendarDataRaw, selectedDate);
                 } else {
-                    window.renderMapMarkers(calendarDataRaw, null);
+                    parent.renderMapMarkers(calendarDataRaw, null);
                 }
             }
         }
