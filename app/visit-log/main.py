@@ -364,9 +364,12 @@ NO_STORE = {
 
 
 FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" data-favicon-size="84" data-outline-color="#464a52" data-outline-width="5">
-<rect x="16" y="16" width="68" height="68" rx="12" fill="#f7f8f8" stroke="#464a52" stroke-width="5"/>
-<path d="M28 66L44 50L56 58L74 34" fill="none" stroke="#8a8f98" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-<circle cx="74" cy="34" r="7" fill="#58a96b" stroke="#464a52" stroke-width="3"/>
+  <g stroke="#464a52" stroke-width="5" stroke-linejoin="round">
+    <rect x="17" y="46" width="16" height="33" rx="3" fill="#6bbf8f"/>
+    <rect x="42" y="21" width="16" height="58" rx="3" fill="#6bbf8f"/>
+    <rect x="67" y="34" width="16" height="45" rx="3" fill="#6bbf8f"/>
+    <path d="M12 84h76" fill="none" stroke-linecap="round"/>
+  </g>
 </svg>"""
 
 
@@ -550,7 +553,7 @@ INDEX_HTML = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>visit-log</title>
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2">
 <style>
 :root{--bg:#fbfbfa;--fg:#1c1c1a;--mut:#6b6b66;--line:#e2e2dd;--card:#fff;--acc:#2f6f4f}
 @media(prefers-color-scheme:dark){:root{--bg:#16171a;--fg:#e8e8e4;--mut:#9a9a94;--line:#2c2e33;--card:#1e2024;--acc:#6bbf8f}}
