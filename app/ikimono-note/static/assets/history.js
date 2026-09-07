@@ -146,7 +146,59 @@ async function saveShareToken(record,token){
   rerunRecords.set(String(record.id),{...record});
 }
 
-function coordinateDetail(e){const c=e.coordinates;return c?'<div>位置：'+esc(c.latitude)+'、'+esc(c.longitude)+'（おおまかな値）</div>':""}
+function coordinateDetail(e){
+  const c=e.coordinates;
+  return '<section class="photo-location"><div data-location-value>'
+    +(c?'位置：'+esc(c.latitude)+'、'+esc(c.longitude)+'（おおまかな値）':'場所の記録なし')
+    +'</div><p>この記録に使った元写真を選ぶと、撮影場所だけを補えます。</p>'
+    +'<button class="btn location-select" type="button">元写真から場所を補う</button><input class="location-photo" type="file" accept="image/*" hidden>'
+    +'<p class="location-message" role="status"></p></section>';
+}
+
+async function savePhotoLocation(id,data){
+  const {recordWithPhotoLocation}=await import("/assets/photo-location.mjs");
+  const db=await openDb();
+  try{
+    const tx=db.transaction("entries","readwrite"),store=tx.objectStore("entries");
+    const current=await request(store.get(id));
+    if(!current)throw new Error("記録が見つかりません。削除済みの記録は変更できません。");
+    const updated=recordWithPhotoLocation(current,data,message=>confirm(message));
+    if(updated)store.put(updated);
+    await finished(tx);
+    if(updated){rerunRecords.set(String(id),updated);scheduleAutoBackup()}
+    return updated;
+  }finally{db.close()}
+}
+
+document.addEventListener("click",event=>{
+  const button=event.target.closest(".location-select");
+  if(button)button.closest(".photo-location").querySelector(".location-photo").click();
+});
+document.addEventListener("change",async event=>{
+  const input=event.target;
+  if(!input.matches(".location-photo"))return;
+  const file=input.files?.[0];
+  if(!file)return;
+  const node=input.closest("article"),box=input.closest(".photo-location"),message=box.querySelector(".location-message");
+  input.disabled=true;
+  box.querySelector(".location-select").disabled=true;
+  message.textContent="元写真の位置情報を読み取っています…";
+  try{
+    const {readPhotoLocation}=await import("/assets/photo-location.mjs");
+    const data=await readPhotoLocation([file]);
+    const updated=await savePhotoLocation(node.dataset.id,data);
+    if(!updated){message.textContent="場所は変更していません。";return}
+    const c=updated.coordinates;
+    box.querySelector("[data-location-value]").textContent='位置：'+c.latitude+'、'+c.longitude+'（おおまかな値）';
+    const row=node.querySelector(".name").parentElement;
+    row.querySelectorAll(":scope > .muted").forEach((element,index)=>{if(index>0)element.remove()});
+    const label=rowLocation(updated);
+    if(label){const text=document.createElement("div");text.className="muted";text.textContent=label;row.append(text)}
+    message.textContent="撮影場所を保存しました。「観察した場所」の地図にも反映されます。";
+  }catch(error){
+    message.textContent=error.name==="AbortError"?"読み取りに時間がかかっています。記録は変更していません。もう一度お試しください。":error.message;
+  }finally{input.disabled=false;input.value="";box.querySelector(".location-select").disabled=false}
+});
 function fullDetail(e){const x=e.context||{},m=e.resultMeta||{};return detailPhotos(e)+noteEditor(e)+'<div class="facts">'+(e.category?'<div>分類：'+esc(e.category)+'</div>':"")+(e.summary?'<div>'+esc(e.summary)+'</div>':"")+((e.provider||e.model)?'<div>使ったAI：'+esc([providerLabel(e.provider),e.model].filter(Boolean).join(" · "))+'</div>':"")+(x.observedDate?'<div>撮った日：'+esc(x.observedDate)+'</div>':"")+(x.size?'<div>大きさ：'+esc(x.size)+'</div>':"")+(x.location&&!coordinateLocation(x.location)?'<div>撮った場所：'+esc(x.location)+'</div>':"")+coordinateDetail(e)+(m.strictMode?'<div>まちがい防止：学名を図鑑データで自動チェック</div>':"")+(m.taxonomyChecked?'<div>学名を図鑑データで確認済み'+(m.rejectedCandidates?' · 除いた候補 '+esc(m.rejectedCandidates)+'件':"")+'</div>':"")+(m.plantnetUsed?'<div>植物の候補は <a href="https://plantnet.org/" target="_blank" rel="noopener noreferrer">Pl@ntNet recognition API</a> によるもの</div>':"")+'</div><ol>'+(e.candidates||[]).map(c=>fullCandidate(c,e.category)).join("")+'</ol>'}async function enrich(){const records=await all(),byId=new Map(records.map(e=>[String(e.id),e]));document.querySelectorAll(".entry").forEach(node=>{const e=byId.get(node.dataset.id);if(e){node.querySelector(".detail").innerHTML='<summary>記録の内容を見る</summary>'+fullDetail(e);bindNoteEditor(node,e)}});document.querySelectorAll('.meter span[data-width]').forEach(bar=>{bar.style.width=bar.dataset.width+'%'});document.querySelectorAll(".detail-photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()})}setTimeout(()=>enrich().catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
 /* 撮影画面と同じく、棚は候補ごとにその候補の中へ置く。記録から読み返すときも
    「どの候補の広告か」を位置で決められる。開いたときに初めて叩くのは変えない。

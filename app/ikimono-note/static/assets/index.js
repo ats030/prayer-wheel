@@ -2,9 +2,10 @@ function animalReferenceHtml(c,category){const ref=animalReference(c,category);r
 const $=id=>document.getElementById(id);let plantnetReady=false;let affiliate=null;let provider="local";let providerName="Ollama";let selected=[];let gps=null;let locationAutoFilled=false;
 /* 写真の EXIF 問い合わせは非同期で、選択直後から「名前を調べる」は押せる。
    この完了を待たずに押されると、gps がまだ null のまま座標が確定し、
-   EXIF に GPS が無い写真では地図に一切残らなくなる。
+   EXIF に GPS がある写真でも地図に残らなくなる。
    identify 側はこの Promise を待ってから座標を確定する */
 let locationReady=Promise.resolve();
+let photoSelection=0;
 const drop=$("drop"),status=$("status"),previews=$("previews"),identify=$("identify");
 /* お試し枠のことは、使い切る前に言う。1日3回だと知らずに2回使い、3回目で
    初めて壁に当たるのは不親切。続ける道 (自分のキーを入れる) も一緒に出す。
@@ -39,12 +40,12 @@ window.speciesRuntimeModel=model;
   showTrialNote(data);plantnetReady=Boolean(data.api_key_configured.plantnet||(window.speciesPublicMode&&readApiKey("plantnet")));affiliate=data.affiliate;document.getElementById("affiliateDisclosure").classList.toggle("hidden",!affiliate.enabled);document.getElementById("plantnetOption").classList.toggle("hidden",!plantnetReady);if(plantnetReady)$("usePlantnet").checked=true;$("providerStatus").textContent=providerName+" · "+model+(provider==="local"?" · LAN内のOllamaへ送ります":" · 写真は保存しません")}catch(e){showStatus("設定を読み込めませんでした。",true)}}
 const MAX_PHOTOS=3;let previewUrls=[];
 function renderPreviews(){previewUrls.forEach(URL.revokeObjectURL);previewUrls=selected.map(file=>URL.createObjectURL(file));document.body.classList.add("has-selection");/* 枚数で列を変える。3列固定だと、1枚のときも横幅の3分の1しか使わない。 携帯では110pxほどになり、ピントや被写体の位置を確かめられない */previews.className="previews count-"+selected.length;previews.innerHTML=previewUrls.map((url,index)=>'<div class="preview-item"><img class="preview" src="'+url+'" alt="調べる写真 '+(index+1)+'"><button class="btn preview-remove" type="button" data-index="'+index+'">この写真を外す</button></div>').join("");previews.querySelectorAll(".preview-remove").forEach(button=>button.onclick=()=>removeSelectedPhoto(Number(button.dataset.index)));$("previewEmpty").classList.add("hidden");identify.classList.remove("hidden");$("captureTitle").textContent=selected.length+"枚の写真を選択中"}
-function removeSelectedPhoto(index){if(selected.length<=1){showStatus("調べる写真は1枚以上必要です。",true);return}selected.splice(index,1);renderPreviews();showStatus("写真を1枚外して"+selected.length+"枚になりました。")}
+function removeSelectedPhoto(index){if(selected.length<=1){showStatus("調べる写真は1枚以上必要です。",true);return}setFiles(selected.filter((_,i)=>i!==index))}
 function setFiles(files){const chosen=[...files].filter(file=>file.type.startsWith("image/"));if(!chosen.length){showStatus("画像ファイルを選んでください。",true);return}if(chosen.length>MAX_PHOTOS){showStatus("写真は最大"+MAX_PHOTOS+"枚です。",true);return}selected=chosen;gps=null;renderPreviews();showStatus("写真の情報を確認しています。",false,true);locationReady=readPhotoMetadata(chosen)}
 /* 足すときは、いま選んでいる写真を残す。置き換えると、最初に撮った全体像が消えて
    候補が振り出しに戻る。「もっと確かめたいこと」を読んで撮り足す人が欲しいのは、
    全体像に寄りの1枚を加えた組であって、寄りの1枚だけではない。
-   撮った日・場所はすでに1枚目から読み終わっているので、ここでは読み直さない。 */
+   場所は追加後の写真から読み直し、外した写真の位置を残さない。 */
 function addFiles(files){
   const chosen=[...files].filter(file=>file.type.startsWith("image/"));
   if(!chosen.length){showStatus("画像ファイルを選んでください。",true);return}
@@ -53,6 +54,7 @@ function addFiles(files){
   if(room<=0){showStatus("写真は"+MAX_PHOTOS+"枚までです。撮り直すときは「写真を選ぶ」から選びなおしてください。",true);return}
   const added=chosen.slice(0,room);
   selected=[...selected,...added];
+  locationReady=readPhotoMetadata([...selected]);
   renderPreviews();
   const overflow=chosen.length>room?"（"+MAX_PHOTOS+"枚までなので"+added.length+"枚だけ足しました）":"";
   showStatus("写真を足して"+selected.length+"枚になりました"+overflow+"。もう一度「名前を調べる」を押すと、足した写真も合わせて調べます。");
@@ -61,7 +63,28 @@ function addFiles(files){
 function applyPhotoMetadata(data){const found=[];if(data.observed_date&&!$("observedDate").value){$("observedDate").value=data.observed_date;found.push("撮った日")}if(data.location){/* 座標は場所欄の入力状況に関わらず常に写真のEXIFを使う。
    場所欄は、まだユーザーが手で書き換えていない（＝前の写真からの自動入力のままか空の）
    ときだけ、選び直した写真のGPSで上書きする。手入力は上書きしない */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;if(!$("location").value||locationAutoFilled){$("location").value=data.location;locationAutoFilled=true;found.push("撮った場所")}}else{gps=null;$("gpsStatus").textContent="この写真には位置情報が残っていませんでした。位置情報なしでも使えます。";if(locationAutoFilled){$("location").value="";locationAutoFilled=false}}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
-async function readPhotoMetadata(files){const fd=new FormData();files.forEach(file=>fd.append("files",file));try{const r=await fetch("/api/photo-metadata",{method:"POST",body:fd});if(!r.ok)throw new Error();const data=await r.json();if(selected[0]===files[0])applyPhotoMetadata(data)}catch(e){if(selected[0]===files[0]){gps=null;$("gpsStatus").textContent="この写真には位置情報が残っていませんでした。位置情報なしでも使えます。";showStatus("写真を選びました。撮った日や場所の情報は読み取れませんでした。")}}}
+async function readPhotoMetadata(files){
+  const selection=++photoSelection;
+  gps=null;
+  if(locationAutoFilled){$("location").value="";locationAutoFilled=false}
+  try{
+    const {readPhotoLocation,photoCoordinates,coordinateLabel}=await import("/assets/photo-location.mjs");
+    const data=await readPhotoLocation(files);
+    if(selection!==photoSelection)return;
+    const coordinates=photoCoordinates(data);
+    applyPhotoMetadata({...data,location:coordinates?coordinateLabel(coordinates):"",...coordinates});
+  }catch(e){
+    if(selection!==photoSelection)return;
+    gps=null;
+    $("gpsStatus").textContent="写真の位置情報を読み取れませんでした。場所なしで続けられます。";
+    showStatus("写真の情報を読み取れませんでした。もう一度選ぶか、場所なしで続けてください。",true);
+  }
+}
+
+async function waitForPhotoLocation(){
+  let pending;
+  do{pending=locationReady;await pending}while(pending!==locationReady);
+}
 function showStatus(text,error=false,busy=false){status.className='status'+(error?' error':'');status.innerHTML=(busy?'<span class="spinner"></span>':'')+text}
 /* 「選びなおす」と「足す」で入力欄を分ける。1つの入力を旗で切り替えると、
    #library はドロップ領域の <label> の中にあるため .click() が label まで
@@ -220,9 +243,9 @@ function writePending(value){
 
 /* 縮小した写真は data URL にして預ける。3枚でも実測100KB台で localStorage に収まる。
    data URL との往復は backup.js のものを使う (CSP で fetch(data:) が使えない事情も同じ) */
-async function pendingPhotos(){
+async function pendingPhotos(files=selected){
   const out=[];
-  for(const file of selected){
+  for(const file of files){
     try{
       const blob=await shrinkForHistory(file);
       if(blob)out.push(await blobToDataUrl(blob));
@@ -274,13 +297,16 @@ identify.onclick=async()=>{
   if(!selected.length)return;
   identify.disabled=true;
   /* EXIF問い合わせがまだ終わっていないことがある。ここで待たずに
-     coordinates を組み立てると gps が null のまま確定し、EXIFに位置が無い写真では
+     coordinates を組み立てると gps が null のまま確定し、EXIFに位置がある写真でも
      地図に反映される座標が消えてしまう */
-  await locationReady;
+  await waitForPhotoLocation();
+  const files=[...selected];
+  const context={location:$("location").value,observedDate:$("observedDate").value,size:$("size").value};
+  const coordinates=gps?{latitude:Number(gps.latitude.toFixed(4)),longitude:Number(gps.longitude.toFixed(4))}:null;
   const startedAt=Date.now();
   showWorking(startedAt);
   const fd=new FormData();
-  selected.forEach(file=>fd.append("files",file));
+  files.forEach(file=>fd.append("files",file));
   fd.append("background","true");
   fd.append("location",$("location").value);
   fd.append("observed_date",$("observedDate").value);
@@ -293,26 +319,22 @@ identify.onclick=async()=>{
     fd.append("request_api_key",readApiKey(provider));
     fd.append("request_plantnet_key",readApiKey("plantnet"));
   }
-  const photos=await pendingPhotos();
+  const photos=await pendingPhotos(files);
   try{
     /* 公開版で「手元のAI」を選んだときは、写真をサーバーへ送らない。ブラウザから
        その場の Ollama を直接呼び、返ってきた本文だけをサーバーで仕上げる。
        プロンプトと仕上げ (証拠ゲート・種の保存法) はサーバーに1つだけ置き、
        ここへは写さない。写すと片方だけ直して食い違う */
     if(window.speciesPublicMode&&provider==="local"){
-      const data=await identifyWithLocalOllama(selected,{
-        location:$("location").value,observed_date:$("observedDate").value,size:$("size").value});
+      const data=await identifyWithLocalOllama(files,{
+        location:context.location,observed_date:context.observedDate,size:context.size});
       stopWorking();
-      const context={location:$("location").value,observedDate:$("observedDate").value,size:$("size").value};
-      const coordinates=gps?{latitude:Number(gps.latitude.toFixed(4)),longitude:Number(gps.longitude.toFixed(4))}:null;
       await finishIdentification(data,{photos,context,coordinates});
       return;
     }
     const response=await fetch('/identify',{method:'POST',body:fd});
     const data=await response.json();
     if(!response.ok)throw new Error(errorText(data.detail));
-    const context={location:$("location").value,observedDate:$("observedDate").value,size:$("size").value};
-    const coordinates=gps?{latitude:Number(gps.latitude.toFixed(4)),longitude:Number(gps.longitude.toFixed(4))}:null;
     /* 札が返らない置き場もある (サーバーレスでは後ろの仕事が凍るので同期で返す)。
        その場合は返ってきたものが結果そのもの */
     if(!data.job){stopWorking();await finishIdentification(data,{photos,context,coordinates});return}

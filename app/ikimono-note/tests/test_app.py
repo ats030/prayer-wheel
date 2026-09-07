@@ -112,7 +112,7 @@ def test_shooting_guide_offers_camera_and_library_without_losing_photos():
     assert "const MAX_PHOTOS=3" in source
     assert 'class="btn preview-remove"' in source
     assert "function removeSelectedPhoto(index)" in source
-    assert "selected.splice(index,1)" in source
+    assert "setFiles(selected.filter((_,i)=>i!==index))" in source
     assert "調べる写真は1枚以上必要です。" in source
 
 
@@ -1598,7 +1598,7 @@ def test_every_script_actually_parses():
     if not node:
         pytest.skip("node が無いため構文チェックを省略")
     root = Path(__file__).parents[1] / "static"
-    scripts = sorted(root.glob("assets/*.js")) + [root / "theme.js"]
+    scripts = sorted(root.glob("assets/*.js")) + sorted(root.glob("assets/*.mjs")) + [root / "theme.js"]
     assert len(scripts) >= 5
     for script in scripts:
         result = subprocess.run([node, "--check", str(script)], capture_output=True, text=True)
@@ -2057,7 +2057,7 @@ def test_every_photo_used_is_kept_and_viewable():
     長辺960pxのJPEGは実測の中央値33KBで、3枚×50件でもドライブのJSONは6MB台。
     """
     index = client.get("/assets/index.js").text
-    assert "for(const file of selected)" in index          # 選んだ全部を縮小する
+    assert "for(const file of files)" in index             # 送信時に固定した全部を縮小する
     assert "const thumbnail=thumbnails[0]||null;" in index  # 一覧用の1枚は据え置き
     assert "coordinates,thumbnail,thumbnails,listThumbnail}" in index
     history = client.get("/assets/history.js").text
@@ -2428,7 +2428,7 @@ def test_identification_survives_a_reload():
     assert "const pending=readPending();" in index
     assert "if(!pending?.job)return;" in index                 # 開いたときに続きを聞く
     # 更新すると選んだファイルも入力欄も消える。投げる前に控えておく
-    assert "async function pendingPhotos()" in index
+    assert "async function pendingPhotos(files=selected)" in index
     assert "await blobToDataUrl(blob)" in index
     assert "const coordinates=gps?{latitude:" in index
     assert "const pendingContext=pending?.context||" in index
