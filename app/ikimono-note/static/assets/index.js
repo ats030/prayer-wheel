@@ -1,5 +1,5 @@
 function animalReferenceHtml(c,category){const ref=animalReference(c,category);return ref?'<div class="animal-references"><span>オス・メスの違いを調べる資料（外部サイト）</span><a target="_blank" rel="noopener noreferrer" href="'+esc(ref.url)+'">'+esc(ref.label)+' ↗</a></div>':""}
-const $=id=>document.getElementById(id);let plantnetReady=false;let affiliate=null;let provider="local";let providerName="Ollama";let selected=[];let gps=null;
+const $=id=>document.getElementById(id);let plantnetReady=false;let affiliate=null;let provider="local";let providerName="Ollama";let selected=[];let gps=null;let locationAutoFilled=false;
 /* 写真の EXIF 問い合わせと端末 GPS の取得はどちらも非同期で、選択直後から
    「名前を調べる」は押せる。この完了を待たずに押されると、gps がまだ null の
    まま座標が確定し、EXIF に GPS が無い写真では地図に一切残らなくなる。
@@ -59,8 +59,9 @@ function addFiles(files){
   identify.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
 }
 function applyPhotoMetadata(data){const found=[];if(data.observed_date&&!$("observedDate").value){$("observedDate").value=data.observed_date;found.push("撮った日")}if(data.location){/* 座標は場所欄の入力状況に関わらず常に写真のEXIFを最優先で使う。
-   場所欄の自動入力だけ、既に値があるときはユーザーの入力を上書きしない。
-   写真にGPSがある場合、デバイスの現在地取得は行わないため、取得ボタンも無効化する */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;$("gpsButton").disabled=true;if(!$("location").value){$("location").value=data.location;found.push("撮った場所")}}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
+   場所欄は、まだユーザーが手で書き換えていない（＝前の写真からの自動入力のままか空の）
+   ときだけ、選び直した写真のGPSで上書きする。手入力は上書きしない。
+   写真にGPSがある場合、デバイスの現在地取得は行わないため、取得ボタンも無効化する */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;$("gpsButton").disabled=true;if(!$("location").value||locationAutoFilled){$("location").value=data.location;locationAutoFilled=true;found.push("撮った場所")}}else if(locationAutoFilled){$("location").value="";locationAutoFilled=false}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
 async function readPhotoMetadata(files){const fd=new FormData();files.forEach(file=>fd.append("files",file));try{const r=await fetch("/api/photo-metadata",{method:"POST",body:fd});if(!r.ok)throw new Error();const data=await r.json();if(selected[0]===files[0]){applyPhotoMetadata(data);if(gps?.source!=="exif")await requestCurrentLocation(true)}}catch(e){if(selected[0]===files[0]){showStatus("写真を選びました。撮った日や場所の情報は読み取れませんでした。");await requestCurrentLocation(true)}}}
 function showStatus(text,error=false,busy=false){status.className='status'+(error?' error':'');status.innerHTML=(busy?'<span class="spinner"></span>':'')+text}
 /* 「選びなおす」と「足す」で入力欄を分ける。1つの入力を旗で切り替えると、
@@ -68,6 +69,9 @@ function showStatus(text,error=false,busy=false){status.className='status'+(erro
    バブルし、旗を戻す側の処理と競合する。入力を分ければその競合ごと消える */
 $('libraryBtn').onclick=()=> $('library').click();$('cameraBtn').onclick=()=> $('camera').click();$("library").onchange=e=>{setFiles(e.target.files);e.target.value=""};$("libraryAdd").onchange=e=>{addFiles(e.target.files);e.target.value=""};$("camera").onchange=e=>{addFiles(e.target.files);e.target.value=""};
 ['dragenter','dragover'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove('drag')}));drop.addEventListener("drop",e=>setFiles(e.dataTransfer.files));
+/* 場所欄をユーザーが自分で書き換えたら、以後は写真を選び直してもGPSで
+   上書きしない（.value への代入はinputイベントを発火しないので、自動入力とは衝突しない） */
+$("location").addEventListener("input",()=>{locationAutoFilled=false});
 /* 写真のEXIFにも端末の現在地にも位置情報が無いと、coordinates も context.location も
    空のまま保存され、あとから履歴を見て「場所の記録なし」になる。原因が写真になかったのか
    取得に失敗したのかが分からないと混乱するので、自動取得 (automatic) が失敗した経路だけ、

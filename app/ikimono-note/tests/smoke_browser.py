@@ -152,6 +152,31 @@ def photo(name: str) -> dict:
     return {"name": name, "mimeType": "image/jpeg", "buffer": buffer.getvalue()}
 
 
+def photo_with_gps(name: str, lat: float, lng: float) -> dict:
+    """EXIF GPS付きの小さなJPEG。撮った場所の自動入力を確かめるのに使う。"""
+    from io import BytesIO
+
+    from PIL import Image
+
+    def to_dms(value: float) -> tuple:
+        deg = int(value)
+        minutes_full = (value - deg) * 60
+        minutes = int(minutes_full)
+        seconds = (minutes_full - minutes) * 60
+        return (deg, minutes, seconds)
+
+    img = Image.new("RGB", (64, 64), (120, 160, 120))
+    exif = img.getexif()
+    gps_ifd = exif.get_ifd(34853)
+    gps_ifd[1] = "N" if lat >= 0 else "S"
+    gps_ifd[2] = to_dms(abs(lat))
+    gps_ifd[3] = "E" if lng >= 0 else "W"
+    gps_ifd[4] = to_dms(abs(lng))
+    buffer = BytesIO()
+    img.save(buffer, format="JPEG", exif=exif.tobytes())
+    return {"name": name, "mimeType": "image/jpeg", "buffer": buffer.getvalue()}
+
+
 def check(label: str, ok: bool, detail: str = "") -> None:
     print(f"  {'OK  ' if ok else 'NG  '}{label}" + (f"  ({detail})" if detail and not ok else ""))
     if not ok:
@@ -609,6 +634,50 @@ def run_key_saving(base: str) -> None:
         context.close(); browser.close()
 
 
+def run_location_autofill(base: str) -> None:
+    """「写真を選ぶ」を繰り返したとき、撮った場所欄がEXIFのGPSで更新されるか。
+
+    座標 (gps 変数) は常にEXIF優先で更新するのに、表示中の撮った場所欄は
+    「空のときだけ埋める」という初回限定の判定だったため、写真を選び直しても
+    前の写真の場所が残ったまま座標だけ食い違う、という不整合があった。
+    """
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=True)
+        context = browser.new_context(viewport={"width": 1100, "height": 900})
+        page = context.new_page()
+        errors = page_errors(page)
+
+        page.goto(base + "/")
+        page.wait_for_load_state("networkidle")
+
+        page.set_input_files("#library", [photo_with_gps("a.jpg", 35.6581, 139.7411)])
+        page.wait_for_timeout(1200)
+        first = page.input_value("#location")
+        check("1枚目のEXIF GPSで撮った場所欄が埋まる", "35.6581" in first, first)
+
+        page.set_input_files("#library", [photo_with_gps("b.jpg", 34.6937, 135.5023)])
+        page.wait_for_timeout(1200)
+        second = page.input_value("#location")
+        check("写真を選び直すと撮った場所欄が新しいEXIF GPSへ更新される",
+              "34.6937" in second and second != first, second)
+
+        page.set_input_files("#library", [photo("c.jpg")])
+        page.wait_for_timeout(1200)
+        cleared = page.input_value("#location")
+        check("GPSの無い写真へ選び直すと自動入力の撮った場所欄は空になる", cleared == "", cleared)
+
+        page.set_input_files("#library", [photo_with_gps("d.jpg", 43.0621, 141.3544)])
+        page.wait_for_timeout(1200)
+        page.fill("#location", "手入力した場所")
+        page.set_input_files("#library", [photo_with_gps("e.jpg", 26.2124, 127.6809)])
+        page.wait_for_timeout(1200)
+        manual = page.input_value("#location")
+        check("手で直した撮った場所欄は選び直しても上書きされない", manual == "手入力した場所", manual)
+
+        check("撮った場所欄の自動更新でJSエラーが出ない", not errors, "; ".join(errors[:2]))
+        context.close(); browser.close()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", default="", help="確かめる入口 (既定: この場で1つ起こす)")
@@ -619,6 +688,7 @@ def main() -> int:
         base = args.base or (public if args.public else admin)
         print(f"■ {base}")
         run(base, args.identify)
+        run_location_autofill(base)
     if not args.base and not ADMIN:
         # 公開版でしか起きない壊れ方 (APIキーが黙って保存されない) を見る
         with public_app_for_checking() as public_base:
