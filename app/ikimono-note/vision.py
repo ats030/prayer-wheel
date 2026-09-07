@@ -157,7 +157,14 @@ def extract_exif_context(raw: bytes) -> dict[str, Any]:
         gps_ifd = exif.get_ifd(34853)
         latitude = _gps_coordinate(gps_ifd.get(2), gps_ifd.get(1))
         longitude = _gps_coordinate(gps_ifd.get(4), gps_ifd.get(3))
-    except Exception:
+    except Exception as exc:
+        # 「読み取れませんでした」だけでは、HEICなど未対応形式で開けなかったのか
+        # EXIF自体が壊れていたのか区別できない。原因切り分けのため journal にだけ残す。
+        print(
+            f"[ikimono-note] EXIF抽出に失敗 ({type(exc).__name__}: {exc}) "
+            f"先頭バイト={raw[:12].hex()}",
+            flush=True,
+        )
         return {}
     result: dict[str, Any] = {}
     if observed_date:
@@ -165,6 +172,10 @@ def extract_exif_context(raw: bytes) -> dict[str, Any]:
     if latitude is not None and longitude is not None:
         result.update(latitude=round(latitude, 4), longitude=round(longitude, 4))
         result["location"] = f"緯度 {result['latitude']:.4f}, 経度 {result['longitude']:.4f}"
+    elif gps_ifd:
+        # GPS IFD自体はあるのに緯度経度が取れない(タグ欠落・不正値)場合と、
+        # そもそもGPSタグが無い場合を区別できるよう、前者だけ残しておく
+        print(f"[ikimono-note] GPS IFDはあるが緯度経度を取得できず: {dict(gps_ifd)}", flush=True)
     return result
 
 
