@@ -678,6 +678,54 @@ def run_location_autofill(base: str) -> None:
         context.close(); browser.close()
 
 
+def run_map_reflection(base: str) -> None:
+    """EXIF GPSで自動入力された座標が、記録の保存を経てダッシュボードの地図に実際に反映されるか。
+
+    246-286行目の地図テストはIndexedDBへ座標を直接書き込んでおり、地図の描画自体は
+    確かめられるが「写真選択→識別→保存」という実際の経路は通っていない。
+    ここでは gps・pendingPhotos・finishIdentification という実コードをそのまま呼び、
+    AIへの問い合わせ部分だけを結果0件のダミーに差し替えて、座標の受け渡しを頭から尾まで確かめる。
+    """
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=True)
+        context = browser.new_context(viewport={"width": 1100, "height": 900})
+        page = context.new_page()
+        errors = page_errors(page)
+
+        page.goto(base + "/")
+        page.wait_for_load_state("networkidle")
+        page.set_input_files("#library", [photo_with_gps("map-a.jpg", 43.0621, 141.3544)])
+        page.wait_for_function("() => typeof gps !== 'undefined' && gps && Math.abs(gps.latitude - 43.0621) < 0.001")
+
+        saved_id = page.evaluate("""async () => {
+          const coordinates = gps
+            ? {latitude: Number(gps.latitude.toFixed(4)), longitude: Number(gps.longitude.toFixed(4))}
+            : null;
+          const photos = await pendingPhotos();
+          const context = {location: document.getElementById('location').value, observedDate: '', size: ''};
+          await finishIdentification(
+            {category: '植物', summary: 'スモークテスト用', candidates: []},
+            {photos, context, coordinates});
+          return lastSavedRecordId;
+        }""")
+        check("候補0件でもEXIF GPSの座標つきで記録が保存される", bool(saved_id), str(saved_id))
+
+        page.goto(base + "/dashboard"); page.wait_for_load_state("networkidle"); page.wait_for_timeout(300)
+        check("実フローで保存した座標がダッシュボードの件数に入る", page.locator("#locatedCount").inner_text() == "1")
+        page.click("#showMap"); page.wait_for_selector("#historyMap.leaflet-container")
+        check("写真選択から保存した場所が地図にピンで出る", page.locator("#historyMap .leaflet-marker-icon").count() == 1)
+        marker_point = page.evaluate(
+            "id => mapEntries.find(e => e.id === id)?.coordinates", saved_id)
+        check("地図に反映された座標がEXIF GPSと一致する",
+              marker_point is not None
+              and abs(marker_point["latitude"] - 43.0621) < 0.001
+              and abs(marker_point["longitude"] - 141.3544) < 0.001,
+              str(marker_point))
+
+        check("実フローでの地図反映確認中にJSエラーが出ない", not errors, "; ".join(errors[:2]))
+        context.close(); browser.close()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", default="", help="確かめる入口 (既定: この場で1つ起こす)")
@@ -689,6 +737,7 @@ def main() -> int:
         print(f"■ {base}")
         run(base, args.identify)
         run_location_autofill(base)
+        run_map_reflection(base)
     if not args.base and not ADMIN:
         # 公開版でしか起きない壊れ方 (APIキーが黙って保存されない) を見る
         with public_app_for_checking() as public_base:
