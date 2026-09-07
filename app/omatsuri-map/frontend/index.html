@@ -161,8 +161,8 @@
                     <p>${festival.date}</p>
                     ${descriptionHtml}
                     <div class="links">
-                        <a href="${wikidataUrl}" onclick="parent.window.open(this.href, '_blank'); return false;">Wikidata</a> | 
-                        <a href="${wikipediaUrl}" onclick="parent.window.open(this.href, '_blank'); return false;">Wikipedia</a>
+                        <a href="javascript:void(0)" data-url="${wikidataUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikidata</a> | 
+                        <a href="javascript:void(0)" data-url="${wikipediaUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikipedia</a>
                     </div>
                     <div id="festival-image-container" style="margin-top:10px;"></div>
                 </div>
@@ -224,8 +224,8 @@
                         <p style="margin: 0 0 5px 0; color: #666;">${festival.prefecture}</p>
                         <p style="margin: 0 0 5px 0; color: #666;">${festival.date}</p>
                         <div style="margin-top: 8px; font-size: 12px;">
-                            <a href="${wikidataUrl}" onclick="parent.window.open(this.href, '_blank'); return false;">Wikidata</a> | 
-                            <a href="${wikipediaUrl}" onclick="parent.window.open(this.href, '_blank'); return false;">Wikipedia</a>
+                            <a href="javascript:void(0)" data-url="${wikidataUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikidata</a> | 
+                            <a href="javascript:void(0)" data-url="${wikipediaUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikipedia</a>
                         </div>
                     </div>
                 `;
