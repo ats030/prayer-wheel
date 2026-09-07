@@ -2431,7 +2431,7 @@ def test_identification_survives_a_reload():
     assert "async function pendingPhotos()" in index
     assert "await blobToDataUrl(blob)" in index
     assert "const coordinates=gps?{latitude:" in index
-    assert "context:pending?.context||" in index
+    assert "const pendingContext=pending?.context||" in index
     history = client.get("/assets/history.js").text
     assert 'const RERUN_PENDING_KEY="species-pending-rerun"' in history
     assert "function resumeRerun()" in history
