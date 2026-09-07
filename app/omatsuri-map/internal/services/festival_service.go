@@ -8,13 +8,14 @@ import (
 )
 
 type Festival struct {
-	QID        string  `json:"qid"`
-	LabelJA    string  `json:"label_ja"`
-	LabelEN    string  `json:"label_en"`
-	Prefecture string  `json:"prefecture"`
-	Latitude   float64 `json:"latitude"`
-	Longitude  float64 `json:"longitude"`
-	Date       string  `json:"date"`
+	QID         string  `json:"qid"`
+	LabelJA     string  `json:"label_ja"`
+	LabelEN     string  `json:"label_en"`
+	Prefecture  string  `json:"prefecture"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
+	Date        string  `json:"date"`
+	Description string  `json:"description"`
 }
 
 type FestivalService struct {
@@ -71,4 +72,8 @@ func (s *FestivalService) GetByQID(qid string) *Festival {
 
 func (s *FestivalService) GetByID(qid string) *Festival {
 	return s.GetByQID(qid)
+}
+
+func (s *FestivalService) GetAllFestivalsWithDescriptions() []Festival {
+	return s.festivals
 }

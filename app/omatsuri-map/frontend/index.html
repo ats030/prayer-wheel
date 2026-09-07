@@ -71,7 +71,7 @@
         var currentFestival = null;
 
         // Fetch festival data
-        fetch('festivals-with-descriptions.json')
+        fetch('/api/festivals/descriptions')
             .then(response => response.json())
             .then(data => {
                 renderMarkers(data);

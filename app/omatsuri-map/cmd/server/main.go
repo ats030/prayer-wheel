@@ -29,6 +29,7 @@ func main() {
 
 	// API routes
 	mux.HandleFunc("/api/festivals/prefecture/", handler.GetFestivalsByPrefecture)
+	mux.HandleFunc("/api/festivals/descriptions", handler.GetAllFestivalsWithDescriptions)
 	mux.HandleFunc("/api/festivals/", handler.GetAllFestivals)
 	mux.HandleFunc("/api/festivals", handler.GetAllFestivals)
 
