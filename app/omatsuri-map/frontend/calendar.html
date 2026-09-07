@@ -75,7 +75,7 @@
 
         currentDate.setHours(0, 0, 0, 0);
 
-        fetch('festivals.json')
+        fetch('/festivals.json')
             .then(response => response.json())
             .then(data => {
                 calendarDataRaw = data;
