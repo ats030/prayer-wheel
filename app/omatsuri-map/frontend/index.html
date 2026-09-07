@@ -124,7 +124,74 @@
             }
         }
 
-        // Fetch Wikipedia image using page title
+        // Cache for festival images
+        const imageCache = {};
+
+        // Fetch festival image from Wikidata P18 with license check
+        async function fetchFestivalImage(qid, labelJa) {
+            // Check cache first
+            if (imageCache[qid] !== undefined) {
+                return imageCache[qid];
+            }
+
+            try {
+                // Get image file name from Wikidata P18 claim
+                const wdResponse = await fetch(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${qid}&props=claims&format=json`);
+                const wdData = await wdResponse.json();
+                const claims = wdData.entities[qid]?.claims;
+                
+                if (!claims || !claims.P18 || claims.P18.length === 0) {
+                    // Fallback: try Wikipedia page image
+                    const wikiImage = await fetchWikipediaImage(labelJa);
+                    imageCache[qid] = wikiImage;
+                    return wikiImage;
+                }
+
+                // Get the first image filename
+                const imageFile = claims.P18[0].mainsnak.datavalue?.value;
+                if (!imageFile) {
+                    const wikiImage = await fetchWikipediaImage(labelJa);
+                    imageCache[qid] = wikiImage;
+                    return wikiImage;
+                }
+
+                // Get license info for the Commons image
+                const encodedFileName = encodeURIComponent(imageFile.replace(/ /g, '_'));
+                const licenseResponse = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=extmetadata&iiextmetadatafilter=License&format=json&titles=File:${encodedFileName}`);
+                const licenseData = await licenseResponse.json();
+                
+                const pages = licenseData.query?.pages;
+                const page = pages ? pages[Object.keys(pages)[0]] : null;
+                const licenseInfo = page?.imageinfo?.[0]?.extmetadata?.License?.value;
+                
+                // Check if license allows display (exclude "Copyrighted")
+                if (licenseInfo && licenseInfo.toLowerCase().includes('copyrighted')) {
+                    console.log(`Image for ${qid} is copyrighted, not displaying`);
+                    imageCache[qid] = null;
+                    return null;
+                }
+
+                // Get image thumbnail URL
+                const thumbResponse = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url&iiurlwidth=500&format=json&titles=File:${encodedFileName}`);
+                const thumbData = await thumbResponse.json();
+                
+                const thumbPages = thumbData.query?.pages;
+                const thumbPage = thumbPages ? thumbPages[Object.keys(thumbPages)[0]] : null;
+                const imageUrl = thumbPage?.imageinfo?.[0]?.thumburl || thumbPage?.imageinfo?.[0]?.url;
+                
+                imageCache[qid] = imageUrl;
+                return imageUrl;
+
+            } catch (e) {
+                console.log(`Failed to fetch image for ${qid}:`, e);
+                // Fallback to Wikipedia page image
+                const wikiImage = await fetchWikipediaImage(labelJa);
+                imageCache[qid] = wikiImage;
+                return wikiImage;
+            }
+        }
+
+        // Fetch Wikipedia image using page title (fallback)
         async function fetchWikipediaImage(title) {
             try {
                 const response = await fetch(`https://ja.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${encodeURIComponent(title)}&pithumbsize=500&format=json`);
@@ -149,7 +216,7 @@
             currentFestival = festival;
             
             const wikidataUrl = `https://www.wikidata.org/wiki/${festival.qid}`;
-            const wikipediaUrl = `https://ja.wikipedia.org/wiki/${festival.qid}`;
+            const wikipediaUrl = `https://ja.wikipedia.org/wiki/${encodeURIComponent(festival.label_ja)}`;
             
             let descriptionHtml = festival.description ? `<div class="description">${festival.description}</div>` : '';
             
@@ -168,7 +235,7 @@
                 </div>
             `;
             
-            const imageUrl = await fetchWikipediaImage(festival.label_ja);
+            const imageUrl = await fetchFestivalImage(festival.qid, festival.label_ja);
             if (imageUrl) {
                 document.getElementById('festival-image-container').innerHTML = `<img src="${imageUrl}" style="max-width:100%; border-radius:8px;">`;
             }
@@ -215,7 +282,7 @@
                 marker.on('click', () => showInfoPanel(festival));
                 
                 const wikidataUrl = `https://www.wikidata.org/wiki/${festival.qid}`;
-                const wikipediaUrl = `https://ja.wikipedia.org/wiki/${festival.qid}`;
+                const wikipediaUrl = `https://ja.wikipedia.org/wiki/${encodeURIComponent(festival.label_ja)}`;
                 
                 let popupContent = `
                     <div style="padding: 10px;">

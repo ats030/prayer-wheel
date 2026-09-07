@@ -47,11 +47,13 @@ def fetch_cultural_data(wikidata_ref_url: str) -> dict:
     if match:
         cultural_data["name"] = match.group(1).strip()
     
-    match = re.search(r'[^>]*県\s*</td>', html)
+    match = re.search(r'所在都道府県、地域[\s\S]*?<td width="310" class="detail-td">[\s\S]*?(長崎県|北海道|青森県|岩手県|宮城県|秋田県|山形県|福島県|茨城県|栃木県|群馬県|埼玉県|千葉県|東京都|神奈川県|新潟県|富山県|石川県|福井県|山梨県|長野県|岐阜県|静岡県|愛知県|三重県|滋賀県|京都府|大阪府|兵庫県|奈良県|和歌山県|鳥取県|島根県|岡山県|広島県|山口県|徳島県|香川県|愛媛県|高知県|福岡県|佐賀県|長崎県|熊本県|大分県|宮崎県|鹿児島県|沖縄県)[\s\S]*?</td>', html)
     if match:
-        cultural_data["prefecture"] = match.group(0).replace('</td>', '').strip()
+        cultural_data["prefecture"] = match.group(1)
     
-    cultural_data["date"] = ""
+    match = re.search(r'公開日：([^<]+)', html)
+    if match:
+        cultural_data["date"] = match.group(1).strip()
     
     return cultural_data
 
