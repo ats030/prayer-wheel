@@ -717,6 +717,7 @@ function chartToLatest(move) {
 }
 document.addEventListener('DOMContentLoaded', () => {
   const sort = document.getElementById('sort-order');
+  sortTables(sort.value);
   sort.addEventListener('change', () => {
     sortTables(sort.value);
     document.getElementById('sort-description').textContent =
@@ -766,7 +767,8 @@ def render_page(issues: list[Issue], today: date) -> str:
     series = daily_series(issues, today)
     m = metrics(issues, today)
     cohorts = cohort_table(issues, today)
-    rows = backlog_rows(issues, today)
+    rows = sorted(backlog_rows(issues, today),
+                  key=lambda r: (r.priority, -r.age_days, r.id))
 
     # 初期画面には、棚卸し判断へ直接つながる3指標だけを置く。
     tiles = [
@@ -852,15 +854,15 @@ def render_page(issues: list[Issue], today: date) -> str:
   <div class="section-head">
     <label class="sort-control" for="sort-order">並び順
       <select id="sort-order" aria-label="タスク一覧の並び順">
-        <option value="age" selected>滞留順</option>
-        <option value="priority">優先順</option>
+        <option value="age">滞留順</option>
+        <option value="priority" selected>優先順</option>
       </select>
     </label>
   </div>
 
   <div class="section-head">
     <h2>いま判断するタスク</h2>
-    <span class="section-count">{len(action_rows)}件 · <span id="sort-description">滞留順</span></span>
+    <span class="section-count">{len(action_rows)}件 · <span id="sort-description">優先順</span></span>
   </div>
   {_table(action_rows)}
 

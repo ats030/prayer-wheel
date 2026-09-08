@@ -351,9 +351,10 @@ class TestPage:
         ])
         page = main.render_page(issues, date(2026, 8, 24))
         assert "<select id=\"sort-order\"" in page
-        assert "<option value=\"age\" selected>\u6ede\u7559\u9806</option>" in page
-        assert "<option value=\"priority\">\u512a\u5148\u9806</option>" in page
+        assert "<option value=\"age\">\u6ede\u7559\u9806</option>" in page
+        assert "<option value=\"priority\" selected>\u512a\u5148\u9806</option>" in page
         assert page.count("<tbody data-sortable>") == 3
+        assert page.index("data-id=\"p0-new\"") < page.index("data-id=\"p2-old\"")
         assert "data-age=\"54\" data-priority=\"2\" data-id=\"p2-old\"" in page
         assert "function compareRows(left, right, order)" in main.JS
         assert "return priority || age || left.dataset.id.localeCompare(right.dataset.id);" in main.JS
