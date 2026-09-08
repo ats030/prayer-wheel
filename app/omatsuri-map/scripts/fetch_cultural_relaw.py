@@ -6,6 +6,8 @@ import json
 import time
 import re
 from pathlib import Path
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 OUTPUT_DIR = Path("/home/ats030/app/omatsuri-map/data")
 
@@ -33,6 +35,17 @@ def fetch_wikidata_p3259_url(qid: str) -> str | None:
     
     return None
 
+def geocode_address(address: str) -> tuple[float, float] | None:
+    """住所から緯度経度を取得（OpenStreetMap Nominatim API）"""
+    try:
+        geolocator = Nominatim(user_agent="OmatsuriMap/1.0", timeout=5)
+        location = geolocator.geocode(address)
+        if location:
+            return (location.latitude, location.longitude)
+    except (GeocoderTimedOut, GeocoderServiceError):
+        pass
+    return None
+
 def fetch_cultural_data(wikidata_ref_url: str) -> dict:
     """Wikidataの証拠URLから文化庁データを抽出"""
     headers = {"User-Agent": "OmatsuriMap/1.0"}
@@ -41,19 +54,23 @@ def fetch_cultural_data(wikidata_ref_url: str) -> dict:
     response.raise_for_status()
     html = response.text
     
-    cultural_data = {"name": "", "prefecture": "", "date": "", "url": wikidata_ref_url}
+    cultural_data = {"name": "", "prefecture": "", "date": "", "url": wikidata_ref_url, "address": ""}
     
     match = re.search(r'<span id="title1"[^>]*>([^<]+)</span>', html)
     if match:
         cultural_data["name"] = match.group(1).strip()
     
-    match = re.search(r'所在都道府県、地域[\s\S]*?<td width="310" class="detail-td">[\s\S]*?(長崎県|北海道|青森県|岩手県|宮城県|秋田県|山形県|福島県|茨城県|栃木県|群馬県|埼玉県|千葉県|東京都|神奈川県|新潟県|富山県|石川県|福井県|山梨県|長野県|岐阜県|静岡県|愛知県|三重県|滋賀県|京都府|大阪府|兵庫県|奈良県|和歌山県|鳥取県|島根県|岡山県|広島県|山口県|徳島県|香川県|愛媛県|高知県|福岡県|佐賀県|長崎県|熊本県|大分県|宮崎県|鹿児島県|沖縄県)[\s\S]*?</td>', html)
+    match = re.search(r'所在都道府県、地域[\s\S]*?>([^<]+県)', html)
     if match:
-        cultural_data["prefecture"] = match.group(1)
+        cultural_data["prefecture"] = match.group(1).strip()
     
     match = re.search(r'公開日：([^<]+)', html)
     if match:
         cultural_data["date"] = match.group(1).strip()
+    
+    match = re.search(r'所在地[\s\S]*?<td[^>]*class="detail-td">[\s\S]*?([^<]+)</td>', html)
+    if match:
+        cultural_data["address"] = match.group(1).strip()
     
     return cultural_data
 
@@ -69,7 +86,7 @@ def main():
     
     cultural_relaw_results = []
     
-    for festival in festivals[:20]:
+    for festival in festivals:
         qid = festival.get("qid")
         label_ja = festival.get("label_ja", "")
         
@@ -101,9 +118,18 @@ def main():
                         "prefecture": cultural_data["prefecture"],
                         "date": cultural_data["date"],
                         "cultural_type": "重要無形民俗文化財",
-                        "url": ref_url
+                        "url": ref_url,
+                        "address": cultural_data.get("address", "")
                     }
                 }
+                if not festival.get("latitude") or not festival.get("longitude"):
+                    address = f"{cultural_data['prefecture']}{cultural_data.get('address', '')}"
+                    if address:
+                        coords = geocode_address(address)
+                        if coords:
+                            result["latitude"] = coords[0]
+                            result["longitude"] = coords[1]
+                            print(f"    GeoCoding 成功: {coords[0]:.6f}, {coords[1]:.6f}")
                 cultural_relaw_results.append(result)
                 
                 print(f"  取得成功:")
