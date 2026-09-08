@@ -17,7 +17,8 @@ Always use non-interactive forms: `cp -f`, `mv -f`, `rm -f`/`rm -rf`,
 - Offer at most three alternatives; recommend first with reason and drawback. Bound tool output and inspect the first causal error before widening.
 - Improve context and validation before changing model, context, compaction, or reasoning settings.
 - Before reporting work complete, run `git diff --stat` and confirm every changed file is in scope; drop or revert anything that isn't.
-- Notice an unrequested improvement mid-task? Don't fix it inline — file it via `bd create --deps discovered-from:<id>` and keep going on the original issue.
+- Notice an unrequested defect mid-task? Fix it in the original issue only when every condition holds: it blocks the requested outcome or reproduces in the same component or call path; there is reproducible evidence for the symptom and cause; it does not materially expand an API, data format, permission boundary, external operation, or product decision; and the original task's validation can prove the fix. Add a comment to the original issue with the symptom, fix, and validation. Separate it from the requested change in the commit and final handoff.
+- For an unrequested issue outside those conditions, create a linked issue with `bd create --deps discovered-from:<id>` and continue the original issue. If the boundary is unclear, treat it as separate work.
 - After a non-trivial implementation, run `/code-review` (medium) before declaring the task done.
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:full hash:f65d5d33 -->
