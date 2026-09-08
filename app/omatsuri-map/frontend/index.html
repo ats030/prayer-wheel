@@ -126,6 +126,36 @@
 
         // Cache for festival images
         const imageCache = {};
+        const CACHE_KEY = 'omatsuri-map-image-cache-v1';
+        const DEFAULT_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2M2YzZjNiI+PHBhdGggZD0iTTEyIDJTNiAyIDYgNnYxMmMwIDQuNDEgMy41OCA4IDguNCA4czguNC0zLjU5IDguNC04VjZjMC00LjQzLTMuNTgtOC04LjQtOHptMCAxNGMtMy4zMSAwLTYtMi42OS02LTYgMC0zLjMxIDIuNjktNiA2LTZzNiAyLjY5IDYgNmMtMCAzLjMxLTIuNjkgNi02IDZ6bTAtOWMtMS4xMSAwLTItLjg5LTItMnMuODktMiAyLTJzMiAuODkgMiAyLS44OSAyLTIGZD0iTTQgNGg1djVIM3ptNSA5aDR2NWgtNHptNi05aDR2NWgtNHptLTUgOWg0djVoLTR6Ii8+PC9zdmc+';
+
+        // Load cached images from localStorage on startup
+        try {
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                try {
+                    const parsed = JSON.parse(cached);
+                    Object.assign(imageCache, parsed);
+                } catch (e) {
+                    console.log('Failed to parse image cache:', e);
+                }
+            }
+        } catch (e) {
+            console.log('Failed to load image cache:', e);
+        }
+
+        // Save cache periodically
+        let saveTimeout;
+        function saveCache() {
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                try {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(imageCache));
+                } catch (e) {
+                    console.log('Failed to save image cache:', e);
+                }
+            }, 500);
+        }
 
         // Fetch festival image from Wikidata P18 with license check
         async function fetchFestivalImage(qid, labelJa) {
@@ -139,55 +169,59 @@
                 const wdResponse = await fetch(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${qid}&props=claims&format=json`);
                 const wdData = await wdResponse.json();
                 const claims = wdData.entities[qid]?.claims;
-                
+
                 if (!claims || !claims.P18 || claims.P18.length === 0) {
                     // Fallback: try Wikipedia page image
                     const wikiImage = await fetchWikipediaImage(labelJa);
-                    imageCache[qid] = wikiImage;
-                    return wikiImage;
+                    imageCache[qid] = wikiImage || DEFAULT_IMAGE;
+                    saveCache();
+                    return wikiImage || DEFAULT_IMAGE;
                 }
 
                 // Get the first image filename
                 const imageFile = claims.P18[0].mainsnak.datavalue?.value;
                 if (!imageFile) {
                     const wikiImage = await fetchWikipediaImage(labelJa);
-                    imageCache[qid] = wikiImage;
-                    return wikiImage;
+                    imageCache[qid] = wikiImage || DEFAULT_IMAGE;
+                    saveCache();
+                    return wikiImage || DEFAULT_IMAGE;
                 }
 
                 // Get license info for the Commons image
                 const encodedFileName = encodeURIComponent(imageFile.replace(/ /g, '_'));
                 const licenseResponse = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=extmetadata&iiextmetadatafilter=License&format=json&titles=File:${encodedFileName}`);
                 const licenseData = await licenseResponse.json();
-                
+
                 const pages = licenseData.query?.pages;
                 const page = pages ? pages[Object.keys(pages)[0]] : null;
                 const licenseInfo = page?.imageinfo?.[0]?.extmetadata?.License?.value;
-                
+
                 // Check if license allows display (exclude "Copyrighted")
                 if (licenseInfo && licenseInfo.toLowerCase().includes('copyrighted')) {
                     console.log(`Image for ${qid} is copyrighted, not displaying`);
                     imageCache[qid] = null;
+                    saveCache();
                     return null;
                 }
 
                 // Get image thumbnail URL
                 const thumbResponse = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url&iiurlwidth=500&format=json&titles=File:${encodedFileName}`);
                 const thumbData = await thumbResponse.json();
-                
+
                 const thumbPages = thumbData.query?.pages;
                 const thumbPage = thumbPages ? thumbPages[Object.keys(thumbPages)[0]] : null;
                 const imageUrl = thumbPage?.imageinfo?.[0]?.thumburl || thumbPage?.imageinfo?.[0]?.url;
-                
-                imageCache[qid] = imageUrl;
-                return imageUrl;
+
+                imageCache[qid] = imageUrl || DEFAULT_IMAGE;
+                saveCache();
+                return imageUrl || DEFAULT_IMAGE;
 
             } catch (e) {
                 console.log(`Failed to fetch image for ${qid}:`, e);
-                // Fallback to Wikipedia page image
                 const wikiImage = await fetchWikipediaImage(labelJa);
-                imageCache[qid] = wikiImage;
-                return wikiImage;
+                imageCache[qid] = wikiImage || DEFAULT_IMAGE;
+                saveCache();
+                return imageCache[qid];
             }
         }
 
@@ -196,10 +230,13 @@
             try {
                 const response = await fetch(`https://ja.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${encodeURIComponent(title)}&pithumbsize=500&format=json`);
                 const data = await response.json();
-                const pages = data.query.pages;
+                const pages = data.query?.pages;
                 for (const page in pages) {
-                    if (pages[page].thumbnail) {
-                        return pages[page].thumbnail.source;
+                    const p = pages[page];
+                    // Skip missing pages
+                    if (p.missing) continue;
+                    if (p.thumbnail) {
+                        return p.thumbnail.source;
                     }
                 }
             } catch (e) {
@@ -212,14 +249,14 @@
         async function showInfoPanel(festival) {
             const infoPanel = document.getElementById('info-panel');
             const infoContent = document.getElementById('info-content');
-            
+
             currentFestival = festival;
-            
+
             const wikidataUrl = `https://www.wikidata.org/wiki/${festival.qid}`;
             const wikipediaUrl = `https://ja.wikipedia.org/wiki/${encodeURIComponent(festival.label_ja)}`;
-            
+
             let descriptionHtml = festival.description ? `<div class="description">${festival.description}</div>` : '';
-            
+
             infoContent.innerHTML = `
                 <div class="info-card">
                     <h3>${festival.label_ja}</h3>
@@ -228,18 +265,24 @@
                     <p>${festival.date}</p>
                     ${descriptionHtml}
                     <div class="links">
-                        <a href="javascript:void(0)" data-url="${wikidataUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikidata</a> | 
+                        <a href="javascript:void(0)" data-url="${wikidataUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikidata</a> |
                         <a href="javascript:void(0)" data-url="${wikipediaUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikipedia</a>
                     </div>
                     <div id="festival-image-container" style="margin-top:10px;"></div>
                 </div>
             `;
-            
+
             const imageUrl = await fetchFestivalImage(festival.qid, festival.label_ja);
             if (imageUrl) {
-                document.getElementById('festival-image-container').innerHTML = `<img src="${imageUrl}" style="max-width:100%; border-radius:8px;">`;
+                document.getElementById('festival-image-container').innerHTML = `<div style="cursor:pointer;" onclick="showFestivalImageLightbox('${imageUrl.replace(/'/g, "\\'")}')">
+                    <img src="${imageUrl}" style="max-width:100%; border-radius:8px;" onerror="this.src='${DEFAULT_IMAGE.replace(/'/g, "\\'")}'" title="Click to view full size">
+                </div>`;
+            } else {
+                document.getElementById('festival-image-container').innerHTML = `<div style="cursor:pointer;" onclick="showFestivalImageLightbox('${DEFAULT_IMAGE.replace(/'/g, "\\'")}')">
+                    <img src="${DEFAULT_IMAGE}" style="max-width:100%; border-radius:8px;" title="Click to view full size">
+                </div>`;
             }
-            
+
             infoPanel.classList.remove('hidden');
             switchTab('info');
         }
@@ -280,10 +323,10 @@
             filtered.forEach(festival => {
                 const marker = L.marker([festival.latitude, festival.longitude]).addTo(map);
                 marker.on('click', () => showInfoPanel(festival));
-                
+
                 const wikidataUrl = `https://www.wikidata.org/wiki/${festival.qid}`;
                 const wikipediaUrl = `https://ja.wikipedia.org/wiki/${encodeURIComponent(festival.label_ja)}`;
-                
+
                 let popupContent = `
                     <div style="padding: 10px;">
                         <h3 style="margin: 0 0 5px 0; font-size: 16px;">${festival.label_ja}</h3>
@@ -291,18 +334,98 @@
                         <p style="margin: 0 0 5px 0; color: #666;">${festival.prefecture}</p>
                         <p style="margin: 0 0 5px 0; color: #666;">${festival.date}</p>
                         <div style="margin-top: 8px; font-size: 12px;">
-                            <a href="javascript:void(0)" data-url="${wikidataUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikidata</a> | 
+                            <a href="javascript:void(0)" data-url="${wikidataUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikidata</a> |
                             <a href="javascript:void(0)" data-url="${wikipediaUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikipedia</a>
                         </div>
                     </div>
                 `;
-                
+
                 marker.bindPopup(popupContent);
                 markers.push(marker);
             });
         }
 
+        // Lightbox for festival images
+        let lightboxOverlay;
+        let lightboxImage;
+
+        function createLightbox() {
+            if (lightboxOverlay) return;
+
+            const container = document.createElement('div');
+            container.id = 'lightbox-overlay';
+            container.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.95);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+                padding: 20px;
+                box-sizing: border-box;
+            `;
+
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '×';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: #fff;
+                border: none;
+                font-size: 40px;
+                width: 50px;
+                height: 50px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                color: #333;
+            `;
+
+            closeBtn.onclick = hideLightbox;
+
+            lightboxImage = document.createElement('img');
+            lightboxImage.style.cssText = `
+                max-width: 90vw;
+                max-height: 80vh;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            `;
+            lightboxImage.onclick = (e) => e.stopPropagation();
+
+            container.appendChild(closeBtn);
+            container.appendChild(lightboxImage);
+            container.onclick = hideLightbox;
+            document.body.appendChild(container);
+            lightboxOverlay = container;
+        }
+
+        function showFestivalImageLightbox(imageUrl) {
+            if (!lightboxOverlay) {
+                createLightbox();
+            }
+            lightboxImage.src = imageUrl;
+            lightboxOverlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideLightbox() {
+            if (lightboxOverlay) {
+                lightboxOverlay.style.display = 'none';
+                lightboxImage.src = '';
+                document.body.style.overflow = '';
+            }
+        }
+
         window.renderMapMarkers = renderMarkers;
+        window.showFestivalImageLightbox = showFestivalImageLightbox;
     </script>
 </body>
 </html>
