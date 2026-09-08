@@ -11,6 +11,11 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 OUTPUT_DIR = Path("/home/ats030/app/omatsuri-map/data")
 
+PREFECTURE_PATTERN = (
+    r"(?:北海道|東京都|京都府|大阪府|"
+    r"(?:青森|岩手|宮城|秋田|山形|福島|茨城|栃木|群馬|埼玉|千葉|神奈川|新潟|富山|石川|福井|山梨|長野|岐阜|静岡|愛知|三重|滋賀|兵庫|奈良|和歌山|鳥取|島根|岡山|広島|山口|徳島|香川|愛媛|高知|福岡|佐賀|長崎|熊本|大分|宮崎|鹿児島|沖縄)県)"
+)
+
 def fetch_wikidata_p3259_url(qid: str) -> str | None:
     """WikidataからP3259の証拠URLを取得"""
     url = "https://www.wikidata.org/w/api.php"
@@ -60,7 +65,7 @@ def fetch_cultural_data(wikidata_ref_url: str) -> dict:
     if match:
         cultural_data["name"] = match.group(1).strip()
     
-    match = re.search(r'所在都道府県、地域[\s\S]*?>([^<]+県)', html)
+    match = re.search(rf'所在都道府県、地域[\s\S]*?>({PREFECTURE_PATTERN})', html)
     if match:
         cultural_data["prefecture"] = match.group(1).strip()
     
