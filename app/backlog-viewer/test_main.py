@@ -341,6 +341,26 @@ class TestPage:
     def test_select_all_is_scoped_to_its_own_table(self):
         assert "source.closest('table').querySelectorAll('.pick')" in main.JS
 
+    def test_all_backlog_tables_support_the_shared_sort_control(self):
+        issues = main.parse_issues([
+            issue("p2-old", iso(2026, 7, 1), priority=2),
+            issue("p0-new", iso(2026, 8, 20), priority=0),
+            issue("wait", iso(2026, 8, 1), status="deferred", priority=1),
+            issue("record", iso(2026, 8, 2), status="deferred", priority=3,
+                  title="record \u51cd\u7d50\u4e2d"),
+        ])
+        page = main.render_page(issues, date(2026, 8, 24))
+        assert "<select id=\"sort-order\"" in page
+        assert "<option value=\"age\" selected>\u6ede\u7559\u9806</option>" in page
+        assert "<option value=\"priority\">\u512a\u5148\u9806</option>" in page
+        assert page.count("<tbody data-sortable>") == 3
+        assert "data-age=\"54\" data-priority=\"2\" data-id=\"p2-old\"" in page
+        assert "function compareRows(left, right, order)" in main.JS
+        assert "return priority || age || left.dataset.id.localeCompare(right.dataset.id);" in main.JS
+        assert "sortTables(sort.value);" in main.JS
+        assert "sort-description" in main.JS
+        assert "localStorage" not in main.JS
+
     def test_deferred_deadline_is_visible_on_the_page(self, monkeypatch):
         from fastapi.testclient import TestClient
 

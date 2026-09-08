@@ -627,6 +627,12 @@ button:focus-visible, summary:focus-visible, input:focus-visible {
 button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 button.primary:hover { background: var(--accent-hover); }
 button:disabled { opacity: .55; cursor: not-allowed; }
+select {
+  background: var(--raised); color: var(--text); border: 1px solid var(--border-strong);
+  border-radius: 6px; padding: 5px 28px 5px 10px; font: inherit; cursor: pointer;
+}
+select:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
+.sort-control { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
 textarea {
   width: 100%; background: var(--raised); color: var(--text); border: 1px solid var(--border);
   border-radius: 6px; padding: 8px 10px; font-family: var(--font-mono);
@@ -690,6 +696,18 @@ function toggleAll(source) {
   source.closest('table').querySelectorAll('.pick').forEach(e => { e.checked = source.checked; });
   refresh();
 }
+function compareRows(left, right, order) {
+  const age = Number(right.dataset.age) - Number(left.dataset.age);
+  if (order === "age") return age || left.dataset.id.localeCompare(right.dataset.id);
+  const priority = Number(left.dataset.priority) - Number(right.dataset.priority);
+  return priority || age || left.dataset.id.localeCompare(right.dataset.id);
+}
+function sortTables(order) {
+  document.querySelectorAll("tbody[data-sortable]").forEach(body => {
+    Array.from(body.rows).sort((left, right) => compareRows(left, right, order))
+      .forEach(row => body.appendChild(row));
+  });
+}
 function chartToLatest(move) {
   document.querySelectorAll('.chart').forEach(el => {
     const scrollable = el.scrollWidth > el.clientWidth + 1;
@@ -698,6 +716,12 @@ function chartToLatest(move) {
   });
 }
 document.addEventListener('DOMContentLoaded', () => {
+  const sort = document.getElementById('sort-order');
+  sort.addEventListener('change', () => {
+    sortTables(sort.value);
+    document.getElementById('sort-description').textContent =
+      sort.value === 'priority' ? '優先順' : '滞留順';
+  });
   chartToLatest(true);
   window.addEventListener('resize', () => chartToLatest(false));
   document.querySelectorAll('.pick').forEach(e => e.addEventListener('change', refresh));
@@ -783,7 +807,8 @@ def render_page(issues: list[Issue], today: date) -> str:
         }.get(r.actor, "")
         wait_chip = '<span class="chip gray">外部待ち</span>' if r.deferred else ""
         return (
-            "<tr>"
+            f'<tr data-age="{r.age_days}" data-priority="{r.priority}" '
+            f'data-id="{html.escape(r.id, quote=True)}">'
             f'<td><input type="checkbox" class="pick" value="{html.escape(r.id)}" '
             f'aria-label="{html.escape(r.id)} を選択"></td>'
             f'<td class="id">{html.escape(r.id)}</td>'
@@ -803,7 +828,7 @@ def render_page(issues: list[Issue], today: date) -> str:
             '<th><input type="checkbox" onchange="toggleAll(this)" aria-label="この一覧をすべて選択"></th>'
             '<th>ID</th><th class="num">滞留</th><th class="num hide-sm">無更新</th>'
             '<th class="num">復帰</th><th>P</th><th class="hide-sm">種別</th><th>タイトル</th>'
-            f'</tr></thead><tbody>{"".join(_row(r) for r in table_rows)}</tbody></table></div>'
+            f'</tr></thead><tbody data-sortable>{"".join(_row(r) for r in table_rows)}</tbody></table></div>'
         )
 
     analysis_note = (
@@ -825,8 +850,17 @@ def render_page(issues: list[Issue], today: date) -> str:
   <div class="tiles">{tile_html}</div>
 
   <div class="section-head">
+    <label class="sort-control" for="sort-order">並び順
+      <select id="sort-order" aria-label="タスク一覧の並び順">
+        <option value="age" selected>滞留順</option>
+        <option value="priority">優先順</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="section-head">
     <h2>いま判断するタスク</h2>
-    <span class="section-count">{len(action_rows)}件 · 滞留順</span>
+    <span class="section-count">{len(action_rows)}件 · <span id="sort-description">滞留順</span></span>
   </div>
   {_table(action_rows)}
 
