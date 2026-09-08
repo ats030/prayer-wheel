@@ -46,6 +46,7 @@ def run(loaded_sequence, *, target=TARGET):
     ka.target_model = lambda: target
     ka.loaded_models = lambda: seq.pop(0) if seq else (seq[-1] if seq else None)
     ka.post = lambda path, payload: calls.append((path, payload)) or {"done": True}
+    ka.time.sleep = lambda seconds: None
     rc = ka.main()
     return rc, len(calls)
 
@@ -61,25 +62,30 @@ check("終了コード", rc, 3)
 check("post を呼ばない", calls, 0)
 
 print("3. 何も載っていないなら固定する")
-rc, calls = run([{}, {TARGET: FAR}])
+rc, calls = run([{}, {}, {TARGET: FAR}])
 check("終了コード", rc, 0)
 check("post を1回呼ぶ", calls, 1)
 
-print("4. 目的のモデルが載っているが未固定なら固定し直す (蹴らない)")
+print("4. 再確認で別のモデルが現れたら見送る")
+rc, calls = run([{}, {OTHER: SOON}])
+check("終了コード", rc, 3)
+check("post を呼ばない", calls, 0)
+
+print("5. 目的のモデルが載っているが未固定なら固定し直す (蹴らない)")
 rc, calls = run([{TARGET: SOON}, {TARGET: FAR}])
 check("終了コード", rc, 0)
 check("post を1回呼ぶ", calls, 1)
 
-print("5. /api/ps に届かないなら何もしない")
+print("6. /api/ps に届かないなら何もしない")
 rc, calls = run([None])
 check("終了コード", rc, 3)
 check("post を呼ばない", calls, 0)
 
-print("6. 固定を要求したのに反映されないのは障害")
-rc, calls = run([{}, {}])
+print("7. 固定を要求したのに反映されないのは障害")
+rc, calls = run([{}, {}, {}])
 check("終了コード", rc, 1)
 
-print("7. 別のモデルと目的のモデルが両方載っているなら固定してよい")
+print("8. 別のモデルと目的のモデルが両方載っているなら固定してよい")
 rc, calls = run([{TARGET: SOON, OTHER: SOON}, {TARGET: FAR, OTHER: SOON}])
 check("終了コード", rc, 0)
 check("post を1回呼ぶ", calls, 1)
