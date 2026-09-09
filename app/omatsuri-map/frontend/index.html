@@ -144,6 +144,19 @@
             console.log('Failed to load image cache:', e);
         }
 
+        // Get license display name
+        function getLicenseName(licenseId) {
+            const licenseMap = {
+                'cc-by-4.0': 'Creative Commons BY 4.0',
+                'cc-by-3.0': 'Creative Commons BY 3.0',
+                'cc-by-sa-4.0': 'Creative Commons BY-SA 4.0',
+                'cc-by-sa-3.0': 'Creative Commons BY-SA 3.0',
+                'cc-zero-1.0': 'CC0 Public Domain',
+                'cc0-1.0': 'CC0 Public Domain'
+            };
+            return licenseMap[licenseId.toLowerCase()] || licenseId;
+        }
+
         // Save cache periodically
         let saveTimeout;
         function saveCache() {
@@ -155,6 +168,20 @@
                     console.log('Failed to save image cache:', e);
                 }
             }, 500);
+        }
+
+        // Normalize image result to {url, license} format
+        function normalizeImageResult(result, qid) {
+            if (!result) {
+                return { url: DEFAULT_IMAGE, license: null };
+            }
+            if (typeof result === 'string') {
+                return { url: result, license: null };
+            }
+            if (result.url) {
+                return result;
+            }
+            return { url: DEFAULT_IMAGE, license: null };
         }
 
         // Fetch festival image from Wikidata P18 with license check
@@ -173,18 +200,20 @@
                 if (!claims || !claims.P18 || claims.P18.length === 0) {
                     // Fallback: try Wikipedia page image
                     const wikiImage = await fetchWikipediaImage(labelJa);
-                    imageCache[qid] = wikiImage || DEFAULT_IMAGE;
+                    const result = normalizeImageResult(wikiImage, qid);
+                    imageCache[qid] = result;
                     saveCache();
-                    return wikiImage || DEFAULT_IMAGE;
+                    return result;
                 }
 
                 // Get the first image filename
                 const imageFile = claims.P18[0].mainsnak.datavalue?.value;
                 if (!imageFile) {
                     const wikiImage = await fetchWikipediaImage(labelJa);
-                    imageCache[qid] = wikiImage || DEFAULT_IMAGE;
+                    const result = normalizeImageResult(wikiImage, qid);
+                    imageCache[qid] = result;
                     saveCache();
-                    return wikiImage || DEFAULT_IMAGE;
+                    return result;
                 }
 
                 // Get license info for the Commons image
@@ -200,9 +229,10 @@
                 const allowedLicenses = ['cc-by-4.0', 'cc-by-3.0', 'cc-by-sa-4.0', 'cc-by-sa-3.0', 'cc0-1.0'];
                 if (licenseInfo && !allowedLicenses.some(l => licenseInfo.toLowerCase().includes(l))) {
                     console.log(`Image for ${qid} has license: ${licenseInfo}, not displaying`);
-                    imageCache[qid] = null;
+                    const result = { url: null, license: licenseInfo };
+                    imageCache[qid] = result;
                     saveCache();
-                    return null;
+                    return result;
                 }
 
                 // Get image thumbnail URL
@@ -216,21 +246,24 @@
                 if (!imageUrl) {
                     console.log(`No image URL for ${qid}, fallback to Wikipedia`);
                     const wikiImage = await fetchWikipediaImage(labelJa);
-                    imageCache[qid] = wikiImage || DEFAULT_IMAGE;
+                    const result = normalizeImageResult(wikiImage, qid);
+                    imageCache[qid] = result;
                     saveCache();
-                    return { url: wikiImage, license: null };
+                    return result;
                 }
 
-                imageCache[qid] = { url: imageUrl, license: licenseInfo || null };
+                const result = { url: imageUrl, license: licenseInfo || null };
+                imageCache[qid] = result;
                 saveCache();
-                return { url: imageUrl, license: licenseInfo || null };
+                return result;
 
             } catch (e) {
                 console.log(`Failed to fetch image for ${qid}:`, e);
                 const wikiImage = await fetchWikipediaImage(labelJa);
-                imageCache[qid] = { url: wikiImage || DEFAULT_IMAGE, license: null };
+                const result = normalizeImageResult(wikiImage, qid);
+                imageCache[qid] = result;
                 saveCache();
-                return imageCache[qid];
+                return result;
             }
         }
 
@@ -284,8 +317,9 @@
             if (imageResult && imageResult.url) {
                 let licenseHtml = '';
                 if (imageResult.license) {
-                    const licenseName = imageResult.license.toLowerCase().replace(/-/g, ' ').replace(/\d/g, '');
-                    licenseHtml = `<div style="font-size:11px; color:#666; margin-top:5px;">License: ${imageResult.license}</div>`;
+                    const licenseName = getLicenseName(imageResult.license);
+                    const licenseLink = `https://spdx.org/licenses/${imageResult.license}.html`;
+                    licenseHtml = `<div style="font-size:11px; color:#666; margin-top:5px;">License: <a href="${licenseLink}" target="_blank" style="color:#007bff;">${licenseName}</a></div>`;
                 }
                 document.getElementById('festival-image-container').innerHTML = `
                     <div style="cursor:pointer;" onclick="showFestivalImageLightbox('${imageResult.url.replace(/'/g, "\\'")}')">
@@ -443,6 +477,7 @@
 
         window.renderMapMarkers = renderMarkers;
         window.showFestivalImageLightbox = showFestivalImageLightbox;
+        window.getLicenseName = getLicenseName;
     </script>
 </body>
 </html>
