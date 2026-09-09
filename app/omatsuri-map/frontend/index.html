@@ -196,8 +196,14 @@
                 const page = pages ? pages[Object.keys(pages)[0]] : null;
                 const licenseInfo = page?.imageinfo?.[0]?.extmetadata?.License?.value;
 
-                // Skip license check for now - just get the image
-                // const licenseInfo = page?.imageinfo?.[0]?.extmetadata?.License?.value;
+                // Check if license allows commercial use (CC-BY, CC0, CC-BY-SA only)
+                const allowedLicenses = ['cc-by-4.0', 'cc-by-3.0', 'cc-by-sa-4.0', 'cc-by-sa-3.0', 'cc0-1.0'];
+                if (licenseInfo && !allowedLicenses.some(l => licenseInfo.toLowerCase().includes(l))) {
+                    console.log(`Image for ${qid} has license: ${licenseInfo}, not displaying`);
+                    imageCache[qid] = null;
+                    saveCache();
+                    return null;
+                }
 
                 // Get image thumbnail URL
                 const thumbResponse = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url&iiurlwidth=500&format=json&titles=File:${encodedFileName}`);
