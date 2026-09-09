@@ -20,7 +20,7 @@
     "date": "日付未定",
     "cultural_relaw": {
       "id": "",
-      "name": "重要無形民俗文化財",
+      "name": "",
       "prefecture": "長崎県",
       "date": "",
       "cultural_type": "重要無形民俗文化財",
@@ -39,9 +39,9 @@
     "date": "日付未定",
     "cultural_relaw": {
       "id": "",
-      "name": "重要無形民俗文化財",
+      "name": "",
       "prefecture": "青森県",
-      "date": "毎年８月２～７日（※指定当時・お出掛けの際は該当する市町村教育委員会などへご確認ください）",
+      "date": "",
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/3",
       "address": ""
@@ -138,9 +138,9 @@
     "date": "日付未定",
     "cultural_relaw": {
       "id": "",
-      "name": "重要無形民俗文化財",
+      "name": "",
       "prefecture": "青森県",
-      "date": "毎年８月１～７日（※指定当時・お出掛けの際は該当する市町村教育委員会などにご確認ください）",
+      "date": "",
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/4",
       "address": ""
@@ -187,9 +187,9 @@
     "date": "日付未定",
     "cultural_relaw": {
       "id": "",
-      "name": "重要無形民俗文化財",
+      "name": "",
       "prefecture": "佐賀県",
-      "date": "毎年１１月２～４日（※指定当時・お出掛けの際は該当する市町村教育委員会などへご確認ください）",
+      "date": "",
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/138",
       "address": ""
@@ -256,9 +256,9 @@
     "date": "日付未定",
     "cultural_relaw": {
       "id": "",
-      "name": "重要無形民俗文化財",
+      "name": "",
       "prefecture": "秋田県",
-      "date": "毎年８月５～７日（※指定当時・お出掛けの際は該当する市町村教育委員会などにご確認ください）",
+      "date": "",
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/18",
       "address": ""
@@ -275,9 +275,9 @@
     "date": "日付未定",
     "cultural_relaw": {
       "id": "",
-      "name": "重要無形民俗文化財",
+      "name": "",
       "prefecture": "福岡県",
-      "date": "毎年７月１～１５日（※指定当時・お出掛けの際は該当する市町村教育委員会などへご確認ください）",
+      "date": "",
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/133",
       "address": ""
@@ -324,9 +324,9 @@
     "date": "日付未定",
     "cultural_relaw": {
       "id": "",
-      "name": "重要無形民俗文化財",
+      "name": "",
       "prefecture": "富山県",
-      "date": "毎年５月１日（※指定当時・お出掛けの際は該当する市町村教育委員会などにご確認ください）",
+      "date": "",
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/56",
       "address": ""
@@ -460,7 +460,16 @@
     "latitude": 34.61135,
     "longitude": 135.492453,
     "description": "住吉大社の御田植神事は、毎年5月1日から3日まで大阪市住吉区の住吉大社で行われる伝統的な田植儀礼です。  \n神職と氏子が神聖な田んぼで古式ゆかしく田植えを行い、五穀豊穣と豊作を祈願します。  \n国の重要無形民俗文化財に指定されており、約600年の歴史を持つ貴重な農耕信仰の儀式です。",
-    "date": "日付未定"
+    "date": "日付未定",
+    "cultural_relaw": {
+      "id": "",
+      "name": "",
+      "prefecture": "大阪府",
+      "date": "",
+      "cultural_type": "重要無形民俗文化財",
+      "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/103",
+      "address": ""
+    }
   },
   {
     "qid": "Q11280396",
@@ -533,9 +542,9 @@
     "date": "日付未定",
     "cultural_relaw": {
       "id": "",
-      "name": "重要無形民俗文化財",
+      "name": "",
       "prefecture": "山梨県",
-      "date": "毎年８月２６・２７日（※指定当時・お出掛けの際は該当する市町村教育委員会などにご確認ください）",
+      "date": "",
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/00000881",
       "address": ""
@@ -2572,7 +2581,7 @@
     "date": "日付未定",
     "cultural_relaw": {
       "id": "",
-      "name": "重要無形民俗文化財",
+      "name": "",
       "prefecture": "奈良県",
       "date": "",
       "cultural_type": "重要無形民俗文化財",
