@@ -1,6 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <text id="kago-moji" x="50" y="66" font-family="'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif" font-size="46" font-weight="900" text-anchor="middle">祭</text>
+    <clipPath id="kago-moji-clip"><use href="#kago-moji"/></clipPath>
+  </defs>
   <rect x="16" y="10" width="68" height="14" rx="3" fill="#171717"/>
   <rect x="21" y="22" width="58" height="56" rx="17" fill="#d71920"/>
-  <text x="50" y="66" fill="#fff" font-family="'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif" font-size="46" font-weight="900" text-anchor="middle">祭</text>
+  <use href="#kago-moji" fill="#fff" stroke="#fff" stroke-width="1.5" paint-order="stroke"/>
+  <g clip-path="url(#kago-moji-clip)" fill="none" stroke="#d71920" stroke-width="1.6">
+    <path d="M22 43 76 25M22 54 79 35M24 66 78 48"/>
+  </g>
   <rect x="16" y="76" width="68" height="14" rx="3" fill="#171717"/>
 </svg>
