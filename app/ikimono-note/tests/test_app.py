@@ -2880,6 +2880,12 @@ def test_a_disabled_common_control_does_not_look_hoverable():
     assert ".control:hover:not(:disabled)" in css
 
 
+def test_style_snapshot_waits_for_web_fonts_before_collecting():
+    source = Path("tests/style_snapshot.py").read_text(encoding="utf-8")
+    assert source.index('page.evaluate("document.fonts.ready")') < source.index(
+        "page.wait_for_timeout(600)")
+
+
 def test_the_public_pages_can_be_shared_and_found():
     """商用の基盤へ移した動機は「人に届くこと」だった。
 

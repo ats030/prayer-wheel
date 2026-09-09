@@ -123,6 +123,10 @@ def capture(out_path: str) -> None:
                     # PlantNet の選択肢の出し入れが実行ごとに変わり、
                     # 整理による差分と見分けられなくなる。
                     page.wait_for_load_state("networkidle")
+                    # networkidle だけでは Web フォントの適用完了を保証しない。ここを
+                    # 待たないとフォールバック書体での折り返しが高さや幅の差分として
+                    # 混ざり、CSS の変更と区別できなくなる。
+                    page.evaluate("document.fonts.ready")
                     page.wait_for_timeout(600)
                     # 合言葉は毎回変わる。画面の名前には残さない
                     name = "/s/*" if path.startswith("/s/") else path
