@@ -170,94 +170,113 @@
             }
         }
 
-        document.getElementById("prevDay").addEventListener("click", () => {
-            currentDate.setDate(currentDate.getDate() - 1);
-            if (filterMode !== 'date') {
-                filterMode = 'today';
-                document.getElementById("btnToday").classList.add("active");
-                document.getElementById("btnAll").classList.remove("active");
+        document.addEventListener("DOMContentLoaded", () => {
+            const prevDayBtn = document.getElementById("prevDay");
+            const todayBtn = document.getElementById("today");
+            const nextDayBtn = document.getElementById("nextDay");
+            const dateFilter = document.getElementById("dateFilter");
+            const todayOnly = document.getElementById("todayOnly");
+            const btnToday = document.getElementById("btnToday");
+            const btnAll = document.getElementById("btnAll");
+
+            if (prevDayBtn) {
+                prevDayBtn.addEventListener("click", () => {
+                    currentDate.setDate(currentDate.getDate() - 1);
+                    if (filterMode !== 'date') {
+                        filterMode = 'today';
+                        btnToday.classList.add("active");
+                        btnAll.classList.remove("active");
+                    }
+                    updateDisplay();
+                    applyFilterToMap();
+                });
             }
-            updateDisplay();
-            applyFilterToMap();
-        });
 
-        document.getElementById("nextDay").addEventListener("click", () => {
-            currentDate.setDate(currentDate.getDate() + 1);
-            if (filterMode !== 'date') {
-                filterMode = 'today';
-                document.getElementById("btnToday").classList.add("active");
-                document.getElementById("btnAll").classList.remove("active");
+            if (nextDayBtn) {
+                nextDayBtn.addEventListener("click", () => {
+                    currentDate.setDate(currentDate.getDate() + 1);
+                    if (filterMode !== 'date') {
+                        filterMode = 'today';
+                        btnToday.classList.add("active");
+                        btnAll.classList.remove("active");
+                    }
+                    updateDisplay();
+                    applyFilterToMap();
+                });
             }
-            updateDisplay();
-            applyFilterToMap();
-        });
 
-        document.getElementById("today").addEventListener("click", () => {
-            currentDate = new Date();
-            currentDate.setHours(0, 0, 0, 0);
-            if (filterMode !== 'date') {
-                filterMode = 'today';
-                document.getElementById("btnToday").classList.add("active");
-                document.getElementById("btnAll").classList.remove("active");
+            if (todayBtn) {
+                todayBtn.addEventListener("click", () => {
+                    currentDate = new Date();
+                    currentDate.setHours(0, 0, 0, 0);
+                    if (filterMode !== 'date') {
+                        filterMode = 'today';
+                        btnToday.classList.add("active");
+                        btnAll.classList.remove("active");
+                    }
+                    updateDisplay();
+                    applyFilterToMap();
+                });
             }
-            updateDisplay();
-            applyFilterToMap();
-        });
 
-        document.getElementById("dateFilter").addEventListener("change", (e) => {
-            if (e.target.value) {
-                selectedDate = new Date(e.target.value + "T00:00:00");
-                filterMode = 'date';
-                currentDate = selectedDate;
-                updateDisplay();
-                applyFilterToMap();
+            if (dateFilter) {
+                dateFilter.addEventListener("change", (e) => {
+                    if (e.target.value) {
+                        selectedDate = new Date(e.target.value + "T00:00:00");
+                        filterMode = 'date';
+                        currentDate = selectedDate;
+                        updateDisplay();
+                        applyFilterToMap();
+                    }
+                });
+            }
+
+            if (todayOnly) {
+                todayOnly.addEventListener("change", (e) => {
+                    if (e.target.checked) {
+                        selectedDate = new Date();
+                        selectedDate.setHours(0, 0, 0, 0);
+                        filterMode = 'date';
+                        currentDate = selectedDate;
+                        btnToday.classList.add("active");
+                        btnAll.classList.remove("active");
+                    } else {
+                        filterMode = 'all';
+                        btnToday.classList.remove("active");
+                        btnAll.classList.add("active");
+                        dateFilter.value = "";
+                    }
+                    updateDisplay();
+                    applyFilterToMap();
+                });
+            }
+
+            if (btnToday) {
+                btnToday.addEventListener("click", () => {
+                    filterMode = 'today';
+                    currentDate = new Date();
+                    currentDate.setHours(0, 0, 0, 0);
+                    btnToday.classList.add("active");
+                    btnAll.classList.remove("active");
+                    dateFilter.value = "";
+                    if (todayOnly) todayOnly.checked = false;
+                    updateDisplay();
+                    applyFilterToMap();
+                });
+            }
+
+            if (btnAll) {
+                btnAll.addEventListener("click", () => {
+                    filterMode = 'all';
+                    btnAll.classList.add("active");
+                    btnToday.classList.remove("active");
+                    dateFilter.value = "";
+                    if (todayOnly) todayOnly.checked = false;
+                    updateDisplay();
+                    applyFilterToMap();
+                });
             }
         });
-
-        document.getElementById("todayOnly").addEventListener("change", (e) => {
-            if (e.target.checked) {
-                selectedDate = new Date();
-                selectedDate.setHours(0, 0, 0, 0);
-                filterMode = 'date';
-                currentDate = selectedDate;
-                document.getElementById("btnToday").classList.add("active");
-                document.getElementById("btnAll").classList.remove("active");
-            } else {
-                filterMode = 'today';
-                currentDate = new Date();
-                currentDate.setHours(0, 0, 0, 0);
-                document.getElementById("btnToday").classList.add("active");
-                document.getElementById("btnAll").classList.remove("active");
-            }
-            document.getElementById("dateFilter").value = "";
-            updateDisplay();
-            applyFilterToMap();
-        });
-
-        document.getElementById("btnToday").addEventListener("click", () => {
-            filterMode = 'today';
-            currentDate = new Date();
-            currentDate.setHours(0, 0, 0, 0);
-            document.getElementById("btnToday").classList.add("active");
-            document.getElementById("btnAll").classList.remove("active");
-            document.getElementById("dateFilter").value = "";
-            document.getElementById("todayOnly").checked = false;
-            updateDisplay();
-            applyFilterToMap();
-        });
-
-        document.getElementById("btnAll").addEventListener("click", () => {
-            filterMode = 'all';
-            document.getElementById("btnAll").classList.add("active");
-            document.getElementById("btnToday").classList.remove("active");
-            document.getElementById("dateFilter").value = "";
-            document.getElementById("todayOnly").checked = false;
-            updateDisplay();
-            applyFilterToMap();
-        });
-
-        updateDisplay();
-        applyFilterToMap();
     </script>
 </body>
 </html>
