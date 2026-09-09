@@ -25,26 +25,42 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Initialize handler
-	handler := handlers.NewFestivalHandler(service)
+	// Initialize handlers
+	festivalHandler := handlers.NewFestivalHandler(service)
+	wikidataHandler := handlers.NewWikidataHandler()
 
 	// Create mux
 	mux := http.NewServeMux()
 
 	// API routes
-	mux.HandleFunc("/api/festivals/prefecture/", handler.GetFestivalsByPrefecture)
-	mux.HandleFunc("/api/festivals/descriptions", handler.GetAllFestivalsWithDescriptions)
-	mux.HandleFunc("/api/festivals/", handler.GetAllFestivals)
-	mux.HandleFunc("/api/festivals", handler.GetAllFestivals)
+	mux.HandleFunc("/api/festivals/prefecture/", festivalHandler.GetFestivalsByPrefecture)
+	mux.HandleFunc("/api/festivals/descriptions", festivalHandler.GetAllFestivalsWithDescriptions)
+	mux.HandleFunc("/api/festivals/", festivalHandler.GetAllFestivals)
+	mux.HandleFunc("/api/festivals", festivalHandler.GetAllFestivals)
+	mux.HandleFunc("/api/wiki/image", wikidataHandler.GetWikidataImage)
+
+	// CORS middleware wrapper
+	muxWithCORS := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		mux.ServeHTTP(w, r)
+	})
 
 	// Static file server for frontend
 	fs := http.FileServer(http.Dir("frontend"))
-	mux.Handle("/", fs)
+	mux.Handle("/", http.StripPrefix("/", fs))
 
 	// Create server
 	server := &http.Server{
 		Addr:    ":8527",
-		Handler: mux,
+		Handler: muxWithCORS,
 	}
 
 	// Start server in goroutine

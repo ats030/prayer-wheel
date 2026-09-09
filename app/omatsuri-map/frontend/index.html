@@ -204,67 +204,20 @@
             }
 
             try {
-                // Get image file name from Wikidata P18 claim
-                const wdResponse = await fetch(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${qid}&props=claims&format=json`);
-                const wdData = await wdResponse.json();
-                const claims = wdData.entities[qid]?.claims;
+                // Use proxy to avoid CORS
+                const proxyResponse = await fetch(`/api/wiki/image?qid=${qid}`);
+                const proxyData = await proxyResponse.json();
 
-                if (!claims || !claims.P18 || claims.P18.length === 0) {
-                    // Fallback: try Wikipedia page image
-                    const wikiImage = await fetchWikipediaImage(labelJa);
-                    const result = normalizeImageResult(wikiImage, qid);
+                if (proxyData.url) {
+                    const result = { url: proxyData.url, license: proxyData.license };
                     imageCache[qid] = result;
                     saveCache();
                     return result;
                 }
 
-                // Get the first image filename
-                const imageFile = claims.P18[0].mainsnak.datavalue?.value;
-                if (!imageFile) {
-                    const wikiImage = await fetchWikipediaImage(labelJa);
-                    const result = normalizeImageResult(wikiImage, qid);
-                    imageCache[qid] = result;
-                    saveCache();
-                    return result;
-                }
-
-                // Get license info for the Commons image
-                const encodedFileName = encodeURIComponent(imageFile.replace(/ /g, '_'));
-                const licenseResponse = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=extmetadata&iiextmetadatafilter=License&format=json&titles=File:${encodedFileName}`);
-                const licenseData = await licenseResponse.json();
-
-                const pages = licenseData.query?.pages;
-                const page = pages ? pages[Object.keys(pages)[0]] : null;
-                const licenseInfo = page?.imageinfo?.[0]?.extmetadata?.License?.value;
-
-                // Check if license allows commercial use (CC-BY, CC0, CC-BY-SA only)
-                const allowedLicenses = ['cc-by-4.0', 'cc-by-3.0', 'cc-by-sa-4.0', 'cc-by-sa-3.0', 'cc0-1.0'];
-                if (licenseInfo && !allowedLicenses.some(l => licenseInfo.toLowerCase().includes(l))) {
-                    console.log(`Image for ${qid} has license: ${licenseInfo}, not displaying`);
-                    const result = { url: null, license: licenseInfo };
-                    imageCache[qid] = result;
-                    saveCache();
-                    return result;
-                }
-
-                // Get image thumbnail URL
-                const thumbResponse = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url&iiurlwidth=500&format=json&titles=File:${encodedFileName}`);
-                const thumbData = await thumbResponse.json();
-
-                const thumbPages = thumbData.query?.pages;
-                const thumbPage = thumbPages ? thumbPages[Object.keys(thumbPages)[0]] : null;
-                const imageUrl = thumbPage?.imageinfo?.[0]?.thumburl || thumbPage?.imageinfo?.[0]?.url;
-
-                if (!imageUrl) {
-                    console.log(`No image URL for ${qid}, fallback to Wikipedia`);
-                    const wikiImage = await fetchWikipediaImage(labelJa);
-                    const result = normalizeImageResult(wikiImage, qid);
-                    imageCache[qid] = result;
-                    saveCache();
-                    return result;
-                }
-
-                const result = { url: imageUrl, license: licenseInfo || null };
+                // Fallback: try Wikipedia page image
+                const wikiImage = await fetchWikipediaImage(labelJa);
+                const result = normalizeImageResult(wikiImage, qid);
                 imageCache[qid] = result;
                 saveCache();
                 return result;
@@ -282,6 +235,8 @@
         // Fetch Wikipedia image using page title (fallback)
         async function fetchWikipediaImage(title) {
             try {
+                // Note: Using direct API call as fallback since Wikipedia API has CORS
+                // In production, add a proxy endpoint for Wikipedia API too
                 const response = await fetch(`https://ja.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
                 const data = await response.json();
                 if (data.thumbnail && data.thumbnail.source) {

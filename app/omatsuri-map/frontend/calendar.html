@@ -170,7 +170,7 @@
             }
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
+        window.onload = () => {
             const prevDayBtn = document.getElementById("prevDay");
             const todayBtn = document.getElementById("today");
             const nextDayBtn = document.getElementById("nextDay");
@@ -276,7 +276,7 @@
                     applyFilterToMap();
                 });
             }
-        });
+        };
     </script>
 </body>
 </html>
