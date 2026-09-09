@@ -2875,6 +2875,11 @@ def test_the_entrance_uses_styles_that_exist():
         assert f".{name}" in css, f"{name} に対応する定義が login.css/control.css に無い"
 
 
+def test_a_disabled_common_control_does_not_look_hoverable():
+    css = client.get("/assets/control.css").text
+    assert ".control:hover:not(:disabled)" in css
+
+
 def test_the_public_pages_can_be_shared_and_found():
     """商用の基盤へ移した動機は「人に届くこと」だった。
 

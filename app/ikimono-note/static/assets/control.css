@@ -33,7 +33,7 @@
   --control-focus:var(--gr-78);
 }
 .control{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 13px;border:1px solid var(--control-line);border-radius:8px;background:var(--control-bg);color:var(--control-ink);font:inherit;font-weight:650;text-decoration:none;white-space:nowrap;cursor:pointer}
-.control:hover{border-color:var(--control-line-hover)}
+.control:hover:not(:disabled){border-color:var(--control-line-hover)}
 .control:active{transform:translateY(1px)}
 .control:focus-visible{outline:2px solid var(--control-focus);outline-offset:2px}
 @media(prefers-reduced-motion:no-preference){.control{transition:border-color .15s ease,background-color .15s ease,transform .08s ease}}
