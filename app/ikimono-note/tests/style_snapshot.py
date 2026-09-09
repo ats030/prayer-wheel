@@ -72,7 +72,7 @@ COLLECT = """(props) => {
     const cs = getComputedStyle(el);
     const row = {};
     for (const p of props) row[p] = cs.getPropertyValue(p);
-    out.push({ k: n + ":" + tag + (el.id ? "#" + el.id : "") + "." + (el.className || ""), v: row });
+    out.push({ k: n + ":" + tag, v: row });
     n++;
   }
   return out;
