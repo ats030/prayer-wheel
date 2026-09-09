@@ -218,17 +218,17 @@
                     const wikiImage = await fetchWikipediaImage(labelJa);
                     imageCache[qid] = wikiImage || DEFAULT_IMAGE;
                     saveCache();
-                    return wikiImage || DEFAULT_IMAGE;
+                    return { url: wikiImage, license: null };
                 }
 
-                imageCache[qid] = imageUrl;
+                imageCache[qid] = { url: imageUrl, license: licenseInfo || null };
                 saveCache();
-                return imageUrl;
+                return { url: imageUrl, license: licenseInfo || null };
 
             } catch (e) {
                 console.log(`Failed to fetch image for ${qid}:`, e);
                 const wikiImage = await fetchWikipediaImage(labelJa);
-                imageCache[qid] = wikiImage || DEFAULT_IMAGE;
+                imageCache[qid] = { url: wikiImage || DEFAULT_IMAGE, license: null };
                 saveCache();
                 return imageCache[qid];
             }
@@ -280,11 +280,19 @@
                 </div>
             `;
 
-            const imageUrl = await fetchFestivalImage(festival.qid, festival.label_ja);
-            if (imageUrl) {
-                document.getElementById('festival-image-container').innerHTML = `<div style="cursor:pointer;" onclick="showFestivalImageLightbox('${imageUrl.replace(/'/g, "\\'")}')">
-                    <img src="${imageUrl}" style="max-width:100%; border-radius:8px;" onerror="this.src='${DEFAULT_IMAGE.replace(/'/g, "\\'")}'" title="Click to view full size">
-                </div>`;
+            const imageResult = await fetchFestivalImage(festival.qid, festival.label_ja);
+            if (imageResult && imageResult.url) {
+                let licenseHtml = '';
+                if (imageResult.license) {
+                    const licenseName = imageResult.license.toLowerCase().replace(/-/g, ' ').replace(/\d/g, '');
+                    licenseHtml = `<div style="font-size:11px; color:#666; margin-top:5px;">License: ${imageResult.license}</div>`;
+                }
+                document.getElementById('festival-image-container').innerHTML = `
+                    <div style="cursor:pointer;" onclick="showFestivalImageLightbox('${imageResult.url.replace(/'/g, "\\'")}')">
+                        <img src="${imageResult.url}" style="max-width:100%; border-radius:8px;" onerror="this.src='${DEFAULT_IMAGE.replace(/'/g, "\\'")}'" title="Click to view full size">
+                    </div>
+                    ${licenseHtml}
+                `;
             } else {
                 document.getElementById('festival-image-container').innerHTML = `<div style="cursor:pointer;" onclick="showFestivalImageLightbox('${DEFAULT_IMAGE.replace(/'/g, "\\'")}')">
                     <img src="${DEFAULT_IMAGE}" style="max-width:100%; border-radius:8px;" title="Click to view full size">
