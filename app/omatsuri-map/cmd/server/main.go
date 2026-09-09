@@ -5,9 +5,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"omatsuri-map/internal/handlers"
 	"omatsuri-map/internal/services"
@@ -37,10 +41,38 @@ func main() {
 	fs := http.FileServer(http.Dir("frontend"))
 	mux.Handle("/", fs)
 
-	// Start server
-	fmt.Println("Starting server on :8527")
-	if err := http.ListenAndServe(":8527", mux); err != nil {
-		fmt.Printf("Server error: %v\n", err)
+	// Create server
+	server := &http.Server{
+		Addr:    ":8527",
+		Handler: mux,
+	}
+
+	// Start server in goroutine
+	go func() {
+		fmt.Println("Starting server on :8527")
+		if err := server.ListenAndServe(); err != http.ErrServerClosed {
+			fmt.Printf("Server error: %v\n", err)
+			os.Exit(1)
+		}
+	}()
+
+	// Wait for SIGTERM or SIGINT
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	// Wait for signal
+	<-stop
+	fmt.Println("Shutting down server...")
+
+	// Create shutdown context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Graceful shutdown
+	if err := server.Shutdown(ctx); err != nil {
+		fmt.Printf("Server forced to shutdown: %v\n", err)
 		os.Exit(1)
 	}
+
+	fmt.Println("Server stopped gracefully")
 }
