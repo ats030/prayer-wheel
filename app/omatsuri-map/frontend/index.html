@@ -144,7 +144,7 @@
             console.log('Failed to load image cache:', e);
         }
 
-        // Get license display name
+         // Get license display name
         function getLicenseName(licenseId) {
             const licenseMap = {
                 'cc-by-4.0': 'Creative Commons BY 4.0',
@@ -155,6 +155,18 @@
                 'cc0-1.0': 'CC0 Public Domain'
             };
             return licenseMap[licenseId.toLowerCase()] || licenseId;
+        }
+
+        // Get license icon SVG
+        function getLicenseIcon(licenseId) {
+            const lowerId = licenseId.toLowerCase();
+            if (lowerId.includes('zero') || lowerId.includes('cc0')) {
+                return '<svg viewBox="0 0 24 24" width="16" height="16" fill="#28a745"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2h-10v-2zm0 4h10v2h-10v-2z"/></svg>';
+            }
+            if (lowerId.includes('by-sa')) {
+                return '<svg viewBox="0 0 24 24" width="16" height="16" fill="#007bff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2h-10v-2zm0 4h10v2h-10v-2z"/></svg>';
+            }
+            return '<svg viewBox="0 0 24 24" width="16" height="16" fill="#17a2b8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2h-10v-2zm0 4h10v2h-10v-2z"/></svg>';
         }
 
         // Save cache periodically
@@ -319,7 +331,8 @@
                 if (imageResult.license) {
                     const licenseName = getLicenseName(imageResult.license);
                     const licenseLink = `https://spdx.org/licenses/${imageResult.license}.html`;
-                    licenseHtml = `<div style="font-size:11px; color:#666; margin-top:5px;">License: <a href="${licenseLink}" target="_blank" style="color:#007bff;">${licenseName}</a></div>`;
+                    const licenseIcon = getLicenseIcon(imageResult.license);
+                    licenseHtml = `<div style="display:flex;align-items:center;gap:6px;background:#f8f9fa;padding:6px 10px;border-radius:6px;margin-top:8px;"><div style="flex-shrink:0;">${licenseIcon}</div><span style="font-size:12px;color:#555;">License: <a href="${licenseLink}" target="_blank" style="color:#007bff;text-decoration:none;font-weight:500;">${licenseName}</a></span></div>`;
                 }
                 document.getElementById('festival-image-container').innerHTML = `
                     <div style="cursor:pointer;" onclick="showFestivalImageLightbox('${imageResult.url.replace(/'/g, "\\'")}')">
@@ -419,7 +432,48 @@
                 flex-direction: column;
                 padding: 20px;
                 box-sizing: border-box;
+                overflow: auto;
             `;
+
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '×';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: #fff;
+                border: none;
+                font-size: 40px;
+                width: 50px;
+                height: 50px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                color: #333;
+                z-index: 10000;
+            `;
+
+            closeBtn.onclick = hideLightbox;
+
+            lightboxImage = document.createElement('img');
+            lightboxImage.style.cssText = `
+                max-width: 90vw;
+                max-height: 80vh;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+                cursor: zoom-out;
+                transition: transform 0.2s ease;
+            `;
+            lightboxImage.onclick = (e) => {
+                e.stopPropagation();
+                if (lightboxImage.style.transform === 'scale(1.2)') {
+                    lightboxImage.style.transform = '';
+                } else {
+                    lightboxImage.style.transform = 'scale(1.2)';
+                }
+            };
 
             const closeBtn = document.createElement('button');
             closeBtn.innerHTML = '×';
@@ -443,13 +497,22 @@
             closeBtn.onclick = hideLightbox;
 
             lightboxImage = document.createElement('img');
-            lightboxImage.style.cssText = `
-                max-width: 90vw;
-                max-height: 80vh;
-                border-radius: 8px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            `;
-            lightboxImage.onclick = (e) => e.stopPropagation();
+             lightboxImage.style.cssText = `
+                 max-width: 90vw;
+                 max-height: 80vh;
+                 border-radius: 8px;
+                 box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+                 cursor: zoom-out;
+                 transition: transform 0.2s ease;
+             `;
+             lightboxImage.onclick = (e) => {
+                 e.stopPropagation();
+                 if (lightboxImage.style.transform === 'scale(1.2)') {
+                     lightboxImage.style.transform = '';
+                 } else {
+                     lightboxImage.style.transform = 'scale(1.2)';
+                 }
+             };
 
             container.appendChild(closeBtn);
             container.appendChild(lightboxImage);
@@ -471,6 +534,7 @@
             if (lightboxOverlay) {
                 lightboxOverlay.style.display = 'none';
                 lightboxImage.src = '';
+                lightboxImage.style.transform = '';
                 document.body.style.overflow = '';
             }
         }
@@ -478,6 +542,12 @@
         window.renderMapMarkers = renderMarkers;
         window.showFestivalImageLightbox = showFestivalImageLightbox;
         window.getLicenseName = getLicenseName;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightboxOverlay && lightboxOverlay.style.display !== 'none') {
+                hideLightbox();
+            }
+        });
     </script>
 </body>
 </html>
