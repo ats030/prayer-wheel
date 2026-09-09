@@ -961,7 +961,7 @@ def test_pages_carry_no_inline_style_or_script():
 
 
 def test_page_assets_are_served_locally():
-    for name in ["index.css", "index.js", "settings.css", "settings.js",
+    for name in ["index.css", "index.js", "account.css", "settings.css", "settings.js",
                  "history.css", "history.js", "sharing.js", "legal.css"]:
         response = client.get(f"/assets/{name}")
         assert response.status_code == 200, name
@@ -2204,7 +2204,8 @@ def test_the_hidden_attribute_actually_hides_on_every_page():
     調べ直すボタンが写真を足す前から出ていた。クラスの .hidden だけでは足りない。
     """
     for name in ["settings.css", "history.css"]:
-        css = client.get(f"/assets/{name}").text
+        css = ((client.get("/assets/account.css").text if name == "settings.css" else "")
+               + client.get(f"/assets/{name}").text)
         assert "[hidden]{display:none!important}" in css, name
 
 
@@ -2866,7 +2867,8 @@ def test_the_entrance_uses_styles_that_exist():
     ヘッダーの共通ボタン (.control) は login.css ではなく control.css で定義する。
     """
     page = client.get("/login").text
-    css = (client.get("/assets/login.css").text
+    css = (client.get("/assets/account.css").text
+           + client.get("/assets/login.css").text
            + client.get("/assets/control.css").text)
     import re
     used = set(re.findall(r'class="([^"]+)"', page))
