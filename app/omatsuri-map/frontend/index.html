@@ -257,6 +257,11 @@
 
             let descriptionHtml = festival.description ? `<div class="description">${festival.description}</div>` : '';
 
+            let culturalRelawLink = '';
+            if (festival.cultural_relaw?.url) {
+                culturalRelawLink = ` | <a href="javascript:void(0)" data-url="${festival.cultural_relaw.url}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">文化庁</a>`;
+            }
+
             infoContent.innerHTML = `
                 <div class="info-card">
                     <h3>${festival.label_ja}</h3>
@@ -266,7 +271,7 @@
                     ${descriptionHtml}
                     <div class="links">
                         <a href="javascript:void(0)" data-url="${wikidataUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikidata</a> |
-                        <a href="javascript:void(0)" data-url="${wikipediaUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikipedia</a>
+                        <a href="javascript:void(0)" data-url="${wikipediaUrl}" onclick="parent.window.open(this.dataset.url, '_blank'); return false;">Wikipedia</a>${culturalRelawLink}
                     </div>
                     <div id="festival-image-container" style="margin-top:10px;"></div>
                 </div>
