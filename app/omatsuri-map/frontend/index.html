@@ -147,12 +147,12 @@
          // Get license display name
         function getLicenseName(licenseId) {
             const licenseMap = {
-                'cc-by-4.0': 'Creative Commons BY 4.0',
-                'cc-by-3.0': 'Creative Commons BY 3.0',
-                'cc-by-sa-4.0': 'Creative Commons BY-SA 4.0',
-                'cc-by-sa-3.0': 'Creative Commons BY-SA 3.0',
-                'cc-zero-1.0': 'CC0 Public Domain',
-                'cc0-1.0': 'CC0 Public Domain'
+                'cc-by-4.0': 'CC BY 4.0',
+                'cc-by-3.0': 'CC BY 3.0',
+                'cc-by-sa-4.0': 'CC BY-SA 4.0',
+                'cc-by-sa-3.0': 'CC BY-SA 3.0',
+                'cc-zero-1.0': 'CC0',
+                'cc0-1.0': 'CC0'
             };
             return licenseMap[licenseId.toLowerCase()] || licenseId;
         }
@@ -330,9 +330,7 @@
                 let licenseHtml = '';
                 if (imageResult.license) {
                     const licenseName = getLicenseName(imageResult.license);
-                    const licenseLink = `https://spdx.org/licenses/${imageResult.license}.html`;
-                    const licenseIcon = getLicenseIcon(imageResult.license);
-                    licenseHtml = `<div style="display:flex;align-items:center;gap:6px;background:#f8f9fa;padding:6px 10px;border-radius:6px;margin-top:8px;"><div style="flex-shrink:0;">${licenseIcon}</div><span style="font-size:12px;color:#555;">License: <a href="${licenseLink}" target="_blank" style="color:#007bff;text-decoration:none;font-weight:500;">${licenseName}</a></span></div>`;
+                    licenseHtml = `<div style="font-size:12px;color:#666;margin-top:6px;">License: ${licenseName}</div>`;
                 }
                 document.getElementById('festival-image-container').innerHTML = `
                     <div style="cursor:pointer;" onclick="showFestivalImageLightbox('${imageResult.url.replace(/'/g, "\\'")}')">
