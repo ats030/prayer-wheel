@@ -475,45 +475,6 @@
                 }
             };
 
-            const closeBtn = document.createElement('button');
-            closeBtn.innerHTML = '×';
-            closeBtn.style.cssText = `
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                background: #fff;
-                border: none;
-                font-size: 40px;
-                width: 50px;
-                height: 50px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 50%;
-                color: #333;
-            `;
-
-            closeBtn.onclick = hideLightbox;
-
-            lightboxImage = document.createElement('img');
-             lightboxImage.style.cssText = `
-                 max-width: 90vw;
-                 max-height: 80vh;
-                 border-radius: 8px;
-                 box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-                 cursor: zoom-out;
-                 transition: transform 0.2s ease;
-             `;
-             lightboxImage.onclick = (e) => {
-                 e.stopPropagation();
-                 if (lightboxImage.style.transform === 'scale(1.2)') {
-                     lightboxImage.style.transform = '';
-                 } else {
-                     lightboxImage.style.transform = 'scale(1.2)';
-                 }
-             };
-
             container.appendChild(closeBtn);
             container.appendChild(lightboxImage);
             container.onclick = hideLightbox;
