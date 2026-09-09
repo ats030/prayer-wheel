@@ -1,4 +1,4 @@
-"""backlog-viewer: 残タスクが収束しない理由を可視化する (port 8524)。
+"""backlog-viewer: 残タスクが収束しない理由を可視化する (port 8509)。
 
 read-only。bd の DB には一切書かない。棚卸しの実行は画面が生成した
 bd close / bd defer の1行をコピペして人間が叩く。

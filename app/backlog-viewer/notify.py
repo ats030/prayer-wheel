@@ -16,7 +16,7 @@ from pathlib import Path
 
 import main
 
-URL = "http://ubuntu-server-app:8524/"
+URL = "http://ubuntu-server-app:8509/"
 # 前回の送信結果。再生成できるので ~/cache に置く (~/CLAUDE.md「データの保全」)。
 # 失われても次回の通知が書き直すだけで、実害は「1回ぶん欠測を伝え損ねる」だけ。
 STATE_PATH = Path.home() / "cache" / "backlog-viewer" / "last-send.json"
