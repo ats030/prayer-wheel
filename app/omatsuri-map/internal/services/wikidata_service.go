@@ -11,41 +11,28 @@ import (
 	"time"
 )
 
-type WikidataImageResponse struct {
-	PropertyPages []PropertyPage `json:"pages"`
-}
+var client = &http.Client{Timeout: 10 * time.Second}
 
-type PropertyPage struct {
-	Title    string            `json:"title"`
-	Claims   map[string][]map[string]interface{} `json:"claims"`
-}
-
-type WikimediaLicenseInfo struct {
-	Query struct {
-		Pages map[string]WikimediaPage `json:"pages"`
-	} `json:"query"`
-}
-
-type WikimediaPage struct {
-	Title      string `json:"title"`
-	ImageInfo  []struct {
-		License string `json:"license"`
-	} `json:"imageinfo"`
-}
-
+// FetchWikidataImage resolves a Wikidata QID to a Commons thumbnail URL and its SPDX license.
+//
+// It first pulls the P18 (image) claim from Wikidata, then asks the Commons API for the
+// authoritative thumbnail URL and license. Building the thumbnail URL by hand is incorrect
+// because the /thumb/<dir1>/<dir2>/ path is an MD5 hash of the filename, so the URL must be
+// read from the API response instead of recomputed.
 func FetchWikidataImage(qid string) (string, string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	wikidataURL := fmt.Sprintf("https://www.wikidata.org/w/api.php?action=wbgetentities&ids=%s&props=claims&format=json", qid)
+	wikidataURL := fmt.Sprintf(
+		"https://www.wikidata.org/w/api.php?action=wbgetentities&ids=%s&props=claims&format=json",
+		url.QueryEscape(qid),
+	)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, wikidataURL, nil)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to create request: %w", err)
 	}
-
 	req.Header.Set("User-Agent", "omatsuri-map/1.0")
 
-	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to fetch from Wikidata: %w", err)
@@ -61,81 +48,122 @@ func FetchWikidataImage(qid string) (string, string, error) {
 		return "", "", fmt.Errorf("failed to read response: %w", err)
 	}
 
-	var data map[string]interface{}
-	if err := json.Unmarshal(body, &data); err != nil {
-		return "", "", fmt.Errorf("failed to parse Wikidata response: %w", err)
-	}
-
-	entities := data["entities"].(map[string]interface{})
-	qidEntity, exists := entities[qid]
-	if !exists {
-		return "", "", fmt.Errorf("QID %s not found in Wikidata", qid)
-	}
-
-	entity := qidEntity.(map[string]interface{})
-	claims := entity["claims"].(map[string]interface{})
-
-	var imageUrl string
-	if p18Claims, ok := claims["P18"]; ok {
-		if len(p18Claims.([]interface{})) > 0 {
-			snak := p18Claims.([]interface{})[0].(map[string]interface{})["m"].([]interface{})[1].(map[string]interface{})
-			value := snak["text"].(string)
-			imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/" + value[:1] + "/" + value[:2] + "/" + url.PathEscape(value) + "/800px-" + url.PathEscape(value)
-		}
-	}
-
-	if imageUrl == "" {
-		return "", "", fmt.Errorf("no image found for QID %s", qid)
-	}
-
-	licenseId, err := getWikimediaLicense(imageUrl)
+	fileName, err := extractP18FileName(body, qid)
 	if err != nil {
 		return "", "", err
 	}
 
-	return imageUrl, licenseId, nil
+	thumbURL, license := fetchCommonsImageInfo(fileName)
+	if thumbURL == "" {
+		return "", "", fmt.Errorf("no usable image for %s", qid)
+	}
+	return thumbURL, license, nil
 }
 
-func getWikimediaLicense(imageUrl string) (string, error) {
+func extractP18FileName(body []byte, qid string) (string, error) {
+	var data map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		return "", fmt.Errorf("failed to parse Wikidata response: %w", err)
+	}
+	var entity map[string]interface{}
+	if entities, ok := data["entities"].(map[string]interface{}); ok {
+		entity, _ = entities[qid].(map[string]interface{})
+	}
+	if entity == nil {
+		return "", fmt.Errorf("QID %s not found in Wikidata", qid)
+	}
+	claims, _ := entity["claims"].(map[string]interface{})
+	stmts, _ := claims["P18"].([]interface{})
+	for _, s := range stmts {
+		stmt, _ := s.(map[string]interface{})
+		mainsnak, _ := stmt["mainsnak"].(map[string]interface{})
+		datavalue, _ := mainsnak["datavalue"].(map[string]interface{})
+		if v, _ := datavalue["value"].(string); v != "" {
+			return v, nil
+		}
+	}
+	return "", fmt.Errorf("no image found for QID %s", qid)
+}
+
+// fetchCommonsImageInfo asks the Commons API for the thumbnail URL (at 800px width) and the
+// SPDX license id in a single call. The thumbnail URL is authoritative: the /thumb/ subpath
+// is an MD5 hash of the filename that cannot be derived locally. The UTM query params the
+// API appends are stripped so downstream <img src> and onerror swaps stay clean.
+func fetchCommonsImageInfo(fileName string) (string, string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	imageName := imageUrl[strings.LastIndex(imageUrl, "/")+1:]
-	wikimediaURL := fmt.Sprintf("https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=license&titles=%s&format=json", url.PathEscape(imageName))
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, wikimediaURL, nil)
+	apiURL := fmt.Sprintf(
+		"https://commons.wikimedia.org/w/api.php?action=query&titles=File:%s&prop=imageinfo&iiprop=url|extmetadata|size&iiextmetadatafilter=License&iiurlwidth=800&format=json",
+		url.QueryEscape(strings.ReplaceAll(fileName, " ", "_")),
+	)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to create Wikimedia request: %w", err)
+		return "", ""
 	}
-
 	req.Header.Set("User-Agent", "omatsuri-map/1.0")
 
-	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch from Wikimedia: %w", err)
+		return "", ""
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("Wikimedia API returned status %d", resp.StatusCode)
+		return "", ""
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("failed to read Wikimedia response: %w", err)
+		return "", ""
 	}
 
-	var data WikimediaLicenseInfo
+	var data struct {
+		Query struct {
+			Pages map[string]struct {
+				Missing   bool `json:"missing"`
+				ImageInfo []struct {
+					ThumbURL    string `json:"thumburl"`
+					URL         string `json:"url"`
+					Extmetadata map[string]struct {
+						Value string `json:"value"`
+					} `json:"extmetadata"`
+				} `json:"imageinfo"`
+			} `json:"pages"`
+		} `json:"query"`
+	}
 	if err := json.Unmarshal(body, &data); err != nil {
-		return "", fmt.Errorf("failed to parse Wikimedia response: %w", err)
+		return "", ""
 	}
 
 	for _, page := range data.Query.Pages {
-		if len(page.ImageInfo) > 0 && page.ImageInfo[0].License != "" {
-			return page.ImageInfo[0].License, nil
+		if page.Missing {
+			continue
+		}
+		for _, info := range page.ImageInfo {
+			u := info.ThumbURL
+			if u == "" {
+				u = info.URL
+			}
+			if u == "" {
+				continue
+			}
+			license := ""
+			if lic, ok := info.Extmetadata["License"]; ok {
+				license = lic.Value
+			}
+			return stripUTM(u), license
 		}
 	}
+	return "", ""
+}
 
-	return "unknown", nil
+func stripUTM(rawURL string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
+	u.RawQuery = ""
+	u.Fragment = ""
+	return u.String()
 }

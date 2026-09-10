@@ -8,22 +8,22 @@ import (
 func TestNewFestivalService(t *testing.T) {
 	// Use the test data directory
 	dataDir := "/home/ats030/app/omatsuri-map/data"
-	
+
 	service, err := NewFestivalService(dataDir + "/festivals.json")
 	if err != nil {
 		t.Fatalf("Failed to create festival service: %v", err)
 	}
-	
+
 	if service == nil {
 		t.Fatal("Festival service is nil")
 	}
-	
+
 	// Verify we have festivals
 	festivals := service.GetAll()
 	if len(festivals) == 0 {
 		t.Fatal("No festivals loaded")
 	}
-	
+
 	t.Logf("Loaded %d festivals", len(festivals))
 }
 
@@ -33,9 +33,9 @@ func TestGetAll(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	festivals := service.GetAll()
-	
+
 	// Verify structure of first festival
 	if len(festivals) > 0 {
 		f := festivals[0]
@@ -63,13 +63,13 @@ func TestGetByPrefecture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	// Test with Tokyo
 	tokyoFestivals := service.GetByPrefecture("東京都")
 	if len(tokyoFestivals) == 0 {
 		t.Error("No festivals found for Tokyo")
 	}
-	
+
 	// Verify all are Tokyo
 	for _, f := range tokyoFestivals {
 		if f.Prefecture != "東京都" {
@@ -84,13 +84,13 @@ func TestGetByID(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	// Get first festival's QID
 	festivals := service.GetAll()
 	if len(festivals) == 0 {
 		t.Fatal("No festivals to test")
 	}
-	
+
 	qid := festivals[0].QID
 	f := service.GetByID(qid)
 	if f == nil {
@@ -106,7 +106,7 @@ func TestGetByIDNotFound(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	f := service.GetByID("NONEXISTENT")
 	if f != nil {
 		t.Errorf("GetByID should return nil for non-existent ID")
@@ -119,14 +119,14 @@ func TestPrefectureCoverage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	prefectures := make(map[string]bool)
 	for _, f := range service.GetAll() {
 		prefectures[f.Prefecture] = true
 	}
-	
+
 	t.Logf("Found festivals in %d prefectures", len(prefectures))
-	
+
 	// Verify we have coverage across different regions
 	neededRegions := []string{"北海道", "東京都", "大阪府", "宮城県", "広島県", "長崎県"}
 	for _, region := range neededRegions {
@@ -142,9 +142,9 @@ func TestDataIntegrity(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	festivals := service.GetAll()
-	
+
 	for i, f := range festivals {
 		if f.QID == "" {
 			t.Errorf("Festival %d has empty QID", i)
@@ -173,17 +173,17 @@ func TestFileExists(t *testing.T) {
 	if _, err := os.Stat(dataPath); os.IsNotExist(err) {
 		t.Fatalf("Data file does not exist: %s", dataPath)
 	}
-	
+
 	// Check file size
 	info, err := os.Stat(dataPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	if info.Size() < 1000 {
 		t.Errorf("Data file seems too small: %d bytes", info.Size())
 	}
-	
+
 	t.Logf("Data file size: %d bytes", info.Size())
 }
 func TestDateFieldPresent(t *testing.T) {
@@ -192,15 +192,15 @@ func TestDateFieldPresent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	festivals := service.GetAll()
-	
+
 	for i, f := range festivals {
 		if f.Date == "" {
 			t.Errorf("Festival %d (QID: %s) has empty date field", i, f.QID)
 		}
 	}
-	
+
 	t.Logf("All %d festivals have date field", len(festivals))
 }
 
@@ -210,22 +210,15 @@ func TestQIDDuplicate(t *testing.T) {
 		{"qid": "Q1", "label_ja": "Test 1", "label_en": "Test 1", "prefecture": "東京都", "latitude": 35.68, "longitude": 139.69, "date": "日付未定"},
 		{"qid": "Q1", "label_ja": "Test 2", "label_en": "Test 2", "prefecture": "大阪府", "latitude": 34.69, "longitude": 135.50, "date": "日付未定"}
 	]`
-	
-	// Temporarily replace festivals-with-date.json with test data
-	import (
-		"os"
-		"path/filepath"
-	)
-	
+
 	testPath := "/tmp/test-festivals.json"
 	if err := os.WriteFile(testPath, []byte(testData), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(testPath)
-	
+
 	_, err := NewFestivalService(testPath)
 	if err == nil {
 		t.Error("Expected error for duplicate QIDs, but got nil")
 	}
 }
-

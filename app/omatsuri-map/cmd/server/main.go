@@ -55,7 +55,7 @@ func main() {
 
 	// Static file server for frontend
 	fs := http.FileServer(http.Dir("frontend"))
-	mux.Handle("/", http.StripPrefix("/", fs))
+	mux.Handle("/", fs)
 
 	// Create server
 	server := &http.Server{
