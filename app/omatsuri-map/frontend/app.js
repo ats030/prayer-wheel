@@ -10,6 +10,7 @@ let festivals=[];
 let visible=[];
 let markers=new Map();
 let selectedKey=null;
+let selectedOrigin=null;
 const saveTimers={};
 
 for(const [key,target] of [[CACHE_KEY,imageCache],[GEOCODING_CACHE_KEY,geocodingCache]]){
@@ -99,7 +100,7 @@ function renderList(){
     const key=festivalKey(f,index);
     return `<button class="festival-card" type="button" data-key="${esc(key)}" aria-current="${key===selectedKey}"><span class="card-index">${String(index+1).padStart(2,'0')}</span><span><span class="card-name">${esc(f.label_ja||f.label_en||'名称未登録')}</span><span class="card-meta"><span>${esc(f.prefecture||'地域未登録')}</span><span>${esc(latestDateLabel(f))}</span></span></span></button>`;
   }).join('');
-  list.querySelectorAll('button').forEach(card=>card.addEventListener('click',()=>selectFestival(card.dataset.key,true)));
+  list.querySelectorAll('button').forEach(card=>card.addEventListener('click',()=>selectFestival(card.dataset.key,'list')));
 }
 function icon(selected){return L.divIcon({className:'',html:`<span class="festival-marker${selected?' selected':''}"></span>`,iconSize:[22,22],iconAnchor:[11,11],popupAnchor:[0,-12]})}
 function renderMarkers(){
@@ -108,7 +109,7 @@ function renderMarkers(){
     if(!Number.isFinite(Number(f.latitude))||!Number.isFinite(Number(f.longitude)))return;
     const key=festivalKey(f,index),marker=L.marker([Number(f.latitude),Number(f.longitude)],{icon:icon(key===selectedKey)}).addTo(map);
     marker.bindTooltip(esc(f.label_ja||f.label_en||'名称未登録'),{direction:'top',offset:[0,-10]});
-    marker.on('click',()=>selectFestival(key,false));markers.set(key,{marker,festival:f});
+    marker.on('click',()=>selectFestival(key,'marker'));markers.set(key,{marker,festival:f});
   });
   if(selectedKey&&!markers.has(selectedKey))closeDetail(false);
 }
@@ -118,23 +119,22 @@ function detail(f){
   const culture=safeUrl(f.cultural_relaw?.url);
   return `<article class="detail"><header class="detail-lead"><p class="detail-kicker">${esc(f.label_en||'Festival in Japan')}</p><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2></header><dl class="detail-facts"><div><dt>開催地</dt><dd>${esc(f.prefecture||'地域未登録')}</dd></div><div><dt>開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${esc(f.description||'紹介文はまだ登録されていません。')}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section></article>`;
 }
-function selectFestival(key,move){
-  const entry=markers.get(key);if(!entry)return;selectedKey=key;
+function selectFestival(key,origin){
+  const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;
   markers.forEach(({marker},markerKey)=>marker.setIcon(icon(markerKey===key)));
   document.querySelectorAll('.festival-card').forEach(card=>card.setAttribute('aria-current',String(card.dataset.key===key)));
-  const card=document.querySelector(`.festival-card[data-key="${CSS.escape(key)}"]`);
-  if(!move&&card)card.scrollIntoView({behavior:'smooth',block:'nearest'});
-  if(move)map.flyTo(entry.marker.getLatLng(),Math.max(map.getZoom(),8),{duration:.55});
-  openDetail(entry.festival,key,!move);
+  if(origin==='list')map.flyTo(entry.marker.getLatLng(),Math.max(map.getZoom(),8),{duration:.55});
+  openDetail(entry.festival,key,origin);
 }
-function openDetail(f,key,focusDescription){
-  const panel=document.querySelector('#detail-panel'),content=document.querySelector('#detail-content');
+function openDetail(f,key,origin){
+  const panel=document.querySelector('#detail-panel'),content=document.querySelector('#detail-content'),originLabel=document.querySelector('#detail-origin');
   panel.hidden=false;document.querySelector('.app-shell').classList.add('has-detail');content.dataset.state='loading';content.innerHTML=detail(f);
+  originLabel.textContent=origin==='marker'?'地図から選択':'検索結果から選択';
   const locationElement=document.querySelector('.detail-facts dd');
   if(locationElement){locationElement.id='detail-location';locationElement.insertAdjacentHTML('beforeend','<span class="location-status">詳細を確認中…</span>')}
-  const focusTarget=focusDescription?document.querySelector('.detail-description'):document.querySelector('#detail-title');
-  if(focusTarget)focusTarget.tabIndex=-1;
-  requestAnimationFrame(()=>{map.invalidateSize();focusTarget?.focus({preventScroll:!focusDescription})});
+  const focusTarget=document.querySelector('#detail-title');
+  panel.scrollTop=0;
+  requestAnimationFrame(()=>{map.invalidateSize();focusTarget?.focus({preventScroll:origin!=='marker'})});
   hydrateImage(f,key);
   hydrateLocation(f,key);
 }
@@ -143,10 +143,13 @@ async function hydrateLocation(f,key){
   if(element&&selectedKey===key)element.textContent=location;
 }
 function closeDetail(restoreFocus=true){
-  const key=selectedKey;selectedKey=null;document.querySelector('#detail-panel').hidden=true;document.querySelector('.app-shell').classList.remove('has-detail');
+  const key=selectedKey,origin=selectedOrigin;selectedKey=null;selectedOrigin=null;document.querySelector('#detail-panel').hidden=true;document.querySelector('.app-shell').classList.remove('has-detail');
   markers.forEach(({marker})=>marker.setIcon(icon(false)));document.querySelectorAll('.festival-card').forEach(card=>card.setAttribute('aria-current','false'));
   requestAnimationFrame(()=>map.invalidateSize());
-  if(restoreFocus&&key){document.querySelector(`.festival-card[data-key="${CSS.escape(key)}"]`)?.focus()}
+  if(restoreFocus&&key){
+    const target=origin==='marker'?markers.get(key)?.marker.getElement():document.querySelector(`.festival-card[data-key="${CSS.escape(key)}"]`);
+    target?.focus();
+  }
 }
 async function hydrateImage(f,key){
   let result=imageCache[f.qid];if(typeof result==='string')result={url:result};
