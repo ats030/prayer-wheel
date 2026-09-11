@@ -12,6 +12,7 @@ type WikidataResponse struct {
 	License    string `json:"license"`
 	LicenseURL string `json:"license_url,omitempty"`
 	Artist     string `json:"artist,omitempty"`
+	Credit     string `json:"credit,omitempty"`
 	SourceURL  string `json:"source_url,omitempty"`
 }
 
@@ -44,7 +45,7 @@ func (h *WikidataHandler) GetWikidataImage(w http.ResponseWriter, r *http.Reques
 	if effectiveLicense == "" {
 		effectiveLicense = license
 	}
-	if err != nil || effectiveLicense == "" || (attribution.AttributionRequired && attribution.Artist == "") {
+	if err != nil || effectiveLicense == "" || (attribution.AttributionRequired && attribution.Artist == "" && attribution.Credit == "") {
 		http.Error(w, "image attribution metadata is incomplete", http.StatusNotFound)
 		return
 	}
@@ -54,6 +55,7 @@ func (h *WikidataHandler) GetWikidataImage(w http.ResponseWriter, r *http.Reques
 		License:    effectiveLicense,
 		LicenseURL: attribution.LicenseURL,
 		Artist:     attribution.Artist,
+		Credit:     attribution.Credit,
 		SourceURL:  attribution.SourceURL,
 	}
 

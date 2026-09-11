@@ -27,6 +27,22 @@ func TestParseCommonsAttribution(t *testing.T) {
 	}
 }
 
+func TestParseCommonsAttributionUsesCreditForCC3(t *testing.T) {
+	body := []byte(`{"query":{"pages":{"1":{"imageinfo":[{"descriptionurl":"https://commons.wikimedia.org/wiki/File:Festival.jpg","extmetadata":{"Credit":{"value":"Festival archive"},"LicenseShortName":{"value":"CC BY-SA 3.0"},"LicenseUrl":{"value":"https://creativecommons.org/licenses/by-sa/3.0/"},"AttributionRequired":{"value":"true"}}}]}}}}`)
+	got, err := parseCommonsAttribution(body)
+	if err != nil || got.Credit != "Festival archive" || got.License != "CC BY-SA 3.0" || !got.AttributionRequired {
+		t.Fatalf("unexpected CC 3.0 attribution: %+v, %v", got, err)
+	}
+}
+
+func TestParseCommonsAttributionAllowsPublicDomainWithoutArtist(t *testing.T) {
+	body := []byte(`{"query":{"pages":{"1":{"imageinfo":[{"descriptionurl":"https://commons.wikimedia.org/wiki/File:Historic.jpg","extmetadata":{"LicenseShortName":{"value":"Public domain"},"AttributionRequired":{"value":"false"}}}]}}}}`)
+	got, err := parseCommonsAttribution(body)
+	if err != nil || got.Artist != "" || got.Credit != "" || got.License != "Public domain" || got.AttributionRequired {
+		t.Fatalf("unexpected public-domain attribution: %+v, %v", got, err)
+	}
+}
+
 func TestCommonsFileNameRejectsOtherHosts(t *testing.T) {
 	if _, err := commonsFileName("https://example.com/image.jpg"); err == nil {
 		t.Fatal("expected non-Commons URL to be rejected")
