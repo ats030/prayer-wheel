@@ -1,0 +1,14 @@
+[Unit]
+Description=sales-viewer - Cults3D売上CSVの月次ダウンロード通知
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ats030/app/sales-viewer
+ExecStart=/home/ats030/app/sales-viewer-cults-reminder.sh
+# 3 = Webhook未設定で送らなかった（設計どおり）
+SuccessExitStatus=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sales-viewer-cults-reminder
