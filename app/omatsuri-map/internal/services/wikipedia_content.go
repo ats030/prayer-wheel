@@ -19,6 +19,7 @@ type WikipediaContent struct {
 	SourceURL   string
 	ImageURL    string
 	Attribution CommonsAttribution
+	ImageTitles []string
 }
 
 func FetchWikipediaContent(title, expectedQID string) (WikipediaContent, error) {
@@ -29,13 +30,14 @@ func FetchWikipediaContent(title, expectedQID string) (WikipediaContent, error) 
 		"format":        {"json"},
 		"formatversion": {"2"},
 		"redirects":     {"1"},
-		"prop":          {"extracts|pageimages|pageprops"},
+		"prop":          {"extracts|pageimages|pageprops|images"},
 		"exintro":       {"1"},
 		"explaintext":   {"1"},
 		"exchars":       {"700"},
 		"piprop":        {"thumbnail"},
 		"pithumbsize":   {"1200"},
 		"pilicense":     {"free"},
+		"imlimit":       {"20"},
 		"titles":        {title},
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, wikipediaAPIBase+"/w/api.php?"+params.Encode(), nil)
@@ -55,7 +57,35 @@ func FetchWikipediaContent(title, expectedQID string) (WikipediaContent, error) 
 	if err != nil {
 		return WikipediaContent{}, err
 	}
-	return parseWikipediaContent(body, expectedQID)
+	content, err := parseWikipediaContent(body, expectedQID)
+	if err != nil {
+		return WikipediaContent{}, err
+	}
+	if content.ImageURL == "" {
+		for _, title := range usableArticleImageTitles(content.ImageTitles) {
+			fileName := strings.TrimPrefix(strings.TrimPrefix(title, "ファイル:"), "File:")
+			candidateURL := "https://upload.wikimedia.org/" + url.PathEscape(fileName)
+			attribution, err := FetchCommonsAttribution(candidateURL)
+			if err == nil && attribution.ImageURL != "" && attribution.License != "" {
+				content.ImageURL = attribution.ImageURL
+				content.Attribution = attribution
+				break
+			}
+		}
+	}
+	return content, nil
+}
+
+func usableArticleImageTitles(titles []string) []string {
+	result := make([]string, 0, len(titles))
+	for _, title := range titles {
+		lower := strings.ToLower(title)
+		if strings.Contains(lower, "logo") || strings.Contains(lower, "icon") || strings.Contains(lower, "wiki letter") || strings.Contains(lower, "camera-photo") || strings.HasSuffix(lower, ".svg") {
+			continue
+		}
+		result = append(result, title)
+	}
+	return result
 }
 
 func parseWikipediaContent(body []byte, expectedQID string) (WikipediaContent, error) {
@@ -71,6 +101,9 @@ func parseWikipediaContent(body []byte, expectedQID string) (WikipediaContent, e
 				PageProps struct {
 					WikibaseItem string `json:"wikibase_item"`
 				} `json:"pageprops"`
+				Images []struct {
+					Title string `json:"title"`
+				} `json:"images"`
 			} `json:"pages"`
 		} `json:"query"`
 	}
@@ -85,6 +118,9 @@ func parseWikipediaContent(body []byte, expectedQID string) (WikipediaContent, e
 			Description: strings.TrimSpace(page.Extract),
 			SourceURL:   "https://ja.wikipedia.org/wiki/" + url.PathEscape(strings.ReplaceAll(page.Title, " ", "_")),
 			ImageURL:    page.Thumbnail.Source,
+		}
+		for _, image := range page.Images {
+			content.ImageTitles = append(content.ImageTitles, image.Title)
 		}
 		if content.ImageURL != "" {
 			if attribution, err := FetchCommonsAttribution(content.ImageURL); err == nil {

@@ -28,3 +28,15 @@ func TestParseWikipediaContentRejectsDifferentWikidataItem(t *testing.T) {
 		t.Fatal("expected Wikidata identity mismatch error")
 	}
 }
+
+func TestUsableArticleImageTitlesSkipsInterfaceArtwork(t *testing.T) {
+	got := usableArticleImageTitles([]string{
+		"ファイル:Commons-logo.svg",
+		"ファイル:Camera-photo Upload.svg",
+		"ファイル:Sirotoriodori.jpg",
+		"ファイル:白鳥おどり発祥の碑.jpg",
+	})
+	if len(got) != 2 || got[0] != "ファイル:Sirotoriodori.jpg" || got[1] != "ファイル:白鳥おどり発祥の碑.jpg" {
+		t.Fatalf("unexpected candidates: %#v", got)
+	}
+}

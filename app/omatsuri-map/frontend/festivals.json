@@ -2208,18 +2208,6 @@
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
   },
   {
-    "qid": "Q135186783",
-    "label_ja": "志氐神社に合祀",
-    "label_en": "Co-Enshrinement of Haseno Shrine",
-    "prefecture": "愛知県",
-    "latitude": 34.990927,
-    "longitude": 136.632934,
-    "description": "",
-    "date": "日付未定",
-    "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
-  },
-  {
     "qid": "Q135194564",
     "label_ja": "八幡神社",
     "label_en": "Hachiman Shrine",

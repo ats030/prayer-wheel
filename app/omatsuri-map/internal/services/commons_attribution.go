@@ -14,6 +14,7 @@ import (
 var commonsAttributionAPIBase = "https://commons.wikimedia.org"
 
 type CommonsAttribution struct {
+	ImageURL            string
 	Artist              string
 	Credit              string
 	License             string
@@ -50,7 +51,7 @@ func fetchCommonsAttributionOnce(ctx context.Context, imageURL string) (CommonsA
 		return CommonsAttribution{}, false, err
 	}
 	apiURL := fmt.Sprintf(
-		"%s/w/api.php?action=query&titles=File:%s&prop=imageinfo&iiprop=url|extmetadata&iiextmetadatafilter=Artist|Credit|License|LicenseShortName|LicenseUrl|AttributionRequired&format=json",
+		"%s/w/api.php?action=query&titles=File:%s&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=1200&iiextmetadatafilter=Artist|Credit|License|LicenseShortName|LicenseUrl|AttributionRequired&format=json",
 		commonsAttributionAPIBase,
 		url.QueryEscape(fileName),
 	)
@@ -103,6 +104,8 @@ func parseCommonsAttribution(body []byte) (CommonsAttribution, error) {
 		Query struct {
 			Pages map[string]struct {
 				ImageInfo []struct {
+					URL            string `json:"url"`
+					ThumbURL       string `json:"thumburl"`
 					DescriptionURL string `json:"descriptionurl"`
 					Extmetadata    map[string]struct {
 						Value string `json:"value"`
@@ -121,7 +124,12 @@ func parseCommonsAttribution(body []byte) (CommonsAttribution, error) {
 			if license == "" {
 				license = value("License")
 			}
+			imageURL := info.ThumbURL
+			if imageURL == "" {
+				imageURL = info.URL
+			}
 			return CommonsAttribution{
+				ImageURL:            imageURL,
 				Artist:              value("Artist"),
 				Credit:              value("Credit"),
 				License:             license,
