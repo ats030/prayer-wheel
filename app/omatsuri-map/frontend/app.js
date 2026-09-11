@@ -35,15 +35,35 @@ function commonsFilePage(value){
     return fileName?`https://commons.wikimedia.org/wiki/File:${encodeURIComponent(fileName)}`:'';
   }catch{return''}
 }
-function locationCacheKey(f){return `${Number(f.latitude).toFixed(5)},${Number(f.longitude).toFixed(5)}`}
+function venueData(f){return f.venue&&typeof f.venue==='object'&&f.venue.name&&safeUrl(f.venue.source)?f.venue:null}
+function mapCoordinates(f){
+  const venue=venueData(f),hasVenuePoint=venue&&venue.latitude!==null&&venue.latitude!==''&&venue.longitude!==null&&venue.longitude!=='';
+  const latitude=Number(hasVenuePoint?venue.latitude:f.latitude),longitude=Number(hasVenuePoint?venue.longitude:f.longitude);
+  return Number.isFinite(latitude)&&Number.isFinite(longitude)?{latitude,longitude}:null;
+}
+function locationCacheKey(f){const point=mapCoordinates(f);return point?`${point.latitude.toFixed(5)},${point.longitude.toFixed(5)}`:''}
+function locationPrecisionLabel(f){
+  const venue=venueData(f);
+  if(venue)return venue.precision==='exact'?'会場位置を確認済み':'会場周辺';
+  if(f.coordinate_source==='administrative_area')return'位置は行政区域の目安';
+  if(f.coordinate_source==='venue')return'会場データ由来（未検証）';
+  return'位置は目安';
+}
+function locationMarkup(location,f){
+  const venue=venueData(f),status=`<span class="location-status">${esc(locationPrecisionLabel(f))}</span>`;
+  if(!venue)return `${esc(location)}${status}`;
+  const address=venue.address?`<span class="location-address">${esc(venue.address)}</span>`:'';
+  return `<a href="${esc(safeUrl(venue.source))}" target="_blank" rel="noopener noreferrer">${esc(venue.name)}<span aria-hidden="true">↗</span></a>${address}${status}`;
+}
 async function detailedLocation(f){
-  const embedded=f.venue||f.address||f.location||f.municipality||f.city;
+  const venue=venueData(f);if(venue)return venue.name;
+  const embedded=f.address||f.location||f.municipality||f.city;
   if(embedded)return [f.prefecture,embedded].filter((value,index,items)=>value&&items.indexOf(value)===index).join(' ');
-  if(!Number.isFinite(Number(f.latitude))||!Number.isFinite(Number(f.longitude)))return f.prefecture||'地域未登録';
+  const point=mapCoordinates(f);if(!point)return f.prefecture||'地域未登録';
   const key=locationCacheKey(f);
   if(geocodingCache[key])return geocodingCache[key];
   if(geocodingCacheQueue[key])return geocodingCacheQueue[key];
-  geocodingCacheQueue[key]=fetch('/api/geocoding/reverse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat:Number(f.latitude),lng:Number(f.longitude)})})
+  geocodingCacheQueue[key]=fetch('/api/geocoding/reverse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat:point.latitude,lng:point.longitude})})
     .then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()})
     .then(data=>{
       const resolved=data.success&&(data.full_location||data.location)?data.full_location||data.location:'';
@@ -148,9 +168,9 @@ function icon(selected){return L.divIcon({className:'',html:`<span class="festiv
 function renderMarkers(){
   markers.forEach(({marker})=>map.removeLayer(marker));markers=new Map();
   visible.forEach((f,index)=>{
-    if(!Number.isFinite(Number(f.latitude))||!Number.isFinite(Number(f.longitude)))return;
+    const point=mapCoordinates(f);if(!point)return;
     const key=festivalKey(f,index),selected=key===selectedKey;
-    const marker=L.marker([Number(f.latitude),Number(f.longitude)],{icon:icon(selected),zIndexOffset:selected?SELECTED_MARKER_Z_INDEX:0}).addTo(map);
+    const marker=L.marker([point.latitude,point.longitude],{icon:icon(selected),zIndexOffset:selected?SELECTED_MARKER_Z_INDEX:0}).addTo(map);
     marker.bindTooltip(esc(f.label_ja||f.label_en||'名称未登録'),{direction:'top',offset:[0,-10]});
     marker.on('click',()=>selectFestival(key,'marker'));markers.set(key,{marker,festival:f});
   });
@@ -160,7 +180,7 @@ function detail(f){
   const wiki=f.qid?`https://www.wikidata.org/wiki/${encodeURIComponent(f.qid)}`:'';
   const pedia=f.label_ja?`https://ja.wikipedia.org/wiki/${encodeURIComponent(f.label_ja)}`:'';
   const culture=safeUrl(f.cultural_relaw?.url);
-  return `<article class="detail"><header class="detail-lead"><p class="detail-kicker">${esc(f.label_en||'Festival in Japan')}</p><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2></header><dl class="detail-facts"><div><dt>開催地</dt><dd>${esc(f.prefecture||'地域未登録')}</dd></div><div><dt>次回開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${esc(f.description||'紹介文はまだ登録されていません。')}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真・画像</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section></article>`;
+  return `<article class="detail"><header class="detail-lead"><p class="detail-kicker">${esc(f.label_en||'Festival in Japan')}</p><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2></header><dl class="detail-facts"><div><dt>開催地</dt><dd id="detail-location">${locationMarkup(f.prefecture||'地域未登録',f)}${venueData(f)?'':'<span class="location-loading">詳細を確認中…</span>'}</dd></div><div><dt>次回開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${esc(f.description||'紹介文はまだ登録されていません。')}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真・画像</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section></article>`;
 }
 function selectFestival(key,origin){
   const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;
@@ -173,8 +193,6 @@ function openDetail(f,key,origin){
   const panel=document.querySelector('#detail-panel'),content=document.querySelector('#detail-content'),originLabel=document.querySelector('#detail-origin');
   panel.hidden=false;document.querySelector('.app-shell').classList.add('has-detail');content.dataset.state='loading';content.innerHTML=detail(f);
   originLabel.textContent=origin==='marker'?'地図から選択':'検索結果から選択';
-  const locationElement=document.querySelector('.detail-facts dd');
-  if(locationElement){locationElement.id='detail-location';locationElement.insertAdjacentHTML('beforeend','<span class="location-status">詳細を確認中…</span>')}
   const focusTarget=document.querySelector('#detail-title');
   panel.scrollTop=0;
   requestAnimationFrame(()=>{map.invalidateSize();focusTarget?.focus({preventScroll:origin!=='marker'})});
@@ -183,7 +201,7 @@ function openDetail(f,key,origin){
 }
 async function hydrateLocation(f,key){
   const location=await detailedLocation(f),element=document.querySelector('#detail-location');
-  if(element&&selectedKey===key)element.textContent=location;
+  if(element&&selectedKey===key)element.innerHTML=locationMarkup(location,f);
 }
 function closeDetail(restoreFocus=true){
   const key=selectedKey,origin=selectedOrigin;selectedKey=null;selectedOrigin=null;document.querySelector('#detail-panel').hidden=true;document.querySelector('.app-shell').classList.remove('has-detail');

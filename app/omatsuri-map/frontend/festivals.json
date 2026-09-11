@@ -1323,7 +1323,7 @@
     "prefecture": "千葉県",
     "latitude": 35.80247,
     "longitude": 139.89385,
-    "description": "松戸花火大会は千葉県松戸市で毎年8月上旬に開催される伝統的な夏の風物詩です。会場は松戸市役所前広場（松戸中央公園）で、約1万発の花火が夜空を彩ります。無料で観覧可能で、多くの来場者でにぎわう人気イベントです。",
+    "description": "松戸花火大会は、千葉県松戸市の古ケ崎河川敷スポーツ広場で開催される花火大会です。2026年は12,000発の打上花火とスターマインが予定されています。",
     "date": "2026-08-01",
     "occurrences": [
       {
@@ -1332,7 +1332,16 @@
         "end": "2026-08-01",
         "source": "https://matsudo-hanabi.com/"
       }
-    ]
+    ],
+    "venue": {
+      "name": "古ケ崎河川敷スポーツ広場",
+      "latitude": 35.80247,
+      "longitude": 139.89385,
+      "source": "https://matsudo-hanabi.com/",
+      "coordinate_source": "https://www.wikidata.org/wiki/Q132860355",
+      "precision": "venue_area"
+    },
+    "description_source": "https://matsudo-hanabi.com/"
   },
   {
     "qid": "Q135039171",
