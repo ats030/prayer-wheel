@@ -1,7 +1,7 @@
 const map=L.map('map').setView([36.2,138.2],5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
 
-const CACHE_KEY='omatsuri-map-image-cache-v1';
+const CACHE_KEY='omatsuri-map-image-cache-v2';
 const GEOCODING_CACHE_KEY='omatsuri-map-geocoding-cache-v1';
 const SELECTED_MARKER_Z_INDEX=10000;
 const imageCache={};
@@ -26,6 +26,14 @@ function persist(key,value){
 function festivalKey(f,index=0){return f.qid||`${f.label_ja}-${f.latitude}-${f.longitude}-${index}`}
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}}
+function commonsFilePage(value){
+  try{
+    const url=new URL(value);if(url.hostname!=='upload.wikimedia.org')return'';
+    const parts=url.pathname.split('/').filter(Boolean),thumbIndex=parts.indexOf('thumb');
+    const fileName=decodeURIComponent(thumbIndex>=0?parts[parts.length-2]:parts[parts.length-1]);
+    return fileName?`https://commons.wikimedia.org/wiki/File:${encodeURIComponent(fileName)}`:'';
+  }catch{return''}
+}
 function locationCacheKey(f){return `${Number(f.latitude).toFixed(5)},${Number(f.longitude).toFixed(5)}`}
 async function detailedLocation(f){
   const embedded=f.venue||f.address||f.location||f.municipality||f.city;
@@ -151,7 +159,7 @@ function detail(f){
   const wiki=f.qid?`https://www.wikidata.org/wiki/${encodeURIComponent(f.qid)}`:'';
   const pedia=f.label_ja?`https://ja.wikipedia.org/wiki/${encodeURIComponent(f.label_ja)}`:'';
   const culture=safeUrl(f.cultural_relaw?.url);
-  return `<article class="detail"><header class="detail-lead"><p class="detail-kicker">${esc(f.label_en||'Festival in Japan')}</p><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2></header><dl class="detail-facts"><div><dt>開催地</dt><dd>${esc(f.prefecture||'地域未登録')}</dd></div><div><dt>次回開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${esc(f.description||'紹介文はまだ登録されていません。')}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section></article>`;
+  return `<article class="detail"><header class="detail-lead"><p class="detail-kicker">${esc(f.label_en||'Festival in Japan')}</p><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2></header><dl class="detail-facts"><div><dt>開催地</dt><dd>${esc(f.prefecture||'地域未登録')}</dd></div><div><dt>次回開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${esc(f.description||'紹介文はまだ登録されていません。')}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真・画像</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section></article>`;
 }
 function selectFestival(key,origin){
   const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;
@@ -188,12 +196,13 @@ function closeDetail(restoreFocus=true){
 async function hydrateImage(f,key){
   let result=imageCache[f.qid];if(typeof result==='string')result={url:result};
   if(!result&&f.qid){
-    try{const response=await fetch(`/api/wiki/image?qid=${encodeURIComponent(f.qid)}`);if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();result={url:safeUrl(data.url),license:data.license};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
+    try{const response=await fetch(`/api/wiki/image?qid=${encodeURIComponent(f.qid)}`);if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();result={url:safeUrl(data.url),license:String(data.license||'').trim()};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
     catch(error){console.warn(`Image could not be loaded for ${f.qid}`,error)}
   }
   const container=document.querySelector('#detail-image'),content=document.querySelector('#detail-content');if(!container||selectedKey!==key)return;
-  if(!result?.url){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">画像を読み込めませんでした。</p>';return}
-  content.dataset.state='success';container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(f.label_ja||'祭り')}の画像を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(f.label_ja||'祭り')}の画像"></button>${result.license?`<p class="license">画像ライセンス: ${esc(result.license)}</p>`:''}`;
+  if(!result?.url||!result?.license){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">ライセンス情報を確認できる画像がありません。</p>';return}
+  const source=commonsFilePage(result.url);
+  content.dataset.state='success';container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(f.label_ja||'祭り')}の画像を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(f.label_ja||'祭り')}の画像"></button><p class="license">画像ライセンス: ${esc(result.license)}${source?` ・ <a href="${esc(source)}" target="_blank" rel="noopener noreferrer">画像の出典<span aria-hidden="true">↗</span></a>`:''}</p>`;
   container.querySelector('button').addEventListener('click',()=>openLightbox(result.url,f.label_ja));
 }
 function openLightbox(url,alt){const dialog=document.querySelector('#lightbox'),image=document.querySelector('#lightbox-image');image.src=url;image.alt=`${alt||'祭り'}の拡大画像`;dialog.showModal()}
