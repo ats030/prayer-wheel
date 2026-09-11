@@ -8,8 +8,11 @@ import (
 )
 
 type WikidataResponse struct {
-	URL     string `json:"url"`
-	License string `json:"license"`
+	URL        string `json:"url"`
+	License    string `json:"license"`
+	LicenseURL string `json:"license_url,omitempty"`
+	Artist     string `json:"artist,omitempty"`
+	SourceURL  string `json:"source_url,omitempty"`
 }
 
 type WikidataHandler struct {
@@ -36,10 +39,22 @@ func (h *WikidataHandler) GetWikidataImage(w http.ResponseWriter, r *http.Reques
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
+	attribution, err := services.FetchCommonsAttribution(url)
+	effectiveLicense := attribution.License
+	if effectiveLicense == "" {
+		effectiveLicense = license
+	}
+	if err != nil || effectiveLicense == "" || (attribution.AttributionRequired && attribution.Artist == "") {
+		http.Error(w, "image attribution metadata is incomplete", http.StatusNotFound)
+		return
+	}
 
 	response := WikidataResponse{
-		URL:     url,
-		License: license,
+		URL:        url,
+		License:    effectiveLicense,
+		LicenseURL: attribution.LicenseURL,
+		Artist:     attribution.Artist,
+		SourceURL:  attribution.SourceURL,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

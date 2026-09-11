@@ -1,7 +1,7 @@
 const map=L.map('map').setView([36.2,138.2],5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
 
-const CACHE_KEY='omatsuri-map-image-cache-v2';
+const CACHE_KEY='omatsuri-map-image-cache-v3';
 const GEOCODING_CACHE_KEY='omatsuri-map-geocoding-cache-v1';
 const SELECTED_MARKER_Z_INDEX=10000;
 const imageCache={};
@@ -26,6 +26,7 @@ function persist(key,value){
 function festivalKey(f,index=0){return f.qid||`${f.label_ja}-${f.latitude}-${f.longitude}-${index}`}
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}}
+function plainText(value){const document=new DOMParser().parseFromString(String(value||''),'text/html');return document.body.textContent.trim()}
 function commonsFilePage(value){
   try{
     const url=new URL(value);if(url.hostname!=='upload.wikimedia.org')return'';
@@ -196,15 +197,16 @@ function closeDetail(restoreFocus=true){
 async function hydrateImage(f,key){
   let result=imageCache[f.qid],loadFailed=false;if(typeof result==='string')result={url:result};
   if(!result&&f.qid){
-    try{const response=await fetch(`/api/wiki/image?qid=${encodeURIComponent(f.qid)}`);if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();result={url:safeUrl(data.url),license:String(data.license||'').trim()};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
+    try{const response=await fetch(`/api/wiki/image?qid=${encodeURIComponent(f.qid)}`);if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();result={url:safeUrl(data.url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),sourceUrl:safeUrl(data.source_url)};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
     catch(error){loadFailed=true;console.warn(`Image could not be loaded for ${f.qid}`,error)}
   }
   const container=document.querySelector('#detail-image'),content=document.querySelector('#detail-content');if(!container||selectedKey!==key)return;
   if(loadFailed){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">画像を取得できませんでした。</p>';return}
   if(!result?.url){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">表示できる画像が登録されていません。</p>';return}
   if(!result.license){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">画像のライセンス情報を確認できないため、表示していません。</p>';return}
-  const source=commonsFilePage(result.url);
-  content.dataset.state='success';container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(f.label_ja||'祭り')}の画像を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(f.label_ja||'祭り')}の画像"></button><p class="license">画像ライセンス: ${esc(result.license)}${source?` ・ <a href="${esc(source)}" target="_blank" rel="noopener noreferrer">画像の出典<span aria-hidden="true">↗</span></a>`:''}</p>`;
+  const source=result.sourceUrl||commonsFilePage(result.url);
+  const license=result.licenseUrl?`<a href="${esc(result.licenseUrl)}" target="_blank" rel="noopener noreferrer">${esc(result.license)}<span aria-hidden="true">↗</span></a>`:esc(result.license);
+  content.dataset.state='success';container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(f.label_ja||'祭り')}の画像を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(f.label_ja||'祭り')}の画像"></button><p class="license">${result.artist?`作者: ${esc(result.artist)} ・ `:''}ライセンス: ${license}${source?` ・ <a href="${esc(source)}" target="_blank" rel="noopener noreferrer">画像の出典<span aria-hidden="true">↗</span></a>`:''}</p>`;
   container.querySelector('button').addEventListener('click',()=>openLightbox(result.url,f.label_ja));
 }
 function openLightbox(url,alt){const dialog=document.querySelector('#lightbox'),image=document.querySelector('#lightbox-image');image.src=url;image.alt=`${alt||'祭り'}の拡大画像`;dialog.showModal()}
