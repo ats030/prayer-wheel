@@ -4,7 +4,6 @@
 .detail-content[data-state=loading],.detail-content[data-state=error],.detail-content[data-state=success]{border-left:0}
 .detail-lead{position:relative;padding:0 0 var(--space-lg) var(--space-md);border-bottom:1px solid var(--color-rule)}
 .detail-lead:before{position:absolute;top:.25rem;bottom:var(--space-lg);left:0;width:3px;background:var(--color-accent);content:""}
-.detail-kicker{margin:0 0 var(--space-xs);color:var(--color-ink-2);font-size:.72rem;font-weight:700;letter-spacing:.04em;line-height:1.4;overflow-wrap:anywhere}
 .detail h2{min-width:0;max-width:18ch;margin:0;font-size:clamp(1.5rem,2.4vw,2rem);line-height:1.25;letter-spacing:.01em}.detail h2:focus{outline:0}.detail h2:focus-visible{outline:3px solid var(--color-focus);outline-offset:4px}
 .detail-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;border-bottom:1px solid var(--color-rule)}
 .detail-facts div{min-width:0;padding:var(--space-md) 0}.detail-facts div+div{border-left:1px solid var(--color-rule);padding-left:var(--space-md)}

@@ -40,6 +40,7 @@ func main() {
 	mux.HandleFunc("/api/festivals/", festivalHandler.GetAllFestivals)
 	mux.HandleFunc("/api/festivals", festivalHandler.GetAllFestivals)
 	mux.HandleFunc("/api/wiki/image", wikidataHandler.GetWikidataImage)
+	mux.HandleFunc("/api/wiki/links", wikidataHandler.GetWikidataLinks)
 	mux.HandleFunc("/api/wiki/content", handlers.GetWikipediaContent)
 	mux.HandleFunc("/api/geocoding/reverse", geocodingHandler.ReverseGeocode)
 

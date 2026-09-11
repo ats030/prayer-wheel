@@ -62,3 +62,25 @@ func (h *WikidataHandler) GetWikidataImage(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
+
+func (h *WikidataHandler) GetWikidataLinks(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	qid := r.URL.Query().Get("qid")
+	if qid == "" {
+		http.Error(w, "qid parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	links, err := services.FetchWikidataLinks(qid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(links)
+}

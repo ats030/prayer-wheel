@@ -1,0 +1,178 @@
+package services
+
+import (
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"regexp"
+	"sync/atomic"
+	"testing"
+	"time"
+)
+
+func withCommonsBase(t *testing.T, s *httptest.Server) {
+	t.Helper()
+	orig := commonsAPIBase
+	origBackoff := initialBackoff
+	commonsAPIBase = s.URL
+	initialBackoff = time.Millisecond
+	t.Cleanup(func() {
+		commonsAPIBase = orig
+		initialBackoff = origBackoff
+	})
+}
+
+func withWikidataBase(t *testing.T, s *httptest.Server) {
+	t.Helper()
+	orig := wikidataAPIBase
+	wikidataAPIBase = s.URL
+	t.Cleanup(func() {
+		wikidataAPIBase = orig
+	})
+}
+
+func TestFetchWikidataLinks_ExtractsAllProperties(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"entities":{"Q1":{"claims":{
+			"P856":[{"mainsnak":{"datavalue":{"value":"https://example.com/"}}}],
+			"P2013":[{"mainsnak":{"datavalue":{"value":"examplepage"}}}],
+			"P2002":[{"mainsnak":{"datavalue":{"value":"examplehandle"}}}],
+			"P2003":[{"mainsnak":{"datavalue":{"value":"exampleinsta"}}}],
+			"P2397":[{"mainsnak":{"datavalue":{"value":"UCabc123"}}}]
+		}}}}`))
+	}))
+	defer s.Close()
+	withWikidataBase(t, s)
+
+	links, err := FetchWikidataLinks("Q1")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if links.OfficialSite != "https://example.com/" {
+		t.Errorf("OfficialSite = %q", links.OfficialSite)
+	}
+	if links.Facebook != "https://www.facebook.com/examplepage" {
+		t.Errorf("Facebook = %q", links.Facebook)
+	}
+	if links.Twitter != "https://x.com/examplehandle" {
+		t.Errorf("Twitter = %q", links.Twitter)
+	}
+	if links.Instagram != "https://www.instagram.com/exampleinsta" {
+		t.Errorf("Instagram = %q", links.Instagram)
+	}
+	if links.YouTube != "https://www.youtube.com/channel/UCabc123" {
+		t.Errorf("YouTube = %q", links.YouTube)
+	}
+}
+
+func TestFetchWikidataLinks_NoLinksReturnsError(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"entities":{"Q2":{"claims":{}}}}`))
+	}))
+	defer s.Close()
+	withWikidataBase(t, s)
+
+	if _, err := FetchWikidataLinks("Q2"); err == nil {
+		t.Fatal("expected error when no links are present")
+	}
+}
+
+func TestFetchCommonsImageInfo_RetriesOn429ThenSucceeds(t *testing.T) {
+	var calls int32
+	mux := http.NewServeMux()
+	mux.HandleFunc("/w/api.php", func(w http.ResponseWriter, r *http.Request) {
+		n := atomic.AddInt32(&calls, 1)
+		if n <= 2 {
+			http.Error(w, "rate limited", http.StatusTooManyRequests)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"query":{"pages":{"42":{"imageinfo":[{"thumburl":"https://commons.wikimedia.org/thumb/x/y/f.jpg","url":"https://commons.wikimedia.org/x/y/f.jpg","extmetadata":{"License":{"value":"cc-by-4.0"}}}]}}}}`))
+	})
+	s := httptest.NewServer(mux)
+	defer s.Close()
+	withCommonsBase(t, s)
+
+	u, license, err := fetchCommonsImageInfo(context.Background(), "f.jpg")
+	if err != nil {
+		t.Fatalf("expected success after retry, got err: %v", err)
+	}
+	if u != "https://commons.wikimedia.org/thumb/x/y/f.jpg" {
+		t.Errorf("unexpected thumburl: %q", u)
+	}
+	if license != "cc-by-4.0" {
+		t.Errorf("unexpected license: %q", license)
+	}
+	if got := atomic.LoadInt32(&calls); got != 3 {
+		t.Errorf("expected 3 calls (2 retries + 1 success), got %d", got)
+	}
+}
+
+func TestFetchCommonsImageInfo_StopsRetryingOnNonRetryableError(t *testing.T) {
+	var calls int32
+	mux := http.NewServeMux()
+	mux.HandleFunc("/w/api.php", func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&calls, 1)
+		http.Error(w, "not found", http.StatusNotFound)
+	})
+	s := httptest.NewServer(mux)
+	defer s.Close()
+	withCommonsBase(t, s)
+
+	_, _, err := fetchCommonsImageInfo(context.Background(), "missing.jpg")
+	if err == nil {
+		t.Fatal("expected error for 404, got nil")
+	}
+	if got := atomic.LoadInt32(&calls); got != 1 {
+		t.Errorf("404 must not be retried, expected 1 call, got %d", got)
+	}
+}
+
+func TestFetchCommonsImageInfo_RetriesExhausted(t *testing.T) {
+	var calls int32
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&calls, 1)
+		http.Error(w, "rate limited", http.StatusTooManyRequests)
+	}))
+	defer s.Close()
+	withCommonsBase(t, s)
+
+	_, _, err := fetchCommonsImageInfo(context.Background(), "f.jpg")
+	if err == nil {
+		t.Fatal("expected error after retries exhausted")
+	}
+	if got := atomic.LoadInt32(&calls); got != maxRetries+1 {
+		t.Errorf("expected %d calls (initial + %d retries), got %d", maxRetries+1, maxRetries, got)
+	}
+}
+
+func TestParseRetryAfter(t *testing.T) {
+	if got := parseRetryAfter(""); got != 0 {
+		t.Errorf("empty header: got %v, want 0", got)
+	}
+	if got := parseRetryAfter("5"); got != 5*time.Second {
+		t.Errorf("delta-seconds: got %v, want 5s", got)
+	}
+	if got := parseRetryAfter(time.Now().Add(3*time.Second).UTC().Format(http.TimeFormat)); got <= 0 || got > 4*time.Second {
+		t.Errorf("http-date: got %v, want ~3s", got)
+	}
+	if got := parseRetryAfter("not-a-number"); got != 0 {
+		t.Errorf("garbage: got %v, want 0", got)
+	}
+	if got := parseRetryAfter("-3"); got != 0 {
+		t.Errorf("negative: got %v, want 0", got)
+	}
+}
+
+func TestStripUTMPreservesPath(t *testing.T) {
+	in := "https://commons.wikimedia.org/thumb/x/y/f.jpg?utm_source=web&utm_medium=referral"
+	got := stripUTM(in)
+	if got != "https://commons.wikimedia.org/thumb/x/y/f.jpg" {
+		t.Errorf("stripUTM(%q) = %q", in, got)
+	}
+	if match, _ := regexp.MatchString("utm_", got); match {
+		t.Errorf("unexpected utm param in %q", got)
+	}
+}

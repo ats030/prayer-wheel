@@ -3,12 +3,14 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&
 
 const CACHE_KEY='omatsuri-map-image-cache-v5';
 const GEOCODING_CACHE_KEY='omatsuri-map-geocoding-cache-v1';
+const LINKS_CACHE_KEY='omatsuri-map-links-cache-v1';
 const SELECTED_MARKER_Z_INDEX=10000;
 const imageCache={};
 const wikiContentCache={};
 const wikiContentQueue={};
 const geocodingCache={};
 const geocodingCacheQueue={};
+const linksCache={};
 let festivals=[];
 let visible=[];
 let markers=new Map();
@@ -16,7 +18,7 @@ let selectedKey=null;
 let selectedOrigin=null;
 const saveTimers={};
 
-for(const [key,target] of [[CACHE_KEY,imageCache],[GEOCODING_CACHE_KEY,geocodingCache]]){
+for(const [key,target] of [[CACHE_KEY,imageCache],[GEOCODING_CACHE_KEY,geocodingCache],[LINKS_CACHE_KEY,linksCache]]){
   try{Object.assign(target,JSON.parse(localStorage.getItem(key)||'{}'))}
   catch(error){console.warn(`Cache ${key} could not be loaded`,error)}
 }
@@ -235,7 +237,7 @@ function detail(f){
   const culture=safeUrl(f.cultural_relaw?.url);
   const about=groundedDescription(f);
   const aboutBody=about.locationAware?`${esc(about.body)}「<span id="detail-about-location">${esc(f.prefecture||'地域未登録')}</span>」付近に登録されています。正確な会場は確認中です。`:esc(about.body);
-  return `<article class="detail"><header class="detail-lead"><p class="detail-kicker">${esc(f.label_en||'Festival in Japan')}</p><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2></header><dl class="detail-facts"><div><dt>開催地</dt><dd id="detail-location">${locationMarkup(f.prefecture||'地域未登録',f)}${venueData(f)?'':'<span class="location-loading">詳細を確認中…</span>'}</dd></div><div><dt>次回開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status">${esc(about.status)}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section></article>`;
+  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2></header><dl class="detail-facts"><div><dt>開催地</dt><dd id="detail-location">${locationMarkup(f.prefecture||'地域未登録',f)}${venueData(f)?'':'<span class="location-loading">詳細を確認中…</span>'}</dd></div><div><dt>次回開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status">${esc(about.status)}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" id="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section></article>`;
 }
 function selectFestival(key,origin){
   const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;
@@ -254,6 +256,7 @@ function openDetail(f,key,origin){
   hydrateImage(f,key);
   hydrateLocation(f,key);
   hydrateAbout(f,key);
+  hydrateLinks(f,key);
 }
 async function hydrateAbout(f,key){
   const venue=venueData(f),descriptionSource=safeUrl(f.description_source);
@@ -297,6 +300,26 @@ async function hydrateImage(f,key){
   const creator=result.artist||result.credit;
   content.dataset.state='success';container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(f.label_ja||'祭り')}の画像を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(f.label_ja||'祭り')}の画像"></button><p class="license">${creator?`${esc(creator)} · `:''}${license}${source?` · <a href="${esc(source)}" target="_blank" rel="noopener noreferrer" aria-label="Wikimedia Commonsの画像出典">Commons<span aria-hidden="true">↗</span></a>`:''}</p>`;
   container.querySelector('button').addEventListener('click',()=>openLightbox(result.url,f.label_ja));
+}
+async function hydrateLinks(f,key){
+  if(!f.qid)return;
+  let links=linksCache[f.qid];
+  if(!links){
+    try{
+      const data=await fetchJSONWithRetry(`/api/wiki/links?qid=${encodeURIComponent(f.qid)}`);
+      links={officialSite:safeUrl(data.official_site),facebook:safeUrl(data.facebook),twitter:safeUrl(data.twitter),instagram:safeUrl(data.instagram),youtube:safeUrl(data.youtube)};
+      linksCache[f.qid]=links;persist(LINKS_CACHE_KEY,linksCache);
+    }catch(error){links={}}
+  }
+  const nav=document.querySelector('#detail-links');if(!nav||selectedKey!==key)return;
+  const extra=[
+    links.officialSite?`<a href="${esc(links.officialSite)}" target="_blank" rel="noopener noreferrer">公式サイト<span aria-hidden="true">↗</span></a>`:'',
+    links.facebook?`<a href="${esc(links.facebook)}" target="_blank" rel="noopener noreferrer">Facebook<span aria-hidden="true">↗</span></a>`:'',
+    links.twitter?`<a href="${esc(links.twitter)}" target="_blank" rel="noopener noreferrer">X (Twitter)<span aria-hidden="true">↗</span></a>`:'',
+    links.instagram?`<a href="${esc(links.instagram)}" target="_blank" rel="noopener noreferrer">Instagram<span aria-hidden="true">↗</span></a>`:'',
+    links.youtube?`<a href="${esc(links.youtube)}" target="_blank" rel="noopener noreferrer">YouTube<span aria-hidden="true">↗</span></a>`:'',
+  ].join('');
+  if(extra)nav.insertAdjacentHTML('afterbegin',extra);
 }
 function openLightbox(url,alt){const dialog=document.querySelector('#lightbox'),image=document.querySelector('#lightbox-image');image.src=url;image.alt=`${alt||'祭り'}の拡大画像`;dialog.showModal()}
 function closeLightbox(){const dialog=document.querySelector('#lightbox');if(dialog.open)dialog.close();document.querySelector('#lightbox-image').src=''}
