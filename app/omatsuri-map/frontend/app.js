@@ -24,6 +24,26 @@ function persist(key,value){
 function festivalKey(f,index=0){return f.qid||`${f.label_ja}-${f.latitude}-${f.longitude}-${index}`}
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}}
+function locationCacheKey(f){return `${Number(f.latitude).toFixed(5)},${Number(f.longitude).toFixed(5)}`}
+async function detailedLocation(f){
+  const embedded=f.venue||f.address||f.location||f.municipality||f.city;
+  if(embedded)return [f.prefecture,embedded].filter((value,index,items)=>value&&items.indexOf(value)===index).join(' ');
+  if(!Number.isFinite(Number(f.latitude))||!Number.isFinite(Number(f.longitude)))return f.prefecture||'地域未登録';
+  const key=locationCacheKey(f);
+  if(geocodingCache[key])return geocodingCache[key];
+  if(geocodingCacheQueue[key])return geocodingCacheQueue[key];
+  geocodingCacheQueue[key]=fetch('/api/geocoding/reverse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat:Number(f.latitude),lng:Number(f.longitude)})})
+    .then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()})
+    .then(data=>{
+      const resolved=data.success&&(data.full_location||data.location)?data.full_location||data.location:'';
+      if(!resolved)return f.prefecture||'地域未登録';
+      return f.prefecture&&!resolved.includes(f.prefecture)?`${f.prefecture} ${resolved}`:resolved;
+    })
+    .catch(error=>{console.warn(`Location could not be resolved for ${key}`,error);return f.prefecture||'地域未登録'})
+    .then(location=>{geocodingCache[key]=location;persist(GEOCODING_CACHE_KEY,geocodingCache);return location})
+    .finally(()=>delete geocodingCacheQueue[key]);
+  return geocodingCacheQueue[key];
+}
 function parseRange(value){
   if(!value||value==='日付未定')return{};
   const parts=value.split(/[〜～]/),valid=s=>/^\d{4}-\d{2}-\d{2}$/.test(s);
@@ -89,10 +109,17 @@ function selectFestival(key,move){
 function openDetail(f,key,focusDescription){
   const panel=document.querySelector('#detail-panel'),content=document.querySelector('#detail-content');
   panel.hidden=false;document.querySelector('.app-shell').classList.add('has-detail');content.dataset.state='loading';content.innerHTML=detail(f);
+  const locationElement=document.querySelector('.detail-facts dd');
+  if(locationElement){locationElement.id='detail-location';locationElement.insertAdjacentHTML('beforeend','<span class="location-status">詳細を確認中…</span>')}
   const focusTarget=focusDescription?document.querySelector('.detail-description'):document.querySelector('#detail-title');
   if(focusTarget)focusTarget.tabIndex=-1;
   requestAnimationFrame(()=>{map.invalidateSize();focusTarget?.focus({preventScroll:!focusDescription})});
   hydrateImage(f,key);
+  hydrateLocation(f,key);
+}
+async function hydrateLocation(f,key){
+  const location=await detailedLocation(f),element=document.querySelector('#detail-location');
+  if(element&&selectedKey===key)element.textContent=location;
 }
 function closeDetail(restoreFocus=true){
   const key=selectedKey;selectedKey=null;document.querySelector('#detail-panel').hidden=true;document.querySelector('.app-shell').classList.remove('has-detail');

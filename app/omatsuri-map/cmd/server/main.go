@@ -29,6 +29,8 @@ func main() {
 	festivalHandler := handlers.NewFestivalHandler(service)
 	wikidataHandler := handlers.NewWikidataHandler()
 
+	geocodingService := services.NewGeocodingService()
+	geocodingHandler := handlers.NewGeocodingHandler(geocodingService)
 	// Create mux
 	mux := http.NewServeMux()
 
@@ -38,6 +40,7 @@ func main() {
 	mux.HandleFunc("/api/festivals/", festivalHandler.GetAllFestivals)
 	mux.HandleFunc("/api/festivals", festivalHandler.GetAllFestivals)
 	mux.HandleFunc("/api/wiki/image", wikidataHandler.GetWikidataImage)
+	mux.HandleFunc("/api/geocoding/reverse", geocodingHandler.ReverseGeocode)
 
 	// CORS middleware wrapper
 	muxWithCORS := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
