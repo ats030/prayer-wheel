@@ -26,7 +26,15 @@
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/140",
       "address": ""
-    }
+    },
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-07",
+        "end": "10-09",
+        "source": "https://www.wikidata.org/wiki/Q114712#P837"
+      }
+    ]
   },
   {
     "qid": "Q862407",
@@ -138,6 +146,14 @@
         "end": "2026-10-22",
         "source": "https://ja.kyoto.travel/event/single.php?event_id=7049"
       }
+    ],
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-22",
+        "end": "10-22",
+        "source": "https://www.wikidata.org/wiki/Q912124#P837"
+      }
     ]
   },
   {
@@ -244,7 +260,15 @@
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/138",
       "address": ""
-    }
+    },
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "11-02",
+        "end": "11-04",
+        "source": "https://www.wikidata.org/wiki/Q493695#P837"
+      }
+    ]
   },
   {
     "qid": "Q21653307",
@@ -264,7 +288,15 @@
     "latitude": 35.315833333,
     "longitude": 136.941111111,
     "description": "豊年祭は愛知県豊川市で毎年8月1日～3日に開催される伝統的な夏の祭りです。  \n江戸時代から続く「豊川祇園祭」の一部で、曳山のパレードや太鼓の演奏、地元の特産品を味わえる屋台が楽しめます。  \n特に「曳山の練り歩き」は、約30台の山車が市街を練り歩き、観光客を楽しませます。",
-    "date": "日付未定"
+    "date": "日付未定",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "03-15",
+        "end": "03-15",
+        "source": "https://www.wikidata.org/wiki/Q30924149#P837"
+      }
+    ]
   },
   {
     "qid": "Q5288609",
@@ -313,7 +345,15 @@
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/18",
       "address": ""
-    }
+    },
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-03",
+        "end": "08-06",
+        "source": "https://www.wikidata.org/wiki/Q4701224#P837"
+      }
+    ]
   },
   {
     "qid": "Q1749262",
@@ -362,7 +402,15 @@
     "latitude": 38.26049722,
     "longitude": 140.87196944,
     "description": "仙台七夕は毎年8月1日から7日まで宮城県仙台市で開催される伝統的な夏の祭りで、青竹に色とりどりの短冊や吹流しを飾り、七夕の由来にちなみ願い事を込める風習があります。  \n中心は青葉通りや泉中央公園など市内の主要通りで行われる「仙台七夕まつり」で、約300万本の吹流しが風に揺れる光景が特徴です。  \n江戸時代の伊達政宗が奨励した「織姫と彦星の再会を願う行事」が起源とされ、現在は日本三大七夕祭りの一つとして、多くの観光客でにぎわいます。",
-    "date": "日付未定"
+    "date": "日付未定",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-06",
+        "end": "08-08",
+        "source": "https://www.wikidata.org/wiki/Q9385159#P837"
+      }
+    ]
   },
   {
     "qid": "Q6663970",
@@ -381,7 +429,15 @@
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/56",
       "address": ""
-    }
+    },
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "05-01",
+        "end": "05-01",
+        "source": "https://www.wikidata.org/wiki/Q6663970#P837"
+      }
+    ]
   },
   {
     "qid": "Q11261730",
@@ -481,7 +537,15 @@
     "latitude": 43.347434358,
     "longitude": 142.388015401,
     "description": "北海へそ祭りは、北海道の中心部に位置する岩内町（いわないちょう）で開催される地域おこしの祭りです。  \n「日本列島のへそ」と称される地点（北緯43度、東経141度の交点）をテーマに、地元の特産品や文化を紹介するイベントが展開されます。  \n主な催しには、へそストロベリーフェス（イチゴの販売・試食）、地元農産物の販売、ライブ演奏、子ども向け体験コーナーなどがあります。",
-    "date": "日付未定"
+    "date": "日付未定",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "07-28",
+        "end": "07-29",
+        "source": "https://www.wikidata.org/wiki/Q11402390#P837"
+      }
+    ]
   },
   {
     "qid": "Q11386340",
@@ -520,7 +584,15 @@
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/103",
       "address": ""
-    }
+    },
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "06-14",
+        "end": "06-14",
+        "source": "https://www.wikidata.org/wiki/Q11381803#P837"
+      }
+    ]
   },
   {
     "qid": "Q11280396",
@@ -530,7 +602,17 @@
     "latitude": 32.4876083,
     "longitude": 130.6267719,
     "description": "やつしろ全国花火競技大会は、熊本県八代市（旧・八代郡八代町）で毎年8月の土曜日・日曜日に開催される全国規模の花火競技大会です。  \n「日本三大花火大会」の一つに数えられ、約2万発の花火が夜空を彩り、特に「やつしろ式」の独特な演出が評価されています。  \n大会は1926年（大正15年）に始まり、現在は2日間で約80万人以上が訪れる熊本を代表する夏の風物詩です。",
-    "date": "日付未定"
+    "date": "日付未定",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 10,
+        "ordinal": 3,
+        "weekday": 6,
+        "label": "10月の第3土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11280396#P837"
+      }
+    ]
   },
   {
     "qid": "Q11353501",
@@ -540,7 +622,17 @@
     "latitude": 37.04312,
     "longitude": 136.96747,
     "description": "七尾祇園祭は石川県七尾市で毎年7月14日～16日に開催される伝統的な夏の祭りで、約500年の歴史を持つ。  \n「山車（だし）」や「屋台」が市内を練り歩き、迫力ある太鼓の音や「やっほーさ！」の掛け声が特徴的。  \n2017年には「七尾祇園祭の山車行事」として国重要無形民俗文化財に指定されています。",
-    "date": "日付未定"
+    "date": "日付未定",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 7,
+        "ordinal": 2,
+        "weekday": 6,
+        "label": "7月の第2土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11353501#P837"
+      }
+    ]
   },
   {
     "qid": "Q11285021",
@@ -550,7 +642,17 @@
     "latitude": 40.270611111,
     "longitude": 140.558722222,
     "description": "「アメッコ市」は秋田県横手市で12月に開催される伝統的な冬の市で、約250年以上の歴史があります。  \n「アメッコ」とは、古語で「小さな福」や「小さな幸」を意味し、福を呼び込む縁起物として、福助人形や福かまど、福かごなどが販売されます。  \n会場では、地元の特産品や手作り品の他、屋台の食べ物や伝統芸能の披露もあり、多くの来場者でにぎわいます。",
-    "date": "日付未定"
+    "date": "日付未定",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 2,
+        "ordinal": 2,
+        "weekday": 6,
+        "label": "2月の第2土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11285021#P837"
+      }
+    ]
   },
   {
     "qid": "Q11362874",
@@ -570,7 +672,15 @@
     "latitude": 35.807214,
     "longitude": 137.243953,
     "description": "下呂の田の神祭は、岐阜県下呂市で毎年8月15日前後に行われる伝統的な農耕祭です。田植えの無事を祈り、豊作を願って「田の神」を祭り、神輿や山車が練り歩くのが特徴です。2017年には「下呂の田の神祭」が国指定重要無形民俗文化財に認定されました。",
-    "date": "日付未定"
+    "date": "日付未定",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "02-14",
+        "end": "02-14",
+        "source": "https://www.wikidata.org/wiki/Q11360688#P837"
+      }
+    ]
   },
   {
     "qid": "Q11432381",
@@ -599,7 +709,15 @@
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/00000881",
       "address": ""
-    }
+    },
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-26",
+        "end": "08-27",
+        "source": "https://www.wikidata.org/wiki/Q11413521#P837"
+      }
+    ]
   },
   {
     "qid": "Q11425954",
@@ -769,7 +887,15 @@
     "latitude": 35.66752778,
     "longitude": 139.55047222,
     "description": "深大寺鬼燈まつりは、東京都調布市にある深大寺で毎年8月13日～16日に開催される伝統的な灯篭祭りです。  \n「鬼燈（おにぼたる）」と呼ばれる、わらや竹で作られた提灯を境内に並べ、亡き人の霊を導き、供養する行事です。  \n夜間には鬼燈の灯りが幻想的に輝き、地域の夏の風物詩として多くの観光客が訪れます。",
-    "date": "日付未定"
+    "date": "日付未定",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "07-20",
+        "end": "07-20",
+        "source": "https://www.wikidata.org/wiki/Q20045025#P837"
+      }
+    ]
   },
   {
     "qid": "Q17228250",
@@ -859,7 +985,15 @@
     "latitude": 34.480942,
     "longitude": 136.546151,
     "description": "佐那神社は三重県伊賀市にある神社で、毎年10月の第2日曜日に「伊賀佐那神社の火祭り」が開催されます。この祭りは国の重要無形民俗文化財に指定されており、約150年分の伝統を誇る火の儀式で、参拝者が火をくぐって無病息災を願います。祭りの中心は「大火の儀」で、神職が松明を掲げて神域を清める厳かな様子が特徴です。",
-    "date": "日付未定"
+    "date": "日付未定",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-08",
+        "end": "10-08",
+        "source": "https://www.wikidata.org/wiki/Q17226795#P837"
+      }
+    ]
   },
   {
     "qid": "Q21652311",
@@ -2509,7 +2643,15 @@
     "latitude": 36.2310354,
     "longitude": 137.9440724,
     "description": "",
-    "date": "日付未定"
+    "date": "日付未定",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "06-30",
+        "end": "06-30",
+        "source": "https://www.wikidata.org/wiki/Q11477022#P837"
+      }
+    ]
   },
   {
     "qid": "Q11450469",
@@ -2539,7 +2681,15 @@
     "latitude": 37.0642688,
     "longitude": 138.5967298,
     "description": "",
-    "date": "日付未定"
+    "date": "日付未定",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "01-15",
+        "end": "01-15",
+        "source": "https://www.wikidata.org/wiki/Q11447740#P837"
+      }
+    ]
   },
   {
     "qid": "Q24877085",
@@ -2638,7 +2788,15 @@
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/108",
       "address": ""
-    }
+    },
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "12-17",
+        "end": "12-17",
+        "source": "https://www.wikidata.org/wiki/Q11513690#P837"
+      }
+    ]
   },
   {
     "qid": "Q11511700",
@@ -2808,7 +2966,15 @@
     "latitude": 36.049167,
     "longitude": 138.085278,
     "description": "",
-    "date": "日付未定"
+    "date": "日付未定",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-15",
+        "end": "08-15",
+        "source": "https://www.wikidata.org/wiki/Q11631901#P837"
+      }
+    ]
   },
   {
     "qid": "Q11274060",
@@ -2880,7 +3046,15 @@
     "description": "北海道江差町にある姥神大神宮の例大祭",
     "date": "日付未定",
     "wikipedia_title": "姥神大神宮渡御祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-09",
+        "end": "08-11",
+        "source": "https://www.wikidata.org/wiki/Q24896695#P837"
+      }
+    ]
   },
   {
     "qid": "Q123143623",
@@ -2952,7 +3126,15 @@
     "description": "青森県八戸市で行われる予祝芸能",
     "date": "日付未定",
     "wikipedia_title": "えんぶり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "02-17",
+        "end": "02-20",
+        "source": "https://www.wikidata.org/wiki/Q11261148#P837"
+      }
+    ]
   },
   {
     "qid": "Q11372403",
@@ -3048,7 +3230,17 @@
     "description": "岩手県滝沢市から盛岡市で実施される、農耕馬への感謝の祭り",
     "date": "日付未定",
     "wikipedia_title": "チャグチャグ馬コ",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 6,
+        "ordinal": 2,
+        "weekday": 6,
+        "label": "6月の第2土曜日",
+        "source": "https://www.wikidata.org/wiki/Q289513#P837"
+      }
+    ]
   },
   {
     "qid": "Q6417750",
@@ -3060,7 +3252,33 @@
     "description": "岩手県北上市の祭り",
     "date": "日付未定",
     "wikipedia_title": "北上・みちのく芸能まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 8,
+        "ordinal": 1,
+        "weekday": 6,
+        "label": "8月の第1土曜日",
+        "source": "https://www.wikidata.org/wiki/Q6417750#P837"
+      },
+      {
+        "kind": "nth_weekday",
+        "month": 8,
+        "ordinal": 1,
+        "weekday": 7,
+        "label": "8月の第1日曜日",
+        "source": "https://www.wikidata.org/wiki/Q6417750#P837"
+      },
+      {
+        "kind": "nth_weekday",
+        "month": 8,
+        "ordinal": 2,
+        "weekday": 1,
+        "label": "8月の第2月曜日",
+        "source": "https://www.wikidata.org/wiki/Q6417750#P837"
+      }
+    ]
   },
   {
     "qid": "Q11413463",
@@ -3072,7 +3290,15 @@
     "description": "岩手県大船渡市で行われる恒例行事",
     "date": "日付未定",
     "wikipedia_title": "吉浜のスネカ",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "01-15",
+        "end": "01-15",
+        "source": "https://www.wikidata.org/wiki/Q11413463#P837"
+      }
+    ]
   },
   {
     "qid": "Q11511418",
@@ -3096,7 +3322,15 @@
     "description": "岩手県盛岡市にて行われる祭り",
     "date": "日付未定",
     "wikipedia_title": "盛岡さんさ踊り",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-01",
+        "end": "08-04",
+        "source": "https://www.wikidata.org/wiki/Q11581335#P837"
+      }
+    ]
   },
   {
     "qid": "Q11613747",
@@ -3216,7 +3450,15 @@
     "description": "日本の秋田県男鹿半島周辺で行われる年中行事、そこに登場する架空の来訪神",
     "date": "日付未定",
     "wikipedia_title": "なまはげ",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "12-31",
+        "end": "12-31",
+        "source": "https://www.wikidata.org/wiki/Q1133889#P837"
+      }
+    ]
   },
   {
     "qid": "Q11352731",
@@ -3264,7 +3506,15 @@
     "description": "秋田県秋田市にある土崎神明社の例祭",
     "date": "日付未定",
     "wikipedia_title": "土崎神明社祭の曳山行事",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "07-20",
+        "end": "07-21",
+        "source": "https://www.wikidata.org/wiki/Q7849923#P837"
+      }
+    ]
   },
   {
     "qid": "Q11435600",
@@ -3288,7 +3538,15 @@
     "description": "秋田県鹿角市の大日霊貴神社に伝わる民俗芸能",
     "date": "日付未定",
     "wikipedia_title": "大日堂舞楽",
-    "coordinate_source": "festival"
+    "coordinate_source": "festival",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "01-02",
+        "end": "01-02",
+        "source": "https://www.wikidata.org/wiki/Q11435617#P837"
+      }
+    ]
   },
   {
     "qid": "Q11532444",
@@ -3324,7 +3582,15 @@
     "description": "秋田県仙北市角館地域に伝わる伝統行事",
     "date": "日付未定",
     "wikipedia_title": "火振りかまくら",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "02-14",
+        "end": "02-14",
+        "source": "https://www.wikidata.org/wiki/Q11566877#P837"
+      }
+    ]
   },
   {
     "qid": "Q11607247",
@@ -3348,7 +3614,15 @@
     "description": "秋田県鹿角市花輪の祭り",
     "date": "日付未定",
     "wikipedia_title": "花輪ばやし",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-19",
+        "end": "08-20",
+        "source": "https://www.wikidata.org/wiki/Q11615686#P837"
+      }
+    ]
   },
   {
     "qid": "Q6349714",
@@ -3360,7 +3634,15 @@
     "description": "秋田県仙北市の神明社と成就院薬師堂の祭",
     "date": "日付未定",
     "wikipedia_title": "角館のお祭り",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "09-07",
+        "end": "09-09",
+        "source": "https://www.wikidata.org/wiki/Q6349714#P837"
+      }
+    ]
   },
   {
     "qid": "Q11280572",
@@ -3396,7 +3678,15 @@
     "description": "山形県上山市で毎年2月11日に行われる小正月の民俗行事",
     "date": "日付未定",
     "wikipedia_title": "カセ鳥",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "02-11",
+        "end": "02-11",
+        "source": "https://www.wikidata.org/wiki/Q11294189#P837"
+      }
+    ]
   },
   {
     "qid": "Q7497628",
@@ -3408,7 +3698,15 @@
     "description": "山形県新庄市で開催される祭",
     "date": "日付未定",
     "wikipedia_title": "新庄まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-24",
+        "end": "08-26",
+        "source": "https://www.wikidata.org/wiki/Q7497628#P837"
+      }
+    ]
   },
   {
     "qid": "Q131917387",
@@ -3444,7 +3742,17 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "二本松提灯祭り",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 10,
+        "ordinal": 1,
+        "weekday": 6,
+        "label": "10月の第1土曜日",
+        "source": "https://www.wikidata.org/wiki/Q3092868#P837"
+      }
+    ]
   },
   {
     "qid": "Q11381210",
@@ -3480,7 +3788,17 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "松明あかし",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 11,
+        "ordinal": 2,
+        "weekday": 6,
+        "label": "11月の第2土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11530743#P837"
+      }
+    ]
   },
   {
     "qid": "Q11582543",
@@ -3528,7 +3846,17 @@
     "description": "茨城県坂東市で行われる祭",
     "date": "日付未定",
     "wikipedia_title": "将門まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 11,
+        "ordinal": 2,
+        "weekday": 7,
+        "label": "11月の第2日曜日",
+        "source": "https://www.wikidata.org/wiki/Q11458640#P837"
+      }
+    ]
   },
   {
     "qid": "Q120885738",
@@ -3564,7 +3892,17 @@
     "description": "茨城県潮来市で行われる祭礼",
     "date": "日付未定",
     "wikipedia_title": "潮来祇園祭禮",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 8,
+        "ordinal": 1,
+        "weekday": 5,
+        "label": "8月の第1金曜日",
+        "source": "https://www.wikidata.org/wiki/Q11565710#P837"
+      }
+    ]
   },
   {
     "qid": "Q65275473",
@@ -3600,7 +3938,17 @@
     "description": "栃木県那須烏山市の八雲神社例大祭の奉納行事",
     "date": "日付未定",
     "wikipedia_title": "山あげ祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 7,
+        "ordinal": 4,
+        "weekday": 6,
+        "label": "7月の第4土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11465777#P837"
+      }
+    ]
   },
   {
     "qid": "Q11388558",
@@ -3636,7 +3984,15 @@
     "description": "栃木県益子町で行われる祇園祭",
     "date": "日付未定",
     "wikipedia_title": "益子祇園祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "07-23",
+        "end": "07-25",
+        "source": "https://www.wikidata.org/wiki/Q11581191#P837"
+      }
+    ]
   },
   {
     "qid": "Q118153386",
@@ -3672,7 +4028,17 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "桐生八木節まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 8,
+        "ordinal": 1,
+        "weekday": 5,
+        "label": "8月の第1金曜日",
+        "source": "https://www.wikidata.org/wiki/Q11537271#P837"
+      }
+    ]
   },
   {
     "qid": "Q11542199",
@@ -3720,7 +4086,17 @@
     "description": "埼玉県川越市の川越氷川神社の祭礼",
     "date": "日付未定",
     "wikipedia_title": "川越氷川祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 10,
+        "ordinal": 3,
+        "weekday": 7,
+        "label": "10月の第3日曜日",
+        "source": "https://www.wikidata.org/wiki/Q11019445#P837"
+      }
+    ]
   },
   {
     "qid": "Q11568692",
@@ -3744,7 +4120,15 @@
     "description": "埼玉県秩父市にある秩父神社の例祭",
     "date": "日付未定",
     "wikipedia_title": "秩父夜祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "12-02",
+        "end": "12-03",
+        "source": "https://www.wikidata.org/wiki/Q11596116#P837"
+      }
+    ]
   },
   {
     "qid": "Q11596130",
@@ -3756,7 +4140,15 @@
     "description": "毎年7月に開催される埼玉県秩父市の祭り",
     "date": "日付未定",
     "wikipedia_title": "秩父川瀬祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "07-20",
+        "end": "07-20",
+        "source": "https://www.wikidata.org/wiki/Q11596130#P837"
+      }
+    ]
   },
   {
     "qid": "Q11596149",
@@ -3768,7 +4160,15 @@
     "description": "埼玉県秩父市の秩父神社で催される御田植祭",
     "date": "日付未定",
     "wikipedia_title": "秩父神社御田植祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "04-04",
+        "end": "04-04",
+        "source": "https://www.wikidata.org/wiki/Q11596149#P837"
+      }
+    ]
   },
   {
     "qid": "Q11646842",
@@ -3852,7 +4252,17 @@
     "description": "千葉県芝山町で開催される祭",
     "date": "日付未定",
     "wikipedia_title": "芝山はにわ祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 11,
+        "ordinal": 2,
+        "weekday": 7,
+        "label": "11月の第2日曜日",
+        "source": "https://www.wikidata.org/wiki/Q65279849#P837"
+      }
+    ]
   },
   {
     "qid": "Q11645924",
@@ -3876,7 +4286,17 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "香取神宮御田植祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 4,
+        "ordinal": 1,
+        "weekday": 6,
+        "label": "4月の第1土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11667185#P837"
+      }
+    ]
   },
   {
     "qid": "Q11265601",
@@ -3888,7 +4308,15 @@
     "description": "東京都府中市の大國魂神社で行われる例大祭",
     "date": "日付未定",
     "wikipedia_title": "くらやみ祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "05-05",
+        "end": "05-05",
+        "source": "https://www.wikidata.org/wiki/Q11265601#P837"
+      }
+    ]
   },
   {
     "qid": "Q11338823",
@@ -3912,7 +4340,33 @@
     "description": "東京都台東区浅草の浅草神社の例大祭",
     "date": "日付未定",
     "wikipedia_title": "三社祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 5,
+        "ordinal": 3,
+        "weekday": 5,
+        "label": "5月の第3金曜日",
+        "source": "https://www.wikidata.org/wiki/Q219122#P837"
+      },
+      {
+        "kind": "nth_weekday",
+        "month": 5,
+        "ordinal": 3,
+        "weekday": 6,
+        "label": "5月の第3土曜日",
+        "source": "https://www.wikidata.org/wiki/Q219122#P837"
+      },
+      {
+        "kind": "nth_weekday",
+        "month": 5,
+        "ordinal": 3,
+        "weekday": 7,
+        "label": "5月の第3日曜日",
+        "source": "https://www.wikidata.org/wiki/Q219122#P837"
+      }
+    ]
   },
   {
     "qid": "Q112222177",
@@ -4128,7 +4582,15 @@
     "description": "東京都江東区の富岡八幡宮の祭礼",
     "date": "日付未定",
     "wikipedia_title": "深川祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-15",
+        "end": "08-15",
+        "source": "https://www.wikidata.org/wiki/Q3090688#P837"
+      }
+    ]
   },
   {
     "qid": "Q11573005",
@@ -4152,7 +4614,15 @@
     "description": "東京都神津島村の物忌奈命神社の例大祭に行われる行事",
     "date": "日付未定",
     "wikipedia_title": "神津島のかつお釣り行事",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-02",
+        "end": "08-02",
+        "source": "https://www.wikidata.org/wiki/Q11590475#P837"
+      }
+    ]
   },
   {
     "qid": "Q122272702",
@@ -4188,7 +4658,15 @@
     "description": "東京都港区にある泉岳寺で執り行われる供養行事",
     "date": "日付未定",
     "wikipedia_title": "義士祭 (東京都港区)",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "12-14",
+        "end": "12-14",
+        "source": "https://www.wikidata.org/wiki/Q28688423#P837"
+      }
+    ]
   },
   {
     "qid": "Q11657228",
@@ -4260,7 +4738,15 @@
     "description": "神奈川県大磯町で行われる相模国の国府祭",
     "date": "日付未定",
     "wikipedia_title": "国府祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "05-05",
+        "end": "05-05",
+        "source": "https://www.wikidata.org/wiki/Q11420919#P837"
+      }
+    ]
   },
   {
     "qid": "Q11434756",
@@ -4284,7 +4770,15 @@
     "description": "神奈川県小田原市の伝統的な祭り",
     "date": "日付未定",
     "wikipedia_title": "小田原北條五代祭り",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "05-03",
+        "end": "05-03",
+        "source": "https://www.wikidata.org/wiki/Q11462952#P837"
+      }
+    ]
   },
   {
     "qid": "Q65272329",
@@ -4320,7 +4814,17 @@
     "description": "神奈川県茅ヶ崎市で行われる祭り",
     "date": "日付未定",
     "wikipedia_title": "浜降祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 7,
+        "ordinal": 3,
+        "weekday": 1,
+        "label": "7月の第3月曜日",
+        "source": "https://www.wikidata.org/wiki/Q11558084#P837"
+      }
+    ]
   },
   {
     "qid": "Q11563278",
@@ -4356,7 +4860,15 @@
     "description": "神奈川県真鶴町の貴船神社の例大祭",
     "date": "日付未定",
     "wikipedia_title": "貴船まつり",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "07-28",
+        "end": "07-28",
+        "source": "https://www.wikidata.org/wiki/Q105338690#P837"
+      }
+    ]
   },
   {
     "qid": "Q11663791",
@@ -4368,7 +4880,15 @@
     "description": "神奈川県鎌倉市の御霊神社で行われる行事",
     "date": "日付未定",
     "wikipedia_title": "面掛行列",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "09-18",
+        "end": "09-18",
+        "source": "https://www.wikidata.org/wiki/Q11663791#P837"
+      }
+    ]
   },
   {
     "qid": "Q11261149",
@@ -4524,7 +5044,17 @@
     "description": "富山県魚津市で開催される夏祭り",
     "date": "日付未定",
     "wikipedia_title": "じゃんとこい魚津まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 8,
+        "ordinal": 1,
+        "weekday": 5,
+        "label": "8月の第1金曜日",
+        "source": "https://www.wikidata.org/wiki/Q11269431#P837"
+      }
+    ]
   },
   {
     "qid": "Q11271139",
@@ -4548,7 +5078,15 @@
     "description": "富山県南砺市で行なわれる正月行事",
     "date": "日付未定",
     "wikipedia_title": "利賀のはつうま",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "01-15",
+        "end": "01-15",
+        "source": "https://www.wikidata.org/wiki/Q11396942#P837"
+      }
+    ]
   },
   {
     "qid": "Q11426255",
@@ -4560,7 +5098,15 @@
     "description": "富山県南砺市にて行われる城端神明宮の春季祭礼",
     "date": "日付未定",
     "wikipedia_title": "城端曳山祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "05-05",
+        "end": "05-05",
+        "source": "https://www.wikidata.org/wiki/Q11426255#P837"
+      }
+    ]
   },
   {
     "qid": "Q11431351",
@@ -4584,7 +5130,15 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "愛宕社の火祭り",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "01-26",
+        "end": "01-26",
+        "source": "https://www.wikidata.org/wiki/Q11493854#P837"
+      }
+    ]
   },
   {
     "qid": "Q11565005",
@@ -4596,7 +5150,15 @@
     "description": "滑川市の祭事",
     "date": "日付未定",
     "wikipedia_title": "滑川のネブタ流し",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "07-31",
+        "end": "07-31",
+        "source": "https://www.wikidata.org/wiki/Q11565005#P837"
+      }
+    ]
   },
   {
     "qid": "Q11636372",
@@ -4620,7 +5182,17 @@
     "description": "石川県能登町で行われるキリコ祭り",
     "date": "日付未定",
     "wikipedia_title": "あばれ祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 7,
+        "ordinal": 1,
+        "weekday": 5,
+        "label": "7月の第1金曜日",
+        "source": "https://www.wikidata.org/wiki/Q4663470#P837"
+      }
+    ]
   },
   {
     "qid": "Q11277692",
@@ -4644,7 +5216,21 @@
     "description": "石川県奥能登地方で行われる農耕儀礼",
     "date": "日付未定",
     "wikipedia_title": "アエノコト",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "02-09",
+        "end": "02-09",
+        "source": "https://www.wikidata.org/wiki/Q2238334#P837"
+      },
+      {
+        "kind": "fixed",
+        "start": "12-05",
+        "end": "12-05",
+        "source": "https://www.wikidata.org/wiki/Q2238334#P837"
+      }
+    ]
   },
   {
     "qid": "Q11404742",
@@ -4716,7 +5302,17 @@
     "description": "毎年6月に石川県金沢市で行われる祭り",
     "date": "日付未定",
     "wikipedia_title": "金沢百万石まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 6,
+        "ordinal": 1,
+        "weekday": 6,
+        "label": "6月の第1土曜日",
+        "source": "https://www.wikidata.org/wiki/Q5952410#P837"
+      }
+    ]
   },
   {
     "qid": "Q11659803",
@@ -4740,7 +5336,15 @@
     "description": "石川県珠洲市で行われる山車祭り",
     "date": "日付未定",
     "wikipedia_title": "飯田町燈籠山祭り",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "07-20",
+        "end": "07-21",
+        "source": "https://www.wikidata.org/wiki/Q11666571#P837"
+      }
+    ]
   },
   {
     "qid": "Q11257709",
@@ -4764,7 +5368,15 @@
     "description": "福井県坂井市三国町で行われる三國神社の春祭り",
     "date": "日付未定",
     "wikipedia_title": "三国祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "05-19",
+        "end": "05-21",
+        "source": "https://www.wikidata.org/wiki/Q17211667#P837"
+      }
+    ]
   },
   {
     "qid": "Q17211675",
@@ -4800,7 +5412,23 @@
     "description": "福井県勝山市で2月に行われる祭り",
     "date": "日付未定",
     "wikipedia_title": "勝山左義長",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "last_weekday",
+        "month": 2,
+        "weekday": 6,
+        "label": "2月の最終土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11400243#P837"
+      },
+      {
+        "kind": "last_weekday",
+        "month": 2,
+        "weekday": 7,
+        "label": "2月の最終日曜日",
+        "source": "https://www.wikidata.org/wiki/Q11400243#P837"
+      }
+    ]
   },
   {
     "qid": "Q28685424",
@@ -4824,7 +5452,15 @@
     "description": "福井県敦賀市で開催される祭事",
     "date": "日付未定",
     "wikipedia_title": "敦賀まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "09-04",
+        "end": "09-04",
+        "source": "https://www.wikidata.org/wiki/Q11499527#P837"
+      }
+    ]
   },
   {
     "qid": "Q11548898",
@@ -4872,7 +5508,15 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "南部の火祭り",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-15",
+        "end": "08-15",
+        "source": "https://www.wikidata.org/wiki/Q11408485#P837"
+      }
+    ]
   },
   {
     "qid": "Q11442780",
@@ -4896,7 +5540,21 @@
     "description": "山梨県富士河口湖町の河口浅間神社に伝承されている民俗芸能",
     "date": "日付未定",
     "wikipedia_title": "河口の稚児舞",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "04-25",
+        "end": "04-25",
+        "source": "https://www.wikidata.org/wiki/Q11553660#P837"
+      },
+      {
+        "kind": "fixed",
+        "start": "07-28",
+        "end": "07-28",
+        "source": "https://www.wikidata.org/wiki/Q11553660#P837"
+      }
+    ]
   },
   {
     "qid": "Q11567440",
@@ -5064,7 +5722,15 @@
     "description": "岐阜県飛騨市で開催される気多若宮神社の例祭",
     "date": "日付未定",
     "wikipedia_title": "古川祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "04-20",
+        "end": "04-20",
+        "source": "https://www.wikidata.org/wiki/Q11411179#P837"
+      }
+    ]
   },
   {
     "qid": "Q48748967",
@@ -5076,7 +5742,17 @@
     "description": "岐阜県大垣市で行われる祭",
     "date": "日付未定",
     "wikipedia_title": "大垣十万石まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 10,
+        "ordinal": 2,
+        "weekday": 7,
+        "label": "10月の第2日曜日",
+        "source": "https://www.wikidata.org/wiki/Q48748967#P837"
+      }
+    ]
   },
   {
     "qid": "Q11433804",
@@ -5088,7 +5764,15 @@
     "description": "岐阜県大垣市で行われる大垣八幡神社の例祭",
     "date": "日付未定",
     "wikipedia_title": "大垣祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "05-15",
+        "end": "05-15",
+        "source": "https://www.wikidata.org/wiki/Q11433804#P837"
+      }
+    ]
   },
   {
     "qid": "Q126951720",
@@ -5124,7 +5808,25 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "手力の火祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 4,
+        "ordinal": 2,
+        "weekday": 6,
+        "label": "4月の第2土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11496921#P837"
+      },
+      {
+        "kind": "nth_weekday",
+        "month": 8,
+        "ordinal": 2,
+        "weekday": 7,
+        "label": "8月の第2日曜日",
+        "source": "https://www.wikidata.org/wiki/Q11496921#P837"
+      }
+    ]
   },
   {
     "qid": "Q11551423",
@@ -5220,7 +5922,21 @@
     "description": "岐阜県高山市で開催される春の山王祭と秋の八幡祭の総称",
     "date": "日付未定",
     "wikipedia_title": "高山祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "04-14",
+        "end": "04-15",
+        "source": "https://www.wikidata.org/wiki/Q7677467#P837"
+      },
+      {
+        "kind": "fixed",
+        "start": "10-09",
+        "end": "10-10",
+        "source": "https://www.wikidata.org/wiki/Q7677467#P837"
+      }
+    ]
   },
   {
     "qid": "Q11355330",
@@ -5232,7 +5948,15 @@
     "description": "静岡県三島市の三嶋大社に伝わる田楽",
     "date": "日付未定",
     "wikipedia_title": "三嶋大社のお田打",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "01-07",
+        "end": "01-07",
+        "source": "https://www.wikidata.org/wiki/Q11355330#P837"
+      }
+    ]
   },
   {
     "qid": "Q11412729",
@@ -5256,7 +5980,15 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "富士宮秋まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "11-03",
+        "end": "11-05",
+        "source": "https://www.wikidata.org/wiki/Q11455969#P837"
+      }
+    ]
   },
   {
     "qid": "Q11455990",
@@ -5268,7 +6000,17 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "富士山御神火まつり",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 8,
+        "ordinal": 1,
+        "weekday": 6,
+        "label": "8月の第1土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11455990#P837"
+      }
+    ]
   },
   {
     "qid": "Q11459381",
@@ -5436,7 +6178,15 @@
     "description": "愛知県半田市にある神前神社の祭礼",
     "date": "日付未定",
     "wikipedia_title": "亀崎潮干祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "05-03",
+        "end": "05-04",
+        "source": "https://www.wikidata.org/wiki/Q11370941#P837"
+      }
+    ]
   },
   {
     "qid": "Q11396267",
@@ -5484,7 +6234,17 @@
     "description": "津島神社の祭事",
     "date": "日付未定",
     "wikipedia_title": "尾張津島天王祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 7,
+        "ordinal": 4,
+        "weekday": 6,
+        "label": "7月の第4土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11465312#P837"
+      }
+    ]
   },
   {
     "qid": "Q28686206",
@@ -5496,7 +6256,17 @@
     "description": "愛知県津島市にて行われる祭",
     "date": "日付未定",
     "wikipedia_title": "尾張津島秋まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 10,
+        "ordinal": 1,
+        "weekday": 7,
+        "label": "10月の第1日曜日",
+        "source": "https://www.wikidata.org/wiki/Q28686206#P837"
+      }
+    ]
   },
   {
     "qid": "Q11571216",
@@ -5508,7 +6278,25 @@
     "description": "愛知県犬山市で行われる針綱神社の祭礼",
     "date": "日付未定",
     "wikipedia_title": "犬山祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 4,
+        "ordinal": 1,
+        "weekday": 6,
+        "label": "4月の第1土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11571216#P837"
+      },
+      {
+        "kind": "nth_weekday",
+        "month": 4,
+        "ordinal": 1,
+        "weekday": 7,
+        "label": "4月の第1日曜日",
+        "source": "https://www.wikidata.org/wiki/Q11571216#P837"
+      }
+    ]
   },
   {
     "qid": "Q11584632",
@@ -5520,7 +6308,15 @@
     "description": "愛知県知立市で開催される祭礼",
     "date": "日付未定",
     "wikipedia_title": "知立まつり",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "05-02",
+        "end": "05-03",
+        "source": "https://www.wikidata.org/wiki/Q11584632#P837"
+      }
+    ]
   },
   {
     "qid": "Q3536029",
@@ -5604,7 +6400,17 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "鳥羽の火祭り",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 2,
+        "ordinal": 2,
+        "weekday": 7,
+        "label": "2月の第2日曜日",
+        "source": "https://www.wikidata.org/wiki/Q64539503#P837"
+      }
+    ]
   },
   {
     "qid": "Q17225061",
@@ -5640,7 +6446,15 @@
     "description": "三重県伊賀市の菅原神社で行なわれる秋祭り",
     "date": "日付未定",
     "wikipedia_title": "上野天神祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-25",
+        "end": "10-25",
+        "source": "https://www.wikidata.org/wiki/Q11360316#P837"
+      }
+    ]
   },
   {
     "qid": "Q11378916",
@@ -5664,7 +6478,21 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "名のり・注連縄切り・火祭り",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "01-01",
+        "end": "01-01",
+        "source": "https://www.wikidata.org/wiki/Q11414700#P837"
+      },
+      {
+        "kind": "fixed",
+        "start": "12-31",
+        "end": "12-31",
+        "source": "https://www.wikidata.org/wiki/Q11414700#P837"
+      }
+    ]
   },
   {
     "qid": "Q11457148",
@@ -5676,7 +6504,15 @@
     "description": "三重県四日市市で開催される祭り",
     "date": "日付未定",
     "wikipedia_title": "富田の石取祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-14",
+        "end": "08-15",
+        "source": "https://www.wikidata.org/wiki/Q11457148#P837"
+      }
+    ]
   },
   {
     "qid": "Q11457147",
@@ -5688,7 +6524,15 @@
     "description": "三重県四日市市の行事",
     "date": "日付未定",
     "wikipedia_title": "富田の鯨船行事",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-14",
+        "end": "08-15",
+        "source": "https://www.wikidata.org/wiki/Q11457147#P837"
+      }
+    ]
   },
   {
     "qid": "Q11489125",
@@ -5724,7 +6568,17 @@
     "description": "三重県熊野市で行われる木本神社の例祭",
     "date": "日付未定",
     "wikipedia_title": "木本まつり",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 10,
+        "ordinal": 2,
+        "weekday": 1,
+        "label": "10月の第2月曜日",
+        "source": "https://www.wikidata.org/wiki/Q11518609#P837"
+      }
+    ]
   },
   {
     "qid": "Q11568888",
@@ -5736,7 +6590,15 @@
     "description": "三重県熊野市で開催される花火大会",
     "date": "日付未定",
     "wikipedia_title": "熊野大花火大会",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-17",
+        "end": "08-17",
+        "source": "https://www.wikidata.org/wiki/Q11568888#P837"
+      }
+    ]
   },
   {
     "qid": "Q11588063",
@@ -5748,7 +6610,15 @@
     "description": "三重県志摩市の伊雑宮に伝わる田楽",
     "date": "日付未定",
     "wikipedia_title": "磯部の御神田",
-    "coordinate_source": "festival"
+    "coordinate_source": "festival",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "06-24",
+        "end": "06-24",
+        "source": "https://www.wikidata.org/wiki/Q11588063#P837"
+      }
+    ]
   },
   {
     "qid": "Q11255045",
@@ -5760,7 +6630,15 @@
     "description": "宮中および伊勢神宮で行われる祭祀",
     "date": "日付未定",
     "wikipedia_title": "神嘗祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-17",
+        "end": "10-17",
+        "source": "https://www.wikidata.org/wiki/Q11255045#P837"
+      }
+    ]
   },
   {
     "qid": "Q3959472",
@@ -5796,7 +6674,21 @@
     "description": "神宮式年遷宮を構成する祭事",
     "date": "日付未定",
     "wikipedia_title": "遷御",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-02",
+        "end": "10-02",
+        "source": "https://www.wikidata.org/wiki/Q24892914#P837"
+      },
+      {
+        "kind": "fixed",
+        "start": "10-05",
+        "end": "10-05",
+        "source": "https://www.wikidata.org/wiki/Q24892914#P837"
+      }
+    ]
   },
   {
     "qid": "Q17226082",
@@ -5808,7 +6700,15 @@
     "description": "滋賀県大津市の日吉大社の祭礼",
     "date": "日付未定",
     "wikipedia_title": "日吉山王祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "04-14",
+        "end": "04-14",
+        "source": "https://www.wikidata.org/wiki/Q17226082#P837"
+      }
+    ]
   },
   {
     "qid": "Q11653306",
@@ -5880,7 +6780,15 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "宮津祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "05-13",
+        "end": "05-15",
+        "source": "https://www.wikidata.org/wiki/Q11455045#P837"
+      }
+    ]
   },
   {
     "qid": "Q136779585",
@@ -5928,7 +6836,15 @@
     "description": "京都府宇治市の祭",
     "date": "日付未定",
     "wikipedia_title": "県祭り",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "06-05",
+        "end": "06-05",
+        "source": "https://www.wikidata.org/wiki/Q11582690#P837"
+      }
+    ]
   },
   {
     "qid": "Q11586814",
@@ -5940,7 +6856,15 @@
     "description": "京都府八幡市の石清水八幡宮の例祭",
     "date": "日付未定",
     "wikipedia_title": "石清水祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "09-15",
+        "end": "09-15",
+        "source": "https://www.wikidata.org/wiki/Q11586814#P837"
+      }
+    ]
   },
   {
     "qid": "Q17210764",
@@ -6096,7 +7020,17 @@
     "description": "兵庫県立但馬牧場公園（新温泉町）で開催される祭典",
     "date": "日付未定",
     "wikipedia_title": "但馬牛まつり",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 9,
+        "ordinal": 4,
+        "weekday": 7,
+        "label": "9月の第4日曜日",
+        "source": "https://www.wikidata.org/wiki/Q11381635#P837"
+      }
+    ]
   },
   {
     "qid": "Q11395759",
@@ -6108,7 +7042,17 @@
     "description": "兵庫県豊岡市で行われる祭",
     "date": "日付未定",
     "wikipedia_title": "出石初午大祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 3,
+        "ordinal": 3,
+        "weekday": 6,
+        "label": "3月の第3土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11395759#P837"
+      }
+    ]
   },
   {
     "qid": "Q65258470",
@@ -6132,7 +7076,15 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "姫路ゆかたまつり",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "06-22",
+        "end": "06-24",
+        "source": "https://www.wikidata.org/wiki/Q11447453#P837"
+      }
+    ]
   },
   {
     "qid": "Q137299557",
@@ -6228,7 +7180,15 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "灘のけんか祭り",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-14",
+        "end": "10-15",
+        "source": "https://www.wikidata.org/wiki/Q11566794#P837"
+      }
+    ]
   },
   {
     "qid": "Q137299170",
@@ -6252,7 +7212,15 @@
     "description": "兵庫県赤穂市で毎年赤穂義士たちが討ち入りを果たした12月14日に行われる祭り",
     "date": "日付未定",
     "wikipedia_title": "赤穂義士祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "12-14",
+        "end": "12-14",
+        "source": "https://www.wikidata.org/wiki/Q11635899#P837"
+      }
+    ]
   },
   {
     "qid": "Q137299276",
@@ -6300,7 +7268,15 @@
     "description": "毎年3月に日本の東大寺で行われる行事のひとつ",
     "date": "日付未定",
     "wikipedia_title": "お水取り",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "03-12",
+        "end": "03-12",
+        "source": "https://www.wikidata.org/wiki/Q9302453#P837"
+      }
+    ]
   },
   {
     "qid": "Q11274533",
@@ -6336,7 +7312,15 @@
     "description": "奈良県奈良市に伝わる民俗芸能",
     "date": "日付未定",
     "wikipedia_title": "奈良豆比古神社の翁舞",
-    "coordinate_source": "festival"
+    "coordinate_source": "festival",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-08",
+        "end": "10-08",
+        "source": "https://www.wikidata.org/wiki/Q11445444#P837"
+      }
+    ]
   },
   {
     "qid": "Q11492970",
@@ -6360,7 +7344,15 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "春日祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "03-13",
+        "end": "03-13",
+        "source": "https://www.wikidata.org/wiki/Q11513681#P837"
+      }
+    ]
   },
   {
     "qid": "Q11603638",
@@ -6384,7 +7376,15 @@
     "description": "法隆寺で催される聖徳太子の命日の法要",
     "date": "日付未定",
     "wikipedia_title": "聖徳太子のお会式",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "03-22",
+        "end": "03-22",
+        "source": "https://www.wikidata.org/wiki/Q11610994#P837"
+      }
+    ]
   },
   {
     "qid": "Q11611120",
@@ -6396,7 +7396,15 @@
     "description": "奈良県葛城市の當麻寺で挙行される法会",
     "date": "日付未定",
     "wikipedia_title": "聖衆来迎練供養会式",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "04-14",
+        "end": "04-14",
+        "source": "https://www.wikidata.org/wiki/Q11611120#P837"
+      }
+    ]
   },
   {
     "qid": "Q11644507",
@@ -6420,7 +7428,15 @@
     "description": "奈良県奈良市の八柱神社に伝わる民俗芸能",
     "date": "日付未定",
     "wikipedia_title": "題目立",
-    "coordinate_source": "festival"
+    "coordinate_source": "festival",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-12",
+        "end": "10-12",
+        "source": "https://www.wikidata.org/wiki/Q11665038#P837"
+      }
+    ]
   },
   {
     "qid": "Q11665956",
@@ -6456,7 +7472,15 @@
     "description": "和歌山県新宮市の神倉神社の例祭",
     "date": "日付未定",
     "wikipedia_title": "御燈祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "02-06",
+        "end": "02-06",
+        "source": "https://www.wikidata.org/wiki/Q11489206#P837"
+      }
+    ]
   },
   {
     "qid": "Q3334755",
@@ -6468,7 +7492,15 @@
     "description": "和歌山県那智勝浦町にある熊野那智大社の例大祭",
     "date": "日付未定",
     "wikipedia_title": "扇祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "07-14",
+        "end": "07-14",
+        "source": "https://www.wikidata.org/wiki/Q3334755#P837"
+      }
+    ]
   },
   {
     "qid": "Q11522359",
@@ -6492,7 +7524,15 @@
     "description": "和歌山県田辺市にある熊野本宮大社の例大祭",
     "date": "日付未定",
     "wikipedia_title": "熊野本宮大社例大祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "04-13",
+        "end": "04-15",
+        "source": "https://www.wikidata.org/wiki/Q11568918#P837"
+      }
+    ]
   },
   {
     "qid": "Q11568981",
@@ -6504,7 +7544,15 @@
     "description": "和歌山県新宮市にある熊野速玉大社の例大祭",
     "date": "日付未定",
     "wikipedia_title": "熊野速玉祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-15",
+        "end": "10-16",
+        "source": "https://www.wikidata.org/wiki/Q11568981#P837"
+      }
+    ]
   },
   {
     "qid": "Q86727428",
@@ -6516,7 +7564,15 @@
     "description": "和歌山県田辺市で行われる鬪雞神社の例大祭",
     "date": "日付未定",
     "wikipedia_title": "田辺祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "07-25",
+        "end": "07-25",
+        "source": "https://www.wikidata.org/wiki/Q86727428#P837"
+      }
+    ]
   },
   {
     "qid": "Q11599524",
@@ -6600,7 +7656,15 @@
     "description": "島根県の祭り",
     "date": "日付未定",
     "wikipedia_title": "佐陀神能",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "09-24",
+        "end": "09-25",
+        "source": "https://www.wikidata.org/wiki/Q66633854#P837"
+      }
+    ]
   },
   {
     "qid": "Q11659037",
@@ -6636,7 +7700,15 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "勝山喧嘩だんじり",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-19",
+        "end": "10-20",
+        "source": "https://www.wikidata.org/wiki/Q11400226#P837"
+      }
+    ]
   },
   {
     "qid": "Q11401739",
@@ -6672,7 +7744,17 @@
     "description": "広島県福山市の沼名前神社で行われる火祭り",
     "date": "日付未定",
     "wikipedia_title": "お手火祭り",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 7,
+        "ordinal": 2,
+        "weekday": 6,
+        "label": "7月の第2土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11263106#P837"
+      }
+    ]
   },
   {
     "qid": "Q22128166",
@@ -6696,7 +7778,17 @@
     "description": "広島県三原市で開催される祭り",
     "date": "日付未定",
     "wikipedia_title": "やっさ祭り",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 8,
+        "ordinal": 2,
+        "weekday": 7,
+        "label": "8月の第2日曜日",
+        "source": "https://www.wikidata.org/wiki/Q11280366#P837"
+      }
+    ]
   },
   {
     "qid": "Q11336959",
@@ -6756,7 +7848,17 @@
     "description": "広島県北広島町で行われる伝統行事",
     "date": "日付未定",
     "wikipedia_title": "壬生の花田植",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 6,
+        "ordinal": 1,
+        "weekday": 7,
+        "label": "6月の第1日曜日",
+        "source": "https://www.wikidata.org/wiki/Q3307937#P837"
+      }
+    ]
   },
   {
     "qid": "Q28684334",
@@ -6816,7 +7918,17 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "能地春祭り",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 3,
+        "ordinal": 4,
+        "weekday": 6,
+        "label": "3月の第4土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11611950#P837"
+      }
+    ]
   },
   {
     "qid": "Q446474",
@@ -6828,7 +7940,17 @@
     "description": "毎年10月第2土・日曜の2日間にわたって広島県東広島市西条町の西条中央公園と西条酒蔵通りを中心にして行われる祭り",
     "date": "日付未定",
     "wikipedia_title": "酒まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 10,
+        "ordinal": 2,
+        "weekday": 6,
+        "label": "10月の第2土曜日",
+        "source": "https://www.wikidata.org/wiki/Q446474#P837"
+      }
+    ]
   },
   {
     "qid": "Q11466617",
@@ -6840,7 +7962,15 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "山口七夕ちょうちんまつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-06",
+        "end": "08-07",
+        "source": "https://www.wikidata.org/wiki/Q11466617#P837"
+      }
+    ]
   },
   {
     "qid": "Q11474282",
@@ -6864,7 +7994,15 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "萩夏まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-01",
+        "end": "08-03",
+        "source": "https://www.wikidata.org/wiki/Q11620393#P837"
+      }
+    ]
   },
   {
     "qid": "Q11489823",
@@ -6924,7 +8062,15 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "さぬき高松まつり",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-12",
+        "end": "08-14",
+        "source": "https://www.wikidata.org/wiki/Q11268205#P837"
+      }
+    ]
   },
   {
     "qid": "Q22127131",
@@ -6936,7 +8082,17 @@
     "description": "香川県高松市（旧香川町）に伝わる民俗芸能",
     "date": "日付未定",
     "wikipedia_title": "ひょうげ祭り",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 9,
+        "ordinal": 2,
+        "weekday": 7,
+        "label": "9月の第2日曜日",
+        "source": "https://www.wikidata.org/wiki/Q22127131#P837"
+      }
+    ]
   },
   {
     "qid": "Q11367985",
@@ -6948,7 +8104,15 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "丸亀お城まつり",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "05-03",
+        "end": "05-04",
+        "source": "https://www.wikidata.org/wiki/Q11367985#P837"
+      }
+    ]
   },
   {
     "qid": "Q11565101",
@@ -6960,7 +8124,15 @@
     "description": "香川県綾川町に伝わる雨乞いの踊り",
     "date": "日付未定",
     "wikipedia_title": "滝宮の念仏踊",
-    "coordinate_source": "festival"
+    "coordinate_source": "festival",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-25",
+        "end": "08-25",
+        "source": "https://www.wikidata.org/wiki/Q11565101#P837"
+      }
+    ]
   },
   {
     "qid": "Q11573781",
@@ -6972,7 +8144,17 @@
     "description": "香川県観音寺市の琴弾八幡宮の秋季大祭",
     "date": "日付未定",
     "wikipedia_title": "琴弾八幡宮大祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 10,
+        "ordinal": 3,
+        "weekday": 5,
+        "label": "10月の第3金曜日",
+        "source": "https://www.wikidata.org/wiki/Q11573781#P837"
+      }
+    ]
   },
   {
     "qid": "Q11607281",
@@ -6996,7 +8178,17 @@
     "description": "香川県観音寺市豊浜町で行われる祭礼",
     "date": "日付未定",
     "wikipedia_title": "豊浜ちょうさ祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 10,
+        "ordinal": 2,
+        "weekday": 7,
+        "label": "10月の第2日曜日",
+        "source": "https://www.wikidata.org/wiki/Q11633921#P837"
+      }
+    ]
   },
   {
     "qid": "Q11670289",
@@ -7068,7 +8260,15 @@
     "description": "高知県高知市の祭り",
     "date": "日付未定",
     "wikipedia_title": "よさこい祭り",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-09",
+        "end": "08-12",
+        "source": "https://www.wikidata.org/wiki/Q11255132#P837"
+      }
+    ]
   },
   {
     "qid": "Q11278738",
@@ -7080,7 +8280,15 @@
     "description": "宗像大社秋季大祭の最初に行われる祭礼",
     "date": "日付未定",
     "wikipedia_title": "みあれ祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-01",
+        "end": "10-01",
+        "source": "https://www.wikidata.org/wiki/Q11278738#P837"
+      }
+    ]
   },
   {
     "qid": "Q11548439",
@@ -7092,7 +8300,15 @@
     "description": "福岡県久留米市の水天宮で行われる祭り",
     "date": "日付未定",
     "wikipedia_title": "水天宮春大祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "05-05",
+        "end": "05-05",
+        "source": "https://www.wikidata.org/wiki/Q11548439#P837"
+      }
+    ]
   },
   {
     "qid": "Q11556000",
@@ -7140,7 +8356,17 @@
     "description": "佐賀市見島地区で小正月に行なわれる来訪神行事",
     "date": "日付未定",
     "wikipedia_title": "見島のカセドリ",
-    "coordinate_source": "festival"
+    "coordinate_source": "festival",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 2,
+        "ordinal": 2,
+        "weekday": 6,
+        "label": "2月の第2土曜日",
+        "source": "https://www.wikidata.org/wiki/Q11630177#P837"
+      }
+    ]
   },
   {
     "qid": "Q11405696",
@@ -7188,7 +8414,17 @@
     "description": "",
     "date": "日付未定",
     "wikipedia_title": "藤崎八旛宮秋季例大祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "nth_weekday",
+        "month": 9,
+        "ordinal": 3,
+        "weekday": 1,
+        "label": "9月の第3月曜日",
+        "source": "https://www.wikidata.org/wiki/Q4947265#P837"
+      }
+    ]
   },
   {
     "qid": "Q11267368",
@@ -7308,7 +8544,15 @@
     "description": "宮崎県宮崎市で行われる宮崎神宮の例祭",
     "date": "日付未定",
     "wikipedia_title": "宮崎神宮大祭",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "10-26",
+        "end": "10-26",
+        "source": "https://www.wikidata.org/wiki/Q11454559#P837"
+      }
+    ]
   },
   {
     "qid": "Q86734962",
@@ -7356,7 +8600,15 @@
     "description": "鹿児島県薩摩川内市の下甑島に伝わる来訪神",
     "date": "日付未定",
     "wikipedia_title": "トシドン",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "12-31",
+        "end": "12-31",
+        "source": "https://www.wikidata.org/wiki/Q2255821#P837"
+      }
+    ]
   },
   {
     "qid": "Q17223030",
@@ -7392,7 +8644,15 @@
     "description": "鹿児島県南さつま市金峰町高橋に伝わる民俗行事",
     "date": "日付未定",
     "wikipedia_title": "ヨッカブイ",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "annual_schedule": [
+      {
+        "kind": "fixed",
+        "start": "08-22",
+        "end": "08-22",
+        "source": "https://www.wikidata.org/wiki/Q140673421#P837"
+      }
+    ]
   },
   {
     "qid": "Q11396442",

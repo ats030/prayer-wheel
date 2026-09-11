@@ -56,6 +56,35 @@ function occurrenceRanges(f){
   if(occurrences.length)return occurrences.map(item=>({...item,...parseRange(`${item.start}${item.end&&item.end!==item.start?`〜${item.end}`:''}`)})).filter(item=>item.start&&item.end);
   const range=parseRange(f.date);return range.start&&range.end?[{...range}]:[];
 }
+function annualScheduleRange(item,year){
+  if(item.kind==='fixed')return parseRange(`${year}-${item.start}〜${year}-${item.end||item.start}`);
+  const month=Number(item.month),weekday=Number(item.weekday),ordinal=Number(item.ordinal);
+  if(!month||!weekday)return{};
+  let day;
+  if(item.kind==='nth_weekday'){
+    const first=new Date(year,month-1,1),firstIso=first.getDay()||7;
+    day=1+(weekday-firstIso+7)%7+7*(ordinal-1);
+    if(new Date(year,month-1,day).getMonth()!==month-1)return{};
+  }else if(item.kind==='last_weekday'){
+    const last=new Date(year,month,0),lastIso=last.getDay()||7;
+    day=last.getDate()-(lastIso-weekday+7)%7;
+  }else return{};
+  return parseRange(`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`);
+}
+function annualScheduleRanges(f,year){
+  return (Array.isArray(f.annual_schedule)?f.annual_schedule:[]).map(item=>annualScheduleRange(item,year)).filter(item=>item.start&&item.end);
+}
+function annualScheduleLabel(item){
+  if(item.kind!=='fixed')return `例年 ${item.label}`;
+  const [startMonth,startDay]=item.start.split('-').map(Number),[endMonth,endDay]=(item.end||item.start).split('-').map(Number);
+  const end=startMonth===endMonth?`${endDay}日`:`${endMonth}月${endDay}日`;
+  return item.start===(item.end||item.start)?`例年 ${startMonth}月${startDay}日`:`例年 ${startMonth}月${startDay}日〜${end}`;
+}
+function annualScheduleMarkup(f){
+  const items=Array.isArray(f.annual_schedule)?f.annual_schedule:[];
+  if(!items.length)return'';
+  return `<ul class="occurrence-list annual-schedule">${items.map(item=>{const source=safeUrl(item.source);const label=annualScheduleLabel(item);return `<li>${source?`<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`:esc(label)}</li>`}).join('')}</ul>`;
+}
 function formatOccurrence(item){
   const start=new Date(`${item.start}T12:00:00`),end=new Date(`${item.end||item.start}T12:00:00`);
   if(Number.isNaN(start.valueOf())||Number.isNaN(end.valueOf()))return '日付未定';
@@ -65,17 +94,19 @@ function formatOccurrence(item){
 }
 function latestDateLabel(f){
   const items=Array.isArray(f.occurrences)?[...f.occurrences].sort((a,b)=>String(b.start).localeCompare(String(a.start))):[];
-  return items.length?formatOccurrence(items[0]):f.date||'日付未定';
+  if(items.length)return formatOccurrence(items[0]);
+  if(Array.isArray(f.annual_schedule)&&f.annual_schedule.length)return annualScheduleLabel(f.annual_schedule[0]);
+  return f.date||'日付未定';
 }
 function occurrenceMarkup(f){
   const items=Array.isArray(f.occurrences)?[...f.occurrences].sort((a,b)=>String(b.start).localeCompare(String(a.start))):[];
-  if(!items.length)return esc(f.date||'日付未定');
+  if(!items.length)return annualScheduleMarkup(f)||esc(f.date||'日付未定');
   return `<ul class="occurrence-list">${items.map(item=>{const source=safeUrl(item.source);return `<li>${source?`<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">${esc(formatOccurrence(item))}</a>`:esc(formatOccurrence(item))}</li>`}).join('')}</ul>`;
 }
 function matchesDate(f,value){
   if(!value)return true;
   const target=new Date(`${value}T12:00:00`);
-  return occurrenceRanges(f).some(({start,end})=>target>=start&&target<=end);
+  return [...occurrenceRanges(f),...annualScheduleRanges(f,target.getFullYear())].some(({start,end})=>target>=start&&target<=end);
 }
 function populatePrefectures(){
   const select=document.querySelector('#prefecture');

@@ -16,6 +16,11 @@ implementation:
   batching: Up to 50 entities per request with no parallel requests.
   identification: OmatsuriMap User-Agent with repository URL.
   provenance: Each imported record stores its Wikipedia title and Wikidata QID.
+  recurring_dates: >-
+    P837 (day in year for periodic occurrence) is resolved through its linked
+    calendar item. Exact month/day and nth/last weekday rules are retained with
+    a link to the source statement; month-only and lunar-calendar values are
+    omitted rather than guessed.
 sources:
   wikidata_license: https://www.wikidata.org/wiki/Wikidata:Licensing
   wikidata_access: https://www.wikidata.org/wiki/Wikidata:Data_access/en

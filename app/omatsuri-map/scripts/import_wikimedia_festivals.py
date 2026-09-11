@@ -9,6 +9,11 @@ from pathlib import Path
 
 import requests
 
+try:
+    import enrich_wikidata_dates as date_enricher
+except ModuleNotFoundError:  # unittest imports this file from the repository root
+    from scripts import enrich_wikidata_dates as date_enricher
+
 WIKIPEDIA_API = "https://ja.wikipedia.org/w/api.php"
 WIKIDATA_API = "https://www.wikidata.org/w/api.php"
 USER_AGENT = "OmatsuriMap/1.0 (https://github.com/ats030/ikimono-note)"
@@ -178,8 +183,14 @@ def main():
     candidates = build_candidates(title_prefectures, title_qids, entities, places, {item["qid"] for item in base})
     print(f"new geolocated festivals: {len(candidates)}")
     if args.merge:
-        write_json(args.data, base + candidates)
-        print(f"merged total: {len(base) + len(candidates)}")
+        merged = base + candidates
+        missing_qids = {item["qid"] for item in merged if item.get("qid")} - entities.keys()
+        entities.update(fetch_entities(session, missing_qids))
+        calendar_qids = {qid for entity in entities.values() for qid in date_enricher.p837_qids(entity)}
+        calendar_entities = fetch_entities(session, calendar_qids)
+        schedules = date_enricher.schedules_by_festival(entities, calendar_entities)
+        write_json(args.data, date_enricher.enrich(merged, schedules))
+        print(f"merged total: {len(merged)}; annual schedules: {len(schedules)}")
     else:
         print("dry run; pass --merge to update the data file")
 
