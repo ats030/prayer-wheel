@@ -39,6 +39,12 @@ class LocationConsistencyTest(unittest.TestCase):
                 self.assertTrue(row.get("description"))
                 self.assertEqual(source, row.get("venue", {}).get("source"))
 
+    def test_all_coordinates_have_a_boundary_validation_record(self):
+        for row in self.rows:
+            with self.subTest(qid=row.get("qid")):
+                self.assertIn("coordinate_prefecture", row)
+                self.assertTrue(valid_web_url(row.get("coordinate_validation_source")))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -157,7 +157,8 @@ function applyFilters(){
   const date=document.querySelector('#festival-date').value;
   visible=festivals.filter(f=>{
     const text=[f.label_ja,f.label_en,f.prefecture,f.description].filter(Boolean).join(' ').toLocaleLowerCase('ja');
-    return text.includes(q)&&(!prefecture||f.prefecture===prefecture)&&matchesDate(f,date);
+    const prefectureMatches=!prefecture||(f.prefecture===prefecture&&f.coordinate_prefecture===prefecture);
+    return text.includes(q)&&prefectureMatches&&matchesDate(f,date);
   }).sort(compareByNextOccurrence);
   renderList();renderMarkers();
   document.querySelector('#result-count').textContent=visible.length;

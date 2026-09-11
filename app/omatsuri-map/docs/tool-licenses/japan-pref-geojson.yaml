@@ -1,0 +1,15 @@
+tool: JapanPrefGeoJson
+version: 13911412a4fb7ad6d52656edb8900a37b9e8e439
+type: dataset
+source: https://github.com/amay077/JapanPrefGeoJson
+license: Public Domain
+license_evidence: https://github.com/amay077/JapanPrefGeoJson#ライセンス
+pricing: free; self-hosted source file
+commercial_use: allowed
+attribution: not required; source URL retained in generated records
+copyleft: none
+hosted_service: none at runtime; pinned raw file is fetched only during data validation
+restrictions: no trademark, seat, usage, or model-output restrictions identified
+decision: approved
+reviewed_at: 2026-09-11
+reason: Deterministic offline prefecture containment prevents mislabeled coordinates from leaking through the prefecture filter.

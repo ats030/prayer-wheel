@@ -13,10 +13,12 @@ try:
     import enrich_wikidata_dates as date_enricher
     import apply_verified_occurrences as verified_dates
     import apply_verified_venues as verified_venues
+    import validate_prefecture_coordinates as coordinate_validator
 except ModuleNotFoundError:  # unittest imports this file from the repository root
     from scripts import enrich_wikidata_dates as date_enricher
     from scripts import apply_verified_occurrences as verified_dates
     from scripts import apply_verified_venues as verified_venues
+    from scripts import validate_prefecture_coordinates as coordinate_validator
 
 WIKIPEDIA_API = "https://ja.wikipedia.org/w/api.php"
 WIKIDATA_API = "https://www.wikidata.org/w/api.php"
@@ -195,7 +197,11 @@ def main():
         schedules = date_enricher.schedules_by_festival(entities, calendar_entities)
         dated = date_enricher.enrich(merged, schedules)
         with_occurrences = verified_dates.apply_occurrences(dated)
-        write_json(args.data, verified_venues.apply_venues(with_occurrences))
+        with_venues = verified_venues.apply_venues(with_occurrences)
+        validated = coordinate_validator.apply_coordinate_prefectures(
+            with_venues, coordinate_validator.fetch_features()
+        )
+        write_json(args.data, validated)
         print(f"merged total: {len(merged)}; annual schedules: {len(schedules)}")
     else:
         print("dry run; pass --merge to update the data file")
