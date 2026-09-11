@@ -1,10 +1,12 @@
 const map=L.map('map').setView([36.2,138.2],5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
 
-const CACHE_KEY='omatsuri-map-image-cache-v4';
+const CACHE_KEY='omatsuri-map-image-cache-v5';
 const GEOCODING_CACHE_KEY='omatsuri-map-geocoding-cache-v1';
 const SELECTED_MARKER_Z_INDEX=10000;
 const imageCache={};
+const wikiContentCache={};
+const wikiContentQueue={};
 const geocodingCache={};
 const geocodingCacheQueue={};
 let festivals=[];
@@ -62,6 +64,31 @@ function groundedDescription(f){
   }
   const name=f.label_ja||f.label_en||'この祭り';
   return{body:`${name}は、地図上では`,status:'未確認の紹介文は表示していません',locationAware:true};
+}
+function isFestivalWikipediaContent(value){return /(?:祭|祭礼|大会|花火|フェスティバル|イベント|行事|博覧会|盆踊り)/.test(String(value||''))}
+function isCompatibleWikipediaContent(value,f,location){
+  if(!isFestivalWikipediaContent(value))return false;
+  const prefectures=String(value||'').match(/[一-龠々ヶ]{2,4}[都道府県]/g)||[];
+  if(prefectures.some(prefecture=>prefecture!==f.prefecture))return false;
+  const municipalities=String(value||'').match(/[一-龠々ヶ]{1,10}(?:市|区|町|村)/g)||[];
+  const normalizedLocation=String(location||'').replace(/\s/g,'');
+  return municipalities.every(municipality=>normalizedLocation.includes(municipality));
+}
+function safeWikipediaDescription(value){
+  const sentences=String(value||'').match(/[^。！？]+[。！？]?/g)||[];
+  return sentences.filter(sentence=>!/(?:会場|開催地|にて開催)/.test(sentence)).slice(0,3).join('').trim();
+}
+async function loadWikipediaContent(f){
+  const title=f.wikipedia_title||f.label_ja;if(!title)return null;
+  const cacheKey=`${f.qid||''}:${title}`;
+  if(wikiContentCache[cacheKey])return wikiContentCache[cacheKey];
+  if(wikiContentQueue[cacheKey])return wikiContentQueue[cacheKey];
+  wikiContentQueue[cacheKey]=fetch(`/api/wiki/content?title=${encodeURIComponent(title)}&qid=${encodeURIComponent(f.qid||'')}`)
+    .then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()})
+    .then(data=>wikiContentCache[cacheKey]=data)
+    .catch(error=>{console.warn(`Wikipedia content could not be loaded for ${title}`,error);return null})
+    .finally(()=>delete wikiContentQueue[cacheKey]);
+  return wikiContentQueue[cacheKey];
 }
 async function detailedLocation(f){
   const venue=venueData(f);if(venue)return venue.name;
@@ -187,7 +214,8 @@ function renderMarkers(){
 }
 function detail(f){
   const wiki=f.qid?`https://www.wikidata.org/wiki/${encodeURIComponent(f.qid)}`:'';
-  const pedia=f.label_ja?`https://ja.wikipedia.org/wiki/${encodeURIComponent(f.label_ja)}`:'';
+  const wikipediaTitle=f.wikipedia_title||f.label_ja;
+  const pedia=wikipediaTitle?`https://ja.wikipedia.org/wiki/${encodeURIComponent(wikipediaTitle)}`:'';
   const culture=safeUrl(f.cultural_relaw?.url);
   const about=groundedDescription(f);
   const aboutBody=about.locationAware?`${esc(about.body)}「<span id="detail-about-location">${esc(f.prefecture||'地域未登録')}</span>」付近に登録されています。正確な会場は確認中です。`:esc(about.body);
@@ -209,6 +237,17 @@ function openDetail(f,key,origin){
   requestAnimationFrame(()=>{map.invalidateSize();focusTarget?.focus({preventScroll:origin!=='marker'})});
   hydrateImage(f,key);
   hydrateLocation(f,key);
+  hydrateAbout(f,key);
+}
+async function hydrateAbout(f,key){
+  if(!groundedDescription(f).locationAware)return;
+  const [data,location]=await Promise.all([loadWikipediaContent(f),detailedLocation(f)]),body=document.querySelector('.detail-description'),status=document.querySelector('.detail-description-status');
+  if(!data||selectedKey!==key||!body||!status)return;
+  const description=safeWikipediaDescription(data.description),source=safeUrl(data.source_url);
+  if(description.length<30||!source||!isCompatibleWikipediaContent(data.description,f,location))return;
+  body.textContent=description;
+  const contentLicense=safeUrl(data.content_license_url);
+  status.innerHTML=`<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">Wikipediaの概要<span aria-hidden="true">↗</span></a>${contentLicense?` · <a href="${esc(contentLicense)}" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0<span aria-hidden="true">↗</span></a>`:''}（開催地は上欄を参照）`;
 }
 async function hydrateLocation(f,key){
   const location=await detailedLocation(f),element=document.querySelector('#detail-location'),aboutLocation=document.querySelector('#detail-about-location');
@@ -224,10 +263,15 @@ function closeDetail(restoreFocus=true){
   }
 }
 async function hydrateImage(f,key){
-  let result=imageCache[f.qid],loadFailed=false;if(typeof result==='string')result={url:result};
-  if(!result&&f.qid){
+  const [wikipediaContent,location]=await Promise.all([loadWikipediaContent(f),detailedLocation(f)]),contentIsRelevant=!wikipediaContent||isCompatibleWikipediaContent(wikipediaContent.description,f,location);
+  let result=contentIsRelevant?imageCache[f.qid]:null,loadFailed=false;if(typeof result==='string')result={url:result};
+  if(!result&&f.qid&&contentIsRelevant){
     try{const response=await fetch(`/api/wiki/image?qid=${encodeURIComponent(f.qid)}`);if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();result={url:safeUrl(data.url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),sourceUrl:safeUrl(data.source_url)};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
     catch(error){loadFailed=true;console.warn(`Image could not be loaded for ${f.qid}`,error)}
+  }
+  if(!result?.url){
+    if(wikipediaContent)loadFailed=false;
+    if(wikipediaContent?.image_url&&contentIsRelevant){result={url:safeUrl(wikipediaContent.image_url),license:String(wikipediaContent.license||'').trim(),licenseUrl:safeUrl(wikipediaContent.license_url),artist:plainText(wikipediaContent.artist),credit:plainText(wikipediaContent.credit),sourceUrl:safeUrl(wikipediaContent.image_source_url)};loadFailed=false}
   }
   const container=document.querySelector('#detail-image'),content=document.querySelector('#detail-content');if(!container||selectedKey!==key)return;
   if(loadFailed){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">画像を取得できませんでした。</p>';return}
