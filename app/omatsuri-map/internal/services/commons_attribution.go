@@ -23,12 +23,32 @@ type CommonsAttribution struct {
 }
 
 func FetchCommonsAttribution(imageURL string) (CommonsAttribution, error) {
-	fileName, err := commonsFileName(imageURL)
-	if err != nil {
-		return CommonsAttribution{}, err
-	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+	var lastErr error
+	for attempt := 0; attempt < 3; attempt++ {
+		attribution, retry, err := fetchCommonsAttributionOnce(ctx, imageURL)
+		if err == nil {
+			return attribution, nil
+		}
+		lastErr = err
+		if !retry || attempt == 2 {
+			break
+		}
+		select {
+		case <-time.After(time.Duration(250*(1<<attempt)) * time.Millisecond):
+		case <-ctx.Done():
+			return CommonsAttribution{}, ctx.Err()
+		}
+	}
+	return CommonsAttribution{}, lastErr
+}
+
+func fetchCommonsAttributionOnce(ctx context.Context, imageURL string) (CommonsAttribution, bool, error) {
+	fileName, err := commonsFileName(imageURL)
+	if err != nil {
+		return CommonsAttribution{}, false, err
+	}
 	apiURL := fmt.Sprintf(
 		"%s/w/api.php?action=query&titles=File:%s&prop=imageinfo&iiprop=url|extmetadata&iiextmetadatafilter=Artist|Credit|License|LicenseShortName|LicenseUrl|AttributionRequired&format=json",
 		commonsAttributionAPIBase,
@@ -36,22 +56,23 @@ func FetchCommonsAttribution(imageURL string) (CommonsAttribution, error) {
 	)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
 	if err != nil {
-		return CommonsAttribution{}, err
+		return CommonsAttribution{}, false, err
 	}
 	req.Header.Set("User-Agent", "omatsuri-map/1.0")
 	resp, err := client.Do(req)
 	if err != nil {
-		return CommonsAttribution{}, err
+		return CommonsAttribution{}, true, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return CommonsAttribution{}, fmt.Errorf("Commons API returned status %d", resp.StatusCode)
+		return CommonsAttribution{}, resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= http.StatusInternalServerError, fmt.Errorf("Commons API returned status %d", resp.StatusCode)
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return CommonsAttribution{}, err
+		return CommonsAttribution{}, true, err
 	}
-	return parseCommonsAttribution(body)
+	attribution, err := parseCommonsAttribution(body)
+	return attribution, false, err
 }
 
 func commonsFileName(imageURL string) (string, error) {

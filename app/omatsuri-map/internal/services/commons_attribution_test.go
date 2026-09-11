@@ -1,6 +1,11 @@
 package services
 
-import "testing"
+import (
+	"net/http"
+	"net/http/httptest"
+	"sync/atomic"
+	"testing"
+)
 
 func TestCommonsFileNameFromSVGThumbnail(t *testing.T) {
 	got, err := commonsFileName("https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Festival_poster.svg/800px-Festival_poster.svg.png")
@@ -46,5 +51,26 @@ func TestParseCommonsAttributionAllowsPublicDomainWithoutArtist(t *testing.T) {
 func TestCommonsFileNameRejectsOtherHosts(t *testing.T) {
 	if _, err := commonsFileName("https://example.com/image.jpg"); err == nil {
 		t.Fatal("expected non-Commons URL to be rejected")
+	}
+}
+
+func TestFetchCommonsAttributionRetriesRateLimit(t *testing.T) {
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		if requests.Add(1) == 1 {
+			w.WriteHeader(http.StatusTooManyRequests)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"query":{"pages":{"1":{"imageinfo":[{"descriptionurl":"https://commons.wikimedia.org/wiki/File:Festival.jpg","extmetadata":{"LicenseShortName":{"value":"CC0"}}}]}}}}`))
+	}))
+	defer server.Close()
+	previousBase := commonsAttributionAPIBase
+	commonsAttributionAPIBase = server.URL
+	t.Cleanup(func() { commonsAttributionAPIBase = previousBase })
+
+	got, err := FetchCommonsAttribution("https://upload.wikimedia.org/wikipedia/commons/a/ab/Festival.jpg")
+	if err != nil || got.License != "CC0" || requests.Load() != 2 {
+		t.Fatalf("got %+v after %d requests: %v", got, requests.Load(), err)
 	}
 }

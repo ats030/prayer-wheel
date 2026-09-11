@@ -82,6 +82,10 @@ function safeWikipediaDescription(value,f,location){
 function isCompatibleWikipediaContent(value,f,location){
   return isFestivalWikipediaContent(value)&&safeWikipediaDescription(value,f,location).length>=30;
 }
+function isCompatibleWikipediaImage(value,f,location){
+  const sentences=String(value||'').match(/[^。！？]+[。！？]?/g)||[];
+  return isFestivalWikipediaContent(value)&&sentences.some(sentence=>wikipediaSentenceMatchesLocation(sentence,f,location));
+}
 async function loadWikipediaContent(f){
   const title=f.wikipedia_title||f.label_ja;if(!title)return null;
   const cacheKey=`${f.qid||''}:${title}`;
@@ -268,8 +272,9 @@ function closeDetail(restoreFocus=true){
   }
 }
 async function hydrateImage(f,key){
-  const [wikipediaContent,location]=await Promise.all([loadWikipediaContent(f),detailedLocation(f)]),contentIsRelevant=!wikipediaContent||isCompatibleWikipediaContent(wikipediaContent.description,f,location);
-  let result=contentIsRelevant?imageCache[f.qid]:null,loadFailed=false;if(typeof result==='string')result={url:result};
+  const [wikipediaContent,location]=await Promise.all([loadWikipediaContent(f),detailedLocation(f)]),contentIsRelevant=!wikipediaContent||isCompatibleWikipediaImage(wikipediaContent.description,f,location);
+  let result=contentIsRelevant?imageCache[f.qid]:null,loadFailed=false;
+  if(typeof result==='string'||(result?.url&&!result.license)){delete imageCache[f.qid];persist(CACHE_KEY,imageCache);result=null}
   if(!result&&f.qid&&contentIsRelevant){
     try{const response=await fetch(`/api/wiki/image?qid=${encodeURIComponent(f.qid)}`);if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();result={url:safeUrl(data.url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),sourceUrl:safeUrl(data.source_url)};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
     catch(error){loadFailed=true;console.warn(`Image could not be loaded for ${f.qid}`,error)}
