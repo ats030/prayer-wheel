@@ -174,7 +174,15 @@
     "latitude": 40.6039,
     "longitude": 140.4649,
     "description": "弘前さくらまつりは、青森県弘前市で3月下旬から4月中旬にかけて開催される、弘前公園の約2,600本の桜を楽しむ春の一大イベントです。主な見どころは「夜桜ライトアップ」や「さくらまつり期間中の特設ステージでのイベント」、そして「弘前城下町の歴史的風景との融合」です。期間中は屋台や地元特産のグルメも楽しめ、多くの観光客でにぎわいます。",
-    "date": "日付未定"
+    "date": "2026-04-10〜2026-05-05",
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-04-10",
+        "end": "2026-05-05",
+        "source": "https://www.hirosakipark.jp/sakura/"
+      }
+    ]
   },
   {
     "qid": "Q11487218",
@@ -194,7 +202,7 @@
     "latitude": 40.6039,
     "longitude": 140.4649,
     "description": "弘前ねぷたは青森県弘前市で8月上旬に開催される夏の伝統行事で、巨大なねぷた（提灯型の山車）を曳いて、太鼓や笛の音楽に合わせて街中を練り歩きます。  \nねぷたには、歴史や伝説、自然をモチーフにした鮮やかな絵が描かれており、夜の街を彩る光の芸術として知られています。  \n「ねぷた」とは「寝不足」から派生した語で、祭りの盛り上がりに眠れなくなるほど熱狂的で、毎年約300万人が訪れます。",
-    "date": "日付未定",
+    "date": "2026-08-01〜2026-08-07",
     "cultural_relaw": {
       "id": "",
       "name": "",
@@ -203,7 +211,15 @@
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/4",
       "address": ""
-    }
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-01",
+        "end": "2026-08-07",
+        "source": "https://www.hirosaki-kanko.or.jp/web/edit.html?id=cat02_summer_neputa"
+      }
+    ]
   },
   {
     "qid": "Q1046742",
@@ -213,7 +229,16 @@
     "latitude": 35.630833333,
     "longitude": 139.796666666,
     "description": "コミックマーケット（コミケ）は、毎年8月と12月に東京都の有明東京ビッグサイトで開催される世界最大級の同人誌即売会です。  \n約5000のサークルが参加し、同人誌・同人グッズ・音楽・ゲームなど、幅広いジャンルのオリジナル作品を直接販売・交換します。  \n参加者は一般・サークル参加者合わせて50万人以上に上り、同人文化の総本山として知られています。",
-    "date": "日付未定"
+    "date": "2026-12-29〜2026-12-31",
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-12-29",
+        "end": "2026-12-31",
+        "status": "scheduled",
+        "source": "https://www.comiket.co.jp/"
+      }
+    ]
   },
   {
     "qid": "Q10869430",
@@ -363,7 +388,7 @@
     "latitude": 33.59297,
     "longitude": 130.41045,
     "description": "博多祇園山笠は福岡市で7月に開催される伝統的な夏の祭りで、13日間の準備期間を経て、7月15日の「追い山笠」で山笠が市街を練り歩きます。  \n山笠とは、高さ約25メートル、重さ約1トンの装飾山車で、各町内が独自のデザインと歴史を誇ります。  \n「追い山笠」では、山笠を引く「はやし」の掛け声と太鼓のリズムに合わせ、激しい引き合い（山笠の競争）が繰り広げられ、国の重要無形民俗文化財に指定されています。",
-    "date": "日付未定",
+    "date": "2026-07-01〜2026-07-15",
     "cultural_relaw": {
       "id": "",
       "name": "",
@@ -372,7 +397,15 @@
       "cultural_type": "重要無形民俗文化財",
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/133",
       "address": ""
-    }
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-01",
+        "end": "2026-07-15",
+        "source": "https://www.hakatayamakasa.com/"
+      }
+    ]
   },
   {
     "qid": "Q1151186",
@@ -447,7 +480,15 @@
     "latitude": 43.202940261,
     "longitude": 141.007523346,
     "description": "おたる潮まつりは、北海道小樽市で毎年8月中旬に開催される夏の風物詩。  \n港町ならではの海の恵みを祝い、新鮮な海産物の試食や販売、地元の特産品の販売、子どもたちの潮干狩り体験などが行われます。  \n夜には「潮まつり花火大会」が開催され、小樽港に色とりどりの花火が咲き誇ります。",
-    "date": "日付未定"
+    "date": "2026-07-24〜2026-07-26",
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-24",
+        "end": "2026-07-26",
+        "source": "https://otaru.ushiomatsuri.net/"
+      }
+    ]
   },
   {
     "qid": "Q11274443",
@@ -2671,7 +2712,22 @@
     "latitude": 43.727138888,
     "longitude": 142.948777777,
     "description": "",
-    "date": "日付未定"
+    "date": "2027-01-23〜2027-03-07",
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-01-24",
+        "end": "2026-03-08",
+        "source": "https://sounkyo.net/hyoubaku/"
+      },
+      {
+        "year": 2027,
+        "start": "2027-01-23",
+        "end": "2027-03-07",
+        "status": "scheduled",
+        "source": "https://sounkyo.net/hyoubaku/"
+      }
+    ]
   },
   {
     "qid": "Q11447740",
@@ -2996,9 +3052,24 @@
     "latitude": 44.33555555555556,
     "longitude": 143.37208333333334,
     "description": "",
-    "date": "日付未定",
+    "date": "2027-02-11〜2027-02-14",
     "wikipedia_title": "もんべつ流氷まつり",
-    "coordinate_source": "festival"
+    "coordinate_source": "festival",
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-02-06",
+        "end": "2026-02-08",
+        "source": "https://tic.mombetsu.net/drift-ice-fes/"
+      },
+      {
+        "year": 2027,
+        "start": "2027-02-11",
+        "end": "2027-02-14",
+        "status": "scheduled",
+        "source": "https://tic.mombetsu.net/drift-ice-fes/"
+      }
+    ]
   },
   {
     "qid": "Q11292979",
@@ -4002,9 +4073,18 @@
     "latitude": 36.467333333333336,
     "longitude": 140.0933611111111,
     "description": "日本の栃木県益子町で開催される陶器市",
-    "date": "日付未定",
+    "date": "2026-10-31〜2026-11-03",
     "wikipedia_title": "益子陶器市",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-31",
+        "end": "2026-11-03",
+        "status": "scheduled",
+        "source": "https://toukiichi.mashiko-db.net/"
+      }
+    ]
   },
   {
     "qid": "Q24875391",
@@ -4226,9 +4306,17 @@
     "latitude": 35.776666666666664,
     "longitude": 140.31833333333333,
     "description": "千葉県成田市の祭礼行事",
-    "date": "日付未定",
+    "date": "2026-07-10〜2026-07-12",
     "wikipedia_title": "成田祇園祭",
-    "coordinate_source": "administrative_area"
+    "coordinate_source": "administrative_area",
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-10",
+        "end": "2026-07-12",
+        "source": "https://www.nrtk.jp/enjoy/shikisaisai/gion-festival.html"
+      }
+    ]
   },
   {
     "qid": "Q11518518",
@@ -4568,9 +4656,17 @@
     "latitude": 35.71492222222222,
     "longitude": 139.79651666666666,
     "description": "東京都台東区浅草で行われるサンバのパレード",
-    "date": "日付未定",
+    "date": "2026-08-29",
     "wikipedia_title": "浅草サンバカーニバル",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-29",
+        "end": "2026-08-29",
+        "source": "https://www.asakusa-samba.org/"
+      }
+    ]
   },
   {
     "qid": "Q3090688",
@@ -7286,9 +7382,17 @@
     "latitude": 34.68545278,
     "longitude": 135.84341111,
     "description": "毎年8月に奈良市内で開催されるイベント",
-    "date": "日付未定",
+    "date": "2026-08-05〜2026-08-14",
     "wikipedia_title": "なら燈花会",
-    "coordinate_source": "venue"
+    "coordinate_source": "venue",
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-05",
+        "end": "2026-08-14",
+        "source": "https://www.toukae.jp/"
+      }
+    ]
   },
   {
     "qid": "Q100532330",

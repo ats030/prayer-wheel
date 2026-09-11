@@ -11,8 +11,10 @@ import requests
 
 try:
     import enrich_wikidata_dates as date_enricher
+    import apply_verified_occurrences as verified_dates
 except ModuleNotFoundError:  # unittest imports this file from the repository root
     from scripts import enrich_wikidata_dates as date_enricher
+    from scripts import apply_verified_occurrences as verified_dates
 
 WIKIPEDIA_API = "https://ja.wikipedia.org/w/api.php"
 WIKIDATA_API = "https://www.wikidata.org/w/api.php"
@@ -189,7 +191,8 @@ def main():
         calendar_qids = {qid for entity in entities.values() for qid in date_enricher.p837_qids(entity)}
         calendar_entities = fetch_entities(session, calendar_qids)
         schedules = date_enricher.schedules_by_festival(entities, calendar_entities)
-        write_json(args.data, date_enricher.enrich(merged, schedules))
+        dated = date_enricher.enrich(merged, schedules)
+        write_json(args.data, verified_dates.apply_occurrences(dated))
         print(f"merged total: {len(merged)}; annual schedules: {len(schedules)}")
     else:
         print("dry run; pass --merge to update the data file")
