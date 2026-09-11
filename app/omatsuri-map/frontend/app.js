@@ -127,6 +127,20 @@ function matchesDate(f,value){
   const target=new Date(`${value}T12:00:00`);
   return [...occurrenceRanges(f),...annualScheduleRanges(f,target.getFullYear())].some(({start,end})=>target>=start&&target<=end);
 }
+function nextOccurrenceTime(f,now=new Date()){
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const annual=[...annualScheduleRanges(f,today.getFullYear()),...annualScheduleRanges(f,today.getFullYear()+1)];
+  const upcoming=[...occurrenceRanges(f),...annual].filter(({end})=>end>=today);
+  if(!upcoming.length)return Number.POSITIVE_INFINITY;
+  return Math.min(...upcoming.map(({start})=>Math.max(start.getTime(),today.getTime())));
+}
+function compareByNextOccurrence(a,b){
+  const dateOrder=nextOccurrenceTime(a)-nextOccurrenceTime(b);
+  if(Number.isFinite(dateOrder)&&dateOrder!==0)return dateOrder;
+  if(Number.isFinite(nextOccurrenceTime(a)))return -1;
+  if(Number.isFinite(nextOccurrenceTime(b)))return 1;
+  return String(a.label_ja||a.label_en||'').localeCompare(String(b.label_ja||b.label_en||''),'ja');
+}
 function populatePrefectures(){
   const select=document.querySelector('#prefecture');
   [...new Set(festivals.map(f=>f.prefecture).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja')).forEach(p=>select.add(new Option(p,p)));
@@ -138,7 +152,7 @@ function applyFilters(){
   visible=festivals.filter(f=>{
     const text=[f.label_ja,f.label_en,f.prefecture,f.description].filter(Boolean).join(' ').toLocaleLowerCase('ja');
     return text.includes(q)&&(!prefecture||f.prefecture===prefecture)&&matchesDate(f,date);
-  });
+  }).sort(compareByNextOccurrence);
   renderList();renderMarkers();
   document.querySelector('#result-count').textContent=visible.length;
   document.querySelector('#map-count').textContent=`地図上に ${visible.length} 件`;
