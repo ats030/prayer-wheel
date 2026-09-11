@@ -84,12 +84,14 @@ function selectFestival(key,move){
   const card=document.querySelector(`.festival-card[data-key="${CSS.escape(key)}"]`);
   if(!move&&card)card.scrollIntoView({behavior:'smooth',block:'nearest'});
   if(move)map.flyTo(entry.marker.getLatLng(),Math.max(map.getZoom(),8),{duration:.55});
-  openDetail(entry.festival,key);
+  openDetail(entry.festival,key,!move);
 }
-function openDetail(f,key){
+function openDetail(f,key,focusDescription){
   const panel=document.querySelector('#detail-panel'),content=document.querySelector('#detail-content');
   panel.hidden=false;document.querySelector('.app-shell').classList.add('has-detail');content.dataset.state='loading';content.innerHTML=detail(f);
-  requestAnimationFrame(()=>{map.invalidateSize();document.querySelector('#detail-title')?.focus({preventScroll:true})});
+  const focusTarget=focusDescription?document.querySelector('.detail-description'):document.querySelector('#detail-title');
+  if(focusTarget)focusTarget.tabIndex=-1;
+  requestAnimationFrame(()=>{map.invalidateSize();focusTarget?.focus({preventScroll:!focusDescription})});
   hydrateImage(f,key);
 }
 function closeDetail(restoreFocus=true){
