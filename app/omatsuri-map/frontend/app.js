@@ -194,13 +194,15 @@ function closeDetail(restoreFocus=true){
   }
 }
 async function hydrateImage(f,key){
-  let result=imageCache[f.qid];if(typeof result==='string')result={url:result};
+  let result=imageCache[f.qid],loadFailed=false;if(typeof result==='string')result={url:result};
   if(!result&&f.qid){
     try{const response=await fetch(`/api/wiki/image?qid=${encodeURIComponent(f.qid)}`);if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();result={url:safeUrl(data.url),license:String(data.license||'').trim()};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
-    catch(error){console.warn(`Image could not be loaded for ${f.qid}`,error)}
+    catch(error){loadFailed=true;console.warn(`Image could not be loaded for ${f.qid}`,error)}
   }
   const container=document.querySelector('#detail-image'),content=document.querySelector('#detail-content');if(!container||selectedKey!==key)return;
-  if(!result?.url||!result?.license){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">ライセンス情報を確認できる画像がありません。</p>';return}
+  if(loadFailed){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">画像を取得できませんでした。</p>';return}
+  if(!result?.url){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">表示できる画像が登録されていません。</p>';return}
+  if(!result.license){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">画像のライセンス情報を確認できないため、表示していません。</p>';return}
   const source=commonsFilePage(result.url);
   content.dataset.state='success';container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(f.label_ja||'祭り')}の画像を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(f.label_ja||'祭り')}の画像"></button><p class="license">画像ライセンス: ${esc(result.license)}${source?` ・ <a href="${esc(source)}" target="_blank" rel="noopener noreferrer">画像の出典<span aria-hidden="true">↗</span></a>`:''}</p>`;
   container.querySelector('button').addEventListener('click',()=>openLightbox(result.url,f.label_ja));
