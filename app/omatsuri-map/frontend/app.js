@@ -156,7 +156,8 @@ function annualScheduleRanges(f,year){
 }
 function formatOccurrence({start,end,status}){
   const startLabel=`${start.getFullYear()}年${start.getMonth()+1}月${start.getDate()}日`;
-  const endLabel=start.getTime()===end.getTime()?'':start.getFullYear()===end.getFullYear()?`〜${end.getMonth()+1}月${end.getDate()}日`:`〜${end.getFullYear()}年${end.getMonth()+1}月${end.getDate()}日`;
+  const sameDay=start.getFullYear()===end.getFullYear()&&start.getMonth()===end.getMonth()&&start.getDate()===end.getDate();
+  const endLabel=sameDay?'':start.getFullYear()===end.getFullYear()?`〜${end.getMonth()+1}月${end.getDate()}日`:`〜${end.getFullYear()}年${end.getMonth()+1}月${end.getDate()}日`;
   return `${startLabel}${endLabel}${status==='scheduled'?'（予定）':''}`;
 }
 function nextOccurrence(f,now=new Date()){
