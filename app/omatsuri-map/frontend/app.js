@@ -29,7 +29,7 @@ function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].i
 function plainText(value){const document=new DOMParser().parseFromString(String(value||''),'text/html');return document.body.textContent.trim()}
 function commonsFilePage(value){
   try{
-    const url=new URL(value);if(url.hostname!=='upload.wikimedia.org')return'';
+    const url=new URL(value);if(!['upload.wikimedia.org','thumb.wikimedia.org'].includes(url.hostname))return'';
     const parts=url.pathname.split('/').filter(Boolean),thumbIndex=parts.indexOf('thumb');
     const fileName=decodeURIComponent(thumbIndex>=0?parts[parts.length-2]:parts[parts.length-1]);
     return fileName?`https://commons.wikimedia.org/wiki/File:${encodeURIComponent(fileName)}`:'';

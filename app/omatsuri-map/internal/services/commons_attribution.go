@@ -55,7 +55,7 @@ func FetchCommonsAttribution(imageURL string) (CommonsAttribution, error) {
 
 func commonsFileName(imageURL string) (string, error) {
 	u, err := url.Parse(imageURL)
-	if err != nil || u.Hostname() != "upload.wikimedia.org" {
+	if err != nil || (u.Hostname() != "upload.wikimedia.org" && u.Hostname() != "thumb.wikimedia.org") {
 		return "", fmt.Errorf("not a Wikimedia Commons image URL")
 	}
 	parts := strings.Split(strings.Trim(u.Path, "/"), "/")

@@ -9,6 +9,13 @@ func TestCommonsFileNameFromSVGThumbnail(t *testing.T) {
 	}
 }
 
+func TestCommonsFileNameFromThumbnailHost(t *testing.T) {
+	got, err := commonsFileName("https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2e/Asakusa.jpg/960px-Asakusa.jpg")
+	if err != nil || got != "Asakusa.jpg" {
+		t.Fatalf("got %q, %v", got, err)
+	}
+}
+
 func TestParseCommonsAttribution(t *testing.T) {
 	body := []byte(`{"query":{"pages":{"1":{"imageinfo":[{"descriptionurl":"https://commons.wikimedia.org/wiki/File:Festival.svg","extmetadata":{"Artist":{"value":"<a href=\"/wiki/User:Creator\">Creator</a>"},"LicenseShortName":{"value":"CC BY-SA 4.0"},"LicenseUrl":{"value":"https://creativecommons.org/licenses/by-sa/4.0/"},"AttributionRequired":{"value":"true"}}}]}}}}`)
 	got, err := parseCommonsAttribution(body)
