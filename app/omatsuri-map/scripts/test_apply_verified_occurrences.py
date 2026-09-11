@@ -24,6 +24,14 @@ class VerifiedOccurrencesTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "QID not found"):
             verified_occurrences.apply_occurrences([], {"Q404": []})
 
+    def test_matsudo_fireworks_uses_official_2026_date(self):
+        rows = [{"qid": "Q132860355", "date": "日付未定"}]
+        result = verified_occurrences.apply_occurrences(
+            rows, {"Q132860355": verified_occurrences.VERIFIED_OCCURRENCES["Q132860355"]}
+        )
+        self.assertEqual(result[0]["date"], "2026-08-01")
+        self.assertEqual(result[0]["occurrences"][0]["source"], "https://matsudo-hanabi.com/")
+
 
 if __name__ == "__main__":
     unittest.main()

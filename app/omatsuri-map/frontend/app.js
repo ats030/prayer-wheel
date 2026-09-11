@@ -85,6 +85,25 @@ function annualScheduleMarkup(f){
   if(!items.length)return'';
   return `<ul class="occurrence-list annual-schedule">${items.map(item=>{const source=safeUrl(item.source);const label=annualScheduleLabel(item);return `<li>${source?`<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`:esc(label)}</li>`}).join('')}</ul>`;
 }
+function dateSourceMarkup(f){
+  const sources=new Map();
+  for(const item of Array.isArray(f.occurrences)?f.occurrences:[]){
+    const url=safeUrl(item.source);if(!url)continue;
+    const source=sources.get(url)||{years:new Set(),annual:false};
+    source.years.add(item.year||'年次情報');sources.set(url,source);
+  }
+  for(const item of Array.isArray(f.annual_schedule)?f.annual_schedule:[]){
+    const url=safeUrl(item.source);if(!url)continue;
+    const source=sources.get(url)||{years:new Set(),annual:false};
+    source.annual=true;sources.set(url,source);
+  }
+  return [...sources].map(([url,source])=>{
+    const labels=[];
+    if(source.years.size)labels.push(`開催日（${[...source.years].map(esc).join('・')}）`);
+    if(source.annual)labels.push('例年の開催日');
+    return `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${labels.join('・')}<span aria-hidden="true">↗</span></a>`;
+  }).join('');
+}
 function formatOccurrence(item){
   const start=new Date(`${item.start}T12:00:00`),end=new Date(`${item.end||item.start}T12:00:00`);
   if(Number.isNaN(start.valueOf())||Number.isNaN(end.valueOf()))return '日付未定';
@@ -148,7 +167,7 @@ function detail(f){
   const wiki=f.qid?`https://www.wikidata.org/wiki/${encodeURIComponent(f.qid)}`:'';
   const pedia=f.label_ja?`https://ja.wikipedia.org/wiki/${encodeURIComponent(f.label_ja)}`:'';
   const culture=safeUrl(f.cultural_relaw?.url);
-  return `<article class="detail"><header class="detail-lead"><p class="detail-kicker">${esc(f.label_en||'Festival in Japan')}</p><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2></header><dl class="detail-facts"><div><dt>開催地</dt><dd>${esc(f.prefecture||'地域未登録')}</dd></div><div><dt>開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${esc(f.description||'紹介文はまだ登録されていません。')}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section></article>`;
+  return `<article class="detail"><header class="detail-lead"><p class="detail-kicker">${esc(f.label_en||'Festival in Japan')}</p><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2></header><dl class="detail-facts"><div><dt>開催地</dt><dd>${esc(f.prefecture||'地域未登録')}</dd></div><div><dt>開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${esc(f.description||'紹介文はまだ登録されていません。')}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" aria-label="出典">${dateSourceMarkup(f)}${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section></article>`;
 }
 function selectFestival(key,origin){
   const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;

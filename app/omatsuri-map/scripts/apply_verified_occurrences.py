@@ -42,6 +42,9 @@ VERIFIED_OCCURRENCES = {
     "Q11274533": [
         {"year": 2026, "start": "2026-08-05", "end": "2026-08-14", "source": "https://www.toukae.jp/"},
     ],
+    "Q132860355": [
+        {"year": 2026, "start": "2026-08-01", "end": "2026-08-01", "source": "https://matsudo-hanabi.com/"},
+    ],
 }
 
 
