@@ -63,20 +63,24 @@ function groundedDescription(f){
     return{body:f.description,status:'開催地と同じ出典で確認済み',locationAware:false};
   }
   const name=f.label_ja||f.label_en||'この祭り';
-  return{body:`${name}は、地図上では`,status:'未確認の紹介文は表示していません',locationAware:true};
+  const safeLegacy=(String(f.description||'').match(/[^。！？]+[。！？]?/g)||[]).filter(sentence=>!/(?:開催|会場|毎年|日時|[0-9０-９]+月|[0-9０-９]+日|[一-龠々ヶ]{1,10}[都道府県市区町村])/.test(sentence)).slice(0,2).join('').trim();
+  if(safeLegacy.length>=30)return{body:safeLegacy,status:'参考情報（出典を確認中）',locationAware:false};
+  return{body:`${name}は、地図上では`,status:'詳しい概要の出典を確認中です',locationAware:true};
 }
-function isFestivalWikipediaContent(value){return /(?:祭|祭礼|大会|花火|フェスティバル|イベント|行事|博覧会|盆踊り)/.test(String(value||''))}
-function isCompatibleWikipediaContent(value,f,location){
-  if(!isFestivalWikipediaContent(value))return false;
+function isFestivalWikipediaContent(value){return /(?:祭(?:り|礼|典|事)|大会|花火|フェスティバル|イベント|行事|博覧会|盆踊り)/.test(String(value||''))}
+function wikipediaSentenceMatchesLocation(value,f,location){
   const prefectures=String(value||'').match(/[一-龠々ヶ]{2,4}[都道府県]/g)||[];
   if(prefectures.some(prefecture=>prefecture!==f.prefecture))return false;
   const municipalities=String(value||'').match(/[一-龠々ヶ]{1,10}(?:市|区|町|村)/g)||[];
   const normalizedLocation=String(location||'').replace(/\s/g,'');
   return municipalities.every(municipality=>normalizedLocation.includes(municipality));
 }
-function safeWikipediaDescription(value){
+function safeWikipediaDescription(value,f,location){
   const sentences=String(value||'').match(/[^。！？]+[。！？]?/g)||[];
-  return sentences.filter(sentence=>!/(?:会場|開催地|にて開催)/.test(sentence)).slice(0,3).join('').trim();
+  return sentences.filter(sentence=>!/(?:会場|開催地|にて開催)/.test(sentence)&&wikipediaSentenceMatchesLocation(sentence,f,location)).slice(0,3).join('').trim();
+}
+function isCompatibleWikipediaContent(value,f,location){
+  return isFestivalWikipediaContent(value)&&safeWikipediaDescription(value,f,location).length>=30;
 }
 async function loadWikipediaContent(f){
   const title=f.wikipedia_title||f.label_ja;if(!title)return null;
@@ -240,10 +244,11 @@ function openDetail(f,key,origin){
   hydrateAbout(f,key);
 }
 async function hydrateAbout(f,key){
-  if(!groundedDescription(f).locationAware)return;
+  const venue=venueData(f),descriptionSource=safeUrl(f.description_source);
+  if(venue&&f.description&&descriptionSource&&descriptionSource===safeUrl(venue.source))return;
   const [data,location]=await Promise.all([loadWikipediaContent(f),detailedLocation(f)]),body=document.querySelector('.detail-description'),status=document.querySelector('.detail-description-status');
   if(!data||selectedKey!==key||!body||!status)return;
-  const description=safeWikipediaDescription(data.description),source=safeUrl(data.source_url);
+  const description=safeWikipediaDescription(data.description,f,location),source=safeUrl(data.source_url);
   if(description.length<30||!source||!isCompatibleWikipediaContent(data.description,f,location))return;
   body.textContent=description;
   const contentLicense=safeUrl(data.content_license_url);
