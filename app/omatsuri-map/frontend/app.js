@@ -263,7 +263,7 @@ async function hydrateAbout(f,key){
   if(description.length<30||!source||!isCompatibleWikipediaContent(data.description,f,location))return;
   body.textContent=description;
   const contentLicense=safeUrl(data.content_license_url);
-  status.innerHTML=`<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>から一部抜粋・編集${contentLicense?` · <a href="${esc(contentLicense)}" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0<span aria-hidden="true">↗</span></a>`:''}（開催地は上欄を参照）`;
+  status.innerHTML=`<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>${contentLicense?` · <a href="${esc(contentLicense)}" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0<span aria-hidden="true">↗</span></a>`:''} · 編集あり（開催地は上欄を参照）`;
 }
 async function hydrateLocation(f,key){
   const location=await detailedLocation(f),element=document.querySelector('#detail-location'),aboutLocation=document.querySelector('#detail-about-location');
