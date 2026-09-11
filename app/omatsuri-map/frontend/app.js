@@ -86,13 +86,20 @@ function isCompatibleWikipediaImage(value,f,location){
   const sentences=String(value||'').match(/[^。！？]+[。！？]?/g)||[];
   return isFestivalWikipediaContent(value)&&sentences.some(sentence=>wikipediaSentenceMatchesLocation(sentence,f,location));
 }
+async function fetchJSONWithRetry(url){
+  let lastError;
+  for(let attempt=0;attempt<2;attempt++){
+    try{const response=await fetch(url);if(response.ok)return response.json();lastError=new Error(`HTTP ${response.status}`)}catch(error){lastError=error}
+    if(attempt===0)await new Promise(resolve=>setTimeout(resolve,500));
+  }
+  throw lastError;
+}
 async function loadWikipediaContent(f){
   const title=f.wikipedia_title||f.label_ja;if(!title)return null;
   const cacheKey=`${f.qid||''}:${title}`;
   if(wikiContentCache[cacheKey])return wikiContentCache[cacheKey];
   if(wikiContentQueue[cacheKey])return wikiContentQueue[cacheKey];
-  wikiContentQueue[cacheKey]=fetch(`/api/wiki/content?title=${encodeURIComponent(title)}&qid=${encodeURIComponent(f.qid||'')}`)
-    .then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()})
+  wikiContentQueue[cacheKey]=fetchJSONWithRetry(`/api/wiki/content?title=${encodeURIComponent(title)}&qid=${encodeURIComponent(f.qid||'')}`)
     .then(data=>wikiContentCache[cacheKey]=data)
     .catch(error=>{console.warn(`Wikipedia content could not be loaded for ${title}`,error);return null})
     .finally(()=>delete wikiContentQueue[cacheKey]);
@@ -273,18 +280,15 @@ function closeDetail(restoreFocus=true){
 }
 async function hydrateImage(f,key){
   const [wikipediaContent,location]=await Promise.all([loadWikipediaContent(f),detailedLocation(f)]),contentIsRelevant=!wikipediaContent||isCompatibleWikipediaImage(wikipediaContent.description,f,location);
-  let result=contentIsRelevant?imageCache[f.qid]:null,loadFailed=false;
+  let result=contentIsRelevant?imageCache[f.qid]:null,loadError=null;
   if(typeof result==='string'||(result?.url&&!result.license)){delete imageCache[f.qid];persist(CACHE_KEY,imageCache);result=null}
+  if(!result&&wikipediaContent?.image_url&&contentIsRelevant){result={url:safeUrl(wikipediaContent.image_url),license:String(wikipediaContent.license||'').trim(),licenseUrl:safeUrl(wikipediaContent.license_url),artist:plainText(wikipediaContent.artist),credit:plainText(wikipediaContent.credit),sourceUrl:safeUrl(wikipediaContent.image_source_url)};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
   if(!result&&f.qid&&contentIsRelevant){
-    try{const response=await fetch(`/api/wiki/image?qid=${encodeURIComponent(f.qid)}`);if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();result={url:safeUrl(data.url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),sourceUrl:safeUrl(data.source_url)};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
-    catch(error){loadFailed=true;console.warn(`Image could not be loaded for ${f.qid}`,error)}
-  }
-  if(!result?.url){
-    if(wikipediaContent)loadFailed=false;
-    if(wikipediaContent?.image_url&&contentIsRelevant){result={url:safeUrl(wikipediaContent.image_url),license:String(wikipediaContent.license||'').trim(),licenseUrl:safeUrl(wikipediaContent.license_url),artist:plainText(wikipediaContent.artist),credit:plainText(wikipediaContent.credit),sourceUrl:safeUrl(wikipediaContent.image_source_url)};loadFailed=false}
+    try{const data=await fetchJSONWithRetry(`/api/wiki/image?qid=${encodeURIComponent(f.qid)}`);result={url:safeUrl(data.url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),sourceUrl:safeUrl(data.source_url)};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
+    catch(error){loadError=error}
   }
   const container=document.querySelector('#detail-image'),content=document.querySelector('#detail-content');if(!container||selectedKey!==key)return;
-  if(loadFailed){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">画像を取得できませんでした。</p>';return}
+  if(loadError&&!wikipediaContent){console.warn(`Image could not be loaded for ${f.qid}`,loadError);content.dataset.state='error';container.innerHTML='<p class="detail-image-status">画像を取得できませんでした。時間をおいて再度お試しください。</p>';return}
   if(!result?.url){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">表示できる画像が登録されていません。</p>';return}
   if(!result.license){content.dataset.state='error';container.innerHTML='<p class="detail-image-status">画像のライセンス情報を確認できないため、表示していません。</p>';return}
   const source=result.sourceUrl||commonsFilePage(result.url);
