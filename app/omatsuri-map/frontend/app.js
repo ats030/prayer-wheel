@@ -3,6 +3,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&
 
 const CACHE_KEY='omatsuri-map-image-cache-v1';
 const GEOCODING_CACHE_KEY='omatsuri-map-geocoding-cache-v1';
+const SELECTED_MARKER_Z_INDEX=10000;
 const imageCache={};
 const geocodingCache={};
 const geocodingCacheQueue={};
@@ -171,7 +172,8 @@ function renderMarkers(){
   markers.forEach(({marker})=>map.removeLayer(marker));markers=new Map();
   visible.forEach((f,index)=>{
     if(!Number.isFinite(Number(f.latitude))||!Number.isFinite(Number(f.longitude)))return;
-    const key=festivalKey(f,index),marker=L.marker([Number(f.latitude),Number(f.longitude)],{icon:icon(key===selectedKey)}).addTo(map);
+    const key=festivalKey(f,index),selected=key===selectedKey;
+    const marker=L.marker([Number(f.latitude),Number(f.longitude)],{icon:icon(selected),zIndexOffset:selected?SELECTED_MARKER_Z_INDEX:0}).addTo(map);
     marker.bindTooltip(esc(f.label_ja||f.label_en||'名称未登録'),{direction:'top',offset:[0,-10]});
     marker.on('click',()=>selectFestival(key,'marker'));markers.set(key,{marker,festival:f});
   });
@@ -185,7 +187,7 @@ function detail(f){
 }
 function selectFestival(key,origin){
   const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;
-  markers.forEach(({marker},markerKey)=>marker.setIcon(icon(markerKey===key)));
+  markers.forEach(({marker},markerKey)=>{const selected=markerKey===key;marker.setIcon(icon(selected));marker.setZIndexOffset(selected?SELECTED_MARKER_Z_INDEX:0)});
   document.querySelectorAll('.festival-card').forEach(card=>card.setAttribute('aria-current',String(card.dataset.key===key)));
   if(origin==='list')map.flyTo(entry.marker.getLatLng(),Math.max(map.getZoom(),8),{duration:.55});
   openDetail(entry.festival,key,origin);
@@ -208,7 +210,7 @@ async function hydrateLocation(f,key){
 }
 function closeDetail(restoreFocus=true){
   const key=selectedKey,origin=selectedOrigin;selectedKey=null;selectedOrigin=null;document.querySelector('#detail-panel').hidden=true;document.querySelector('.app-shell').classList.remove('has-detail');
-  markers.forEach(({marker})=>marker.setIcon(icon(false)));document.querySelectorAll('.festival-card').forEach(card=>card.setAttribute('aria-current','false'));
+  markers.forEach(({marker})=>{marker.setIcon(icon(false));marker.setZIndexOffset(0)});document.querySelectorAll('.festival-card').forEach(card=>card.setAttribute('aria-current','false'));
   requestAnimationFrame(()=>map.invalidateSize());
   if(restoreFocus&&key){
     const target=origin==='marker'?markers.get(key)?.marker.getElement():document.querySelector(`.festival-card[data-key="${CSS.escape(key)}"]`);
