@@ -25,9 +25,12 @@ func withCommonsBase(t *testing.T, s *httptest.Server) {
 func withWikidataBase(t *testing.T, s *httptest.Server) {
 	t.Helper()
 	orig := wikidataAPIBase
+	origBackoff := initialBackoff
 	wikidataAPIBase = s.URL
+	initialBackoff = time.Millisecond
 	t.Cleanup(func() {
 		wikidataAPIBase = orig
+		initialBackoff = origBackoff
 	})
 }
 
@@ -79,6 +82,73 @@ func TestFetchWikidataLinks_NoLinksReturnsError(t *testing.T) {
 	}
 }
 
+func TestFetchWikidataEntity_RetriesOn429ThenSucceeds(t *testing.T) {
+	var calls int32
+	mux := http.NewServeMux()
+	mux.HandleFunc("/w/api.php", func(w http.ResponseWriter, r *http.Request) {
+		n := atomic.AddInt32(&calls, 1)
+		if n <= 2 {
+			http.Error(w, "rate limited", http.StatusTooManyRequests)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"entities":{"Q1":{"claims":{"P18":[{"mainsnak":{"datavalue":{"value":"f.jpg"}}}]}}}}`))
+	})
+	s := httptest.NewServer(mux)
+	defer s.Close()
+	withWikidataBase(t, s)
+
+	body, err := fetchWikidataEntity(context.Background(), "Q1")
+	if err != nil {
+		t.Fatalf("expected success after retry, got err: %v", err)
+	}
+	fileName, err := extractP18FileName(body, "Q1")
+	if err != nil || fileName != "f.jpg" {
+		t.Errorf("unexpected extracted filename: %q, err: %v", fileName, err)
+	}
+	if got := atomic.LoadInt32(&calls); got != 3 {
+		t.Errorf("expected 3 calls (2 retries + 1 success), got %d", got)
+	}
+}
+
+func TestFetchWikidataEntity_StopsRetryingOnNonRetryableError(t *testing.T) {
+	var calls int32
+	mux := http.NewServeMux()
+	mux.HandleFunc("/w/api.php", func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&calls, 1)
+		http.Error(w, "not found", http.StatusNotFound)
+	})
+	s := httptest.NewServer(mux)
+	defer s.Close()
+	withWikidataBase(t, s)
+
+	_, err := fetchWikidataEntity(context.Background(), "Q1")
+	if err == nil {
+		t.Fatal("expected error for 404, got nil")
+	}
+	if got := atomic.LoadInt32(&calls); got != 1 {
+		t.Errorf("404 must not be retried, expected 1 call, got %d", got)
+	}
+}
+
+func TestFetchWikidataEntity_RetriesExhausted(t *testing.T) {
+	var calls int32
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&calls, 1)
+		http.Error(w, "rate limited", http.StatusTooManyRequests)
+	}))
+	defer s.Close()
+	withWikidataBase(t, s)
+
+	_, err := fetchWikidataEntity(context.Background(), "Q1")
+	if err == nil {
+		t.Fatal("expected error after retries exhausted")
+	}
+	if got := atomic.LoadInt32(&calls); got != maxRetries+1 {
+		t.Errorf("expected %d calls (initial + %d retries), got %d", maxRetries+1, maxRetries, got)
+	}
+}
+
 func TestFetchCommonsImageInfo_RetriesOn429ThenSucceeds(t *testing.T) {
 	var calls int32
 	mux := http.NewServeMux()
@@ -107,6 +177,26 @@ func TestFetchCommonsImageInfo_RetriesOn429ThenSucceeds(t *testing.T) {
 	}
 	if got := atomic.LoadInt32(&calls); got != 3 {
 		t.Errorf("expected 3 calls (2 retries + 1 success), got %d", got)
+	}
+}
+
+func TestFetchCommonsImageInfo_ToleratesArrayExtmetadataValue(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"query":{"pages":{"42":{"imageinfo":[{"thumburl":"https://commons.wikimedia.org/thumb/x/y/f.jpg","url":"https://commons.wikimedia.org/x/y/f.jpg","extmetadata":{"License":[]}}]}}}}`))
+	}))
+	defer s.Close()
+	withCommonsBase(t, s)
+
+	u, license, err := fetchCommonsImageInfo(context.Background(), "f.jpg")
+	if err != nil {
+		t.Fatalf("expected success despite array-shaped extmetadata, got err: %v", err)
+	}
+	if u != "https://commons.wikimedia.org/thumb/x/y/f.jpg" {
+		t.Errorf("unexpected thumburl: %q", u)
+	}
+	if license != "" {
+		t.Errorf("expected empty license for array-shaped extmetadata, got %q", license)
 	}
 }
 

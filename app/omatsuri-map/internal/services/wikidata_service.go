@@ -37,7 +37,11 @@ var wikidataAPIBase = "https://www.wikidata.org"
 // because the /thumb/<dir1>/<dir2>/ path is an MD5 hash of the filename, so the URL must be
 // read from the API response instead of recomputed.
 func FetchWikidataImage(qid string) (string, string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	// Wikidata/Commons responses are occasionally slow enough (measured up to ~11s per
+	// call) that a single retried leg can approach 20s on its own; since this function
+	// makes two such calls sequentially, the overall budget must give both legs enough
+	// room even when one of them needs a retry.
+	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 	defer cancel()
 
 	body, err := fetchWikidataEntity(ctx, qid)
@@ -61,7 +65,49 @@ func FetchWikidataImage(qid string) (string, string, error) {
 }
 
 // fetchWikidataEntity fetches the raw wbgetentities claims payload for a QID.
+//
+// Transient failures (HTTP 429 rate limiting, 5xx responses, and network errors) are
+// retried up to maxRetries times with exponential backoff, mirroring fetchCommonsImageInfo.
 func fetchWikidataEntity(ctx context.Context, qid string) ([]byte, error) {
+	backoff := initialBackoff
+	var lastErr error
+
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		if attempt > 0 {
+			log.Printf("omatsuri-map: Wikidata API retry %d/%d for %s (last error: %v)", attempt, maxRetries, qid, lastErr)
+		}
+
+		body, err := fetchWikidataEntityOnce(ctx, qid)
+		if err == nil {
+			return body, nil
+		}
+		lastErr = err
+
+		if !isRetryableAPIError(err) {
+			return nil, err
+		}
+		if attempt == maxRetries {
+			break
+		}
+
+		_, retryAfter, _ := statusFromError(err)
+		if retryAfter > 0 {
+			backoff = retryAfter
+		}
+
+		select {
+		case <-time.After(backoff):
+		case <-ctx.Done():
+			return nil, err
+		}
+		backoff *= 2
+	}
+
+	log.Printf("omatsuri-map: Wikidata API retries exhausted for %s: %v", qid, lastErr)
+	return nil, lastErr
+}
+
+func fetchWikidataEntityOnce(ctx context.Context, qid string) ([]byte, error) {
 	wikidataURL := fmt.Sprintf(
 		"%s/w/api.php?action=wbgetentities&ids=%s&props=claims&format=json",
 		wikidataAPIBase,
@@ -80,7 +126,7 @@ func fetchWikidataEntity(ctx context.Context, qid string) ([]byte, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Wikidata API returned status %d", resp.StatusCode)
+		return nil, &apiStatusError{status: resp.StatusCode, retryAfter: parseRetryAfter(resp.Header.Get("Retry-After"))}
 	}
 
 	body, err := io.ReadAll(resp.Body)
@@ -222,7 +268,7 @@ func fetchCommonsImageInfo(ctx context.Context, fileName string) (string, string
 		}
 		lastErr = err
 
-		if !isRetryableCommonsError(err) {
+		if !isRetryableAPIError(err) {
 			return "", "", err
 		}
 		if attempt == maxRetries {
@@ -246,7 +292,7 @@ func fetchCommonsImageInfo(ctx context.Context, fileName string) (string, string
 	return "", "", lastErr
 }
 
-func isRetryableCommonsError(err error) bool {
+func isRetryableAPIError(err error) bool {
 	if err == nil {
 		return false
 	}
@@ -255,6 +301,30 @@ func isRetryableCommonsError(err error) bool {
 		return true
 	}
 	return status == http.StatusTooManyRequests || status >= http.StatusInternalServerError
+}
+
+// extValue holds one extmetadata entry's "value" field. The Commons API normally
+// returns an object ({"value": "..."}), but occasionally returns an empty array
+// ([]) for a missing field; UnmarshalJSON tolerates that shape by leaving Value empty
+// instead of failing the whole response.
+type extValue struct {
+	Value string
+}
+
+func (v *extValue) UnmarshalJSON(data []byte) error {
+	var obj struct {
+		Value string `json:"value"`
+	}
+	if err := json.Unmarshal(data, &obj); err == nil {
+		v.Value = obj.Value
+		return nil
+	}
+	trimmed := strings.TrimSpace(string(data))
+	if strings.HasPrefix(trimmed, "[") {
+		v.Value = ""
+		return nil
+	}
+	return fmt.Errorf("extmetadata value: unsupported shape %s", trimmed)
 }
 
 func fetchCommonsImageInfoOnce(ctx context.Context, fileName string) (string, string, error) {
@@ -289,11 +359,9 @@ func fetchCommonsImageInfoOnce(ctx context.Context, fileName string) (string, st
 			Pages map[string]struct {
 				Missing   bool `json:"missing"`
 				ImageInfo []struct {
-					ThumbURL    string `json:"thumburl"`
-					URL         string `json:"url"`
-					Extmetadata map[string]struct {
-						Value string `json:"value"`
-					} `json:"extmetadata"`
+					ThumbURL    string             `json:"thumburl"`
+					URL         string             `json:"url"`
+					Extmetadata map[string]extValue `json:"extmetadata"`
 				} `json:"imageinfo"`
 			} `json:"pages"`
 		} `json:"query"`

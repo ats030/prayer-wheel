@@ -256,9 +256,8 @@ def generate_description_with_ai(festival_name: str, location: str, wikidata_des
 def main():
     # Paths
     script_dir = Path(__file__).parent
-    data_dir = script_dir.parent / "data"
-    input_file = data_dir / "festivals-with-date.json"
-    output_file = data_dir / "festivals-with-descriptions.json"
+    input_file = script_dir.parent / "frontend/festivals.json"
+    output_file = input_file
 
     # Load data
     print(f"Loading {input_file}...")
