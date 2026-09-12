@@ -131,6 +131,51 @@ func TestFetchWikidataEntity_StopsRetryingOnNonRetryableError(t *testing.T) {
 	}
 }
 
+func TestFetchWikidataImage_EntityLegTimeoutLeavesBudgetForCommonsLeg(t *testing.T) {
+	// The Wikidata leg is permanently rate-limited, so fetchWikidataEntity would retry
+	// for up to client.Timeout*4 + backoff on its own. stepTimeout must cut that leg
+	// off well before it can eat into the overall budget.
+	wikidataServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "rate limited", http.StatusTooManyRequests)
+	}))
+	defer wikidataServer.Close()
+	withWikidataBase(t, wikidataServer)
+
+	origStep := stepTimeout
+	stepTimeout = 200 * time.Millisecond
+	defer func() { stepTimeout = origStep }()
+
+	origOverall := overallBudget
+	overallBudget = 2 * time.Second
+	defer func() { overallBudget = origOverall }()
+
+	// withWikidataBase already shrank initialBackoff to 1ms so unrelated retry tests run
+	// fast, but that also means the retry loop's own backoff would exhaust all retries
+	// well before stepTimeout ever elapses, letting this test pass even with stepTimeout
+	// removed entirely. Override it here to something much larger than stepTimeout so the
+	// select in fetchWikidataEntity's retry loop can only return via ctx.Done(), which is
+	// exactly the behavior stepTimeout is supposed to cause.
+	origBackoff := initialBackoff
+	initialBackoff = time.Second
+	defer func() { initialBackoff = origBackoff }()
+
+	start := time.Now()
+	_, _, err := FetchWikidataImage("Q1")
+	elapsed := time.Since(start)
+
+	if err == nil {
+		t.Fatal("expected error since the Wikidata entity fetch never succeeds")
+	}
+	// With initialBackoff (1s) far larger than stepTimeout (200ms), fetchWikidataEntity
+	// can only return this fast because its ctx.Done() branch fired -- i.e. stepTimeout
+	// cut the leg off. Without the per-leg sub-context (ctx bound only to overallBudget),
+	// the retry loop would instead ride out the 1s/2s backoffs until overallBudget (2s)
+	// itself expired, so this assertion would fail if stepTimeout were removed.
+	if elapsed >= overallBudget/2 {
+		t.Errorf("FetchWikidataImage took %v, want close to stepTimeout (%v) and well under overallBudget (%v): stepTimeout should have cut off the stuck entity leg via ctx.Done(), not run out the retry backoff", elapsed, stepTimeout, overallBudget)
+	}
+}
+
 func TestFetchWikidataEntity_RetriesExhausted(t *testing.T) {
 	var calls int32
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
