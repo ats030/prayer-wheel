@@ -22,6 +22,18 @@ const maxRetries = 3
 // a smaller value; the production value is time.Second.
 var initialBackoff = time.Second
 
+// overallBudget is FetchWikidataImage's total time budget across both legs. Tests
+// override it with a smaller value.
+var overallBudget = 45 * time.Second
+
+// stepTimeout caps how long a single leg (the Wikidata entity fetch, or the Commons
+// image lookup) may run within overallBudget. With client.Timeout=10s, maxRetries=3
+// and initialBackoff=1s, a single retried leg can take up to 10*4+1+2+4=47s on its
+// own -- more than the entire overallBudget. Without a per-leg cap, a slow-but-
+// retryable Wikidata call could exhaust the whole budget and leave nothing for the
+// Commons call that follows it. Tests override this with a smaller value.
+var stepTimeout = 22 * time.Second
+
 // commonsAPIBase is the prefix of every Commons API request. Tests replace it with a
 // local httptest server.
 var commonsAPIBase = "https://commons.wikimedia.org"
@@ -40,11 +52,16 @@ func FetchWikidataImage(qid string) (string, string, error) {
 	// Wikidata/Commons responses are occasionally slow enough (measured up to ~11s per
 	// call) that a single retried leg can approach 20s on its own; since this function
 	// makes two such calls sequentially, the overall budget must give both legs enough
-	// room even when one of them needs a retry.
-	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	// room even when one of them needs a retry. Each leg additionally gets its own
+	// stepTimeout sub-context so that a leg stuck retrying against a persistently slow
+	// or rate-limited API cannot consume the entire overallBudget and starve the leg
+	// that follows it.
+	ctx, cancel := context.WithTimeout(context.Background(), overallBudget)
 	defer cancel()
 
-	body, err := fetchWikidataEntity(ctx, qid)
+	entityCtx, entityCancel := context.WithTimeout(ctx, stepTimeout)
+	defer entityCancel()
+	body, err := fetchWikidataEntity(entityCtx, qid)
 	if err != nil {
 		return "", "", err
 	}
@@ -54,7 +71,9 @@ func FetchWikidataImage(qid string) (string, string, error) {
 		return "", "", err
 	}
 
-	thumbURL, license, err := fetchCommonsImageInfo(ctx, fileName)
+	commonsCtx, commonsCancel := context.WithTimeout(ctx, stepTimeout)
+	defer commonsCancel()
+	thumbURL, license, err := fetchCommonsImageInfo(commonsCtx, fileName)
 	if err != nil {
 		return "", "", fmt.Errorf("no usable image for %s: %w", qid, err)
 	}
