@@ -175,10 +175,16 @@ function occurrenceMarkup(f){
   const source=safeUrl(item.source),label=esc(formatOccurrence(item));
   return source?`<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">${label}</a>`:label;
 }
-function matchesDate(f,value){
-  if(!value)return true;
-  const target=new Date(`${value}T12:00:00`);
-  return [...occurrenceRanges(f),...annualScheduleRanges(f,target.getFullYear())].some(({start,end})=>target>=start&&target<=end);
+function matchesDate(f,startValue,endValue){
+  if(!startValue&&!endValue)return true;
+  const rangeStart=startValue?new Date(`${startValue}T00:00:00`):null;
+  const rangeEnd=endValue?new Date(`${endValue}T23:59:59`):null;
+  const startYear=rangeStart?rangeStart.getFullYear():rangeEnd.getFullYear()-5;
+  const endYear=Math.min(rangeEnd?rangeEnd.getFullYear():rangeStart.getFullYear()+5,startYear+50);
+  const years=[];
+  for(let year=startYear;year<=endYear;year++)years.push(year);
+  const candidates=[...occurrenceRanges(f),...years.flatMap(year=>annualScheduleRanges(f,year))];
+  return candidates.some(({start,end})=>(!rangeStart||end>=rangeStart)&&(!rangeEnd||start<=rangeEnd));
 }
 function nextOccurrenceTime(f,now=new Date()){
   const item=nextOccurrence(f,now);if(!item)return Number.POSITIVE_INFINITY;
@@ -199,11 +205,12 @@ function populatePrefectures(){
 function applyFilters(){
   const q=document.querySelector('#keyword').value.trim().toLocaleLowerCase('ja');
   const prefecture=document.querySelector('#prefecture').value;
-  const date=document.querySelector('#festival-date').value;
+  const dateStart=document.querySelector('#festival-date-start').value;
+  const dateEnd=document.querySelector('#festival-date-end').value;
   visible=festivals.filter(f=>{
     const text=[f.label_ja,f.label_en,f.prefecture,f.description].filter(Boolean).join(' ').toLocaleLowerCase('ja');
     const prefectureMatches=!prefecture||(f.prefecture===prefecture&&f.coordinate_prefecture===prefecture);
-    return text.includes(q)&&prefectureMatches&&matchesDate(f,date);
+    return text.includes(q)&&prefectureMatches&&matchesDate(f,dateStart,dateEnd);
   }).sort(compareByNextOccurrence);
   renderList();renderMarkers();
   document.querySelector('#result-count').textContent=visible.length;
@@ -326,14 +333,15 @@ function closeLightbox(){const dialog=document.querySelector('#lightbox');if(dia
 
 document.querySelector('#keyword').addEventListener('input',applyFilters);
 document.querySelector('#prefecture').addEventListener('change',applyFilters);
-document.querySelector('#festival-date').addEventListener('change',applyFilters);
-document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';document.querySelector('#festival-date').value='';applyFilters();document.querySelector('#keyword').focus()});
+document.querySelector('#festival-date-start').addEventListener('change',applyFilters);
+document.querySelector('#festival-date-end').addEventListener('change',applyFilters);
+document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';document.querySelector('#festival-date-start').value='';document.querySelector('#festival-date-end').value='';applyFilters();document.querySelector('#keyword').focus()});
 document.querySelector('.detail-close').addEventListener('click',()=>closeDetail());
 document.querySelector('.lightbox-close').addEventListener('click',closeLightbox);
 document.querySelector('#lightbox').addEventListener('click',event=>{if(event.target.id==='lightbox')closeLightbox()});
 
 fetch('/festivals.json').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{festivals=Array.isArray(data)?data:[];populatePrefectures();applyFilters()}).catch(error=>{console.error('Festival data could not be loaded',error);document.querySelector('#festival-list').innerHTML='<p class="empty-state">祭りの情報を読み込めませんでした。時間をおいて再度お試しください。</p>';document.querySelector('#map-count').textContent='読み込み失敗'});
 
-window.renderMapMarkers=(items,targetDate=null)=>{festivals=Array.isArray(items)?items:festivals;if(targetDate instanceof Date&&!Number.isNaN(targetDate.valueOf()))document.querySelector('#festival-date').value=targetDate.toISOString().slice(0,10);applyFilters()};
+window.renderMapMarkers=(items,targetDate=null)=>{festivals=Array.isArray(items)?items:festivals;if(targetDate instanceof Date&&!Number.isNaN(targetDate.valueOf())){const iso=targetDate.toISOString().slice(0,10);document.querySelector('#festival-date-start').value=iso;document.querySelector('#festival-date-end').value=iso}applyFilters()};
 window.geocodingCacheQueue=geocodingCacheQueue;
 window.saveGeocodingCache=()=>persist(GEOCODING_CACHE_KEY,geocodingCache);
