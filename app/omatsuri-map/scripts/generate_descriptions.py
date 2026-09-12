@@ -139,6 +139,19 @@ def get_wikipedia_extract(title: str) -> str:
         print(f"Error getting Wikipedia extract for {title}: {e}")
         return None
 
+def save_festivals(festivals: list, output_file: Path) -> None:
+    """Write festivals to output_file atomically.
+
+    Writes to a temp file in the same directory first, then os.replace()s it
+    into place, so a crash mid-write never leaves output_file truncated or
+    partially written (important since output_file may be a live data file
+    the running server reads).
+    """
+    tmp_file = output_file.with_suffix(output_file.suffix + ".tmp")
+    with open(tmp_file, "w", encoding="utf-8") as f:
+        json.dump(festivals, f, ensure_ascii=False, indent=2)
+    os.replace(tmp_file, output_file)
+
 def fetch_all_wikidata_data(qids: list) -> dict:
     """Fetch all Wikipedia titles and Wikidata descriptions in batches"""
     cache = {}
@@ -315,13 +328,11 @@ def main():
         # Save periodically
         if (idx + 1) % 5 == 0:
             print("Saving progress...")
-            with open(output_file, "w", encoding="utf-8") as f:
-                json.dump(festivals, f, ensure_ascii=False, indent=2)
+            save_festivals(festivals, output_file)
 
     # Final save
     print("\nSaving final result...")
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(festivals, f, ensure_ascii=False, indent=2)
+    save_festivals(festivals, output_file)
 
     print(f"Done! Output saved to {output_file}")
 
