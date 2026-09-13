@@ -28,14 +28,6 @@
             "input": 65536,
             "output": 8192
           }
-        },
-        "qwen3-coder-next:q4_K_M": {
-          "name": "Qwen3 Coder Next 80B Q4_K_M (64k)",
-          "limit": {
-            "context": 65536,
-            "input": 65536,
-            "output": 8192
-          }
         }
       }
     }
