@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <rect x="8" y="9" width="84" height="7" rx="2.5" fill="#3a2a1a"/>
   <path d="M14 17 L86 17 L86 85 L54 85 L50 73 L46 85 L14 85 Z" fill="#1e3f63"/>
-  <text x="50" y="62" font-family="'Zen Maru Gothic','M PLUS Rounded 1c','Hiragino Maru Gothic ProN',sans-serif" font-size="48" font-weight="900" text-anchor="middle" fill="#fff" stroke="#fff" stroke-width="1.5" paint-order="stroke">♨</text>
+  <text x="50" y="65" font-family="'Zen Maru Gothic','M PLUS Rounded 1c','Hiragino Maru Gothic ProN',sans-serif" font-size="62" font-weight="900" text-anchor="middle" fill="#fff" stroke="#fff" stroke-width="1.8" paint-order="stroke">♨</text>
 </svg>
