@@ -55,7 +55,7 @@
     "auto": true,
     "prune": true,
     "reserved": 8192,
-    "preserve_recent_tokens": 28000,
+    "preserve_recent_tokens": 16000,
     "tail_turns": 6
   },
   "tool_output": {
@@ -65,7 +65,7 @@
   "agent": {
     "build": {
       "temperature": 0.2,
-      "steps": 30
+      "steps": 120
     },
     "plan": {
       "temperature": 0.1
