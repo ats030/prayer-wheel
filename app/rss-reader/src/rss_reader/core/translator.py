@@ -5,6 +5,7 @@ import re
 from hashlib import sha256
 
 from ..config import CACHE_DIR
+from .llm import CLIENT_APP_HEADERS
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +132,7 @@ def _request_translation(
                 "format": "json",
             },
             timeout=httpx.Timeout(connect=5, read=60, write=5, pool=5),
+            headers=CLIENT_APP_HEADERS,
         )
         resp.raise_for_status()
         return _parse_response(resp.json().get("response", ""))

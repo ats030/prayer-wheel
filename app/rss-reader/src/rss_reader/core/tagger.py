@@ -3,6 +3,8 @@ import logging
 import os
 import re
 
+from .llm import CLIENT_APP_HEADERS
+
 logger = logging.getLogger(__name__)
 
 _STOPWORDS_JA = {
@@ -162,6 +164,7 @@ def _ollama_tags(
                 f"{base_url}/api/generate",
                 json={"model": model, "prompt": prompt, "stream": False},
                 timeout=httpx.Timeout(connect=5, read=30, write=5, pool=5),
+                headers=CLIENT_APP_HEADERS,
             )
             resp.raise_for_status()
             text = resp.json().get("response", "").strip()

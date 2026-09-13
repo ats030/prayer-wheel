@@ -20,6 +20,8 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+CLIENT_APP_HEADERS = {"X-Client-App": "rss-reader"}
+
 _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.MULTILINE)
 _OBJECT = re.compile(r"\{.*\}", re.DOTALL)
 
@@ -69,6 +71,7 @@ def ask(
             f"{base_url()}/api/generate",
             json=payload,
             timeout=httpx.Timeout(connect=5, read=read_timeout, write=5, pool=5),
+            headers=CLIENT_APP_HEADERS,
         )
         resp.raise_for_status()
         return (resp.json().get("response") or "").strip()
@@ -137,7 +140,9 @@ def health() -> bool:
     try:
         import httpx
 
-        resp = httpx.get(f"{base_url()}/api/tags", timeout=httpx.Timeout(3.0))
+        resp = httpx.get(
+            f"{base_url()}/api/tags", timeout=httpx.Timeout(3.0), headers=CLIENT_APP_HEADERS
+        )
         return resp.status_code == 200
     except Exception:  # noqa: BLE001
         return False
