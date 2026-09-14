@@ -28,6 +28,10 @@ _spec2 = importlib.util.spec_from_file_location("v", "scripts/validate_prefectur
 v = importlib.util.module_from_spec(_spec2)
 _spec2.loader.exec_module(v)
 
+_spec3 = importlib.util.spec_from_file_location("im", "scripts/import_wikimedia_festivals.py")
+im = importlib.util.module_from_spec(_spec3)
+_spec3.loader.exec_module(im)
+
 PREFECTURES = [
     "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県",
     "茨城県", "栃木県", "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県",
@@ -102,6 +106,49 @@ def fetch_article_texts(session, titles, batch_size=20):
 def extract_prefecture(text):
     m = PREF_RE.search(text)
     return m.group(0) if m else None
+
+
+def collect_category_candidates(session, centroid_table, existing_qids, existing_titles):
+    """カテゴリ(`Category:○○の祭り`)名から都道府県を確定できる座標なし QID を収集する。
+
+    都道府県はカテゴリ付け由来のため、記事リードの推測より確実。
+    同一 QID が複数県カテゴリに入っている(広域)場合は除外する。
+    """
+    title_prefectures = im.discover_titles(session)
+    title_qids = im.fetch_qids(session, title_prefectures.keys())
+    labels_by_qid = im.fetch_entities(session, set(title_qids.values()))
+    results = {}
+    for title, qid in title_qids.items():
+        prefectures = title_prefectures.get(title, set())
+        if len(prefectures) != 1:
+            continue
+        q = qid
+        if q in existing_qids or title in existing_titles:
+            continue
+        if im.EXCLUDED_TITLE.search(title):
+            continue
+        if im.coordinate(labels_by_qid.get(q, {})):
+            continue
+        prefecture = next(iter(prefectures))
+        centroid = centroid_table.get(prefecture)
+        if not centroid:
+            continue
+        lat, lng = centroid
+        entity = labels_by_qid.get(q, {})
+        results[q] = {
+            "qid": q,
+            "label_ja": title,
+            "label_en": entity.get("labels", {}).get("en", {}).get("value", ""),
+            "prefecture": prefecture,
+            "latitude": lat,
+            "longitude": lng,
+            "description": entity.get("descriptions", {}).get("ja", {}).get("value", ""),
+            "date": "日付未定",
+            "wikipedia_title": title,
+            "coordinate_source": "prefecture_centroid",
+            "coordinate_validation_source": "prefecture_bounding_box",
+        }
+    return results
 
 
 def build_new_candidates(cands, texts, centroid_table, existing_qids):
@@ -182,8 +229,28 @@ def main():
     if missing:
         print(f"WARNING: missing centroid for: {missing}", file=sys.stderr)
 
-    results = build_new_candidates(cands, texts, CENTROID_TABLE, existing_qids)
-    print(f"new candidates (prefecture extracted from lead): {len(results)}", flush=True)
+    lead_candidates = build_new_candidates(cands, texts, CENTROID_TABLE, existing_qids)
+    print(f"candidates (prefecture from article lead): {len(lead_candidates)}", flush=True)
+
+    print("collecting category-based candidates (Category:○○の祭り)...", flush=True)
+    category_candidates = collect_category_candidates(session, CENTROID_TABLE, existing_qids, existing_titles)
+    category_candidates = [r for r in category_candidates.values()]
+    print(f"candidates (prefecture from category name): {len(category_candidates)}", flush=True)
+
+    merged_by_qid = {}
+    order = {name: idx for idx, name in enumerate(PREFECTURES)}
+    for row in lead_candidates:
+        merged_by_qid.setdefault(row["qid"], row)
+    for row in category_candidates:
+        existing_row = merged_by_qid.get(row["qid"])
+        if existing_row:
+            existing_row["prefecture"] = row["prefecture"]
+            existing_row["latitude"], existing_row["longitude"] = row["latitude"], row["longitude"]
+            merged_by_qid[row["qid"]] = existing_row
+        else:
+            merged_by_qid[row["qid"]] = row
+    results = sorted(merged_by_qid.values(), key=lambda r: (order.get(r["prefecture"], 99), r["label_ja"]))
+    print(f"merged candidates (deduped, category name preferred): {len(results)}", flush=True)
 
     out_path = args.out or Path("data/new_prefecture_centroid_candidates.json")
     out_path.parent.mkdir(parents=True, exist_ok=True)
