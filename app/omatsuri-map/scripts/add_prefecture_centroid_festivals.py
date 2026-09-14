@@ -122,21 +122,20 @@ def collect_category_candidates(session, centroid_table, existing_qids, existing
         prefectures = title_prefectures.get(title, set())
         if len(prefectures) != 1:
             continue
-        q = qid
-        if q in existing_qids or title in existing_titles:
+        if qid in existing_qids or title in existing_titles:
             continue
         if im.EXCLUDED_TITLE.search(title):
             continue
-        if im.coordinate(labels_by_qid.get(q, {})):
+        entity = labels_by_qid.get(qid, {})
+        if im.coordinate(entity):
             continue
         prefecture = next(iter(prefectures))
         centroid = centroid_table.get(prefecture)
         if not centroid:
             continue
         lat, lng = centroid
-        entity = labels_by_qid.get(q, {})
-        results[q] = {
-            "qid": q,
+        results[qid] = {
+            "qid": qid,
             "label_ja": title,
             "label_en": entity.get("labels", {}).get("en", {}).get("value", ""),
             "prefecture": prefecture,
