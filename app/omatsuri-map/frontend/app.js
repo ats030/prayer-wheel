@@ -4,6 +4,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&
 const CACHE_KEY='omatsuri-map-image-cache-v5';
 const GEOCODING_CACHE_KEY='omatsuri-map-geocoding-cache-v1';
 const LINKS_CACHE_KEY='omatsuri-map-links-cache-v1';
+const JALAN_CACHE_KEY='omatsuri-map-jalan-cache-v1';
 const SELECTED_MARKER_Z_INDEX=10000;
 const imageCache={};
 const wikiContentCache={};
@@ -11,6 +12,8 @@ const wikiContentQueue={};
 const geocodingCache={};
 const geocodingCacheQueue={};
 const linksCache={};
+const jalanCache={};
+const jalanCacheQueue={};
 let festivals=[];
 let visible=[];
 let markers=new Map();
@@ -18,7 +21,7 @@ let selectedKey=null;
 let selectedOrigin=null;
 const saveTimers={};
 
-for(const [key,target] of [[CACHE_KEY,imageCache],[GEOCODING_CACHE_KEY,geocodingCache],[LINKS_CACHE_KEY,linksCache]]){
+for(const [key,target] of [[CACHE_KEY,imageCache],[GEOCODING_CACHE_KEY,geocodingCache],[LINKS_CACHE_KEY,linksCache],[JALAN_CACHE_KEY,jalanCache]]){
   try{Object.assign(target,JSON.parse(localStorage.getItem(key)||'{}'))}
   catch(error){console.warn(`Cache ${key} could not be loaded`,error)}
 }
@@ -198,6 +201,26 @@ function compareByNextOccurrence(a,b){
   if(Number.isFinite(nextOccurrenceTime(b)))return 1;
   return String(a.label_ja||a.label_en||'').localeCompare(String(b.label_ja||b.label_en||''),'ja');
 }
+async function loadNearbyHotels(f){
+  const prefecture=f.prefecture;if(!prefecture)return null;
+  const key=prefecture;
+  if(jalanCache[key]!==undefined)return jalanCache[key];
+  if(jalanCacheQueue[key])return jalanCacheQueue[key];
+  jalanCacheQueue[key]=fetch(`/api/hotel-area/nearby?prefecture=${encodeURIComponent(prefecture)}`)
+    .then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()})
+    .then(data=>Array.isArray(data.hotels)?data.hotels:[])
+    .catch(error=>{console.warn(`Nearby hotels could not be loaded for ${key}`,error);return null})
+    .then(hotels=>{if(hotels!==null){jalanCache[key]=hotels;persist(JALAN_CACHE_KEY,jalanCache)}return hotels})
+    .finally(()=>delete jalanCacheQueue[key]);
+  return jalanCacheQueue[key];
+}
+function affiliateHotelMarkup(hotels){
+  if(!hotels?.length)return'';
+  return `<span class="ad-label">広告</span><ul class="affiliate-hotel-list">${hotels.map(h=>{
+    const link=safeUrl(h.plan_url)||safeUrl(h.detail_url);if(!link)return'';
+    return `<li class="affiliate-hotel"><a class="affiliate-link" href="${esc(link)}" rel="nofollow noopener" target="_blank">${esc(h.name||'宿泊施設')}</a>${h.address?`<span class="affiliate-hotel-address">${esc(h.address)}</span>`:''}</li>`;
+  }).join('')}</ul>`;
+}
 function populatePrefectures(){
   const select=document.querySelector('#prefecture');
   [...new Set(festivals.map(f=>f.prefecture).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja')).forEach(p=>select.add(new Option(p,p)));
@@ -244,7 +267,7 @@ function detail(f){
   const culture=safeUrl(f.cultural_relaw?.url);
   const about=groundedDescription(f);
   const aboutBody=about.locationAware?`${esc(about.body)}「<span id="detail-about-location">${esc(f.prefecture||'地域未登録')}</span>」付近に登録されています。正確な会場は確認中です。`:esc(about.body);
-  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2></header><dl class="detail-facts"><div><dt>開催地</dt><dd id="detail-location">${locationMarkup(f.prefecture||'地域未登録',f)}${venueData(f)?'':'<span class="location-loading">詳細を確認中…</span>'}</dd></div><div><dt>次回開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status">${esc(about.status)}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" id="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section></article>`;
+  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2></header><dl class="detail-facts"><div><dt>開催地</dt><dd id="detail-location">${locationMarkup(f.prefecture||'地域未登録',f)}${venueData(f)?'':'<span class="location-loading">詳細を確認中…</span>'}</dd></div><div><dt>次回開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status">${esc(about.status)}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" id="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section><section class="detail-section detail-affiliate" id="detail-affiliate-section" aria-labelledby="detail-affiliate-heading"><h3 id="detail-affiliate-heading">近くの宿</h3><div class="affiliate" id="detail-affiliate" aria-label="広告"><p class="detail-affiliate-status">近くの宿を検索しています…</p></div></section></article>`;
 }
 function selectFestival(key,origin){
   const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;
@@ -264,6 +287,16 @@ function openDetail(f,key,origin){
   hydrateLocation(f,key);
   hydrateAbout(f,key);
   hydrateLinks(f,key);
+  hydrateNearbyHotels(f,key);
+}
+async function hydrateNearbyHotels(f,key){
+  const hotels=await loadNearbyHotels(f);
+  const section=document.querySelector('#detail-affiliate-section');
+  const container=document.querySelector('#detail-affiliate');if(!container||!section||selectedKey!==key)return;
+  if(hotels===null){section.hidden=true;container.innerHTML='';return}
+  section.hidden=false;
+  if(!hotels.length){container.innerHTML='<p class="detail-affiliate-status">近くの宿が見つかりませんでした。</p>';return}
+  container.innerHTML=affiliateHotelMarkup(hotels);
 }
 async function hydrateAbout(f,key){
   const venue=venueData(f),descriptionSource=safeUrl(f.description_source);

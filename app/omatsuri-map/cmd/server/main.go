@@ -31,6 +31,10 @@ func main() {
 
 	geocodingService := services.NewGeocodingService()
 	geocodingHandler := handlers.NewGeocodingHandler(geocodingService)
+
+	hotelAreaService := services.NewHotelAreaService() // nil when JALAN_A8MAT is unset
+	hotelAreaHandler := handlers.NewHotelAreaHandler(hotelAreaService)
+
 	// Create mux
 	mux := http.NewServeMux()
 
@@ -43,6 +47,7 @@ func main() {
 	mux.HandleFunc("/api/wiki/links", wikidataHandler.GetWikidataLinks)
 	mux.HandleFunc("/api/wiki/content", handlers.GetWikipediaContent)
 	mux.HandleFunc("/api/geocoding/reverse", geocodingHandler.ReverseGeocode)
+	mux.HandleFunc("/api/hotel-area/nearby", hotelAreaHandler.NearbyHotels)
 
 	// CORS middleware wrapper
 	muxWithCORS := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

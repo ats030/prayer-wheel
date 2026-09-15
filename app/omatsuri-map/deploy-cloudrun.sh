@@ -7,9 +7,10 @@
 # 前提は1つ。Console でしかできないので、足りなければ止めて何をすべきか言う。
 #   1. プロジェクトに請求先が紐づいていること (無料枠を使うにも要る)
 #
-# アフィリエイトリンク(A8.net)は本スクリプトの時点では未実装。onsen-mapの
-# HotelAreaService/JALAN_A8MATに相当する仕組みが実装され、A8.net側の提携審査が
-# 通った後に、このスクリプトへSecret Manager連携を追加する(別issueで管理)。
+# JALAN_A8MAT (A8.net アフィリエイトリンク用) は ~/.env から読み、Secret Manager へ
+# 入れてから参照する。--set-env-vars で渡すと Console の環境変数欄に平文で並び、
+# デプロイ履歴にも残るため避ける。未設定でも起動はでき、宿表示機能だけ非表示になる
+# (HotelAreaService の既存の縮退動作)。
 #
 # VISIT_LOG_EXEMPT_REASON: このデプロイは visit-log タグ付けを意図的に除外する。
 # frontend/index.html 等には通常どおり `http://ubuntu-server-app:8526/v.js` タグを
@@ -26,13 +27,18 @@ PROJECT="${OMATSURI_GCP_PROJECT:-ikimono-note-12205}"
 REGION="${OMATSURI_GCP_REGION:-asia-northeast1}"
 SERVICE="${OMATSURI_SERVICE:-omatsuri-map}"
 GCLOUD="${GCLOUD:-$HOME/google-cloud-sdk/bin/gcloud}"
+ENV_FILE="${OMATSURI_ENV_FILE:-$HOME/.env}"
 DEPLOY=0
 [ "${1:-}" = "--deploy" ] && DEPLOY=1
 
 say() { printf '%s\n' "$*"; }
 fail() { printf 'できません: %s\n' "$*" >&2; exit 1; }
 
+# ~/.env から1つ読む。行頭が KEY= のものだけ見る (export や引用符には対応しない)
+env_of() { sed -n "s/^$1=//p" "$ENV_FILE" | tail -1; }
+
 command -v "$GCLOUD" >/dev/null 2>&1 || fail "gcloud が見つかりません ($GCLOUD)"
+[ -f "$ENV_FILE" ] || fail "$ENV_FILE がありません"
 
 say "■ 前提の確認"
 billing=$("$GCLOUD" billing projects describe "$PROJECT" --format='value(billingEnabled)' 2>/dev/null || echo "")
@@ -45,6 +51,10 @@ if [ "$billing" != "True" ]; then
   [ "$DEPLOY" = "1" ] && fail "請求先が無いので出せません"
 fi
 
+A8MAT=$(env_of JALAN_A8MAT)
+mark() { [ -n "$1" ] && printf 'あり' || printf '★無し'; }
+say "  JALAN_A8MAT: $(mark "$A8MAT")$([ -n "$A8MAT" ] || printf ' (宿表示は非表示のまま公開されます)')"
+
 if [ "$DEPLOY" != "1" ]; then
   say ""
   say "(確認のみ。実際に出すには --deploy)"
@@ -54,21 +64,42 @@ fi
 say ""
 say "■ API を有効化"
 "$GCLOUD" services enable run.googleapis.com cloudbuild.googleapis.com \
-  artifactregistry.googleapis.com \
+  artifactregistry.googleapis.com secretmanager.googleapis.com \
   --project "$PROJECT"
 
 PROJECT_NUMBER=$("$GCLOUD" projects describe "$PROJECT" --format='value(projectNumber)')
 RUNTIME_SA="${OMATSURI_RUNTIME_SA:-$PROJECT_NUMBER-compute@developer.gserviceaccount.com}"
 
+SECRETS=""
+if [ -n "$A8MAT" ]; then
+  say "■ 秘密を Secret Manager へ"
+  if ! "$GCLOUD" secrets describe omatsuri-jalan-a8mat --project "$PROJECT" >/dev/null 2>&1; then
+    "$GCLOUD" secrets create omatsuri-jalan-a8mat --replication-policy=automatic --project "$PROJECT" >/dev/null
+  fi
+  printf '%s' "$A8MAT" | "$GCLOUD" secrets versions add omatsuri-jalan-a8mat --data-file=- --project "$PROJECT" >/dev/null
+  say "  omatsuri-jalan-a8mat"
+
+  say "■ 秘密の読み取りを許可 ($RUNTIME_SA)"
+  "$GCLOUD" secrets add-iam-policy-binding omatsuri-jalan-a8mat \
+    --member="serviceAccount:$RUNTIME_SA" \
+    --role="roles/secretmanager.secretAccessor" \
+    --project "$PROJECT" >/dev/null
+  say "  omatsuri-jalan-a8mat"
+
+  SECRETS="JALAN_A8MAT=omatsuri-jalan-a8mat:latest"
+fi
+
 say ""
 say "■ デプロイ"
-"$GCLOUD" run deploy "$SERVICE" \
-  --source . --project "$PROJECT" --region "$REGION" \
-  --service-account "$RUNTIME_SA" \
-  --allow-unauthenticated \
-  --max-instances=2 \
-  --timeout=60 \
-  --memory=256Mi
+DEPLOY_ARGS=(run deploy "$SERVICE"
+  --source . --project "$PROJECT" --region "$REGION"
+  --service-account "$RUNTIME_SA"
+  --allow-unauthenticated
+  --max-instances=2
+  --timeout=60
+  --memory=256Mi)
+[ -n "$SECRETS" ] && DEPLOY_ARGS+=(--set-secrets "$SECRETS")
+"$GCLOUD" "${DEPLOY_ARGS[@]}"
 
 URL=$("$GCLOUD" run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" \
       --format='value(status.url)')
