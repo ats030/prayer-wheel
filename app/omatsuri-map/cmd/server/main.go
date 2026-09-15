@@ -62,15 +62,21 @@ func main() {
 	fs := http.FileServer(http.Dir("frontend"))
 	mux.Handle("/", fs)
 
+	// Port for cloud platforms (Cloud Run, App Engine) via PORT env var, defaulting to 8527.
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8527"
+	}
+
 	// Create server
 	server := &http.Server{
-		Addr:    ":8527",
+		Addr:    ":" + port,
 		Handler: muxWithCORS,
 	}
 
 	// Start server in goroutine
 	go func() {
-		fmt.Println("Starting server on :8527")
+		fmt.Printf("Starting server on :%s\n", port)
 		if err := server.ListenAndServe(); err != http.ErrServerClosed {
 			fmt.Printf("Server error: %v\n", err)
 			os.Exit(1)

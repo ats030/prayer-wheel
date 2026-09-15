@@ -1,0 +1,14 @@
+.git/
+.gitignore
+omatsuri-map-server
+go1.22.7.linux-amd64.tar.gz
+*.exe
+*.log
+__pycache__/
+*.pyc
+.venv/
+bin/
+data/
+docs/
+scripts/
+.patch-probe
