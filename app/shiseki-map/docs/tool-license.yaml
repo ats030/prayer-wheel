@@ -1,0 +1,23 @@
+reviewed_at: 2026-09-16
+decision: approved
+intended_use: public read-only historical-site map, including commercial affiliate links
+sources:
+  - name: Wikidata structured data
+    cost: free
+    license: CC0-1.0
+    commercial_use: allowed
+    attribution: not required by CC0; source links retained for provenance
+    evidence: https://www.wikidata.org/wiki/Wikidata:Licensing
+  - name: Japanese Database of National Cultural Properties text
+    cost: free
+    license: MEXT website terms
+    commercial_use: allowed with attribution
+    attribution: required
+    restriction: images require separate permission and are not copied
+    evidence: https://kunishitei.bunka.go.jp/top/policy
+  - name: Wikimedia Commons images
+    cost: free
+    license: per-file license
+    commercial_use: only when the per-file license permits it
+    attribution: author, license and source shown per image
+    restriction: omit images without machine-verifiable license metadata

@@ -1,0 +1,16 @@
+# 実行バイナリ
+app-server
+*.exe
+build/
+
+# LLM 要約キャッシュ
+data/summaries.json
+data/summaries.json.tmp
+data/status_cache.json
+
+# Python
+__pycache__/
+*.pyc
+
+# ログ
+*.log

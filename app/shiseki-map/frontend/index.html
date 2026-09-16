@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>史跡マップ</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="/app.css?v=20260916">
+  <link rel="stylesheet" href="/detail-panel.css?v=20260916">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="workbench" aria-label="史跡を探す">
+      <header class="masthead"><h1>史跡マップ</h1><p class="lede">指定区分や時代から、日本各地の史跡を探せます。<a href="/changelog.html">更新履歴</a></p></header>
+      <div class="filters" role="search">
+        <label class="field field-wide">史跡名・地域<input id="keyword" type="search" placeholder="例：熊本城、奈良" autocomplete="off"></label>
+        <label class="field">都道府県<select id="prefecture"><option value="">すべて</option></select></label>
+        <label class="field">カテゴリ<select id="category"><option value="">すべて</option></select></label>
+        <label class="field">時代<select id="era"><option value="">すべて</option></select></label>
+        <label class="field">指定区分<select id="designation"><option value="">すべて</option><option value="special">特別史跡</option><option value="national">国指定</option><option value="local">地方指定</option><option value="undesig">未指定</option><option value="unknown">不明</option></select></label>
+      </div>
+      <div class="result-bar" aria-live="polite"><span><strong id="result-count">0</strong> 件の史跡</span><button id="clear-filters" type="button">条件をクリア</button></div>
+      <div class="shiseki-list" id="shiseki-list"></div>
+    </section>
+    <section class="map-region" aria-label="史跡の地図"><div id="map"></div><div class="map-count" id="map-count">読み込み中</div><div class="map-legend" aria-label="指定区分の凡例"><span><span class="legend-dot legend-dot--special"></span>特別史跡</span><span><span class="legend-dot legend-dot--national"></span>国指定</span><span><span class="legend-dot legend-dot--local"></span>地方指定</span><span><span class="legend-dot"></span>未指定・不明</span></div></section>
+    <aside class="detail-panel" id="detail-panel" aria-labelledby="detail-panel-label" tabindex="-1" hidden>
+      <header class="detail-header"><div><p class="eyebrow" id="detail-panel-label">史跡の詳細</p><p class="detail-origin" id="detail-origin">選択中の史跡</p></div><button class="detail-close" type="button" aria-label="詳細を閉じる">×</button></header>
+      <div class="detail-content" id="detail-content" aria-live="polite"></div>
+    </aside>
+  </main>
+  <dialog id="lightbox" aria-label="史跡の画像"><button class="lightbox-close" type="button" aria-label="画像を閉じる">×</button><img id="lightbox-image" alt=""></dialog>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="http://ubuntu-server-app:8526/v.js" data-site="shiseki-map" defer></script>
+  <script src="/app.js?v=20260916"></script>
+</body>
+</html>
