@@ -1,5 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect x="8" y="9" width="84" height="7" rx="2.5" fill="#3a2a1a"/>
-  <path d="M14 17 L86 17 L86 85 L54 85 L50 73 L46 85 L14 85 Z" fill="#1e3f63"/>
-  <text x="50" y="65" font-family="'Zen Maru Gothic','M PLUS Rounded 1c','Hiragino Maru Gothic ProN',sans-serif" font-size="62" font-weight="900" text-anchor="middle" fill="#fff" stroke="#fff" stroke-width="1.8" paint-order="stroke">♨</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="史の文字を刻んだ石碑">
+  <rect x="16" y="8" width="68" height="13" rx="3" fill="#3a2a1a"/>
+  <path d="M22 20h56l-4 59H26l-4-59Z" fill="#1e3f63"/>
+  <text x="50" y="66" font-family="system-ui,'Yu Gothic',sans-serif" font-size="52" font-weight="900" text-anchor="middle" fill="#fffaf2" stroke="#fffaf2" stroke-width="1.2" paint-order="stroke">史</text>
+  <rect x="12" y="78" width="76" height="14" rx="3" fill="#3a2a1a"/>
 </svg>
