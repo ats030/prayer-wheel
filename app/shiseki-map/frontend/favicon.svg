@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="史の文字を刻んだ石碑">
-  <rect x="16" y="8" width="68" height="13" rx="3" fill="#3a2a1a"/>
-  <path d="M22 20h56l-4 59H26l-4-59Z" fill="#1e3f63"/>
-  <text x="50" y="66" font-family="system-ui,'Yu Gothic',sans-serif" font-size="52" font-weight="900" text-anchor="middle" fill="#fffaf2" stroke="#fffaf2" stroke-width="1.2" paint-order="stroke">史</text>
-  <rect x="12" y="78" width="76" height="14" rx="3" fill="#3a2a1a"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="歴の文字を記した史跡案内板">
+  <rect x="7" y="7" width="86" height="66" rx="8" fill="#3a2a1a"/>
+  <rect x="13" y="13" width="74" height="54" rx="4" fill="#1e3f63"/>
+  <text x="50" y="59" font-family="system-ui,'Yu Gothic',sans-serif" font-size="51" font-weight="900" text-anchor="middle" fill="#fffaf2" stroke="#fffaf2" stroke-width="1.2" paint-order="stroke">歴</text>
+  <path d="M23 72h10v21H23zM67 72h10v21H67z" fill="#3a2a1a"/>
 </svg>
