@@ -41,7 +41,8 @@
   },
   "enabledPlugins": {
     "grill-me@ai-workflow": true,
-    "hallmark@ai-workflow": true
+    "hallmark@ai-workflow": true,
+    "thinking-workflow@ai-workflow": true
   },
   "extraKnownMarketplaces": {
     "ai-workflow": {
