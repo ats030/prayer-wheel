@@ -10,7 +10,9 @@ Always use non-interactive forms: `cp -f`, `mv -f`, `rm -f`/`rm -rf`,
 
 ## Efficient High-Quality Workflow
 
-- Keep one issue per session; restart when the objective changes.
+- Keep one issue per session. Restart when the objective changes, or after the
+  first automatic context compaction when substantial work remains; leave a
+  concise handoff on the issue before restarting.
 - Before editing, derive outcome, checks, and scope from the issue or repository.
 - For narrow work, use `rg` and relevant ranges. Skip generated trackers, lockfiles, build output, indexes, minified assets, and full logs unless relevant.
 - Prefer targeted tests, `git diff --check`, API/HTTP responses, service state over prose.
