@@ -10,10 +10,7 @@
       "options": {
         "baseURL": "http://localhost:11434/v1",
         "timeout": 600000,
-        "chunkTimeout": 300000,
-        "headers": {
-          "X-Client-App": "opencode"
-        }
+        "chunkTimeout": 300000
       },
       "models": {
         "gemma4:31b": {
