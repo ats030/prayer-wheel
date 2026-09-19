@@ -73,6 +73,10 @@ GENERATION_RETRY_AFTER = int(env("OLLAMA_PROXY_RETRY_AFTER", "30"))
 # 再デプロイ無しで切れるよう既定で有効にしておく。
 EVICT_COMPETITORS_ENABLED = env("OLLAMA_PROXY_EVICT_COMPETITORS", "1") not in ("0", "false", "no")
 EVICT_TIMEOUT = float(env("OLLAMA_PROXY_EVICT_TIMEOUT", "10"))
+# 未設定 (既定0) は従来どおり _generation_gate による単一直列化のみ。
+# ホストの実効 VRAM を実測した上で設定した場合だけ、常駐モデル合計+対象
+# モデルがこの予算に収まる限りゲートを介さず並行転送する (ats030-pe2x)。
+VRAM_BUDGET_BYTES = int(env("OLLAMA_PROXY_VRAM_BUDGET_BYTES", "0") or "0")
 ALLOWED_NETWORKS = tuple(
     ipaddress.ip_network(value.strip())
     for value in env("OLLAMA_PROXY_ALLOWED_NETWORKS", "127.0.0.0/8").split(",")
@@ -110,6 +114,11 @@ _usage_lock = threading.Lock()
 # より上流 timeout が長いと、切断済みの生成が何本も残るため proxy の入口で
 # 生成系だけを1本に制限する。tags/ps/show 等の管理 API は塞がない。
 _generation_gate = threading.Lock()
+# VRAM予算判定用に /api/ps で観測したモデルサイズを溜めるキャッシュ。
+# プロセス起動直後などサイズ未観測のモデルは admit_without_gate() 側で
+# 安全側 (フォールバック) に倒すため、ここが空でも実害は無い。
+_model_size_lock = threading.Lock()
+_model_size_cache: dict[str, int] = {}
 
 
 def require_config() -> None:
@@ -232,6 +241,60 @@ def request_model(body: bytes | None) -> str:
     return d.get("model") or "" if isinstance(d, dict) else ""
 
 
+def fetch_loaded_models() -> list[dict] | None:
+    """/api/ps を叩いてロード中モデルの一覧を返す。失敗時は None。"""
+    try:
+        request = urllib.request.Request(
+            TARGET_BASE_URL + "/api/ps",
+            headers={
+                "Authorization": f"Bearer {OPENWEBUI_API_KEY}",
+                "Accept": "application/json",
+            },
+        )
+        with urllib.request.urlopen(request, timeout=EVICT_TIMEOUT) as response:
+            return json.load(response).get("models") or []
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def admit_without_gate(target_model: str) -> bool:
+    """VRAM予算方式: ゲートを取らず並行転送してよいか判定する。
+
+    OLLAMA_PROXY_VRAM_BUDGET_BYTES が未設定 (既定0) の環境では常に False を
+    返し、従来どおり _generation_gate による単一直列化のみで動く。判定材料
+    (対象モデルの観測済みサイズなど) が欠けている場合も安全側に倒して
+    False を返す (OOM で常駐モデルを巻き込むよりゲート待ちの方が安全)。
+    実測に基づく予算値の設定は運用側の責任とし、この関数は実測を代替しない
+    (ats030-pe2x)。
+    """
+    if VRAM_BUDGET_BYTES <= 0 or not target_model:
+        return False
+    models = fetch_loaded_models()
+    if models is None:
+        return False
+    loaded_total = 0
+    target_loaded = False
+    for model in models:
+        name = model.get("name")
+        size = model.get("size_vram")
+        if name and isinstance(size, int):
+            with _model_size_lock:
+                _model_size_cache[name] = size
+        if name == target_model:
+            target_loaded = True
+            continue
+        if isinstance(size, int):
+            loaded_total += size
+    if target_loaded:
+        # 既にロード済みのモデルへの追加要求は新規VRAM確保を伴わない。
+        return True
+    with _model_size_lock:
+        target_size = _model_size_cache.get(target_model)
+    if target_size is None:
+        return False
+    return loaded_total + target_size <= VRAM_BUDGET_BYTES
+
+
 def evict_idle_competitors(target_model: str) -> None:
     """X-Client-Appを名乗るバッチのために、他の常駐モデルをkeep_alive=0で降ろす。
 
@@ -245,17 +308,8 @@ def evict_idle_competitors(target_model: str) -> None:
 
     失敗は個々に握りつぶし、他のモデルの退避や本来の転送を妨げない。
     """
-    try:
-        request = urllib.request.Request(
-            TARGET_BASE_URL + "/api/ps",
-            headers={
-                "Authorization": f"Bearer {OPENWEBUI_API_KEY}",
-                "Accept": "application/json",
-            },
-        )
-        with urllib.request.urlopen(request, timeout=EVICT_TIMEOUT) as response:
-            models = json.load(response).get("models") or []
-    except Exception:  # noqa: BLE001
+    models = fetch_loaded_models()
+    if models is None:
         return
     for model in models:
         name = model.get("name")
@@ -408,7 +462,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
         tail = b""
         gate_acquired = False
         try:
-            if self.is_generation_request():
+            if self.is_generation_request() and not admit_without_gate(request_model(body)):
                 client_app = self.headers.get("X-Client-App")
                 is_batch_client = bool(client_app and client_app.strip())
                 # バッチクライアントは opencode の長時間生成 (実測60秒超) と

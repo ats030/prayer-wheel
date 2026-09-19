@@ -486,6 +486,110 @@ with tempfile.TemporaryDirectory() as tmp:
     upstream.shutdown()
     upstream.server_close()
 
+print("14. VRAM予算方式: 既定 (未設定) では常にゲート越しの従来動作")
+old_budget = proxy.VRAM_BUDGET_BYTES
+proxy.VRAM_BUDGET_BYTES = 0
+check("予算未設定はネットワークを叩かず False",
+      proxy.admit_without_gate("qwen3.8:27b"), False)
+
+print("15. VRAM予算方式: 既にロード済みのモデルはゲート不要")
+with tempfile.TemporaryDirectory() as tmp:
+    proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
+    proxy.VRAM_BUDGET_BYTES = 30_000_000_000
+    EvictionUpstream.ps_fails = False
+    EvictionUpstream.resident = [
+        {"name": "qwen3.8:27b", "size_vram": 18_725_795_265},
+    ]
+    upstream, proxy.TARGET_BASE_URL = serve(EvictionUpstream)
+    check("ロード済みモデル宛は True", proxy.admit_without_gate("qwen3.8:27b"), True)
+    upstream.shutdown()
+    upstream.server_close()
+
+print("16. VRAM予算方式: 未ロードでも合計が予算内なら並行転送を許可")
+with tempfile.TemporaryDirectory() as tmp:
+    proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
+    proxy._model_size_cache.clear()
+    proxy.VRAM_BUDGET_BYTES = 30_000_000_000
+    EvictionUpstream.ps_fails = False
+    EvictionUpstream.resident = [
+        {"name": "qwen3.8:27b", "size_vram": 18_725_795_265},
+    ]
+    upstream, proxy.TARGET_BASE_URL = serve(EvictionUpstream)
+    check("未観測の新モデルはサイズ不明で False (安全側)",
+          proxy.admit_without_gate("bge-m3"), False)
+    # bge-m3 がロードされた瞬間の /api/ps でサイズがキャッシュへ積まれる。
+    EvictionUpstream.resident = [
+        {"name": "qwen3.8:27b", "size_vram": 18_725_795_265},
+        {"name": "bge-m3", "size_vram": 1_000_000_000},
+    ]
+    proxy.admit_without_gate("bge-m3")  # 観測してキャッシュへ積むだけの呼び出し
+    # bge-m3 がアイドル退避などで /api/ps から消えた後でも、キャッシュ済み
+    # サイズを使って合計が予算内かどうかを判定できることを確認する。
+    EvictionUpstream.resident = [
+        {"name": "qwen3.8:27b", "size_vram": 18_725_795_265},
+    ]
+    check("再ロード要求は観測済みサイズで予算内なら True",
+          proxy.admit_without_gate("bge-m3"), True)
+    upstream.shutdown()
+    upstream.server_close()
+
+print("17. VRAM予算方式: 合計が予算を超えるならゲートへフォールバック")
+with tempfile.TemporaryDirectory() as tmp:
+    proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
+    proxy.VRAM_BUDGET_BYTES = 20_000_000_000
+    with proxy._model_size_lock:
+        proxy._model_size_cache["qwen3-coder-next:q4_K_M"] = 52_000_000_000
+    EvictionUpstream.resident = [
+        {"name": "qwen3.8:27b", "size_vram": 18_725_795_265},
+    ]
+    upstream, proxy.TARGET_BASE_URL = serve(EvictionUpstream)
+    check("予算超過は False", proxy.admit_without_gate("qwen3-coder-next:q4_K_M"), False)
+    upstream.shutdown()
+    upstream.server_close()
+
+print("18. VRAM予算方式: /api/ps 失敗時はゲートへフォールバック")
+proxy.VRAM_BUDGET_BYTES = 30_000_000_000
+with proxy._model_size_lock:
+    proxy._model_size_cache["qwen3.8:27b"] = 18_725_795_265
+proxy.TARGET_BASE_URL = "http://127.0.0.1:1"  # 接続不可
+check("ps不通は False", proxy.admit_without_gate("qwen3.8:27b"), False)
+
+proxy.VRAM_BUDGET_BYTES = old_budget
+
+print("19. VRAM予算方式: 予算内なら並行転送が実際にゲートを介さず通る")
+with tempfile.TemporaryDirectory() as tmp:
+    proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
+    proxy.VRAM_BUDGET_BYTES = 40_000_000_000
+    proxy.GENERATION_QUEUE_TIMEOUT = 0.01
+    EvictionUpstream.resident = [{"name": "qwen3.8:27b", "size_vram": 18_725_795_265}]
+    EvictionUpstream.generate_calls = []
+    upstream, proxy.TARGET_BASE_URL = serve(EvictionUpstream)
+    front, base = serve(proxy.ProxyHandler)
+    results = []
+
+    def concurrent_post_same_model():
+        request = urllib.request.Request(
+            base + "/api/chat", data=b'{"model":"qwen3.8:27b"}',
+            method="POST", headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(request, timeout=10) as response:
+                results.append(response.status)
+        except urllib.error.HTTPError as exc:
+            results.append(exc.code)
+
+    workers = [threading.Thread(target=concurrent_post_same_model) for _ in range(2)]
+    for worker in workers:
+        worker.start()
+    for worker in workers:
+        worker.join()
+    front.shutdown()
+    front.server_close()
+    upstream.shutdown()
+    upstream.server_close()
+    check("既にロード済みモデル宛は両方成功 (busyにならない)",
+          sorted(results), [200, 200])
+    proxy.VRAM_BUDGET_BYTES = old_budget
+
 print()
 if failures:
     print(f"失敗 {len(failures)} 件: {', '.join(failures)}")
