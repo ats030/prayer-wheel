@@ -11,35 +11,47 @@ export class PathGenerator {
   generate(canvasWidth, canvasHeight) {
     const gridCols = 8;
     const gridRows = 8;
-    
+    const rangeStart = 1;
+    const rangeEnd = gridCols - 2;
+
+    const randomCoord = () =>
+      rangeStart + Math.floor(Math.random() * (rangeEnd - rangeStart + 1));
+
     this.path = [];
-    
-    // 始点（左上付近）
-    this.path.push({ x: 1, y: 1 });
-    
-    let current = { x: 1, y: 1 };
-    
+
+    // 始点（端から1セル余白のある範囲でランダム）
+    let start = { x: randomCoord(), y: randomCoord() };
+
+    // ゴール（始点と異なる範囲内のランダム地点）
+    let goal = { x: randomCoord(), y: randomCoord() };
+    while (goal.x === start.x && goal.y === start.y) {
+      goal = { x: randomCoord(), y: randomCoord() };
+    }
+
+    const targetX = goal.x;
+    const targetY = goal.y;
+
+    this.path.push({ ...start });
+
+    let current = { ...start };
+
     // 前2つの移動方向を記録（滑らかさを保つため）
     let directionHistory = [];
-    
+
     // 既に通った地点を記録（交差防止）
     const visited = new Set();
-    visited.add('1,1');
-    
+    visited.add(`${start.x},${start.y}`);
+
     // ゴールへ向かうルートを生成（可能な限り一本線で滑らかに）
     let loopCount = 0;
     const maxLoops = 10000;
-    while (current.x !== gridCols - 2 || current.y !== gridRows - 2) {
+    while (current.x !== targetX || current.y !== targetY) {
       loopCount++;
       if (loopCount > maxLoops) {
         console.warn('generateRandomPath: max loops reached, breaking');
         break;
       }
       const possibleMoves = [];
-      
-      // 目標方向を計算
-      const targetX = gridCols - 2;
-      const targetY = gridRows - 2;
       
       // 2つ前の方向を取得（尖った経路回避用）
       let prev2Move = { x: 0, y: 0 };
@@ -136,9 +148,9 @@ export class PathGenerator {
     }
     
      // 終点が達成されていない場合、強制的に終点へ
-     if (current.x !== gridCols - 2 || current.y !== gridRows - 2) {
-       this.path.push({ x: gridCols - 2, y: gridRows - 2 });
-     }
+      if (current.x !== targetX || current.y !== targetY) {
+        this.path.push({ x: targetX, y: targetY });
+      }
      
      // グリッド座標をピクセル座標に変換（中心点）
      const cellSize = canvasWidth / gridCols;
@@ -149,9 +161,9 @@ export class PathGenerator {
     
     // プレイヤーとゴールの初期位置
     const player = { x: this.path[0].x, y: this.path[0].y };
-    const goal = { x: this.path[this.path.length - 1].x, y: this.path[this.path.length - 1].y };
-    
-    return { path: this.path, player, goal };
+    const goalPos = { x: this.path[this.path.length - 1].x, y: this.path[this.path.length - 1].y };
+
+    return { path: this.path, player, goal: goalPos };
   }
 
   draw(ctx, canvasWidth, canvasHeight, themeEmojiStart, themeEmojiEnd) {
