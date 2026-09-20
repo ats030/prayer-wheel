@@ -588,7 +588,66 @@ with tempfile.TemporaryDirectory() as tmp:
     upstream.server_close()
     check("既にロード済みモデル宛は両方成功 (busyにならない)",
           sorted(results), [200, 200])
-    proxy.VRAM_BUDGET_BYTES = old_budget
+proxy.VRAM_BUDGET_BYTES = old_budget
+
+print("20. OpenCode lease中はbackgroundを待たせ、期限後に通す")
+old_lease = proxy.OPENCODE_LEASE_SECONDS
+old_starvation = proxy.BACKGROUND_STARVATION_SECONDS
+proxy.OPENCODE_LEASE_SECONDS = 0.05
+proxy.BACKGROUND_STARVATION_SECONDS = 1
+scheduler = proxy.GenerationScheduler()
+interactive = scheduler.acquire("opencode", "qwen3.8:27b", timeout=1)
+scheduler.release(interactive)
+background_result = []
+worker = threading.Thread(
+    target=lambda: background_result.append(
+        scheduler.acquire("background", "gemma4:12b", timeout=None)
+    )
+)
+worker.start()
+time.sleep(0.02)
+check("lease中はbackgroundが待機", background_result, [])
+worker.join(timeout=1)
+check("lease後にbackgroundが通る", len(background_result), 1)
+scheduler.release(background_result[0])
+
+print("21. 10分相当待ったbackgroundはOpenCode待機より先に1件通す")
+proxy.OPENCODE_LEASE_SECONDS = 0
+proxy.BACKGROUND_STARVATION_SECONDS = 0.05
+scheduler = proxy.GenerationScheduler()
+blocker = scheduler.acquire("foreground", "busy", timeout=1)
+order = []
+
+def acquire_and_record(kind, model):
+    ticket = scheduler.acquire(kind, model, timeout=None)
+    order.append(kind)
+    scheduler.release(ticket)
+
+background = threading.Thread(
+    target=acquire_and_record, args=("background", "gemma4:12b"))
+background.start()
+time.sleep(0.07)
+interactive_worker = threading.Thread(
+    target=acquire_and_record, args=("opencode", "qwen3.8:27b"))
+interactive_worker.start()
+time.sleep(0.01)
+scheduler.release(blocker)
+background.join(timeout=1)
+interactive_worker.join(timeout=1)
+check("aging済みbackgroundが先", order, ["background", "opencode"])
+
+print("22. 状態には本文を含めず、受信時刻と待機数を返す")
+scheduler = proxy.GenerationScheduler()
+ticket = scheduler.acquire("opencode", "qwen3.8:27b", timeout=1)
+scheduler.received(ticket)
+snapshot = scheduler.snapshot()
+check("生成状態", snapshot["state"], "generating")
+check("モデル", snapshot["model"], "qwen3.8:27b")
+check("最終受信", snapshot["last_received_seconds"], 0)
+check("本文フィールド無し", "prompt" in snapshot, False)
+scheduler.release(ticket)
+proxy.OPENCODE_LEASE_SECONDS = old_lease
+proxy.BACKGROUND_STARVATION_SECONDS = old_starvation
 
 print()
 if failures:

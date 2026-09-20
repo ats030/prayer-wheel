@@ -3,8 +3,8 @@
 
 from __future__ import annotations
 
-import json
 import ipaddress
+import json
 import os
 import signal
 import sys
@@ -12,6 +12,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
+from collections import deque
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -59,12 +60,12 @@ TARGET_BASE_URL = env("OLLAMA_PROXY_TARGET_URL") or (
 TARGET_BASE_URL = TARGET_BASE_URL.rstrip("/")
 REQUEST_TIMEOUT = int(env("OLLAMA_PROXY_TIMEOUT", "600"))
 GENERATION_QUEUE_TIMEOUT = float(env("OLLAMA_PROXY_QUEUE_TIMEOUT", "5"))
-# X-Client-App を名乗るバッチ要求 (daily-reflection 等) 向けの待機上限。
-# opencode の対話要求は応答性を保つため既定の短い GENERATION_QUEUE_TIMEOUT
-# のまま。バッチ側は起動時刻がずれて opencode の長時間生成 (実測60秒超) と
-# 競合しても、ゲート取得自体で 503 にならないよう長めに確保する (ats030-pe2x)。
-GENERATION_QUEUE_TIMEOUT_BATCH = float(env("OLLAMA_PROXY_QUEUE_TIMEOUT_BATCH", "120"))
 GENERATION_RETRY_AFTER = int(env("OLLAMA_PROXY_RETRY_AFTER", "30"))
+OPENCODE_CLIENT_APP = "opencode"
+OPENCODE_LEASE_SECONDS = float(env("OLLAMA_PROXY_OPENCODE_LEASE", "60"))
+BACKGROUND_STARVATION_SECONDS = float(
+    env("OLLAMA_PROXY_BACKGROUND_STARVATION", "600")
+)
 # X-Client-App を名乗るバッチ要求だけ、ゲート取得後に他の常駐モデルを
 # keep_alive=0 で退避させる (ats030-pe2x)。_generation_gate は生成要求を
 # 1本に絞るため、ここに到達した時点で他の生成要求 (opencodeの対話要求も
@@ -110,10 +111,149 @@ GENERATION_PATHS = frozenset({
 })
 USAGE_PATHS = GENERATION_PATHS
 _usage_lock = threading.Lock()
-# Ollama は単一 GPU 上で別モデルの要求を内部キューへ積む。依頼元の timeout
-# より上流 timeout が長いと、切断済みの生成が何本も残るため proxy の入口で
-# 生成系だけを1本に制限する。tags/ps/show 等の管理 API は塞がない。
-_generation_gate = threading.Lock()
+# Ollama は単一 GPU 上で別モデルの要求を内部キューへ積むため、proxy の入口で
+# 生成系を直列化する。OpenCode を優先する一方、10分待った background は次に
+# 1件だけ通して飢餓を防ぐ。tags/ps/show 等の管理 API は塞がない。
+
+
+class GenerationScheduler:
+    """単一生成枠、OpenCode lease、background aging をまとめて管理する。"""
+
+    def __init__(self, clock=time.monotonic):
+        self.clock = clock
+        self.condition = threading.Condition()
+        self.active: dict | None = None
+        self.waiting: dict[int, dict] = {}
+        self.background_order: deque[int] = deque()
+        self.next_ticket = 1
+        self.opencode_lease_until = 0.0
+        self.last_received_at: float | None = None
+
+    def reset(self) -> None:
+        """self-test用。稼働中には呼ばない。"""
+        with self.condition:
+            self.active = None
+            self.waiting.clear()
+            self.background_order.clear()
+            self.next_ticket = 1
+            self.opencode_lease_until = 0.0
+            self.last_received_at = None
+            self.condition.notify_all()
+
+    def acquire(self, kind: str, model: str, timeout: float | None) -> int | None:
+        now = self.clock()
+        with self.condition:
+            ticket = self.next_ticket
+            self.next_ticket += 1
+            entry = {"ticket": ticket, "kind": kind, "model": model or "unknown",
+                     "queued_at": now}
+            self.waiting[ticket] = entry
+            if kind == "background":
+                self.background_order.append(ticket)
+            deadline = None if timeout is None else now + timeout
+            try:
+                while not self._may_start(ticket):
+                    if deadline is not None:
+                        remaining = deadline - self.clock()
+                        if remaining <= 0:
+                            return None
+                    else:
+                        remaining = None
+                    # lease/agingの境界でも再評価できるよう、通知だけに依存しない。
+                    wait_for = 1.0 if remaining is None else min(remaining, 1.0)
+                    self.condition.wait(timeout=wait_for)
+                rescued_background = (
+                    kind == "background"
+                    and self.clock() - entry["queued_at"] >= BACKGROUND_STARVATION_SECONDS
+                )
+                self.active = self.waiting.pop(ticket)
+                if kind == "background":
+                    self.background_order.remove(ticket)
+                if rescued_background:
+                    # aging済みを連続で通すとOpenCodeが再び飢餓になる。今回の
+                    # 1件以外は待機時計をここから再開する。
+                    reset_at = self.clock()
+                    for other in self.background_order:
+                        self.waiting[other]["queued_at"] = reset_at
+                self.active["started_at"] = self.clock()
+                self.last_received_at = None
+                return ticket
+            finally:
+                if ticket in self.waiting and (
+                        deadline is not None and self.clock() >= deadline):
+                    self.waiting.pop(ticket, None)
+                    if ticket in self.background_order:
+                        self.background_order.remove(ticket)
+
+    def _may_start(self, ticket: int) -> bool:
+        if self.active is not None:
+            return False
+        entry = self.waiting[ticket]
+        now = self.clock()
+        oldest_background = (
+            self.waiting.get(self.background_order[0]) if self.background_order else None
+        )
+        aged_background = bool(
+            oldest_background
+            and now - oldest_background["queued_at"] >= BACKGROUND_STARVATION_SECONDS
+        )
+        if aged_background:
+            return ticket == oldest_background["ticket"]
+        if entry["kind"] == "background":
+            has_foreground = any(
+                queued["kind"] != "background" for queued in self.waiting.values()
+            )
+            return (
+                ticket == self.background_order[0]
+                and not has_foreground
+                and now >= self.opencode_lease_until
+            )
+        return True
+
+    def received(self, ticket: int | None) -> None:
+        with self.condition:
+            if self.active and self.active["ticket"] == ticket:
+                self.last_received_at = self.clock()
+
+    def release(self, ticket: int | None) -> None:
+        with self.condition:
+            if self.active and self.active["ticket"] == ticket:
+                if self.active["kind"] == "opencode":
+                    self.opencode_lease_until = self.clock() + OPENCODE_LEASE_SECONDS
+                self.active = None
+                self.condition.notify_all()
+
+    def snapshot(self) -> dict:
+        with self.condition:
+            now = self.clock()
+            opencode_waiting = next(
+                (item for item in self.waiting.values() if item["kind"] == "opencode"),
+                None,
+            )
+            shown = opencode_waiting or self.active
+            if shown is None:
+                return {
+                    "state": "idle",
+                    "model": "",
+                    "elapsed_seconds": 0,
+                    "queue_depth": len(self.waiting),
+                    "last_received_seconds": None,
+                }
+            queued = "started_at" not in shown
+            started = shown.get("queued_at") if queued else shown["started_at"]
+            return {
+                "state": "queued" if queued else "generating",
+                "model": shown["model"],
+                "elapsed_seconds": max(0, int(now - started)),
+                "queue_depth": len(self.waiting),
+                "last_received_seconds": (
+                    None if queued or self.last_received_at is None
+                    else max(0, int(now - self.last_received_at))
+                ),
+            }
+
+
+_generation_gate = GenerationScheduler()
 # VRAM予算判定用に /api/ps で観測したモデルサイズを溜めるキャッシュ。
 # プロセス起動直後などサイズ未観測のモデルは admit_without_gate() 側で
 # 安全側 (フォールバック) に倒すため、ここが空でも実害は無い。
@@ -397,6 +537,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
     server_version = "OllamaOpenWebUIProxy/1.0"
 
     def do_GET(self) -> None:  # noqa: N802
+        if self.path.split("?", 1)[0] == "/api/opencode-status":
+            self.serve_opencode_status()
+            return
         self.forward()
 
     def do_POST(self) -> None:  # noqa: N802
@@ -444,6 +587,20 @@ class ProxyHandler(BaseHTTPRequestHandler):
             return False
         return True
 
+    def serve_opencode_status(self) -> None:
+        """tmux status向け。利用状況メタデータなのでloopbackだけに限定する。"""
+        client = ipaddress.ip_address(self.client_address[0])
+        if not client.is_loopback:
+            self.send_error(403, "Status is only available from loopback")
+            return
+        payload = json.dumps(_generation_gate.snapshot(), ensure_ascii=False).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
+
     def forward(self) -> None:
         if not self.request_allowed():
             return
@@ -460,20 +617,22 @@ class ProxyHandler(BaseHTTPRequestHandler):
         status = 0
         error = ""
         tail = b""
-        gate_acquired = False
+        gate_ticket = None
         try:
             if self.is_generation_request() and not admit_without_gate(request_model(body)):
-                client_app = self.headers.get("X-Client-App")
-                is_batch_client = bool(client_app and client_app.strip())
-                # バッチクライアントは opencode の長時間生成 (実測60秒超) と
-                # 起動時刻がずれて競合しても、ゲート取得自体で 503 にならない
-                # よう長めに待たせる。opencode 側の対話応答性は既定の短い
-                # タイムアウトのまま維持する (ats030-pe2x)。
-                queue_timeout = (
-                    GENERATION_QUEUE_TIMEOUT_BATCH if is_batch_client
-                    else GENERATION_QUEUE_TIMEOUT)
-                gate_acquired = _generation_gate.acquire(timeout=queue_timeout)
-                if not gate_acquired:
+                client_app = (self.headers.get("X-Client-App") or "").strip()
+                is_opencode = client_app == OPENCODE_CLIENT_APP
+                is_batch_client = bool(client_app and not is_opencode)
+                kind = "opencode" if is_opencode else (
+                    "background" if is_batch_client else "foreground"
+                )
+                # background は10分でagingされ必ず次の1件になるため、proxy側では
+                # 打ち切らない。その他の未識別対話要求は従来の短いtimeoutを保つ。
+                queue_timeout = None if is_batch_client else GENERATION_QUEUE_TIMEOUT
+                gate_ticket = _generation_gate.acquire(
+                    kind, request_model(body), timeout=queue_timeout
+                )
+                if gate_ticket is None:
                     status = 503
                     error = "generation queue busy"
                     payload = json_error(
@@ -487,6 +646,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
                     return
                 if EVICT_COMPETITORS_ENABLED and is_batch_client:
                     evict_idle_competitors(request_model(body))
+            self._generation_ticket = gate_ticket
             with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT) as response:
                 status = response.status
                 if measure:
@@ -519,8 +679,8 @@ class ProxyHandler(BaseHTTPRequestHandler):
             error = f"{type(exc).__name__}: {exc}"
             raise
         finally:
-            if gate_acquired:
-                _generation_gate.release()
+            if gate_ticket is not None:
+                _generation_gate.release(gate_ticket)
             if measure:
                 self.record_usage(body, tail, status,
                                   round((time.monotonic() - started) * 1000),
@@ -567,6 +727,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
                 break
             self.wfile.write(chunk)
             self.wfile.flush()
+            _generation_gate.received(getattr(self, "_generation_ticket", None))
             if keep_tail:
                 tail = (tail + chunk)[-USAGE_TAIL_BYTES:]
         return tail
