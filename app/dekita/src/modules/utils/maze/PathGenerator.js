@@ -126,8 +126,7 @@ export class PathGenerator {
       } else {
         // 進路が塞がれている場合はバックアップ
         if (this.path.length > 1) {
-          const removed = this.path.pop();
-          visited.delete(`${removed.x},${removed.y}`);
+          this.path.pop();
           directionHistory.pop();
           current = this.path[this.path.length - 1];
           continue;
