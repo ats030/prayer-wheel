@@ -721,8 +721,12 @@ class ProxyHandler(BaseHTTPRequestHandler):
         だけなので、長い生成でもメモリは一定に収まる。
         """
         tail = b""
+        # HTTPResponse.read(size) は size を満たすかEOFまで待つ。LLMの小さな
+        # SSE/NDJSON断片が64KiBに届くまでTUIへ出ないため、read1で現在届いて
+        # いる分を即時転送する。BytesIO等のテスト用応答はreadへfallbackする。
+        read_available = getattr(response, "read1", response.read)
         while True:
-            chunk = response.read(64 * 1024)
+            chunk = read_available(64 * 1024)
             if not chunk:
                 break
             self.wfile.write(chunk)

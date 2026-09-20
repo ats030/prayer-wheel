@@ -303,6 +303,28 @@ class FakeUpstream(BaseHTTPRequestHandler):
         pass
 
 
+class StreamingUpstream(BaseHTTPRequestHandler):
+    """小さい先頭断片を送り、EOFまで待たずproxyが転送するか検証する。"""
+
+    first = b'{"message":{"content":"first"}}\n'
+    second = b'{"done":true}\n'
+    pause = 0.35
+
+    def do_POST(self):  # noqa: N802
+        self.rfile.read(int(self.headers.get("Content-Length", "0") or "0"))
+        self.send_response(200)
+        self.send_header("Content-Type", "application/x-ndjson")
+        self.end_headers()
+        self.wfile.write(type(self).first)
+        self.wfile.flush()
+        time.sleep(type(self).pause)
+        self.wfile.write(type(self).second)
+        self.wfile.flush()
+
+    def log_message(self, *args):
+        pass
+
+
 def post(base, path, payload):
     request = urllib.request.Request(
         base + path, data=payload, method="POST",
@@ -648,6 +670,30 @@ check("本文フィールド無し", "prompt" in snapshot, False)
 scheduler.release(ticket)
 proxy.OPENCODE_LEASE_SECONDS = old_lease
 proxy.BACKGROUND_STARVATION_SECONDS = old_starvation
+
+print("23. 小さいストリーム断片をEOF前に依頼元へ転送する")
+with tempfile.TemporaryDirectory() as tmp:
+    proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
+    upstream, proxy.TARGET_BASE_URL = serve(StreamingUpstream)
+    front, base = serve(proxy.ProxyHandler)
+    request = urllib.request.Request(
+        base + "/api/chat", data=b'{"model":"qwen3.8:27b"}', method="POST",
+        headers={"Content-Type": "application/json"},
+    )
+    started = time.monotonic()
+    with urllib.request.urlopen(request, timeout=3) as response:
+        first_byte = response.read(1)
+        first_byte_elapsed = time.monotonic() - started
+        remainder = response.read()
+    check("先頭byte", first_byte, StreamingUpstream.first[:1])
+    check("EOF待ち時間より前に届く",
+          first_byte_elapsed < StreamingUpstream.pause - 0.05, True)
+    check("本文全体", first_byte + remainder,
+          StreamingUpstream.first + StreamingUpstream.second)
+    front.shutdown()
+    front.server_close()
+    upstream.shutdown()
+    upstream.server_close()
 
 print()
 if failures:
