@@ -1,0 +1,45 @@
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui@sha256:9fcea9c6e32ab60b0498f3986c6cdf651ddbe61db48d2213a3d28048ddd673d4
+    container_name: open-webui
+    env_file:
+      - .env
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+    ports:
+      - "3000:8080"
+    volumes:
+      - open_webui_data:/app/backend/data
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama@sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad
+    container_name: ollama
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_IGPU_ENABLE: "1"
+      OLLAMA_VULKAN: "1"
+      OLLAMA_FLASH_ATTENTION: "1"
+      OLLAMA_KV_CACHE_TYPE: q8_0
+      OLLAMA_CONTEXT_LENGTH: "16384"
+      OLLAMA_NUM_PARALLEL: "3"
+      OLLAMA_MAX_LOADED_MODELS: "2"
+      OLLAMA_MAX_QUEUE: "20"
+      HSA_OVERRIDE_GFX_VERSION: 11.0.0
+      HSA_ENABLE_SDMA: "0"
+    ports:
+      - "127.0.0.1:11435:11434"
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+    external: true
+    name: llm-stack_ollama_data
+  open_webui_data:
+    external: true
+    name: llm-stack_open_webui_data

@@ -27,6 +27,7 @@ HOP_BY_HOP_HEADERS = {
     "transfer-encoding",
     "upgrade",
     "host",
+    "content-length",
 }
 
 
@@ -61,6 +62,18 @@ TARGET_BASE_URL = TARGET_BASE_URL.rstrip("/")
 REQUEST_TIMEOUT = int(env("OLLAMA_PROXY_TIMEOUT", "600"))
 GENERATION_QUEUE_TIMEOUT = float(env("OLLAMA_PROXY_QUEUE_TIMEOUT", "5"))
 GENERATION_RETRY_AFTER = int(env("OLLAMA_PROXY_RETRY_AFTER", "30"))
+MAX_GENERATIONS = int(env("OLLAMA_PROXY_MAX_GENERATIONS", "3"))
+MAX_BACKGROUND_GENERATIONS = int(env("OLLAMA_PROXY_MAX_BACKGROUND_GENERATIONS", "2"))
+MAX_BACKGROUND_QUEUE = int(env("OLLAMA_PROXY_MAX_BACKGROUND_QUEUE", "20"))
+INTERACTIVE_CONTEXT = int(env("OLLAMA_PROXY_INTERACTIVE_CONTEXT", "65536"))
+BATCH_CONTEXT = int(env("OLLAMA_PROXY_BATCH_CONTEXT", "16384"))
+WORKLOAD_HEADER = "X-Ollama-Workload-Class"
+WORKLOAD_MODELS = {
+    "interactive": env("OLLAMA_PROXY_INTERACTIVE_MODEL", "qwen3.8:27b"),
+    "batch-light": env("OLLAMA_PROXY_BATCH_LIGHT_MODEL", "gemma4:12b"),
+    "batch-heavy": env("OLLAMA_PROXY_BATCH_HEAVY_MODEL", "qwen3.8:27b"),
+}
+VIRTUAL_MODELS = {f"auto-{kind}": kind for kind in WORKLOAD_MODELS}
 OPENCODE_CLIENT_APP = "opencode"
 OPENCODE_LEASE_SECONDS = float(env("OLLAMA_PROXY_OPENCODE_LEASE", "60"))
 BACKGROUND_STARVATION_SECONDS = float(
@@ -111,18 +124,22 @@ GENERATION_PATHS = frozenset({
 })
 USAGE_PATHS = GENERATION_PATHS
 _usage_lock = threading.Lock()
-# Ollama は単一 GPU 上で別モデルの要求を内部キューへ積むため、proxy の入口で
-# 生成系を直列化する。OpenCode を優先する一方、10分待った background は次に
-# 1件だけ通して飢餓を防ぐ。tags/ps/show 等の管理 API は塞がない。
+# 生成系は対話用1枠を予約し、backgroundを最大2本まで通す。待機中は対話を
+# 優先する一方、長時間待ったbackgroundはagingで飢餓を防ぐ。管理APIは塞がない。
 
 
 class GenerationScheduler:
-    """単一生成枠、OpenCode lease、background aging をまとめて管理する。"""
+    """対話優先の生成枠とbackground agingをまとめて管理する。"""
 
-    def __init__(self, clock=time.monotonic):
+    def __init__(self, clock=time.monotonic, max_active=None, max_background=None,
+                 max_background_queue=None):
         self.clock = clock
+        self.max_active = max_active or MAX_GENERATIONS
+        self.max_background = max_background or MAX_BACKGROUND_GENERATIONS
+        self.max_background_queue = (max_background_queue if max_background_queue is not None
+                                     else MAX_BACKGROUND_QUEUE)
         self.condition = threading.Condition()
-        self.active: dict | None = None
+        self.active: dict[int, dict] = {}
         self.waiting: dict[int, dict] = {}
         self.background_order: deque[int] = deque()
         self.next_ticket = 1
@@ -132,7 +149,7 @@ class GenerationScheduler:
     def reset(self) -> None:
         """self-test用。稼働中には呼ばない。"""
         with self.condition:
-            self.active = None
+            self.active.clear()
             self.waiting.clear()
             self.background_order.clear()
             self.next_ticket = 1
@@ -143,6 +160,9 @@ class GenerationScheduler:
     def acquire(self, kind: str, model: str, timeout: float | None) -> int | None:
         now = self.clock()
         with self.condition:
+            if (kind == "background"
+                    and len(self.background_order) >= self.max_background_queue):
+                return None
             ticket = self.next_ticket
             self.next_ticket += 1
             entry = {"ticket": ticket, "kind": kind, "model": model or "unknown",
@@ -166,7 +186,7 @@ class GenerationScheduler:
                     kind == "background"
                     and self.clock() - entry["queued_at"] >= BACKGROUND_STARVATION_SECONDS
                 )
-                self.active = self.waiting.pop(ticket)
+                self.active[ticket] = self.waiting.pop(ticket)
                 if kind == "background":
                     self.background_order.remove(ticket)
                 if rescued_background:
@@ -175,8 +195,7 @@ class GenerationScheduler:
                     reset_at = self.clock()
                     for other in self.background_order:
                         self.waiting[other]["queued_at"] = reset_at
-                self.active["started_at"] = self.clock()
-                self.last_received_at = None
+                self.active[ticket]["started_at"] = self.clock()
                 return ticket
             finally:
                 if ticket in self.waiting and (
@@ -186,15 +205,22 @@ class GenerationScheduler:
                         self.background_order.remove(ticket)
 
     def _may_start(self, ticket: int) -> bool:
-        if self.active is not None:
+        if len(self.active) >= self.max_active:
             return False
         entry = self.waiting[ticket]
+        active_background = sum(
+            item["kind"] == "background" for item in self.active.values()
+        )
+        if (entry["kind"] == "background"
+                and active_background >= self.max_background):
+            return False
         now = self.clock()
         oldest_background = (
             self.waiting.get(self.background_order[0]) if self.background_order else None
         )
         aged_background = bool(
             oldest_background
+            and active_background < self.max_background
             and now - oldest_background["queued_at"] >= BACKGROUND_STARVATION_SECONDS
         )
         if aged_background:
@@ -206,21 +232,21 @@ class GenerationScheduler:
             return (
                 ticket == self.background_order[0]
                 and not has_foreground
-                and now >= self.opencode_lease_until
+                and (self.max_active > 1 or now >= self.opencode_lease_until)
             )
         return True
 
     def received(self, ticket: int | None) -> None:
         with self.condition:
-            if self.active and self.active["ticket"] == ticket:
+            if ticket in self.active:
                 self.last_received_at = self.clock()
 
     def release(self, ticket: int | None) -> None:
         with self.condition:
-            if self.active and self.active["ticket"] == ticket:
-                if self.active["kind"] == "opencode":
+            if ticket in self.active:
+                if self.active[ticket]["kind"] == "opencode":
                     self.opencode_lease_until = self.clock() + OPENCODE_LEASE_SECONDS
-                self.active = None
+                self.active.pop(ticket)
                 self.condition.notify_all()
 
     def snapshot(self) -> dict:
@@ -230,13 +256,15 @@ class GenerationScheduler:
                 (item for item in self.waiting.values() if item["kind"] == "opencode"),
                 None,
             )
-            shown = opencode_waiting or self.active
+            active = next(iter(self.active.values()), None)
+            shown = opencode_waiting or active
             if shown is None:
                 return {
                     "state": "idle",
                     "model": "",
                     "elapsed_seconds": 0,
                     "queue_depth": len(self.waiting),
+                    "active_count": len(self.active),
                     "last_received_seconds": None,
                 }
             queued = "started_at" not in shown
@@ -246,6 +274,7 @@ class GenerationScheduler:
                 "model": shown["model"],
                 "elapsed_seconds": max(0, int(now - started)),
                 "queue_depth": len(self.waiting),
+                "active_count": len(self.active),
                 "last_received_seconds": (
                     None if queued or self.last_received_at is None
                     else max(0, int(now - self.last_received_at))
@@ -379,6 +408,44 @@ def request_model(body: bytes | None) -> str:
     except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
         return ""
     return d.get("model") or "" if isinstance(d, dict) else ""
+
+
+def route_request(body: bytes | None, workload_header: str,
+                  client_app: str) -> tuple[bytes | None, str, str]:
+    """処理クラスを解決し、仮想モデルとnum_ctxを実モデル要求へ変換する。"""
+    if not body:
+        return body, "interactive", ""
+    try:
+        payload = json.loads(body)
+    except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+        return body, "interactive", ""
+    if not isinstance(payload, dict):
+        return body, "interactive", ""
+
+    requested_model = str(payload.get("model") or "")
+    alias_workload = VIRTUAL_MODELS.get(requested_model)
+    workload = workload_header.strip().lower() or alias_workload
+    if not workload:
+        workload = ("interactive" if not client_app or client_app == OPENCODE_CLIENT_APP
+                    else "batch-heavy")
+    if workload not in WORKLOAD_MODELS:
+        raise ValueError(f"{WORKLOAD_HEADER} must be one of: "
+                         + ", ".join(WORKLOAD_MODELS))
+
+    if alias_workload or workload_header:
+        payload["model"] = WORKLOAD_MODELS[workload]
+    context_limit = (INTERACTIVE_CONTEXT if workload == "interactive"
+                     else BATCH_CONTEXT)
+    options = payload.get("options")
+    if not isinstance(options, dict):
+        options = {}
+        payload["options"] = options
+    requested_context = options.get("num_ctx")
+    if (not isinstance(requested_context, int) or requested_context <= 0
+            or requested_context > context_limit):
+        options["num_ctx"] = context_limit
+    return (json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+            workload, payload.get("model", ""))
 
 
 def fetch_loaded_models() -> list[dict] | None:
@@ -560,7 +627,8 @@ class ProxyHandler(BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", origin)
             self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers",
+                         f"Content-Type, {WORKLOAD_HEADER}, X-Client-App")
         self.send_header("Access-Control-Allow-Private-Network", "true")
         self.send_header("Access-Control-Max-Age", "600")
         self.end_headers()
@@ -606,6 +674,21 @@ class ProxyHandler(BaseHTTPRequestHandler):
             return
         target_url = TARGET_BASE_URL + self.path
         body = self.read_body()
+        client_app = (self.headers.get("X-Client-App") or "").strip()
+        workload = "interactive"
+        if self.is_generation_request():
+            try:
+                body, workload, _model = route_request(
+                    body, self.headers.get(WORKLOAD_HEADER) or "", client_app
+                )
+            except ValueError as exc:
+                payload = json_error(str(exc))
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(payload)))
+                self.end_headers()
+                self.wfile.write(payload)
+                return
         measure = self.should_measure()
         request = urllib.request.Request(
             target_url,
@@ -619,10 +702,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
         tail = b""
         gate_ticket = None
         try:
-            if self.is_generation_request() and not admit_without_gate(request_model(body)):
-                client_app = (self.headers.get("X-Client-App") or "").strip()
+            if self.is_generation_request():
                 is_opencode = client_app == OPENCODE_CLIENT_APP
-                is_batch_client = bool(client_app and not is_opencode)
+                is_batch_client = workload != "interactive"
                 kind = "opencode" if is_opencode else (
                     "background" if is_batch_client else "foreground"
                 )
@@ -633,7 +715,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
                     kind, request_model(body), timeout=queue_timeout
                 )
                 if gate_ticket is None:
-                    status = 503
+                    status = 429 if is_batch_client else 503
                     error = "generation queue busy"
                     payload = json_error(
                         "Ollama generation queue is busy; retry later")
@@ -644,7 +726,8 @@ class ProxyHandler(BaseHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(payload)
                     return
-                if EVICT_COMPETITORS_ENABLED and is_batch_client:
+                if (EVICT_COMPETITORS_ENABLED and is_batch_client
+                        and MAX_GENERATIONS == 1):
                     evict_idle_competitors(request_model(body))
             self._generation_ticket = gate_ticket
             with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT) as response:

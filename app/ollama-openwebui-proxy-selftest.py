@@ -374,7 +374,7 @@ with tempfile.TemporaryDirectory() as tmp:
     check("上流不在は status 0", lines[2]["status"], 0)
     check("上流不在の理由が残る", bool(lines[2].get("error")), True)
 
-print("12. 生成は同時に1本だけ通し、後続は Retry-After 付き503にする")
+print("12. 生成は同時に3本通し、4本目は Retry-After 付き503にする")
 with tempfile.TemporaryDirectory() as tmp:
     proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
     proxy.GENERATION_QUEUE_TIMEOUT = 0.01
@@ -393,7 +393,7 @@ with tempfile.TemporaryDirectory() as tmp:
         except urllib.error.HTTPError as exc:
             results.append((exc.code, exc.headers.get("Retry-After")))
 
-    workers = [threading.Thread(target=concurrent_post) for _ in range(2)]
+    workers = [threading.Thread(target=concurrent_post) for _ in range(4)]
     for worker in workers:
         worker.start()
     for worker in workers:
@@ -403,14 +403,14 @@ with tempfile.TemporaryDirectory() as tmp:
     upstream.shutdown()
     upstream.server_close()
 
-    check("応答は成功1件とbusy1件", sorted(code for code, _ in results),
-          [200, 503])
+    check("応答は成功3件とbusy1件", sorted(code for code, _ in results),
+          [200, 200, 200, 503])
     retry_headers = [value for code, value in results if code == 503]
     check("503にRetry-After", retry_headers,
           [str(proxy.GENERATION_RETRY_AFTER)])
-    check("上流の最大同時生成数", FakeUpstream.max_active, 1)
+    check("上流の最大同時生成数", FakeUpstream.max_active, 3)
 
-print("13. X-Client-Appのバッチはゲート取得後に別の常駐モデルをkeep_alive=0で降ろす")
+print("13. 3枠運用では同時常駐のため別モデルを退避しない")
 
 
 class EvictionUpstream(BaseHTTPRequestHandler):
@@ -488,8 +488,7 @@ with tempfile.TemporaryDirectory() as tmp:
     check("X-Client-App付きの応答コード", status, 200)
     check("対象モデル自身は退避しない",
           [c for c in EvictionUpstream.generate_calls if c[0] == "qwen3.8:27b"], [])
-    check("別モデルをkeep_alive=0で退避", EvictionUpstream.generate_calls,
-          [("qwen3-coder-next:q4_K_M", 0)])
+    check("別モデルを退避しない", EvictionUpstream.generate_calls, [])
 
     EvictionUpstream.generate_calls = []
     status, _ = post_with_headers(base, "/api/chat", b'{"model":"qwen3.8:27b"}')
@@ -617,7 +616,7 @@ old_lease = proxy.OPENCODE_LEASE_SECONDS
 old_starvation = proxy.BACKGROUND_STARVATION_SECONDS
 proxy.OPENCODE_LEASE_SECONDS = 0.05
 proxy.BACKGROUND_STARVATION_SECONDS = 1
-scheduler = proxy.GenerationScheduler()
+scheduler = proxy.GenerationScheduler(max_active=1, max_background=1)
 interactive = scheduler.acquire("opencode", "qwen3.8:27b", timeout=1)
 scheduler.release(interactive)
 background_result = []
@@ -671,7 +670,51 @@ scheduler.release(ticket)
 proxy.OPENCODE_LEASE_SECONDS = old_lease
 proxy.BACKGROUND_STARVATION_SECONDS = old_starvation
 
-print("23. 小さいストリーム断片をEOF前に依頼元へ転送する")
+print("23. 用途別ルーティングはモデルとcontext上限を書き換える")
+routed, workload, model = proxy.route_request(
+    b'{"model":"auto-batch-light","options":{"num_ctx":99999}}', "", "")
+payload = json.loads(routed)
+check("light workload", workload, "batch-light")
+check("light model", model, "gemma4:12b")
+check("batch context", payload["options"]["num_ctx"], 16384)
+
+routed, workload, model = proxy.route_request(
+    b'{"model":"auto-batch-light"}', "interactive", "")
+payload = json.loads(routed)
+check("header優先", workload, "interactive")
+check("header優先モデル", model, "qwen3.8:27b")
+check("interactive context", payload["options"]["num_ctx"], 65536)
+
+print("24. aging済みバッチがあっても対話1枠を予約する")
+old_starvation = proxy.BACKGROUND_STARVATION_SECONDS
+proxy.BACKGROUND_STARVATION_SECONDS = 0.01
+scheduler = proxy.GenerationScheduler(
+    max_active=3, max_background=2, max_background_queue=20)
+batch1 = scheduler.acquire("background", "gemma4:12b", timeout=1)
+batch2 = scheduler.acquire("background", "gemma4:12b", timeout=1)
+waiting_batch = []
+worker = threading.Thread(target=lambda: waiting_batch.append(
+    scheduler.acquire("background", "gemma4:12b", timeout=1)))
+worker.start()
+time.sleep(0.02)
+interactive = scheduler.acquire("foreground", "qwen3.8:27b", timeout=0.1)
+check("aging後も対話が3枠目を取得", interactive is not None, True)
+check("3枠が同時active", scheduler.snapshot()["active_count"], 3)
+scheduler.release(interactive)
+scheduler.release(batch1)
+worker.join(timeout=1)
+check("解放後に待機バッチが開始", len(waiting_batch), 1)
+scheduler.release(waiting_batch[0])
+scheduler.release(batch2)
+proxy.BACKGROUND_STARVATION_SECONDS = old_starvation
+
+print("25. バッチ待ち行列上限では即時拒否する")
+scheduler = proxy.GenerationScheduler(
+    max_active=3, max_background=2, max_background_queue=0)
+check("queue上限0", scheduler.acquire(
+    "background", "gemma4:12b", timeout=None), None)
+
+print("26. 小さいストリーム断片をEOF前に依頼元へ転送する")
 with tempfile.TemporaryDirectory() as tmp:
     proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
     upstream, proxy.TARGET_BASE_URL = serve(StreamingUpstream)
