@@ -714,7 +714,40 @@ scheduler = proxy.GenerationScheduler(
 check("queue上限0", scheduler.acquire(
     "background", "gemma4:12b", timeout=None), None)
 
-print("26. 小さいストリーム断片をEOF前に依頼元へ転送する")
+print("26. 対話routingは会話先頭へstickyで、5秒相当後に空き側へ逃がす")
+base_body = json.dumps({"messages": [
+    {"role": "system", "content": "rules"},
+    {"role": "user", "content": "first"},
+]}).encode()
+extended_body = json.dumps({"messages": [
+    {"role": "system", "content": "rules"},
+    {"role": "user", "content": "first"},
+    {"role": "assistant", "content": "reply"},
+]}).encode()
+key = proxy.conversation_key(base_body)
+check("会話追記後もkey固定", proxy.conversation_key(extended_body), key)
+router = proxy.InteractiveRouter(("a", "b"))
+preferred = router.acquire(key, sticky_wait=0.03, timeout=0.2)
+fallback = []
+worker = threading.Thread(target=lambda: fallback.append(
+    router.acquire(key, sticky_wait=0.03, timeout=0.2)))
+worker.start()
+time.sleep(0.01)
+check("sticky待ち中は同じworkerを待つ", fallback, [])
+worker.join(timeout=0.2)
+check("sticky期限後は別worker", fallback, [1 - preferred])
+router.release(preferred)
+router.release(fallback[0])
+router.active = [True, True]
+check("両worker busyはtimeout", router.acquire(
+    key, sticky_wait=0.01, timeout=0.02), None)
+router.active = [False, False]
+router.active[preferred] = True
+check("障害workerを除外して残存workerへ縮退", router.acquire_other(
+    preferred, timeout=0.02), 1 - preferred)
+router.release(1 - preferred)
+
+print("27. 小さいストリーム断片をEOF前に依頼元へ転送する")
 with tempfile.TemporaryDirectory() as tmp:
     proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
     upstream, proxy.TARGET_BASE_URL = serve(StreamingUpstream)

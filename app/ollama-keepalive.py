@@ -53,6 +53,7 @@ failure にすると、止まっている間ずっと15分おきに通知が飛�
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 import urllib.error
@@ -61,7 +62,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 CONFIG = Path.home() / ".config" / "opencode" / "opencode.json"
-BASE = "http://127.0.0.1:11434"
+BASE = os.environ.get("OLLAMA_KEEPALIVE_BASE", "http://127.0.0.1:11434").rstrip("/")
 PROVIDER_PREFIX = "ollama/"
 # ロードだけの要求は、GPU が空いていれば 52GB でも十数秒で返る (実測 13.7秒)。
 # それ以上待たされるのは順番待ちをしている証拠で、待てば待つほど他所の生成の

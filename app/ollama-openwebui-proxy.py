@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import ipaddress
+import hashlib
 import json
 import os
 import signal
@@ -59,6 +60,13 @@ TARGET_BASE_URL = env("OLLAMA_PROXY_TARGET_URL") or (
     f"{OPENWEBUI_BASE_URL}/ollama" if OPENWEBUI_BASE_URL else ""
 )
 TARGET_BASE_URL = TARGET_BASE_URL.rstrip("/")
+INTERACTIVE_TARGETS = tuple(
+    value.strip().rstrip("/")
+    for value in env("OLLAMA_PROXY_INTERACTIVE_TARGETS", TARGET_BASE_URL).split(",")
+    if value.strip()
+)
+INTERACTIVE_STICKY_WAIT = float(env("OLLAMA_PROXY_INTERACTIVE_STICKY_WAIT", "5"))
+INTERACTIVE_QUEUE_TIMEOUT = float(env("OLLAMA_PROXY_INTERACTIVE_QUEUE_TIMEOUT", "120"))
 REQUEST_TIMEOUT = int(env("OLLAMA_PROXY_TIMEOUT", "600"))
 GENERATION_QUEUE_TIMEOUT = float(env("OLLAMA_PROXY_QUEUE_TIMEOUT", "5"))
 GENERATION_RETRY_AFTER = int(env("OLLAMA_PROXY_RETRY_AFTER", "30"))
@@ -282,7 +290,86 @@ class GenerationScheduler:
             }
 
 
+class InteractiveRouter:
+    """会話を通常は同じ上流へ固定し、混雑時だけ別上流へ逃がす。"""
+
+    def __init__(self, targets: tuple[str, ...], clock=time.monotonic):
+        self.targets = targets
+        self.clock = clock
+        self.condition = threading.Condition()
+        self.active = [False] * len(targets)
+
+    def acquire(self, session_key: str, sticky_wait: float,
+                timeout: float) -> int | None:
+        if not self.targets:
+            return None
+        preferred = int(session_key[:16], 16) % len(self.targets)
+        started = self.clock()
+        sticky_deadline = started + sticky_wait
+        deadline = started + timeout
+        with self.condition:
+            while True:
+                now = self.clock()
+                if not self.active[preferred]:
+                    self.active[preferred] = True
+                    return preferred
+                if now >= sticky_deadline:
+                    for index in range(len(self.targets)):
+                        if index != preferred and not self.active[index]:
+                            self.active[index] = True
+                            return index
+                if now >= deadline:
+                    return None
+                wake_at = sticky_deadline if now < sticky_deadline else deadline
+                self.condition.wait(timeout=max(0.01, wake_at - now))
+
+    def release(self, index: int | None) -> None:
+        if index is None:
+            return
+        with self.condition:
+            self.active[index] = False
+            self.condition.notify_all()
+
+    def acquire_other(self, failed_index: int, timeout: float) -> int | None:
+        """障害workerを除外し、残存workerが空くまで待つ。"""
+        deadline = self.clock() + timeout
+        with self.condition:
+            while True:
+                for index in range(len(self.targets)):
+                    if index != failed_index and not self.active[index]:
+                        self.active[index] = True
+                        return index
+                remaining = deadline - self.clock()
+                if remaining <= 0:
+                    return None
+                self.condition.wait(timeout=remaining)
+
+    def reset(self) -> None:
+        with self.condition:
+            self.active = [False] * len(self.targets)
+            self.condition.notify_all()
+
+
+def conversation_key(body: bytes | None) -> str:
+    """会話先頭だけから非永続のrouting keyを作る。本文は保存しない。"""
+    anchor: object = ""
+    if body:
+        try:
+            payload = json.loads(body)
+        except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+            payload = {}
+        if isinstance(payload, dict):
+            messages = payload.get("messages")
+            if isinstance(messages, list) and messages:
+                anchor = messages[:2]
+            else:
+                anchor = str(payload.get("prompt") or "")[:4096]
+    serialized = json.dumps(anchor, ensure_ascii=False, sort_keys=True).encode()
+    return hashlib.sha256(serialized).hexdigest()
+
+
 _generation_gate = GenerationScheduler()
+_interactive_router = InteractiveRouter(INTERACTIVE_TARGETS)
 # VRAM予算判定用に /api/ps で観測したモデルサイズを溜めるキャッシュ。
 # プロセス起動直後などサイズ未観測のモデルは admit_without_gate() 側で
 # 安全側 (フォールバック) に倒すため、ここが空でも実害は無い。
@@ -672,8 +759,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
     def forward(self) -> None:
         if not self.request_allowed():
             return
-        target_url = TARGET_BASE_URL + self.path
         body = self.read_body()
+        session_key = conversation_key(body)
+        target_base_url = TARGET_BASE_URL
         client_app = (self.headers.get("X-Client-App") or "").strip()
         workload = "interactive"
         if self.is_generation_request():
@@ -690,17 +778,12 @@ class ProxyHandler(BaseHTTPRequestHandler):
                 self.wfile.write(payload)
                 return
         measure = self.should_measure()
-        request = urllib.request.Request(
-            target_url,
-            data=body,
-            headers=self.forward_headers(),
-            method=self.command,
-        )
         started = time.monotonic()
         status = 0
         error = ""
         tail = b""
         gate_ticket = None
+        interactive_index = None
         try:
             if self.is_generation_request():
                 is_opencode = client_app == OPENCODE_CLIENT_APP
@@ -729,8 +812,49 @@ class ProxyHandler(BaseHTTPRequestHandler):
                 if (EVICT_COMPETITORS_ENABLED and is_batch_client
                         and MAX_GENERATIONS == 1):
                     evict_idle_competitors(request_model(body))
+            if (workload == "interactive"
+                    and request_model(body) == WORKLOAD_MODELS["interactive"]
+                    and len(INTERACTIVE_TARGETS) > 1):
+                interactive_index = _interactive_router.acquire(
+                    session_key, INTERACTIVE_STICKY_WAIT,
+                    INTERACTIVE_QUEUE_TIMEOUT,
+                )
+                if interactive_index is None:
+                    status = 503
+                    error = "interactive queue busy"
+                    payload = json_error(
+                        "All interactive Ollama workers are busy; retry later")
+                    self.send_response(status)
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.send_header("Content-Length", str(len(payload)))
+                    self.send_header("Retry-After", str(GENERATION_RETRY_AFTER))
+                    self.end_headers()
+                    self.wfile.write(payload)
+                    return
+                target_base_url = INTERACTIVE_TARGETS[interactive_index]
             self._generation_ticket = gate_ticket
-            with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT) as response:
+            request = urllib.request.Request(
+                target_base_url + self.path, data=body,
+                headers=self.forward_headers(), method=self.command)
+            try:
+                response = urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT)
+            except urllib.error.HTTPError:
+                raise
+            except urllib.error.URLError:
+                if interactive_index is None:
+                    raise
+                failed_index = interactive_index
+                _interactive_router.release(failed_index)
+                interactive_index = _interactive_router.acquire_other(
+                    failed_index, INTERACTIVE_QUEUE_TIMEOUT)
+                if interactive_index is None:
+                    raise
+                target_base_url = INTERACTIVE_TARGETS[interactive_index]
+                request = urllib.request.Request(
+                    target_base_url + self.path, data=body,
+                    headers=self.forward_headers(), method=self.command)
+                response = urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT)
+            with response:
                 status = response.status
                 if measure:
                     # identity を要求しても上流が圧縮して返すことはある。
@@ -762,6 +886,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
             error = f"{type(exc).__name__}: {exc}"
             raise
         finally:
+            _interactive_router.release(interactive_index)
             if gate_ticket is not None:
                 _generation_gate.release(gate_ticket)
             if measure:
