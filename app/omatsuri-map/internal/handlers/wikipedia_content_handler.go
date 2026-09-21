@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"omatsuri-map/internal/services"
@@ -30,7 +32,11 @@ func GetWikipediaContent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "title and qid parameters are required", http.StatusBadRequest)
 		return
 	}
-	content, err := services.FetchWikipediaContent(title, qid)
+	content, err := services.FetchWikipediaContent(r.Context(), title, qid)
+	if errors.Is(err, context.DeadlineExceeded) {
+		http.Error(w, "upstream request timed out", http.StatusGatewayTimeout)
+		return
+	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return

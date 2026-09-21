@@ -23,21 +23,21 @@ type CommonsAttribution struct {
 	AttributionRequired bool
 }
 
-func FetchCommonsAttribution(imageURL string) (CommonsAttribution, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+func FetchCommonsAttribution(ctx context.Context, imageURL string) (CommonsAttribution, error) {
+	ctx, cancel := context.WithTimeout(ctx, 40*time.Second)
 	defer cancel()
 	var lastErr error
 	for attempt := 0; attempt < 3; attempt++ {
-		attribution, retry, err := fetchCommonsAttributionOnce(ctx, imageURL)
+		attribution, status, delay, err := fetchCommonsAttributionOnce(ctx, imageURL)
 		if err == nil {
 			return attribution, nil
 		}
 		lastErr = err
-		if !retry || attempt == 2 {
+		if !retryableStatus(status) || attempt == 2 {
 			break
 		}
 		select {
-		case <-time.After(time.Duration(250*(1<<attempt)) * time.Millisecond):
+		case <-time.After(delay):
 		case <-ctx.Done():
 			return CommonsAttribution{}, ctx.Err()
 		}
@@ -45,10 +45,11 @@ func FetchCommonsAttribution(imageURL string) (CommonsAttribution, error) {
 	return CommonsAttribution{}, lastErr
 }
 
-func fetchCommonsAttributionOnce(ctx context.Context, imageURL string) (CommonsAttribution, bool, error) {
+func fetchCommonsAttributionOnce(ctx context.Context, imageURL string) (CommonsAttribution, int, time.Duration, error) {
+	base := 250 * time.Millisecond
 	fileName, err := commonsFileName(imageURL)
 	if err != nil {
-		return CommonsAttribution{}, false, err
+		return CommonsAttribution{}, 0, base, err
 	}
 	apiURL := fmt.Sprintf(
 		"%s/w/api.php?action=query&titles=File:%s&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=1200&iiextmetadatafilter=Artist|Credit|License|LicenseShortName|LicenseUrl|AttributionRequired&format=json",
@@ -57,23 +58,27 @@ func fetchCommonsAttributionOnce(ctx context.Context, imageURL string) (CommonsA
 	)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
 	if err != nil {
-		return CommonsAttribution{}, false, err
+		return CommonsAttribution{}, 0, base, err
 	}
 	req.Header.Set("User-Agent", "omatsuri-map/1.0")
 	resp, err := client.Do(req)
 	if err != nil {
-		return CommonsAttribution{}, true, err
+		return CommonsAttribution{}, 0, base, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return CommonsAttribution{}, resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= http.StatusInternalServerError, fmt.Errorf("Commons API returned status %d", resp.StatusCode)
+		delay := 0 * time.Second
+		if retryableStatus(resp.StatusCode) {
+			delay = retryDelayFor(resp, base)
+		}
+		return CommonsAttribution{}, resp.StatusCode, delay, fmt.Errorf("Commons API returned status %d", resp.StatusCode)
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return CommonsAttribution{}, true, err
+		return CommonsAttribution{}, resp.StatusCode, base, err
 	}
 	attribution, err := parseCommonsAttribution(body)
-	return attribution, false, err
+	return attribution, resp.StatusCode, 0, err
 }
 
 func commonsFileName(imageURL string) (string, error) {

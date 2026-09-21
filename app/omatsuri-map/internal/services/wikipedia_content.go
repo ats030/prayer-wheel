@@ -22,8 +22,8 @@ type WikipediaContent struct {
 	ImageTitles []string
 }
 
-func FetchWikipediaContent(title, expectedQID string) (WikipediaContent, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
+func FetchWikipediaContent(ctx context.Context, title, expectedQID string) (WikipediaContent, error) {
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 	params := url.Values{
 		"action":        {"query"},
@@ -40,24 +40,33 @@ func FetchWikipediaContent(title, expectedQID string) (WikipediaContent, error) 
 		"imlimit":       {"20"},
 		"titles":        {title},
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, wikipediaAPIBase+"/w/api.php?"+params.Encode(), nil)
-	if err != nil {
-		return WikipediaContent{}, err
+	apiURL := wikipediaAPIBase + "/w/api.php?" + params.Encode()
+
+	var lastErr error
+	var body []byte
+	for attempt := 0; attempt < 3; attempt++ {
+		respBody, status, delay, err := fetchWikipediaContentOnce(ctx, apiURL)
+		if err == nil {
+			body = respBody
+			lastErr = nil
+			break
+		}
+		lastErr = err
+		if !retryableStatus(status) || attempt == 2 {
+			break
+		}
+		select {
+		case <-time.After(delay):
+		case <-ctx.Done():
+			return WikipediaContent{}, ctx.Err()
+		}
 	}
-	req.Header.Set("User-Agent", "omatsuri-map/1.0")
-	resp, err := wikipediaClient.Do(req)
-	if err != nil {
-		return WikipediaContent{}, err
+	if lastErr != nil {
+		return WikipediaContent{}, lastErr
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return WikipediaContent{}, fmt.Errorf("Wikipedia API returned status %d", resp.StatusCode)
-	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return WikipediaContent{}, err
-	}
-	content, err := parseWikipediaContent(body, expectedQID)
+
+
+	content, err := parseWikipediaContent(ctx, body, expectedQID)
 	if err != nil {
 		return WikipediaContent{}, err
 	}
@@ -65,7 +74,7 @@ func FetchWikipediaContent(title, expectedQID string) (WikipediaContent, error) 
 		for _, title := range usableArticleImageTitles(content.ImageTitles) {
 			fileName := strings.TrimPrefix(strings.TrimPrefix(title, "ファイル:"), "File:")
 			candidateURL := "https://upload.wikimedia.org/" + url.PathEscape(fileName)
-			attribution, err := FetchCommonsAttribution(candidateURL)
+			attribution, err := FetchCommonsAttribution(ctx, candidateURL)
 			if err == nil && attribution.ImageURL != "" && attribution.License != "" {
 				content.ImageURL = attribution.ImageURL
 				content.Attribution = attribution
@@ -88,7 +97,33 @@ func usableArticleImageTitles(titles []string) []string {
 	return result
 }
 
-func parseWikipediaContent(body []byte, expectedQID string) (WikipediaContent, error) {
+func fetchWikipediaContentOnce(ctx context.Context, apiURL string) ([]byte, int, time.Duration, error) {
+	base := 250 * time.Millisecond
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
+	if err != nil {
+		return nil, 0, base, err
+	}
+	req.Header.Set("User-Agent", "omatsuri-map/1.0")
+	resp, err := wikipediaClient.Do(req)
+	if err != nil {
+		return nil, 0, base, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		delay := 0 * time.Second
+		if retryableStatus(resp.StatusCode) {
+			delay = retryDelayFor(resp, base)
+		}
+		return nil, resp.StatusCode, delay, fmt.Errorf("Wikipedia API returned status %d", resp.StatusCode)
+	}
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, resp.StatusCode, base, err
+	}
+	return data, resp.StatusCode, 0, nil
+}
+
+func parseWikipediaContent(ctx context.Context, body []byte, expectedQID string) (WikipediaContent, error) {
 	var data struct {
 		Query struct {
 			Pages []struct {
@@ -123,7 +158,7 @@ func parseWikipediaContent(body []byte, expectedQID string) (WikipediaContent, e
 			content.ImageTitles = append(content.ImageTitles, image.Title)
 		}
 		if content.ImageURL != "" {
-			if attribution, err := FetchCommonsAttribution(content.ImageURL); err == nil {
+			if attribution, err := FetchCommonsAttribution(ctx, content.ImageURL); err == nil {
 				content.Attribution = attribution
 			} else {
 				content.ImageURL = ""

@@ -40,7 +40,7 @@ func (h *WikidataHandler) GetWikidataImage(w http.ResponseWriter, r *http.Reques
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	attribution, err := services.FetchCommonsAttribution(url)
+	attribution, err := services.FetchCommonsAttribution(r.Context(), url)
 	effectiveLicense := attribution.License
 	if effectiveLicense == "" {
 		effectiveLicense = license

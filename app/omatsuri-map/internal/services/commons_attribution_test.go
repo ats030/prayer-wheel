@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"sync/atomic"
@@ -69,7 +70,7 @@ func TestFetchCommonsAttributionRetriesRateLimit(t *testing.T) {
 	commonsAttributionAPIBase = server.URL
 	t.Cleanup(func() { commonsAttributionAPIBase = previousBase })
 
-	got, err := FetchCommonsAttribution("https://upload.wikimedia.org/wikipedia/commons/a/ab/Festival.jpg")
+	got, err := FetchCommonsAttribution(context.Background(), "https://upload.wikimedia.org/wikipedia/commons/a/ab/Festival.jpg")
 	if err != nil || got.License != "CC0" || requests.Load() != 2 {
 		t.Fatalf("got %+v after %d requests: %v", got, requests.Load(), err)
 	}
