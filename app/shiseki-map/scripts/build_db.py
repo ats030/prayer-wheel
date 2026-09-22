@@ -14,7 +14,8 @@ label_en TEXT NOT NULL DEFAULT '', prefecture TEXT NOT NULL DEFAULT '', latitude
 longitude REAL NOT NULL, description TEXT NOT NULL DEFAULT '', title_ja TEXT NOT NULL DEFAULT '',
 era TEXT NOT NULL DEFAULT '', designation TEXT NOT NULL DEFAULT 'unknown',
 designation_label TEXT NOT NULL DEFAULT '', designation_source TEXT NOT NULL DEFAULT '',
-heritage_id TEXT NOT NULL DEFAULT '', source_url TEXT NOT NULL DEFAULT '');
+heritage_id TEXT NOT NULL DEFAULT '', source_url TEXT NOT NULL DEFAULT '',
+jalan_lrg_code TEXT NOT NULL DEFAULT '', jalan_lrg_name TEXT NOT NULL DEFAULT '');
 CREATE INDEX idx_shiseki_prefecture ON shiseki(prefecture);
 CREATE INDEX idx_shiseki_designation ON shiseki(designation);
 CREATE TABLE categories (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);
@@ -36,12 +37,13 @@ def build():
             if designation not in VALID_DESIGNATIONS:
                 designation = "unknown"
             cur = conn.execute(
-                "INSERT INTO shiseki (qid,label_ja,label_en,prefecture,latitude,longitude,description,title_ja,era,designation,designation_label,designation_source,heritage_id,source_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO shiseki (qid,label_ja,label_en,prefecture,latitude,longitude,description,title_ja,era,designation,designation_label,designation_source,heritage_id,source_url,jalan_lrg_code,jalan_lrg_name) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (item["qid"], item["label_ja"], item.get("label_en", ""), item.get("prefecture", ""),
                  float(item["latitude"]), float(item["longitude"]), item.get("description", ""),
                  item.get("title_ja", ""), item.get("era", ""), designation,
                  item.get("designation_label", ""), item.get("designation_source", ""),
-                 item.get("heritage_id", ""), item.get("source_url", "")),
+                 item.get("heritage_id", ""), item.get("source_url", ""),
+                 item.get("jalan_lrg_code", ""), item.get("jalan_lrg_name", "")),
             )
             for category in dict.fromkeys(item.get("categories") or ["その他"]):
                 if category not in category_ids:

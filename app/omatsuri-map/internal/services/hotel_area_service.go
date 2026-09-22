@@ -5,14 +5,14 @@ import (
 	"os"
 )
 
-// jisPrefectureCode maps Japanese prefecture names to their two-digit JIS
-// X 0401 administrative codes. Jalan's public area-listing pages use this
-// code (times 10000, e.g. 130000 for Tokyo) as the URL path, so this map
+// jalanPrefectureCode maps Japanese prefecture names to Jalan's two-digit
+// prefecture codes. These differ from JIS X 0401 in northern Kanto.
+// Jalan's public area-listing pages use the code (times 10000) as the URL path.
 // lets us build a destination URL from a festival's prefecture name alone,
 // without any Jalan API access.
-var jisPrefectureCode = map[string]string{
+var jalanPrefectureCode = map[string]string{
 	"北海道": "01", "青森県": "02", "岩手県": "03", "宮城県": "04", "秋田県": "05",
-	"山形県": "06", "福島県": "07", "茨城県": "08", "栃木県": "09", "群馬県": "10",
+	"山形県": "06", "福島県": "07", "茨城県": "10", "栃木県": "08", "群馬県": "09",
 	"埼玉県": "11", "千葉県": "12", "東京都": "13", "神奈川県": "14", "新潟県": "15",
 	"富山県": "16", "石川県": "17", "福井県": "18", "山梨県": "19", "長野県": "20",
 	"岐阜県": "21", "静岡県": "22", "愛知県": "23", "三重県": "24", "滋賀県": "25",
@@ -52,13 +52,21 @@ func NewHotelAreaServiceForTest(a8mat string) *HotelAreaService {
 
 // AreaSearchLink returns an A8.net-wrapped link to Jalan's hotel-listing
 // page for the given prefecture, and whether the prefecture was recognized.
-func (s *HotelAreaService) AreaSearchLink(prefecture string) (string, bool) {
-	code, ok := jisPrefectureCode[prefecture]
+func (s *HotelAreaService) AreaSearchLink(prefecture, lrgCode string) (string, bool) {
+	code, ok := jalanPrefectureCode[prefecture]
 	if !ok {
 		return "", false
 	}
 	destURL := "https://www.jalan.net/" + code + "0000/"
+	if s.IsLargeArea(prefecture, lrgCode) {
+		destURL += "LRG_" + lrgCode + "/"
+	}
 	return s.affiliateWrap(destURL), true
+}
+
+func (s *HotelAreaService) IsLargeArea(prefecture, lrgCode string) bool {
+	code, ok := jalanPrefectureCode[prefecture]
+	return ok && len(lrgCode) == 6 && lrgCode[:2] == code && lrgCode[4:] == "00"
 }
 
 // affiliateWrap turns a destination URL into an A8.net tracking link via

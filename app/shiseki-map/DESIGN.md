@@ -25,6 +25,11 @@
 
 - 自己ホスト版は既定 port 8530。Cloud Runでは `PORT` を使用する。
 - Cloud Runでは `SHISEKI_SUMMARY_DISABLE=1` とし、Wikipedia本文ブロックを表示する。
-- `JALAN_A8MAT` がある場合のみ、都道府県別のじゃらん宿泊リンクを詳細下部に表示する。
+- `JALAN_A8MAT` がある場合のみ、地点に事前割り当てしたじゃらん大エリア（LRG）の宿泊リンクを
+  詳細下部に表示する。LRGが未判定または曖昧な地点は都道府県リンクへフォールバックする。
+- LRGはリポジトリルートの `scripts/generate-jalan-lrg.py` で全地点へ静的に付与する。境界データの版と
+  商用利用条件は `docs/tool-license-jalan-lrg.yaml` を参照する。
+- 自治体判定は「国土数値情報（行政区域データ）（国土交通省）を加工して作成」した
+  Geolonia `japanese-admins`（生成時のみ使用）に基づく。
 - 全HTML entry pointに `data-site="shiseki-map"` のvisit-logタグを置く。Cloud Runから
   LAN内集計先へ到達できない点は `deploy-cloudrun.sh` に例外理由を記録する。

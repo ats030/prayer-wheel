@@ -128,10 +128,12 @@ async function detailedLocation(o){
 }
 async function loadNearbyHotels(o){
   const prefecture=o.prefecture;if(!prefecture)return null;
-  const key=prefecture;
+  const lrgCode=o.jalan_lrg_code||'',lrgName=o.jalan_lrg_name||'';
+  const key=lrgCode||prefecture;
   if(jalanCache[key]!==undefined)return jalanCache[key];
   if(jalanCacheQueue[key])return jalanCacheQueue[key];
-  jalanCacheQueue[key]=fetch(`/api/hotel-area/nearby?prefecture=${encodeURIComponent(prefecture)}`)
+  const params=new URLSearchParams({prefecture});if(lrgCode&&lrgName){params.set('lrg_code',lrgCode);params.set('lrg_name',lrgName)}
+  jalanCacheQueue[key]=fetch(`/api/hotel-area/nearby?${params}`)
     .then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()})
     .then(data=>Array.isArray(data.hotels)?data.hotels:[])
     .catch(error=>{console.warn(`Nearby hotels could not be loaded for ${key}`,error);return null})

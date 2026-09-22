@@ -40,7 +40,7 @@ func TestNewHotelAreaService_ConfiguredReturnsService(t *testing.T) {
 func TestAreaSearchLink_UnknownPrefectureReturnsFalse(t *testing.T) {
 	svc := NewHotelAreaServiceForTest("test-a8mat")
 
-	if _, ok := svc.AreaSearchLink("存在しない県"); ok {
+	if _, ok := svc.AreaSearchLink("存在しない県", ""); ok {
 		t.Fatal("Expected ok=false for an unrecognized prefecture")
 	}
 }
@@ -48,7 +48,7 @@ func TestAreaSearchLink_UnknownPrefectureReturnsFalse(t *testing.T) {
 func TestAreaSearchLink_KnownPrefectureWrapsA8Link(t *testing.T) {
 	svc := NewHotelAreaServiceForTest("test-a8mat")
 
-	link, ok := svc.AreaSearchLink("東京都")
+	link, ok := svc.AreaSearchLink("東京都", "")
 	if !ok {
 		t.Fatal("Expected ok=true for 東京都")
 	}
@@ -72,11 +72,37 @@ func TestAreaSearchLink_KnownPrefectureWrapsA8Link(t *testing.T) {
 func TestAreaSearchLink_WithoutA8matReturnsPlainURL(t *testing.T) {
 	svc := NewHotelAreaServiceForTest("")
 
-	link, ok := svc.AreaSearchLink("東京都")
+	link, ok := svc.AreaSearchLink("東京都", "")
 	if !ok {
 		t.Fatal("Expected ok=true for 東京都")
 	}
 	if link != "https://www.jalan.net/130000/" {
 		t.Errorf("link = %q, want the plain destination URL", link)
+	}
+}
+
+func TestAreaSearchLink_LargeAreaAndPrefectureFallback(t *testing.T) {
+	svc := NewHotelAreaServiceForTest("")
+	link, ok := svc.AreaSearchLink("神奈川県", "141600")
+	if !ok || link != "https://www.jalan.net/140000/LRG_141600/" {
+		t.Fatalf("large-area link = %q, %v", link, ok)
+	}
+	link, ok = svc.AreaSearchLink("神奈川県", "091400")
+	if !ok || link != "https://www.jalan.net/140000/" {
+		t.Fatalf("mismatched LRG should fall back, got %q, %v", link, ok)
+	}
+}
+
+func TestAreaSearchLink_UsesJalanCodesForNorthKanto(t *testing.T) {
+	svc := NewHotelAreaServiceForTest("")
+	for prefecture, want := range map[string]string{
+		"茨城県": "https://www.jalan.net/100000/",
+		"栃木県": "https://www.jalan.net/080000/",
+		"群馬県": "https://www.jalan.net/090000/",
+	} {
+		got, ok := svc.AreaSearchLink(prefecture, "")
+		if !ok || got != want {
+			t.Errorf("%s link = %q, %v; want %q", prefecture, got, ok, want)
+		}
 	}
 }

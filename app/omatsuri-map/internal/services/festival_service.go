@@ -8,14 +8,16 @@ import (
 )
 
 type Festival struct {
-	QID         string  `json:"qid"`
-	LabelJA     string  `json:"label_ja"`
-	LabelEN     string  `json:"label_en"`
-	Prefecture  string  `json:"prefecture"`
-	Latitude    float64 `json:"latitude"`
-	Longitude   float64 `json:"longitude"`
-	Date        string  `json:"date"`
-	Description string  `json:"description"`
+	QID          string  `json:"qid"`
+	LabelJA      string  `json:"label_ja"`
+	LabelEN      string  `json:"label_en"`
+	Prefecture   string  `json:"prefecture"`
+	Latitude     float64 `json:"latitude"`
+	Longitude    float64 `json:"longitude"`
+	JalanLRGCode string  `json:"jalan_lrg_code,omitempty"`
+	JalanLRGName string  `json:"jalan_lrg_name,omitempty"`
+	Date         string  `json:"date"`
+	Description  string  `json:"description"`
 }
 
 type FestivalService struct {
