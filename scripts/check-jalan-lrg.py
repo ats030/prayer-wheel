@@ -14,6 +14,15 @@ DATASETS = (
 )
 OVERRIDES = ROOT / "data/jalan-lrg-overrides.json"
 SML_OVERRIDES = ROOT / "data/jalan-sml-overrides.json"
+JALAN_PREF_CODE = {
+    "北海道": "01", "青森県": "02", "岩手県": "03", "宮城県": "04", "秋田県": "05", "山形県": "06", "福島県": "07",
+    "栃木県": "08", "群馬県": "09", "茨城県": "10", "埼玉県": "11", "千葉県": "12", "東京都": "13", "神奈川県": "14",
+    "山梨県": "15", "長野県": "16", "新潟県": "17", "富山県": "18", "石川県": "19", "福井県": "20", "静岡県": "21",
+    "岐阜県": "22", "愛知県": "23", "三重県": "24", "滋賀県": "25", "京都府": "26", "大阪府": "27", "兵庫県": "28",
+    "奈良県": "29", "和歌山県": "30", "鳥取県": "31", "島根県": "32", "岡山県": "33", "広島県": "34", "山口県": "35",
+    "徳島県": "36", "香川県": "37", "愛媛県": "38", "高知県": "39", "福岡県": "40", "佐賀県": "41", "長崎県": "42",
+    "熊本県": "43", "大分県": "44", "宮崎県": "45", "鹿児島県": "46", "沖縄県": "47",
+}
 
 
 def main():
@@ -35,6 +44,8 @@ def main():
             override = overrides.get(qid)
             if not re.fullmatch(r"\d{4}00", code):
                 errors.append(f"{path}:{qid}: malformed or missing code {code!r}")
+            if code[:2] != JALAN_PREF_CODE.get(record.get("prefecture")):
+                errors.append(f"{path}:{qid}: prefecture and Jalan code differ")
             if not name:
                 errors.append(f"{path}:{qid}: missing name")
             if not override:

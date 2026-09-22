@@ -25,3 +25,18 @@ func TestAreaSearchLink_SmallArea(t *testing.T) {
 		t.Fatalf("small-area link = %q, %v", link, ok)
 	}
 }
+
+func TestAreaSearchLink_JalanCodesDifferingFromJIS(t *testing.T) {
+	svc := NewHotelAreaServiceForTest("")
+	for _, tc := range []struct{ prefecture, lrg, sml string }{
+		{"山梨県", "150100", "150105"}, {"長野県", "160600", "160605"},
+		{"新潟県", "171700", "171705"}, {"富山県", "180800", "180805"},
+		{"石川県", "192600", "192605"}, {"福井県", "200300", "200302"},
+		{"静岡県", "210400", "210402"}, {"岐阜県", "220500", "220502"},
+	} {
+		want := "https://www.jalan.net/" + tc.lrg[:2] + "0000/LRG_" + tc.lrg + "/SML_" + tc.sml + "/"
+		if got, ok := svc.AreaSearchLink(tc.prefecture, tc.lrg, tc.sml); !ok || got != want {
+			t.Errorf("%s link = %q, %v; want %q", tc.prefecture, got, ok, want)
+		}
+	}
+}
