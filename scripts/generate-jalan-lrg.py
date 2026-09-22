@@ -3,8 +3,8 @@
 
 The generator combines the official Jalan area master and the municipalities
 shown on each large-area results page with Geolonia's processed MLIT municipal
-boundaries. Ambiguous or unmatched municipalities intentionally remain without
-LRG fields so the applications can fall back to their prefecture links.
+boundaries. The committed override table resolves ambiguous records, and the
+command fails instead of silently emitting prefecture-level fallbacks.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ import argparse
 import concurrent.futures
 import json
 import re
+import time
 import urllib.request
 import xml.etree.ElementTree as ET
 from collections import defaultdict
@@ -26,6 +27,7 @@ DATASETS = (
     Path("app/omatsuri-map/frontend/festivals.json"),
     Path("app/shiseki-map/frontend/shiseki.json"),
 )
+OVERRIDES = Path("data/jalan-lrg-overrides.json")
 PREF_CODE = {
     "北海道": "01", "青森県": "02", "岩手県": "03", "宮城県": "04", "秋田県": "05",
     "山形県": "06", "福島県": "07", "茨城県": "08", "栃木県": "09", "群馬県": "10",
@@ -41,9 +43,16 @@ PREF_CODE = {
 
 
 def fetch(url: str) -> bytes:
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=60) as response:
-        return response.read()
+    for attempt in range(4):
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(request, timeout=60) as response:
+                return response.read()
+        except Exception:
+            if attempt == 3:
+                raise
+            time.sleep(2 ** attempt)
+    raise RuntimeError("unreachable")
 
 
 def load_areas() -> dict[str, tuple[str, str]]:
@@ -146,7 +155,7 @@ def choose_area(candidates: list[str], areas: dict, label: str) -> str:
     return matches[0] if len(matches) == 1 else ""
 
 
-def update_dataset(path: Path, boundaries: dict, areas: dict, municipality_areas: dict) -> dict:
+def update_dataset(path: Path, boundaries: dict, areas: dict, municipality_areas: dict, overrides: dict) -> dict:
     records = json.loads(path.read_text())
     reverse: dict[str, list[str]] = defaultdict(list)
     for code, municipalities in municipality_areas.items():
@@ -157,6 +166,17 @@ def update_dataset(path: Path, boundaries: dict, areas: dict, municipality_areas
     for record in records:
         record.pop("jalan_lrg_code", None)
         record.pop("jalan_lrg_name", None)
+        override = overrides.get(str(record.get("qid")))
+        if override:
+            code = override["code"]
+            if code not in areas or override.get("name") != areas[code][1]:
+                raise SystemExit(f"invalid override for {record.get('qid')}: {override}")
+            if areas[code][0] != record.get("prefecture"):
+                raise SystemExit(f"override prefecture mismatch for {record.get('qid')}: {override}")
+            record["jalan_lrg_code"] = code
+            record["jalan_lrg_name"] = areas[code][1]
+            assigned += 1
+            continue
         municipality = municipality_at(
             boundaries,
             str(record.get("prefecture", "")),
@@ -184,7 +204,11 @@ def main() -> None:
     areas = load_areas()
     municipality_areas = area_municipalities(areas, args.workers)
     boundaries = load_boundaries(args.boundaries)
-    report = [update_dataset(path, boundaries, areas, municipality_areas) for path in DATASETS]
+    overrides = json.loads(OVERRIDES.read_text()) if OVERRIDES.exists() else {}
+    report = [update_dataset(path, boundaries, areas, municipality_areas, overrides) for path in DATASETS]
+    missing = sum(item["fallback"] for item in report)
+    if missing:
+        raise SystemExit(json.dumps({"error": "unassigned Jalan LRG records", "report": report}, ensure_ascii=False, indent=2))
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
 

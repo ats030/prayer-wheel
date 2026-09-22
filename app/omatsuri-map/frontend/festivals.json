@@ -146,7 +146,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "東京都",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "CON-CANムービーフェスティバル"
+    "wikipedia_title": "CON-CANムービーフェスティバル",
+    "jalan_lrg_code": "120500",
+    "jalan_lrg_name": "舞浜・浦安・船橋・幕張"
   },
   {
     "qid": "Q903645",
@@ -299,7 +301,9 @@
     ],
     "coordinate_prefecture": "東京都",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "コミックマーケット"
+    "wikipedia_title": "コミックマーケット",
+    "jalan_lrg_code": "137100",
+    "jalan_lrg_name": "お台場・汐留・新橋・品川"
   },
   {
     "qid": "Q10869430",
@@ -335,7 +339,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "東京都",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "東京国際映画祭"
+    "wikipedia_title": "東京国際映画祭",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q493695",
@@ -380,7 +386,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "しろんご祭り"
+    "wikipedia_title": "しろんご祭り",
+    "jalan_lrg_code": "241100",
+    "jalan_lrg_name": "鳥羽"
   },
   {
     "qid": "Q30924149",
@@ -540,7 +548,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "東京都",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "足立の花火"
+    "wikipedia_title": "足立の花火",
+    "jalan_lrg_code": "137400",
+    "jalan_lrg_name": "上野・浅草・両国"
   },
   {
     "qid": "Q9385159",
@@ -661,7 +671,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "東京都",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "レインボー・リール東京"
+    "wikipedia_title": "レインボー・リール東京",
+    "jalan_lrg_code": "136200",
+    "jalan_lrg_name": "銀座・日本橋・東京駅周辺"
   },
   {
     "qid": "Q7398902",
@@ -718,7 +730,9 @@
     "description": "横浜ジャズフェスティバルは、港町・横浜の開放的な街並みを舞台に、国内外のジャズアーティストが集い、自由で豊かな音楽の表現を共有するイベントです。開催時期や年間の恒例性については明確な情報がありませんが、夏の風物詩として、多くの来場者が街中を歩きながら、生のジャズに触れる機会となっているとされています。イベントは神社の祭礼とは異なり、地域の文化振興や市民参加を重視した現代的な性格を持ち、横浜の国際性と開放的な雰囲気と相まって、独特の雰囲気を醸し出しています。",
     "date": "日付未定",
     "coordinate_prefecture": "神奈川県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "140200",
+    "jalan_lrg_name": "横浜"
   },
   {
     "qid": "Q11404276",
@@ -1021,7 +1035,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "神奈川県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "狛江・多摩川花火大会"
+    "wikipedia_title": "狛江・多摩川花火大会",
+    "jalan_lrg_code": "138300",
+    "jalan_lrg_name": "渋谷・目黒・世田谷"
   },
   {
     "qid": "Q124363255",
@@ -1048,7 +1064,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "神奈川県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "2027年国際園芸博覧会"
+    "wikipedia_title": "2027年国際園芸博覧会",
+    "jalan_lrg_code": "141400",
+    "jalan_lrg_name": "相模原"
   },
   {
     "qid": "Q115680256",
@@ -1075,7 +1093,9 @@
     "description": "「つきがた夏まつり」という名称から、北海道の「月形町」で開催される地域の夏の祭りであると推測されます。地名に由来する「月」のイメージが、祭りの雰囲気や装飾に反映されている可能性があります。北海道の夏祭りは、地域の豊かな自然や農業・酪農文化を祝う場として、住民の交流や観光促進の役割も果たしており、地元の特産品の販売や子どもたちの盆踊り、軽い音楽やダンスなどの要素が含まれるケースが多いようです。神社の祭礼と直接結びついているとは限りませんが、地域の信仰や伝統を背景に、静かで温かな雰囲気の中で行われる行事であると考えられます。",
     "date": "日付未定",
     "coordinate_prefecture": "北海道",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "012900",
+    "jalan_lrg_name": "石狩・空知・千歳"
   },
   {
     "qid": "Q130753581",
@@ -1102,7 +1122,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "東京都",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "小金井桜まつり"
+    "wikipedia_title": "小金井桜まつり",
+    "jalan_lrg_code": "139200",
+    "jalan_lrg_name": "八王子・立川・町田・府中・調布"
   },
   {
     "qid": "Q125959947",
@@ -1174,7 +1196,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "宮城県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "おもしぇがらきてけさin富谷"
+    "wikipedia_title": "おもしぇがらきてけさin富谷",
+    "jalan_lrg_code": "040500",
+    "jalan_lrg_name": "松島・塩竈"
   },
   {
     "qid": "Q21652985",
@@ -1345,7 +1369,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "宮城県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "とみやマーチングフェスティバル"
+    "wikipedia_title": "とみやマーチングフェスティバル",
+    "jalan_lrg_code": "040200",
+    "jalan_lrg_name": "仙台"
   },
   {
     "qid": "Q17226795",
@@ -1366,7 +1392,9 @@
         "end": "10-08",
         "source": "https://www.wikidata.org/wiki/Q17226795#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "240800",
+    "jalan_lrg_name": "津・久居・美杉・松阪"
   },
   {
     "qid": "Q21652311",
@@ -1409,7 +1437,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "埼玉県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "小川町七夕まつり"
+    "wikipedia_title": "小川町七夕まつり",
+    "jalan_lrg_code": "110800",
+    "jalan_lrg_name": "飯能"
   },
   {
     "qid": "Q20043629",
@@ -1512,7 +1542,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "宮城県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "なとり夏まつり"
+    "wikipedia_title": "なとり夏まつり",
+    "jalan_lrg_code": "040200",
+    "jalan_lrg_name": "仙台"
   },
   {
     "qid": "Q21653325",
@@ -1540,7 +1572,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "宮城県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "天空のゆりガーデン"
+    "wikipedia_title": "天空のゆりガーデン",
+    "jalan_lrg_code": "040200",
+    "jalan_lrg_name": "仙台"
   },
   {
     "qid": "Q21652456",
@@ -1568,7 +1602,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "埼玉県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "長幡部神社 (上里町)"
+    "wikipedia_title": "長幡部神社 (上里町)",
+    "jalan_lrg_code": "111400",
+    "jalan_lrg_name": "本庄・熊谷"
   },
   {
     "qid": "Q110191727",
@@ -1596,7 +1632,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "東京都",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "御笏神社"
+    "wikipedia_title": "御笏神社",
+    "jalan_lrg_code": "139800",
+    "jalan_lrg_name": "伊豆七島・小笠原"
   },
   {
     "qid": "Q114884345",
@@ -1608,7 +1646,9 @@
     "description": "大鳥美波比神社は、大阪府堺市南区にある神社で、大鳥大社の摂社として古くから信仰を集めています。この神社の由来は明確には記されていませんが、大鳥大社の関連社としての位置づけから、古代の国造り神話や地域の守護神としての役割を担ってきたと考えられています。神社名の「美波比」は、古語で「みなび」または「みなひ」と読み、水の流れや豊かな恵みを象徴する表現と関連する説もあり、地域の水辺との深いつながりがうかがえます。\n\nこの神社の最も注目すべき特徴は、毎年10月の第3金曜日から日曜日にかけて開催される「堺だんじり祭」における役割です。祭りの中心である大鳥大社の本宮に加え、大鳥美波比神社も宮入りの重要な舞台となっており、数基のだんじりが神社境内に曳き込まれ、激しい勢いと技を披露します。境内では、神事や奉納演芸も行われ、地元住民の信仰と活力が息づく様子が伝わります。だんじりの曳き合いは、神社の境内を狭い路地や石段を駆け抜ける迫力ある光景で、観光客にも大きな衝撃を与えます。\n\n開催時期は秋の実りの季節にあたり、堺市内の他の神社と連動して行われるため、数日間にわたって各地で祭りが繰り広げられます。規模としては、大鳥大社を含む一連の祭りは関西有数の伝統行事として知られ、多くの来場者でにぎわいます。大鳥美波比神社は、その立地と歴史的背景から、地域の文化継承を支える重要な拠点であり、だんじり祭の魅力を深く体感できる場所です。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "273800",
+    "jalan_lrg_name": "大阪南部（堺・岸和田・関西空港）"
   },
   {
     "qid": "Q114045450",
@@ -1664,7 +1704,9 @@
     "description": "福井県の新鞍神社は、地名「新鞍」に由来するご神体をまつる小さな神社で、地域の守り神として古くから崇敬されてきたと考えられます。神社名の「新鞍」には、古代の鞍作業に関連する職能や、交通の要所としての意味が含まれる可能性があり、地元の生活や移動の安全を守る神格が信仰の背景にあるかもしれません。祭礼や行事については、地域の伝承や農耕行事と連動した形で、春や秋の収穫期に近い時期に、地元住民が中心となって行われる小さな祭りが開催されることが一般的です。規模は地元中心のもので、地域のつながりを深める役割を果たしていると考えられます。",
     "date": "日付未定",
     "coordinate_prefecture": "京都府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "200500",
+    "jalan_lrg_name": "若狭"
   },
   {
     "qid": "Q135039309",
@@ -1676,7 +1718,9 @@
     "description": "愛知県にある「畠田神社」は、その名前から農耕や土地の豊かさに関わる信仰が根付いていた可能性が考えられる神社です。神社名に「畠田」が含まれることから、かつてこの地域が田畑の開発や農業の中心地であった背景がうかがえます。日本の伝統的な神社では、地域の産業や生活に密着した神様をまつり、その恵みに感謝する祭りが行われることが多いですが、この神社においても、収穫や豊作を願うような地域固有の祭礼が、古くから続けられてきたと考えられます。現在も、地元住民の信仰の対象として、静かに営まれている可能性があります。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q135039147",
@@ -1688,7 +1732,9 @@
     "description": "「辛国神社」という名称から、古代の「辛国（からくに）」という地名や、その地域に伝わる神格との関連が推測される神社であり、大阪府内に位置する小さな地域の氏神様をまつる神社と考えられます。神社名に「辛」という字が含まれることから、土地の開発や農耕、あるいは海路の安全を守る信仰が背景にある可能性もあり、地元住民による伝統的な祭礼が継承されてきたものと見られます。規模は比較的小規模で、地域の交流の場としての役割も果たしており、春や秋の定例祭など、季節の移り変わりに合わせた祈願行事が行われる傾向があります。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "273200",
+    "jalan_lrg_name": "上本町・天王寺・市内南部"
   },
   {
     "qid": "Q135039297",
@@ -1700,7 +1746,9 @@
     "description": "愛知県に所在する「合祀：畠田神社」は、地名「畠田」に由来する神社で、地域の守り神として古くから崇敬されてきたと考えられます。神社名の「畠田」は、かつての田畑や耕作地を連想させ、農耕の守護や豊作を願う信仰が根付いていた可能性があります。神社の祭礼や行事については、地域の伝統や季節の移り変わりに合わせて行われる一般的な祭典の流れに沿って、地元住民の手で継承されてきたと見られ、春の豊作祈願や秋の収穫感謝といった、農耕文化に深く根ざした信仰の形がうかがわれます。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q135041278",
@@ -1712,7 +1760,9 @@
     "description": "麻為比売神社は、和歌山県和歌山市秋月に鎮座する神社で、主祭神は麻為比売命（あさひめのみこと）です。この神社の由来は古く、『和歌山市史』や地元の伝承によれば、古代の豪族・阿倍氏の祖神として崇敬されてきたとされ、秋月の地における信仰の中心的な存在です。神社周辺には古くから「秋月の里」としての集落が形成され、地域の歴史や文化と深く結びついてきました。境内には参道や社殿の他、境内社として幾つかの小祠も祀られており、地元住民の日常生活に寄り添った、穏やかな神社の雰囲気が特徴です。\n\n行事については、毎年10月中旬頃に「秋月神社祭」（通称・秋月祭）が行われ、地域の伝統行事として長く継承されてきました。祭礼では、地元の子どもたちが担ぐ稚児行列や、地元有志による盆踊り、地元特産の果物や農産物を販売する屋台が並ぶなど、地域密着型の温かい雰囲気の中で催されます。また、神社の境内には梅の名所としても知られ、春には梅の花と社殿のコントラストが美しい風景が広がります。特に「梅の花祭」の時期には、境内の梅林が見頃を迎え、地元の文化活動や観光と連携したイベントが行われることもあります。祭典の規模はそれほど大きくありませんが、地元住民の強い関心と支えにより、代々受け継がれてきた、落ち着いた雰囲気の祭りです。交通の便はやや不便な場所にありますが、その分、静けさと歴史に触れられる、非日常的な体験が得られる神社です。",
     "date": "日付未定",
     "coordinate_prefecture": "和歌山県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "273800",
+    "jalan_lrg_name": "大阪南部（堺・岸和田・関西空港）"
   },
   {
     "qid": "Q135040253",
@@ -1724,7 +1774,9 @@
     "description": "石川県の高向神社は、地名「高向」に由来する古くから地域に根ざした神社であり、地元の信仰の中心として長く親しまれてきたと考えられます。神社名から推測されるように、かつてこの地が「高き地」や「向かう道」に関連した場所であった可能性があり、旅人や農耕・漁業に従事する人々の安全や豊穣を願う祭りが伝わってきたかもしれません。日本の地方神社に共通して見られるように、春秋の祭典や地域の伝統行事を通じて、住民の結束と文化の継承が図られてきたと考えられます。",
     "date": "日付未定",
     "coordinate_prefecture": "福井県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "192600",
+    "jalan_lrg_name": "加賀・小松・辰口"
   },
   {
     "qid": "Q135039159",
@@ -1736,7 +1788,9 @@
     "description": "「大鳥美波比神社」という名称から、古くから「大鳥」や「美波比」（みなひ）といった地名や、水の神、船の守護、あるいは鳥の神格に関連する信仰が根付いていた地域に鎮座する神社であると考えられます。大阪府の河内地域や摂津地域では、古代から河川や運河の交通・灌漑の要所として発展し、水神や船頭の守護神としての祭祀が盛んでした。このような背景を踏まえ、同神社も地域の安全や航海の安全、豊作を願う祭礼が伝わってきた可能性があります。祭典は、地域の歴史や風土に応じて、春や秋の定例祭、あるいは水に関わる時期に開催される伝統行事が行われてきたと推測されます。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "273800",
+    "jalan_lrg_name": "大阪南部（堺・岸和田・関西空港）"
   },
   {
     "qid": "Q135039294",
@@ -1748,7 +1802,9 @@
     "description": "愛知県にある「畠田神社」は、実は三重県多気郡多気町仁田に所在する神社であり、愛知県内には同名の神社は存在しないことが確認されています。このため、愛知県における「畠田神社」に関する具体的な由来や行事の情報は、現時点で公的な記録や文献において明確に示されていません。Wikidata上では三重県の仁田に位置する神社として記載されているのみで、祭神や創建年代、祭礼の内容、開催時期などの詳細な情報は公表されていません。そのため、愛知県に実際に存在する「畠田神社」について、具体的な歴史的背景や行事の特徴を述べることは困難です。神社名が似ている他の神社や、地域で俗称される施設と混同されている可能性もありますが、現段階で信頼できる情報源において、愛知県内の「畠田神社」に関する正確な事実が確認できない状況です。神社の詳細を知りたい場合は、当地の観光協会や市町の公式ウェブサイト、あるいは神社自身への直接問い合わせが最も確実な方法となります。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q132860355",
@@ -1791,7 +1847,9 @@
     "description": "大阪府に位置する「等乃伎神社」は、地名「等乃伎」に由来する古くからある地域の氏神様をまつる神社です。神社名の「等乃伎」は、古語で「等しい」「調和する」といった意味を持つ語が語源とされ、地域の平穏や調和を願う信仰の表れとされています。神社の祭礼や行事については、地元住民による伝統的な祭りが行われている可能性がありますが、具体的な名称や時期については公的な記録が限られています。境内には、地域の歴史や生活に深く根ざした信仰の痕跡が色濃く残っているとされ、地元の皆さんの日常的な参拝や、地域のつながりを大切にする祭りの雰囲気が感じられる場所です。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "273800",
+    "jalan_lrg_name": "大阪南部（堺・岸和田・関西空港）"
   },
   {
     "qid": "Q135040625",
@@ -1803,7 +1861,9 @@
     "description": "京都府にある浅間神社は、その名前から富士山信仰や火山の神、特に浅間大神を祭る神社である可能性が考えられます。浅間神社という名称は、全国に点在し、その多くが山岳信仰や水守りの神としての側面を持つとされています。京都の地に位置するこの神社も、地域の自然環境や歴史的背景に応じて、守りの神として親しまれてきたものと推測されます。祭礼については、各地の浅間神社で見られるような、春や秋の時期に開催される伝統的な祭典が行われている可能性があり、地域住民による奉納行事や神輿渡しといった一般的な神社祭りの様子が想定されます。",
     "date": "日付未定",
     "coordinate_prefecture": "兵庫県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "264500",
+    "jalan_lrg_name": "丹後・久美浜"
   },
   {
     "qid": "Q135039284",
@@ -1815,7 +1875,9 @@
     "description": "「合祀：鳥墓神社」という名称から、同神社が鳥という自然の存在や、あるいは「鳥」の字を含む地名に由来する可能性が考えられます。愛知県内には「鳥墓」という地名が存在し、その由来には古くから伝わる地域の信仰や風土が反映されているかもしれません。神社の祭礼や行事については、一般的に地域の豊穣や安全を願う伝統的な祭りが行われていることが多く、地元住民の生活と深く結びついた信仰の場として機能していると考えられます。鳥を象徴する神格や、鳥居にちなんだ信仰も、名称から連想される要素の一つです。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q135039310",
@@ -1841,7 +1903,9 @@
     "description": "鳥取県の日本海沿いに位置する「坐波夜都武自和気神社」は、その名に「波」や「夜」、「和気」を含むことから、海の神や風雨の神、あるいは地域の調和を司る神格を祀る可能性が考えられます。名称の「坐波夜都武自」は、古語で「波に坐す夜の神」や「波を鎮める武の神」などと解釈されることがあり、航海の安全や漁業の豊漁を願う信仰の対象となったと考えられます。神社の規模や祭礼の詳細は明確ではありませんが、沿岸部の神社として、地域の安全や豊かさを願う伝統的な祭りが行われてきた可能性があります。",
     "date": "日付未定",
     "coordinate_prefecture": "島根県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "310800",
+    "jalan_lrg_name": "米子・大山"
   },
   {
     "qid": "Q135039250",
@@ -1853,7 +1917,9 @@
     "description": "兵庫県神戸市に鎮座する神戸神社は、古くから港町・神戸の守り神として崇敬されてきた神社です。名称から、地域の守護や海の安全、商工業の繁栄を願う信仰が根付いていることがうかがえます。神戸の街は歴史的にも外国との交流の窓口として発展し、その文化の多様性が神社の雰囲気にも反映されている可能性があります。神社の祭礼や行事は、地域の伝統や季節の移ろいに合わせて行われ、住民の生活に深く根ざした形で継承されてきたと考えられます。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "280500",
+    "jalan_lrg_name": "尼崎・宝塚・三田・篠山"
   },
   {
     "qid": "Q135039254",
@@ -1935,7 +2001,9 @@
     "description": "「合祀：明星神社」という名称から、この神社が複数の神を一体として祀る「合祀」の形式をとっている可能性が読み取れます。愛知県内に点在する同様の神社と同様に、地域の信仰の変遷や合併の歴史に伴い、異なる神格が統合されて祭祀の対象となったと考えられます。「明星」という語は、天体信仰や光を象徴する神格、あるいは地名に由来するもので、夜空の星や光明を守護する神として親しまれてきた地域の伝承を反映しているかもしれません。神社の祭礼は、一般的に春や秋の定例祭、あるいは地域の産業や収穫にちなんだ行事と連動して行われる傾向があり、住民の生活と密接に結びついた形で継承されてきたと考えられます。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q135040911",
@@ -1947,7 +2015,9 @@
     "description": "鳥取県の「坐御訳神社」は、その名に「坐御訳」という古語を含むことから、地域の信仰の根幹をなす神が鎮座する社であると推察されます。「坐御訳」とは、古くは神がその場に静かに坐し、人々の願いに応じて導きや判断を下す存在として尊ばれた概念であり、地元の安寧や豊作、安全を願う信仰の対象となった可能性があります。神社の所在地や周辺の地理的特徴から、農村や漁村の信仰の中心として長きにわたり地域社会に寄り添ってきたと考えられ、地域の伝統行事や祭礼においても、その神の御加護を仰ぐ形で、自然や生活に感謝する姿勢が色濃く反映されているかもしれません。",
     "date": "日付未定",
     "coordinate_prefecture": "島根県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "310800",
+    "jalan_lrg_name": "米子・大山"
   },
   {
     "qid": "Q135039306",
@@ -1959,7 +2029,9 @@
     "description": "三重県にある相生神社は、その名前に「相生」という言葉を含むことから、男女の調和や縁結び、あるいは自然との共生といったテーマが関連付けられる神社であると考えられます。神社名に見られる「相生」は、古くから日本で重んじられてきた陰陽調和の思想や、地域の自然環境との共生を表す語として用いられた可能性があります。祭礼や行事については、各地域の風土や歴史に応じて多様な形で行われていることが一般的ですが、相生神社においても、地元住民の信仰の対象として、季節の移り変わりや地域の安寧を願う伝統的な祭りが継承されてきたと推測されます。神社の規模や歴史的背景については、現時点で公にされている具体的な情報は限られています。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "240800",
+    "jalan_lrg_name": "津・久居・美杉・松阪"
   },
   {
     "qid": "Q135039452",
@@ -1971,7 +2043,9 @@
     "description": "「合祀：北桑名神社」という名称から、愛知県桑名市（旧北桑名町）の地域に伝わる神様が祀られていることがうかがえます。「合祀」という語は、複数の神を一つの社殿に集めて祭る形態を示すもので、地域の信仰の変化や統合に伴って設けられた可能性があります。神社名に「北桑名」と含まれることから、かつての北桑名地域の共同体が中心となって守り育んできた地元の神様が対象と考えられ、地域の安全や豊作、人々の営みの基盤として historically 重要な存在であったと推測されます。このような神社では、地域の祭りとして、季節の移り変わりや農作業の節目ごとに、住民が協力して行う伝統的な祭礼が行われる傾向があります。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "230200",
+    "jalan_lrg_name": "名古屋"
   },
   {
     "qid": "Q135039361",
@@ -2207,7 +2281,9 @@
     "description": "滋賀県大津市に鎮座する大津神社は、地名の由来となった「大津」の地に古くから崇敬されてきた神社であり、地域の守り神としての役割を担ってきたと考えられています。神社名に「大津」と冠することから、古代の交通の要所・港町としての歴史と深く結びついている可能性が窺えます。祭礼や行事については、地域の伝統や自然の恵みに感謝する一般的な祭りの流れに沿って、春や秋の時期に地域住民が参加する形で行われてきたと見られますが、その具体的な様子は各時代や地域の変遷により変化してきたと考えられます。神社の境内や周辺には、地元の風土や信仰が息づく静かな雰囲気が漂っています。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "250200",
+    "jalan_lrg_name": "大津"
   },
   {
     "qid": "Q135039315",
@@ -2247,7 +2323,9 @@
     "description": "兵庫県の黒野神社は、地名に由来する「黒野」という名称から、かつての森林や土地の特徴と関連する信仰が根付いていた可能性が考えられます。神社の祭神や歴史的経緯については明確な記録が残っていないため、具体的な由来や祭典の詳細は断定できませんが、地域の自然環境や人々の生活に深く根ざした、いわゆる「地鎮神」や「産土神」としての側面が強かったと考えられます。神社の祭礼は、地域の農作業の節目や季節の移り変わりに合わせて行われる伝統的な行事が中心であり、地域住民の協力によって継承されてきたものと推測されます。",
     "date": "日付未定",
     "coordinate_prefecture": "兵庫県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "281200",
+    "jalan_lrg_name": "香住・浜坂・湯村"
   },
   {
     "qid": "Q135040761",
@@ -2329,7 +2407,9 @@
     "description": "大阪府に位置する陶荒田神社は、地名に由来する「陶荒田」の語から、かつて陶磁器の生産や関連の産業が盛んだった地域に鎮座する神社であると推察されます。神社名に「荒田」と含まれることから、開墾や農耕の神、あるいは陶土の採掘・焼成を守る地域の守護神として、古くから村民の信仰を集めてきた可能性があります。神社の祭礼は、地域の豊作や産業の繁栄を願う一般的な年中行事に則って行われ、地元住民の手によって継承されてきたと考えられます。規模や祭典の詳細については公開された情報が限られていますが、地域の歴史と深く結びついた、静かな存在感を放つ神社であると見られます。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "273800",
+    "jalan_lrg_name": "大阪南部（堺・岸和田・関西空港）"
   },
   {
     "qid": "Q135039157",
@@ -2341,7 +2421,9 @@
     "description": "大阪府に所在する「合祀：櫻井神社」は、名称から「合祀」の形態をとる神社であることがうかがえ、複数の神を一体として祭る伝統的なあり方を示していると考えられます。「櫻井」という地名には、古くから桜の木が繁っていたり、井戸や水源と関連した地形的特徴が反映されている可能性があり、自然崇拝や地元の生活と深く結びついた信仰の背景がうかがわれます。神社の祭礼や行事については、地域の歴史や風土に応じて、春の豊作祈願や秋の収穫感謝といった一般的な年中行事が行われているケースが多く見られ、地元住民による伝統的な継承が続けられている可能性があります。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "273800",
+    "jalan_lrg_name": "大阪南部（堺・岸和田・関西空港）"
   },
   {
     "qid": "Q132858753",
@@ -2367,7 +2449,9 @@
     "description": "三重県の相鹿上神社は、地名に由来する「相鹿」という古語にちなんだ名称を持つ神社で、地域の信仰の中心として長く親しまれてきたと考えられます。神社名に「上」が含まれることから、周辺に同系の神社が存在し、その序列や位置関係を示す可能性があります。祭礼や行事については、地域の伝統に根ざした形で、 Harvest 時期や季節の節目などに合わせて行われる可能性があり、地元住民による温かく穏やかな祭りの雰囲気が漂うでしょう。神社の境内には、自然の恵みや地域の安寧を願う祈りが込められた、控えめながらも荘厳な空間が広がっています。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "240800",
+    "jalan_lrg_name": "津・久居・美杉・松阪"
   },
   {
     "qid": "Q135038739",
@@ -2408,7 +2492,9 @@
     "description": "「合祀：北桑名神社」という名称から、愛知県桑名市北部に位置し、かつて複数の神社が合祀された形跡のある神社であることがうかがえます。「北桑名」という地名は、かつての桑名郡の北部にあたる地域を指すもので、古くから交通や交易の要衝として発展した可能性があります。神社名に「合祀」とあることから、地域の信仰の集約や行政的な神社合併の影響を受けた歴史を持つと考えられ、地元住民の信仰の中心として、四季折々の伝統行事や地域の安寧・豊作を願う祭りが行われてきたと推測されます。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "230200",
+    "jalan_lrg_name": "名古屋"
   },
   {
     "qid": "Q135040906",
@@ -2420,7 +2506,9 @@
     "description": "鳥取県に所在する「同社坐大穴持御子神社」は、その名称に「大穴持」と「御子」という語を含むことから、古くから地元で信仰された地域の守護神や、開拓・繁栄を司る神格に由来する可能性が考えられます。神社名に「御子」とあることから、男神の子神あるいは神の子孫にあたる神を主祭神とする伝統も想定されます。鳥取県の山間や沿岸部に見られるような、農耕や漁業の安全を願う地域的な祭りの流れの中で、地元住民によって代々受け継がれてきた祭礼が行われていると推測されます。神社の規模や祭典の形式については、地域の歴史や人口規模に応じて、比較的規模の小さな伝統的祭りとして営まれているケースが多いとされています。",
     "date": "日付未定",
     "coordinate_prefecture": "島根県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "310800",
+    "jalan_lrg_name": "米子・大山"
   },
   {
     "qid": "Q135040905",
@@ -2432,7 +2520,9 @@
     "description": "鳥取県東部の若桜町に鎮座する坐大穴持神社は、地名に由来する「坐」（すわ）の字から、古くからその地に鎮座する神として崇敬されてきた可能性が考えられます。「大穴持」の神名は、日本書紀や古事記に見られる国造りの神「大穴持命」（おおなむちのみこと）と関連づけられることがあり、農耕や産業、交通の守護神として地域の繁栄を願う信仰の対象となったと考えられます。神社の祭礼や行事については、地域の伝承や歴史的記録が限られているため詳細は不明ですが、地方の小規模な神社として、地元住民による伝統的な祭りが継承されてきたものと推察されます。",
     "date": "日付未定",
     "coordinate_prefecture": "島根県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "310800",
+    "jalan_lrg_name": "米子・大山"
   },
   {
     "qid": "Q135193370",
@@ -2444,7 +2534,9 @@
     "description": "群馬県に所在する「長幡部神社 旧社地」は、古くから地域の信仰の対象となった神社の一つであり、その名前には「長幡」という語が含まれることから、広大な神域や豊かな自然に囲まれた歴史的な背景がうかがわれます。旧社地という名称から、現在の社殿とは異なる場所にかつて本社が鎮座していたことが伺え、地域の信仰の移り変わりや歴史的変遷を物語る存在です。神社の周辺では、伝統的な農耕や自然の恵みへの感謝を祝う地域の祭りが、時代を経て継承されてきた可能性があります。",
     "date": "日付未定",
     "coordinate_prefecture": "埼玉県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "092000",
+    "jalan_lrg_name": "藤岡・碓氷・磯部・妙義"
   },
   {
     "qid": "Q135186732",
@@ -2456,7 +2548,9 @@
     "description": "愛知県に所在する須伎神社は、地名「須伎」に由来する古くから地域の守り神として崇敬されてきた神社です。「須伎」という地名には「水の流れが静かで清らかな場所」という意味が込められており、水の神や地の神としての側面が想定されます。神社の祭礼は、地域の農耕や漁業の豊穣、住民の安全を願う伝統的な行事と深く結びついている可能性があります。春や秋の定例祭では、地元住民による奉納芸能や神輿の渡御が行われるケースが多く、地域の連帯感を育む重要な場となっています。祭典の規模や形式は、周辺の神社や地域の歴史的背景に応じて多様な形で継承されてきたと考えられます。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q135193681",
@@ -2468,7 +2562,9 @@
     "description": "福井県にある「（合祀）八幡神社」は、名称から八幡信仰に由来する神社であると推測される。八幡神は、武運や国家安泰、産業発展などを司る神格として広く崇敬されており、特に東国や北陸地方では地域の守護神として親しまれている傾向がある。神社名に「合祀」との表記が含まれることから、かつて別の神社や神仏習合の形態で祭祀されていた神祇が統合された歴史を持つ可能性が考えられる。北陸の冬の厳しさや歴史的背景を背景に、地域の信仰の営みは長く続いていると見られ、春や秋の定期祭や、地域の行事に合わせた簡素な祭礼が行われてきたと推定される。",
     "date": "日付未定",
     "coordinate_prefecture": "滋賀県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "200500",
+    "jalan_lrg_name": "若狭"
   },
   {
     "qid": "Q135186398",
@@ -2480,7 +2576,9 @@
     "description": "愛知県内に伝わる「根倉神社跡」という名称から、かつて当地に存在していた神社であることがうかがえます。「根倉」の地名は、古くからこの地域の自然環境や住民の営みと深く結びついた名称であり、神社の祭神や由来も、その土地特有の信仰や風土に根ざしたものであったと考えられます。神社跡として現存するものは、現在では主に境内地や石碑、あるいは地元の伝承を通じてその痕跡をしのぶことができるかもしれません。地域の祭りや行事においても、こうした歴史的な神社の存在が、地域のアイデンティティや伝統の継承に何らかの形で影響を与えている可能性があります。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q135098896",
@@ -2604,7 +2702,9 @@
     "description": "愛知県にある「畠田神社」は、地名に由来する名称を持つ地域の氏神様をまつる神社と推察されます。「畠田」という地名は、かつて畑や田んぼが広がっていた土地を示すもので、農耕の守り神や土地の開発・繁栄を願う信仰が根付いていた可能性があります。神社の祭礼や行事は、地域の伝統や季節の移り変わりに合わせて行われるものが一般的で、春の祈年祭や秋の豊作感謝の祭りなど、農作業の節目と結びついた形で営まれてきたと考えられます。参拝者は、地域の安寧や五穀豊穣、家内安全を願って日々の生活に根ざした信仰を寄せる場として、静かな存在感を保っているでしょう。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q135185436",
@@ -2644,7 +2744,9 @@
     "description": "三重県に所在する「佐那神社（合祀）」は、地名「佐那」に由来する神社であり、合祀の形態をとっていることから、複数の神霊が一体となってまつられている可能性が考えられます。神社名に「佐那」という地名が用いられていることから、地域の歴史や風土と深く結びついた信仰が根付いていると考えられ、近隣の住民による伝統的な祭礼や年中行事が行われてきたと推測されます。日本の神社において、合祀は地域の統合や信仰の継承を目的とする場合が多く、その祭典は、地域の安全や豊作、人々の平穏を願う形で営まれてきた傾向があります。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "240800",
+    "jalan_lrg_name": "津・久居・美杉・松阪"
   },
   {
     "qid": "Q135186709",
@@ -2712,7 +2814,9 @@
     "description": "愛知県内に伝わる「長倉神社」は、地名「長倉」に由来する地域の氏神として、古くから村民の信仰の対象となってきたと考えられます。神社名から推測されるように、かつての長倉地区の住民が守り神として崇敬を寄せ、地域の安寧や豊作、安全を祈願してきた可能性があります。神社の祭礼は、多くの地方の氏神信仰と同様に、地域の歴史や風土に根ざした形で継承されてきたと見られ、春や秋の定例祭、あるいは地域固有の行事を通じて、住民の連帯と伝統の継承が図られてきたと考えられます。現在に至るまで、その役割は地域の精神的支えとして、静かに続けられてきたものと推察されます。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "230200",
+    "jalan_lrg_name": "名古屋"
   },
   {
     "qid": "Q135070197",
@@ -2766,7 +2870,9 @@
     "description": "愛知県内に伝わる「畠田神社 旧社地」という名称から、かつて畠田という地名の信仰の中心だったことがうかがえる神社です。神社名に「畠田」が含まれることから、開墾や農耕に関わる地域の歴史や、土地の開発に深くかかわった人物や神格が由来している可能性があります。旧社地という表記は、現在の社殿が別の場所に移転・再建されたことを示唆しており、地域の変遷や信仰の継承が背景にあると考えられます。このような神社では、地域の豊作や安全を願う祭りが古くから行われてきたとされ、住民の生活に根ざした伝統的な行事が継承されてきた可能性があります。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q135186194",
@@ -2778,7 +2884,9 @@
     "description": "三重県に所在する「相鹿上神社（合祀）」は、その名称に「相鹿」という地名と「上」の字が含まれることから、地域の古くからの信仰の中心として、あるいは地形的な位置関係から上位の社として崇敬されてきた可能性があります。合祀の形態をとることから、複数の神霊が一体としてまつられ、地域の調和や繁栄を願う信仰の対象となっていると考えられます。神社の祭礼は、地域の農耕行事や季節の移り変わりに合わせて行われることが多く、住民の生活と深く結びついた形で継承されてきた伝統的な祭りの一つであると推測されます。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "240800",
+    "jalan_lrg_name": "津・久居・美杉・松阪"
   },
   {
     "qid": "Q135186660",
@@ -2804,19 +2912,23 @@
     "description": "愛知県内に伝わる「畠田神社 旧社地」という名称から、かつて畠田（はただ）という地名や、畑を耕す人々の信仰が根付いていた地域に、農耕や土地の豊かさを願って営まれた神社があったと考えられます。神社名に「畠田」とあることから、田畑の開墾や収穫を守る神格、あるいは地域の開発に関わる人物が祭られている可能性があります。旧社地とされる場所には、現在では社殿がなく、地元の伝承や石碑などによってその存在が伝えられているケースが多く、地域の歴史をたどる上で貴重な痕跡となることがあります。春や秋の農作業の節目には、近隣で行われる伝統的な祭礼に、かつてこの神社が関与していたかもしれません。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q135099013",
     "label_ja": "出雲岡神社",
     "label_en": "Izumowokano Shrine",
-    "prefecture": "島根県",
+    "prefecture": "愛媛県",
     "latitude": 33.851268,
     "longitude": 132.786913,
     "description": "島根県出雲市にある「出雲岡神社」は、古くから「出雲」の地に鎮座する神社として知られ、その名前には「岡」の字が示すように、やや高台に位置する地形的特徴が反映されていると考えられます。出雲地域は、古事記や日本書紀において大国主神が国譲りの際に活躍する「国譲り」の舞台とされ、神々の交流や縁結びの信仰が根付いている地域です。神社の祭礼は、地域の伝統や季節の移り変わりに合わせて行われることが多く、参拝者にとって心落ち着く場所として親しまれています。周囲の自然環境や歴史的背景を背景に、地元の方々の信仰の対象として、静かな威厳を保ちながら脈々と受け継がれてきた神社です。",
     "date": "日付未定",
     "coordinate_prefecture": "愛媛県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "380200",
+    "jalan_lrg_name": "松山・道後"
   },
   {
     "qid": "Q135186324",
@@ -2856,7 +2968,9 @@
     "description": "愛知県にある「大口神社（論社を合祀）」は、その名称から、かつて存在した「論社」という神社を合祀した形跡がうかがえる。合祀の背景には、地域の信仰の集約や行政的な統合といった歴史的経緯が考えられ、神社の由来は明確には伝えられていない。祭礼や行事については、地域の伝統に根ざした一般的な神社祭事の流れを踏襲している可能性があり、春や秋の定期祭、地域住民による奉納行事などが行われていると見られる。神社の規模や祭神は特定されておらず、地元の信仰の対象として静かに営まれている様子がうかがえる。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q135186284",
@@ -2868,7 +2982,9 @@
     "description": "三重県にある「幸神社（合祀）」は、名称に「幸（さいわい）」という言葉を含むことから、地域の繁栄や人々の幸せを願う信仰が根付いている可能性が考えられます。合祀という表記から、複数の神を一体としてまつる形態であることがうかがえ、地元の歴史や風土に深く根ざした、比較的小規模な地域の神社であると推測されます。神社の祭礼や行事は、地域の農作業の節目や季節の移り変わりに合わせて行われる傾向があり、住民の生活と密接に結びついた形で継承されてきたと考えられます。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "241000",
+    "jalan_lrg_name": "伊勢・二見"
   },
   {
     "qid": "Q135186320",
@@ -2880,7 +2996,9 @@
     "description": "愛知県内に「竹神社」という名称の神社があるとされるが、現時点で公的な神社一覧や文献に明確な記録が見られないため、具体的な由来や歴史については断定できない。名称から連想されるように、竹を神域の象徴とする信仰や、地域の伝承に竹が関連する要素があった可能性が考えられる。日本の神社では、地名や自然物に由来する社名が多く、その背景には土地の風土や人々の生活に深く根ざした信仰が反映されていることが多い。祭礼や行事についても、地域ごとに異なる形で継承されてきた伝統行事が行われている場合があるが、この神社に特有のものについては確認できない。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q135194345",
@@ -2906,7 +3024,9 @@
     "description": "月山神社は、山形県最上郡山形市にある神社で、月山（がくさん）の信仰の中心として古くから崇敬されてきました。月山は、出羽三山の一つであり、かつては修験道の聖地として知られ、山伏たちが修行の場として登拝した山です。神社の創建は古く、『出羽国風土記』逸文には応神天皇時代の創建と伝えられており、その後、東北地方の山岳信仰や出羽三山信仰の拠点として発展しました。祭神は応神天皇、仁徳天皇、履中天皇の三神で、特に応神天皇を主祭神としています。\n\n行事の特色として、毎年7月1日から3日間にわたり開催される「月山神社夏越大祭」が知られています。この祭りでは、神輿の渡御や山伏による「山伏行列」が行われ、伝統的な修験の様子を今に伝える貴重な行事です。特に7月2日の本祭では、神輿が山形市街を練り歩き、地域の繁栄と無病息災を願います。また、境内には「御手洗池」と呼ばれる清らかな池があり、祭礼の際に神事に使われる水を汲む場所として大切にされています。境内には、江戸時代に建立された本殿や参道の石段など、歴史的な建造物も点在し、信仰と文化の重層が感じられる空間です。\n\n開催時期は主に夏季の夏越大祭が最も盛大ですが、春には「春季大祭」、秋には「秋季大祭」など、年間を通じてさまざまな祭典が行われます。規模は地方の神社としては中規模で、地域住民の信仰の対象として根強く、近年では観光客にも親しまれつつあります。祭りの雰囲気は厳かながらも温かく、伝統を守りながら地域の活力が感じられる貴重な祭典です。",
     "date": "日付未定",
     "coordinate_prefecture": "山形県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "060800",
+    "jalan_lrg_name": "寒河江・月山"
   },
   {
     "qid": "Q135186661",
@@ -2932,7 +3052,9 @@
     "description": "久須須美神社は京都府内にあり、その名前には「久須須美（くすび）」という古語に由来する語形が見られ、これは水や湿気、あるいは豊かな自然と結びついた神格を連想させるものです。神社名から推測されるように、地域の自然環境や水の恵みを守る神様を祭る傾向があり、近隣の山林や川辺との関わりが深い可能性があります。京都の伝統的な神社と同様に、季節の移り変わりや農作業の節目において、地域住民による祈願や感謝の行事が行われてきたと考えられます。祭礼の規模や具体的な行事の内容については、各時代や地域の状況に応じて多様な形で継承されてきたものと見られ、現在も地元の文化や信仰の場として親しまれているでしょう。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "263300",
+    "jalan_lrg_name": "京都南部（宇治・長岡京・山崎）"
   },
   {
     "qid": "Q135099001",
@@ -3028,7 +3150,9 @@
     "description": "福井県にある「日枝神社（合祀）」は、地名や周辺の地形に由来する「日枝」の名称を持つ神社であり、一般的に山の神や守護神として崇敬されてきた可能性があります。合祀という表記から、かつて別の神社や神体と統合された経緯がうかがわれ、地域の信仰の変遷を反映しているとも考えられます。福井県の山間や村落に見られる这样的な神社は、春秋の季節に地域住民による祭礼が行われ、豊作や安全を願う伝統行事が継承されてきたケースが多く、そうした地域の営みと深く結びついていると推測されます。",
     "date": "日付未定",
     "coordinate_prefecture": "滋賀県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "200500",
+    "jalan_lrg_name": "若狭"
   },
   {
     "qid": "Q135098806",
@@ -3040,7 +3164,9 @@
     "description": "京都府にある「御諸神社」は、地名「御諸」に由来する古くから当地を守護する神社とされ、地域の信仰の中心として長く親しまれてきたと考えられています。神社名に「御諸」という表記を用いることは、古代の国造や地名の変遷と関連し、地域の歴史的背景を反映している可能性があります。祭礼や行事については、各地域の神社と同様に、春秋の例祭や地域の豊穣・安全を願う伝統的な祭りが行われていると見られ、住民の生活と密接に結びついた信仰活動が継承されてきたと考えられます。境内には、地域の風土や信仰の変遷を示す古い建築や宝物が残されている場合もあり、地元の文化財としての価値も高いとされています。",
     "date": "日付未定",
     "coordinate_prefecture": "京都府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "260500",
+    "jalan_lrg_name": "京都駅周辺"
   },
   {
     "qid": "Q135098926",
@@ -3066,7 +3192,9 @@
     "description": "久須須美神社の旧社地は、京都府内に所在する神社の一つで、その名称に「久須須美」という古語由来の語が含まれることから、古代の信仰や地域の歴史に根ざした神格を尊ぶ伝統を持つと推測されます。神社の旧社地という位置づけから、現在の社殿とは異なる歴史的な場所であり、地域の信仰の変遷や移転の痕跡を示す重要な場所と考えられます。京都の山間や里山の地に見られるような、自然と調和した静かな環境にあり、地元の住民による伝統的な祭礼や、季節の移り変わりに合わせた祈願行事が、古くから継続されてきた可能性があります。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "263300",
+    "jalan_lrg_name": "京都南部（宇治・長岡京・山崎）"
   },
   {
     "qid": "Q135098974",
@@ -3078,7 +3206,9 @@
     "description": "静岡県浜松市に鎮座する須波若御子神社は、地名「須波」に由来する古くから地域の守り神として崇敬されてきた神社です。「若御子」という神名から、若き神霊や子孫繁栄・成長の守護をイメージさせる名称であり、地域の安寧や農耕・漁業の豊穣を願う信仰の対象となっていると考えられます。神社の境内では、伝統的な祭礼として春や秋の定期祭が行われ、地元住民の参拝や地域のつながりを深める場となっている可能性があります。周囲の自然環境に合わせた祭りの形態や、地域特有の風習が息づいているとも推察されます。",
     "date": "日付未定",
     "coordinate_prefecture": "静岡県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "213500",
+    "jalan_lrg_name": "浜松・浜名湖"
   },
   {
     "qid": "Q135098903",
@@ -3090,7 +3220,9 @@
     "description": "京都府内に「幣久良神社」という名称の神社があるとされる地域では、地名に「幣」の字が含まれることから、古くから神事に用いられる幣束（へいそく）や神聖な供物に関連した信仰が根付いていた可能性が考えられます。神社名に「久良」が用いられる背景については、地形や古語に由来する説が地域伝承として伝えられている場合もあり、その由来には多様な解釈の余地があります。祭礼や行事については、地域の農耕周期や自然の恵みへの感謝を祝う一般的な年中行事と連動した形で、地元住民の手によって伝承されてきたと見られる一方で、具体的な名称や時期については明確な記録が残っていないケースも少なくありません。神社の規模や歴史的背景についても、地方の小さな社として長きにわたり地域の守り神として親しまれてきた可能性が高く、その静かな存在感が地域の風土と調和する形で今も息づいていると考えられます。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "263300",
+    "jalan_lrg_name": "京都南部（宇治・長岡京・山崎）"
   },
   {
     "qid": "Q135069907",
@@ -3116,7 +3248,9 @@
     "description": "三重県内に「佐那神社（合祀）」という名称の神社が存在する可能性について、その名称から推測できる範囲で紹介すると、「佐那」は地名や古語に由来するものとされ、地域の歴史や風土に根ざした信仰の対象となる神格が祭られていると考えられます。「合祀」という表記は、複数の神を一つの社殿で合わせて祭る形態を示すことがあり、地域の信仰の変遷や統合の歴史を反映している可能性があります。神社の祭礼や行事については、各地域の伝統や自然環境に応じて多様な形で行われており、季節の移り変わりや農耕の節目などに合わせた祈願や感謝の儀礼が一般的に見られます。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "240800",
+    "jalan_lrg_name": "津・久居・美杉・松阪"
   },
   {
     "qid": "Q135186214",
@@ -3128,7 +3262,9 @@
     "description": "愛知県内に伝わる「畠田神社（合祀）」は、地名に由来する「畠田」という地名にちなんだ神社と推定され、地域の信仰の中心として長く親しまれてきた可能性があります。合祀という表記から、複数の神や過去の別神社が統合されて現在の形をなしているケースも考えられ、地域の歴史や共同体の変遷を反映した神社であると見られます。此类の神社では、春秋の祭礼や地域の豊作・安全を願う伝統的な儀礼が、地域住民の手によって継承されてきた傾向があります。",
     "date": "日付未定",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "231100",
+    "jalan_lrg_name": "知多"
   },
   {
     "qid": "Q135194567",
@@ -3283,7 +3419,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "猪名川花火大会"
+    "wikipedia_title": "猪名川花火大会",
+    "jalan_lrg_code": "280500",
+    "jalan_lrg_name": "尼崎・宝塚・三田・篠山"
   },
   {
     "qid": "Q48748728",
@@ -3296,7 +3434,9 @@
     "date": "日付未定",
     "coordinate_prefecture": null,
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "江差かもめ島祭り"
+    "wikipedia_title": "江差かもめ島祭り",
+    "jalan_lrg_code": "011400",
+    "jalan_lrg_name": "函館・大沼・松前"
   },
   {
     "qid": "Q48758315",
@@ -3352,7 +3492,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "愛知県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "国府宮はだか祭"
+    "wikipedia_title": "国府宮はだか祭",
+    "jalan_lrg_code": "230800",
+    "jalan_lrg_name": "尾張・犬山・小牧"
   },
   {
     "qid": "Q135195174",
@@ -3392,7 +3534,9 @@
     "description": "岡山県の「御崎神社」は、その名前から海や岬に関連する信仰が根付いている可能性が考えられる神社です。日本では、地形の突き出た部分や海辺の要所に建立される神社が多く、航海の安全や漁業の豊漁、地域の守り神として崇拝されてきました。「御崎」という地名や神名には、自然の厳しさと恵みを象徴する要素が含まれることが多く、そうした背景を踏まえて、地域の生活と深く結びついた信仰の対象として長く親しまれてきたと考えられます。祭礼や行事については、各地域の伝統や自然環境に応じて多様な形で行われてきたと推測され、地元住民による継続的な支えによって、その営みが今に伝えられている可能性があります。",
     "date": "日付未定",
     "coordinate_prefecture": null,
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "330500",
+    "jalan_lrg_name": "倉敷・総社・井笠"
   },
   {
     "qid": "Q135194565",
@@ -3432,7 +3576,9 @@
     "description": "石川県に所在する足羽神社（合祀）は、地名「足羽」に由来する神格を祭る神社と推察されます。合祀の形態から、かつて存在した複数の神社が統合され、地域の信仰の中心として機能してきた可能性があります。神社の祭礼や行事については、一般的に地域の豊作や安全を願う春・秋の祭典が行われるケースが多く、地元住民の連携によって伝承されてきたと考えられます。規模や行事の詳細は明確な記録が残っていないため、具体的な内容に言及することは控えますが、地域の歴史や風土に根ざした、ゆるやかな継承が見られる神社であると推定されます。",
     "date": "日付未定",
     "coordinate_prefecture": "福井県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "192600",
+    "jalan_lrg_name": "加賀・小松・辰口"
   },
   {
     "qid": "Q135194742",
@@ -3444,7 +3590,9 @@
     "description": "石川県に所在する牧岡神社は、足羽神社の境内に合祀されている神社であり、その名前から、かつて地域の牧畜や農耕に関わる信仰が根付いていた可能性がうかがえます。「牧岡」という地名や神名には、放牧地や丘陵地帯にまつわる自然崇拝の痕跡が見られることが多く、こうした神社は、地域の生活と密接に結びついた守り神として、古くから崇敬されてきたと考えられます。合祀という形をとっていることから、近代以降の神社合併の流れに伴うものであり、現在では足羽神社の祭祀活動の一環として、地域の信仰の継承が続けられているものと推測されます。",
     "date": "日付未定",
     "coordinate_prefecture": "福井県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "192600",
+    "jalan_lrg_name": "加賀・小松・辰口"
   },
   {
     "qid": "Q135206688",
@@ -3456,7 +3604,9 @@
     "description": "「旧鎮座地」という名称から、かつて神社が鎮座していたとされる場所であることが読み取れます。大阪府内の該当地では、地名に「鎮座地」が残るケースがあり、これは古くから信仰の対象となった神が祀られていた跡地を示す可能性があります。神社の鎮座地が後年に移転・廃止された背景には、戦国期の戦乱や近世の統治体制の変化など、時代の流れによる影響も考えられます。現在では、その土地が神社の起源を伝える地名として残り、地域の歴史や信仰の変遷をうかがい知る手がかりとなっています。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "273800",
+    "jalan_lrg_name": "大阪南部（堺・岸和田・関西空港）"
   },
   {
     "qid": "Q135194703",
@@ -3468,7 +3618,9 @@
     "description": "岐阜県内に伝わる「清瀧神社（合祀）」という名称から、水の神や滝を崇敬する信仰が根付いていた可能性が考えられます。「清瀧」という語は、清らかな滝を表し、その自然現象を神体として崇拝する伝統的な神道信仰の一形態を示唆しています。合祀という表記は、複数の神を一体として祭る形態を示すもので、地域の信仰の変遷や統合の痕跡を反映しているかもしれません。岐阜県は山岳信仰や水神信仰が盛んだった地域であり、こうした神社名は、その自然環境と密接に結びついた信仰のあり方をうかがわせるものです。祭礼や行事については、地域の実情に応じて、収穫や雨水の恵みに感謝するような、一般的な農耕信仰に根ざした形で行われてきたと推測されます。",
     "date": "日付未定",
     "coordinate_prefecture": "福井県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "220600",
+    "jalan_lrg_name": "郡上・美濃・関"
   },
   {
     "qid": "Q135194598",
@@ -3522,7 +3674,9 @@
     "description": "京都府にある幣久良神社の旧社地は、地名に由来する「幣」や「久良」といった語から、古くから水や豊穣に関わる信仰が根付いていた地域の一つと推測されます。神社の旧跡としての性格から、かつては地域の守り神として、農作業の豊作や水害からの守りを願う祭りが行われていた可能性があります。日本の伝統的な神社のあり方として、こうした旧社地では、地元住民による継続的な参拝や、地域の節目となる行事が静かに継承されてきたと考えられます。現在は社殿が残るのみで、具体的な祭礼の様子は明らかになっていませんが、その歴史的背景から、地域の記憶を守る静かな聖域としての価値が認められています。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "263300",
+    "jalan_lrg_name": "京都南部（宇治・長岡京・山崎）"
   },
   {
     "qid": "Q135194764",
@@ -3534,7 +3688,9 @@
     "description": "岐阜県に所在する神明宮は、古くから「神明」という名称で知られ、伊勢神宮の別宮としての性格を持つ神社の一つとされています。名称からうかがえるように、天照大御神をはじめとする神明信仰に由来する祭祀が行われてきたと考えられ、地域の守り神として長きにわたって崇敬されてきた可能性があります。市ノ瀬という地名も含む表記から、かつての村落や交通の要所としての歴史的背景がうかがわれ、その周辺地域の文化や生活に深く根ざした信仰の対象であったと推測されます。神社の祭礼や行事は、地域の年中行事として、住民の協力と継承によって営まれてきたと見られ、季節の移り変わりや農事の節目と結びついた形で、伝統的な祭典が行われてきたと考えられます。",
     "date": "日付未定",
     "coordinate_prefecture": "石川県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "220600",
+    "jalan_lrg_name": "郡上・美濃・関"
   },
   {
     "qid": "Q135195244",
@@ -3583,7 +3739,9 @@
         "end": "06-30",
         "source": "https://www.wikidata.org/wiki/Q11477022#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "162200",
+    "jalan_lrg_name": "松本市（松本駅周辺・浅間・美ヶ原・塩尻）"
   },
   {
     "qid": "Q11450469",
@@ -3856,7 +4014,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "長野県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "松本ぼんぼん"
+    "wikipedia_title": "松本ぼんぼん",
+    "jalan_lrg_code": "162200",
+    "jalan_lrg_name": "松本市（松本駅周辺・浅間・美ヶ原・塩尻）"
   },
   {
     "qid": "Q11547768",
@@ -3927,7 +4087,9 @@
     "description": "大阪府東大阪市にある白鳥神社は、古くから「しらとりじんじゃ」として知られ、当地の産土神として崇敬されてきた神社です。創建は不詳ですが、古くは「白鳥大明神」と称され、飛鳥時代に建立されたという伝承もあり、地域の信仰の中心として長きにわたり人々の生活を支えてきました。社名の由来は、神鹿として知られる白鳥が神の使いとされ、境内には白鳥をかたどった絵馬や装飾が見られるところから、自然と神がつながる信仰が根付いていることがうかがえます。\n\n神社の主な行事として、毎年1月14日に執り行われる「火祭り」が知られています。この火祭りは「松焚き」とも呼ばれ、年末の門松やしめ縄などを集めて大きな焚き火を焚き、その炎に身を清めて無病息災を願う伝統行事です。参拝者は火の前で手を合わせ、一年の無事と豊穣を祈ります。また、境内には「白鳥神社の梅園」があり、2月頃から梅の花が咲き誇り、地元の春の風物詩となっています。梅の花と赤い鳥居のコントラストは写真映えも良く、多くの写真愛好家や家族連れでにぎわいます。\n\n境内には本殿の他、厄除けや安産、子育ての守り神として知られる「子安神社」や「天神社」なども鎮座しており、多様な願いを叶える信仰の場として親しまれています。参道には古くから伝わる露店が並び、地域の特産品や手作りの菓子を味わえることも、訪れる人の笑顔を引き立てています。交通は近鉄大阪線の「八戸井」駅から徒歩約15分と、市街地からも比較的アクセスしやすく、地元住民だけでなく、近隣地域からの参拝者で年間を通じてにぎわいを見せています。",
     "date": "日付未定",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "273200",
+    "jalan_lrg_name": "上本町・天王寺・市内南部"
   },
   {
     "qid": "Q11612066",
@@ -3955,7 +4117,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "徳島県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "葦稲葉神社"
+    "wikipedia_title": "葦稲葉神社",
+    "jalan_lrg_code": "360200",
+    "jalan_lrg_name": "徳島・鳴門"
   },
   {
     "qid": "Q11580506",
@@ -3997,7 +4161,9 @@
     "description": "葛木坐火雷神社は、奈良県生駒市葛木にある神社で、火雷神（ひかみかず）を祭神としており、火災除けや火の神様として古くから信仰を集めてきた。神社の由来は古く、『日本書紀』によれば、垂仁天皇の時代、火災から国を守るため、火雷神を祀ったことが始まりとされる。境内には、国指定重要文化財である本殿や拝殿が残り、江戸時代前期の建築様式を今に伝える貴重な建造物である。また、神社は葛木山の麓に位置し、自然に囲まれた静かな境内は、参拝者に安らぎを与える。\n\n行事としては、毎年2月11日に「火祭り」が行われ、神社の最大の祭典となる。この祭りでは、境内の松明が点火され、炎が空へと昇る様子が壮観で、多くの参拝者が火の神様の加護を求める。松明の炎は、厄除けや無病息災、家内安全の象徴とされ、火を浴びることで罪穢れを祓う「火渡り」の行事も行われる。近年では、夜の松明の炎がライトアップされ、幻想的な光景が広がる。祭り当日は、地元住民や近隣地域からの参拝者が集まり、伝統を守りながら活気に満ちた雰囲気が漂う。神社の境内には、古老的な石段や参道が整備されており、参拝の旅をより荘厳なものにしてくれる。葛木坐火雷神社の祭りは、自然と信仰が深く結びついた日本の伝統文化を体感できる貴重な機会となっている。",
     "date": "日付未定",
     "coordinate_prefecture": "奈良県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "290500",
+    "jalan_lrg_name": "飛鳥・橿原・三輪"
   },
   {
     "qid": "Q11630000",
@@ -4010,7 +4176,9 @@
     "date": "日付未定",
     "coordinate_prefecture": "秋田県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "wikipedia_title": "西馬音内の盆踊"
+    "wikipedia_title": "西馬音内の盆踊",
+    "jalan_lrg_code": "051100",
+    "jalan_lrg_name": "横手・鳥海"
   },
   {
     "qid": "Q11642725",
@@ -4165,7 +4333,9 @@
         "end": "08-11",
         "source": "https://www.wikidata.org/wiki/Q24896695#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "011400",
+    "jalan_lrg_name": "函館・大沼・松前"
   },
   {
     "qid": "Q123143623",
@@ -4195,7 +4365,9 @@
     "wikipedia_title": "木古内町寒中みそぎ祭り",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "北海道",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "011400",
+    "jalan_lrg_name": "函館・大沼・松前"
   },
   {
     "qid": "Q17209319",
@@ -4209,7 +4381,9 @@
     "wikipedia_title": "松前城下時代まつり",
     "coordinate_source": "venue",
     "coordinate_prefecture": "北海道",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "011400",
+    "jalan_lrg_name": "函館・大沼・松前"
   },
   {
     "qid": "Q11579109",
@@ -4603,7 +4777,9 @@
     "wikipedia_title": "ドラゴンカヌー大会 (加美町)",
     "coordinate_source": "festival",
     "coordinate_prefecture": "宮城県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "041100",
+    "jalan_lrg_name": "鳴子・大崎"
   },
   {
     "qid": "Q11428854",
@@ -4633,7 +4809,9 @@
     "wikipedia_title": "東北輓馬競技大会",
     "coordinate_source": "festival",
     "coordinate_prefecture": "宮城県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "041100",
+    "jalan_lrg_name": "鳴子・大崎"
   },
   {
     "qid": "Q38266943",
@@ -4647,7 +4825,9 @@
     "wikipedia_title": "活き生き田園フェスティバル",
     "coordinate_source": "festival",
     "coordinate_prefecture": "宮城県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "040500",
+    "jalan_lrg_name": "松島・塩竈"
   },
   {
     "qid": "Q1133889",
@@ -4685,7 +4865,9 @@
     "wikipedia_title": "一日市の盆踊",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "秋田県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "050800",
+    "jalan_lrg_name": "白神・男鹿"
   },
   {
     "qid": "Q11359427",
@@ -4915,7 +5097,9 @@
     "wikipedia_title": "やや祭り",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "山形県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "061400",
+    "jalan_lrg_name": "酒田・鶴岡"
   },
   {
     "qid": "Q11284894",
@@ -4929,7 +5113,9 @@
     "wikipedia_title": "アマハゲ",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "山形県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "061400",
+    "jalan_lrg_name": "酒田・鶴岡"
   },
   {
     "qid": "Q11294189",
@@ -5123,7 +5309,9 @@
     "wikipedia_title": "都々古別神社の御田植",
     "coordinate_source": "festival",
     "coordinate_prefecture": "福島県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "072800",
+    "jalan_lrg_name": "白河"
   },
   {
     "qid": "Q11431301",
@@ -5418,7 +5606,9 @@
     "wikipedia_title": "樋越神明宮の春鍬祭",
     "coordinate_source": "venue",
     "coordinate_prefecture": "群馬県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "091400",
+    "jalan_lrg_name": "前橋・高崎・伊勢崎・太田･榛名"
   },
   {
     "qid": "Q774193",
@@ -5880,7 +6070,9 @@
     "wikipedia_title": "南沢獅子舞",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "139200",
+    "jalan_lrg_name": "八王子・立川・町田・府中・調布"
   },
   {
     "qid": "Q10860730",
@@ -5894,7 +6086,9 @@
     "wikipedia_title": "原宿表参道元氣祭り・スーパーよさこい",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q141062701",
@@ -5908,7 +6102,9 @@
     "wikipedia_title": "夜間特別開園 たてもの園 下町夕涼み",
     "coordinate_source": "festival",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "139200",
+    "jalan_lrg_name": "八王子・立川・町田・府中・調布"
   },
   {
     "qid": "Q11442189",
@@ -5922,7 +6118,9 @@
     "wikipedia_title": "天下祭",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "136500",
+    "jalan_lrg_name": "お茶の水・湯島・九段・後楽園・東京ドーム"
   },
   {
     "qid": "Q11462421",
@@ -5952,7 +6150,9 @@
     "wikipedia_title": "小金井阿波おどり",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "139200",
+    "jalan_lrg_name": "八王子・立川・町田・府中・調布"
   },
   {
     "qid": "Q218663",
@@ -5966,7 +6166,9 @@
     "wikipedia_title": "山王祭 (千代田区)",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "136800",
+    "jalan_lrg_name": "六本木・麻布・赤坂・青山"
   },
   {
     "qid": "Q22124175",
@@ -5996,7 +6198,9 @@
     "wikipedia_title": "東京ミレナリオ",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "136200",
+    "jalan_lrg_name": "銀座・日本橋・東京駅周辺"
   },
   {
     "qid": "Q11524909",
@@ -6026,7 +6230,9 @@
     "wikipedia_title": "板橋の田遊び",
     "coordinate_source": "festival",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "137700",
+    "jalan_lrg_name": "池袋・目白・板橋・赤羽"
   },
   {
     "qid": "Q11541041",
@@ -6040,7 +6246,9 @@
     "wikipedia_title": "椿祭り (東京都)",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "139800",
+    "jalan_lrg_name": "伊豆七島・小笠原"
   },
   {
     "qid": "Q11550984",
@@ -6054,7 +6262,9 @@
     "wikipedia_title": "江戸三大祭り",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q720663",
@@ -6100,7 +6310,9 @@
         "end": "08-15",
         "source": "https://www.wikidata.org/wiki/Q3090688#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "138900",
+    "jalan_lrg_name": "葛飾・江戸川・江東"
   },
   {
     "qid": "Q11573005",
@@ -6138,7 +6350,9 @@
         "end": "08-02",
         "source": "https://www.wikidata.org/wiki/Q11590475#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "139800",
+    "jalan_lrg_name": "伊豆七島・小笠原"
   },
   {
     "qid": "Q122272702",
@@ -6152,7 +6366,9 @@
     "wikipedia_title": "神田カレーグランプリ",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "136500",
+    "jalan_lrg_name": "お茶の水・湯島・九段・後楽園・東京ドーム"
   },
   {
     "qid": "Q218646",
@@ -6166,7 +6382,9 @@
     "wikipedia_title": "神田祭",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "136500",
+    "jalan_lrg_name": "お茶の水・湯島・九段・後楽園・東京ドーム"
   },
   {
     "qid": "Q28688423",
@@ -6188,7 +6406,9 @@
         "end": "12-14",
         "source": "https://www.wikidata.org/wiki/Q28688423#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "137100",
+    "jalan_lrg_name": "お台場・汐留・新橋・品川"
   },
   {
     "qid": "Q11657228",
@@ -6500,7 +6720,9 @@
     "wikipedia_title": "おぢや風船一揆",
     "coordinate_source": "venue",
     "coordinate_prefecture": "新潟県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "171100",
+    "jalan_lrg_name": "柏崎・寺泊・長岡・魚沼（湯之谷）"
   },
   {
     "qid": "Q28682646",
@@ -6626,7 +6848,9 @@
     "wikipedia_title": "牛の角突き",
     "coordinate_source": "venue",
     "coordinate_prefecture": "新潟県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "171100",
+    "jalan_lrg_name": "柏崎・寺泊・長岡・魚沼（湯之谷）"
   },
   {
     "qid": "Q11579603",
@@ -7204,7 +7428,9 @@
     "wikipedia_title": "水海の田楽・能舞",
     "coordinate_source": "venue",
     "coordinate_prefecture": "福井県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "200300",
+    "jalan_lrg_name": "福井・奥越前"
   },
   {
     "qid": "Q131932035",
@@ -7384,7 +7610,9 @@
     "wikipedia_title": "塩嶺御野立記念祭",
     "coordinate_source": "festival",
     "coordinate_prefecture": "長野県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "162200",
+    "jalan_lrg_name": "松本市（松本駅周辺・浅間・美ヶ原・塩尻）"
   },
   {
     "qid": "Q11443804",
@@ -7398,7 +7626,9 @@
     "wikipedia_title": "天龍村の霜月神楽",
     "coordinate_source": "festival",
     "coordinate_prefecture": "長野県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "162600",
+    "jalan_lrg_name": "伊那・駒ヶ根・飯田・昼神"
   },
   {
     "qid": "Q131919562",
@@ -7412,7 +7642,9 @@
     "wikipedia_title": "宮田祇園祭",
     "coordinate_source": "venue",
     "coordinate_prefecture": "長野県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "162600",
+    "jalan_lrg_name": "伊那・駒ヶ根・飯田・昼神"
   },
   {
     "qid": "Q11476051",
@@ -7442,7 +7674,9 @@
     "wikipedia_title": "新野の雪まつり",
     "coordinate_source": "venue",
     "coordinate_prefecture": "長野県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "162600",
+    "jalan_lrg_name": "伊那・駒ヶ根・飯田・昼神"
   },
   {
     "qid": "Q11530789",
@@ -7456,7 +7690,9 @@
     "wikipedia_title": "松本あめ市",
     "coordinate_source": "venue",
     "coordinate_prefecture": "長野県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "162200",
+    "jalan_lrg_name": "松本市（松本駅周辺・浅間・美ヶ原・塩尻）"
   },
   {
     "qid": "Q11530797",
@@ -7470,7 +7706,9 @@
     "wikipedia_title": "松本のぼんぼん・青山様",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "長野県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "162200",
+    "jalan_lrg_name": "松本市（松本駅周辺・浅間・美ヶ原・塩尻）"
   },
   {
     "qid": "Q11654106",
@@ -7704,7 +7942,9 @@
     "wikipedia_title": "真桑人形浄瑠璃",
     "coordinate_source": "festival",
     "coordinate_prefecture": "岐阜県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "221100",
+    "jalan_lrg_name": "岐阜・大垣・養老"
   },
   {
     "qid": "Q11603435",
@@ -7734,7 +7974,9 @@
     "wikipedia_title": "能郷の能・狂言",
     "coordinate_source": "festival",
     "coordinate_prefecture": "岐阜県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "221100",
+    "jalan_lrg_name": "岐阜・大垣・養老"
   },
   {
     "qid": "Q6430768",
@@ -7884,7 +8126,9 @@
     "wikipedia_title": "小國神社の田遊び",
     "coordinate_source": "venue",
     "coordinate_prefecture": "静岡県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "213200",
+    "jalan_lrg_name": "大井川・寸又峡・川根"
   },
   {
     "qid": "Q11467613",
@@ -7898,7 +8142,9 @@
     "wikipedia_title": "山名神社天王祭舞楽",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "静岡県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "213200",
+    "jalan_lrg_name": "大井川・寸又峡・川根"
   },
   {
     "qid": "Q11498235",
@@ -7912,7 +8158,9 @@
     "wikipedia_title": "掛川祭",
     "coordinate_source": "venue",
     "coordinate_prefecture": "静岡県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "212900",
+    "jalan_lrg_name": "焼津・御前崎・掛川"
   },
   {
     "qid": "Q11590321",
@@ -7958,7 +8206,9 @@
     "wikipedia_title": "遠州横須賀三熊野神社大祭",
     "coordinate_source": "venue",
     "coordinate_prefecture": "静岡県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "212900",
+    "jalan_lrg_name": "焼津・御前崎・掛川"
   },
   {
     "qid": "Q11642131",
@@ -7972,7 +8222,9 @@
     "wikipedia_title": "遠江森町の舞楽",
     "coordinate_source": "festival",
     "coordinate_prefecture": "静岡県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "213200",
+    "jalan_lrg_name": "大井川・寸又峡・川根"
   },
   {
     "qid": "Q11678799",
@@ -8018,7 +8270,9 @@
     "wikipedia_title": "三河の田楽",
     "coordinate_source": "festival",
     "coordinate_prefecture": "愛知県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "230500",
+    "jalan_lrg_name": "三河"
   },
   {
     "qid": "Q86726605",
@@ -8162,7 +8416,9 @@
         "label": "7月の第4土曜日",
         "source": "https://www.wikidata.org/wiki/Q11465312#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "230200",
+    "jalan_lrg_name": "名古屋"
   },
   {
     "qid": "Q28686206",
@@ -8186,7 +8442,9 @@
         "label": "10月の第1日曜日",
         "source": "https://www.wikidata.org/wiki/Q28686206#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "230200",
+    "jalan_lrg_name": "名古屋"
   },
   {
     "qid": "Q11571216",
@@ -8242,7 +8500,9 @@
         "end": "05-03",
         "source": "https://www.wikidata.org/wiki/Q11584632#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "230200",
+    "jalan_lrg_name": "名古屋"
   },
   {
     "qid": "Q3536029",
@@ -8544,7 +8804,9 @@
     "wikipedia_title": "斎王まつり",
     "coordinate_source": "venue",
     "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "240800",
+    "jalan_lrg_name": "津・久居・美杉・松阪"
   },
   {
     "qid": "Q11518609",
@@ -8640,7 +8902,9 @@
         "end": "10-17",
         "source": "https://www.wikidata.org/wiki/Q11255045#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "241000",
+    "jalan_lrg_name": "伊勢・二見"
   },
   {
     "qid": "Q3959472",
@@ -8724,7 +8988,9 @@
         "end": "04-14",
         "source": "https://www.wikidata.org/wiki/Q17226082#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "251700",
+    "jalan_lrg_name": "雄琴・堅田"
   },
   {
     "qid": "Q11653306",
@@ -8922,7 +9188,9 @@
         "end": "09-15",
         "source": "https://www.wikidata.org/wiki/Q11586814#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "263300",
+    "jalan_lrg_name": "京都南部（宇治・長岡京・山崎）"
   },
   {
     "qid": "Q17210764",
@@ -9048,7 +9316,9 @@
     "wikipedia_title": "津久野だんじり祭",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "273800",
+    "jalan_lrg_name": "大阪南部（堺・岸和田・関西空港）"
   },
   {
     "qid": "Q11672570",
@@ -9062,7 +9332,9 @@
     "wikipedia_title": null,
     "coordinate_source": "venue",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "273800",
+    "jalan_lrg_name": "大阪南部（堺・岸和田・関西空港）"
   },
   {
     "qid": "Q11675240",
@@ -9076,7 +9348,9 @@
     "wikipedia_title": null,
     "coordinate_source": "venue",
     "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "273800",
+    "jalan_lrg_name": "大阪南部（堺・岸和田・関西空港）"
   },
   {
     "qid": "Q60996309",
@@ -9090,7 +9364,9 @@
     "wikipedia_title": null,
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "兵庫県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "281100",
+    "jalan_lrg_name": "城崎・竹野・豊岡"
   },
   {
     "qid": "Q11360551",
@@ -9156,7 +9432,9 @@
         "label": "3月の第3土曜日",
         "source": "https://www.wikidata.org/wiki/Q11395759#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "281400",
+    "jalan_lrg_name": "神鍋・鉢伏・養父・和田山"
   },
   {
     "qid": "Q65258470",
@@ -9170,7 +9448,9 @@
     "wikipedia_title": "大生部兵主神社春の大祭",
     "coordinate_source": "festival",
     "coordinate_prefecture": "兵庫県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "281400",
+    "jalan_lrg_name": "神鍋・鉢伏・養父・和田山"
   },
   {
     "qid": "Q11447453",
@@ -9240,7 +9520,9 @@
     "wikipedia_title": "広井の万灯火祭り",
     "coordinate_source": "venue",
     "coordinate_prefecture": "兵庫県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "281400",
+    "jalan_lrg_name": "神鍋・鉢伏・養父・和田山"
   },
   {
     "qid": "Q11498705",
@@ -9270,7 +9552,9 @@
     "wikipedia_title": null,
     "coordinate_source": "festival",
     "coordinate_prefecture": "兵庫県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "281100",
+    "jalan_lrg_name": "城崎・竹野・豊岡"
   },
   {
     "qid": "Q60996676",
@@ -9300,7 +9584,9 @@
     "wikipedia_title": null,
     "coordinate_source": "festival",
     "coordinate_prefecture": "兵庫県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "281400",
+    "jalan_lrg_name": "神鍋・鉢伏・養父・和田山"
   },
   {
     "qid": "Q11566794",
@@ -9394,7 +9680,9 @@
     "wikipedia_title": null,
     "coordinate_source": "venue",
     "coordinate_prefecture": "奈良県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "290200",
+    "jalan_lrg_name": "奈良・斑鳩・天理"
   },
   {
     "qid": "Q132126211",
@@ -9600,7 +9888,9 @@
         "end": "04-14",
         "source": "https://www.wikidata.org/wiki/Q11611120#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "290500",
+    "jalan_lrg_name": "飛鳥・橿原・三輪"
   },
   {
     "qid": "Q11644507",
@@ -9806,7 +10096,9 @@
         "end": "07-25",
         "source": "https://www.wikidata.org/wiki/Q86727428#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "300800",
+    "jalan_lrg_name": "白浜・龍神"
   },
   {
     "qid": "Q11599524",
@@ -10080,7 +10372,9 @@
         "label": "8月の第2日曜日",
         "source": "https://www.wikidata.org/wiki/Q11280366#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "340300",
+    "jalan_lrg_name": "福山・竹原・呉"
   },
   {
     "qid": "Q11336959",
@@ -10184,7 +10478,9 @@
     "wikipedia_title": "大崎上島櫂伝馬競漕",
     "coordinate_source": "venue",
     "coordinate_prefecture": "広島県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "340300",
+    "jalan_lrg_name": "福山・竹原・呉"
   },
   {
     "qid": "Q11451190",
@@ -10230,7 +10526,9 @@
     "wikipedia_title": "管絃祭",
     "coordinate_source": "venue",
     "coordinate_prefecture": null,
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "340900",
+    "jalan_lrg_name": "広島・宮島"
   },
   {
     "qid": "Q11611950",
@@ -10254,7 +10552,9 @@
         "label": "3月の第4土曜日",
         "source": "https://www.wikidata.org/wiki/Q11611950#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "340300",
+    "jalan_lrg_name": "福山・竹原・呉"
   },
   {
     "qid": "Q446474",
@@ -10278,7 +10578,9 @@
         "label": "10月の第2土曜日",
         "source": "https://www.wikidata.org/wiki/Q446474#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "340900",
+    "jalan_lrg_name": "広島・宮島"
   },
   {
     "qid": "Q11466617",
@@ -10502,7 +10804,9 @@
         "end": "08-25",
         "source": "https://www.wikidata.org/wiki/Q11565101#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "370200",
+    "jalan_lrg_name": "高松・東讃"
   },
   {
     "qid": "Q11573781",
@@ -10696,7 +11000,9 @@
         "end": "10-01",
         "source": "https://www.wikidata.org/wiki/Q11278738#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "400400",
+    "jalan_lrg_name": "糸島・前原"
   },
   {
     "qid": "Q11548439",
@@ -10808,7 +11114,9 @@
     "wikipedia_title": "千灯籠まつり",
     "coordinate_source": "venue",
     "coordinate_prefecture": "長崎県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "420600",
+    "jalan_lrg_name": "佐世保・ハウステンボス"
   },
   {
     "qid": "Q11598643",
@@ -10976,7 +11284,9 @@
     "wikipedia_title": null,
     "coordinate_source": "venue",
     "coordinate_prefecture": "大分県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "440200",
+    "jalan_lrg_name": "大分"
   },
   {
     "qid": "Q11488963",
@@ -10990,7 +11300,9 @@
     "wikipedia_title": null,
     "coordinate_source": "festival",
     "coordinate_prefecture": "大分県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "440200",
+    "jalan_lrg_name": "大分"
   },
   {
     "qid": "Q11509924",
@@ -11100,7 +11412,9 @@
         "end": "12-31",
         "source": "https://www.wikidata.org/wiki/Q2255821#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "461400",
+    "jalan_lrg_name": "北薩・川内"
   },
   {
     "qid": "Q17223030",
@@ -11130,7 +11444,9 @@
     "wikipedia_title": "ボゼ",
     "coordinate_source": "festival",
     "coordinate_prefecture": "鹿児島県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "461700",
+    "jalan_lrg_name": "離島"
   },
   {
     "qid": "Q140673421",
@@ -11184,7 +11500,9 @@
     "wikipedia_title": "大王殿祭り",
     "coordinate_source": "venue",
     "coordinate_prefecture": "鹿児島県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "461100",
+    "jalan_lrg_name": "霧島"
   },
   {
     "qid": "Q55526350",
@@ -11230,7 +11548,9 @@
     "wikipedia_title": null,
     "coordinate_source": "venue",
     "coordinate_prefecture": "滋賀県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "470200",
+    "jalan_lrg_name": "那覇"
   },
   {
     "qid": "Q11552606",
@@ -11938,7 +12258,9 @@
     "wikipedia_title": "しばれフェスティバル",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "北海道",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "012600",
+    "jalan_lrg_name": "釧路・阿寒・根室・川湯・屈斜路"
   },
   {
     "qid": "Q11269668",
@@ -11968,7 +12290,9 @@
     "wikipedia_title": "ゆうばり国際ファンタスティック映画祭",
     "coordinate_source": "venue",
     "coordinate_prefecture": "北海道",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "012900",
+    "jalan_lrg_name": "石狩・空知・千歳"
   },
   {
     "qid": "Q1033843",
@@ -12070,7 +12394,9 @@
     "wikipedia_title": "LOUD PARK",
     "coordinate_source": "venue",
     "coordinate_prefecture": "千葉県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "120200",
+    "jalan_lrg_name": "千葉・市原"
   },
   {
     "qid": "Q11280851",
@@ -12284,7 +12610,9 @@
         "end": "07-13",
         "source": "https://www.wikidata.org/wiki/Q140367591#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "273200",
+    "jalan_lrg_name": "上本町・天王寺・市内南部"
   },
   {
     "qid": "Q11256803",
@@ -12940,7 +13268,9 @@
     "wikipedia_title": "大高祭り",
     "coordinate_source": "venue",
     "coordinate_prefecture": "愛知県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "230200",
+    "jalan_lrg_name": "名古屋"
   },
   {
     "qid": "Q28691756",
@@ -13036,7 +13366,9 @@
     "wikipedia_title": "片貝まつり",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "新潟県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "171100",
+    "jalan_lrg_name": "柏崎・寺泊・長岡・魚沼（湯之谷）"
   },
   {
     "qid": "Q17226213",
@@ -13066,7 +13398,9 @@
     "wikipedia_title": "COMITIA",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "137100",
+    "jalan_lrg_name": "お台場・汐留・新橋・品川"
   },
   {
     "qid": "Q20042868",
@@ -13080,7 +13414,9 @@
     "wikipedia_title": "ICU祭",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "139200",
+    "jalan_lrg_name": "八王子・立川・町田・府中・調布"
   },
   {
     "qid": "Q11249715",
@@ -13094,7 +13430,9 @@
     "wikipedia_title": "TOKYO IDOL FESTIVAL",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q11252016",
@@ -13108,7 +13446,9 @@
     "wikipedia_title": "UNHCR難民映画祭",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q7814002",
@@ -13122,7 +13462,9 @@
     "wikipedia_title": "〈東京の夏〉音楽祭",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q11259476",
@@ -13136,7 +13478,9 @@
     "wikipedia_title": "いたばし花火大会",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "137700",
+    "jalan_lrg_name": "池袋・目白・板橋・赤羽"
   },
   {
     "qid": "Q11268616",
@@ -13150,7 +13494,9 @@
     "wikipedia_title": "さんピンCAMP",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "136200",
+    "jalan_lrg_name": "銀座・日本橋・東京駅周辺"
   },
   {
     "qid": "Q11268878",
@@ -13180,7 +13526,9 @@
     "wikipedia_title": null,
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q30927123",
@@ -13210,7 +13558,9 @@
     "wikipedia_title": null,
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q11293020",
@@ -13272,7 +13622,9 @@
     "wikipedia_title": "ゲームマーケット",
     "coordinate_source": "festival",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "137100",
+    "jalan_lrg_name": "お台場・汐留・新橋・品川"
   },
   {
     "qid": "Q11308232",
@@ -13286,7 +13638,9 @@
     "wikipedia_title": "ショートショートフィルムフェスティバル",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q21019186",
@@ -13316,7 +13670,9 @@
     "wikipedia_title": "ハワリンバヤル",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q117084954",
@@ -13370,7 +13726,9 @@
         "end": "11-23",
         "source": "https://www.wikidata.org/wiki/Q11356768#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "136800",
+    "jalan_lrg_name": "六本木・麻布・赤坂・青山"
   },
   {
     "qid": "Q11387821",
@@ -13392,7 +13750,9 @@
         "end": "01-03",
         "source": "https://www.wikidata.org/wiki/Q11387821#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "136800",
+    "jalan_lrg_name": "六本木・麻布・赤坂・青山"
   },
   {
     "qid": "Q6404141",
@@ -13422,7 +13782,9 @@
     "wikipedia_title": null,
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "136200",
+    "jalan_lrg_name": "銀座・日本橋・東京駅周辺"
   },
   {
     "qid": "Q109362097",
@@ -13436,7 +13798,9 @@
     "wikipedia_title": null,
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q12624253",
@@ -13450,7 +13814,9 @@
     "wikipedia_title": null,
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q28685833",
@@ -13464,7 +13830,9 @@
     "wikipedia_title": "早稲田映画まつり",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q1139891",
@@ -13478,7 +13846,9 @@
     "wikipedia_title": "東京フィルメックス",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q11524656",
@@ -13492,7 +13862,9 @@
     "wikipedia_title": "東京多摩国際園芸博覧会",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "139200",
+    "jalan_lrg_name": "八王子・立川・町田・府中・調布"
   },
   {
     "qid": "Q6518561",
@@ -13522,7 +13894,9 @@
     "wikipedia_title": "毎朝御代拝",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "136800",
+    "jalan_lrg_name": "六本木・麻布・赤坂・青山"
   },
   {
     "qid": "Q6518542",
@@ -13536,7 +13910,9 @@
     "wikipedia_title": "神宮外苑花火大会",
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q11590440",
@@ -13558,7 +13934,9 @@
         "end": "04-03",
         "source": "https://www.wikidata.org/wiki/Q11590440#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "136800",
+    "jalan_lrg_name": "六本木・麻布・赤坂・青山"
   },
   {
     "qid": "Q55540286",
@@ -13572,7 +13950,9 @@
     "wikipedia_title": null,
     "coordinate_source": "venue",
     "coordinate_prefecture": "東京都",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "136500",
+    "jalan_lrg_name": "お茶の水・湯島・九段・後楽園・東京ドーム"
   },
   {
     "qid": "Q11597870",
@@ -13595,7 +13975,9 @@
         "label": "7月の最終土曜日",
         "source": "https://www.wikidata.org/wiki/Q11597870#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "139200",
+    "jalan_lrg_name": "八王子・立川・町田・府中・調布"
   },
   {
     "qid": "Q17214735",
@@ -13957,7 +14339,9 @@
     "wikipedia_title": "鶴見の田祭り",
     "coordinate_source": "venue",
     "coordinate_prefecture": "神奈川県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "140100",
+    "jalan_lrg_name": "川崎"
   },
   {
     "qid": "Q11270952",
@@ -13995,7 +14379,9 @@
         "end": "08-11",
         "source": "https://www.wikidata.org/wiki/Q18235534#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "200200",
+    "jalan_lrg_name": "三国・あわら"
   },
   {
     "qid": "Q7972772",
@@ -14197,7 +14583,9 @@
         "label": "7月の第4土曜日",
         "source": "https://www.wikidata.org/wiki/Q7811554#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "400800",
+    "jalan_lrg_name": "北九州"
   },
   {
     "qid": "Q67704099",
@@ -14427,7 +14815,9 @@
     "wikipedia_title": null,
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "長野県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "162200",
+    "jalan_lrg_name": "松本市（松本駅周辺・浅間・美ヶ原・塩尻）"
   },
   {
     "qid": "Q109363890",
@@ -14553,7 +14943,9 @@
         "end": "08-10",
         "source": "https://www.wikidata.org/wiki/Q11498044#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "210400",
+    "jalan_lrg_name": "伊東・宇佐美・川奈"
   },
   {
     "qid": "Q11557606",
@@ -14567,7 +14959,9 @@
     "wikipedia_title": "浜名湖花博",
     "coordinate_source": "administrative_area",
     "coordinate_prefecture": "静岡県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson"
+    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
+    "jalan_lrg_code": "213500",
+    "jalan_lrg_name": "浜松・浜名湖"
   },
   {
     "qid": "Q109603119",
@@ -14615,7 +15009,9 @@
         "label": "6月の第1日曜日",
         "source": "https://www.wikidata.org/wiki/Q11642072#P837"
       }
-    ]
+    ],
+    "jalan_lrg_code": "213500",
+    "jalan_lrg_name": "浜松・浜名湖"
   },
   {
     "qid": "Q11662899",
@@ -14853,7 +15249,9 @@
     "wikipedia_title": "KHBまつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "宮城県"
+    "coordinate_prefecture": "宮城県",
+    "jalan_lrg_code": "040500",
+    "jalan_lrg_name": "松島・塩竈"
   },
   {
     "qid": "Q11248231",
@@ -14867,7 +15265,9 @@
     "wikipedia_title": "TBC夏まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "宮城県"
+    "coordinate_prefecture": "宮城県",
+    "jalan_lrg_code": "040500",
+    "jalan_lrg_name": "松島・塩竈"
   },
   {
     "qid": "Q11251519",
@@ -14881,7 +15281,9 @@
     "wikipedia_title": "仙台・青葉まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "宮城県"
+    "coordinate_prefecture": "宮城県",
+    "jalan_lrg_code": "040500",
+    "jalan_lrg_name": "松島・塩竈"
   },
   {
     "qid": "Q20045311",
@@ -14895,7 +15297,9 @@
     "wikipedia_title": "仙台放送まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "宮城県"
+    "coordinate_prefecture": "宮城県",
+    "jalan_lrg_code": "040500",
+    "jalan_lrg_name": "松島・塩竈"
   },
   {
     "qid": "Q11378042",
@@ -14909,7 +15313,9 @@
     "wikipedia_title": "仙台短篇映画祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "宮城県"
+    "coordinate_prefecture": "宮城県",
+    "jalan_lrg_code": "040500",
+    "jalan_lrg_name": "松島・塩竈"
   },
   {
     "qid": "Q11271457",
@@ -14923,7 +15329,9 @@
     "wikipedia_title": "定禅寺ストリートジャズフェスティバル",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "宮城県"
+    "coordinate_prefecture": "宮城県",
+    "jalan_lrg_code": "040500",
+    "jalan_lrg_name": "松島・塩竈"
   },
   {
     "qid": "Q11586462",
@@ -14937,7 +15345,9 @@
     "wikipedia_title": "石巻川開き祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "宮城県"
+    "coordinate_prefecture": "宮城県",
+    "jalan_lrg_code": "040500",
+    "jalan_lrg_name": "松島・塩竈"
   },
   {
     "qid": "Q11611892",
@@ -15607,7 +16017,9 @@
     "wikipedia_title": "くろほね夏まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "090800",
+    "jalan_lrg_name": "赤城・桐生・渡良瀬"
   },
   {
     "qid": "Q11397240",
@@ -15621,7 +16033,9 @@
     "wikipedia_title": "前橋まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "090800",
+    "jalan_lrg_name": "赤城・桐生・渡良瀬"
   },
   {
     "qid": "Q11438548",
@@ -15635,7 +16049,9 @@
     "wikipedia_title": "大胡祇園まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "090800",
+    "jalan_lrg_name": "赤城・桐生・渡良瀬"
   },
   {
     "qid": "Q11465151",
@@ -15649,7 +16065,9 @@
     "wikipedia_title": "尾島ねぷた",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "090800",
+    "jalan_lrg_name": "赤城・桐生・渡良瀬"
   },
   {
     "qid": "Q18458829",
@@ -15679,7 +16097,9 @@
     "wikipedia_title": "高崎まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "090800",
+    "jalan_lrg_name": "赤城・桐生・渡良瀬"
   },
   {
     "qid": "Q11669772",
@@ -15693,7 +16113,9 @@
     "wikipedia_title": "高崎映画祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "090800",
+    "jalan_lrg_name": "赤城・桐生・渡良瀬"
   },
   {
     "qid": "Q22130964",
@@ -15995,7 +16417,9 @@
     "wikipedia_title": "NARITA花火大会in印旛沼",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "千葉県"
+    "coordinate_prefecture": "千葉県",
+    "jalan_lrg_code": "121700",
+    "jalan_lrg_name": "九十九里・銚子"
   },
   {
     "qid": "Q55526656",
@@ -16009,7 +16433,9 @@
     "wikipedia_title": "ほくそう春まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "千葉県"
+    "coordinate_prefecture": "千葉県",
+    "jalan_lrg_code": "121700",
+    "jalan_lrg_name": "九十九里・銚子"
   },
   {
     "qid": "Q11382961",
@@ -16023,7 +16449,9 @@
     "wikipedia_title": "佐倉市民花火大会",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "千葉県"
+    "coordinate_prefecture": "千葉県",
+    "jalan_lrg_code": "121700",
+    "jalan_lrg_name": "九十九里・銚子"
   },
   {
     "qid": "Q11400381",
@@ -16037,7 +16465,9 @@
     "wikipedia_title": "勝浦大漁まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "千葉県"
+    "coordinate_prefecture": "千葉県",
+    "jalan_lrg_code": "121700",
+    "jalan_lrg_name": "九十九里・銚子"
   },
   {
     "qid": "Q11463659",
@@ -16051,7 +16481,9 @@
     "wikipedia_title": "小見川祇園祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "千葉県"
+    "coordinate_prefecture": "千葉県",
+    "jalan_lrg_code": "121700",
+    "jalan_lrg_name": "九十九里・銚子"
   },
   {
     "qid": "Q38277378",
@@ -16065,7 +16497,9 @@
     "wikipedia_title": "日本幻野祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "千葉県"
+    "coordinate_prefecture": "千葉県",
+    "jalan_lrg_code": "121700",
+    "jalan_lrg_name": "九十九里・銚子"
   },
   {
     "qid": "Q11528627",
@@ -16079,7 +16513,9 @@
     "wikipedia_title": "東金桜まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "千葉県"
+    "coordinate_prefecture": "千葉県",
+    "jalan_lrg_code": "121700",
+    "jalan_lrg_name": "九十九里・銚子"
   },
   {
     "qid": "Q11549310",
@@ -16093,7 +16529,9 @@
     "wikipedia_title": "水郷おみがわ花火大会",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "千葉県"
+    "coordinate_prefecture": "千葉県",
+    "jalan_lrg_code": "121700",
+    "jalan_lrg_name": "九十九里・銚子"
   },
   {
     "qid": "Q11558195",
@@ -16107,7 +16545,9 @@
     "wikipedia_title": "浦安三社祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "千葉県"
+    "coordinate_prefecture": "千葉県",
+    "jalan_lrg_code": "121700",
+    "jalan_lrg_name": "九十九里・銚子"
   },
   {
     "qid": "Q11617035",
@@ -16121,7 +16561,9 @@
     "wikipedia_title": "茂原七夕まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "千葉県"
+    "coordinate_prefecture": "千葉県",
+    "jalan_lrg_code": "121700",
+    "jalan_lrg_name": "九十九里・銚子"
   },
   {
     "qid": "Q11241119",
@@ -16135,7 +16577,9 @@
     "wikipedia_title": "ROCKS TOKYO",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "東京都"
+    "coordinate_prefecture": "東京都",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q11236230",
@@ -16149,7 +16593,9 @@
     "wikipedia_title": "デザインフェスタ",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "東京都"
+    "coordinate_prefecture": "東京都",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q11414198",
@@ -16163,7 +16609,9 @@
     "wikipedia_title": "吉祥寺秋まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "東京都"
+    "coordinate_prefecture": "東京都",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q116045081",
@@ -16177,7 +16625,9 @@
     "wikipedia_title": "未体験ゾーンの映画たち",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "東京都"
+    "coordinate_prefecture": "東京都",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q17219247",
@@ -16191,7 +16641,9 @@
     "wikipedia_title": "江戸川花火大会 (江戸川区・市川市)",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "東京都"
+    "coordinate_prefecture": "東京都",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q97280756",
@@ -16205,7 +16657,9 @@
     "wikipedia_title": "目白バ・ロック音楽祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "東京都"
+    "coordinate_prefecture": "東京都",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q11594028",
@@ -16219,7 +16673,9 @@
     "wikipedia_title": "福生七夕まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "東京都"
+    "coordinate_prefecture": "東京都",
+    "jalan_lrg_code": "138000",
+    "jalan_lrg_name": "新宿・中野・杉並・吉祥寺"
   },
   {
     "qid": "Q11227575",
@@ -17875,7 +18331,9 @@
     "wikipedia_title": "お走りさん",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q60988115",
@@ -17889,7 +18347,9 @@
     "wikipedia_title": "くつっ子まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11270948",
@@ -17903,7 +18363,9 @@
     "wikipedia_title": "たけの海上花火大会",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11438152",
@@ -17917,7 +18379,9 @@
     "wikipedia_title": "大石りくまつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11452522",
@@ -17931,7 +18395,9 @@
     "wikipedia_title": "宝塚観光花火大会",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11534049",
@@ -17945,7 +18411,9 @@
     "wikipedia_title": "柳まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11564136",
@@ -17959,7 +18427,9 @@
     "wikipedia_title": "源氏まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q65272115",
@@ -17989,7 +18459,9 @@
     "wikipedia_title": "弁慶まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "和歌山県"
+    "coordinate_prefecture": "和歌山県",
+    "jalan_lrg_code": "301000",
+    "jalan_lrg_name": "本宮・新宮・中辺路"
   },
   {
     "qid": "Q11604063",
@@ -18035,7 +18507,9 @@
     "wikipedia_title": "お蔵出し映画祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "広島県"
+    "coordinate_prefecture": "広島県",
+    "jalan_lrg_code": "340600",
+    "jalan_lrg_name": "庄原・三次・芸北"
   },
   {
     "qid": "Q11526894",
@@ -18049,7 +18523,9 @@
     "wikipedia_title": "東広島映画祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "広島県"
+    "coordinate_prefecture": "広島県",
+    "jalan_lrg_code": "340600",
+    "jalan_lrg_name": "庄原・三次・芸北"
   },
   {
     "qid": "Q11577736",
@@ -18063,7 +18539,9 @@
     "wikipedia_title": "甲山廿日えびす",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "広島県"
+    "coordinate_prefecture": "広島県",
+    "jalan_lrg_code": "340600",
+    "jalan_lrg_name": "庄原・三次・芸北"
   },
   {
     "qid": "Q11591996",
@@ -18077,7 +18555,9 @@
     "wikipedia_title": "福山ばら祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "広島県"
+    "coordinate_prefecture": "広島県",
+    "jalan_lrg_code": "340600",
+    "jalan_lrg_name": "庄原・三次・芸北"
   },
   {
     "qid": "Q11466745",
@@ -18219,7 +18699,9 @@
     "wikipedia_title": "おんまく",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "愛媛県"
+    "coordinate_prefecture": "愛媛県",
+    "jalan_lrg_code": "380200",
+    "jalan_lrg_name": "松山・道後"
   },
   {
     "qid": "Q11274711",
@@ -18233,7 +18715,9 @@
     "wikipedia_title": "にいはま納涼花火大会",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "愛媛県"
+    "coordinate_prefecture": "愛媛県",
+    "jalan_lrg_code": "380200",
+    "jalan_lrg_name": "松山・道後"
   },
   {
     "qid": "Q11461220",
@@ -18247,7 +18731,9 @@
     "wikipedia_title": "小松祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "愛媛県"
+    "coordinate_prefecture": "愛媛県",
+    "jalan_lrg_code": "380200",
+    "jalan_lrg_name": "松山・道後"
   },
   {
     "qid": "Q11523928",
@@ -18261,7 +18747,9 @@
     "wikipedia_title": "東予祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "愛媛県"
+    "coordinate_prefecture": "愛媛県",
+    "jalan_lrg_code": "380200",
+    "jalan_lrg_name": "松山・道後"
   },
   {
     "qid": "Q11529891",
@@ -18275,7 +18763,9 @@
     "wikipedia_title": "松山港まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "愛媛県"
+    "coordinate_prefecture": "愛媛県",
+    "jalan_lrg_code": "380200",
+    "jalan_lrg_name": "松山・道後"
   },
   {
     "qid": "Q11628729",
@@ -18289,7 +18779,9 @@
     "wikipedia_title": "西条祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "愛媛県"
+    "coordinate_prefecture": "愛媛県",
+    "jalan_lrg_code": "380200",
+    "jalan_lrg_name": "松山・道後"
   },
   {
     "qid": "Q11261622",
@@ -18303,7 +18795,9 @@
     "wikipedia_title": "おしろい祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11265326",
@@ -18317,7 +18811,9 @@
     "wikipedia_title": "くきのうみ花火の祭典",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11566788",
@@ -18331,7 +18827,9 @@
     "wikipedia_title": "みやま納涼花火大会",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11371526",
@@ -18345,7 +18843,9 @@
     "wikipedia_title": "二島祇園",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11390862",
@@ -18359,7 +18859,9 @@
     "wikipedia_title": "八屋祇園",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11397692",
@@ -18373,7 +18875,9 @@
     "wikipedia_title": "前田祇園山笠",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11438786",
@@ -18387,7 +18891,9 @@
     "wikipedia_title": "大蛇山 (祭り)",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11478929",
@@ -18401,7 +18907,9 @@
     "wikipedia_title": "川渡り神幸祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11581773",
@@ -18415,7 +18923,9 @@
     "wikipedia_title": "直方山笠",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q38277461",
@@ -18429,7 +18939,9 @@
     "wikipedia_title": "高塔山ジャム",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11673429",
@@ -18443,7 +18955,9 @@
     "wikipedia_title": "鬼夜",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11255135",
@@ -18553,7 +19067,9 @@
     "wikipedia_title": "山鹿灯籠まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "熊本県"
+    "coordinate_prefecture": "熊本県",
+    "jalan_lrg_code": "430200",
+    "jalan_lrg_name": "熊本"
   },
   {
     "qid": "Q11566826",
@@ -18567,7 +19083,9 @@
     "wikipedia_title": "火の国まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "熊本県"
+    "coordinate_prefecture": "熊本県",
+    "jalan_lrg_code": "430200",
+    "jalan_lrg_name": "熊本"
   },
   {
     "qid": "Q11260406",
@@ -18741,7 +19259,9 @@
     "wikipedia_title": "西都古墳まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "宮崎県"
+    "coordinate_prefecture": "宮崎県",
+    "jalan_lrg_code": "450200",
+    "jalan_lrg_name": "宮崎・青島・日南"
   },
   {
     "qid": "Q86727691",
@@ -19299,7 +19819,9 @@
     "wikipedia_title": "ナニャドヤラ",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "岩手県"
+    "coordinate_prefecture": "岩手県",
+    "jalan_lrg_code": "030800",
+    "jalan_lrg_name": "三陸海岸"
   },
   {
     "qid": "Q11338094",
@@ -19313,7 +19835,9 @@
     "wikipedia_title": "ホロロン",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "岩手県"
+    "coordinate_prefecture": "岩手県",
+    "jalan_lrg_code": "030800",
+    "jalan_lrg_name": "三陸海岸"
   },
   {
     "qid": "Q11445758",
@@ -19327,7 +19851,9 @@
     "wikipedia_title": "奥州水沢夏祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "岩手県"
+    "coordinate_prefecture": "岩手県",
+    "jalan_lrg_code": "030800",
+    "jalan_lrg_name": "三陸海岸"
   },
   {
     "qid": "Q11467783",
@@ -19341,7 +19867,9 @@
     "wikipedia_title": "山屋の田植踊",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "岩手県"
+    "coordinate_prefecture": "岩手県",
+    "jalan_lrg_code": "030800",
+    "jalan_lrg_name": "三陸海岸"
   },
   {
     "qid": "Q11475055",
@@ -19355,7 +19883,9 @@
     "wikipedia_title": "岩手雪まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "岩手県"
+    "coordinate_prefecture": "岩手県",
+    "jalan_lrg_code": "030800",
+    "jalan_lrg_name": "三陸海岸"
   },
   {
     "qid": "Q28691201",
@@ -19369,7 +19899,9 @@
     "wikipedia_title": "盛岡山車",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "岩手県"
+    "coordinate_prefecture": "岩手県",
+    "jalan_lrg_code": "030800",
+    "jalan_lrg_name": "三陸海岸"
   },
   {
     "qid": "Q65289048",
@@ -19383,7 +19915,9 @@
     "wikipedia_title": "釜石よいさ",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "岩手県"
+    "coordinate_prefecture": "岩手県",
+    "jalan_lrg_code": "030800",
+    "jalan_lrg_name": "三陸海岸"
   },
   {
     "qid": "Q5267453",
@@ -19397,7 +19931,9 @@
     "wikipedia_title": "鬼剣舞",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "岩手県"
+    "coordinate_prefecture": "岩手県",
+    "jalan_lrg_code": "030800",
+    "jalan_lrg_name": "三陸海岸"
   },
   {
     "qid": "Q11189529",
@@ -19651,7 +20187,9 @@
     "wikipedia_title": "南陽菊人形",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "山形県"
+    "coordinate_prefecture": "山形県",
+    "jalan_lrg_code": "060800",
+    "jalan_lrg_name": "寒河江・月山"
   },
   {
     "qid": "Q65278059",
@@ -19665,7 +20203,9 @@
     "wikipedia_title": "米沢上杉まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "山形県"
+    "coordinate_prefecture": "山形県",
+    "jalan_lrg_code": "060800",
+    "jalan_lrg_name": "寒河江・月山"
   },
   {
     "qid": "Q109930449",
@@ -19679,7 +20219,9 @@
     "wikipedia_title": "花笠まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "山形県"
+    "coordinate_prefecture": "山形県",
+    "jalan_lrg_code": "060800",
+    "jalan_lrg_name": "寒河江・月山"
   },
   {
     "qid": "Q11255137",
@@ -19885,7 +20427,9 @@
     "wikipedia_title": "KENPOKU ART 2016 茨城県北芸術祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "茨城県"
+    "coordinate_prefecture": "茨城県",
+    "jalan_lrg_code": "100500",
+    "jalan_lrg_name": "水戸・笠間"
   },
   {
     "qid": "Q17225782",
@@ -19899,7 +20443,9 @@
     "wikipedia_title": "おめこ祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "茨城県"
+    "coordinate_prefecture": "茨城県",
+    "jalan_lrg_code": "100500",
+    "jalan_lrg_name": "水戸・笠間"
   },
   {
     "qid": "Q11263932",
@@ -19913,7 +20459,9 @@
     "wikipedia_title": "かつた祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "茨城県"
+    "coordinate_prefecture": "茨城県",
+    "jalan_lrg_code": "100500",
+    "jalan_lrg_name": "水戸・笠間"
   },
   {
     "qid": "Q118785261",
@@ -19927,7 +20475,9 @@
     "wikipedia_title": "大飯祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "茨城県"
+    "coordinate_prefecture": "茨城県",
+    "jalan_lrg_code": "100500",
+    "jalan_lrg_name": "水戸・笠間"
   },
   {
     "qid": "Q65266331",
@@ -19941,7 +20491,9 @@
     "wikipedia_title": "常陸大津の御船祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "茨城県"
+    "coordinate_prefecture": "茨城県",
+    "jalan_lrg_code": "100500",
+    "jalan_lrg_name": "水戸・笠間"
   },
   {
     "qid": "Q22123259",
@@ -19955,7 +20507,9 @@
     "wikipedia_title": "筑波山もみじ祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "茨城県"
+    "coordinate_prefecture": "茨城県",
+    "jalan_lrg_code": "100500",
+    "jalan_lrg_name": "水戸・笠間"
   },
   {
     "qid": "Q30936427",
@@ -19969,7 +20523,9 @@
     "wikipedia_title": "茨城県北芸術祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "茨城県"
+    "coordinate_prefecture": "茨城県",
+    "jalan_lrg_code": "100500",
+    "jalan_lrg_name": "水戸・笠間"
   },
   {
     "qid": "Q11679184",
@@ -19983,7 +20539,9 @@
     "wikipedia_title": "龍ヶ崎の撞舞",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "茨城県"
+    "coordinate_prefecture": "茨城県",
+    "jalan_lrg_code": "100500",
+    "jalan_lrg_name": "水戸・笠間"
   },
   {
     "qid": "Q109597767",
@@ -20053,7 +20611,9 @@
     "wikipedia_title": "1000人ROCK FES.GUNMA",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "091100",
+    "jalan_lrg_name": "渋川・伊香保"
   },
   {
     "qid": "Q48750161",
@@ -20067,7 +20627,9 @@
     "wikipedia_title": "前橋七夕まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "091100",
+    "jalan_lrg_name": "渋川・伊香保"
   },
   {
     "qid": "Q48750228",
@@ -20081,7 +20643,9 @@
     "wikipedia_title": "前橋初市まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "091100",
+    "jalan_lrg_name": "渋川・伊香保"
   },
   {
     "qid": "Q48750057",
@@ -20095,7 +20659,9 @@
     "wikipedia_title": "前橋大酉祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "091100",
+    "jalan_lrg_name": "渋川・伊香保"
   },
   {
     "qid": "Q11405586",
@@ -20109,7 +20675,9 @@
     "wikipedia_title": "千本木龍頭神舞",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "091100",
+    "jalan_lrg_name": "渋川・伊香保"
   },
   {
     "qid": "Q109366488",
@@ -20123,7 +20691,9 @@
     "wikipedia_title": "太田市やぶ塚かかし祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "091100",
+    "jalan_lrg_name": "渋川・伊香保"
   },
   {
     "qid": "Q60996436",
@@ -20137,7 +20707,9 @@
     "wikipedia_title": "新里まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "群馬県"
+    "coordinate_prefecture": "群馬県",
+    "jalan_lrg_code": "091100",
+    "jalan_lrg_name": "渋川・伊香保"
   },
   {
     "qid": "Q29841203",
@@ -22991,7 +23563,9 @@
     "wikipedia_title": "かすみかに感謝祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11271456",
@@ -23005,7 +23579,9 @@
     "wikipedia_title": "たんとうチューリップまつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q137299271",
@@ -23019,7 +23595,9 @@
     "wikipedia_title": "つかいだんじり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q17223197",
@@ -23033,7 +23611,9 @@
     "wikipedia_title": "とよおか津居山港かにまつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q17211547",
@@ -23047,7 +23627,9 @@
     "wikipedia_title": "みきマルシェ",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11320356",
@@ -23061,7 +23643,9 @@
     "wikipedia_title": "デカンショ祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q17211554",
@@ -23075,7 +23659,9 @@
     "wikipedia_title": "三木げんきまつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11355566",
@@ -23089,7 +23675,9 @@
     "wikipedia_title": "三木さんさんまつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11355708",
@@ -23103,7 +23691,9 @@
     "wikipedia_title": "三木金物まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11356672",
@@ -23117,7 +23707,9 @@
     "wikipedia_title": "三田マダン",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11378742",
@@ -23131,7 +23723,9 @@
     "wikipedia_title": "伊丹マダン",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11381623",
@@ -23145,7 +23739,9 @@
     "wikipedia_title": "但馬三大祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11395766",
@@ -23159,7 +23755,9 @@
     "wikipedia_title": "出石藩夏まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q97178064",
@@ -23173,7 +23771,9 @@
     "wikipedia_title": "千燈会",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11417979",
@@ -23187,7 +23787,9 @@
     "wikipedia_title": "和田山地蔵祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11420929",
@@ -23201,7 +23803,9 @@
     "wikipedia_title": "国恩祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q22130187",
@@ -23215,7 +23819,9 @@
     "wikipedia_title": "国領水無月祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11426140",
@@ -23229,7 +23835,9 @@
     "wikipedia_title": "城崎温泉夏物語",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11453356",
@@ -23243,7 +23851,9 @@
     "wikipedia_title": "宮前ふとん太鼓巡行",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11455615",
@@ -23257,7 +23867,9 @@
     "wikipedia_title": "宿場一夜夢街道",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q48745772",
@@ -23271,7 +23883,9 @@
     "wikipedia_title": "愛宕祭 (丹波市)",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11572617",
@@ -23285,7 +23899,9 @@
     "wikipedia_title": "玉手屋台",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q65273762",
@@ -23299,7 +23915,9 @@
     "wikipedia_title": "田ノ口の賽の神祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11637132",
@@ -23313,7 +23931,9 @@
     "wikipedia_title": "踊っこまつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q11667133",
@@ -23327,7 +23947,9 @@
     "wikipedia_title": "香住ふるさとまつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "兵庫県"
+    "coordinate_prefecture": "兵庫県",
+    "jalan_lrg_code": "280800",
+    "jalan_lrg_name": "姫路・赤穂・播磨"
   },
   {
     "qid": "Q17222011",
@@ -23405,7 +24027,9 @@
     "wikipedia_title": "おどるんや〜紀州よさこい祭り〜",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "和歌山県"
+    "coordinate_prefecture": "和歌山県",
+    "jalan_lrg_code": "300800",
+    "jalan_lrg_name": "白浜・龍神"
   },
   {
     "qid": "Q11269711",
@@ -23419,7 +24043,9 @@
     "wikipedia_title": "すずめ踊り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "和歌山県"
+    "coordinate_prefecture": "和歌山県",
+    "jalan_lrg_code": "300800",
+    "jalan_lrg_name": "白浜・龍神"
   },
   {
     "qid": "Q11279274",
@@ -23433,7 +24059,9 @@
     "wikipedia_title": "みやこ姫よさこい祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "和歌山県"
+    "coordinate_prefecture": "和歌山県",
+    "jalan_lrg_code": "300800",
+    "jalan_lrg_name": "白浜・龍神"
   },
   {
     "qid": "Q11393882",
@@ -23447,7 +24075,9 @@
     "wikipedia_title": "内原祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "和歌山県"
+    "coordinate_prefecture": "和歌山県",
+    "jalan_lrg_code": "300800",
+    "jalan_lrg_name": "白浜・龍神"
   },
   {
     "qid": "Q11409083",
@@ -23461,7 +24091,9 @@
     "wikipedia_title": "印南祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "和歌山県"
+    "coordinate_prefecture": "和歌山県",
+    "jalan_lrg_code": "300800",
+    "jalan_lrg_name": "白浜・龍神"
   },
   {
     "qid": "Q11488887",
@@ -23475,7 +24107,9 @@
     "wikipedia_title": "御坊祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "和歌山県"
+    "coordinate_prefecture": "和歌山県",
+    "jalan_lrg_code": "300800",
+    "jalan_lrg_name": "白浜・龍神"
   },
   {
     "qid": "Q11556223",
@@ -23489,7 +24123,9 @@
     "wikipedia_title": "津浪祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "和歌山県"
+    "coordinate_prefecture": "和歌山県",
+    "jalan_lrg_code": "300800",
+    "jalan_lrg_name": "白浜・龍神"
   },
   {
     "qid": "Q24872693",
@@ -23503,7 +24139,9 @@
     "wikipedia_title": "由良祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "和歌山県"
+    "coordinate_prefecture": "和歌山県",
+    "jalan_lrg_code": "300800",
+    "jalan_lrg_name": "白浜・龍神"
   },
   {
     "qid": "Q11605033",
@@ -23517,7 +24155,9 @@
     "wikipedia_title": "紀州おどり ぶんだら節",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "和歌山県"
+    "coordinate_prefecture": "和歌山県",
+    "jalan_lrg_code": "300800",
+    "jalan_lrg_name": "白浜・龍神"
   },
   {
     "qid": "Q11642731",
@@ -23531,7 +24171,9 @@
     "wikipedia_title": "那智の田楽",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "和歌山県"
+    "coordinate_prefecture": "和歌山県",
+    "jalan_lrg_code": "300800",
+    "jalan_lrg_name": "白浜・龍神"
   },
   {
     "qid": "Q17230686",
@@ -23913,7 +24555,9 @@
     "wikipedia_title": "二上りおどり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "広島県"
+    "coordinate_prefecture": "広島県",
+    "jalan_lrg_code": "340600",
+    "jalan_lrg_name": "庄原・三次・芸北"
   },
   {
     "qid": "Q11407328",
@@ -23927,7 +24571,9 @@
     "wikipedia_title": "南の風EBAあそび",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "広島県"
+    "coordinate_prefecture": "広島県",
+    "jalan_lrg_code": "340600",
+    "jalan_lrg_name": "庄原・三次・芸北"
   },
   {
     "qid": "Q11495226",
@@ -23941,7 +24587,9 @@
     "wikipedia_title": "憧憬の路",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "広島県"
+    "coordinate_prefecture": "広島県",
+    "jalan_lrg_code": "340600",
+    "jalan_lrg_name": "庄原・三次・芸北"
   },
   {
     "qid": "Q11251627",
@@ -24227,7 +24875,9 @@
     "wikipedia_title": "三木町いけのべ七夕まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "香川県"
+    "coordinate_prefecture": "香川県",
+    "jalan_lrg_code": "370200",
+    "jalan_lrg_name": "高松・東讃"
   },
   {
     "qid": "Q86735254",
@@ -24241,7 +24891,9 @@
     "wikipedia_title": "大野原八幡神社秋季例大祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "香川県"
+    "coordinate_prefecture": "香川県",
+    "jalan_lrg_code": "370200",
+    "jalan_lrg_name": "高松・東讃"
   },
   {
     "qid": "Q11288916",
@@ -24255,7 +24907,9 @@
     "wikipedia_title": "引田ひなまつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "香川県"
+    "coordinate_prefecture": "香川県",
+    "jalan_lrg_code": "370200",
+    "jalan_lrg_name": "高松・東讃"
   },
   {
     "qid": "Q11534021",
@@ -24269,7 +24923,9 @@
     "wikipedia_title": "柞田秋祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "香川県"
+    "coordinate_prefecture": "香川県",
+    "jalan_lrg_code": "370200",
+    "jalan_lrg_name": "高松・東讃"
   },
   {
     "qid": "Q11572209",
@@ -24283,7 +24939,9 @@
     "wikipedia_title": "獅子舞フェスタ",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "香川県"
+    "coordinate_prefecture": "香川県",
+    "jalan_lrg_code": "370200",
+    "jalan_lrg_name": "高松・東讃"
   },
   {
     "qid": "Q11263600",
@@ -24505,7 +25163,9 @@
     "wikipedia_title": "あしや人形感謝祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11437768",
@@ -24519,7 +25179,9 @@
     "wikipedia_title": "おおむた『大蛇山』まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q134467730",
@@ -24533,7 +25195,9 @@
     "wikipedia_title": "こっぱげ面",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11364578",
@@ -24547,7 +25211,9 @@
     "wikipedia_title": "中島祇園祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11551246",
@@ -24561,7 +25227,9 @@
     "wikipedia_title": "江浦町祇園祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11561951",
@@ -24575,7 +25243,9 @@
     "wikipedia_title": "渡瀬祇園祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11592170",
@@ -24589,7 +25259,9 @@
     "wikipedia_title": "福岡五大祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q55528450",
@@ -24603,7 +25275,9 @@
     "wikipedia_title": "苅田山笠",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q109602387",
@@ -24617,7 +25291,9 @@
     "wikipedia_title": "飯塚山笠",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "福岡県"
+    "coordinate_prefecture": "福岡県",
+    "jalan_lrg_code": "400300",
+    "jalan_lrg_name": "太宰府・宗像"
   },
   {
     "qid": "Q11459287",
@@ -24775,7 +25451,9 @@
     "wikipedia_title": "なんかん夏まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "熊本県"
+    "coordinate_prefecture": "熊本県",
+    "jalan_lrg_code": "430200",
+    "jalan_lrg_name": "熊本"
   },
   {
     "qid": "Q11571194",
@@ -24789,7 +25467,9 @@
     "wikipedia_title": "犬子ひょうたん祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "熊本県"
+    "coordinate_prefecture": "熊本県",
+    "jalan_lrg_code": "430200",
+    "jalan_lrg_name": "熊本"
   },
   {
     "qid": "Q11587564",
@@ -24803,7 +25483,9 @@
     "wikipedia_title": "砥川獅子舞",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "熊本県"
+    "coordinate_prefecture": "熊本県",
+    "jalan_lrg_code": "430200",
+    "jalan_lrg_name": "熊本"
   },
   {
     "qid": "Q86744313",
@@ -25009,7 +25691,9 @@
     "wikipedia_title": "下水流臼太鼓踊",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "宮崎県"
+    "coordinate_prefecture": "宮崎県",
+    "jalan_lrg_code": "450200",
+    "jalan_lrg_name": "宮崎・青島・日南"
   },
   {
     "qid": "Q11454341",
@@ -25023,7 +25707,9 @@
     "wikipedia_title": "宮崎映画祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "宮崎県"
+    "coordinate_prefecture": "宮崎県",
+    "jalan_lrg_code": "450200",
+    "jalan_lrg_name": "宮崎・青島・日南"
   },
   {
     "qid": "Q11605829",
@@ -25037,7 +25723,9 @@
     "wikipedia_title": "細島みなと祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "宮崎県"
+    "coordinate_prefecture": "宮崎県",
+    "jalan_lrg_code": "450200",
+    "jalan_lrg_name": "宮崎・青島・日南"
   },
   {
     "qid": "Q11668872",
@@ -25051,7 +25739,9 @@
     "wikipedia_title": "高千穂の夜神楽",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "宮崎県"
+    "coordinate_prefecture": "宮崎県",
+    "jalan_lrg_code": "450200",
+    "jalan_lrg_name": "宮崎・青島・日南"
   },
   {
     "qid": "Q86733396",
@@ -25097,7 +25787,9 @@
     "wikipedia_title": "アンガマ",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "沖縄県"
+    "coordinate_prefecture": "沖縄県",
+    "jalan_lrg_code": "470800",
+    "jalan_lrg_name": "西海岸・東海岸"
   },
   {
     "qid": "Q11298553",
@@ -25111,7 +25803,9 @@
     "wikipedia_title": "クイチャーフェスティバル",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "沖縄県"
+    "coordinate_prefecture": "沖縄県",
+    "jalan_lrg_code": "470800",
+    "jalan_lrg_name": "西海岸・東海岸"
   },
   {
     "qid": "Q48764235",
@@ -25125,7 +25819,9 @@
     "wikipedia_title": "シヌグ",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "沖縄県"
+    "coordinate_prefecture": "沖縄県",
+    "jalan_lrg_code": "470800",
+    "jalan_lrg_name": "西海岸・東海岸"
   },
   {
     "qid": "Q48744754",
@@ -25139,7 +25835,9 @@
     "wikipedia_title": "具志堅のシニグ",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "沖縄県"
+    "coordinate_prefecture": "沖縄県",
+    "jalan_lrg_code": "470800",
+    "jalan_lrg_name": "西海岸・東海岸"
   },
   {
     "qid": "Q11415615",
@@ -25153,7 +25851,9 @@
     "wikipedia_title": "名護夏祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "沖縄県"
+    "coordinate_prefecture": "沖縄県",
+    "jalan_lrg_code": "470800",
+    "jalan_lrg_name": "西海岸・東海岸"
   },
   {
     "qid": "Q48764258",
@@ -25167,7 +25867,9 @@
     "wikipedia_title": "海神祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "沖縄県"
+    "coordinate_prefecture": "沖縄県",
+    "jalan_lrg_code": "470800",
+    "jalan_lrg_name": "西海岸・東海岸"
   },
   {
     "qid": "Q11573688",
@@ -25181,7 +25883,9 @@
     "wikipedia_title": "琉球競馬",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "沖縄県"
+    "coordinate_prefecture": "沖縄県",
+    "jalan_lrg_code": "470800",
+    "jalan_lrg_name": "西海岸・東海岸"
   },
   {
     "qid": "Q60995963",
@@ -25195,7 +25899,9 @@
     "wikipedia_title": "綱引き (嘉陽)",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "沖縄県"
+    "coordinate_prefecture": "沖縄県",
+    "jalan_lrg_code": "470800",
+    "jalan_lrg_name": "西海岸・東海岸"
   },
   {
     "qid": "Q60995959",
@@ -25209,7 +25915,9 @@
     "wikipedia_title": "臼太鼓",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "沖縄県"
+    "coordinate_prefecture": "沖縄県",
+    "jalan_lrg_code": "470800",
+    "jalan_lrg_name": "西海岸・東海岸"
   },
   {
     "qid": "Q60995970",
@@ -25223,6 +25931,8 @@
     "wikipedia_title": "豊年祭 (嘉陽)",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "coordinate_prefecture": "沖縄県"
+    "coordinate_prefecture": "沖縄県",
+    "jalan_lrg_code": "470800",
+    "jalan_lrg_name": "西海岸・東海岸"
   }
 ]
