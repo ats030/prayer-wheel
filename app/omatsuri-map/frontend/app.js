@@ -204,10 +204,12 @@ function compareByNextOccurrence(a,b){
 async function loadNearbyHotels(f){
   const prefecture=f.prefecture;if(!prefecture)return null;
   const lrgCode=f.jalan_lrg_code||'',lrgName=f.jalan_lrg_name||'';
-  const key=lrgCode||prefecture;
+  const smlCode=f.jalan_sml_code||'',smlName=f.jalan_sml_name||'';
+  const key=smlCode||lrgCode||prefecture;
   if(jalanCache[key]!==undefined)return jalanCache[key];
   if(jalanCacheQueue[key])return jalanCacheQueue[key];
   const params=new URLSearchParams({prefecture});if(lrgCode&&lrgName){params.set('lrg_code',lrgCode);params.set('lrg_name',lrgName)}
+  if(smlCode&&smlName){params.set('sml_code',smlCode);params.set('sml_name',smlName)}
   jalanCacheQueue[key]=fetch(`/api/hotel-area/nearby?${params}`)
     .then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()})
     .then(data=>Array.isArray(data.hotels)?data.hotels:[])

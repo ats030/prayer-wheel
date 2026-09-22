@@ -53,7 +53,7 @@ func NewHotelAreaServiceForTest(a8mat string) *HotelAreaService {
 
 // AreaSearchLink returns an A8.net-wrapped link to Jalan's hotel-listing
 // page for the given prefecture, and whether the prefecture was recognized.
-func (s *HotelAreaService) AreaSearchLink(prefecture, lrgCode string) (string, bool) {
+func (s *HotelAreaService) AreaSearchLink(prefecture, lrgCode, smlCode string) (string, bool) {
 	code, ok := jalanPrefectureCode[prefecture]
 	if !ok {
 		return "", false
@@ -61,8 +61,15 @@ func (s *HotelAreaService) AreaSearchLink(prefecture, lrgCode string) (string, b
 	destURL := "https://www.jalan.net/" + code + "0000/"
 	if s.IsLargeArea(prefecture, lrgCode) {
 		destURL += "LRG_" + lrgCode + "/"
+		if s.IsSmallArea(lrgCode, smlCode) {
+			destURL += "SML_" + smlCode + "/"
+		}
 	}
 	return s.affiliateWrap(destURL), true
+}
+
+func (s *HotelAreaService) IsSmallArea(lrgCode, smlCode string) bool {
+	return len(smlCode) == 6 && len(lrgCode) == 6 && smlCode[:4] == lrgCode[:4] && smlCode[4:] != "00"
 }
 
 func (s *HotelAreaService) IsLargeArea(prefecture, lrgCode string) bool {

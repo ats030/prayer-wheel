@@ -16,6 +16,8 @@ type Festival struct {
 	Longitude    float64 `json:"longitude"`
 	JalanLRGCode string  `json:"jalan_lrg_code,omitempty"`
 	JalanLRGName string  `json:"jalan_lrg_name,omitempty"`
+	JalanSMLCode string  `json:"jalan_sml_code,omitempty"`
+	JalanSMLName string  `json:"jalan_sml_name,omitempty"`
 	Date         string  `json:"date"`
 	Description  string  `json:"description"`
 }

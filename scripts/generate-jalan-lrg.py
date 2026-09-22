@@ -28,6 +28,7 @@ DATASETS = (
     Path("app/shiseki-map/frontend/shiseki.json"),
 )
 OVERRIDES = Path("data/jalan-lrg-overrides.json")
+SML_OVERRIDES = Path("data/jalan-sml-overrides.json")
 PREF_CODE = {
     "北海道": "01", "青森県": "02", "岩手県": "03", "宮城県": "04", "秋田県": "05",
     "山形県": "06", "福島県": "07", "茨城県": "08", "栃木県": "09", "群馬県": "10",
@@ -61,6 +62,16 @@ def load_areas() -> dict[str, tuple[str, str]]:
         area.attrib["cd"]: (pref.attrib["name"], area.attrib["name"])
         for pref in root.findall("Prefecture")
         for area in pref.findall("LargeArea")
+    }
+
+
+def load_small_areas() -> dict[str, tuple[str, str, str, str]]:
+    root = ET.fromstring(fetch(AREA_XML))
+    return {
+        small.attrib["cd"]: (pref.attrib["name"], large.attrib["cd"], large.attrib["name"], small.attrib["name"])
+        for pref in root.findall("Prefecture")
+        for large in pref.findall("LargeArea")
+        for small in large.findall("SmallArea")
     }
 
 
@@ -155,7 +166,8 @@ def choose_area(candidates: list[str], areas: dict, label: str) -> str:
     return matches[0] if len(matches) == 1 else ""
 
 
-def update_dataset(path: Path, boundaries: dict, areas: dict, municipality_areas: dict, overrides: dict) -> dict:
+def update_dataset(path: Path, boundaries: dict, areas: dict, municipality_areas: dict, overrides: dict,
+                   small_areas: dict, sml_overrides: dict) -> dict:
     records = json.loads(path.read_text())
     reverse: dict[str, list[str]] = defaultdict(list)
     for code, municipalities in municipality_areas.items():
@@ -166,6 +178,8 @@ def update_dataset(path: Path, boundaries: dict, areas: dict, municipality_areas
     for record in records:
         record.pop("jalan_lrg_code", None)
         record.pop("jalan_lrg_name", None)
+        record.pop("jalan_sml_code", None)
+        record.pop("jalan_sml_name", None)
         override = overrides.get(str(record.get("qid")))
         if override:
             code = override["code"]
@@ -175,6 +189,15 @@ def update_dataset(path: Path, boundaries: dict, areas: dict, municipality_areas
                 raise SystemExit(f"override prefecture mismatch for {record.get('qid')}: {override}")
             record["jalan_lrg_code"] = code
             record["jalan_lrg_name"] = areas[code][1]
+            sml = sml_overrides.get(str(record.get("qid")))
+            if not sml or sml.get("lrg_code") != code:
+                raise SystemExit(f"missing or mismatched SML override for {record.get('qid')}")
+            sml_code = sml.get("sml_code")
+            expected = small_areas.get(sml_code)
+            if not expected or expected != (record.get("prefecture"), code, areas[code][1], sml.get("sml_name")):
+                raise SystemExit(f"invalid SML override for {record.get('qid')}: {sml}")
+            record["jalan_sml_code"] = sml_code
+            record["jalan_sml_name"] = expected[3]
             assigned += 1
             continue
         municipality = municipality_at(
@@ -202,10 +225,12 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=6)
     args = parser.parse_args()
     areas = load_areas()
+    small_areas = load_small_areas()
     municipality_areas = area_municipalities(areas, args.workers)
     boundaries = load_boundaries(args.boundaries)
     overrides = json.loads(OVERRIDES.read_text()) if OVERRIDES.exists() else {}
-    report = [update_dataset(path, boundaries, areas, municipality_areas, overrides) for path in DATASETS]
+    sml_overrides = json.loads(SML_OVERRIDES.read_text()) if SML_OVERRIDES.exists() else {}
+    report = [update_dataset(path, boundaries, areas, municipality_areas, overrides, small_areas, sml_overrides) for path in DATASETS]
     missing = sum(item["fallback"] for item in report)
     if missing:
         raise SystemExit(json.dumps({"error": "unassigned Jalan LRG records", "report": report}, ensure_ascii=False, indent=2))

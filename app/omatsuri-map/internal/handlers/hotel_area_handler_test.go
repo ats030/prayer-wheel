@@ -12,6 +12,7 @@ import (
 func TestHotelAreaNearbyHotels_LargeAreaNameAndFallback(t *testing.T) {
 	h := NewHotelAreaHandler(services.NewHotelAreaServiceForTest(""))
 	for _, test := range []struct{ query, wantName, wantURL string }{
+		{"prefecture=神奈川県&lrg_code=141600&lrg_name=箱根&sml_code=141602&sml_name=箱根", "箱根の宿を探す（じゃらん）", "https://www.jalan.net/140000/LRG_141600/SML_141602/"},
 		{"prefecture=神奈川県&lrg_code=141600&lrg_name=箱根", "箱根の宿を探す（じゃらん）", "https://www.jalan.net/140000/LRG_141600/"},
 		{"prefecture=神奈川県&lrg_code=091400&lrg_name=誤った地域", "神奈川県の宿を探す（じゃらん）", "https://www.jalan.net/140000/"},
 	} {

@@ -16,6 +16,8 @@ type Shiseki struct {
 	Longitude         float64  `json:"longitude"`
 	JalanLRGCode      string   `json:"jalan_lrg_code,omitempty"`
 	JalanLRGName      string   `json:"jalan_lrg_name,omitempty"`
+	JalanSMLCode      string   `json:"jalan_sml_code,omitempty"`
+	JalanSMLName      string   `json:"jalan_sml_name,omitempty"`
 	Description       string   `json:"description"`
 	TitleJA           string   `json:"title_ja,omitempty"`
 	Era               string   `json:"era,omitempty"`
@@ -50,6 +52,8 @@ CREATE TABLE IF NOT EXISTS shiseki (
 	source_url TEXT NOT NULL DEFAULT '',
 	jalan_lrg_code TEXT NOT NULL DEFAULT '',
 	jalan_lrg_name TEXT NOT NULL DEFAULT ''
+	,jalan_sml_code TEXT NOT NULL DEFAULT ''
+	,jalan_sml_name TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS categories (
 	id   INTEGER PRIMARY KEY,
@@ -65,7 +69,7 @@ CREATE TABLE IF NOT EXISTS shiseki_categories (
 const shisekiColumns = "o.id, o.qid, o.label_ja, o.label_en, o.prefecture," +
 	" o.latitude, o.longitude, o.description, o.title_ja, o.era," +
 	" o.designation, o.designation_label, o.designation_source, o.heritage_id, o.source_url," +
-	" o.jalan_lrg_code, o.jalan_lrg_name"
+	" o.jalan_lrg_code, o.jalan_lrg_name, o.jalan_sml_code, o.jalan_sml_name"
 
 func NewShisekiService(dbPath string) (*ShisekiService, error) {
 	db, err := sql.Open("sqlite", dbPath)
@@ -85,6 +89,14 @@ func NewShisekiService(dbPath string) (*ShisekiService, error) {
 		return nil, err
 	}
 	if err := ensureColumn(db, "jalan_lrg_name", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if err := ensureColumn(db, "jalan_sml_code", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if err := ensureColumn(db, "jalan_sml_name", "TEXT NOT NULL DEFAULT ''"); err != nil {
 		db.Close()
 		return nil, err
 	}
@@ -126,7 +138,7 @@ func (s *ShisekiService) collect(query string, args ...any) ([]Shiseki, error) {
 		if err := rows.Scan(&id, &o.QID, &o.LabelJA, &o.LabelEN, &o.Prefecture,
 			&o.Latitude, &o.Longitude, &o.Description, &o.TitleJA,
 			&o.Era, &o.Designation, &o.DesignationLabel, &o.DesignationSource,
-			&o.HeritageID, &o.SourceURL, &o.JalanLRGCode, &o.JalanLRGName); err != nil {
+			&o.HeritageID, &o.SourceURL, &o.JalanLRGCode, &o.JalanLRGName, &o.JalanSMLCode, &o.JalanSMLName); err != nil {
 			return nil, err
 		}
 		idToIndex[id] = len(result)

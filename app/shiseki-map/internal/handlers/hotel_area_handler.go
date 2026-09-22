@@ -47,7 +47,9 @@ func (h *HotelAreaHandler) NearbyHotels(w http.ResponseWriter, r *http.Request) 
 
 	lrgCode := r.URL.Query().Get("lrg_code")
 	lrgName := r.URL.Query().Get("lrg_name")
-	link, ok := h.service.AreaSearchLink(prefecture, lrgCode)
+	smlCode := r.URL.Query().Get("sml_code")
+	smlName := r.URL.Query().Get("sml_name")
+	link, ok := h.service.AreaSearchLink(prefecture, lrgCode, smlCode)
 	if !ok {
 		http.Error(w, "unknown prefecture", http.StatusBadRequest)
 		return
@@ -55,11 +57,14 @@ func (h *HotelAreaHandler) NearbyHotels(w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(hotelAreaResponse{Hotels: []hotelAreaHotel{
-		{Name: areaLabel(prefecture, lrgName, h.service.IsLargeArea(prefecture, lrgCode)) + "の宿を探す（じゃらん）", DetailURL: link},
+		{Name: areaLabel(prefecture, lrgName, smlName, h.service.IsLargeArea(prefecture, lrgCode), h.service.IsSmallArea(lrgCode, smlCode)) + "の宿を探す（じゃらん）", DetailURL: link},
 	}})
 }
 
-func areaLabel(prefecture, lrgName string, validLRG bool) string {
+func areaLabel(prefecture, lrgName, smlName string, validLRG, validSML bool) string {
+	if validLRG && validSML && smlName != "" {
+		return smlName
+	}
 	if validLRG && lrgName != "" {
 		return lrgName
 	}

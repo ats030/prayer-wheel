@@ -13,10 +13,12 @@ DATASETS = (
     ROOT / "app/shiseki-map/frontend/shiseki.json",
 )
 OVERRIDES = ROOT / "data/jalan-lrg-overrides.json"
+SML_OVERRIDES = ROOT / "data/jalan-sml-overrides.json"
 
 
 def main():
     overrides = json.loads(OVERRIDES.read_text())
+    sml_overrides = json.loads(SML_OVERRIDES.read_text())
     errors = []
     total = 0
     record_qids = set()
@@ -45,6 +47,19 @@ def main():
                 errors.append(f"{path}:{qid}: official URL mismatch")
             if not evidence.get("confirmed_at") or not evidence.get("method"):
                 errors.append(f"{path}:{qid}: incomplete evidence")
+            sml_code = record.get("jalan_sml_code", "")
+            sml_name = record.get("jalan_sml_name", "")
+            sml = sml_overrides.get(qid)
+            if not re.fullmatch(r"\d{6}", sml_code) or sml_code.endswith("00"):
+                errors.append(f"{path}:{qid}: malformed or missing SML code {sml_code!r}")
+            if not sml or (sml.get("lrg_code"), sml.get("sml_code"), sml.get("sml_name")) != (code, sml_code, sml_name):
+                errors.append(f"{path}:{qid}: dataset and SML override differ")
+            sml_evidence = (sml or {}).get("evidence", {})
+            sml_url = f"https://www.jalan.net/{code[:2]}0000/LRG_{code}/SML_{sml_code}/"
+            if sml_evidence.get("official_url") != sml_url:
+                errors.append(f"{path}:{qid}: official SML URL mismatch")
+            if not sml_evidence.get("confirmed_at") or not sml_evidence.get("method"):
+                errors.append(f"{path}:{qid}: incomplete SML evidence")
     if errors:
         raise SystemExit("\n".join(errors[:100]))
     override_qids = set(overrides)
@@ -52,7 +67,9 @@ def main():
         missing = sorted(record_qids - override_qids)
         stale = sorted(override_qids - record_qids)
         raise SystemExit(f"override keys differ: missing={missing[:20]} stale={stale[:20]}")
-    print(json.dumps({"records": total, "overrides": len(overrides), "unassigned": 0}))
+    if set(sml_overrides) != record_qids:
+        raise SystemExit("SML override keys differ from dataset qids")
+    print(json.dumps({"records": total, "lrg_overrides": len(overrides), "sml_overrides": len(sml_overrides), "unassigned": 0}))
 
 
 if __name__ == "__main__":
