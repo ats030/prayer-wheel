@@ -108,8 +108,8 @@ async function loadWikipediaContent(o){
   return wikiContentQueue[cacheKey];
 }
 async function detailedLocation(o){
-  const embedded=[o.prefecture,o.address,o.location,o.municipality,o.city].filter((value,index,items)=>value&&items.indexOf(value)===index).join(' ');
-  if(embedded)return embedded;
+  const embedded=o.address||o.location||o.municipality||o.city;
+  if(embedded)return [o.prefecture,embedded].filter((value,index,items)=>value&&items.indexOf(value)===index).join(' ');
   const point=mapCoordinates(o);if(!point)return o.prefecture||'地域未登録';
   const key=locationCacheKey(o);
   if(geocodingCache[key])return geocodingCache[key];
