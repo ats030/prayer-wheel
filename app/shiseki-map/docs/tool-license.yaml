@@ -1,5 +1,6 @@
 reviewed_at: 2026-09-23
-decision: approved
+decision: conditional
+decision_note: existing Wikidata use remains approved; new public datasets require per-source publication gates
 intended_use: public read-only historical-site map, including commercial affiliate links
 sources:
   - name: Wikidata structured data
@@ -28,6 +29,38 @@ sources:
     attribution: preserve the contributing database and source record attribution
     restriction: ingest only databases and fields explicitly enabled for API reuse; recheck before release
     evidence: https://jpsearch.go.jp/static/developer/webapi/ch1_intro.html
+  - name: Tokyo Metropolitan Government designated cultural properties CSV
+    cost: free
+    license: CC-BY-4.0
+    commercial_use: allowed
+    attribution: Tokyo Metropolitan Government and dataset link required
+    restriction: only site-class records with valid coordinates and verified access are publication candidates
+    decision: conditional
+    evidence: https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017
+  - name: Okinawa Prefecture cultural properties CSV (2025-05)
+    cost: free
+    license: CC-BY-4.0
+    commercial_use: allowed
+    attribution: Okinawa Prefecture and dataset link required
+    restriction: most historic-site rows lack coordinates; verify access and coordinates per record
+    decision: conditional
+    evidence: https://data.bodik.jp/dataset/470007_bunkazai
+  - name: Hokkaido archaeological sites GIS
+    cost: free
+    license: CC-BY-4.0
+    commercial_use: allowed
+    attribution: Hokkaido Government, source link, and modifications required
+    restriction: use both point and polygon data; publication held pending visitability and site safety checks
+    decision: conditional
+    evidence: https://www.harp.lg.jp/opendata/dataset/1245.html
+  - name: Japan Search Mie regional cultural assets database
+    cost: free API access
+    license: Mie Prefecture site policy; reuse permission unconfirmed
+    commercial_use: blocked
+    attribution: not sufficient to resolve reuse prohibition
+    restriction: source site policy prohibits unauthorized reproduction; exclude until explicit permission
+    decision: blocked
+    evidence: https://www.bunka.pref.mie.lg.jp/42550034923.htm
   - name: National Land Numerical Information prefectural cultural properties P32
     cost: free
     license: non-commercial
