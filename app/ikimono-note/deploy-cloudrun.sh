@@ -168,6 +168,33 @@ URL=$("$GCLOUD" run services describe "$SERVICE" --project "$PROJECT" --region "
 OLD_HOST=${URL#https://}
 NEW_URL="https://$NEW_HOST"
 
+# Route 100% of untagged traffic to the newest ready revision and clear
+# leftover staging tags. The service has no OAuth- or host-dependent traffic
+# split, so this is a no-op when traffic already points at latest, but it
+# guards against a stale pin (e.g. a previous revision held at 100%).
+"$GCLOUD" run services update-traffic "$SERVICE" \
+    --project "$PROJECT" --region "$REGION" --to-latest --clear-tags
+
+# Smoke check: ikimono-note's / 302-redirects to the login page, so accept
+# any 2xx or 3xx (an HTTP response proves the new revision is serving).
+# The browser-only verification below still applies for functional correctness.
+say ""
+say "■ 応答確認 (smoke)"
+for attempt in 1 2; do
+  code=$(curl -s -o /dev/null -w '%{http_code}' -m 60 "$NEW_URL/")
+  case "$code" in
+    2*|3*)
+      say "  OK (HTTP $code, try #$attempt)"
+      break ;;
+  esac
+  say "  HTTP $code (try #$attempt)" >&2
+  if [ "$attempt" = 2 ]; then
+    say "  ★smoke 失敗 — 新リビジョンが本番に乗っていない可能性があります" >&2
+    exit 1
+  fi
+  sleep 5
+done
+
 # Google は新旧2つのURLを配信する。status.url は旧形式しか返さないので、両方通す。
 # 片方だけ許可していると、もう片方は TrustedHostMiddleware に 400 で弾かれる。
 if [ -n "$OLD_HOST" ] && [ "$OLD_HOST" != "$NEW_HOST" ]; then
