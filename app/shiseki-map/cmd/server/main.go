@@ -98,7 +98,7 @@ func main() {
 	// Create server
 	server := &http.Server{
 		Addr:    ":" + port,
-		Handler: muxWithCORS,
+		Handler: gzipMiddleware(muxWithCORS),
 	}
 
 	// Start server in goroutine
