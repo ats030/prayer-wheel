@@ -84,7 +84,7 @@ def main():
         records = json.loads((ROOT / dataset).read_text())
         for record in records:
             if record.get("jalan_lrg_code"):
-                qid = str(record.get("qid"))
+                qid = str(record.get("id") or record.get("qid"))
                 code = record["jalan_lrg_code"]
                 existing = overrides.get(qid)
                 if existing and existing["code"] != code:
@@ -115,12 +115,12 @@ def main():
                 if points:
                     distances.append((min(distance_km(lat, lng, p[0], p[1]) for p in points), code))
             if not distances:
-                unresolved.append({"dataset": str(dataset), "qid": record.get("qid"), "candidates": candidates})
+                unresolved.append({"dataset": str(dataset), "qid": record.get("id") or record.get("qid"), "candidates": candidates})
                 continue
             distances.sort()
             best_distance, code = distances[0]
             runner_up = distances[1][0] if len(distances) > 1 else None
-            qid = str(record.get("qid"))
+            qid = str(record.get("id") or record.get("qid"))
             existing = overrides.get(qid)
             if existing and existing["code"] != code:
                 raise SystemExit(f"conflicting assignments for {qid}: {existing['code']} vs {code}")

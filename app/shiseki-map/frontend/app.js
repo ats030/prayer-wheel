@@ -30,7 +30,8 @@ function persist(key,value){
   clearTimeout(saveTimers[key]);
   saveTimers[key]=setTimeout(()=>{try{localStorage.setItem(key,JSON.stringify(value))}catch(error){console.warn(`Cache ${key} could not be saved`,error)}},500);
 }
-function shisekiKey(o,index=0){return o.qid||`${o.label_ja}-${o.latitude}-${o.longitude}-${index}`}
+function shisekiKey(o,index=0){return o.id||o.qid||`${o.label_ja}-${o.latitude}-${o.longitude}-${index}`}
+function wikiQID(o){return /^Q[1-9][0-9]*$/.test(o.qid||'')?o.qid:''}
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}}
 function plainText(value){const document=new DOMParser().parseFromString(String(value||''),'text/html');return document.body.textContent.trim()}
@@ -86,8 +87,9 @@ async function fetchJSONWithRetry(url){
 }
 const WIKI_SECTIONS_RETRY_MS=60000;
 async function loadWikipediaContent(o){
+  if(!wikiQID(o)&&!o.wikipedia_title)return null;
   const title=o.wikipedia_title||o.title_ja||o.label_ja;if(!title)return null;
-  const cacheKey=`${o.qid||''}:${title}`;
+  const cacheKey=`${shisekiKey(o)}:${title}`;
   const cached=wikiContentCache[cacheKey];
   // A transient sections failure is cached too (so re-opening the panel does
   // not re-issue every Wikimedia request for this shiseki), but only for a
@@ -109,7 +111,7 @@ async function loadWikipediaContent(o){
 }
 async function detailedLocation(o){
   const embedded=o.address||o.location||o.municipality||o.city;
-  if(embedded)return [o.prefecture,embedded].filter((value,index,items)=>value&&items.indexOf(value)===index).join(' ');
+  if(embedded)return embedded.startsWith(o.prefecture)?embedded:[o.prefecture,embedded].filter(Boolean).join(' ');
   const point=mapCoordinates(o);if(!point)return o.prefecture||'地域未登録';
   const key=locationCacheKey(o);
   if(geocodingCache[key])return geocodingCache[key];
@@ -199,13 +201,20 @@ function renderMarkers(){
   if(selectedKey&&!markers.has(selectedKey))closeDetail(false);
 }
 function detail(o){
-  const wiki=o.qid?`https://www.wikidata.org/wiki/${encodeURIComponent(o.qid)}`:'';
-  const wikipediaTitle=o.wikipedia_title||o.title_ja||o.label_ja;
+  const qid=wikiQID(o);
+  const wiki=qid?`https://www.wikidata.org/wiki/${encodeURIComponent(qid)}`:'';
+  const wikipediaTitle=o.wikipedia_title||(qid?(o.title_ja||o.label_ja):'');
   const pedia=wikipediaTitle?`https://ja.wikipedia.org/wiki/${encodeURIComponent(wikipediaTitle)}`:'';
   const category=categoryDetailText(o);
   const source=safeUrl(o.designation_source||o.source_url);
-  const aboutBody=o.description?esc(o.description):'記事の概要を読み込んでいます…';
-  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(o.label_ja||o.label_en||'名称未登録')}</h2>${designationBadge(o)}</header><dl class="detail-facts"><div><dt>所在地</dt><dd id="detail-location">${locationMarkup(o.prefecture||'地域未登録',o)}<span class="location-loading">詳細を確認中…</span></dd></div><div><dt>カテゴリ</dt><dd id="detail-category">${esc(category||'その他')}</dd></div><div><dt>時代</dt><dd>${esc(o.era||'未登録')}</dd></div><div><dt>指定情報</dt><dd>${esc(o.designation_label||designationLabel(designationRank(o)))}${source?` <a href="${esc(source)}" target="_blank" rel="noopener noreferrer">根拠↗</a>`:''}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">概要</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status"></p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section" id="detail-history-section" aria-labelledby="detail-history"><h3 id="detail-history">歴史</h3><div class="detail-history" id="detail-history-body"></div><p class="detail-history-status" id="detail-history-status">読み込んでいます…</p></section><section class="detail-section" id="detail-remains-section" aria-labelledby="detail-remains"><h3 id="detail-remains">遺構・見どころ</h3><div class="detail-remains" id="detail-remains-body"></div><p class="detail-remains-status" id="detail-remains-status">読み込んでいます…</p></section><section class="detail-section" id="detail-access-section" aria-labelledby="detail-access"><h3 id="detail-access">アクセス</h3><div class="detail-access" id="detail-access-body"></div><p class="detail-access-status" id="detail-access-status">読み込んでいます…</p></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" id="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}</nav></section><section class="detail-section detail-affiliate" id="detail-affiliate-section" aria-labelledby="detail-affiliate-heading"><h3 id="detail-affiliate-heading">近くの宿</h3><div class="affiliate" id="detail-affiliate" aria-label="広告"><p class="detail-affiliate-status">近くの宿を検索しています…</p></div></section></article>`;
+  const aboutBody=o.description?esc(o.description):(qid?'記事の概要を読み込んでいます…':'概要情報は未登録です。');
+  const access=o.access_note?`<p>${esc(o.access_note)}</p>`:'';
+  const sourceName=o.source_name?esc(o.source_name):'';
+  const dataset=safeUrl(o.source_url);
+  const visit=safeUrl(o.visit_url);
+  const license=o.source_license==='CC BY 4.0'?'<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener noreferrer">CC BY 4.0<span aria-hidden="true">↗</span></a>':'';
+  const sourceLinks=`${sourceName&&dataset?`<a href="${esc(dataset)}" target="_blank" rel="noopener noreferrer">${sourceName}（表示用に加工）<span aria-hidden="true">↗</span></a>${license}`:''}${visit?`<a href="${esc(visit)}" target="_blank" rel="noopener noreferrer">現行の訪問案内<span aria-hidden="true">↗</span></a>`:''}`;
+  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(o.label_ja||o.label_en||'名称未登録')}</h2>${designationBadge(o)}</header><dl class="detail-facts"><div><dt>所在地</dt><dd id="detail-location">${locationMarkup(o.prefecture||'地域未登録',o)}<span class="location-loading">詳細を確認中…</span></dd></div><div><dt>カテゴリ</dt><dd id="detail-category">${esc(category||'その他')}</dd></div><div><dt>時代</dt><dd>${esc(o.era||'未登録')}</dd></div><div><dt>指定情報</dt><dd>${esc(o.designation_label||designationLabel(designationRank(o)))}${source?` <a href="${esc(source)}" target="_blank" rel="noopener noreferrer">根拠↗</a>`:''}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">概要</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status"></p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section" id="detail-history-section" aria-labelledby="detail-history"><h3 id="detail-history">歴史</h3><div class="detail-history" id="detail-history-body"></div><p class="detail-history-status" id="detail-history-status">読み込んでいます…</p></section><section class="detail-section" id="detail-remains-section" aria-labelledby="detail-remains"><h3 id="detail-remains">遺構・見どころ</h3><div class="detail-remains" id="detail-remains-body"></div><p class="detail-remains-status" id="detail-remains-status">読み込んでいます…</p></section><section class="detail-section" id="detail-access-section" aria-labelledby="detail-access"><h3 id="detail-access">アクセス</h3><div class="detail-access" id="detail-access-body">${access}</div><p class="detail-access-status" id="detail-access-status">${visit?'訪問前にリンク先の最新情報をご確認ください。':'読み込んでいます…'}</p></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" id="detail-links" aria-label="出典">${sourceLinks}${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}</nav></section><section class="detail-section detail-affiliate" id="detail-affiliate-section" aria-labelledby="detail-affiliate-heading"><h3 id="detail-affiliate-heading">近くの宿</h3><div class="affiliate" id="detail-affiliate" aria-label="広告"><p class="detail-affiliate-status">近くの宿を検索しています…</p></div></section></article>`;
 }
 function selectShiseki(key,origin){
   const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;
@@ -256,6 +265,13 @@ async function hydrateWikiSection(o,key,config){
   const section=document.querySelector(config.sectionId);
   if(!section)return;
   const body=document.querySelector(config.bodyId),status=document.querySelector(config.statusId);
+  if(!wikiQID(o)&&!o.wikipedia_title){
+    if(config.field!=='access'||!o.access_note){
+      if(body)body.innerHTML='<p class="detail-empty">情報なし</p>';
+      if(status)status.textContent='';
+    }
+    return;
+  }
   const data=await loadWikipediaContent(o);
   if(selectedKey!==key)return;
   const wikiLink=url=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`;
@@ -315,11 +331,12 @@ function closeDetail(restoreFocus=true){
 }
 async function hydrateImage(o,key){
   const [wikipediaContent]=await Promise.all([loadWikipediaContent(o)]);
-  let result=imageCache[o.qid]||null,loadError=null;
-  if(typeof result==='string'||(result?.url&&!result.license)){delete imageCache[o.qid];persist(CACHE_KEY,imageCache);result=null}
-  if(!result&&wikipediaContent?.image_url){result={url:safeUrl(wikipediaContent.image_url),license:String(wikipediaContent.license||'').trim(),licenseUrl:safeUrl(wikipediaContent.license_url),artist:plainText(wikipediaContent.artist),credit:plainText(wikipediaContent.credit),sourceUrl:safeUrl(wikipediaContent.image_source_url)};imageCache[o.qid]=result;persist(CACHE_KEY,imageCache)}
-  if(!result&&o.qid){
-    try{const data=await fetchJSONWithRetry(`/api/wiki/image?qid=${encodeURIComponent(o.qid)}`);if(data&&data.url){result={url:safeUrl(data.url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),sourceUrl:safeUrl(data.source_url)};imageCache[o.qid]=result;persist(CACHE_KEY,imageCache)}}
+  const cacheKey=shisekiKey(o),qid=wikiQID(o);
+  let result=imageCache[cacheKey]||null,loadError=null;
+  if(typeof result==='string'||(result?.url&&!result.license)){delete imageCache[cacheKey];persist(CACHE_KEY,imageCache);result=null}
+  if(!result&&wikipediaContent?.image_url){result={url:safeUrl(wikipediaContent.image_url),license:String(wikipediaContent.license||'').trim(),licenseUrl:safeUrl(wikipediaContent.license_url),artist:plainText(wikipediaContent.artist),credit:plainText(wikipediaContent.credit),sourceUrl:safeUrl(wikipediaContent.image_source_url)};imageCache[cacheKey]=result;persist(CACHE_KEY,imageCache)}
+  if(!result&&qid){
+    try{const data=await fetchJSONWithRetry(`/api/wiki/image?qid=${encodeURIComponent(qid)}`);if(data&&data.url){result={url:safeUrl(data.url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),sourceUrl:safeUrl(data.source_url),artist:plainText(data.artist),credit:plainText(data.credit)};imageCache[cacheKey]=result;persist(CACHE_KEY,imageCache)}}
     catch(error){loadError=error}
   }
   const container=document.querySelector('#detail-image'),content=document.querySelector('#detail-content');if(!container||selectedKey!==key)return;
@@ -332,13 +349,14 @@ async function hydrateImage(o,key){
   container.querySelector('button').addEventListener('click',()=>openLightbox(result.url,o.label_ja));
 }
 async function hydrateLinks(o,key){
-  if(!o.qid)return;
-  let links=linksCache[o.qid];
+  const qid=wikiQID(o);
+  if(!qid)return;
+  let links=linksCache[qid];
   if(!links){
     try{
-      const data=await fetchJSONWithRetry(`/api/wiki/links?qid=${encodeURIComponent(o.qid)}`);
+      const data=await fetchJSONWithRetry(`/api/wiki/links?qid=${encodeURIComponent(qid)}`);
       links={officialSite:safeUrl(data.official_site),officialSiteSource:data.official_site_source||'',facebook:safeUrl(data.facebook),twitter:safeUrl(data.twitter),instagram:safeUrl(data.instagram),youtube:safeUrl(data.youtube)};
-      linksCache[o.qid]=links;persist(LINKS_CACHE_KEY,linksCache);
+      linksCache[qid]=links;persist(LINKS_CACHE_KEY,linksCache);
     }catch(error){links={}}
   }
   const nav=document.querySelector('#detail-links');if(!nav||selectedKey!==key)return;

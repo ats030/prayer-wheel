@@ -89,7 +89,7 @@ def main():
     for dataset in base.DATASETS:
         records = json.loads((ROOT / dataset).read_text())
         for record in records:
-            qid = str(record["qid"])
+            qid = str(record.get("id") or record["qid"])
             lrg = record["jalan_lrg_code"]
             latlng = (float(record["latitude"]), float(record["longitude"]))
             municipality = base.municipality_at(boundaries, record["prefecture"], *latlng)

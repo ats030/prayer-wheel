@@ -53,16 +53,16 @@ func (h *ShisekiHandler) GetShisekiByQID(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Extract qid from path: /api/shiseki/:qid
+	// The path accepts a Wikidata QID or a source-scoped site ID.
 	path := strings.TrimPrefix(r.URL.Path, "/api/shiseki/")
-	qid := strings.TrimSpace(path)
+	id := strings.TrimSpace(path)
 
-	if qid == "" {
-		http.Error(w, "QID parameter is required", http.StatusBadRequest)
+	if id == "" {
+		http.Error(w, "Site ID parameter is required", http.StatusBadRequest)
 		return
 	}
 
-	shiseki := h.service.GetByQID(qid)
+	shiseki := h.service.GetByID(id)
 	if shiseki == nil {
 		http.Error(w, "Shiseki not found", http.StatusNotFound)
 		return

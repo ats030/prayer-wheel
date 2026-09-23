@@ -8,6 +8,7 @@ import (
 )
 
 type Shiseki struct {
+	ID                string   `json:"id"`
 	QID               string   `json:"qid"`
 	LabelJA           string   `json:"label_ja"`
 	LabelEN           string   `json:"label_en"`
@@ -26,6 +27,11 @@ type Shiseki struct {
 	DesignationSource string   `json:"designation_source,omitempty"`
 	HeritageID        string   `json:"heritage_id,omitempty"`
 	SourceURL         string   `json:"source_url,omitempty"`
+	Address           string   `json:"address,omitempty"`
+	SourceName        string   `json:"source_name,omitempty"`
+	SourceLicense     string   `json:"source_license,omitempty"`
+	VisitURL          string   `json:"visit_url,omitempty"`
+	AccessNote        string   `json:"access_note,omitempty"`
 	Categories        []string `json:"categories"`
 }
 
@@ -36,7 +42,8 @@ type ShisekiService struct {
 const baseSchema = `
 CREATE TABLE IF NOT EXISTS shiseki (
 	id              INTEGER PRIMARY KEY,
-	qid             TEXT NOT NULL UNIQUE,
+	site_id         TEXT NOT NULL UNIQUE,
+	qid             TEXT NOT NULL DEFAULT '',
 	label_ja        TEXT NOT NULL,
 	label_en        TEXT NOT NULL DEFAULT '',
 	prefecture      TEXT NOT NULL DEFAULT '',
@@ -50,6 +57,11 @@ CREATE TABLE IF NOT EXISTS shiseki (
 	designation_source TEXT NOT NULL DEFAULT '',
 	heritage_id TEXT NOT NULL DEFAULT '',
 	source_url TEXT NOT NULL DEFAULT '',
+	address TEXT NOT NULL DEFAULT '',
+	source_name TEXT NOT NULL DEFAULT '',
+	source_license TEXT NOT NULL DEFAULT '',
+	visit_url TEXT NOT NULL DEFAULT '',
+	access_note TEXT NOT NULL DEFAULT '',
 	jalan_lrg_code TEXT NOT NULL DEFAULT '',
 	jalan_lrg_name TEXT NOT NULL DEFAULT ''
 	,jalan_sml_code TEXT NOT NULL DEFAULT ''
@@ -66,9 +78,10 @@ CREATE TABLE IF NOT EXISTS shiseki_categories (
 );
 `
 
-const shisekiColumns = "o.id, o.qid, o.label_ja, o.label_en, o.prefecture," +
+const shisekiColumns = "o.id, o.site_id, o.qid, o.label_ja, o.label_en, o.prefecture," +
 	" o.latitude, o.longitude, o.description, o.title_ja, o.era," +
 	" o.designation, o.designation_label, o.designation_source, o.heritage_id, o.source_url," +
+	" o.address, o.source_name, o.source_license, o.visit_url, o.access_note," +
 	" o.jalan_lrg_code, o.jalan_lrg_name, o.jalan_sml_code, o.jalan_sml_name"
 
 func NewShisekiService(dbPath string) (*ShisekiService, error) {
@@ -97,6 +110,27 @@ func NewShisekiService(dbPath string) (*ShisekiService, error) {
 		return nil, err
 	}
 	if err := ensureColumn(db, "jalan_sml_name", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		db.Close()
+		return nil, err
+	}
+	for _, column := range []struct{ name, definition string }{
+		{"site_id", "TEXT NOT NULL DEFAULT ''"},
+		{"address", "TEXT NOT NULL DEFAULT ''"},
+		{"source_name", "TEXT NOT NULL DEFAULT ''"},
+		{"source_license", "TEXT NOT NULL DEFAULT ''"},
+		{"visit_url", "TEXT NOT NULL DEFAULT ''"},
+		{"access_note", "TEXT NOT NULL DEFAULT ''"},
+	} {
+		if err := ensureColumn(db, column.name, column.definition); err != nil {
+			db.Close()
+			return nil, err
+		}
+	}
+	if _, err := db.Exec("UPDATE shiseki SET site_id = qid WHERE site_id = ''"); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if _, err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_shiseki_site_id ON shiseki(site_id)"); err != nil {
 		db.Close()
 		return nil, err
 	}
@@ -135,10 +169,12 @@ func (s *ShisekiService) collect(query string, args ...any) ([]Shiseki, error) {
 	for rows.Next() {
 		var o Shiseki
 		var id int
-		if err := rows.Scan(&id, &o.QID, &o.LabelJA, &o.LabelEN, &o.Prefecture,
+		if err := rows.Scan(&id, &o.ID, &o.QID, &o.LabelJA, &o.LabelEN, &o.Prefecture,
 			&o.Latitude, &o.Longitude, &o.Description, &o.TitleJA,
 			&o.Era, &o.Designation, &o.DesignationLabel, &o.DesignationSource,
-			&o.HeritageID, &o.SourceURL, &o.JalanLRGCode, &o.JalanLRGName, &o.JalanSMLCode, &o.JalanSMLName); err != nil {
+			&o.HeritageID, &o.SourceURL, &o.Address, &o.SourceName,
+			&o.SourceLicense, &o.VisitURL, &o.AccessNote,
+			&o.JalanLRGCode, &o.JalanLRGName, &o.JalanSMLCode, &o.JalanSMLName); err != nil {
 			return nil, err
 		}
 		idToIndex[id] = len(result)
@@ -209,6 +245,9 @@ func (s *ShisekiService) GetByPrefecture(prefecture string) []Shiseki {
 }
 
 func (s *ShisekiService) GetByQID(qid string) *Shiseki {
+	if qid == "" {
+		return nil
+	}
 	list, _ := s.collect("SELECT "+shisekiColumns+" FROM shiseki o WHERE o.qid = ?", qid)
 	if len(list) == 0 {
 		return nil
@@ -216,8 +255,12 @@ func (s *ShisekiService) GetByQID(qid string) *Shiseki {
 	return &list[0]
 }
 
-func (s *ShisekiService) GetByID(qid string) *Shiseki {
-	return s.GetByQID(qid)
+func (s *ShisekiService) GetByID(id string) *Shiseki {
+	list, _ := s.collect("SELECT "+shisekiColumns+" FROM shiseki o WHERE o.site_id = ?", id)
+	if len(list) == 0 {
+		return nil
+	}
+	return &list[0]
 }
 
 func (s *ShisekiService) GetAllShisekiWithDescriptions() []Shiseki {

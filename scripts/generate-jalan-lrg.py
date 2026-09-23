@@ -176,26 +176,27 @@ def update_dataset(path: Path, boundaries: dict, areas: dict, municipality_areas
 
     assigned = 0
     for record in records:
+        site_id = str(record.get("id") or record.get("qid"))
         record.pop("jalan_lrg_code", None)
         record.pop("jalan_lrg_name", None)
         record.pop("jalan_sml_code", None)
         record.pop("jalan_sml_name", None)
-        override = overrides.get(str(record.get("qid")))
+        override = overrides.get(site_id)
         if override:
             code = override["code"]
             if code not in areas or override.get("name") != areas[code][1]:
-                raise SystemExit(f"invalid override for {record.get('qid')}: {override}")
+                raise SystemExit(f"invalid override for {site_id}: {override}")
             if areas[code][0] != record.get("prefecture"):
-                raise SystemExit(f"override prefecture mismatch for {record.get('qid')}: {override}")
+                raise SystemExit(f"override prefecture mismatch for {site_id}: {override}")
             record["jalan_lrg_code"] = code
             record["jalan_lrg_name"] = areas[code][1]
-            sml = sml_overrides.get(str(record.get("qid")))
+            sml = sml_overrides.get(site_id)
             if not sml or sml.get("lrg_code") != code:
-                raise SystemExit(f"missing or mismatched SML override for {record.get('qid')}")
+                raise SystemExit(f"missing or mismatched SML override for {site_id}")
             sml_code = sml.get("sml_code")
             expected = small_areas.get(sml_code)
             if not expected or expected != (record.get("prefecture"), code, areas[code][1], sml.get("sml_name")):
-                raise SystemExit(f"invalid SML override for {record.get('qid')}: {sml}")
+                raise SystemExit(f"invalid SML override for {site_id}: {sml}")
             record["jalan_sml_code"] = sml_code
             record["jalan_sml_name"] = expected[3]
             assigned += 1

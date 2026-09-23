@@ -10,7 +10,7 @@ import math
 from collections import defaultdict
 from pathlib import Path
 
-from audit_public_supply import names_in_map, normalized_name, read_csv, valid_coordinates
+from audit_public_supply import normalized_name, read_csv, valid_coordinates
 
 TOKYO_SHA256 = "0ceefb11fc6a6adbf1414e7733be2754f0e6fd867bacec02db2fd1afe72a73ee"
 OKINAWA_SHA256 = "25f57972a9fe70f75ed9d98d836b264edf6b1af3ac2d1cd7c3870cb7636b2460"
@@ -74,7 +74,12 @@ def review(tokyo: Path, okinawa: Path, existing_path: Path) -> dict:
     tokyo_rows = checked_rows(tokyo, TOKYO_SHA256)
     okinawa_rows = checked_rows(okinawa, OKINAWA_SHA256)
     existing = json.loads(existing_path.read_text(encoding="utf-8"))
-    names = names_in_map(existing_path)
+    # Reconstruct the map baseline used for this historical review. The three
+    # accepted Tokyo records were published later and must not exclude themselves.
+    existing = [item for item in existing if not str(item.get("id", "")).startswith("tokyo:130001:")]
+    names: dict[str, set[str]] = defaultdict(set)
+    for item in existing:
+        names[item["prefecture"]].add(normalized_name(item["label_ja"]))
     tokyo = [row for row in tokyo_rows if row["種類"] in {"史跡", "旧跡"}
              and valid_coordinates(row) and "?" not in row["名称"]
              and "�" not in row["名称"]

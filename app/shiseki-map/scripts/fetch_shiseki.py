@@ -199,7 +199,9 @@ def main():
             "designation_source": source,
             "heritage_id": "", "source_url": "https://www.wikidata.org/wiki/" + qid,
         })
-    rows.sort(key=lambda item: (item["prefecture"], item["label_ja"]))
+    from merge_public_sites import merge_rows
+
+    rows = merge_rows(rows)
     OUTPUT.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     counts = {}
     for item in rows:

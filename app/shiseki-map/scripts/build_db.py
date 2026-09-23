@@ -9,16 +9,20 @@ SRC = ROOT / "frontend" / "shiseki.json"
 DST = ROOT / "frontend" / "shiseki.db"
 SCHEMA = """
 DROP TABLE IF EXISTS shiseki_categories; DROP TABLE IF EXISTS categories; DROP TABLE IF EXISTS shiseki;
-CREATE TABLE shiseki (id INTEGER PRIMARY KEY, qid TEXT NOT NULL UNIQUE, label_ja TEXT NOT NULL,
+CREATE TABLE shiseki (id INTEGER PRIMARY KEY, site_id TEXT NOT NULL UNIQUE, qid TEXT NOT NULL DEFAULT '', label_ja TEXT NOT NULL,
 label_en TEXT NOT NULL DEFAULT '', prefecture TEXT NOT NULL DEFAULT '', latitude REAL NOT NULL,
 longitude REAL NOT NULL, description TEXT NOT NULL DEFAULT '', title_ja TEXT NOT NULL DEFAULT '',
 era TEXT NOT NULL DEFAULT '', designation TEXT NOT NULL DEFAULT 'unknown',
 designation_label TEXT NOT NULL DEFAULT '', designation_source TEXT NOT NULL DEFAULT '',
 heritage_id TEXT NOT NULL DEFAULT '', source_url TEXT NOT NULL DEFAULT '',
+address TEXT NOT NULL DEFAULT '', source_name TEXT NOT NULL DEFAULT '',
+source_license TEXT NOT NULL DEFAULT '', visit_url TEXT NOT NULL DEFAULT '',
+access_note TEXT NOT NULL DEFAULT '',
 jalan_lrg_code TEXT NOT NULL DEFAULT '', jalan_lrg_name TEXT NOT NULL DEFAULT '',
 jalan_sml_code TEXT NOT NULL DEFAULT '', jalan_sml_name TEXT NOT NULL DEFAULT '');
 CREATE INDEX idx_shiseki_prefecture ON shiseki(prefecture);
 CREATE INDEX idx_shiseki_designation ON shiseki(designation);
+CREATE UNIQUE INDEX idx_shiseki_qid ON shiseki(qid) WHERE qid != '';
 CREATE TABLE categories (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);
 CREATE TABLE shiseki_categories (shiseki_id INTEGER NOT NULL REFERENCES shiseki(id),
 type_id INTEGER NOT NULL REFERENCES categories(id), PRIMARY KEY (shiseki_id, type_id));
@@ -38,12 +42,15 @@ def build():
             if designation not in VALID_DESIGNATIONS:
                 designation = "unknown"
             cur = conn.execute(
-                "INSERT INTO shiseki (qid,label_ja,label_en,prefecture,latitude,longitude,description,title_ja,era,designation,designation_label,designation_source,heritage_id,source_url,jalan_lrg_code,jalan_lrg_name,jalan_sml_code,jalan_sml_name) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (item["qid"], item["label_ja"], item.get("label_en", ""), item.get("prefecture", ""),
+                "INSERT INTO shiseki (site_id,qid,label_ja,label_en,prefecture,latitude,longitude,description,title_ja,era,designation,designation_label,designation_source,heritage_id,source_url,address,source_name,source_license,visit_url,access_note,jalan_lrg_code,jalan_lrg_name,jalan_sml_code,jalan_sml_name) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (item.get("id") or item["qid"], item.get("qid", ""), item["label_ja"], item.get("label_en", ""), item.get("prefecture", ""),
                  float(item["latitude"]), float(item["longitude"]), item.get("description", ""),
                  item.get("title_ja", ""), item.get("era", ""), designation,
                  item.get("designation_label", ""), item.get("designation_source", ""),
                  item.get("heritage_id", ""), item.get("source_url", ""),
+                 item.get("address", ""), item.get("source_name", ""),
+                 item.get("source_license", ""), item.get("visit_url", ""),
+                 item.get("access_note", ""),
                  item.get("jalan_lrg_code", ""), item.get("jalan_lrg_name", ""),
                  item.get("jalan_sml_code", ""), item.get("jalan_sml_name", "")),
             )

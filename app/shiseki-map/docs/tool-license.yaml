@@ -36,6 +36,8 @@ sources:
     attribution: Tokyo Metropolitan Government and dataset link required
     restriction: only site-class records with valid coordinates and verified access are publication candidates
     decision: conditional
+    published_record_ids: ["0000000114", "0000000115", "0000000243"]
+    publication_note: three individually checked records only; the 2019 access hours are not republished; UI links source, CC BY 4.0, and current ward guidance
     evidence: https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017
   - name: Okinawa Prefecture cultural properties CSV (2025-05)
     cost: free

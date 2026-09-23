@@ -44,7 +44,13 @@ func main() {
 	// API routes
 	mux.HandleFunc("/api/shiseki/prefecture/", shisekiHandler.GetShisekiByPrefecture)
 	mux.HandleFunc("/api/shiseki/descriptions", shisekiHandler.GetAllShisekiWithDescriptions)
-	mux.HandleFunc("/api/shiseki/", shisekiHandler.GetAllShiseki)
+	mux.HandleFunc("/api/shiseki/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/shiseki/" {
+			shisekiHandler.GetAllShiseki(w, r)
+			return
+		}
+		shisekiHandler.GetShisekiByQID(w, r)
+	})
 	mux.HandleFunc("/api/shiseki", shisekiHandler.GetAllShiseki)
 	mux.HandleFunc("/api/wiki/image", wikidataHandler.GetWikidataImage)
 	mux.HandleFunc("/api/wiki/links", wikidataHandler.GetWikidataLinks)

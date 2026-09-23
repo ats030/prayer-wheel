@@ -44218,6 +44218,35 @@
     "jalan_sml_name": "お茶の水・湯島・本郷"
   },
   {
+    "id": "tokyo:130001:0000000114",
+    "qid": "",
+    "label_ja": "多摩川台古墳群",
+    "label_en": "",
+    "prefecture": "東京都",
+    "address": "東京都大田区田園調布1-63ほか",
+    "latitude": 35.590063,
+    "longitude": 139.666173,
+    "description": "多摩川台公園内にある古墳群です。",
+    "title_ja": "多摩川台古墳群",
+    "categories": [
+      "古墳"
+    ],
+    "era": "",
+    "designation": "local",
+    "designation_label": "東京都指定史跡",
+    "designation_source": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+    "heritage_id": "0000000114",
+    "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+    "source_name": "東京都教育庁 文化財一覧",
+    "source_license": "CC BY 4.0",
+    "visit_url": "https://www.city.ota.tokyo.jp/shisetsu/park/tamagawadai.html",
+    "access_note": "公園の一部エリアには季節別の開閉時間があります。訪問前に大田区の案内を確認してください。",
+    "jalan_lrg_code": "138600",
+    "jalan_lrg_name": "蒲田・大森・羽田周辺",
+    "jalan_sml_code": "138602",
+    "jalan_sml_name": "蒲田・大森・羽田周辺"
+  },
+  {
     "qid": "Q85878682",
     "label_ja": "大丸遺跡 (稲城市)",
     "label_en": "",
@@ -44355,6 +44384,35 @@
     "jalan_lrg_name": "葛飾・江戸川・江東",
     "jalan_sml_code": "138902",
     "jalan_sml_name": "葛飾・江戸川"
+  },
+  {
+    "id": "tokyo:130001:0000000243",
+    "qid": "",
+    "label_ja": "子規庵",
+    "label_en": "",
+    "prefecture": "東京都",
+    "address": "東京都台東区根岸2-5-11",
+    "latitude": 35.724461,
+    "longitude": 139.776392,
+    "description": "正岡子規が暮らした場所で、現在の建物は戦後に再建されたものです。",
+    "title_ja": "子規庵",
+    "categories": [
+      "史跡"
+    ],
+    "era": "",
+    "designation": "local",
+    "designation_label": "東京都指定史跡",
+    "designation_source": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+    "heritage_id": "0000000243",
+    "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+    "source_name": "東京都教育庁 文化財一覧",
+    "source_license": "CC BY 4.0",
+    "visit_url": "https://t-navi.city.taito.lg.jp/spot/1062",
+    "access_note": "原則として水・土・日曜と祝日に公開されます。夏季・冬季の休庵や行事変更があるため、訪問前に公式案内を確認してください。",
+    "jalan_lrg_code": "137400",
+    "jalan_lrg_name": "上野・浅草・両国",
+    "jalan_sml_code": "137402",
+    "jalan_sml_name": "上野"
   },
   {
     "qid": "Q21019133",
@@ -46890,6 +46948,35 @@
     "jalan_lrg_name": "八王子・立川・町田・府中・調布",
     "jalan_sml_code": "139212",
     "jalan_sml_name": "福生・東村山・小金井"
+  },
+  {
+    "id": "tokyo:130001:0000000115",
+    "qid": "",
+    "label_ja": "野毛大塚古墳",
+    "label_en": "",
+    "prefecture": "東京都",
+    "address": "東京都世田谷区野毛1-25",
+    "latitude": 35.605274,
+    "longitude": 139.642335,
+    "description": "玉川野毛町公園内にある古墳です。",
+    "title_ja": "野毛大塚古墳",
+    "categories": [
+      "古墳"
+    ],
+    "era": "",
+    "designation": "local",
+    "designation_label": "東京都指定史跡",
+    "designation_source": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+    "heritage_id": "0000000115",
+    "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+    "source_name": "東京都教育庁 文化財一覧",
+    "source_license": "CC BY 4.0",
+    "visit_url": "https://www.city.setagaya.lg.jp/02075/9083.html",
+    "access_note": "古墳は一部を除き立ち入り自由です。公園の開閉時間は世田谷区の案内を確認してください。",
+    "jalan_lrg_code": "138300",
+    "jalan_lrg_name": "渋谷・目黒・世田谷",
+    "jalan_sml_code": "138308",
+    "jalan_sml_name": "世田谷"
   },
   {
     "qid": "Q140932504",

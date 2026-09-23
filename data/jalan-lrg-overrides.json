@@ -1,4 +1,43 @@
 {
+  "tokyo:130001:0000000114": {
+    "code": "138600",
+    "name": "蒲田・大森・羽田周辺",
+    "evidence": {
+      "method": "nearby_verified_site_same_municipality",
+      "municipality": "東京都大田区",
+      "reference_site": "亀甲山古墳",
+      "distance_m": 125,
+      "point_name": "多摩川台古墳群",
+      "official_url": "https://www.jalan.net/130000/LRG_138600/",
+      "confirmed_at": "2026-09-23"
+    }
+  },
+  "tokyo:130001:0000000115": {
+    "code": "138300",
+    "name": "渋谷・目黒・世田谷",
+    "evidence": {
+      "method": "nearby_verified_site_same_municipality",
+      "municipality": "東京都世田谷区",
+      "reference_site": "稲荷丸北遺跡",
+      "distance_m": 972,
+      "point_name": "野毛大塚古墳",
+      "official_url": "https://www.jalan.net/130000/LRG_138300/",
+      "confirmed_at": "2026-09-23"
+    }
+  },
+  "tokyo:130001:0000000243": {
+    "code": "137400",
+    "name": "上野・浅草・両国",
+    "evidence": {
+      "method": "nearby_verified_site_same_municipality",
+      "municipality": "東京都台東区",
+      "reference_site": "横山大観記念館",
+      "distance_m": 1563,
+      "point_name": "子規庵",
+      "official_url": "https://www.jalan.net/130000/LRG_137400/",
+      "confirmed_at": "2026-09-23"
+    }
+  },
   "Q11462667": {
     "code": "162600",
     "name": "伊那・駒ヶ根・飯田・昼神",

@@ -35,7 +35,7 @@ def main():
         records = json.loads(path.read_text())
         total += len(records)
         for record in records:
-            qid = str(record.get("qid"))
+            qid = str(record.get("id") or record.get("qid"))
             if qid in record_qids:
                 errors.append(f"{path}:{qid}: duplicate qid across datasets")
             record_qids.add(qid)
