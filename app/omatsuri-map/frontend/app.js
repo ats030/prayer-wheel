@@ -306,7 +306,7 @@ function detail(f){
   const culture=safeUrl(f.cultural_relaw?.url);
   const about=groundedDescription(f);
   const aboutBody=about.locationAware?`${esc(about.body)}「<span id="detail-about-location">${esc(f.prefecture||'地域未登録')}</span>」付近に登録されています。正確な会場は確認中です。`:esc(about.body);
-  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2>${heritageBadge(f)}</header><dl class="detail-facts"><div><dt>開催地</dt><dd id="detail-location">${locationMarkup(f.prefecture||'地域未登録',f)}${venueData(f)?'':'<span class="location-loading">詳細を確認中…</span>'}</dd></div><div><dt>次回開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status">${esc(about.status)}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" id="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section><section class="detail-section detail-affiliate" id="detail-affiliate-section" aria-labelledby="detail-affiliate-heading"><h3 id="detail-affiliate-heading">近くの宿</h3><div class="affiliate" id="detail-affiliate" aria-label="広告"><p class="detail-affiliate-status">近くの宿を検索しています…</p></div></section></article>`;
+  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2>${heritageBadge(f)}</header><dl class="detail-facts"><div><dt>開催地</dt><dd id="detail-location">${locationMarkup(f.prefecture||'地域未登録',f)}${venueData(f)?'':'<span class="location-loading">詳細を確認中…</span>'}</dd></div><div><dt>次回開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status">${esc(about.status)}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section" id="detail-history-section" aria-labelledby="detail-history"><h3 id="detail-history">歴史</h3><div class="detail-history" id="detail-history-body"></div><p class="detail-history-status" id="detail-history-status">読み込んでいます…</p></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" id="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section><section class="detail-section detail-affiliate" id="detail-affiliate-section" aria-labelledby="detail-affiliate-heading"><h3 id="detail-affiliate-heading">近くの宿</h3><div class="affiliate" id="detail-affiliate" aria-label="広告"><p class="detail-affiliate-status">近くの宿を検索しています…</p></div></section></article>`;
 }
 function selectFestival(key,origin){
   const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;
@@ -325,6 +325,7 @@ function openDetail(f,key,origin){
   hydrateImage(f,key);
   hydrateLocation(f,key);
   hydrateAbout(f,key);
+  hydrateHistory(f,key);
   hydrateLinks(f,key);
   hydrateNearbyHotels(f,key);
 }
@@ -347,6 +348,60 @@ async function hydrateAbout(f,key){
   body.textContent=description;
   const contentLicense=safeUrl(data.content_license_url);
   status.innerHTML=`<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>${contentLicense?` · <a href="${esc(contentLicense)}" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0<span aria-hidden="true">↗</span></a>`:''} · 編集あり`;
+}
+async function hydrateWikiSection(f,key,config){
+  const section=document.querySelector(config.sectionId);
+  if(!section)return;
+  const body=document.querySelector(config.bodyId),status=document.querySelector(config.statusId);
+  const data=await loadWikipediaContent(f);
+  if(selectedKey!==key)return;
+  const wikiLink=url=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`;
+  const ccLink=url=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0<span aria-hidden="true">↗</span></a>`;
+  if(!data||data.sections_unavailable){
+    if(body)body.innerHTML='';
+    if(status)status.textContent='読み込みに失敗しました。もう一度開いてください。';
+    return;
+  }
+  const payload=data[config.field]||{};
+  const summary=String(payload.summary||'').trim();
+  const items=Array.isArray(payload.items)?payload.items:[];
+  const blocks=Array.isArray(payload.blocks)?payload.blocks:[];
+  const source=safeUrl(payload.source_url)||safeUrl(data.source_url);
+  const license=safeUrl(data.content_license_url);
+  if(!body)return;
+  if(!summary&&!items.length&&!blocks.length){
+    body.innerHTML=`<p class="detail-empty">${esc(config.placeholder)}</p>`;
+    if(status)status.textContent='';
+    return;
+  }
+  const renderItem=item=>{
+    const label=String(item.label||'').trim();
+    const value=String(item.value||'').trim();
+    const from=String(item.from||'').trim();
+    const to=String(item.to||'').trim();
+    const bodyText=[from&&to?`${from} → ${to}`:'',value].filter(Boolean).join(' ');
+    return `<div><dt>${esc(label)}</dt><dd>${esc(bodyText)}</dd></div>`;
+  };
+  const itemsMarkup=items.map(renderItem).join('');
+  const blockMarkup=blocks.map(b=>{
+    const heading=esc(String(b.heading||'')),text=esc(String(b.text||''));
+    return (heading?`<p class="detail-subheading">${heading}</p>`:'')+`<p>${text}</p>`;
+  }).join('');
+  const sourceMarkup=blockMarkup
+    ?(items.length?`<details class="section-source"><summary>原文を読む</summary>${blockMarkup}</details>`:blockMarkup)
+    :'';
+  body.innerHTML=[
+    summary?`<p class="detail-summary">${esc(summary)}</p>`:'',
+    items.length?`<dl class="section-items">${itemsMarkup}</dl>`:'',
+    sourceMarkup,
+  ].filter(Boolean).join('');
+  const attribution=[summary?'AIによる要約':'編集あり'];
+  if(source)attribution.push(wikiLink(source));
+  if(license)attribution.push(ccLink(license));
+  if(status)status.innerHTML=attribution.join(' · ');
+}
+async function hydrateHistory(f,key){
+  await hydrateWikiSection(f,key,{sectionId:'#detail-history-section',bodyId:'#detail-history-body',statusId:'#detail-history-status',field:'history',placeholder:'この記事には歴史の記述がありません。'});
 }
 async function hydrateLocation(f,key){
   const location=await detailedLocation(f),element=document.querySelector('#detail-location'),aboutLocation=document.querySelector('#detail-about-location');

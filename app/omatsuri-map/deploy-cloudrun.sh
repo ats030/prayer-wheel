@@ -12,6 +12,10 @@
 # デプロイ履歴にも残るため避ける。未設定でも起動はでき、宿表示機能だけ非表示になる
 # (HotelAreaService の既存の縮退動作)。
 #
+# OMATSURI_SUMMARY_DISABLE=1: Cloud Run には Ollama が無いので LLM 要約は使えない。
+# 祭りの歴史セクションは本文ブロックのみで表示され、
+# 自己ホスト版（port 8527 + ローカルOllama）でのみ要約が付く。
+#
 # VISIT_LOG_EXEMPT_REASON: このデプロイは visit-log タグ付けを意図的に除外する。
 # frontend/index.html 等には通常どおり `http://ubuntu-server-app:8526/v.js` タグを
 # 残すが (自己ホスト版 port 8527 ではそのまま計測される)、Cloud Run はホーム内 LAN /
@@ -99,6 +103,7 @@ DEPLOY_ARGS=(run deploy "$SERVICE"
   --timeout=60
   --memory=256Mi)
 [ -n "$SECRETS" ] && DEPLOY_ARGS+=(--set-secrets "$SECRETS")
+DEPLOY_ARGS+=(--set-env-vars OMATSURI_SUMMARY_DISABLE=1)
 "$GCLOUD" "${DEPLOY_ARGS[@]}"
 
 # gcloud run deploy preserves any existing tagged-traffic split on the
