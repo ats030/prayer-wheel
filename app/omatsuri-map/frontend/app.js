@@ -1,4 +1,4 @@
-const map=L.map('map').setView([36.2,138.2],5);
+const map=L.map('map',{preferCanvas:true}).setView([36.2,138.2],5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
 
 const CACHE_KEY='omatsuri-map-image-cache-v5';
@@ -17,6 +17,7 @@ const jalanCacheQueue={};
 let festivals=[];
 let visible=[];
 let markers=new Map();
+let selectedMarker=null;
 let selectedKey=null;
 let selectedOrigin=null;
 const saveTimers={};
@@ -283,16 +284,33 @@ function icon(selected,festival){
   const category=categoryCode(festival);
   return L.divIcon({className:'',html:`<span class="festival-marker cat-${category}${selected?' selected':''}" role="img" aria-label="${esc(festival.label_ja||festival.label_en||'祭り')}"></span>`,iconSize:[22,22],iconAnchor:[11,11],popupAnchor:[0,-12]});
 }
+// Thousands of DOM markers make panning slow, so unselected points are drawn on
+// the shared canvas and only the selected point keeps the DOM icon.
+const markerLayer=L.layerGroup().addTo(map);
+function markerStyle(f){
+  const css=getComputedStyle(document.documentElement);
+  const fill=css.getPropertyValue(`--cat-${categoryCode(f)}`).trim()||css.getPropertyValue('--color-ink').trim();
+  return {radius:9,weight:2,color:css.getPropertyValue('--color-paper').trim(),fillColor:fill,fillOpacity:1};
+}
 function renderMarkers(){
-  markers.forEach(({marker})=>map.removeLayer(marker));markers=new Map();
+  markerLayer.clearLayers();markers=new Map();
   visible.forEach((f,index)=>{
     const point=mapCoordinates(f);if(!point)return;
-    const key=festivalKey(f,index),selected=key===selectedKey;
-    const marker=L.marker([point.latitude,point.longitude],{icon:icon(selected,f),zIndexOffset:selected?SELECTED_MARKER_Z_INDEX:0}).addTo(map);
+    const key=festivalKey(f,index),latlng=[point.latitude,point.longitude],style=markerStyle(f);
+    const marker=L.circleMarker(latlng,style).addTo(markerLayer);
+    L.circleMarker(latlng,{radius:2.5,stroke:false,fillColor:style.color,fillOpacity:1,interactive:false}).addTo(markerLayer);
     marker.bindTooltip(esc(f.label_ja||f.label_en||'名称未登録'),{direction:'top',offset:[0,-10]});
     marker.on('click',()=>selectFestival(key,'marker'));markers.set(key,{marker,festival:f});
   });
-  if(selectedKey&&!markers.has(selectedKey))closeDetail(false);
+  if(selectedKey&&!markers.has(selectedKey))closeDetail(false);else showSelectedMarker(selectedKey);
+}
+function showSelectedMarker(key){
+  if(selectedMarker){map.removeLayer(selectedMarker);selectedMarker=null}
+  const entry=key&&markers.get(key);if(!entry)return;
+  const f=entry.festival;
+  selectedMarker=L.marker(entry.marker.getLatLng(),{icon:icon(true,f),zIndexOffset:SELECTED_MARKER_Z_INDEX}).addTo(map);
+  selectedMarker.bindTooltip(esc(f.label_ja||f.label_en||'名称未登録'),{direction:'top',offset:[0,-10]});
+  selectedMarker.on('click',()=>selectFestival(key,'marker'));
 }
 function heritageBadge(f){
   const type=String(f.cultural_relaw?.cultural_type||'').trim(),url=safeUrl(f.cultural_relaw?.url);
@@ -310,7 +328,7 @@ function detail(f){
 }
 function selectFestival(key,origin){
   const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;
-  markers.forEach(({marker,festival},markerKey)=>{const selected=markerKey===key;marker.setIcon(icon(selected,festival));marker.setZIndexOffset(selected?SELECTED_MARKER_Z_INDEX:0)});
+  showSelectedMarker(key);
   document.querySelectorAll('.festival-card').forEach(card=>card.setAttribute('aria-current',String(card.dataset.key===key)));
   if(origin==='list')map.flyTo(entry.marker.getLatLng(),Math.max(map.getZoom(),8),{duration:.55});
   openDetail(entry.festival,key,origin);
@@ -409,10 +427,10 @@ async function hydrateLocation(f,key){
 }
 function closeDetail(restoreFocus=true){
   const key=selectedKey,origin=selectedOrigin;selectedKey=null;selectedOrigin=null;document.querySelector('#detail-panel').hidden=true;document.querySelector('.app-shell').classList.remove('has-detail');
-  markers.forEach(({marker,festival})=>{marker.setIcon(icon(false,festival));marker.setZIndexOffset(0)});document.querySelectorAll('.festival-card').forEach(card=>card.setAttribute('aria-current','false'));
+  showSelectedMarker(null);document.querySelectorAll('.festival-card').forEach(card=>card.setAttribute('aria-current','false'));
   requestAnimationFrame(()=>map.invalidateSize());
   if(restoreFocus&&key){
-    const target=origin==='marker'?markers.get(key)?.marker.getElement():document.querySelector(`.festival-card[data-key="${CSS.escape(key)}"]`);
+    const target=origin==='marker'?document.querySelector('#map'):document.querySelector(`.festival-card[data-key="${CSS.escape(key)}"]`);
     target?.focus();
   }
 }
