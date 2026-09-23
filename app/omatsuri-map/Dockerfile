@@ -1,7 +1,7 @@
 # Cloud Run用ビルド。外部DB不要(frontend/festivals.jsonを直接読み込み)。
 FROM golang:1.25-bookworm AS build
 WORKDIR /src
-COPY go.mod ./
+COPY go.mod go.sum ./
 RUN go mod download
 COPY cmd ./cmd
 COPY internal ./internal
