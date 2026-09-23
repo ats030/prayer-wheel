@@ -45,6 +45,39 @@ VERIFIED_OCCURRENCES = {
     "Q132860355": [
         {"year": 2026, "start": "2026-08-01", "end": "2026-08-01", "source": "https://matsudo-hanabi.com/"},
     ],
+    "Q114712": [
+        {"year": 2026, "start": "2026-10-07", "end": "2026-10-09", "status": "scheduled", "source": "https://nagasaki-kunchi.com/"},
+    ],
+    "Q4701224": [
+        {"year": 2026, "start": "2026-08-03", "end": "2026-08-06", "source": "https://www.kantou.gr.jp/kanran/"},
+    ],
+    "Q9385159": [
+        {"year": 2026, "start": "2026-08-06", "end": "2026-08-08", "source": "https://www.sendaitanabata.com/special/2951/"},
+    ],
+    "Q6663970": [
+        {"year": 2026, "start": "2026-05-01", "end": "2026-05-01", "source": "https://www.takaoka.or.jp/news/detail_114.html"},
+    ],
+    "Q7398902": [
+        {"year": 2026, "start": "2026-10-30", "end": "2026-11-03", "status": "scheduled", "source": "https://www.sibf.jp/news/2026/20260311a.html"},
+    ],
+    "Q6663968": [
+        {"year": 2026, "start": "2026-05-30", "end": "2026-05-30", "source": "https://www.adachikanko.net/en/adachi_no_hanabi48"},
+    ],
+    "Q11413521": [
+        {"year": 2026, "start": "2026-08-26", "end": "2026-08-27", "source": "https://www.city.fujiyoshida.yamanashi.jp/page/15160.html"},
+    ],
+    "Q493695": [
+        {"year": 2026, "start": "2026-11-02", "end": "2026-11-04", "status": "scheduled", "source": "https://www.city.karatsu.lg.jp/page/4344.html"},
+    ],
+    "Q1043431": [
+        {"year": 2026, "start": "2026-10-26", "end": "2026-11-04", "status": "scheduled", "source": "https://2026.tiff-jp.net/ja/"},
+    ],
+    "Q1151186": [
+        {"year": 2026, "start": "2026-07-24", "end": "2026-07-26", "source": "https://www.fujirockfestival.com/info/index"},
+    ],
+    "Q11402392": [
+        {"year": 2026, "start": "2026-08-09", "end": "2026-08-09", "source": "https://www.town.yoichi.hokkaido.jp/kankou/event/2026-0430-1416-19.html"},
+    ],
 }
 
 
