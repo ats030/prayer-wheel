@@ -231,7 +231,7 @@ function populatePrefectures(){
 }
 function populateCategories(){
   const select=document.querySelector('#category');
-  CATEGORY_META.forEach(meta=>select.add(new Option(meta.label,meta.code)));
+  CATEGORY_META.filter(meta=>meta.code!=='kt').forEach(meta=>select.add(new Option(meta.label,meta.code)));
 }
 function applyFilters(){
   const q=document.querySelector('#keyword').value.trim().toLocaleLowerCase('ja');
