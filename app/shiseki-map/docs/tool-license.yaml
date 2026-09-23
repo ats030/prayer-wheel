@@ -1,4 +1,4 @@
-reviewed_at: 2026-09-16
+reviewed_at: 2026-09-23
 decision: approved
 intended_use: public read-only historical-site map, including commercial affiliate links
 sources:
@@ -21,3 +21,17 @@ sources:
     commercial_use: only when the per-file license permits it
     attribution: author, license and source shown per image
     restriction: omit images without machine-verifiable license metadata
+  - name: Japan Search metadata API
+    cost: free
+    license: per-contributing-database metadata terms
+    commercial_use: conditional
+    attribution: preserve the contributing database and source record attribution
+    restriction: ingest only databases and fields explicitly enabled for API reuse; recheck before release
+    evidence: https://jpsearch.go.jp/static/developer/webapi/ch1_intro.html
+  - name: National Land Numerical Information prefectural cultural properties P32
+    cost: free
+    license: non-commercial
+    commercial_use: not allowed for the intended affiliate-supported site
+    attribution: required if used in an eligible non-commercial context
+    restriction: declined; 2014 snapshot also omits all records for Tokyo, Nara, and Oita
+    evidence: https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-P32.html
