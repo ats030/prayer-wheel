@@ -36,7 +36,7 @@ python3 -c 'import json,hashlib; d=json.load(open("app/shiseki-map/docs/public-c
 | `0184` | 原胤敦墓 | [八王子市](https://www.city.hachioji.tokyo.jp/kankobunka/003/003/001/002/p005269.html)は上野町11-1・本立寺内と記載。元CSVは11-2。 | 墓所への立入り条件・正確な座標は未確認。既存地図に同名なし。 | 保留・地番要照合 |
 | `0139` | 久喜藩主・長瀞藩主 米津家墓所 | [東久留米市](https://www.city.higashikurume.lg.jp/bunka/bunka/1027827/1027857/1027874.html)が幸町4-2-40・米津寺境内墓地と掲載。 | 墓域への立入り条件は未確認。既存地図に同名なし。 | 保留 |
 | `0170` | 三遊亭円朝墓 | [台東区指定一覧](https://www.city.taito.lg.jp/gakushu/shogaigakushu/shakaikyoiku/bunkazai/tobunkazai.html)が全生庵・谷中五丁目と掲載。 | [区観光](https://t-navi.city.taito.lg.jp/spot/1077)も墓所に言及するが、墓域への立入り条件は未確認。既存地図に同名なし。 | 保留 |
-| `okinawa:2025-05:233f890248e7c086` | 弁之御嶽 | [文化庁の国指定文化財DB](https://kunishitei.bunka.go.jp/heritage/detail/401/00004046)は弁ヶ嶽を別称と明記。[那覇市の指定一覧](https://www.city.naha.okinawa.jp/_res/projects/default_project/_page_/001/006/032/r7-6.pdf)は首里鳥堀町4丁目121外。 | 既存地図の「弁ヶ嶽」と同一対象。ただし候補座標は既存点から約619m離れ、どちらが訪問入口か未確認。 | 独立追加は除外。既存点の位置・訪問可否は別途確認 |
+| `okinawa:2025-05:233f890248e7c086` | 弁之御嶽 | [文化庁の国指定文化財DB](https://kunishitei.bunka.go.jp/heritage/detail/401/00004046)は弁ヶ嶽を別称と明記。[沖縄県の文化財解説](https://www.pref.okinawa.jp/_res/projects/default_project/_page_/001/008/473/08bunkazai.pdf)は首里鳥堀町4丁目121番地外。 | 既存地図の「弁ヶ嶽」と同一対象。ただし候補座標は既存点から約619m離れ、どちらが訪問入口か未確認。 | 独立追加は除外。既存点の位置・訪問可否は別途確認 |
 
 ## 追加照合（同日、上記12件のうち4件）
 
@@ -60,4 +60,4 @@ python3 -c 'import json,hashlib; d=json.load(open("app/shiseki-map/docs/public-c
 上記の無作為標本とその分母・分子には加えていない。未照合は東京の67件で、
 沖縄10件は同一性を判定したが訪問点・訪問条件の照合が残る。
 
-次は広園寺境域・原胤敦墓の指定範囲と見学入口を確認し、青梅新町の大井戸の修理後の見学状態を確認する。残り76件も同じ証拠基準で個別照合する。
+次は広園寺境域・原胤敦墓の指定範囲と見学入口を確認し、青梅新町の大井戸の修理後の見学状態を確認する。未照合の東京67件も同じ証拠基準で個別照合する。
