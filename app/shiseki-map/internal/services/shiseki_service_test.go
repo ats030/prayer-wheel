@@ -5,6 +5,7 @@ import (
 	_ "modernc.org/sqlite"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -104,5 +105,51 @@ func TestShisekiServiceOpensCurrentDatabaseReadOnly(t *testing.T) {
 	defer service.Close()
 	if service.GetByID("tokyo:130001:1") == nil {
 		t.Fatal("read-only database did not return the source-scoped site")
+	}
+}
+
+func TestShisekiServiceCompletesInterruptedIDMigration(t *testing.T) {
+	for _, backfilled := range []bool{false, true} {
+		name := "column_only"
+		if backfilled {
+			name = "backfilled_without_index"
+		}
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "partial.db")
+			db, err := sql.Open("sqlite", path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			partialSchema := strings.Replace(baseSchema, "site_id         TEXT NOT NULL UNIQUE", "site_id         TEXT NOT NULL DEFAULT ''", 1)
+			if partialSchema == baseSchema {
+				t.Fatal("test schema did not remove the site_id constraint")
+			}
+			if _, err := db.Exec(partialSchema); err != nil {
+				t.Fatal(err)
+			}
+			for _, qid := range []string{"Q1", "Q2"} {
+				id := ""
+				if backfilled {
+					id = qid
+				}
+				if _, err := db.Exec(`INSERT INTO shiseki(site_id,qid,label_ja,prefecture,latitude,longitude) VALUES(?,?,?,'東京都',35,139)`, id, qid, qid); err != nil {
+					t.Fatal(err)
+				}
+			}
+			db.Close()
+			service, err := NewShisekiService(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer service.Close()
+			for _, qid := range []string{"Q1", "Q2"} {
+				if item := service.GetByID(qid); item == nil || item.QID != qid {
+					t.Fatalf("migration did not recover %s: %#v", qid, item)
+				}
+			}
+			if _, err := service.db.Exec(`INSERT INTO shiseki(site_id,qid,label_ja,prefecture,latitude,longitude) VALUES('Q1','Q3','duplicate','東京都',35,139)`); err == nil {
+				t.Fatal("site_id uniqueness was not restored")
+			}
+		})
 	}
 }

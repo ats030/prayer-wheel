@@ -113,11 +113,6 @@ func NewShisekiService(dbPath string) (*ShisekiService, error) {
 		db.Close()
 		return nil, err
 	}
-	var hasSiteID int
-	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('shiseki') WHERE name='site_id'").Scan(&hasSiteID); err != nil {
-		db.Close()
-		return nil, err
-	}
 	for _, column := range []struct{ name, definition string }{
 		{"site_id", "TEXT NOT NULL DEFAULT ''"},
 		{"address", "TEXT NOT NULL DEFAULT ''"},
@@ -131,11 +126,26 @@ func NewShisekiService(dbPath string) (*ShisekiService, error) {
 			return nil, err
 		}
 	}
-	if hasSiteID == 0 {
+	var missingIDs int
+	if err := db.QueryRow("SELECT COUNT(*) FROM shiseki WHERE site_id = ''").Scan(&missingIDs); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if missingIDs > 0 {
 		if _, err := db.Exec("UPDATE shiseki SET site_id = qid WHERE site_id = ''"); err != nil {
 			db.Close()
 			return nil, err
 		}
+	}
+	var uniqueSiteID int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM pragma_index_list('shiseki') AS indexes
+		WHERE indexes."unique" = 1
+		AND (SELECT COUNT(*) FROM pragma_index_info(indexes.name)) = 1
+		AND (SELECT name FROM pragma_index_info(indexes.name) LIMIT 1) = 'site_id'`).Scan(&uniqueSiteID); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if uniqueSiteID == 0 {
 		if _, err := db.Exec("CREATE UNIQUE INDEX idx_shiseki_site_id ON shiseki(site_id)"); err != nil {
 			db.Close()
 			return nil, err
