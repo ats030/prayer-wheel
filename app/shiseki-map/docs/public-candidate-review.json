@@ -11,7 +11,7 @@
     "independently_checked": 4,
     "confirmed_visit_data_conflicts": 2,
     "existing_exact_name": 3,
-    "existing_alias_candidate": 4,
+    "existing_alias_candidate": 5,
     "coordinate_shared_records": 17
   },
   "records": [
@@ -2417,14 +2417,17 @@
       "status": "hold",
       "reasons": [
         "no_visit_information_in_source",
-        "source_id_provisional_for_snapshot"
+        "source_id_provisional_for_snapshot",
+        "possible_alias_of_existing_map"
       ],
       "current_evidence_url": "",
       "current_evidence_finding": "",
       "visit_data_conflict": false,
       "same_coordinate_as": [],
       "existing_name_match": [],
-      "existing_alias_candidate": [],
+      "existing_alias_candidate": [
+        "弁ヶ嶽"
+      ],
       "nearest_existing": {
         "name": "弁ヶ嶽",
         "distance_m": 619
