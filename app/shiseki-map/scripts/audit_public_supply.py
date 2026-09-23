@@ -44,6 +44,7 @@ def csv_metrics(path: Path, prefecture: str, site_rule, existing: dict[str, set[
     candidates = [row for row in rows if site_rule(row)]
     located = [row for row in candidates if valid_coordinates(row)]
     keys = [(normalized_name(row["名称"]), row["緯度"], row["経度"]) for row in located]
+    coordinate_counts = Counter((row["緯度"].strip(), row["経度"].strip()) for row in located)
     garbled = [row for row in located if "?" in row["名称"] or "�" in row["名称"]]
     screened = [
         row for row in located
@@ -61,6 +62,7 @@ def csv_metrics(path: Path, prefecture: str, site_rule, existing: dict[str, set[
         "garbled_name_in_located_candidates": len(garbled),
         "screened_new_candidates_with_access_days": len(screened),
         "exact_duplicate_rows_in_candidates": len(keys) - len(set(keys)),
+        "shared_coordinate_extra_rows": sum(count - 1 for count in coordinate_counts.values() if count > 1),
         "same_name_as_existing_map": sum(normalized_name(row["名称"]) in names for row in located),
         "candidate_classes": dict(Counter(f'{row["文化財分類"]} / {row["種類"]}' for row in candidates).most_common()),
         "sample": [row["名称"] for row in located[::max(1, len(located) // 12)][:12]],
@@ -81,6 +83,10 @@ def hokkaido_metrics(path: Path, existing: dict[str, set[str]]) -> dict:
         ]
         names = existing.get("北海道", set())
         ids = [row[0] for row in features if row[0]]
+        names_by_id: dict[str, set[str]] = {}
+        for register_id, name, _ in features:
+            if register_id:
+                names_by_id.setdefault(register_id, set()).add(name or "")
         # This is a geometry coverage check, not a visitability or positional accuracy check.
         geometry_counts = {
             table: connection.execute(f'SELECT COUNT(*) FROM "{table}" WHERE geom IS NOT NULL').fetchone()[0]
@@ -94,6 +100,7 @@ def hokkaido_metrics(path: Path, existing: dict[str, set[str]]) -> dict:
             "features": len(features),
             "distinct_register_ids": len(set(ids)),
             "missing_register_id": len(features) - len(ids),
+            "register_ids_with_conflicting_names": sum(len(values) > 1 for values in names_by_id.values()),
             "missing_name": sum(not (row[1] or "").strip() for row in features),
             "same_name_as_existing_map": sum(normalized_name(row[1] or "") in names for row in features),
             "site_types": dict(Counter(row[2] or "(empty)" for row in features).most_common(15)),
