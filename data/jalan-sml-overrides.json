@@ -87613,5 +87613,57 @@
       "official_url": "https://www.jalan.net/460000/LRG_460200/SML_460202/",
       "confirmed_at": "2026-09-22"
     }
+  },
+  "tokyo:130001:0000000136": {
+    "lrg_code": "139200",
+    "lrg_name": "八王子・立川・町田・府中・調布",
+    "sml_code": "139205",
+    "sml_name": "立川・八王子・多摩",
+    "evidence": {
+      "method": "official_small_area_lists_hino_station",
+      "municipality": "東京都日野市",
+      "point_name": "日野宿脇本陣跡",
+      "official_url": "https://www.jalan.net/130000/LRG_139200/SML_139205/",
+      "confirmed_at": "2026-09-23"
+    }
+  },
+  "tokyo:130001:0000000140": {
+    "lrg_code": "139200",
+    "lrg_name": "八王子・立川・町田・府中・調布",
+    "sml_code": "139205",
+    "sml_name": "立川・八王子・多摩",
+    "evidence": {
+      "method": "official_small_area_includes_tama",
+      "municipality": "東京都多摩市",
+      "point_name": "稲荷塚古墳",
+      "official_url": "https://www.jalan.net/130000/LRG_139200/SML_139205/",
+      "confirmed_at": "2026-09-23"
+    }
+  },
+  "tokyo:130001:0000000141": {
+    "lrg_code": "139200",
+    "lrg_name": "八王子・立川・町田・府中・調布",
+    "sml_code": "139205",
+    "sml_name": "立川・八王子・多摩",
+    "evidence": {
+      "method": "official_small_area_includes_tama",
+      "municipality": "東京都多摩市",
+      "point_name": "霞ノ関南木戸柵跡",
+      "official_url": "https://www.jalan.net/130000/LRG_139200/SML_139205/",
+      "confirmed_at": "2026-09-23"
+    }
+  },
+  "tokyo:130001:0000000142": {
+    "lrg_code": "139200",
+    "lrg_name": "八王子・立川・町田・府中・調布",
+    "sml_code": "139205",
+    "sml_name": "立川・八王子・多摩",
+    "evidence": {
+      "method": "official_small_area_includes_tama",
+      "municipality": "東京都多摩市",
+      "point_name": "多摩ニュータウンNo.57遺跡",
+      "official_url": "https://www.jalan.net/130000/LRG_139200/SML_139205/",
+      "confirmed_at": "2026-09-23"
+    }
   }
 }
