@@ -322,6 +322,66 @@ func isRetryableAPIError(err error) bool {
 	return status == http.StatusTooManyRequests || status >= http.StatusInternalServerError
 }
 
+// IsTransientWikimediaError reports whether err reflects a transient failure
+// (rate limiting, a server error, or a network-level error) as opposed to a
+// permanent condition such as an article or section that does not exist.
+// Callers outside this package (the HTTP handler) use this to distinguish
+// "temporarily unavailable, worth telling the client not to cache" from a
+// stable negative result that should be cached like any other empty value.
+func IsTransientWikimediaError(err error) bool {
+	if errors.Is(err, errWikipediaArticleContentNotFound) {
+		return false
+	}
+	return isRetryableAPIError(err)
+}
+
+// withRetry retries a fallible Wikimedia-family API call on transient failures
+// (HTTP 429, 5xx, and network errors) up to maxRetries times with exponential
+// backoff. A Retry-After response value takes precedence over the calculated
+// backoff. It centralizes the retry loop so callers (Wikidata, Commons, and the
+// Japanese Wikipedia content fetcher) share identical transient-failure policy.
+func withRetry[T any](ctx context.Context, label string, attempt func() (T, error)) (T, error) {
+	backoff := initialBackoff
+	var lastErr error
+
+	for i := 0; i <= maxRetries; i++ {
+		if i > 0 {
+			log.Printf("omatsuri-map: %s API retry %d/%d (last error: %v)", label, i, maxRetries, lastErr)
+		}
+
+		result, err := attempt()
+		if err == nil {
+			return result, nil
+		}
+		lastErr = err
+
+		if !isRetryableAPIError(err) {
+			var zero T
+			return zero, err
+		}
+		if i == maxRetries {
+			break
+		}
+
+		_, retryAfter, _ := statusFromError(err)
+		if retryAfter > 0 {
+			backoff = retryAfter
+		}
+
+		select {
+		case <-time.After(backoff):
+		case <-ctx.Done():
+			var zero T
+			return zero, err
+		}
+		backoff *= 2
+	}
+
+	log.Printf("omatsuri-map: %s API retries exhausted: %v", label, lastErr)
+	var zero T
+	return zero, lastErr
+}
+
 // extValue holds one extmetadata entry's "value" field. The Commons API normally
 // returns an object ({"value": "..."}), but occasionally returns an empty array
 // ([]) for a missing field; UnmarshalJSON tolerates that shape by leaving Value empty

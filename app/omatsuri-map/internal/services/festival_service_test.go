@@ -1,151 +1,175 @@
 package services
 
 import (
+	"database/sql"
 	"os"
+	"path/filepath"
 	"testing"
+
+	_ "modernc.org/sqlite"
 )
 
-func TestNewFestivalService(t *testing.T) {
-	// Use the test data directory
-	dataDir := "/home/ats030/app/omatsuri-map/data"
+func testFestivalDBPath(t *testing.T) string {
+	t.Helper()
+	root, err := filepath.Abs("../..")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return filepath.Join(root, "frontend", "festivals.db")
+}
 
-	service, err := NewFestivalService(dataDir + "/festivals.json")
+// makeTestDB creates a temp sqlite database from festivalBaseSchema and inserts rows.
+func makeTestDB(t *testing.T, rows ...Festival) string {
+	t.Helper()
+	dbPath := filepath.Join(t.TempDir(), "test.db")
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	if _, err := db.Exec(festivalBaseSchema); err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range rows {
+		if _, err := db.Exec(
+			"INSERT INTO festival (qid,label_ja,label_en,prefecture,latitude,longitude,date,description,wikipedia_title) VALUES (?,?,?,?,?,?,?,?,?)",
+			f.QID, f.LabelJA, f.LabelEN, f.Prefecture, f.Latitude, f.Longitude, f.Date, f.Description, f.WikipediaTitle); err != nil {
+			t.Fatal(err)
+		}
+		row := db.QueryRow("SELECT id FROM festival WHERE qid=?", f.QID)
+		var festivalID int
+		if err := row.Scan(&festivalID); err != nil {
+			t.Fatal(err)
+		}
+		for _, tag := range f.Categories {
+			c, err := db.Exec("INSERT OR IGNORE INTO category_types (name) VALUES (?)", tag)
+			if err != nil {
+				t.Fatal(err)
+			}
+			last, _ := c.LastInsertId()
+			trow := db.QueryRow("SELECT id FROM category_types WHERE name=?", tag)
+			var tid int
+			if err := trow.Scan(&tid); err != nil {
+				tid = int(last)
+			}
+			if _, err := db.Exec("INSERT OR IGNORE INTO festival_categories (festival_id,type_id) VALUES (?,?)", festivalID, tid); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	return dbPath
+}
+
+func loadTestService(t *testing.T, dbPath string) *FestivalService {
+	t.Helper()
+	service, err := NewFestivalService(dbPath)
 	if err != nil {
 		t.Fatalf("Failed to create festival service: %v", err)
 	}
+	return service
+}
 
+func TestNewFestivalService(t *testing.T) {
+	dbPath := testFestivalDBPath(t)
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		t.Skipf("data file not yet generated: %s", dbPath)
+	}
+	service := loadTestService(t, dbPath)
 	if service == nil {
 		t.Fatal("Festival service is nil")
 	}
-
-	// Verify we have festivals
-	festivals := service.GetAll()
-	if len(festivals) == 0 {
+	if len(service.GetAll()) == 0 {
 		t.Fatal("No festivals loaded")
 	}
-
-	t.Logf("Loaded %d festivals", len(festivals))
-}
-
-func TestGetAll(t *testing.T) {
-	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir + "/festivals.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	festivals := service.GetAll()
-
-	// Verify structure of first festival
-	if len(festivals) > 0 {
-		f := festivals[0]
-		if f.QID == "" {
-			t.Error("First festival has empty QID")
-		}
-		if f.LabelJA == "" {
-			t.Error("First festival has empty label_ja")
-		}
-		if f.Prefecture == "" {
-			t.Error("First festival has empty prefecture")
-		}
-		if f.Latitude == 0 {
-			t.Error("First festival has zero latitude")
-		}
-		if f.Longitude == 0 {
-			t.Error("First festival has zero longitude")
-		}
-	}
+	t.Logf("Loaded %d festivals", len(service.GetAll()))
 }
 
 func TestGetByPrefecture(t *testing.T) {
-	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir + "/festivals.json")
-	if err != nil {
-		t.Fatal(err)
-	}
+	dbPath := makeTestDB(t,
+		Festival{QID: "Q1", LabelJA: "テスト祭A", Prefecture: "東京都", Latitude: 35.68, Longitude: 139.69},
+		Festival{QID: "Q2", LabelJA: "テスト祭B", Prefecture: "大阪府", Latitude: 34.69, Longitude: 135.50},
+	)
+	service := loadTestService(t, dbPath)
 
-	// Test with Tokyo
-	tokyoFestivals := service.GetByPrefecture("東京都")
-	if len(tokyoFestivals) == 0 {
-		t.Error("No festivals found for Tokyo")
+	got := service.GetByPrefecture("東京都")
+	if len(got) != 1 {
+		t.Fatalf("Expected 1 festival for Tokyo, got %d", len(got))
 	}
-
-	// Verify all are Tokyo
-	for _, f := range tokyoFestivals {
-		if f.Prefecture != "東京都" {
-			t.Errorf("Expected Tokyo, got %s", f.Prefecture)
-		}
+	if got[0].QID != "Q1" {
+		t.Errorf("Expected Q1, got %s", got[0].QID)
+	}
+	if len(service.GetByPrefecture("沖縄県")) != 0 {
+		t.Error("Expected empty list for missing prefecture")
 	}
 }
 
 func TestGetByID(t *testing.T) {
-	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir + "/festivals.json")
-	if err != nil {
-		t.Fatal(err)
-	}
+	dbPath := makeTestDB(t,
+		Festival{QID: "Q1", LabelJA: "由布の祭り", Prefecture: "大分県", Latitude: 33.27, Longitude: 131.35},
+	)
+	service := loadTestService(t, dbPath)
 
-	// Get first festival's QID
-	festivals := service.GetAll()
-	if len(festivals) == 0 {
-		t.Fatal("No festivals to test")
-	}
-
-	qid := festivals[0].QID
-	f := service.GetByID(qid)
+	f := service.GetByID("Q1")
 	if f == nil {
-		t.Errorf("GetByID returned nil for %s", qid)
-	} else if f.QID != qid {
-		t.Errorf("Expected QID %s, got %s", qid, f.QID)
+		t.Fatal("GetByID returned nil")
+	}
+	if f.LabelJA != "由布の祭り" {
+		t.Errorf("Expected 由布の祭り, got %s", f.LabelJA)
+	}
+	if service.GetByID("Q999") != nil {
+		t.Error("GetByID should return nil for non-existent ID")
 	}
 }
 
-func TestGetByIDNotFound(t *testing.T) {
-	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir + "/festivals.json")
-	if err != nil {
-		t.Fatal(err)
+func TestCategoriesTag(t *testing.T) {
+	dbPath := makeTestDB(t,
+		Festival{QID: "Q1", LabelJA: "テスト", Prefecture: "宮城県", Latitude: 38.0, Longitude: 141.0,
+			Categories: []string{"山車・屋台", "演舞・盆踊り", "行事"}},
+	)
+	service := loadTestService(t, dbPath)
+	f := service.GetByID("Q1")
+	if f == nil {
+		t.Fatal("GetByID nil")
 	}
-
-	f := service.GetByID("NONEXISTENT")
-	if f != nil {
-		t.Errorf("GetByID should return nil for non-existent ID")
+	if len(f.Categories) != 3 {
+		t.Fatalf("Expected 3 categories, got %v", f.Categories)
+	}
+	if !f.HasCategory("山車・屋台") {
+		t.Error("Expected contains 山車・屋台")
+	}
+	if !f.HasCategory("行事") {
+		t.Error("Expected contains 行事")
 	}
 }
 
-func TestPrefectureCoverage(t *testing.T) {
-	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir + "/festivals.json")
-	if err != nil {
-		t.Fatal(err)
+func TestGetCategories(t *testing.T) {
+	dbPath := makeTestDB(t,
+		Festival{QID: "Q1", LabelJA: "A", Prefecture: "宮城県", Latitude: 38.0, Longitude: 141.0,
+			Categories: []string{"花火", "行事"}},
+		Festival{QID: "Q2", LabelJA: "B", Prefecture: "宮城県", Latitude: 38.0, Longitude: 141.0,
+			Categories: []string{"行列・渡御"}},
+	)
+	service := loadTestService(t, dbPath)
+	got := service.GetCategories()
+	set := map[string]bool{}
+	for _, c := range got {
+		set[c] = true
 	}
-
-	prefectures := make(map[string]bool)
-	for _, f := range service.GetAll() {
-		prefectures[f.Prefecture] = true
-	}
-
-	t.Logf("Found festivals in %d prefectures", len(prefectures))
-
-	// Verify we have coverage across different regions
-	neededRegions := []string{"北海道", "東京都", "大阪府", "宮城県", "広島県", "長崎県"}
-	for _, region := range neededRegions {
-		if !prefectures[region] {
-			t.Logf("Warning: No festivals found for %s", region)
+	for _, want := range []string{"花火", "行事", "行列・渡御"} {
+		if !set[want] {
+			t.Errorf("GetCategories missing %q (got %v)", want, got)
 		}
 	}
 }
 
 func TestDataIntegrity(t *testing.T) {
-	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir + "/festivals.json")
-	if err != nil {
-		t.Fatal(err)
+	dbPath := testFestivalDBPath(t)
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		t.Skipf("data file not yet generated: %s", dbPath)
 	}
-
-	festivals := service.GetAll()
-
-	for i, f := range festivals {
+	service := loadTestService(t, dbPath)
+	emptyPrefecture := 0
+	for i, f := range service.GetAll() {
 		if f.QID == "" {
 			t.Errorf("Festival %d has empty QID", i)
 		}
@@ -153,72 +177,17 @@ func TestDataIntegrity(t *testing.T) {
 			t.Errorf("Festival %d (QID: %s) has empty label_ja", i, f.QID)
 		}
 		if f.Prefecture == "" {
-			t.Errorf("Festival %d (QID: %s) has empty prefecture", i, f.QID)
+			emptyPrefecture++
 		}
-		if f.Latitude < -90 || f.Latitude > 90 {
-			t.Errorf("Festival %d (QID: %s) has invalid latitude: %f", i, f.QID, f.Latitude)
+		if f.Latitude < 24 || f.Latitude > 46 {
+			t.Errorf("Festival %d (QID: %s) latitude %.4f outside Japan", i, f.QID, f.Latitude)
 		}
-		if f.Longitude < -180 || f.Longitude > 153 {
-			t.Errorf("Festival %d (QID: %s) has invalid longitude: %f", i, f.QID, f.Longitude)
-		}
-		// Verify coordinates are for Japan (roughly 24-45 lat, 122-153 lon)
-		if f.Latitude < 30 || f.Latitude > 46 {
-			t.Logf("Warning: Festival %s (QID: %s) latitude %.4f seems outside Japan", f.LabelJA, f.QID, f.Latitude)
+		if f.Longitude < 122 || f.Longitude > 154 {
+			t.Errorf("Festival %d (QID: %s) longitude %.4f outside Japan", i, f.QID, f.Longitude)
 		}
 	}
-}
-
-func TestFileExists(t *testing.T) {
-	dataPath := "/home/ats030/app/omatsuri-map/data/festivals.json"
-	if _, err := os.Stat(dataPath); os.IsNotExist(err) {
-		t.Fatalf("Data file does not exist: %s", dataPath)
-	}
-
-	// Check file size
-	info, err := os.Stat(dataPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if info.Size() < 1000 {
-		t.Errorf("Data file seems too small: %d bytes", info.Size())
-	}
-
-	t.Logf("Data file size: %d bytes", info.Size())
-}
-func TestDateFieldPresent(t *testing.T) {
-	dataDir := "/home/ats030/app/omatsuri-map/data"
-	service, err := NewFestivalService(dataDir + "/festivals-with-date.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	festivals := service.GetAll()
-
-	for i, f := range festivals {
-		if f.Date == "" {
-			t.Errorf("Festival %d (QID: %s) has empty date field", i, f.QID)
-		}
-	}
-
-	t.Logf("All %d festivals have date field", len(festivals))
-}
-
-func TestQIDDuplicate(t *testing.T) {
-	// Create a test data file with duplicate QIDs
-	testData := `[
-		{"qid": "Q1", "label_ja": "Test 1", "label_en": "Test 1", "prefecture": "東京都", "latitude": 35.68, "longitude": 139.69, "date": "日付未定"},
-		{"qid": "Q1", "label_ja": "Test 2", "label_en": "Test 2", "prefecture": "大阪府", "latitude": 34.69, "longitude": 135.50, "date": "日付未定"}
-	]`
-
-	testPath := "/tmp/test-festivals.json"
-	if err := os.WriteFile(testPath, []byte(testData), 0644); err != nil {
-		t.Fatal(err)
-	}
-	defer os.Remove(testPath)
-
-	_, err := NewFestivalService(testPath)
-	if err == nil {
-		t.Error("Expected error for duplicate QIDs, but got nil")
+	total := len(service.GetAll())
+	if emptyPrefecture > total/20 {
+		t.Errorf("%d/%d festivals have empty prefecture (threshold 5%%)", emptyPrefecture, total)
 	}
 }

@@ -5,6 +5,10 @@
 .detail-lead{position:relative;padding:0 0 var(--space-lg) var(--space-md);border-bottom:1px solid var(--color-rule)}
 .detail-lead:before{position:absolute;top:.25rem;bottom:var(--space-lg);left:0;width:3px;background:var(--color-accent);content:""}
 .detail h2{min-width:0;max-width:18ch;margin:0;font-size:clamp(1.5rem,2.4vw,2rem);line-height:1.25;letter-spacing:.01em}.detail h2:focus{outline:0}.detail h2:focus-visible{outline:3px solid var(--color-focus);outline-offset:4px}
+.badge-line{display:flex;flex-wrap:wrap;align-items:baseline;gap:.25rem .6rem;margin:.6rem 0 0}
+.badge{display:inline-block;padding:.15rem .55rem;border:1px solid;border-radius:999px;font-size:.75rem;font-weight:700;line-height:1.4}
+.badge--heritage{color:#6b5a1f;border-color:#c9b26a;background:#f3ecd4}
+.badge-link{color:var(--color-accent);font-size:.72rem;font-weight:500;text-decoration:underline;text-decoration-color:var(--color-rule);text-underline-offset:.18em}
 .detail-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;border-bottom:1px solid var(--color-rule)}
 .detail-facts div{min-width:0;padding:var(--space-md) 0}.detail-facts div+div{border-left:1px solid var(--color-rule);padding-left:var(--space-md)}
 .detail-facts dt{margin-bottom:.3rem;color:var(--color-ink-2);font-size:.68rem;font-weight:700;letter-spacing:.08em}.detail-facts dd{margin:0;font-size:.92rem;font-weight:700;line-height:1.45;overflow-wrap:anywhere}

@@ -18,8 +18,12 @@ import (
 )
 
 func main() {
-	// Initialize service
-	service, err := services.NewFestivalService("frontend/festivals.json")
+	// Initialize service (DB path can be overridden via OMATSURI_DB_PATH)
+	dbPath := os.Getenv("OMATSURI_DB_PATH")
+	if dbPath == "" {
+		dbPath = "frontend/festivals.db"
+	}
+	service, err := services.NewFestivalService(dbPath)
 	if err != nil {
 		fmt.Printf("Failed to load festivals: %v\n", err)
 		os.Exit(1)
