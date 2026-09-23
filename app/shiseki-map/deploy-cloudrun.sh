@@ -109,8 +109,36 @@ DEPLOY_ARGS=(run deploy "$SERVICE"
 [ -n "$SECRETS" ] && DEPLOY_ARGS+=(--set-secrets "$SECRETS")
 "$GCLOUD" "${DEPLOY_ARGS[@]}"
 
+# gcloud run deploy preserves any existing tagged-traffic split on the
+# service (e.g. a staging tag). Without an explicit redirect the new
+# revision can stay at 0% and production keeps serving the old one.
+# --to-latest sends 100% of untagged traffic to the newest ready revision;
+# --clear-tags drops leftover staging tags from the service spec. A staging
+# split must therefore be applied *after* this script finishes (--set-tags),
+# or it will be removed here.
+"$GCLOUD" run services update-traffic "$SERVICE" \
+    --project "$PROJECT" --region "$REGION" --to-latest --clear-tags
+
 URL=$("$GCLOUD" run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" \
       --format='value(status.url)')
+
+# Smoke check: confirm production actually serves the new revision with HTTP
+# 200. Retry once before failing so cold starts don't cause a false alarm.
+say ""
+say "■ 応答確認 (smoke)"
+for attempt in 1 2; do
+  code=$(curl -s -o /dev/null -w '%{http_code}' -m 30 "$URL/")
+  if [ "$code" = "200" ]; then
+    say "  OK (HTTP 200, try #$attempt)"
+    break
+  fi
+  say "  HTTP $code (try #$attempt)" >&2
+  if [ "$attempt" = 2 ]; then
+    say "  ★smoke 失敗 — 新リビジョンが本番に乗っていない可能性があります" >&2
+    exit 1
+  fi
+  sleep 5
+done
 
 say ""
 say "■ 出ました"
