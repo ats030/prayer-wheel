@@ -113,6 +113,11 @@ func NewShisekiService(dbPath string) (*ShisekiService, error) {
 		db.Close()
 		return nil, err
 	}
+	var hasSiteID int
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('shiseki') WHERE name='site_id'").Scan(&hasSiteID); err != nil {
+		db.Close()
+		return nil, err
+	}
 	for _, column := range []struct{ name, definition string }{
 		{"site_id", "TEXT NOT NULL DEFAULT ''"},
 		{"address", "TEXT NOT NULL DEFAULT ''"},
@@ -126,13 +131,15 @@ func NewShisekiService(dbPath string) (*ShisekiService, error) {
 			return nil, err
 		}
 	}
-	if _, err := db.Exec("UPDATE shiseki SET site_id = qid WHERE site_id = ''"); err != nil {
-		db.Close()
-		return nil, err
-	}
-	if _, err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_shiseki_site_id ON shiseki(site_id)"); err != nil {
-		db.Close()
-		return nil, err
+	if hasSiteID == 0 {
+		if _, err := db.Exec("UPDATE shiseki SET site_id = qid WHERE site_id = ''"); err != nil {
+			db.Close()
+			return nil, err
+		}
+		if _, err := db.Exec("CREATE UNIQUE INDEX idx_shiseki_site_id ON shiseki(site_id)"); err != nil {
+			db.Close()
+			return nil, err
+		}
 	}
 	return &ShisekiService{db: db}, nil
 }

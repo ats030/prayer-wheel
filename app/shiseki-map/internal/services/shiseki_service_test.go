@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	_ "modernc.org/sqlite"
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -77,5 +78,31 @@ func TestShisekiServiceReadsSourceScopedID(t *testing.T) {
 	}
 	if service.GetByQID("tokyo:130001:1") != nil {
 		t.Fatal("source-scoped ID must not resolve as a Wikidata QID")
+	}
+}
+
+func TestShisekiServiceOpensCurrentDatabaseReadOnly(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "readonly.db")
+	db, err := sql.Open("sqlite", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(baseSchema); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`INSERT INTO shiseki(site_id,qid,label_ja,prefecture,latitude,longitude) VALUES('tokyo:130001:1','','史跡A','東京都',35,139)`); err != nil {
+		t.Fatal(err)
+	}
+	db.Close()
+	if err := os.Chmod(path, 0444); err != nil {
+		t.Fatal(err)
+	}
+	service, err := NewShisekiService(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer service.Close()
+	if service.GetByID("tokyo:130001:1") == nil {
+		t.Fatal("read-only database did not return the source-scoped site")
 	}
 }
