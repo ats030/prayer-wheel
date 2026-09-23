@@ -1,0 +1,2561 @@
+{
+  "reviewed_at": "2026-09-23",
+  "snapshot_sha256": {
+    "tokyo": "0ceefb11fc6a6adbf1414e7733be2754f0e6fd867bacec02db2fd1afe72a73ee",
+    "okinawa": "25f57972a9fe70f75ed9d98d836b264edf6b1af3ac2d1cd7c3870cb7636b2460"
+  },
+  "counts": {
+    "total": 91,
+    "publish": 3,
+    "hold": 88,
+    "independently_checked": 4,
+    "confirmed_visit_data_conflicts": 2,
+    "existing_exact_name": 3,
+    "existing_alias_candidate": 4,
+    "coordinate_shared_records": 17
+  },
+  "records": [
+    {
+      "source_id": "tokyo:130001:0000000112",
+      "name": "奥絵師狩野家墓所",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都大田区池上1-1、2-10（池上本門寺墓所）",
+      "latitude": 35.579586,
+      "longitude": 139.708578,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "大森貝塚",
+        "distance_m": 2239
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000114",
+      "name": "多摩川台古墳群",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都大田区田園調布1-63ほか",
+      "latitude": 35.590063,
+      "longitude": 139.666173,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "publish",
+      "reasons": [
+        "current_official_access_confirmed"
+      ],
+      "current_evidence_url": "https://www.city.ota.tokyo.jp/shisetsu/park/tamagawadai.html",
+      "current_evidence_finding": "Park includes the kofun group; CSV hours describe the exhibit room, not park access.",
+      "visit_data_conflict": true,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "亀甲山古墳",
+        "distance_m": 125
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000115",
+      "name": "野毛大塚古墳",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都世田谷区野毛1-25",
+      "latitude": 35.605274,
+      "longitude": 139.642335,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "publish",
+      "reasons": [
+        "current_official_access_confirmed"
+      ],
+      "current_evidence_url": "https://www.setagayadigitalmuseum.jp/information/842/detail/",
+      "current_evidence_finding": "The 2026 autumn ward guidance locates public visits at the kofun in Tamagawa Noge Park.",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "稲荷丸北遺跡",
+        "distance_m": 972
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000116",
+      "name": "世田谷代官屋敷",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都世田谷区世田谷1-29-18",
+      "latitude": 35.641392,
+      "longitude": 139.647661,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "seasonal_access_unconfirmed"
+      ],
+      "current_evidence_url": "https://www.setagayadigitalmuseum.jp/information/other/131495380/",
+      "current_evidence_finding": "The next room-opening period is announced for autumn; daily entry cannot be inferred.",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "桜木遺跡",
+        "distance_m": 578
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000117",
+      "name": "等々力渓谷三号横穴",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都世田谷区等々力1-22",
+      "latitude": 35.604349,
+      "longitude": 139.646185,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "稲荷丸北遺跡",
+        "distance_m": 1292
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000118",
+      "name": "徳冨蘆花旧宅",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都世田谷区粕谷1-20-1",
+      "latitude": 35.661958,
+      "longitude": 139.611108,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "玉川上水",
+        "distance_m": 2198
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000119",
+      "name": "西ケ原貝塚",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都北区西ヶ原3-3-1",
+      "latitude": 35.744499,
+      "longitude": 139.742019,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "西ヶ原一里塚",
+        "distance_m": 312
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000120",
+      "name": "多紀家墓所",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都北区上中里1-159",
+      "latitude": 35.743985,
+      "longitude": 139.749624,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "中里貝塚",
+        "distance_m": 428
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000122",
+      "name": "尾崎遺跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都練馬区春日町5-12-1",
+      "latitude": 35.746688,
+      "longitude": 139.639891,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "栗原遺跡",
+        "distance_m": 3061
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000123",
+      "name": "葛西城跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都葛飾区青戸7-21-7",
+      "latitude": 35.755176,
+      "longitude": 139.854983,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "高砂橋",
+        "distance_m": 977
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000124",
+      "name": "立石",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都葛飾区立石8-37-17",
+      "latitude": 35.739772,
+      "longitude": 139.855751,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "本奥戸橋",
+        "distance_m": 370
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000126",
+      "name": "片倉城跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都八王子市片倉町2423",
+      "latitude": 35.639685,
+      "longitude": 139.337905,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "道了堂跡",
+        "distance_m": 1929
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000127",
+      "name": "広園寺境域",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都八王子市山田町1577",
+      "latitude": 35.646741,
+      "longitude": 139.316795,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "浅川橋",
+        "distance_m": 2501
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000128",
+      "name": "出山横穴墓群第８号墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都三鷹市大沢2-1097-1",
+      "latitude": 35.680365,
+      "longitude": 139.53808,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "深大寺城",
+        "distance_m": 2086
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000129",
+      "name": "天寧寺境域",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都青梅市根ケ布1-454",
+      "latitude": 35.801091,
+      "longitude": 139.269716,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "調布橋",
+        "distance_m": 1973
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000130",
+      "name": "海禅寺境域",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都青梅市二俣尾4-962、963",
+      "latitude": 35.804159,
+      "longitude": 139.21523,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "調布橋",
+        "distance_m": 4982
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000131",
+      "name": "安楽寺境域",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都青梅市成木1-583ほか",
+      "latitude": 35.838484,
+      "longitude": 139.275364,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "調布橋",
+        "distance_m": 6153
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000132",
+      "name": "虎柏神社境域",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都青梅市根ケ布1-316",
+      "latitude": 35.79725,
+      "longitude": 139.267874,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "調布橋",
+        "distance_m": 1520
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000133",
+      "name": "青梅新町の大井戸",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都青梅市新町2-27",
+      "latitude": 35.78928,
+      "longitude": 139.299419,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "圏央道多摩川橋",
+        "distance_m": 1693
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000134",
+      "name": "大日堂境域及び日吉神社境域",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都昭島市拝島町1-10-14及び19",
+      "latitude": 35.706113,
+      "longitude": 139.346224,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "滝山城",
+        "distance_m": 1684
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000135",
+      "name": "本町田遺跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都町田市本町田3455-36ほか",
+      "latitude": 35.567928,
+      "longitude": 139.449028,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "高ヶ坂石器時代遺跡",
+        "distance_m": 2625
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000136",
+      "name": "日野宿脇本陣跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都日野市日野本町2-15-9",
+      "latitude": 35.678081,
+      "longitude": 139.399628,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "立川橋",
+        "distance_m": 1229
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000137",
+      "name": "新山遺跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都東久留米市下里3-21-1ほか",
+      "latitude": 35.75187,
+      "longitude": 139.500131,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "鈴木遺跡",
+        "distance_m": 3712
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000138",
+      "name": "下里本邑遺跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都東久留米市野火止3-3-4",
+      "latitude": 35.761572,
+      "longitude": 139.509279,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "鈴木遺跡",
+        "distance_m": 4914
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000139",
+      "name": "久喜藩主・長瀞藩主　米津家墓所",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都東久留米市幸町4-2-40",
+      "latitude": 35.757192,
+      "longitude": 139.517357,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "鈴木遺跡",
+        "distance_m": 4684
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000140",
+      "name": "稲荷塚古墳",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都多摩市百草1140-1ほか",
+      "latitude": 35.638592,
+      "longitude": 139.43473,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "武蔵府中熊野神社古墳",
+        "distance_m": 4538
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000141",
+      "name": "霞ノ関南木戸柵跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都多摩市関戸5-35-5",
+      "latitude": 35.641089,
+      "longitude": 139.449278,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "大丸遺跡 (稲城市)",
+        "distance_m": 3695
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000142",
+      "name": "多摩ニュータウンNo.57遺跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都多摩市落合1-14-2",
+      "latitude": 35.62603,
+      "longitude": 139.42765,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "大丸遺跡 (稲城市)",
+        "distance_m": 6065
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000143",
+      "name": "瀬戸岡古墳群",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都あきる野市瀬戸岡398-1",
+      "latitude": 35.739842,
+      "longitude": 139.287671,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "前田耕地遺跡",
+        "distance_m": 3059
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000144",
+      "name": "戸倉城跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都あきる野市戸倉328ほか",
+      "latitude": 35.725616,
+      "longitude": 139.20214,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "調布橋",
+        "distance_m": 8578
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000145",
+      "name": "広徳寺境域",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都あきる野市小和田234ほか",
+      "latitude": 35.721875,
+      "longitude": 139.21736,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "調布橋",
+        "distance_m": 8098
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000148",
+      "name": "利島阿豆佐和気命本宮境域",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都利島村南御神山",
+      "latitude": 34.529696,
+      "longitude": 139.276952,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "鶴間公園遺跡",
+        "distance_m": 110401
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000149",
+      "name": "利島大山小山神社境域",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都利島村なが山",
+      "latitude": 34.515663,
+      "longitude": 139.277276,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "鶴間公園遺跡",
+        "distance_m": 111937
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000150",
+      "name": "利島下上神社境域",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都利島村東山",
+      "latitude": 34.521171,
+      "longitude": 139.284177,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "鶴間公園遺跡",
+        "distance_m": 111235
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000151",
+      "name": "梅辻規清墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都八丈町中之郷上浦墓地",
+      "latitude": 33.068052,
+      "longitude": 139.812183,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "鶴間公園遺跡",
+        "distance_m": 273356
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000152",
+      "name": "八重根のメットウ井戸",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都八丈町大賀郷",
+      "latitude": 33.104201,
+      "longitude": 139.789323,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "鶴間公園遺跡",
+        "distance_m": 269125
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000153",
+      "name": "佐々木次郎太夫伊信墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都青ヶ島村休戸郷",
+      "latitude": 32.464535,
+      "longitude": 139.767136,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "鶴間公園遺跡",
+        "distance_m": 339753
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000154",
+      "name": "将門塚",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都千代田区大手町1-2",
+      "latitude": 35.687353,
+      "longitude": 139.762519,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "神田橋",
+        "distance_m": 270
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000155",
+      "name": "藤田東湖護母致命の処",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都文京区後楽1-6-6",
+      "latitude": 35.704826,
+      "longitude": 139.748192,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "小石川後楽園",
+        "distance_m": 120
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000157",
+      "name": "戸田茂睡墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区浅草2-3-1",
+      "latitude": 35.713968,
+      "longitude": 139.796449,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "六地蔵石燈籠"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "言問橋",
+        "distance_m": 622
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000158",
+      "name": "六地蔵石燈籠",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区浅草2-3-1",
+      "latitude": 35.713968,
+      "longitude": 139.796449,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "戸田茂睡墓"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "言問橋",
+        "distance_m": 622
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000159",
+      "name": "玉川庄右衛門及び同清右衛門墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区松が谷2-3-3",
+      "latitude": 35.712818,
+      "longitude": 139.786553,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "駒形橋",
+        "distance_m": 1107
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000160",
+      "name": "大久保主水墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区谷中4-2-5",
+      "latitude": 35.723166,
+      "longitude": 139.767734,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "横山大観記念館",
+        "distance_m": 1232
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000161",
+      "name": "谷文晁墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区東上野6-18-12",
+      "latitude": 35.714121,
+      "longitude": 139.784692,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "幡随院長兵衛墓"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "駒形橋",
+        "distance_m": 1323
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000162",
+      "name": "幡随院長兵衛墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区東上野6-18-12",
+      "latitude": 35.714121,
+      "longitude": 139.784692,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "谷文晁墓"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "駒形橋",
+        "distance_m": 1323
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000163",
+      "name": "慈海僧正墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区上野桜木1-14-11",
+      "latitude": 35.721453,
+      "longitude": 139.774204,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "了翁禅師塔碑"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "横山大観記念館",
+        "distance_m": 1175
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000164",
+      "name": "葛飾北斎墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区元浅草4-6-9",
+      "latitude": 35.709788,
+      "longitude": 139.785434,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "厩橋",
+        "distance_m": 1048
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000166",
+      "name": "了翁禅師塔碑",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区上野桜木1-14-11",
+      "latitude": 35.721453,
+      "longitude": 139.774204,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "慈海僧正墓"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "横山大観記念館",
+        "distance_m": 1175
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000167",
+      "name": "天海僧正毛髪塔",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区上野公園1",
+      "latitude": 35.712679,
+      "longitude": 139.774237,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "横山大観記念館",
+        "distance_m": 552
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000168",
+      "name": "樋口定伊墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区池之端2-5-30",
+      "latitude": 35.716972,
+      "longitude": 139.765079,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "浄厳律師墓"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "横山大観記念館",
+        "distance_m": 610
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000169",
+      "name": "山岡鉄舟墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区谷中5-4-7",
+      "latitude": 35.724189,
+      "longitude": 139.766754,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "三遊亭円朝墓"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "横山大観記念館",
+        "distance_m": 1351
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000170",
+      "name": "三遊亭円朝墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都台東区谷中5-4-7",
+      "latitude": 35.724189,
+      "longitude": 139.766754,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "山岡鉄舟墓"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "横山大観記念館",
+        "distance_m": 1351
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000171",
+      "name": "赤穂浪士元禄義挙の跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都墨田区両国3-6-11、13-9～12、14-6～8",
+      "latitude": 35.693073,
+      "longitude": 139.794552,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "両国橋",
+        "distance_m": 544
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000172",
+      "name": "加藤千蔭墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都墨田区両国2-8-10",
+      "latitude": 35.693309,
+      "longitude": 139.792007,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "磐瀬京伝墓",
+        "磐瀬京山墓"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "両国橋",
+        "distance_m": 317
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000173",
+      "name": "磐瀬京伝墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都墨田区両国2-8-10",
+      "latitude": 35.693309,
+      "longitude": 139.792007,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "加藤千蔭墓",
+        "磐瀬京山墓"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "両国橋",
+        "distance_m": 317
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000174",
+      "name": "磐瀬京山墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都墨田区両国2-8-10",
+      "latitude": 35.693309,
+      "longitude": 139.792007,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "加藤千蔭墓",
+        "磐瀬京伝墓"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "両国橋",
+        "distance_m": 317
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000175",
+      "name": "日蓮上人入滅の旧跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都大田区池上2-10-5",
+      "latitude": 35.58002,
+      "longitude": 139.703895,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "大森貝塚",
+        "distance_m": 2579
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000176",
+      "name": "彰義隊戦死者墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都荒川区南千住1-59-11",
+      "latitude": 35.73403,
+      "longitude": 139.79286,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "東京電力荒川専用橋",
+        "distance_m": 672
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000177",
+      "name": "徳丸ケ原",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都板橋区高島平・新河岸・三園一帯",
+      "latitude": 35.791604,
+      "longitude": 139.660545,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "戸田橋",
+        "distance_m": 2326
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000178",
+      "name": "松月院大堂",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都板橋区赤塚6-40-7",
+      "latitude": 35.779348,
+      "longitude": 139.646923,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "栗原遺跡",
+        "distance_m": 3575
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000179",
+      "name": "池永道雲墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都練馬区練馬4-27",
+      "latitude": 35.742455,
+      "longitude": 139.65086,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "栗原遺跡",
+        "distance_m": 2368
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000180",
+      "name": "初代安藤広重墓及び記念碑",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都足立区伊興本町1-5-16",
+      "latitude": 35.797744,
+      "longitude": 139.788571,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "浮花橋",
+        "distance_m": 3131
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000181",
+      "name": "安積艮斎墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都葛飾区堀切3-25-16",
+      "latitude": 35.745868,
+      "longitude": 139.83147,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "本奥戸橋",
+        "distance_m": 2177
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000182",
+      "name": "葛西清重墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都葛飾区4つ木1-25-8",
+      "latitude": 35.734152,
+      "longitude": 139.833426,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "かつしかハープ橋",
+        "distance_m": 1507
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000183",
+      "name": "山田検校墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都葛飾区高砂7-13-34",
+      "latitude": 35.754023,
+      "longitude": 139.865724,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "高砂橋",
+        "distance_m": 647
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000184",
+      "name": "原胤敦墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都八王子市上野町11-2",
+      "latitude": 35.655468,
+      "longitude": 139.329732,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "浅川橋",
+        "distance_m": 1215
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000185",
+      "name": "鈴法寺跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都青梅市新町1-22-18",
+      "latitude": 35.788182,
+      "longitude": 139.29638,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "圏央道多摩川橋",
+        "distance_m": 1488
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000186",
+      "name": "府中高札場",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都府中市宮西町5-1-1",
+      "latitude": 35.669798,
+      "longitude": 139.476383,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "武蔵国府",
+        "distance_m": 326
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000187",
+      "name": "川崎定孝墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都府中市押立町4-35",
+      "latitude": 35.65399,
+      "longitude": 139.518717,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "大丸遺跡 (稲城市)",
+        "distance_m": 2747
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000188",
+      "name": "平山季重墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都日野市平山6-15-11",
+      "latitude": 35.645065,
+      "longitude": 139.382681,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "道了堂跡",
+        "distance_m": 3795
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000189",
+      "name": "久米川古戦場",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都東村山市諏訪町2丁目付近（西宿公園）",
+      "latitude": 35.768836,
+      "longitude": 139.464478,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "鈴木遺跡",
+        "distance_m": 6289
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000190",
+      "name": "伊藤単朴墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都国立市青柳355",
+      "latitude": 35.686214,
+      "longitude": 139.424643,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "立川橋",
+        "distance_m": 1825
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000191",
+      "name": "三田氏館跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都国立市谷保5983-1～4、5995～6005",
+      "latitude": 35.679219,
+      "longitude": 139.43782,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "武蔵府中熊野神社古墳",
+        "distance_m": 1798
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000192",
+      "name": "玉川碑跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都狛江市中和泉4-14-13",
+      "latitude": 35.634794,
+      "longitude": 139.56568,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "下布田遺跡",
+        "distance_m": 1824
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000193",
+      "name": "二宮神社並びに城跡",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都あきる野市二宮2252",
+      "latitude": 35.726873,
+      "longitude": 139.3136,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "前田耕地遺跡",
+        "distance_m": 319
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000194",
+      "name": "近藤守真墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "旧跡",
+      "address": "東京都八丈町三根125",
+      "latitude": 33.120434,
+      "longitude": 139.80201,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "鶴間公園遺跡",
+        "distance_m": 267461
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000240",
+      "name": "原氏墓所",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都文京区本駒込3-19-4",
+      "latitude": 35.727307,
+      "longitude": 139.75426,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "東京大学大学院理学系研究科附属植物園",
+        "distance_m": 1208
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000241",
+      "name": "太宰春台墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都台東区谷中1-2-14",
+      "latitude": 35.718895,
+      "longitude": 139.766921,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "横山大観記念館",
+        "distance_m": 764
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000242",
+      "name": "浄厳律師墓",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都台東区池之端2-5-30",
+      "latitude": 35.716972,
+      "longitude": 139.765079,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "月火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "樋口定伊墓"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "横山大観記念館",
+        "distance_m": 610
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000243",
+      "name": "子規庵",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都台東区根岸2-5-11",
+      "latitude": 35.724461,
+      "longitude": 139.776392,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "publish",
+      "reasons": [
+        "current_official_access_confirmed"
+      ],
+      "current_evidence_url": "https://t-navi.city.taito.lg.jp/spot/1062",
+      "current_evidence_finding": "Ward tourism page confirms access but current open days differ from the CSV.",
+      "visit_data_conflict": true,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "横山大観記念館",
+        "distance_m": 1563
+      }
+    },
+    {
+      "source_id": "tokyo:130001:0000000244",
+      "name": "中村不折旧宅（書道博物館）",
+      "prefecture": "東京都",
+      "municipality": "",
+      "category": "史跡",
+      "address": "東京都台東区根岸2-10-4",
+      "latitude": 35.724711,
+      "longitude": 139.776467,
+      "source_url": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+      "source_access_days": "火水木金土日",
+      "source_last_confirmed": "2019-03-29",
+      "status": "hold",
+      "reasons": [
+        "visit_information_last_checked_2019"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "横山大観記念館",
+        "distance_m": 1590
+      }
+    },
+    {
+      "source_id": "okinawa:2025-05:2cd3d03dd0be3c83",
+      "name": "首里城跡",
+      "prefecture": "沖縄県",
+      "municipality": "那覇市",
+      "category": "国指定史跡",
+      "address": "那覇市首里当蔵3丁目",
+      "latitude": 26.22056526,
+      "longitude": 127.7192274,
+      "source_url": "https://data.bodik.jp/dataset/470007_bunkazai",
+      "source_access_days": "",
+      "source_last_confirmed": "",
+      "status": "hold",
+      "reasons": [
+        "no_visit_information_in_source",
+        "source_id_provisional_for_snapshot",
+        "possible_alias_of_existing_map"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [
+        "首里城"
+      ],
+      "nearest_existing": {
+        "name": "円覚寺",
+        "distance_m": 249
+      }
+    },
+    {
+      "source_id": "okinawa:2025-05:ec01ca4968b2cd97",
+      "name": "円覚寺跡",
+      "prefecture": "沖縄県",
+      "municipality": "那覇市",
+      "category": "国指定史跡",
+      "address": "那覇市首里当蔵町1丁目、2丁目",
+      "latitude": 26.2209791,
+      "longitude": 127.7189357,
+      "source_url": "https://data.bodik.jp/dataset/470007_bunkazai",
+      "source_access_days": "",
+      "source_last_confirmed": "",
+      "status": "hold",
+      "reasons": [
+        "no_visit_information_in_source",
+        "source_id_provisional_for_snapshot",
+        "possible_alias_of_existing_map",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "国学 ・首里聖廟石垣"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [
+        "円覚寺"
+      ],
+      "nearest_existing": {
+        "name": "円覚寺",
+        "distance_m": 299
+      }
+    },
+    {
+      "source_id": "okinawa:2025-05:c2e6be87b9f831e5",
+      "name": "玉陵",
+      "prefecture": "沖縄県",
+      "municipality": "那覇市",
+      "category": "国指定史跡",
+      "address": "那覇市首里金城町1丁目",
+      "latitude": 26.21743494,
+      "longitude": 127.7144113,
+      "source_url": "https://data.bodik.jp/dataset/470007_bunkazai",
+      "source_access_days": "",
+      "source_last_confirmed": "",
+      "status": "hold",
+      "reasons": [
+        "no_visit_information_in_source",
+        "source_id_provisional_for_snapshot",
+        "same_name_as_existing_map"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [
+        "玉陵"
+      ],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "玉陵",
+        "distance_m": 105
+      }
+    },
+    {
+      "source_id": "okinawa:2025-05:a6301af9fe072aca",
+      "name": "末吉宮跡",
+      "prefecture": "沖縄県",
+      "municipality": "那覇市",
+      "category": "国指定史跡",
+      "address": "那覇市首里末吉町1丁目",
+      "latitude": 26.22720606,
+      "longitude": 127.7121081,
+      "source_url": "https://data.bodik.jp/dataset/470007_bunkazai",
+      "source_access_days": "",
+      "source_last_confirmed": "",
+      "status": "hold",
+      "reasons": [
+        "no_visit_information_in_source",
+        "source_id_provisional_for_snapshot",
+        "possible_alias_of_existing_map"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [
+        "末吉宮"
+      ],
+      "nearest_existing": {
+        "name": "末吉宮",
+        "distance_m": 382
+      }
+    },
+    {
+      "source_id": "okinawa:2025-05:a3dd3dbb35609c50",
+      "name": "銘苅墓跡群",
+      "prefecture": "沖縄県",
+      "municipality": "那覇市",
+      "category": "国指定史跡",
+      "address": "那覇市銘苅2丁目",
+      "latitude": 26.23083857,
+      "longitude": 127.6998976,
+      "source_url": "https://data.bodik.jp/dataset/470007_bunkazai",
+      "source_access_days": "",
+      "source_last_confirmed": "",
+      "status": "hold",
+      "reasons": [
+        "no_visit_information_in_source",
+        "source_id_provisional_for_snapshot",
+        "same_name_as_existing_map"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [
+        "銘苅墓跡群"
+      ],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "銘苅墓跡群",
+        "distance_m": 241
+      }
+    },
+    {
+      "source_id": "okinawa:2025-05:233f890248e7c086",
+      "name": "弁之御嶽",
+      "prefecture": "沖縄県",
+      "municipality": "那覇市",
+      "category": "国指定史跡",
+      "address": "那覇市首里鳥堀町四丁目",
+      "latitude": 26.2180741,
+      "longitude": 127.7287517,
+      "source_url": "https://data.bodik.jp/dataset/470007_bunkazai",
+      "source_access_days": "",
+      "source_last_confirmed": "",
+      "status": "hold",
+      "reasons": [
+        "no_visit_information_in_source",
+        "source_id_provisional_for_snapshot"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "弁ヶ嶽",
+        "distance_m": 619
+      }
+    },
+    {
+      "source_id": "okinawa:2025-05:8883f8d389480e02",
+      "name": "龍潭及びその周辺",
+      "prefecture": "沖縄県",
+      "municipality": "那覇市",
+      "category": "県指定史跡",
+      "address": "那覇市首里真和志町1丁目",
+      "latitude": 26.21968749,
+      "longitude": 127.7151972,
+      "source_url": "https://data.bodik.jp/dataset/470007_bunkazai",
+      "source_access_days": "",
+      "source_last_confirmed": "",
+      "status": "hold",
+      "reasons": [
+        "no_visit_information_in_source",
+        "source_id_provisional_for_snapshot",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "園比屋武御嶽"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "玉陵",
+        "distance_m": 158
+      }
+    },
+    {
+      "source_id": "okinawa:2025-05:83aa90d2a5c35277",
+      "name": "園比屋武御嶽",
+      "prefecture": "沖縄県",
+      "municipality": "那覇市",
+      "category": "県指定史跡",
+      "address": "那覇市首里真和志町1丁目",
+      "latitude": 26.21968749,
+      "longitude": 127.7151972,
+      "source_url": "https://data.bodik.jp/dataset/470007_bunkazai",
+      "source_access_days": "",
+      "source_last_confirmed": "",
+      "status": "hold",
+      "reasons": [
+        "no_visit_information_in_source",
+        "source_id_provisional_for_snapshot",
+        "same_name_as_existing_map",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "龍潭及びその周辺"
+      ],
+      "existing_name_match": [
+        "園比屋武御嶽"
+      ],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "玉陵",
+        "distance_m": 158
+      }
+    },
+    {
+      "source_id": "okinawa:2025-05:0cf9e0fd30076211",
+      "name": "那覇市山下町第一洞穴",
+      "prefecture": "沖縄県",
+      "municipality": "那覇市",
+      "category": "県指定史跡",
+      "address": "那覇市山下町167",
+      "latitude": 26.20332417,
+      "longitude": 127.6701492,
+      "source_url": "https://data.bodik.jp/dataset/470007_bunkazai",
+      "source_access_days": "",
+      "source_last_confirmed": "",
+      "status": "hold",
+      "reasons": [
+        "no_visit_information_in_source",
+        "source_id_provisional_for_snapshot",
+        "possible_alias_of_existing_map"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [],
+      "existing_name_match": [],
+      "existing_alias_candidate": [
+        "山下町第一洞穴遺跡"
+      ],
+      "nearest_existing": {
+        "name": "山下町第一洞穴遺跡",
+        "distance_m": 386
+      }
+    },
+    {
+      "source_id": "okinawa:2025-05:1c792cbfe1069602",
+      "name": "国学 ・首里聖廟石垣",
+      "prefecture": "沖縄県",
+      "municipality": "那覇市",
+      "category": "県指定史跡",
+      "address": "那覇市首里当蔵町1丁目",
+      "latitude": 26.2209791,
+      "longitude": 127.7189357,
+      "source_url": "https://data.bodik.jp/dataset/470007_bunkazai",
+      "source_access_days": "",
+      "source_last_confirmed": "",
+      "status": "hold",
+      "reasons": [
+        "no_visit_information_in_source",
+        "source_id_provisional_for_snapshot",
+        "coordinate_shared_with_distinct_record"
+      ],
+      "current_evidence_url": "",
+      "current_evidence_finding": "",
+      "visit_data_conflict": false,
+      "same_coordinate_as": [
+        "円覚寺跡"
+      ],
+      "existing_name_match": [],
+      "existing_alias_candidate": [],
+      "nearest_existing": {
+        "name": "円覚寺",
+        "distance_m": 299
+      }
+    }
+  ]
+}
