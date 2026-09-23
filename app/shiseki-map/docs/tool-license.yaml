@@ -36,9 +36,27 @@ sources:
     attribution: Tokyo Metropolitan Government and dataset link required
     restriction: only site-class records with valid coordinates and verified access are publication candidates
     decision: conditional
-    published_record_ids: ["0000000114", "0000000115", "0000000243"]
-    publication_note: three individually checked records only; the 2019 access hours are not republished; UI links source, CC BY 4.0, and current ward guidance
+    published_record_ids: ["0000000114", "0000000115", "0000000243", "0000000186"]
+    publication_note: four individually checked records only; the 2019 access hours are not republished; the Fuchu site uses Fuchu City open-data coordinates instead of the Tokyo CSV coordinates
     evidence: https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017
+  - name: Fuchu City open-data cultural property list
+    cost: free download
+    license: CC-BY-4.0
+    commercial_use: allowed
+    attribution: Fuchu City, dataset link, and modification notice required
+    restriction: use only the individually verified Fuchu Kosatsuba row; confirm visit guidance separately
+    decision: approved
+    published_record_ids: ["0000000018"]
+    evidence: https://www.city.fuchu.tokyo.jp/gyosei/opendata/index.html
+    license_evidence: https://creativecommons.org/licenses/by/4.0/deed.ja
+  - name: Tokyo Board of Education cultural walk map JSON
+    cost: free to read
+    license: website site policy; reuse permission not granted
+    commercial_use: blocked for copying the map data into the affiliate-supported site
+    attribution: not sufficient to override the site policy
+    restriction: do not publish its coordinates or copy its descriptive content; use only as a read-only cross-check
+    decision: blocked
+    evidence: https://www.syougai.metro.tokyo.lg.jp/riyou/policy.html
   - name: Okinawa Prefecture cultural properties CSV (2025-05)
     cost: free
     license: CC-BY-4.0

@@ -44691,6 +44691,35 @@
     "jalan_sml_name": "お茶の水・湯島・本郷"
   },
   {
+    "id": "tokyo:130001:0000000186",
+    "qid": "",
+    "label_ja": "府中高札場",
+    "label_en": "",
+    "prefecture": "東京都",
+    "address": "東京都府中市宮西町5-1",
+    "latitude": 35.6698744028941,
+    "longitude": 139.476697449382,
+    "description": "旧甲州街道と府中街道の交差点にある、江戸時代の高札場です。",
+    "title_ja": "府中高札場",
+    "categories": [
+      "旧跡"
+    ],
+    "era": "江戸時代",
+    "designation": "local",
+    "designation_label": "東京都指定旧跡",
+    "designation_source": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017",
+    "heritage_id": "0000000186",
+    "source_url": "https://www.city.fuchu.tokyo.jp/gyosei/opendata/index.html",
+    "source_name": "府中市オープンデータ 文化財一覧",
+    "source_license": "CC BY 4.0",
+    "visit_url": "https://www.city.fuchu.tokyo.jp/kanko/kanko/spot.html",
+    "access_note": "旧甲州街道と府中街道の交差点にあります。訪問前に府中市の案内を確認してください。",
+    "jalan_lrg_code": "139200",
+    "jalan_lrg_name": "八王子・立川・町田・府中・調布",
+    "jalan_sml_code": "139202",
+    "jalan_sml_name": "調布・府中"
+  },
+  {
     "qid": "Q54662040",
     "label_ja": "弁慶橋",
     "label_en": "",

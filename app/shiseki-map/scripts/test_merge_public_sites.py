@@ -10,15 +10,22 @@ class PublicSiteMergeTest(unittest.TestCase):
         rows = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
         once = merge_rows(rows)
         self.assertEqual(once, merge_rows(once))
-        self.assertEqual(len(once), 3314)
+        self.assertEqual(len(once), 3315)
         additions = json.loads(SUPPLEMENT.read_text(encoding="utf-8"))
         review = json.loads((ROOT / "docs" / "public-candidate-review.json").read_text(encoding="utf-8"))
         approved = {row["source_id"]: row for row in review["records"] if row["status"] == "publish"}
-        self.assertEqual({row["id"] for row in additions}, set(approved))
+        review_by_id = {row["source_id"]: row for row in review["records"]}
+        fuchu_id = "tokyo:130001:0000000186"
+        self.assertEqual({row["id"] for row in additions}, set(approved) | {fuchu_id})
         for row in additions:
-            source = approved[row["id"]]
-            self.assertEqual((row["label_ja"], row["latitude"], row["longitude"]),
-                             (source["name"], source["latitude"], source["longitude"]))
+            source = review_by_id[row["id"]]
+            self.assertEqual(row["label_ja"], source["name"])
+            if source["source_id"] == fuchu_id:
+                self.assertEqual((row["latitude"], row["longitude"]),
+                                 (35.669874402894102, 139.47669744938199))
+            else:
+                self.assertEqual((row["latitude"], row["longitude"]),
+                                 (source["latitude"], source["longitude"]))
 
     def test_same_name_record_is_rejected(self):
         rows = json.loads(SNAPSHOT.read_text(encoding="utf-8"))

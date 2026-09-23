@@ -6,7 +6,8 @@ Issue: `ats030-0blv`。判定日: 2026-09-23。
 `publish`/`hold` と理由は [判定表](public-candidate-review.json) に記録した。
 `publish` は判定時点では取り込み候補を意味した。2026-09-23にこの3件を
 [確認済み追加データ](../data/verified_public_sites.json)として地図へ反映した。
-保留88件は地図へ反映していない。
+当初の保留88件は、この判定時点では地図へ反映していなかった。
+この段落と下表は当初判定の記録である。後続の追加判断は末尾を参照。
 
 ## 判定結果
 
@@ -61,3 +62,7 @@ python3 app/shiseki-map/scripts/review_public_candidates.py \
 
 元データの商用再利用・出典条件は [tool-license.yaml](tool-license.yaml) に記録済み。
 出典はレコードごとに判定表へ格納した。公開を実施するならそのリンクをUIにも表示する。
+
+## 後続の追加判断
+
+Issue `ats030-tjrm` で府中高札場を個別照合し、[府中市のCC BY公開データ](https://www.city.fuchu.tokyo.jp/gyosei/opendata/index.html)の座標と[市の現行観光案内](https://www.city.fuchu.tokyo.jp/kanko/kanko/spot.html)を用いて4件目として追加した。[当初の判定表](public-candidate-review.json)は無作為標本の再現性のため変更していない。位置と利用条件の判断は[東京候補の後続照合](held-tokyo-priority-review.md)に記録した。
