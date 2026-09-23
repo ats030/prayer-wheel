@@ -10,13 +10,15 @@ class PublicSiteMergeTest(unittest.TestCase):
         rows = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
         once = merge_rows(rows)
         self.assertEqual(once, merge_rows(once))
-        self.assertEqual(len(once), 3315)
+        self.assertEqual(len(once), 3319)
         additions = json.loads(SUPPLEMENT.read_text(encoding="utf-8"))
         review = json.loads((ROOT / "docs" / "public-candidate-review.json").read_text(encoding="utf-8"))
         approved = {row["source_id"]: row for row in review["records"] if row["status"] == "publish"}
         review_by_id = {row["source_id"]: row for row in review["records"]}
         fuchu_id = "tokyo:130001:0000000186"
-        self.assertEqual({row["id"] for row in additions}, set(approved) | {fuchu_id})
+        batch_ids = {"tokyo:130001:0000000136", "tokyo:130001:0000000140",
+                     "tokyo:130001:0000000141", "tokyo:130001:0000000142"}
+        self.assertEqual({row["id"] for row in additions}, set(approved) | {fuchu_id} | batch_ids)
         for row in additions:
             source = review_by_id[row["id"]]
             self.assertEqual(row["label_ja"], source["name"])

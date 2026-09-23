@@ -13,8 +13,8 @@ SNAPSHOT = ROOT / "frontend" / "shiseki.json"
 
 def merge_rows(rows: list[dict]) -> list[dict]:
     additions = json.loads(SUPPLEMENT.read_text(encoding="utf-8"))
-    if len(additions) != 4:
-        raise ValueError("expected exactly four reviewed public-source records")
+    if len(additions) != 8:
+        raise ValueError("expected exactly eight reviewed public-source records")
     addition_ids = {item["id"] for item in additions}
     if len(addition_ids) != len(additions):
         raise ValueError("duplicate source-scoped ID in supplement")

@@ -36,8 +36,8 @@ sources:
     attribution: Tokyo Metropolitan Government and dataset link required
     restriction: only site-class records with valid coordinates and verified access are publication candidates
     decision: conditional
-    published_record_ids: ["0000000114", "0000000115", "0000000243", "0000000186"]
-    publication_note: four individually checked records only; the 2019 access hours are not republished; the Fuchu site uses Fuchu City open-data coordinates instead of the Tokyo CSV coordinates
+    published_record_ids: ["0000000114", "0000000115", "0000000243", "0000000186", "0000000136", "0000000140", "0000000141", "0000000142"]
+    publication_note: eight individually checked records only; the 2019 access hours are not republished; the Fuchu site uses Fuchu City open-data coordinates instead of the Tokyo CSV coordinates
     evidence: https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017
   - name: Fuchu City open-data cultural property list
     cost: free download
