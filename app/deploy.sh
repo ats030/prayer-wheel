@@ -3,7 +3,8 @@
 #
 #   app/deploy.sh <サービス名>
 #
-# 対象は $HOME/app/<サービス名> に clone してあるリポジトリ。編集は pCloudDrive 側の
+# 対象は $HOME/app/<サービス名> に clone してあるリポジトリ、または monorepo ($HOME)
+# 配下のアプリ。後者は pull せず再起動と応答確認だけ行う。編集は pCloudDrive 側の
 # 作業コピーで行い、そこで commit & push してからこれを実行して取り込む。
 #
 # なぜローカルに置くか: pCloudDrive は FUSE のクラウド同期で、ストールすると稼働中の
@@ -34,10 +35,17 @@ register_visit_log_site() {
     echo "visit-log 登録を確認: $NAME ($site_url)"
 }
 
-[ -d "$CHECKOUT/.git" ] || { echo "ローカルチェックアウトがない: $CHECKOUT" >&2; exit 1; }
-
-echo "更新中: $CHECKOUT"
-git -C "$CHECKOUT" pull --ff-only
+if [ -d "$CHECKOUT/.git" ]; then
+    echo "更新中: $CHECKOUT"
+    git -C "$CHECKOUT" pull --ff-only
+elif [ "$(git -C "$CHECKOUT" rev-parse --show-toplevel 2>/dev/null)" = "$HOME" ]; then
+    # monorepo 配下のアプリ (ats030-h28z)。$HOME の作業ツリーそのものが
+    # チェックアウトなので、ここでは pull しない。追従は monorepo 側で行う。
+    echo "monorepo 配下のため pull を省略: $CHECKOUT"
+else
+    echo "ローカルチェックアウトがない: $CHECKOUT" >&2
+    exit 1
+fi
 
 echo "再起動: $UNIT"
 systemctl --user restart "$UNIT"
