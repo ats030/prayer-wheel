@@ -745,5 +745,147 @@
         "end": "2026-08-10"
       }
     ]
+  },
+  "Q21654102": {
+    "status": "active",
+    "source": "https://numata-youtaka.com/",
+    "description": "昭和52年に、開拓の祖・沼田喜三郎翁の故郷である富山県小矢部市から優雅で勇壮な田祭りとして伝えられた祭り。北海道の三大あんどん祭りの一つで、道内唯一の「喧嘩あんどん」として、高さ7m・長さ12m・重さ5tの大あんどんの「ぶつけあい」が見どころ。毎年8月中旬の金曜日・土曜日の2日間、沼田の街で開かれる。",
+    "venue": {
+      "name": "沼田町市街地",
+      "address": "北海道雨竜郡沼田町"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-21",
+        "end": "2026-08-22"
+      }
+    ]
+  },
+  "Q11438026": {
+    "status": "active",
+    "source": "https://www.city.mutsu.lg.jp/bunka/information/kankou-oohatahatimannguureitaisai.html",
+    "description": "大畑八幡宮の例祭で、住民からは「大畑祭り」と呼ばれる。毎年9月14日から16日に行われ、14日が宵宮祭、15・16日が本祭と御神輿渡御で、15日は春日神社をお旅所とし、16日に還御する。神輿は「ハンユイ」の掛け声で担がれ、渡御行列は平成12年に青森県指定無形民俗文化財となった。享保三年（1718）に本町から繰り出した八幡山をはじめとする山車や能舞・神楽が加わり、16日には大畑漁港で「浜祈祷」が行われる。",
+    "venue": {
+      "name": "大畑八幡宮・大畑地区",
+      "address": "青森県むつ市大畑町"
+    }
+  },
+  "Q11189529": {
+    "status": "active",
+    "source": "https://arabaki.com/about/",
+    "description": "東北において勢力を伸ばしたといわれる「荒吐族」から名付けられたロックフェスティバル。郷土独自の文化や人間性を全国へ発信するため、『祭』をこの地東北に築くことを目指して生まれた。",
+    "venue": {
+      "name": "国営みちのく杜の湖畔公園 北地区 エコキャンプみちのく",
+      "address": "宮城県柴田郡川崎町大字川内字向原254番地",
+      "latitude": 38.200636,
+      "longitude": 140.671641,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E3%82%A8%E3%82%B3%E3%82%AD%E3%83%A3%E3%83%B3%E3%83%97%E3%81%BF%E3%81%A1%E3%81%AE%E3%81%8F&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-04-25",
+        "end": "2026-04-26"
+      }
+    ]
+  },
+  "Q11402409": {
+    "status": "active",
+    "source": "https://www.htb.co.jp/event/bonodori/",
+    "description": "さっぽろ夏まつりの風物詩として、札幌大通公園西2丁目の特設会場で4日間開かれる盆踊り。札幌民謡連盟による生演奏で踊る。",
+    "venue": {
+      "name": "札幌大通公園西2丁目 特設会場",
+      "address": "北海道札幌市中央区大通西2丁目",
+      "latitude": 43.060896,
+      "longitude": 141.354406,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E5%A4%A7%E9%80%9A%E8%A5%BF2%E4%B8%81%E7%9B%AE+%E6%9C%AD%E5%B9%8C%E5%B8%82%E4%B8%AD%E5%A4%AE%E5%8C%BA&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-13",
+        "end": "2026-08-16"
+      }
+    ]
+  },
+  "Q28684776": {
+    "status": "active",
+    "source": "http://www.asakakunituko.jp/html/page06.html",
+    "description": "安積国造神社の秋祭りで、毎年9月27日から29日まで行われる。27日の例大祭式典の後、3日間にわたって市内を神輿渡御する。28日夜には八幡ばやしを奏でる17町会の山車が駅前大通りに勢ぞろいし、29日夜には3社の本神輿と35の町神輿が集まって表参道から神社へ進む。山車は元文3年（1738）、神輿渡御は明和2年（1765）から始まり、江戸時代の郡山宿の繁栄を伝える祭りと言われる。",
+    "venue": {
+      "name": "安積国造神社・駅前大通り",
+      "address": "福島県郡山市",
+      "latitude": 37.398762,
+      "longitude": 140.382055,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E5%AE%89%E7%A9%8D%E5%9B%BD%E9%80%A0%E7%A5%9E%E7%A4%BE&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    }
+  },
+  "Q17222215": {
+    "status": "active",
+    "source": "https://www.city.daisen.lg.jp/archive/p20241001125445",
+    "description": "秋田県特有の大型の白うさぎ（日本白色種秋田改良種）を後世に残し、品質改良と全国的な普及を図るために行われるイベント。1日目は大きさや毛並みなどを審査する品評会が主となり、2日目は品評会のほかうさぎ体重あてコンテストなどが行われる。",
+    "venue": {
+      "name": "ドンパン広場（大仙市中仙支所前）",
+      "address": "秋田県大仙市北長野字茶畑141"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-17",
+        "end": "2026-10-18"
+      }
+    ]
+  },
+  "Q11677260": {
+    "status": "active",
+    "source": "https://explorekazuno.jp/event/kemanaibonodori2026/",
+    "description": "ユネスコ無形文化遺産に登録され、国指定重要無形民俗文化財にも指定されている毛馬内盆踊り。秋田県の三大盆踊りのひとつで、紋付の着物や訪問着に豆しぼりの手ぬぐいで頬被りをした踊り手が、路上に焚いた篝火を囲んで踊る。大太鼓と笛の囃子で踊る大の坂と、無伴奏で歌のみで踊る甚句がある。",
+    "venue": {
+      "name": "毛馬内こもせ通り",
+      "address": "秋田県鹿角市十和田毛馬内字毛馬内7 周辺"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-21",
+        "end": "2026-08-23"
+      }
+    ]
+  },
+  "Q24872903": {
+    "status": "active",
+    "source": "https://r.goope.jp/kankou/info/6903716",
+    "description": "海老根伝統手漉和紙で作られた灯ろうを使い、平成15年から毎年秋に開かれる催し。海老根伝統手漉和紙工房の周辺で、地域住民や学生らが絵や文字を描いた灯ろうに火を灯し、静かな田園に幻想的な風景を映し出す。",
+    "venue": {
+      "name": "中田町海老根和紙工房 周辺",
+      "address": "福島県郡山市中田町海老根字北向地内"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-19",
+        "end": "2026-09-20"
+      }
+    ]
+  },
+  "Q24877080": {
+    "status": "active",
+    "source": "https://r.goope.jp/kankou/info/6903727",
+    "description": "江戸時代の末頃から行われてきたといわれる農村歌舞伎で、地元の菅布禰神社で村人が芝居や踊りを楽しんだのが始まりと言われる。中断を経て昭和55年に地区全域が保存会の会員となって継承し、昭和58年に郡山市指定の重要無形民俗文化財となった。",
+    "venue": {
+      "name": "柳橋歌舞伎伝承館 黒石荘",
+      "address": "福島県郡山市中田町柳橋字町向51番地"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-20",
+        "end": "2026-09-20"
+      }
+    ]
   }
 }
