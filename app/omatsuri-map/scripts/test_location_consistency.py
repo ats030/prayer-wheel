@@ -24,6 +24,10 @@ class LocationConsistencyTest(unittest.TestCase):
                 continue
             with self.subTest(qid=row.get("qid")):
                 self.assertTrue(venue.get("name"))
+                self.assertTrue(valid_web_url(venue.get("source")))
+                # 座標のない会場は名前と出典だけ出し、地図は祭り自体の座標を使う。
+                if "latitude" not in venue and "longitude" not in venue:
+                    continue
                 self.assertIsInstance(venue.get("latitude"), (int, float))
                 self.assertIsInstance(venue.get("longitude"), (int, float))
                 self.assertTrue(valid_web_url(venue.get("source")))

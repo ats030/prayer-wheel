@@ -44,15 +44,17 @@ function commonsFilePage(value){
   }catch{return''}
 }
 function venueData(f){return f.venue&&typeof f.venue==='object'&&f.venue.name&&safeUrl(f.venue.source)?f.venue:null}
+// 座標のない確認済み会場もある。そのときは祭り自体の座標で地図に置く。
+function venuePoint(venue){return!!venue&&typeof venue.latitude==='number'&&typeof venue.longitude==='number'}
 function mapCoordinates(f){
-  const venue=venueData(f),hasVenuePoint=venue&&venue.latitude!==null&&venue.latitude!==''&&venue.longitude!==null&&venue.longitude!=='';
+  const venue=venueData(f),hasVenuePoint=venuePoint(venue);
   const latitude=Number(hasVenuePoint?venue.latitude:f.latitude),longitude=Number(hasVenuePoint?venue.longitude:f.longitude);
   return Number.isFinite(latitude)&&Number.isFinite(longitude)?{latitude,longitude}:null;
 }
 function locationCacheKey(f){const point=mapCoordinates(f);return point?`${point.latitude.toFixed(5)},${point.longitude.toFixed(5)}`:''}
 function locationPrecisionLabel(f){
   const venue=venueData(f);
-  if(venue)return venue.precision==='exact'?'会場位置を確認済み':'会場周辺';
+  if(venuePoint(venue))return venue.precision==='exact'?'会場位置を確認済み':'会場周辺';
   if(f.coordinate_source==='administrative_area')return'位置は行政区域の目安';
   if(f.coordinate_source==='venue')return'会場データ由来（未検証）';
   return'位置は目安';
