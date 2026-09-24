@@ -19785,8 +19785,8 @@
     "prefecture": "北海道",
     "latitude": 43.455399,
     "longitude": 144.115097,
-    "description": "",
-    "date": "日付未定",
+    "description": "JOIN ALIVEは、北海道岩見沢市のいわみざわ公園 野外音楽堂キタオンと北海道グリーンランド遊園地を会場に、夏に2日間開かれる野外音楽フェスティバルです。",
+    "date": "2026-07-18〜2026-07-19",
     "wikipedia_title": "JOIN ALIVE",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -19795,7 +19795,25 @@
     "jalan_lrg_name": "釧路・阿寒・根室・川湯・屈斜路",
     "jalan_sml_code": "012602",
     "jalan_sml_name": "釧路・阿寒",
-    "categories": []
+    "categories": [],
+    "description_source": "https://www.joinalive.jp/",
+    "venue": {
+      "name": "いわみざわ公園 野外音楽堂キタオン・北海道グリーンランド遊園地",
+      "source": "https://www.joinalive.jp/",
+      "address": "北海道岩見沢市",
+      "latitude": 43.165961,
+      "longitude": 141.78474,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E3%81%84%E3%82%8F%E3%81%BF%E3%81%96%E3%82%8F%E5%85%AC%E5%9C%92+%E5%B2%A9%E8%A6%8B%E6%B2%A2%E5%B8%82&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-18",
+        "end": "2026-07-19",
+        "source": "https://www.joinalive.jp/"
+      }
+    ]
   },
   {
     "qid": "Q11246063",
@@ -19825,8 +19843,8 @@
     "prefecture": "北海道",
     "latitude": 43.455399,
     "longitude": 144.115097,
-    "description": "",
-    "date": "日付未定",
+    "description": "とまこまいスケートまつりは、スケートのまち苫小牧市の中央公園をメイン会場に開かれる冬のまつりです。",
+    "date": "2026-02-07〜2026-02-08",
     "wikipedia_title": "とまこまいスケートまつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -19837,6 +19855,24 @@
     "jalan_sml_name": "釧路・阿寒",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.city.tomakomai.hokkaido.jp/kankojoho/event/skatematsuri/skatematsuri_kaijo.html",
+    "venue": {
+      "name": "中央公園",
+      "source": "https://www.city.tomakomai.hokkaido.jp/kankojoho/event/skatematsuri/skatematsuri_kaijo.html",
+      "address": "北海道苫小牧市若草町2丁目3",
+      "latitude": 42.638183,
+      "longitude": 141.60694,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E8%8B%AB%E5%B0%8F%E7%89%A7%E5%B8%82+%E4%B8%AD%E5%A4%AE%E5%85%AC%E5%9C%92&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-02-07",
+        "end": "2026-02-08",
+        "source": "https://www.city.tomakomai.hokkaido.jp/kankojoho/event/skatematsuri/skatematsuri_kaijo.html"
+      }
     ]
   },
   {
@@ -19846,7 +19882,7 @@
     "prefecture": "北海道",
     "latitude": 43.455399,
     "longitude": 144.115097,
-    "description": "",
+    "description": "北見厳寒の焼き肉まつりは、冬の寒さを食べてしまおうと、2月上旬に氷点下の屋外で北見名物の焼肉を味わう北見市のまつりです。",
     "date": "日付未定",
     "wikipedia_title": "北見厳寒の焼き肉まつり",
     "coordinate_source": "prefecture_centroid",
@@ -19858,7 +19894,13 @@
     "jalan_sml_name": "釧路・阿寒",
     "categories": [
       "行事"
-    ]
+    ],
+    "description_source": "https://www.city.kitami.lg.jp/tourism/tourism/detail.php?content=8314",
+    "venue": {
+      "name": "北見市",
+      "source": "https://www.city.kitami.lg.jp/tourism/tourism/detail.php?content=8314",
+      "address": "北海道北見市"
+    }
   },
   {
     "qid": "Q21654102",
@@ -19888,8 +19930,8 @@
     "prefecture": "北海道",
     "latitude": 43.455399,
     "longitude": 144.115097,
-    "description": "",
-    "date": "日付未定",
+    "description": "活性の火は、活性の火実行委員会が主催する入場無料の音楽イベントで、苫小牧市民文化ホールART CUBESとELLCUBE・アカシア公園を会場に2日間開かれます。",
+    "date": "2026-08-29〜2026-08-30",
     "wikipedia_title": "活性の火",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -19898,7 +19940,25 @@
     "jalan_lrg_name": "釧路・阿寒・根室・川湯・屈斜路",
     "jalan_sml_code": "012602",
     "jalan_sml_name": "釧路・阿寒",
-    "categories": []
+    "categories": [],
+    "description_source": "https://activefire.net/",
+    "venue": {
+      "name": "苫小牧市民文化ホールART CUBES、ELLCUBE・アカシア公園",
+      "source": "https://activefire.net/",
+      "address": "北海道苫小牧市旭町3丁目3-3",
+      "latitude": 42.632467,
+      "longitude": 141.603496,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E8%8B%AB%E5%B0%8F%E7%89%A7%E5%B8%82%E6%97%AD%E7%94%BA3%E4%B8%81%E7%9B%AE&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-29",
+        "end": "2026-08-30",
+        "source": "https://activefire.net/"
+      }
+    ]
   },
   {
     "qid": "Q11475377",
@@ -25390,8 +25450,8 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
-    "date": "日付未定",
+    "description": "函館いか踊りは、例年8月1日から5日に開かれる函館港まつりの名物で、市民参加パレード「ワッショイはこだて」で踊られ、当日の自由参加もできます。最終日には函館駅前からはこだてグリーンプラザにかけての歩行者天国でいか踊り大会も行われます。",
+    "date": "2026-08-01〜2026-08-05",
     "wikipedia_title": "いか踊り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -25400,7 +25460,21 @@
     "jalan_lrg_name": "富良野・美瑛・トマム",
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
-    "categories": []
+    "categories": [],
+    "description_source": "https://www.hakobura.jp/events/355",
+    "venue": {
+      "name": "函館駅前付近・五稜郭公園前付近（函館港まつりパレード）",
+      "source": "https://www.hakobura.jp/events/355",
+      "address": "北海道函館市"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-01",
+        "end": "2026-08-05",
+        "source": "https://www.hakobura.jp/events/355"
+      }
+    ]
   },
   {
     "qid": "Q11260220",
@@ -25409,8 +25483,8 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
-    "date": "日付未定",
+    "description": "いわみざわ彩花まつりは、岩見沢市のあやめ公園やいわみざわ公園、駅東市民広場公園などを会場に夏に開かれるまつりで、あやめ株の販売や盆栽展、踊りとお祭りの広場、フォトコンテストなどが行われます。",
+    "date": "2026-07-02〜2026-07-05",
     "wikipedia_title": "いわみざわ彩花まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -25421,6 +25495,24 @@
     "jalan_sml_name": "富良野",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://iwamizawa-kankou.jp/lp/%E3%81%84%E3%82%8F%E3%81%BF%E3%81%96%E3%82%8F%E5%BD%A9%E8%8A%B1%E3%81%BE%E3%81%A4%E3%82%8A2026/",
+    "venue": {
+      "name": "いわみざわ公園・あやめ公園ほか",
+      "source": "https://iwamizawa-kankou.jp/lp/%E3%81%84%E3%82%8F%E3%81%BF%E3%81%96%E3%82%8F%E5%BD%A9%E8%8A%B1%E3%81%BE%E3%81%A4%E3%82%8A2026/",
+      "address": "北海道岩見沢市",
+      "latitude": 43.165961,
+      "longitude": 141.78474,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E3%81%84%E3%82%8F%E3%81%BF%E3%81%96%E3%82%8F%E5%85%AC%E5%9C%92+%E5%B2%A9%E8%A6%8B%E6%B2%A2%E5%B8%82&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-02",
+        "end": "2026-07-05",
+        "source": "https://iwamizawa-kankou.jp/lp/%E3%81%84%E3%82%8F%E3%81%BF%E3%81%96%E3%82%8F%E5%BD%A9%E8%8A%B1%E3%81%BE%E3%81%A4%E3%82%8A2026/"
+      }
     ]
   },
   {
@@ -25451,8 +25543,8 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
-    "date": "日付未定",
+    "description": "くしろチューリップ＆花フェアは、釧路に本格的な春の訪れを告げる花のイベントで、鶴ケ岱公園を会場に約11,000球のチューリップなどの花々が彩り、ステージやグルメ屋台、市民団体のバザー、大抽選会も行われます。",
+    "date": "2026-05-24",
     "wikipedia_title": "くしろチューリップ&花フェア",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -25461,7 +25553,25 @@
     "jalan_lrg_name": "富良野・美瑛・トマム",
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
-    "categories": []
+    "categories": [],
+    "description_source": "https://www.visit-hokkaido.jp/event/detail_11054.html",
+    "venue": {
+      "name": "鶴ケ岱公園",
+      "source": "https://www.visit-hokkaido.jp/event/detail_11054.html",
+      "address": "北海道釧路市鶴ケ岱1丁目10",
+      "latitude": 42.979073,
+      "longitude": 144.397936,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E9%B6%B4%E3%82%B1%E5%B2%B1%E5%85%AC%E5%9C%92&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-05-24",
+        "end": "2026-05-24",
+        "source": "https://www.visit-hokkaido.jp/event/detail_11054.html"
+      }
+    ]
   },
   {
     "qid": "Q11265342",
@@ -25470,8 +25580,8 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
-    "date": "日付未定",
+    "description": "くしろ市民北海盆踊りは、夏の終わりを飾る釧路市の恒例行事で、道東最大級の本櫓を中心に釧路駅前から北大通にかけての会場で毎年8月19日に開かれ、手踊りや仮装などのコンクールも行われます。",
+    "date": "2026-08-19",
     "wikipedia_title": "くしろ市民北海盆踊り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -25482,6 +25592,24 @@
     "jalan_sml_name": "富良野",
     "categories": [
       "演舞・盆踊り"
+    ],
+    "description_source": "http://ja.kushiro-lakeakan.com/things_to_do/2564/",
+    "venue": {
+      "name": "北大通6〜13丁目",
+      "source": "http://ja.kushiro-lakeakan.com/things_to_do/2564/",
+      "address": "北海道釧路市北大通6丁目",
+      "latitude": 42.984785,
+      "longitude": 144.384309,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E9%87%A7%E8%B7%AF%E5%B8%82%E5%8C%97%E5%A4%A7%E9%80%9A6%E4%B8%81%E7%9B%AE&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-19",
+        "end": "2026-08-19",
+        "source": "http://ja.kushiro-lakeakan.com/things_to_do/2564/"
+      }
     ]
   },
   {
@@ -25491,8 +25619,8 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
-    "date": "日付未定",
+    "description": "くしろ冬まつり（くしろ氷まつりの後継）は、釧路港耐震・旅客船ターミナルをメイン会場に2月に開かれる釧路市の冬のまつりで、チューブスライダーや氷雪像が設置され、子どももちまき大会や寒風カラオケのど自慢大会など様々な催しが行われます。",
+    "date": "2026-02-07〜2026-02-08",
     "wikipedia_title": "くしろ氷まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -25503,6 +25631,24 @@
     "jalan_sml_name": "富良野",
     "categories": [
       "行事"
+    ],
+    "description_source": "http://ja.kushiro-lakeakan.com/things_to_do/1869/",
+    "venue": {
+      "name": "釧路港耐震・旅客船ターミナル",
+      "source": "http://ja.kushiro-lakeakan.com/things_to_do/1869/",
+      "address": "北海道釧路市幸町4-1",
+      "latitude": 42.982709,
+      "longitude": 144.379768,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E9%87%A7%E8%B7%AF%E5%B8%82%E5%B9%B8%E7%94%BA4%E4%B8%81%E7%9B%AE&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-02-07",
+        "end": "2026-02-08",
+        "source": "http://ja.kushiro-lakeakan.com/things_to_do/1869/"
+      }
     ]
   },
   {
@@ -25512,8 +25658,8 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
-    "date": "日付未定",
+    "description": "くしろ港まつりは、昭和23年の釧路港開港50年を記念した「釧路港開港50年港まつり」を第1回として続く釧路市の夏のまつりで、花火大会（耐震・旅客船ターミナル）や北大通での市民踊りパレード・音楽パレードが行われます。",
+    "date": "2026-08-07〜2026-08-09",
     "wikipedia_title": "くしろ港まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -25524,6 +25670,20 @@
     "jalan_sml_name": "富良野",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.city.kushiro.lg.jp/sangyou/umisora/1006541/1006564/1006566.html",
+    "venue": {
+      "name": "北大通・耐震旅客船ターミナル",
+      "source": "https://www.city.kushiro.lg.jp/sangyou/umisora/1006541/1006564/1006566.html",
+      "address": "北海道釧路市北大通"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-07",
+        "end": "2026-08-09",
+        "source": "https://www.city.kushiro.lg.jp/sangyou/umisora/1006541/1006564/1006566.html"
+      }
     ]
   },
   {
@@ -25533,8 +25693,8 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
-    "date": "日付未定",
+    "description": "くしろ霧フェスティバルは、釧路市の幸町緑地・耐震岸壁の特設ステージを会場に夏に開かれる音楽フェスティバルで、ライブやレーザーショー、ステージイベントなどが行われます。",
+    "date": "2026-07-24〜2026-07-26",
     "wikipedia_title": "くしろ霧フェスティバル",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -25545,6 +25705,24 @@
     "jalan_sml_name": "富良野",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.kushirokirifestival.com/",
+    "venue": {
+      "name": "幸町緑地・耐震岸壁 特設ステージ",
+      "source": "https://www.kushirokirifestival.com/",
+      "address": "北海道釧路市幸町4丁目1",
+      "latitude": 42.982709,
+      "longitude": 144.379768,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E9%87%A7%E8%B7%AF%E5%B8%82%E5%B9%B8%E7%94%BA4%E4%B8%81%E7%9B%AE&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-24",
+        "end": "2026-07-26",
+        "source": "https://www.kushirokirifestival.com/"
+      }
     ]
   },
   {
@@ -25554,7 +25732,7 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
+    "description": "なかしべつ夏祭りは中標津町の夏をにぎわす祭りで、中標津町総合文化会館・しるべっと広場のメイン会場に盆踊りのやぐらを中心として約6000個の提灯が飾り付けられ、YOSAKOIソーランステージや大通パレードも行われます。毎年8月の第二土曜日・日曜日に開かれます。",
     "date": "日付未定",
     "wikipedia_title": "なかしべつ夏祭り",
     "coordinate_source": "prefecture_centroid",
@@ -25566,7 +25744,13 @@
     "jalan_sml_name": "富良野",
     "categories": [
       "行事"
-    ]
+    ],
+    "description_source": "https://kaiyoudai.jp/index.php/sightseeing/summerfestival/",
+    "venue": {
+      "name": "中標津町総合文化会館・しるべっと広場",
+      "source": "https://kaiyoudai.jp/index.php/sightseeing/summerfestival/",
+      "address": "北海道標津郡中標津町"
+    }
   },
   {
     "qid": "Q11277312",
@@ -25638,7 +25822,7 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
+    "description": "北海道音楽大行進は、昭和4年に始まった旭川市の音楽行事で、4,000人以上が参加します。リベライン旭川パークでの合同演奏のあと永隆橋通を行進し、買物公園でアフターコンサートを行います。毎年6月上旬に開かれます。",
     "date": "日付未定",
     "wikipedia_title": "北海道音楽大行進",
     "coordinate_source": "prefecture_centroid",
@@ -25648,7 +25832,17 @@
     "jalan_lrg_name": "富良野・美瑛・トマム",
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
-    "categories": []
+    "categories": [],
+    "description_source": "https://www.atca.jp/kankouspoy/%E5%8C%97%E6%B5%B7%E9%81%93%E9%9F%B3%E6%A5%BD%E5%A4%A7%E8%A1%8C%E9%80%B2/",
+    "venue": {
+      "name": "リベライン旭川パーク・永隆橋通",
+      "source": "https://www.atca.jp/kankouspoy/%E5%8C%97%E6%B5%B7%E9%81%93%E9%9F%B3%E6%A5%BD%E5%A4%A7%E8%A1%8C%E9%80%B2/",
+      "address": "北海道旭川市",
+      "latitude": 43.778561,
+      "longitude": 142.362522,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E3%83%AA%E3%83%99%E3%83%A9%E3%82%A4%E3%83%B3%E6%97%AD%E5%B7%9D%E3%83%91%E3%83%BC%E3%82%AF&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    }
   },
   {
     "qid": "Q11405646",
@@ -25699,8 +25893,8 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
-    "date": "日付未定",
+    "description": "幌加内町新そば祭りは、そばの作付面積日本一の幌加内町で平成6年に始まった北海道初のそば祭りで、全国ご当地そば自慢広場やそば打ち大会などが行われました。令和7年の第30回「the FINAL」をもって終了しています。",
+    "date": "2025-08-29〜2025-08-31",
     "wikipedia_title": "幌加内町新そば祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -25711,6 +25905,24 @@
     "jalan_sml_name": "富良野",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.town.horokanai.hokkaido.jp/tanoshimu/festival",
+    "venue": {
+      "name": "幌加内町役場前周辺",
+      "source": "https://www.town.horokanai.hokkaido.jp/tanoshimu/festival",
+      "address": "北海道雨竜郡幌加内町",
+      "latitude": 44.009774,
+      "longitude": 142.153683,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E5%B9%8C%E5%8A%A0%E5%86%85%E7%94%BA%E5%BD%B9%E5%A0%B4&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2025,
+        "start": "2025-08-29",
+        "end": "2025-08-31",
+        "source": "https://www.town.horokanai.hokkaido.jp/tanoshimu/festival"
+      }
     ]
   },
   {
@@ -25720,7 +25932,7 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
+    "description": "永山屯田まつりは、昭和62年に地域住民手作りのおまつりとして生まれた旭川市永山地区の一大イベントで、夜には約30〜40台の屯山あんどんが練り歩き、永山屯田太鼓・永山屯山太鼓の演奏やもちまき大会なども行われます。毎年7月下旬に開かれます。",
     "date": "日付未定",
     "wikipedia_title": "永山屯田まつり",
     "coordinate_source": "prefecture_centroid",
@@ -25732,7 +25944,13 @@
     "jalan_sml_name": "富良野",
     "categories": [
       "行事"
-    ]
+    ],
+    "description_source": "https://www.atca.jp/kankouspoy/%E6%B0%B8%E5%B1%B1%E5%B1%AF%E7%94%B0%E3%81%BE%E3%81%A4%E3%82%8A/",
+    "venue": {
+      "name": "永山おまつり広場（永山市民交流センター周辺）",
+      "source": "https://www.atca.jp/kankouspoy/%E6%B0%B8%E5%B1%B1%E5%B1%AF%E7%94%B0%E3%81%BE%E3%81%A4%E3%82%8A/",
+      "address": "北海道旭川市永山4条20丁目"
+    }
   },
   {
     "qid": "Q65272664",
@@ -25741,8 +25959,8 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
-    "date": "日付未定",
+    "description": "焼尻めん羊まつりは焼尻島の夏の恒例イベントで、焼尻港特設会場を会場に、焼尻島産サフォーク羊の羊肉BBQや海産物屋台など島ならではの味覚が楽しめます。",
+    "date": "2026-08-01",
     "wikipedia_title": "焼尻めん羊まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -25753,6 +25971,24 @@
     "jalan_sml_name": "富良野",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://teuri-yagishiri.jp/7293.html",
+    "venue": {
+      "name": "焼尻港特設会場",
+      "source": "https://teuri-yagishiri.jp/7293.html",
+      "address": "北海道苫前郡羽幌町大字焼尻",
+      "latitude": 44.44123,
+      "longitude": 141.428646,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E7%84%BC%E5%B0%BB%E6%B8%AF&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-01",
+        "end": "2026-08-01",
+        "source": "https://teuri-yagishiri.jp/7293.html"
+      }
     ]
   },
   {
@@ -25762,7 +25998,7 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
+    "description": "登別漁港まつりは、大漁と海上安全を願って登別漁港で開かれる祭りです。鮭の棒引き、ステージイベント、花火が行われます。例年9月上旬から中旬の週末に開かれます。",
     "date": "日付未定",
     "wikipedia_title": "登別漁港まつり",
     "coordinate_source": "prefecture_centroid",
@@ -25774,7 +26010,17 @@
     "jalan_sml_name": "富良野",
     "categories": [
       "行事"
-    ]
+    ],
+    "description_source": "https://nishiiburi.jpn.org/noboribetugyokoumaturi/",
+    "venue": {
+      "name": "登別漁港",
+      "source": "https://nishiiburi.jpn.org/noboribetugyokoumaturi/",
+      "address": "北海道登別市登別港町1-1-2",
+      "latitude": 42.452239,
+      "longitude": 141.188053,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E7%99%BB%E5%88%A5%E6%BC%81%E6%B8%AF&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    }
   },
   {
     "qid": "Q65275368",
@@ -25783,8 +26029,8 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
-    "date": "日付未定",
+    "description": "白老牛肉まつりでは、BBQ用の白老牛、白老産黒毛和牛100%のハンバーグ、会場限定の白老バーガーなどが販売されます。会場に用意された1,200個の炭火焼コンロで白老牛をその場で焼いて食べられるほか、「黒毛和牛の丸焼き」やステージイベントも行われます。",
+    "date": "2025-06-07〜2025-06-08",
     "wikipedia_title": "白老牛肉まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -25795,6 +26041,23 @@
     "jalan_sml_name": "富良野",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://shiraoi.net/event/shiraoibeef/",
+    "venue": {
+      "name": "ポロトミンタㇻ（白老駅北観光商業ゾーン）",
+      "source": "https://shiraoi.net/event/shiraoibeef/",
+      "latitude": 42.554764,
+      "longitude": 141.36004,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E7%99%BD%E8%80%81%E9%A7%85&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2025,
+        "start": "2025-06-07",
+        "end": "2025-06-08",
+        "source": "https://shiraoi.net/event/shiraoibeef/"
+      }
     ]
   },
   {
@@ -25804,8 +26067,8 @@
     "prefecture": "北海道",
     "latitude": 43.085074,
     "longitude": 142.308002,
-    "description": "",
-    "date": "日付未定",
+    "description": "釧路大漁どんぱくは、釧路川と釧路港を彩る花火大会を中心に、農業・農村フェアや姉妹都市・友好都市交流物産展などが行われる釧路市の秋のまつりで、北海道最大級の三尺玉の打上げが見どころです。",
+    "date": "2026-09-12〜2026-09-13",
     "wikipedia_title": "釧路大漁どんぱく",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -25814,7 +26077,25 @@
     "jalan_lrg_name": "富良野・美瑛・トマム",
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
-    "categories": []
+    "categories": [],
+    "description_source": "https://ja.kushiro-lakeakan.com/donpaku/",
+    "venue": {
+      "name": "釧路川河口付近（幣舞橋下流）",
+      "source": "https://ja.kushiro-lakeakan.com/donpaku/",
+      "address": "北海道釧路市",
+      "latitude": 42.982144,
+      "longitude": 144.385181,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E5%B9%A3%E8%88%9E%E6%A9%8B&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-12",
+        "end": "2026-09-13",
+        "source": "https://ja.kushiro-lakeakan.com/donpaku/"
+      }
+    ]
   },
   {
     "qid": "Q86733740",
