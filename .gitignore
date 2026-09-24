@@ -17,6 +17,7 @@
 /app/x-post/
 /app/memo/
 /app/tool-inventory/
+/app/onsen-map/
 
 # アプリの設定 (APIキーが入る) と利用者のデータ。追跡されていないだけで無視は
 # されておらず、git add -A 一発で入りうる状態だった。非公開リポジトリでも、
