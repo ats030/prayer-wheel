@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Local SDK / tooling
+google-cloud-sdk/
+
+# Test output
+test-results/
+playwright-report/
+
+# Environment & credentials
+.env
+.env.*
+credentials/
+
+# OS
+.DS_Store
+
+# Backup files
+*.bak

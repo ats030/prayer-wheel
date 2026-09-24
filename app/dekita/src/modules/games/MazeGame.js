@@ -63,12 +63,7 @@ export class MazeGame {
     this.state.mazeCurrentTheme = themes[themeIndex] || themes[0];
     this.state.themeEmojiStart = this.state.mazeCurrentTheme.start;
     this.state.themeEmojiEnd = this.state.mazeCurrentTheme.end;
-    
-    console.log('startMazeGame called:', themeIndex);
-    console.log('themes[0]:', themes[0]);
-    console.log('this.state.themeEmojiStart:', this.state.themeEmojiStart);
-    console.log('this.state.themeEmojiEnd:', this.state.themeEmojiEnd);
-    
+
     const canvas = this.root.getElementById('maze-canvas');
     canvas.width = 300;
     canvas.height = 300;
@@ -92,14 +87,6 @@ export class MazeGame {
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
-    console.log('drawMaze called:');
-    console.log('  canvas.width:', canvas.width);
-    console.log('  canvas.height:', canvas.height);
-    console.log('  ctx:', ctx);
-    console.log('  themeEmojiStart:', this.state.themeEmojiStart);
-    console.log('  themeEmojiEnd:', this.state.themeEmojiEnd);
-    console.log('  mazePath length:', this.state.mazePath.length);
-    
     const gridCols = 8;
     const cellSize = canvas.width / gridCols;
 
@@ -369,11 +356,9 @@ export class MazeGame {
   }
 
   failMaze() {
-    console.log('failMaze() called');
     this.state.mazeActive = false;
     const area = this.root.getElementById('maze-feedback-area');
     const text = this.root.getElementById('maze-feedback-text');
-    console.log('area:', area, 'text:', text);
     if (area && text) {
       area.style.display = 'block';
       text.textContent = 'だいじょうぶ！もういっこ！';

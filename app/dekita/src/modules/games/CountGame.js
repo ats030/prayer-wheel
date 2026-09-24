@@ -11,7 +11,6 @@ export class CountGame extends GameBase {
   }
 
   init(rootElement) {
-    console.log('[CountGame] init called');
     super.init(rootElement);
     this.registerEventListeners();
     this.state.gameMode = 'number';
@@ -20,18 +19,14 @@ export class CountGame extends GameBase {
   }
 
   registerEventListeners() {
-    console.log('[CountGame] registerEventListeners called');
     const startBtn = this.root.getElementById('start-btn');
-    console.log('startBtn element:', startBtn);
     if (startBtn) {
       startBtn.addEventListener('click', () => {
-        console.log('[CountGame] start-btn clicked - event triggered');
         this.audio.init();
         this.audio.setInterAudioDelay(300);
         this.audio.playPopSound();
         this.start();
       });
-      console.log('click event listener attached');
     } else {
       console.error('start-btn not found!');
     }
@@ -55,18 +50,10 @@ export class CountGame extends GameBase {
   }
 
   start() {
-    console.log('[CountGame] start called');
     super.start();
     this.state.gameMode = 'number';
     this.screen.showGame();
     this.generateQuestion();
-  }
-
-  loadScore() {
-    const saved = localStorage.getItem('gakushuGameHighScore');
-    if (saved) {
-      console.log(`前回の最高点: ${saved}てん`);
-    }
   }
 
   renderNumberGrid() {

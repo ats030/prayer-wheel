@@ -85,9 +85,6 @@ export class PuzzleGame extends GameBase {
     this.correctIndex = Math.floor(Math.random() * 9);
     this.correctEmoji = this.silhouettes[this.correctIndex];
     
-    console.log('[Puzzle] Correct emoji:', this.correctEmoji, 'at index:', this.correctIndex);
-    console.log('[Puzzle] All silhouettes:', this.silhouettes);
-    
     this.createGrid();
   }
 
@@ -121,7 +118,6 @@ export class PuzzleGame extends GameBase {
     if (correctSlot) {
       correctSlot.setAttribute('draggable', 'true');
       correctSlot.addEventListener('dragstart', (e) => this.handleDragStart(e));
-      console.log('[Puzzle] Set correct slot draggable:', correctSlot.dataset.emoji, 'at index:', this.correctIndex);
     } else {
       console.warn('[Puzzle] Correct slot not found at index:', this.correctIndex);
     }
@@ -130,7 +126,6 @@ export class PuzzleGame extends GameBase {
   }
 
   handleDragStart(e) {
-    console.log('[Puzzle] Drag start:', this.correctEmoji);
     this.draggedPiece = this.correctEmoji;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', this.correctEmoji);
@@ -145,15 +140,11 @@ export class PuzzleGame extends GameBase {
       slot = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-emoji]');
     }
     if (!slot) {
-      console.log('[Puzzle] No slot found for drop');
       return;
     }
     
     const slotEmoji = slot.dataset.emoji;
-    console.log('[Puzzle] Drop on emoji:', slotEmoji, 'Expected:', this.correctEmoji);
-    
-    if (slotEmoji === this.correctEmoji) {
-      console.log('[Puzzle] Check win!');
+        if (slotEmoji === this.correctEmoji) {
       this.checkWin();
     } else {
       this.audio.playErrorSound();
@@ -169,14 +160,12 @@ export class PuzzleGame extends GameBase {
   }
 
   checkWin() {
-    console.log('[Puzzle] Check win! Grid index:', this.correctIndex);
     const gridArea = this.getGridArea();
     if (gridArea && gridArea.children[this.correctIndex]) {
       const correctSlot = gridArea.children[this.correctIndex];
       correctSlot.classList.remove('puzzle-piece');
       correctSlot.classList.add('puzzle-silhouette', 'revealed');
       correctSlot.style.opacity = '1';
-      console.log('[Puzzle] Slot revealed:', correctSlot.dataset.emoji);
     }
 
     this.state.addScore(20);
