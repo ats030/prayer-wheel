@@ -13,6 +13,12 @@ from pathlib import Path
 WIKIDATA_API = "https://www.wikidata.org/w/api.php"
 WIKIPEDIA_API = "https://ja.wikipedia.org/w/api.php"
 OLLAMA_API = "http://localhost:11434/api/generate"
+# 実モデルはバッチ標準の qwen3.8:27b (ats030-7fj8)。上書きは環境変数で行う。
+OLLAMA_MODEL = os.environ.get("OMATSURI_DESCRIPTION_MODEL", "qwen3.8:27b")
+# X-Client-App 付きの要求は proxy で batch 扱いになり、混雑時も 503 で
+# 打ち切られず待ち行列に入る (最長10分で aging)。
+OLLAMA_HEADERS = {"Content-Type": "application/json",
+                  "X-Client-App": "omatsuri-map-descriptions"}
 
 def get_wikipedia_title(qid: str, cache: dict = None) -> str:
     """Get Japanese Wikipedia title from Wikidata QID"""
@@ -246,17 +252,19 @@ def generate_description_with_ai(festival_name: str, location: str, wikidata_des
         )
 
     payload = {
-        "model": "qwen3-coder-next:q4_K_M",
+        "model": OLLAMA_MODEL,
         "prompt": prompt,
-        "stream": False
+        "stream": False,
+        # qwen3.8 は think 有効時に response が空になることがある
+        "think": False,
     }
 
     try:
         response = requests.post(
             OLLAMA_API,
-            headers={"Content-Type": "application/json"},
+            headers=OLLAMA_HEADERS,
             json=payload,
-            timeout=60
+            timeout=900
         )
         response.raise_for_status()
         data = response.json()
