@@ -887,5 +887,53 @@
         "end": "2026-09-20"
       }
     ]
+  },
+  "Q17228743": {
+    "status": "active",
+    "source": "https://www.town.taiwa.miyagi.jp/soshiki/shokokanko/shokokanko/496.html",
+    "description": "大和町吉岡地区の古刹、吉岡八幡神社の冬の例祭「島田飴まつり」で、師走の12月14日に催される400年以上の歴史がある良縁祈願のお祭り。恋煩いで病に伏した神主を、村人がこしらえた島田の髪の形をした飴が救ったという言い伝えがある。このお祭りでのみ手に入れられる島田飴は花嫁の島田髪に似せた飴細工で、手に入れると翌年に良縁に恵まれるといわれる。花嫁を初めとした和装の人々が吉岡八幡神社周辺を練り歩く「花嫁道仲行列」が同時開催される。",
+    "venue": {
+      "name": "吉岡八幡神社",
+      "address": "宮城県黒川郡大和町吉岡字町裏39",
+      "latitude": 38.447887,
+      "longitude": 140.887117,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E5%90%89%E5%B2%A1%E5%85%AB%E5%B9%A1%E7%A5%9E%E7%A4%BE+%E5%A4%A7%E5%92%8C%E7%94%BA&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    }
+  },
+  "Q11248231": {
+    "status": "active",
+    "source": "https://www.tbc-sendai.co.jp/wassyoi_miyagi_fes/108/",
+    "description": "2007年の復活以来、毎年7月に開催してきた「tbc夏まつり」。tbc「わっしょい！みやぎ」キャンペーンの一環として、“地元に根差したイベント”を目指す。2026年は勾当台公園と錦町公園で実施された。",
+    "venue": {
+      "name": "勾当台公園・錦町公園",
+      "address": "宮城県仙台市"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-25",
+        "end": "2026-07-26"
+      }
+    ]
+  },
+  "Q11378042": {
+    "status": "active",
+    "source": "https://www.shortpiece.com/",
+    "description": "「仙台短篇映画祭 2026」は9/19（土）、20（日）、21（月）の3日間の開催。AからIまでのプログラムで「新しい才能に出会う」「撮り続ける真利子哲也」「アート・アニメーション」などを上映し、開催期間中は7F Studio bでせんだい・宮城フィルムコミッションパネル展も開かれる。",
+    "venue": {
+      "name": "せんだいメディアテーク",
+      "latitude": 38.265514,
+      "longitude": 140.865547,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E3%81%9B%E3%82%93%E3%81%A0%E3%81%84%E3%83%A1%E3%83%87%E3%82%A3%E3%82%A2%E3%83%86%E3%83%BC%E3%82%AF&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-19",
+        "end": "2026-09-21"
+      }
+    ]
   }
 }
