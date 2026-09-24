@@ -19986,8 +19986,8 @@
     "prefecture": "岩手県",
     "latitude": 39.599634,
     "longitude": 141.36335,
-    "description": "",
-    "date": "日付未定",
+    "description": "日高火防祭は、奥州市水沢で開かれる岩手県指定無形民俗文化財の祭りで、古趣豊かな音曲と雅びなはやし屋台が市街地を練り歩きます。令和8年度は4月25日に本祭が開かれ、はやし屋台が大手町や立町、中町などの町内を運行しました。",
+    "date": "2026-04-25",
     "wikipedia_title": "日高火防祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -19998,6 +19998,20 @@
     "jalan_sml_name": "盛岡・つなぎ",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.city.oshu.iwate.jp/kanko/event/1/433.html",
+    "venue": {
+      "name": "奥州市水沢の市街地（大手町ほか）",
+      "source": "https://www.city.oshu.iwate.jp/kanko/event/1/433.html",
+      "address": "岩手県奥州市水沢"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-04-25",
+        "end": "2026-04-25",
+        "source": "https://www.city.oshu.iwate.jp/kanko/event/1/433.html"
+      }
     ]
   },
   {
@@ -20007,8 +20021,8 @@
     "prefecture": "岩手県",
     "latitude": 39.599634,
     "longitude": 141.36335,
-    "description": "",
-    "date": "日付未定",
+    "description": "江刺甚句まつりは、岩谷堂の火防祭をルーツとし、奥州市江刺で昭和49年から続く市民総参加の祭りです。厄年を迎える年祝連の演舞、100人の江刺鹿踊による「百鹿大群舞」、1,000人を超える市民が踊る「江刺甚句大パレード」などが行われます。第53回は5月3日・4日に開かれました。",
+    "date": "2026-05-03〜2026-05-04",
     "wikipedia_title": "江刺甚句まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -20019,6 +20033,24 @@
     "jalan_sml_name": "盛岡・つなぎ",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.city.oshu.iwate.jp/kanko/event/1/12512.html",
+    "venue": {
+      "name": "奥州市江刺 大通り公園ほか",
+      "source": "https://www.city.oshu.iwate.jp/kanko/event/1/12512.html",
+      "address": "岩手県奥州市江刺",
+      "latitude": 39.192858,
+      "longitude": 141.175403,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E5%A5%A5%E5%B7%9E%E5%B8%82%E6%B1%9F%E5%88%BA%E5%A4%A7%E9%80%9A%E3%82%8A&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-05-03",
+        "end": "2026-05-04",
+        "source": "https://www.city.oshu.iwate.jp/kanko/event/1/12512.html"
+      }
     ]
   },
   {
@@ -20028,8 +20060,8 @@
     "prefecture": "岩手県",
     "latitude": 39.599634,
     "longitude": 141.36335,
-    "description": "",
-    "date": "日付未定",
+    "description": "花巻まつりは、岩手県花巻市で花巻まつり実行委員会が開く祭りです。令和8年度は9月11日から13日までの3日間、上町「おまつり広場」を会場に開かれ、期間中は花巻まつり屋台村や花巻郷土芸能祭なども催されます。",
+    "date": "2026-09-11〜2026-09-13",
     "wikipedia_title": "花巻まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -20040,6 +20072,24 @@
     "jalan_sml_name": "盛岡・つなぎ",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.city.hanamaki.iwate.jp/kanko/oshirase/1021701",
+    "venue": {
+      "name": "上町「おまつり広場」",
+      "source": "https://www.city.hanamaki.iwate.jp/kanko/oshirase/1021701",
+      "address": "岩手県花巻市",
+      "latitude": 39.386128,
+      "longitude": 141.118681,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E8%8A%B1%E5%B7%BB%E5%B8%82%E4%B8%8A%E7%94%BA&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-11",
+        "end": "2026-09-13",
+        "source": "https://www.city.hanamaki.iwate.jp/kanko/oshirase/1021701"
+      }
     ]
   },
   {
@@ -20049,8 +20099,8 @@
     "prefecture": "岩手県",
     "latitude": 39.599634,
     "longitude": 141.36335,
-    "description": "",
-    "date": "日付未定",
+    "description": "春の藤原まつりは、岩手県平泉町で毎年春に開かれる行事です。令和8年は5月1日から5日まで町内で開かれ、3日には兄頼朝に追われた義経主従が平泉で秀衡に迎えられた情景を再現する「源義経公東下り行列」が毛越寺から中尊寺まで練り歩きます。",
+    "date": "2026-05-01〜2026-05-05",
     "wikipedia_title": "藤原まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -20061,6 +20111,20 @@
     "jalan_sml_name": "盛岡・つなぎ",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.town.hiraizumi.iwate.jp/%E4%BB%A4%E5%92%8C%EF%BC%98%E5%B9%B4%E3%80%8C%E6%98%A5%E3%81%AE%E8%97%A4%E5%8E%9F%E3%81%BE%E3%81%A4%E3%82%8A%E3%80%8D-37316/",
+    "venue": {
+      "name": "平泉町内",
+      "source": "https://www.town.hiraizumi.iwate.jp/%E4%BB%A4%E5%92%8C%EF%BC%98%E5%B9%B4%E3%80%8C%E6%98%A5%E3%81%AE%E8%97%A4%E5%8E%9F%E3%81%BE%E3%81%A4%E3%82%8A%E3%80%8D-37316/",
+      "address": "岩手県西磐井郡平泉町"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-05-01",
+        "end": "2026-05-05",
+        "source": "https://www.town.hiraizumi.iwate.jp/%E4%BB%A4%E5%92%8C%EF%BC%98%E5%B9%B4%E3%80%8C%E6%98%A5%E3%81%AE%E8%97%A4%E5%8E%9F%E3%81%BE%E3%81%A4%E3%82%8A%E3%80%8D-37316/"
+      }
     ]
   },
   {
@@ -20112,8 +20176,8 @@
     "prefecture": "宮城県",
     "latitude": 38.388166,
     "longitude": 140.974907,
-    "description": "",
-    "date": "日付未定",
+    "description": "仙台・青葉まつりは、新緑の仙台市で西公園をメイン会場に開かれる祭りです。2026年の第42回では141の祭連が「仙台すずめ踊り」を市内各所で披露し、17日の本まつりでは仙台山鉾巡行・政宗公神輿渡御・武者行列などの「時代絵巻巡行」が行われます。",
+    "date": "2026-05-16〜2026-05-17",
     "wikipedia_title": "仙台・青葉まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -20124,6 +20188,24 @@
     "jalan_sml_name": "松島・塩竈",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.aoba-matsuri.com/outline/",
+    "venue": {
+      "name": "西公園（メイン会場）",
+      "source": "https://www.aoba-matsuri.com/outline/",
+      "address": "宮城県仙台市",
+      "latitude": 38.259687,
+      "longitude": 140.861651,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E8%A5%BF%E5%85%AC%E5%9C%92+%E4%BB%99%E5%8F%B0%E5%B8%82&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-05-16",
+        "end": "2026-05-17",
+        "source": "https://www.aoba-matsuri.com/outline/"
+      }
     ]
   },
   {
@@ -20175,8 +20257,8 @@
     "prefecture": "宮城県",
     "latitude": 38.388166,
     "longitude": 140.974907,
-    "description": "",
-    "date": "日付未定",
+    "description": "定禅寺ストリートジャズフェスティバルは、仙台市内のストリートをステージに、国内外のプロ・アマのアーティストがジャズやフュージョン、ロック、民族音楽などを演奏する音楽フェスティバルです。第35回は2026年9月12日・13日に仙台市中心部の約50か所で開かれます。",
+    "date": "2026-09-12〜2026-09-13",
     "wikipedia_title": "定禅寺ストリートジャズフェスティバル",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -20187,6 +20269,20 @@
     "jalan_sml_name": "松島・塩竈",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.miyagi-kankou.or.jp/kakikomi/detail.php?id=4106",
+    "venue": {
+      "name": "仙台市中心部 約50か所",
+      "source": "https://www.miyagi-kankou.or.jp/kakikomi/detail.php?id=4106",
+      "address": "宮城県仙台市"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-12",
+        "end": "2026-09-13",
+        "source": "https://www.miyagi-kankou.or.jp/kakikomi/detail.php?id=4106"
+      }
     ]
   },
   {
@@ -20196,8 +20292,8 @@
     "prefecture": "宮城県",
     "latitude": 38.388166,
     "longitude": 140.974907,
-    "description": "",
-    "date": "日付未定",
+    "description": "石巻川開き祭りは、伊達政宗の命を受けて北上川を開削し石巻に港を開いた川村孫兵衛重吉への報恩感謝の祭りで、大正5（1916）年に始まりました。川で亡くなった人の供養祭、陸上パレード、大漁踊り、孫兵衛船競漕、花火大会などが行われます。2026年は7月31日の前夜祭から8月2日まで開かれます。",
+    "date": "2026-07-31〜2026-08-02",
     "wikipedia_title": "石巻川開き祭り",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -20208,6 +20304,20 @@
     "jalan_sml_name": "松島・塩竈",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.city.ishinomaki.lg.jp/cont/10452000b/-kanko/0011/20130225181937.html",
+    "venue": {
+      "name": "石巻市内",
+      "source": "https://www.city.ishinomaki.lg.jp/cont/10452000b/-kanko/0011/20130225181937.html",
+      "address": "宮城県石巻市"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-31",
+        "end": "2026-08-02",
+        "source": "https://www.city.ishinomaki.lg.jp/cont/10452000b/-kanko/0011/20130225181937.html"
+      }
     ]
   },
   {
@@ -20278,7 +20388,7 @@
     "prefecture": "山形県",
     "latitude": 38.471434,
     "longitude": 140.092804,
-    "description": "",
+    "description": "上杉雪灯篭まつりは、山形県米沢市で毎年2月の第2土曜日と翌日曜日に、松が岬公園一帯を主会場に開かれる祭りです。約200基の雪灯篭と約1,000個の雪ぼんぼりに灯がともされ、園内の鎮魂の丘では雪で作った「鎮魂の塔」の前で戦没者の鎮魂祭が行われます。",
     "date": "日付未定",
     "wikipedia_title": "上杉雪灯篭まつり",
     "coordinate_source": "prefecture_centroid",
@@ -20290,7 +20400,17 @@
     "jalan_sml_name": "月山・朝日",
     "categories": [
       "行事"
-    ]
+    ],
+    "description_source": "https://yukidourou.yonezawa-matsuri.jp/about/",
+    "venue": {
+      "name": "松が岬公園一帯",
+      "source": "https://yukidourou.yonezawa-matsuri.jp/about/",
+      "address": "山形県米沢市",
+      "latitude": 37.909495,
+      "longitude": 140.104856,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E6%9D%BE%E3%81%8C%E5%B2%AC%E5%85%AC%E5%9C%92&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    }
   },
   {
     "qid": "Q11428944",
@@ -20343,8 +20463,8 @@
     "prefecture": "山形県",
     "latitude": 38.471434,
     "longitude": 140.092804,
-    "description": "",
-    "date": "日付未定",
+    "description": "山形大花火大会は、山形市の霞城公園内を打ち上げ会場とする花火大会です。2026年は「喝采」をテーマに8月14日に開かれ、約7,000発の花火が打ち上げられます。",
+    "date": "2026-08-14",
     "wikipedia_title": "山形大花火大会",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -20355,6 +20475,24 @@
     "jalan_sml_name": "月山・朝日",
     "categories": [
       "花火"
+    ],
+    "description_source": "https://yamagatahanabi.com/overview/",
+    "venue": {
+      "name": "霞城公園",
+      "source": "https://yamagatahanabi.com/overview/",
+      "address": "山形県山形市霞城町1番7号",
+      "latitude": 38.255577,
+      "longitude": 140.328241,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E9%9C%9E%E5%9F%8E%E5%85%AC%E5%9C%92&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-14",
+        "end": "2026-08-14",
+        "source": "https://yamagatahanabi.com/overview/"
+      }
     ]
   },
   {
@@ -20407,8 +20545,8 @@
     "prefecture": "山形県",
     "latitude": 38.471434,
     "longitude": 140.092804,
-    "description": "",
-    "date": "日付未定",
+    "description": "酒田まつりは、上下両日枝神社の例大祭「山王祭」として1609（慶長14）年から一度も休まず続く祭りで、1979（昭和54）年から「酒田まつり」として開かれています。毎年5月19日から21日の3日間で、2026年は19日の宵祭り、20日の本祭りでの渡御行列・山車行列・酒田花魁道中、21日の裏祭りが行われました。",
+    "date": "2026-05-19〜2026-05-21",
     "wikipedia_title": "酒田祭",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -20419,6 +20557,20 @@
     "jalan_sml_name": "月山・朝日",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://sakata-kankou.com/event/30728",
+    "venue": {
+      "name": "酒田市中町（中通り）ほか",
+      "source": "https://sakata-kankou.com/event/30728",
+      "address": "山形県酒田市中町"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-05-19",
+        "end": "2026-05-21",
+        "source": "https://sakata-kankou.com/event/30728"
+      }
     ]
   },
   {
@@ -20470,7 +20622,7 @@
     "prefecture": "福島県",
     "latitude": 37.384335,
     "longitude": 140.10405,
-    "description": "",
+    "description": "会津田島祇園祭は、南会津町田島で毎年7月22日から24日に開かれる祭りで、日本三大祇園のひとつに数えられます。23日の本祭早朝には花嫁衣装の女性が神社へ歩く「七行器（ななほかい）行列」があり、22日の宵祭と23日の本祭の夕方には大屋台の上で子供歌舞伎が上演されます。昭和56年に国の重要無形民俗文化財に指定されました。",
     "date": "日付未定",
     "wikipedia_title": "会津田島祇園祭",
     "coordinate_source": "prefecture_centroid",
@@ -20482,7 +20634,13 @@
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
     "categories": [
       "行事"
-    ]
+    ],
+    "description_source": "https://www.tif.ne.jp/jp/entry/article.html?spot=7265",
+    "venue": {
+      "name": "南会津町田島",
+      "source": "https://www.tif.ne.jp/jp/entry/article.html?spot=7265",
+      "address": "福島県南会津郡南会津町"
+    }
   },
   {
     "qid": "Q11381258",
@@ -20552,8 +20710,8 @@
     "prefecture": "福島県",
     "latitude": 37.384335,
     "longitude": 140.10405,
-    "description": "",
-    "date": "日付未定",
+    "description": "福島わらじまつりは、福島市で開かれる祭りで、勇壮な太鼓隊の生演奏に合わせて12mの大わらじが大勢の踊り手とともに練り歩きます。2026年の第57回は8月7日・8日に国道13号線（信夫通り）と駅前通りでわらじおどりや大わらじパレードを行い、9日に信夫山の羽黒神社へ大わらじを奉納します。",
+    "date": "2026-08-07〜2026-08-09",
     "wikipedia_title": "福島わらじまつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -20564,6 +20722,20 @@
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.f-kankou.jp/event/42104",
+    "venue": {
+      "name": "国道13号線（信夫通り）・駅前通り",
+      "source": "https://www.f-kankou.jp/event/42104",
+      "address": "福島県福島市"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-07",
+        "end": "2026-08-09",
+        "source": "https://www.f-kankou.jp/event/42104"
+      }
     ]
   },
   {
@@ -20594,8 +20766,8 @@
     "prefecture": "福島県",
     "latitude": 37.384335,
     "longitude": 140.10405,
-    "description": "",
-    "date": "日付未定",
+    "description": "郡山うねめまつりは、昭和40年に安積郡9カ町村が郡山市と合併したのを機に、郷土の伝説である采女物語を主題としてつくられた祭りです。采女物語の縁で郡山市は奈良市と姉妹都市を結んでいます。第62回は8月7日・8日に駅前大通りと郡山駅西口広場を会場に、うねめ踊り流しなどが行われます。",
+    "date": "2026-08-07〜2026-08-08",
     "wikipedia_title": "郡山うねめまつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -20606,6 +20778,20 @@
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.ko-cci.or.jp/event/uneme/",
+    "venue": {
+      "name": "駅前大通り・郡山駅西口広場",
+      "source": "https://www.ko-cci.or.jp/event/uneme/",
+      "address": "福島県郡山市"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-07",
+        "end": "2026-08-08",
+        "source": "https://www.ko-cci.or.jp/event/uneme/"
+      }
     ]
   },
   {
@@ -26707,8 +26893,8 @@
     "prefecture": "山形県",
     "latitude": 38.403,
     "longitude": 140.085271,
-    "description": "",
-    "date": "日付未定",
+    "description": "米沢上杉まつりは、山形県米沢市で開かれる祭りです。2026年は4月29日から5月3日まで開かれ、伝国の杜周辺での開幕祭と上杉神社例大祭、上杉軍団行列、松川河川敷での川中島合戦の再現などが行われます。",
+    "date": "2026-04-29〜2026-05-03",
     "wikipedia_title": "米沢上杉まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -26719,6 +26905,20 @@
     "jalan_sml_name": "月山・朝日",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://yonezawa.info/log/?l=449944",
+    "venue": {
+      "name": "伝国の杜周辺ほか",
+      "source": "https://yonezawa.info/log/?l=449944",
+      "address": "山形県米沢市"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-04-29",
+        "end": "2026-05-03",
+        "source": "https://yonezawa.info/log/?l=449944"
+      }
     ]
   },
   {
