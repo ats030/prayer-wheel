@@ -15,6 +15,8 @@ bd export -o .beads/issues.jsonl
 git add .beads/issues.jsonl
 ```
 
+jsonl を git マージして `bd import` した直後は `uv run python scripts/bd-import-verify.py .beads/issues.jsonl` で差分を確認する。既存 issue の defer_until は import で更新されないため、差分は `bd defer` で直す。
+
 `no-git-ops: true` は外さない。コミット後の差分は、破棄前に HEAD と作業ツリーをそれぞれ sort して内容差か行順差か確認する。
 
 ## Build and Test
