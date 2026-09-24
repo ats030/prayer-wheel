@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>特産物マップ｜発祥地と産地から日本の特産を探す</title>
+  <meta name="description" content="発祥地・産地から、日本各地の特産物 (食材・郷土料理) を検索・地図表示できます。">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="/app.css?v=202609241">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="workbench" aria-label="特産物を探す">
+      <header class="masthead"><h1>特産物マップ</h1><p class="lede">発祥地・産地から、日本各地の特産物を探せます。</p></header>
+      <div class="filters" role="search">
+        <label class="field field-wide">品目名・産地<input id="keyword" type="search" placeholder="例：桜島大根、熊本" autocomplete="off"></label>
+        <label class="field">都道府県<select id="prefecture"><option value="">すべて</option></select></label>
+      </div>
+      <div class="result-bar" aria-live="polite"><span><strong id="result-count">0</strong> 件の特産物</span><button id="clear-filters" type="button">条件をクリア</button></div>
+      <div class="tokusan-list" id="tokusan-list"></div>
+    </section>
+    <section class="map-region" aria-label="特産物の地図"><div id="map"></div><div class="map-count" id="map-count">読み込み中</div></section>
+    <aside class="detail-panel" id="detail-panel" aria-labelledby="detail-panel-label" tabindex="-1" hidden>
+      <header class="detail-header"><div><p class="eyebrow" id="detail-panel-label">特産物の詳細</p><p class="detail-origin" id="detail-origin"></p></div><button class="detail-close" type="button" aria-label="詳細を閉じる">×</button></header>
+      <div class="detail-content" id="detail-content" aria-live="polite"></div>
+    </aside>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="http://ubuntu-server-app:8526/v.js" data-site="tokusan-map" defer></script>
+  <script src="/app.js?v=202609241"></script>
+</body>
+</html>
