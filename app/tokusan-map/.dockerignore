@@ -1,0 +1,7 @@
+app-server
+*.exe
+data/
+.git/
+__pycache__/
+*.log
+node_modules/
