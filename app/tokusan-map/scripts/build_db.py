@@ -21,9 +21,11 @@ CREATE TABLE tokusan (
   lng REAL NOT NULL DEFAULT 0,
   evidence TEXT NOT NULL DEFAULT '',
   confidence REAL NOT NULL DEFAULT 0,
-  source_url TEXT NOT NULL DEFAULT ''
+  source_url TEXT NOT NULL DEFAULT '',
+  category TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX idx_tokusan_prefecture ON tokusan(prefecture);
+CREATE INDEX idx_tokusan_category ON tokusan(category);
 """
 
 
@@ -36,8 +38,8 @@ def main():
     for r in rows:
         con.execute(
             "INSERT INTO tokusan (qid, label_ja, label_en, place, prefecture,"
-            " city, lat, lng, evidence, confidence, source_url)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " city, lat, lng, evidence, confidence, source_url, category)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 r.get("qid", ""),
                 r.get("label_ja", ""),
@@ -50,6 +52,7 @@ def main():
                 r.get("evidence", ""),
                 float(r.get("confidence") or 0),
                 r.get("source_url", ""),
+                r.get("category", ""),
             ),
         )
     con.commit()
@@ -57,8 +60,11 @@ def main():
     pref = con.execute(
         "SELECT COUNT(*) FROM tokusan WHERE prefecture != ''"
     ).fetchone()[0]
+    cats = con.execute("SELECT category, COUNT(*) FROM tokusan GROUP BY category ORDER BY category")
+    cat_str = ", ".join(f"{c[0] or '(空)' }={c[1]}" for c in cats)
     con.close()
     print(f"tokusan.db: 品目 {count} 件 (都道府県特定済み {pref} 件) -> {DST}")
+    print(f"  カテゴリ: {cat_str}")
 
 
 if __name__ == "__main__":

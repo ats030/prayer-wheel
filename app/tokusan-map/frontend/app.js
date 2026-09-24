@@ -4,8 +4,47 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&
 let tokusan=[];
 let visible=[];
 let markers=new Map();
-let selectedMarker=null;
+let markerItems=new Map();
 let selectedKey=null;
+let selectedItem=null;
+
+const IMAGE_CACHE_KEY='tokusan-map-image-cache-v1';
+const imageCache={};
+try{Object.assign(imageCache,JSON.parse(localStorage.getItem(IMAGE_CACHE_KEY)||'{}'))}catch{}
+
+function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}}
+function plainText(value){const document=new DOMParser().parseFromString(String(value||''),'text/html');return document.body.textContent.trim()}
+function commonsFilePage(value){
+  try{
+    const url=new URL(value);if(!['upload.wikimedia.org','thumb.wikimedia.org'].includes(url.hostname))return'';
+    const parts=url.pathname.split('/').filter(Boolean),thumbIndex=parts.indexOf('thumb');
+    const fileName=decodeURIComponent(thumbIndex>=0?parts[parts.length-2]:parts[parts.length-1]);
+    return fileName?`https://commons.wikimedia.org/wiki/File:${encodeURIComponent(fileName)}`:'';
+  }catch{return''}
+}
+async function fetchJSONWithRetry(url){
+  let lastError;
+  for(let attempt=0;attempt<2;attempt++){
+    try{const response=await fetch(url);if(response.ok)return response.json();lastError=new Error(`HTTP ${response.status}`)}catch(error){lastError=error}
+    if(attempt===0)await new Promise(resolve=>setTimeout(resolve,500));
+  }
+  throw lastError;
+}
+
+const CATEGORY_META=[
+  {code:'sa',label:'酒・醸造'},
+  {code:'te',label:'茶・飲料'},
+  {code:'ui',label:'魚介'},
+  {code:'sa2',label:'農産'},
+  {code:'am',label:'砂糖・和菓子'},
+  {code:'ko',label:'穀物・調味料'},
+  {code:'ry',label:'料理・惣菜'},
+  {code:'ta',label:'陶磁器'},
+  {code:'or',label:'織物'},
+  {code:'ri',label:'漆器'},
+];
+function categoryCode(o){return CATEGORY_META.some(m=>m.code===o.category)?String(o.category):'none'}
+function categoryLabel(code){const meta=CATEGORY_META.find(m=>m.code===code);return meta?meta.label:'未分類'}
 
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function itemKey(o,index=0){return o.qid||`${o.label_ja}-${o.latitude}-${o.longitude}-${index}`}
@@ -20,14 +59,29 @@ function populatePrefectures(){
     list.appendChild(option);
   }
 }
+function populateCategories(){
+  const select=document.querySelector('#category');
+  for(const meta of CATEGORY_META){
+    const option=document.createElement('option');
+    option.value=meta.code;option.textContent=meta.label;
+    select.appendChild(option);
+  }
+}
+function renderLegend(){
+  const legend=document.querySelector('#map-legend');
+  if(!legend||legend.childElementCount)return;
+  legend.innerHTML=CATEGORY_META.map(meta=>`<span><span class="legend-dot" style="background:var(--color-cat-${meta.code})"></span>${esc(meta.label)}</span>`).join('');
+}
 
 function applyFilters(){
   const keyword=document.querySelector('#keyword').value.trim().toLowerCase();
   const prefecture=document.querySelector('#prefecture').value;
+  const category=document.querySelector('#category').value;
   visible=tokusan.filter(o=>{
     if(prefecture&&o.prefecture!==prefecture)return false;
+    if(category&&categoryCode(o)!==category)return false;
     if(keyword){
-      const haystack=[o.label_ja,o.label_en,o.place,o.prefecture,o.city].filter(Boolean).join(' ').toLowerCase();
+      const haystack=[o.label_ja,o.label_en,o.place,o.prefecture,o.city,categoryLabel(categoryCode(o))].filter(Boolean).join(' ').toLowerCase();
       if(!haystack.includes(keyword))return false;
     }
     return true;
@@ -48,11 +102,13 @@ function renderList(){
   list.innerHTML=visible.map((o,i)=>{
     const key=itemKey(o,i);
     const located=hasCoordinates(o);
+    const cat=categoryCode(o);
     const badge=located?'<span class="badge badge-located">位置表示あり</span>':'<span class="badge badge-unlocated">産地のみ</span>';
+    const catBadge=CATEGORY_META.some(m=>m.code===cat)?`<span class="badge badge-cat" style="color:var(--color-cat-${cat});border-color:var(--color-cat-${cat})">${esc(categoryLabel(cat))}</span>`:'';
     const metaParts=[];
     if(o.prefecture)metaParts.push(esc(o.prefecture));
     if(o.place&&o.place!==o.prefecture)metaParts.push(esc(o.place));
-    const meta=metaParts.length?metaParts.join('・')+` ${badge}`:badge;
+    const meta=metaParts.length?metaParts.join('・')+` ${catBadge}${badge}`:`${catBadge}${badge}`;
     return `<button type="button" class="tokusan-card" data-key="${esc(key)}" ${o.qid?`data-qid="${esc(o.qid)}"`:''}>
       <span class="card-index">${i+1}</span>
       <span class="card-body"><span class="card-name">${esc(o.label_ja||o.label_en||o.qid)}</span><span class="card-meta">${meta}</span></span>
@@ -64,13 +120,14 @@ function renderList(){
 }
 
 function markerIcon(o,selected){
-  const className=`tokusan-marker${selected?' selected':''}`;
+  const className=`tokusan-marker cat-${categoryCode(o||null)}${selected?' selected':''}`;
   return L.divIcon({className:'',html:`<div class="${className}"></div>`,iconSize:[22,22],iconAnchor:[11,11]});
 }
 
 function renderMarkers(){
   for(const [key,marker] of markers)map.removeLayer(marker);
   markers.clear();
+  markerItems.clear();
   let locatedCount=0;
   const bounds=[];
   visible.forEach((o,i)=>{
@@ -81,6 +138,7 @@ function renderMarkers(){
     marker.on('click',()=>selectItem(key));
     marker.addTo(map);
     markers.set(key,marker);
+    markerItems.set(key,o);
     bounds.push([o.latitude,o.longitude]);
     locatedCount+=1;
   });
@@ -90,12 +148,19 @@ function renderMarkers(){
 }
 
 function selectItem(key){
+  const prevKey=selectedKey;
+  const prevItem=selectedItem;
   selectedKey=key;
   const item=visible.find(o=>itemKey(o,visible.indexOf(o))===key);
+  if(!item){selectedKey=prevKey;selectedItem=prevItem;return}
   for(const button of document.querySelectorAll('.tokusan-card'))button.setAttribute('aria-current',button.dataset.key===key?'true':'false');
-  if(selectedMarker)selectedMarker.setIcon(markerIcon(item,true));
-  for(const [k,m] of markers){if(k!==key&&m._icon?.className?.includes('selected'))m.setIcon(markerIcon(null,false));}
-  if(selectedMarker)selectedMarker.setIcon(markerIcon(item,true));
+  if(prevItem&&prevKey!==key){
+    const prevMarker=markers.get(prevKey);
+    if(prevMarker)prevMarker.setIcon(markerIcon(prevItem,false));
+  }
+  const marker=markers.get(key);
+  if(marker)marker.setIcon(markerIcon(item,true));
+  selectedItem=item;
   showDetail(item);
   if(hasCoordinates(item)){
     map.setView([item.latitude,item.longitude],Math.max(map.getZoom(),9));
@@ -107,10 +172,13 @@ function showDetail(o){
   const panel=document.querySelector('#detail-panel');
   const content=document.querySelector('#detail-content');
   const located=hasCoordinates(o);
+  const cat=categoryCode(o);
   document.querySelector('#detail-panel').hidden=false;
   document.querySelector('#detail-origin').textContent=located?`位置：${o.prefecture||o.place||''}付近`:`産地：${o.prefecture||o.place||'不明'}`;
+  const catRow=CATEGORY_META.some(m=>m.code===cat)?['カテゴリ',`<span class="detail-cat" style="color:var(--color-cat-${cat})">${esc(categoryLabel(cat))}</span>`]:null;
   const rows=[
     ['品目',esc(o.label_en||'—')],
+    ...(catRow?[catRow]:[]),
     ['産地',esc(o.place||o.prefecture||'—')],
     ['都道府県',esc(o.prefecture||'—')],
     ['市町村',esc(o.city||'—')],
@@ -120,29 +188,76 @@ function showDetail(o){
   content.innerHTML=`<div class="detail">
     <h2>${esc(o.label_ja||o.label_en||o.qid)}</h2>
     <dl class="detail-facts">${rows.map(([dt,dd])=>`<div><dt>${dt}</dt><dd>${dd}</dd></div>`).join('')}</dl>
+    <div class="detail-section"><h3>写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></div>
     ${o.evidence?`<div class="detail-section"><h3>根拠 (LLM 抽出)</h3><p class="detail-evidence"><span class="quote">${esc(o.evidence)}</span></p><p class="detail-note">産地は日本語 Wikipedia 記事から LLM で抽出し、座標は Nominatim でジオコードしたため、目安としてお取り決めください。</p></div>`:''}
     <p class="detail-note">出典：<a href="${esc('https://www.wikidata.org/wiki/'+o.qid)}" target="_blank" rel="noopener">Wikidata ${esc(o.qid)}</a></p>
   </div>`;
   document.querySelector('#detail-panel').hidden=false;
   panel.parentElement.classList.add('has-detail');
+  hydrateImage(o);
 }
+
+async function hydrateImage(o){
+  const qid=o.qid;
+  if(!qid)return;
+  const container=document.querySelector('#detail-image');
+  if(!container)return;
+  if(imageCache[qid]){
+    const cached=imageCache[qid];
+    if(cached.url&&cached.license){renderImage(container,cached,o);return}
+  }
+  try{
+    const data=await fetchJSONWithRetry(`/api/wikiimage?qid=${encodeURIComponent(qid)}`);
+    const result={url:safeUrl(data.url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),sourceUrl:safeUrl(data.source_url)};
+    imageCache[qid]=result;
+    try{localStorage.setItem(IMAGE_CACHE_KEY,JSON.stringify(imageCache))}catch{}
+    if(selectedItem!==o)return;
+    if(!result.url){container.innerHTML='<p class="detail-image-status">表示できる画像が登録されていません。</p>';return}
+    if(!result.license){container.innerHTML='<p class="detail-image-status">画像のライセンス情報を確認できないため、表示していません。</p>';return}
+    renderImage(container,result,o);
+  }catch(error){
+    console.warn(`Image could not be loaded for ${qid}`,error);
+    if(selectedItem!==o)return;
+    container.innerHTML='<p class="detail-image-status">表示できる画像が登録されていません。</p>';
+  }
+}
+function renderImage(container,result,o){
+  const source=result.sourceUrl||commonsFilePage(result.url);
+  const license=result.licenseUrl?`<a href="${esc(result.licenseUrl)}" target="_blank" rel="noopener noreferrer">${esc(result.license)}<span aria-hidden="true">↗</span></a>`:esc(result.license);
+  const creator=result.artist||result.credit;
+  const name=o.label_ja||o.label_en||'特産物';
+  container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(name)}の画像を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(name)}の画像"></button><p class="image-license">${creator?`${esc(creator)} · `:''}${license}${source?` · <a href="${esc(source)}" target="_blank" rel="noopener noreferrer" aria-label="Wikimedia Commons の画像出典">Commons<span aria-hidden="true">↗</span></a>`:''}</p>`;
+  container.querySelector('button').addEventListener('click',()=>openLightbox(result.url,name));
+}
+function openLightbox(url,alt){const dialog=document.querySelector('#lightbox'),image=document.querySelector('#lightbox-image');image.src=url;image.alt=`${alt||'特産物'}の拡大画像`;dialog.showModal()}
+function closeLightbox(){const dialog=document.querySelector('#lightbox');if(dialog.open)dialog.close();document.querySelector('#lightbox-image').src='';document.querySelector('#lightbox-image').removeAttribute('alt')}
 
 function closeDetail(){
   document.querySelector('#detail-panel').hidden=true;
   document.querySelector('.app-shell').classList.remove('has-detail');
-  if(selectedMarker)selectedMarker.setIcon(markerIcon(null,false));
-  selectedMarker=null;
+  if(selectedItem&&selectedKey){
+    const m=markers.get(selectedKey);
+    if(m)m.setIcon(markerIcon(selectedItem,false));
+  }
+  selectedItem=null;
   selectedKey=null;
 }
 
 document.querySelector('#keyword').addEventListener('input',applyFilters);
 document.querySelector('#prefecture').addEventListener('change',applyFilters);
-document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';applyFilters();document.querySelector('#keyword').focus()});
+document.querySelector('#category').addEventListener('change',applyFilters);
+document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';document.querySelector('#category').value='';applyFilters();document.querySelector('#keyword').focus()});
 document.querySelector('.detail-close').addEventListener('click',closeDetail);
+document.querySelector('.lightbox-close').addEventListener('click',closeLightbox);
+document.querySelector('#lightbox').addEventListener('click',e=>{if(e.target.id==='lightbox')closeLightbox()});
+document.querySelector('#lightbox').addEventListener('cancel',closeLightbox);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
 
 fetch('/api/tokusan/').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{
   tokusan=Array.isArray(data)?data:[];
   populatePrefectures();
+  populateCategories();
+  renderLegend();
   applyFilters();
 }).catch(error=>{
   console.error('Tokusan data could not be loaded',error);

@@ -43,6 +43,9 @@ func main() {
 	})
 	mux.HandleFunc("/api/tokusan", tokusanHandler.GetAll)
 
+	wikidataHandler := handlers.NewWikidataHandler()
+	mux.HandleFunc("/api/wikiimage", wikidataHandler.GetWikidataImage)
+
 	muxWithCORS := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")

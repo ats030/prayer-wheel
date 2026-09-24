@@ -51,11 +51,31 @@ PREFIX wd: <http://www.wikidata.org/entity/>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 SELECT ?item WHERE {
   ?item wdt:P31 ?t .
-  ?t wdt:P279* wd:Q2095 .
+  { ?t wdt:P279* wd:Q2095 } UNION
+  { ?t wdt:P279* wd:Q13464614 } UNION
+  { ?t wdt:P279* wd:Q28823 } UNION
+  { ?t wdt:P279* wd:Q368972 } .
   ?item wdt:P17 wd:Q17 .
 }
 LIMIT 500
 """
+
+# LLM が選択するカテゴリ (code -> 表示名)。
+# 食品 8 + 工芸 3 = 11 分類。工芸は Q13464614 (陶芸品) / Q28823 (織物) / Q368972 (漆器)。
+CATEGORIES = [
+    ("sa",  "酒・醸造"),
+    ("te",  "茶・飲料"),
+    ("ui",  "魚介"),
+    ("sa2", "農産"),
+    ("am",  "砂糖・和菓子"),
+    ("ko",  "穀物・調味料"),
+    ("ry",  "料理・惣菜"),
+    ("ta",  "陶磁器"),
+    ("or",  "織物"),
+    ("ri",  "漆器"),
+]
+CATEGORY_CODES = [c for c, _ in CATEGORIES]
+CATEGORY_PROMPT_CODES = "、".join(f"{c} ({name})" for c, name in CATEGORIES)
 
 WIKIDATA_LABELS_API = "https://www.wikidata.org/w/api.php"
 
@@ -197,6 +217,98 @@ def ask_llm(label, text):
     raise RuntimeError(f"LLM failed after retries: {last_err}")
 
 
+CATEGORY_PROMPT = """あなたは日本の特産品分類の編集者です。
+下の品目名を、必ず以下カテゴリのいずれか 1 つに分類してください。
+
+カテゴリ (code と表示名):
+{codes}
+
+ルール:
+- 品目名から類推して最も近い code を 1 つ選ぶ
+- 判断に迷う場合は食品は ry (料理・惣菜)、工芸は品目名に合うものに寄せる
+- 必ず {valid_codes} のいずれかを使う
+- 各品目の code を、JSON 配列として品目名の順に出力する (説明や改行は不要)
+
+例: ["sa", "ry", "ta"]
+
+品目名:
+{labels}
+"""
+
+CATEGORY_CACHE = ROOT / "data" / "category_cache.json"
+CATEGORY_BATCH = 40
+
+
+def load_category_cache():
+    if CATEGORY_CACHE.exists():
+        try:
+            return json.loads(CATEGORY_CACHE.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return {}
+    return {}
+
+
+def save_category_cache(cache):
+    CATEGORY_CACHE.parent.mkdir(parents=True, exist_ok=True)
+    CATEGORY_CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def classify_categories(labels):
+    """品目名 (ラベル) からカテゴリ code を LLM でバッチ分類し {label: code} を返す。
+    既にキャッシュ済みの label は再呼び出ししない。失敗した label は "" を代入する."""
+    cache = load_category_cache()
+    # 正規化: 連続空白を除去したものでキーを作る
+    def norm(s):
+        return re.sub(r"\s+", " ", (s or "").strip())
+
+    uncached = [lab for lab in labels if lab and norm(lab) not in cache]
+    if not uncached:
+        return {lab: cache.get(norm(lab), "") for lab in labels}
+
+    valid_codes = "、".join(CATEGORY_CODES)
+    for i in range(0, len(uncached), CATEGORY_BATCH):
+        batch = uncached[i:i + CATEGORY_BATCH]
+        prompt = (CATEGORY_PROMPT
+                  .replace("{codes}", CATEGORY_PROMPT_CODES)
+                  .replace("{valid_codes}", valid_codes)
+                  .replace("{labels}", "\n".join(f"{j}. {lab}" for j, lab in enumerate(batch, 1))))
+        payload = {
+            "model": MODEL,
+            "stream": False,
+            "think": False,
+            "temperature": 0,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        codes = None
+        last_err = None
+        for attempt in range(5):
+            try:
+                resp = requests.post(OLLAMA, json=payload, timeout=120, headers=HEADERS)
+                resp.raise_for_status()
+                content = resp.json()["message"]["content"].strip()
+                start = content.find("[")
+                end = content.rfind("]")
+                if start == -1 or end == -1:
+                    raise ValueError(f"no JSON array in reply: {content[:200]}")
+                arr = json.loads(content[start:end + 1])
+                if not isinstance(arr, list) or len(arr) != len(batch):
+                    raise ValueError(f"expected {len(batch)} codes, got {len(arr) if isinstance(arr, list) else type(arr)}")
+                codes = [str(c).strip().lower() for c in arr]
+                break
+            except (requests.RequestException, ValueError, json.JSONDecodeError) as exc:
+                last_err = exc
+                time.sleep(1 + attempt)
+        # 失敗分は "" で埋める。成功分は検証してキャッシュへ
+        for lab, code in zip(batch, codes or [""] * len(batch)):
+            if code in CATEGORY_CODES:
+                cache[norm(lab)] = code
+            else:
+                cache[norm(lab)] = ""
+        save_category_cache(cache)
+
+    return {lab: cache.get(norm(lab), "") for lab in labels}
+
+
 def geocode(place):
     """Nominatim で座標 (lat, lon, address) を取得する。失敗時は None."""
     for attempt in range(3):
@@ -267,6 +379,7 @@ def process_row(item, cache, prefecture_features):
         "place": place,
         "confidence": confidence,
         "evidence": evidence,
+        "category": "",
         "lat": 0.0, "lng": 0.0,
         "prefecture": "",
         "city": "",
@@ -341,6 +454,18 @@ def main():
             print(f"[{i}/{len(items)}] {item['qid']} {item['label_ja']!r} ERROR: {exc}")
 
     save_cache(cache)
+
+    print("カテゴリ分類中 (LLM バッチ)...")
+    labels = [r.get("label_ja") or r.get("label_en") or r["qid"] for r in processed]
+    category_map = classify_categories(labels)
+    for r in processed:
+        key = r.get("label_ja") or r.get("label_en") or r["qid"]
+        r["category"] = category_map.get(key, "")
+    cat_counts = {}
+    for r in processed:
+        cat_counts[r["category"] or "(未分類)"] = cat_counts.get(r["category"] or "(未分類)", 0) + 1
+    print("カテゴリ内訳: " + ", ".join(f"{k}={v}" for k, v in sorted(cat_counts.items())))
+
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(processed, ensure_ascii=False, indent=1), encoding="utf-8")
 

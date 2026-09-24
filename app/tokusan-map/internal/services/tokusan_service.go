@@ -18,6 +18,7 @@ type Tokusan struct {
 	Evidence   string  `json:"evidence,omitempty"`
 	Confidence float64 `json:"confidence"`
 	SourceURL  string  `json:"source_url,omitempty"`
+	Category   string  `json:"category,omitempty"`
 }
 
 type TokusanService struct {
@@ -60,7 +61,8 @@ func (s *TokusanService) collect(query string, args ...any) ([]Tokusan, error) {
 	for rows.Next() {
 		var t Tokusan
 		if err := rows.Scan(&t.QID, &t.LabelJA, &t.LabelEN, &t.Place, &t.Prefecture,
-			&t.City, &t.Latitude, &t.Longitude, &t.Evidence, &t.Confidence, &t.SourceURL); err != nil {
+			&t.City, &t.Latitude, &t.Longitude, &t.Evidence, &t.Confidence, &t.SourceURL,
+			&t.Category); err != nil {
 			return nil, err
 		}
 		result = append(result, t)
@@ -73,7 +75,7 @@ func (s *TokusanService) collect(query string, args ...any) ([]Tokusan, error) {
 
 func (s *TokusanService) GetAll() []Tokusan {
 	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture," +
-		" city, lat, lng, evidence, confidence, source_url FROM tokusan t")
+		" city, lat, lng, evidence, confidence, source_url, category FROM tokusan t")
 	if list == nil {
 		list = []Tokusan{}
 	}
@@ -82,7 +84,7 @@ func (s *TokusanService) GetAll() []Tokusan {
 
 func (s *TokusanService) GetByPrefecture(prefecture string) []Tokusan {
 	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture,"+
-		" city, lat, lng, evidence, confidence, source_url FROM tokusan t WHERE t.prefecture = ?", prefecture)
+		" city, lat, lng, evidence, confidence, source_url, category FROM tokusan t WHERE t.prefecture = ?", prefecture)
 	if list == nil {
 		list = []Tokusan{}
 	}
@@ -94,7 +96,7 @@ func (s *TokusanService) GetByQID(qid string) *Tokusan {
 		return nil
 	}
 	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture,"+
-		" city, lat, lng, evidence, confidence, source_url FROM tokusan t WHERE t.qid = ?", qid)
+		" city, lat, lng, evidence, confidence, source_url, category FROM tokusan t WHERE t.qid = ?", qid)
 	if len(list) == 0 {
 		return nil
 	}
