@@ -6,8 +6,6 @@ import json
 import time
 import re
 from pathlib import Path
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 OUTPUT_DIR = Path("/home/ats030/app/omatsuri-map/data")
 
@@ -42,6 +40,10 @@ def fetch_wikidata_p3259_url(qid: str) -> str | None:
 
 def geocode_address(address: str) -> tuple[float, float] | None:
     """住所から緯度経度を取得（OpenStreetMap Nominatim API）"""
+    # geopy は座標取得のときだけ使う。未導入の環境でも抽出処理とテストは動かす。
+    from geopy.exc import GeocoderServiceError, GeocoderTimedOut
+    from geopy.geocoders import Nominatim
+
     try:
         geolocator = Nominatim(user_agent="OmatsuriMap/1.0", timeout=5)
         location = geolocator.geocode(address)
