@@ -16,6 +16,7 @@ dependencies = [
     "html2text>=2025.4.15",
     "httpx>=0.28.1",
     "jinja2>=3.1.0",
+    "laya>=0.3.4",
     "lxml>=5.2.0",
     "markdown>=3.7",
     "ollama>=0.6.2",
