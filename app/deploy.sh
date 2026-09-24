@@ -57,11 +57,19 @@ if [ -z "$PORT" ]; then
     exit 0
 fi
 
+# 認証情報を扱うサービスは Tailnet IP にだけ bind し localhost では応答しない
+# (ats030-c77a)。localhost で応答がなければ Tailnet IP も試す。
+TAILNET_IP=$(tailscale ip -4 2>/dev/null | head -n 1 || true)
+
 i=0
 while [ "$i" -lt 30 ]; do
     # 503 は「起動しているが依存先が落ちている」= サービス自体は生きている
     code=$(curl -s -L --max-redirs 5 -o "$BODY_FILE" -w '%{http_code}' \
         "http://localhost:$PORT/" 2>/dev/null || true)
+    if [ "$code" = "000" ] && [ -n "$TAILNET_IP" ]; then
+        code=$(curl -s -L --max-redirs 5 -o "$BODY_FILE" -w '%{http_code}' \
+            "http://$TAILNET_IP:$PORT/" 2>/dev/null || true)
+    fi
     case "$code" in
         2*)
             if grep -Eiq '<!doctype html|<html([ >]|$)' "$BODY_FILE"; then
