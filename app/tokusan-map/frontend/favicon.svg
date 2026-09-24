@@ -1,5 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <circle cx="32" cy="32" r="30" fill="#c4462d"/>
-  <circle cx="32" cy="26" r="14" fill="#fffaf2"/>
-  <path d="M32 44 C32 28, 39 18, 39 18 C39 18, 32 30, 32 44 Z" fill="#305f86"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="特の文字を記した風呂敷包み">
+  <path d="M50 29C30 29 15 44 15 63c0 18 15 29 35 29s35-11 35-29C85 44 70 29 50 29Z" fill="#c4462d"/>
+  <path d="M50 29 27 40 21 31 43 22ZM50 29l23 11 6-9-22-9Z" fill="#a93926"/>
+  <path d="M46 25C37 17 29 13 21 13c1 10 6 17 19 22ZM54 25c9-8 17-12 25-12-1 10-6 17-19 22Z" fill="#c4462d" stroke="#8c3022" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="50" cy="27" r="9" fill="#a93926" stroke="#8c3022" stroke-width="2.5"/>
+  <text x="50" y="77" font-family="'Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif" font-size="51" font-weight="900" text-anchor="middle" fill="#fffaf2" stroke="#fffaf2" stroke-width="1.4" paint-order="stroke">特</text>
 </svg>
