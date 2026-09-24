@@ -11,6 +11,7 @@ FROM gcr.io/distroless/static-debian12
 WORKDIR /app
 COPY --from=build /out/omatsuri-map-server ./omatsuri-map-server
 COPY frontend ./frontend
+COPY data/summaries.json ./data/summaries.json
 COPY favicon.svg ./favicon.svg
 USER nonroot:nonroot
 EXPOSE 8080
