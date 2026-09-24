@@ -33,8 +33,9 @@
   詳細下部に表示する。LRGが未判定または曖昧な地点は都道府県リンクへフォールバックする。
 - LRGはリポジトリルートの `scripts/generate-jalan-lrg.py` で全地点へ静的に付与する。境界データの版と
   商用利用条件は `docs/tool-license-jalan-lrg.yaml` を参照する。
-- 確認済み割り当ては `data/jalan-lrg-overrides.json` に根拠・確認日付きで固定し、新規地点にLRGがなければ
-  生成・検証を失敗させる。`scripts/check-jalan-lrg.py` で全件の欠落と不整合をオフライン検査する。
+- 確認済み割り当てはリポジトリルートの `data/jalan-lrg-overrides.json` に根拠・確認日付きで固定し、
+  新規地点にLRGがなければ生成・検証を失敗させる。リポジトリルートで `uv run python scripts/check-jalan-lrg.py`
+  を実行すると、onsen/omatsuri/shiseki 全件の欠落と不整合をオフライン検査する。
 - 自治体判定は「国土数値情報（行政区域データ）（国土交通省）を加工して作成」した
   Geolonia `japanese-admins`（生成時のみ使用）に基づく。
 - 全HTML entry pointに `data-site="shiseki-map"` のvisit-logタグを置く。Cloud Runから
