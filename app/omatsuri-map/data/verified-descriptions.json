@@ -557,5 +557,193 @@
         "end": "2026-05-21"
       }
     ]
+  },
+  "Q11611892": {
+    "status": "active",
+    "source": "http://bunka.welcomenoshiro.com/culture/noshiroyakutanabata/",
+    "description": "能代役七夕は、天保13年（1842年）の『奥のしをり』にも記された能代の七夕行事です。江戸時代から大町・上町・萬町・清助町・柳町の「五町組」が輪番で運行し、大丁を加勢丁が支えます。2日目には灯籠から鯱を外して米代川に浮かべて燃やす「鯱流し」が行われます。",
+    "venue": {
+      "name": "能代市街地・米代川河口付近",
+      "address": "秋田県能代市"
+    }
+  },
+  "Q11666138": {
+    "status": "active",
+    "source": "https://iizaka.com/events/",
+    "description": "飯坂けんか祭りは、飯坂八幡神社の秋の例大祭です。町内6地区の太鼓屋台が神輿の宮入を阻もうとぶつかり合い、「日本三大けんか祭り」の一つに数えられています。",
+    "venue": {
+      "name": "飯坂八幡神社",
+      "address": "福島県福島市飯坂町",
+      "latitude": 37.833252,
+      "longitude": 140.450282,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E9%A3%AF%E5%9D%82%E5%85%AB%E5%B9%A1%E7%A5%9E%E7%A4%BE&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    }
+  },
+  "Q11423431": {
+    "status": "active",
+    "source": "https://tutizaki-hikiyama.com/",
+    "description": "土崎神明社祭の曳山行事は、土崎神明社の例祭で奉納曳山が曳き回される行事で、「土崎港曳山まつり」とも呼ばれ国の重要無形民俗文化財に指定されています。本祭は7月20日・21日で、令和8年は20日が宵祭、21日が例祭です。",
+    "venue": {
+      "name": "土崎神明社・土崎地区",
+      "address": "秋田県秋田市土崎港",
+      "latitude": 39.75717,
+      "longitude": 140.070887,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E5%9C%9F%E5%B4%8E%E7%A5%9E%E6%98%8E%E7%A4%BE&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-20",
+        "end": "2026-07-21"
+      }
+    ]
+  },
+  "Q86061980": {
+    "status": "active",
+    "source": "https://www.city-yuzawa.jp/site/yuzawatrip/686.html",
+    "description": "犬っこまつりは、約400年続くといわれる湯沢地方の民俗行事です。盗賊を退治した殿様が米の粉で小さな犬っこや鶴亀を作らせ、旧小正月の晩に家の入口や窓に供えたのが由来とされ、現在は雪のお堂にしんこ細工の犬っこを置いて餅や甘酒を供えます。例年2月中旬の土・日曜日に湯沢市総合体育館周辺や中心商店街で開かれます。",
+    "venue": {
+      "name": "湯沢市総合体育館周辺特設会場（メイン会場）",
+      "address": "秋田県湯沢市"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-02-14",
+        "end": "2026-02-15"
+      }
+    ]
+  },
+  "Q11353447": {
+    "status": "active",
+    "source": "https://www.city-yuzawa.jp/site/yuzawatrip/687.html",
+    "description": "七夕絵どうろうまつりは、毎年8月5日から7日に湯沢市中心商店街で開かれる、約300年の歴史をもつ祭りです。秋田藩佐竹南家七代目義安公に京都の鷹司家から嫁いだ奥方が、郷愁の思いを五色の短冊に託して青竹に飾ったのが始まりといわれ、夕刻には美人画を描いた大小百数十基の絵どうろうに明かりが灯ります。",
+    "venue": {
+      "name": "湯沢市中心商店街",
+      "address": "秋田県湯沢市（柳町、大町ほか）"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-05",
+        "end": "2026-08-07"
+      }
+    ]
+  },
+  "Q65258543": {
+    "status": "active",
+    "source": "https://www.town.oishida.yamagata.jp/kankou/matsuri/o-maturi.html",
+    "description": "大石田まつり「最上川花火大会」は、最上川に架かる「大橋」の完成を祝って始まった、90年を超える歴史をもつまつりです。成人を迎えた若者による「成人神輿」などの神輿渡御が行われる中、約3,000発の花火が打ち上がり、最後を「20号玉（2尺玉）」が飾ります。令和8年は15日に大石田駅前広場で「維新祭」、16日に花火大会が行われます。",
+    "venue": {
+      "name": "横山下河原（花火打上げ）・大石田駅前広場",
+      "address": "山形県北村山郡大石田町"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-15",
+        "end": "2026-08-16"
+      }
+    ]
+  },
+  "Q11408739": {
+    "status": "active",
+    "source": "https://nanyo-kiku.jp/",
+    "description": "南陽の菊まつりは、菊人形を飾る「菊まつり」として全国一の歴史をもつとされる祭りです。大正元年（1912年）に初めて菊人形が宮内の料亭に飾られ、その技は菊人形師の菊地家に代々受け継がれています。第114回の2026年は宮内会場（熊野大社周辺）と花公園会場（南陽市中央花公園）で開かれます。",
+    "venue": {
+      "name": "南陽市中央花公園（花公園会場）・熊野大社周辺（宮内会場）",
+      "address": "山形県南陽市三間通1096",
+      "latitude": 38.062908,
+      "longitude": 140.15043,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E5%8D%97%E9%99%BD%E5%B8%82%E4%B8%AD%E5%A4%AE%E8%8A%B1%E5%85%AC%E5%9C%92&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-09",
+        "end": "2026-11-08"
+      }
+    ]
+  },
+  "Q11622475": {
+    "status": "active",
+    "source": "https://www.city.yamagata-yamagata.lg.jp/jigyosya/miryoku/kankojoho/1002607.html",
+    "description": "薬師祭植木市は、日本三大植木市の一つとされる山形市の行事です。山形城主最上義光公が大火で焼けた城下に緑を取り戻そうと住民に呼びかけたのが始まりと言われ、400年以上の歴史があります。例年5月8日から10日に、薬師公園と周辺約3キロの通りに植木や縁日など約400店が出店します。",
+    "venue": {
+      "name": "薬師公園・薬師町通りほか",
+      "address": "山形県山形市",
+      "latitude": 38.261313,
+      "longitude": 140.346875,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E8%96%AC%E5%B8%AB%E5%85%AC%E5%9C%92+%E5%B1%B1%E5%BD%A2%E5%B8%82&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    }
+  },
+  "Q65236261": {
+    "status": "active",
+    "source": "http://www.murayamatokunai.jp/",
+    "description": "むらやま徳内まつりは、山形県村山市を会場に、北海道厚岸町から受け継がれた軽快なお囃子に合わせて、踊り手が力強く勇壮かつ華麗な踊りを繰り広げるまつりです。",
+    "venue": {
+      "name": "村山市内",
+      "address": "山形県村山市"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-21",
+        "end": "2026-08-23"
+      }
+    ]
+  },
+  "Q11381258": {
+    "status": "active",
+    "source": "https://www.aizukanko.com/kk/festival/erousoku-matsuri",
+    "description": "会津絵ろうそくまつりは、会津の伝統的工芸品「会津絵ろうそく」を知ってもらおうと始まった冬のまつりです。鶴ヶ城や御薬園をはじめ市内各所で2日間にわたり、蝋燭の明かりに照らされた雪景色「会津幻影」が繰り広げられます。",
+    "venue": {
+      "name": "鶴ヶ城（メイン会場）・御薬園（サブ会場）",
+      "address": "福島県会津若松市追手町1-1",
+      "latitude": 37.487735,
+      "longitude": 139.929766,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E9%B6%B4%E3%83%B6%E5%9F%8E&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    }
+  },
+  "Q20044802": {
+    "status": "active",
+    "source": "https://www.f-kankou.jp/event/7006",
+    "description": "信夫三山暁まいりは、かつて羽黒神社の仁王門にあった仁王様の足に合う大わらじを作って奉納したことが由来とされ、江戸時代から400有余年受け継がれている行事です。2026年は担ぎ手不足の解消などのため2月第3土・日曜日の開催となり、21日にまちなか広場を出発した大わらじが信夫山羽黒神社に奉納されます。",
+    "venue": {
+      "name": "信夫山羽黒神社",
+      "address": "福島県福島市",
+      "latitude": 37.774115,
+      "longitude": 140.471046,
+      "coordinate_source": "https://nominatim.openstreetmap.org/search?q=%E7%BE%BD%E9%BB%92%E7%A5%9E%E7%A4%BE+%E7%A6%8F%E5%B3%B6%E5%B8%82&format=jsonv2&limit=1&countrycodes=jp&accept-language=ja",
+      "precision": "venue_area"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-02-21",
+        "end": "2026-02-22"
+      }
+    ]
+  },
+  "Q30928431": {
+    "status": "active",
+    "source": "https://www.bandaiatami.or.jp/info/4356/",
+    "description": "萩姫まつりは、磐梯熱海温泉で開かれる祭りで、第60回は8月9日・10日の2日間です。9日は「温泉感謝祭」や「献湯祭」が執り行われ、10日は磐梯熱海駅前で露店やステージイベントのある「萩姫縁日」が開かれます。",
+    "venue": {
+      "name": "磐梯熱海温泉・磐梯熱海駅前",
+      "address": "福島県郡山市熱海町"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-09",
+        "end": "2026-08-10"
+      }
+    ]
   }
 }
