@@ -5,6 +5,13 @@ repository, fixed test commands, and any supporting files the tests need. The
 issue must be open, have acceptance criteria, and lack `human` and `decision`
 labels. The source repository must be clean.
 
+The runner does not identify itself as an OpenCode interactive session to the
+Ollama proxy. A queue rejection (HTTP 429 or 503) ends that attempt immediately;
+`report.json` records `status: retryable_busy` and no patch is accepted. Retry
+manually when the proxy is less busy. Tests are skipped on this outcome because
+there is no completed draft to validate. This leaves the shared proxy's scheduling
+and the normal interactive client configuration unchanged.
+
 The script creates a detached worktree under `~/data/ollama-backlog/`. OpenCode
 uses the configured Ollama model to edit that worktree. It has no shell tool,
 normal home directory, mounted Git repository metadata, Beads executable, or

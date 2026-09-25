@@ -16,7 +16,6 @@ import shlex
 import shutil
 import subprocess
 import sys
-import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -162,23 +161,22 @@ def one_pass(issue: dict, worktree: Path, repo: Path, files: list[str],
                           "messages": [{"role": "user", "content": request_prompt}],
                           "temperature": 0, "max_tokens": 4096}).encode()
     request = urllib.request.Request(base_url + "/chat/completions", data=payload,
-                                     headers={"Content-Type": "application/json",
-                                              "X-Client-App": "opencode"})
-    response_text = ""
+                                     headers={"Content-Type": "application/json"})
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-    for attempt in range(2):
-        try:
-            with opener.open(request, timeout=timeout) as response:
-                response_text = json.loads(response.read())["choices"][0]["message"]["content"]
-            if not isinstance(response_text, str):
-                raise RuntimeError("model returned non-text content")
-            break
-        except urllib.error.HTTPError as exc:
-            if exc.code == 503 and attempt == 0:
-                time.sleep(30)
-                continue
-            (run_dir / "model.stderr.log").write_text(f"HTTP {exc.code}: {exc.read()[:300]!r}\n")
-            return 69
+    try:
+        with opener.open(request, timeout=timeout) as response:
+            response_text = json.loads(response.read())["choices"][0]["message"]["content"]
+        if not isinstance(response_text, str):
+            raise RuntimeError("model returned non-text content")
+    except urllib.error.HTTPError as exc:
+        detail = exc.read()[:300]
+        retry_after = exc.headers.get("Retry-After", "")
+        (run_dir / "model.stderr.log").write_text(
+            f"HTTP {exc.code}; Retry-After: {retry_after or 'unspecified'}; {detail!r}\n")
+        return 75 if exc.code in (429, 503) else 69
+    except urllib.error.URLError as exc:
+        (run_dir / "model.stderr.log").write_text(f"Ollama unavailable: {exc.reason}\n")
+        return 69
     (run_dir / "model.stdout.log").write_text(response_text)
     try:
         drafts = validated_replacements(response_text, files, worktree)
@@ -236,8 +234,7 @@ def main() -> int:
     provider = {"npm": "@ai-sdk/openai-compatible", "name": "Ollama",
                 "options": {"baseURL": source_options["baseURL"],
                             "timeout": source_options.get("timeout", 600000),
-                            "chunkTimeout": source_options.get("chunkTimeout", 300000),
-                            "headers": {"X-Client-App": "opencode"}},
+                            "chunkTimeout": source_options.get("chunkTimeout", 300000)},
                 "models": source_provider["models"]}
     config = {
         "model": model_name, "small_model": model_name, "autoupdate": False,
@@ -282,8 +279,13 @@ def main() -> int:
                 partial.encode() if isinstance(partial, str) else partial)
         (run_dir / "model.stderr.log").write_text(f"timed out after {args.model_timeout}s: {exc}\n")
 
+    model_error = ((run_dir / "model.stderr.log").read_text()[:500]
+                   if (run_dir / "model.stderr.log").exists() else "")
+    retryable_busy = model_code == 75 or (
+        model_code != 0 and ("generation queue is busy" in model_error.lower()
+                             or "service unavailable" in model_error.lower()))
     tests = []
-    for test in args.test:
+    for test in ([] if retryable_busy else args.test):
         argv = shlex.split(test)
         if not argv or argv[0] not in ("python", "python3", "pytest", "/home/ats030/.venv/bin/python"):
             parser.error("tests must invoke Python or pytest directly")
@@ -315,8 +317,8 @@ def main() -> int:
               "source_head": command(["git", "rev-parse", "HEAD"], cwd=worktree).stdout.strip(),
               "model": model_name, "mode": "one_pass" if args.one_pass_file else "opencode",
               "model_exit_code": model_code, "success": passed,
-              "model_error": (run_dir / "model.stderr.log").read_text()[:500]
-              if (run_dir / "model.stderr.log").exists() else "",
+              "status": "ready_for_review" if passed else ("retryable_busy" if retryable_busy else "failed"),
+              "retryable_busy": retryable_busy, "model_error": model_error,
               "changed_files": changed.stdout.splitlines(), "tests": tests,
               "untracked_files": untracked.stdout.splitlines(),
               "diff_check_exit_code": whitespace.returncode,
@@ -325,7 +327,8 @@ def main() -> int:
               "worktree": str(worktree), "run_dir": str(run_dir)}
     (run_dir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
     print(json.dumps({"issue_id": args.issue_id, "run_dir": str(run_dir),
-                      "model_exit_code": model_code, "changed_files": report["changed_files"],
+                      "model_exit_code": model_code, "status": report["status"],
+                      "changed_files": report["changed_files"],
                       "test_exit_codes": [t["exit_code"] for t in tests]},
                      ensure_ascii=False, indent=2))
     return 0 if passed else 1
