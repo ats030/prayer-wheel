@@ -90,6 +90,27 @@ rc, calls = run([{TARGET: SOON, OTHER: SOON}, {TARGET: FAR, OTHER: SOON}])
 check("終了コード", rc, 0)
 check("post を1回呼ぶ", calls, 1)
 
+print("9. 温める先は KEEPALIVE_BASE → INTERACTIVE_TARGETS → 既定の順で決まる")
+saved = {k: ka.os.environ.pop(k, None)
+         for k in ("OLLAMA_KEEPALIVE_BASE", "OLLAMA_PROXY_INTERACTIVE_TARGETS")}
+check("未設定なら既定", ka.keepalive_bases(), [ka.DEFAULT_BASE])
+ka.os.environ["OLLAMA_PROXY_INTERACTIVE_TARGETS"] = "http://a:1/, http://b:2"
+check("プロキシのワーカー一覧を使う", ka.keepalive_bases(), ["http://a:1", "http://b:2"])
+ka.os.environ["OLLAMA_KEEPALIVE_BASE"] = "http://c:3"
+check("KEEPALIVE_BASE が優先", ka.keepalive_bases(), ["http://c:3"])
+for k, v in saved.items():
+    ka.os.environ.pop(k, None)
+    if v is not None:
+        ka.os.environ[k] = v
+
+print("10. 複数ワーカーの終了コードをまとめる")
+for codes, want in (([0, 3], 0), ([3, 3], 3), ([1, 0], 1), ([3, 1], 1)):
+    seq = list(codes)
+    seen = []
+    ka.main = lambda: seen.append(ka.BASE) or seq.pop(0)
+    check(f"{codes}", ka.run_all(["http://a", "http://b"]), want)
+    check(f"{codes} 両方回る", seen, ["http://a", "http://b"])
+
 print()
 if failures:
     print(f"失敗 {len(failures)} 件: {', '.join(failures)}")

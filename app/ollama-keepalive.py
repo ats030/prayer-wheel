@@ -62,7 +62,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 CONFIG = Path.home() / ".config" / "opencode" / "opencode.json"
-BASE = os.environ.get("OLLAMA_KEEPALIVE_BASE", "http://127.0.0.1:11434").rstrip("/")
+DEFAULT_BASE = "http://127.0.0.1:11434"
+# 温める先はホストごとに違う。evo-x2 は対話ワーカーを直接並べるが、
+# ubuntu-server-app にワーカーは無くローカルプロキシしか無い。unit に
+# ポートを書くと git 共有で他ホストへ漏れるため、~/.env の値を読む。
+# 優先順: OLLAMA_KEEPALIVE_BASE → プロキシと同じ OLLAMA_PROXY_INTERACTIVE_TARGETS → 既定。
+BASE = DEFAULT_BASE
 PROVIDER_PREFIX = "ollama/"
 # ロードだけの要求は、GPU が空いていれば 52GB でも十数秒で返る (実測 13.7秒)。
 # それ以上待たされるのは順番待ちをしている証拠で、待てば待つほど他所の生成の
@@ -229,5 +234,31 @@ def main() -> int:
     return 0
 
 
+def keepalive_bases() -> list[str]:
+    raw = (os.environ.get("OLLAMA_KEEPALIVE_BASE")
+           or os.environ.get("OLLAMA_PROXY_INTERACTIVE_TARGETS")
+           or DEFAULT_BASE)
+    return [v.strip().rstrip("/") for v in raw.split(",") if v.strip()] or [DEFAULT_BASE]
+
+
+def run_all(bases: list[str]) -> int:
+    """各ワーカーを順に温める。1つでも障害なら1、1つでも温めたなら0、全部見送りなら3。
+
+    1つ目の障害で止めないのは、片方の障害でもう片方まで冷やさないため。
+    """
+    global BASE
+    codes = []
+    for base in bases:
+        BASE = base
+        if len(bases) > 1:
+            print(f"[{base}]")
+        codes.append(main())
+    if 1 in codes:
+        return 1
+    if 0 in codes:
+        return 0
+    return 3
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(run_all(keepalive_bases()))

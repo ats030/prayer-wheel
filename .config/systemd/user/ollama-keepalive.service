@@ -9,9 +9,9 @@ Type=oneshot
 # failure にすると、止まっている間 15分おきに通知が飛び続ける。
 SuccessExitStatus=3
 WorkingDirectory=/home/ats030
-ExecStart=
-ExecStart=/usr/bin/env OLLAMA_KEEPALIVE_BASE=http://127.0.0.1:11435 /usr/bin/python3 /home/ats030/app/ollama-keepalive.py
-ExecStart=/usr/bin/env OLLAMA_KEEPALIVE_BASE=http://127.0.0.1:11436 /usr/bin/python3 /home/ats030/app/ollama-keepalive.py
+# 温める先はホスト固有なので ~/.env の OLLAMA_PROXY_INTERACTIVE_TARGETS から読む (ats030-hqae)。
+EnvironmentFile=-/home/ats030/.env
+ExecStart=/usr/bin/python3 /home/ats030/app/ollama-keepalive.py
 # 52GB のコールドロードは、他の操作と競合すると数分かかることがある
 # (実測で6分40秒の例あり)。スクリプト側の打ち切り 600秒 より長く取る。
 TimeoutStartSec=900
