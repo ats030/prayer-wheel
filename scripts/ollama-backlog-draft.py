@@ -63,7 +63,8 @@ def repository(path: str) -> Path:
     return repo
 
 
-def sandbox(worktree: Path, state: Path, support: list[Path], repo: Path) -> list[str]:
+def sandbox(worktree: Path, state: Path, support: list[Path], repo: Path,
+            *, offline: bool = False) -> list[str]:
     # The host home, Git metadata, credentials, systemd socket, and bd executable
     # are absent. Network remains shared solely to reach the existing Ollama proxy.
     args = ["bwrap", "--die-with-parent", "--new-session", "--unshare-pid", "--unshare-ipc",
@@ -74,6 +75,8 @@ def sandbox(worktree: Path, state: Path, support: list[Path], repo: Path) -> lis
             "--ro-bind", str(OPENCODE), "/opt/opencode", "--ro-bind", str(VENV), str(VENV),
             "--bind", str(state), "/home/agent", "--bind", str(worktree), str(repo),
             "--ro-bind", str(state.parent / "opencode.json"), "/opt/opencode.json"]
+    if offline:
+        args.insert(1, "--unshare-net")
     ripgrep = shutil.which("rg")
     if ripgrep:
         args += ["--ro-bind", str(Path(ripgrep).resolve()), "/opt/rg"]
@@ -198,6 +201,10 @@ def main() -> int:
     parser.add_argument("--read-only", action="append", default=[], help="support file relative to /home/ats030")
     parser.add_argument("--one-pass-file", action="append", default=[],
                         help="tracked file to provide to a single Ollama patch request")
+    parser.add_argument("--allowed-file", action="append", default=[],
+                        help="tracked file permitted to change; required by PR automation")
+    parser.add_argument("--offline-tests", action="store_true",
+                        help="run fixed tests without network access")
     parser.add_argument("--model-timeout", type=int, default=1200)
     args = parser.parse_args()
     if not ISSUE_ID.fullmatch(args.issue_id):
@@ -224,6 +231,10 @@ def main() -> int:
     created = command(["git", "worktree", "add", "--detach", str(worktree), "HEAD"], cwd=repo, timeout=120)
     if created.returncode:
         raise RuntimeError(f"worktree creation failed: {created.stderr.strip()[:300]}")
+    for name in args.allowed_file:
+        one_pass_file(repo, worktree, name)
+    if args.allowed_file and not set(args.one_pass_file).issubset(args.allowed_file):
+        raise RuntimeError("one-pass files must be allowed files")
 
     user_config = json.loads((ROOT / ".config/opencode/opencode.json").read_text())
     model_name = user_config["model"]
@@ -284,8 +295,27 @@ def main() -> int:
     retryable_busy = model_code == 75 or (
         model_code != 0 and ("generation queue is busy" in model_error.lower()
                              or "service unavailable" in model_error.lower()))
+    before_tests = command(["git", "diff", "--name-only", "-z"], cwd=worktree)
+    before_untracked = command(["git", "ls-files", "--others", "--exclude-standard"], cwd=worktree)
+    before_whitespace = command(["git", "diff", "--check"], cwd=worktree)
+    before_modes = command(["git", "diff", "--summary"], cwd=worktree)
+    before_status = command(["git", "diff", "--name-status", "--no-renames"], cwd=worktree)
+    before_staged = command(["git", "diff", "--cached", "--name-only"], cwd=worktree)
+    changed_names = set(before_tests.stdout.rstrip("\0").split("\0")) if before_tests.stdout else set()
+    allowed = set(args.allowed_file)
+    safe_to_test = (model_code == 0 and before_tests.returncode == 0 and changed_names
+                    and before_untracked.returncode == 0 and not before_untracked.stdout.strip()
+                    and before_whitespace.returncode == 0
+                    and before_modes.returncode == 0 and not before_modes.stdout.strip()
+                    and before_status.returncode == 0
+                    and all(row.startswith("M\t") for row in before_status.stdout.splitlines())
+                    and before_staged.returncode == 0 and not before_staged.stdout.strip()
+                    and all((worktree / name).resolve() == worktree / name
+                            and (worktree / name).is_file() for name in changed_names)
+                    and (not allowed or changed_names <= allowed))
     tests = []
-    for test in ([] if retryable_busy else args.test):
+    test_base = sandbox(worktree, state, support, repo, offline=args.offline_tests)
+    for test in (args.test if safe_to_test else []):
         argv = shlex.split(test)
         if not argv or argv[0] not in ("python", "python3", "pytest", "/home/ats030/.venv/bin/python"):
             parser.error("tests must invoke Python or pytest directly")
@@ -295,7 +325,7 @@ def main() -> int:
                 argv.insert(1, "-m")
                 argv.insert(2, "pytest")
         try:
-            completed = command(base + argv, cwd=repo, timeout=300)
+            completed = command(test_base + argv, cwd=repo, timeout=300)
             tests.append({"command": test, "exit_code": completed.returncode,
                           "stdout": completed.stdout[-8000:], "stderr": completed.stderr[-4000:]})
         except subprocess.TimeoutExpired:
@@ -307,18 +337,24 @@ def main() -> int:
     (run_dir / "changes.patch").write_text(diff.stdout)
     changed = command(["git", "status", "--short"], cwd=worktree)
     untracked = command(["git", "ls-files", "--others", "--exclude-standard"], cwd=worktree)
+    final_names = command(["git", "diff", "--name-only", "-z"], cwd=worktree)
+    final_changed = set(final_names.stdout.rstrip("\0").split("\0")) if final_names.stdout else set()
     support_after = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                      for p in support}
-    passed = (model_code == 0 and diff.returncode == 0 and bool(diff.stdout)
-              and whitespace.returncode == 0 and not untracked.stdout.strip()
+    passed = (safe_to_test and diff.returncode == 0 and bool(diff.stdout)
+              and whitespace.returncode == 0 and untracked.returncode == 0
+              and not untracked.stdout.strip() and final_names.returncode == 0
+              and (not allowed or final_changed <= allowed)
               and support_before == support_after
-              and all(t["exit_code"] == 0 for t in tests))
+              and len(tests) == len(args.test) and all(t["exit_code"] == 0 for t in tests))
     report = {"issue_id": args.issue_id, "source_repository": str(repo),
               "source_head": command(["git", "rev-parse", "HEAD"], cwd=worktree).stdout.strip(),
               "model": model_name, "mode": "one_pass" if args.one_pass_file else "opencode",
               "model_exit_code": model_code, "success": passed,
               "status": "ready_for_review" if passed else ("retryable_busy" if retryable_busy else "failed"),
               "retryable_busy": retryable_busy, "model_error": model_error,
+              "allowed_files": args.allowed_file, "offline_tests": args.offline_tests,
+              "tests_skipped": not safe_to_test,
               "changed_files": changed.stdout.splitlines(), "tests": tests,
               "untracked_files": untracked.stdout.splitlines(),
               "diff_check_exit_code": whitespace.returncode,
