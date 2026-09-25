@@ -10,7 +10,6 @@ import requests
 
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "frontend" / "shiseki.json"
-CACHE = ROOT / "data" / "wikidata_cache"
 sys.path.insert(0, str(ROOT.parent / "omatsuri-map" / "scripts"))
 from validate_prefecture_coordinates import containing_prefecture, fetch_features  # noqa:E402
 
@@ -50,20 +49,14 @@ SELECT DISTINCT ?item ?itemLabel ?itemDescription ?coord ?article ?typeLabel ?er
 }
 """
 # 遺跡・城・古墳・史跡 に加え、庭園・港・橋 を含める(用户指示「すべて含める」)。
-# 神社(Q845945)・仏教寺院(Q5393308)を「社寺・宗教遺跡」カテゴリへ集約する。
-# 日本の城(Q92026)・古墳(Q1141225)は現行の上位QID(Q23413/Q109607)より件数が多いため併載する。
 BROAD_ROOTS = (
     "Q839954",   # 遺跡
     "Q23413",    # 城
-    "Q92026",    # 日本の城
     "Q109607",   # 古墳
-    "Q1141225",  # 古墳(別)
     "Q1081138",  # 史跡
     "Q1107656",  # 庭園
     "Q283202",   # 港
     "Q12280",    # 橋
-    "Q845945",   # 神社
-    "Q5393308",  # 仏教寺院
 )
 
 
@@ -133,37 +126,21 @@ def highest_rank(ranks):
     return best, DESIGNATION_LABEL[best]
 
 
-def query_cached(key, query):
-    """SPARQL結果をファイルキャッシュする。SPARQLは数十分かかるため、取得済み結果は再利用する。"""
-    CACHE.mkdir(parents=True, exist_ok=True)
-    cache_file = CACHE / (key + ".json")
-    if cache_file.exists():
-        return json.loads(cache_file.read_text(encoding="utf-8"))
-    last_error = None
-    for attempt in range(4):
-        try:
-            response = requests.get(ENDPOINT, params={"query": query, "format": "json"},
-                                    headers=HEADERS, timeout=180)
-            response.raise_for_status()
-            rows = response.json()["results"]["bindings"]
-            cache_file.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
-            return rows
-        except (requests.RequestException, ValueError) as error:
-            last_error = error
-            time.sleep(5 * (attempt + 1))
-    raise RuntimeError(f"failed to run query {key!r} after retries: {last_error}")
-
-
 def collect_designations():
-    return query_cached("designations", QUERY)
+    url = ENDPOINT
+    params = {"query": QUERY, "format": "json"}
+    response = requests.get(url, params=params, headers=HEADERS, timeout=180)
+    response.raise_for_status()
+    return response.json()["results"]["bindings"]
 
 
 def collect_broad():
     bindings = []
     for root in BROAD_ROOTS:
-        rows = query_cached("broad_" + root, BROAD_QUERY % root)
-        print(f"using {len(rows)} rows for {root}")
-        bindings.extend(rows)
+        response = requests.get(ENDPOINT, params={"query": BROAD_QUERY % root, "format": "json"},
+                                headers=HEADERS, timeout=120)
+        response.raise_for_status()
+        bindings.extend(response.json()["results"]["bindings"])
         time.sleep(0.5)
     return bindings
 
