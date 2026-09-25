@@ -771,6 +771,28 @@ with tempfile.TemporaryDirectory() as tmp:
     upstream.shutdown()
     upstream.server_close()
 
+print("28. 状態APIはidle/生成中をJSONで返す")
+front, base = serve(proxy.ProxyHandler)
+try:
+    with urllib.request.urlopen(base + "/api/opencode-status", timeout=3) as response:
+        idle = json.load(response)
+        check("状態APIのContent-Type", response.headers.get_content_type(),
+              "application/json")
+    check("状態APIのidle", idle["state"], "idle")
+    check("状態APIの待機数", idle["queue_depth"], 0)
+    check("状態APIの実行数", idle["active_count"], 0)
+    ticket = proxy._generation_gate.acquire("opencode", "qwen3.8:27b", timeout=0.1)
+    try:
+        with urllib.request.urlopen(base + "/api/opencode-status", timeout=3) as response:
+            active = json.load(response)
+        check("状態APIの生成中", active["state"], "generating")
+        check("状態APIの生成数", active["active_count"], 1)
+    finally:
+        proxy._generation_gate.release(ticket)
+finally:
+    front.shutdown()
+    front.server_close()
+
 print()
 if failures:
     print(f"失敗 {len(failures)} 件: {', '.join(failures)}")
