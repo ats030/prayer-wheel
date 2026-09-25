@@ -8,6 +8,9 @@ data/summaries.json
 data/summaries.json.tmp
 data/status_cache.json
 
+# Wikidata SPARQL 結果キャッシュ(再生成可能)
+data/wikidata_cache/
+
 # Python
 __pycache__/
 *.pyc
