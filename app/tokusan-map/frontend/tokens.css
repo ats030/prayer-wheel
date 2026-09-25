@@ -10,6 +10,7 @@
   --color-located: #305f86;
   --color-shadow: rgb(23 43 58 / 12%);
   --color-marker-shadow: rgb(23 43 58 / 35%);
+  --color-backdrop: rgb(12 24 33 / 94%);
   --font-display: system-ui, -apple-system, "Yu Gothic", sans-serif;
   --font-body: system-ui, -apple-system, "Yu Gothic", sans-serif;
   --space-xs: .5rem;

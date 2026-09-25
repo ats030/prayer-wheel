@@ -6,6 +6,7 @@ let visible=[];
 let markers=new Map();
 let markerItems=new Map();
 let selectedKey=null;
+let selectedOrigin=null;
 let selectedItem=null;
 
 const IMAGE_CACHE_KEY='tokusan-map-image-cache-v1';
@@ -101,22 +102,12 @@ function renderList(){
   }
   list.innerHTML=visible.map((o,i)=>{
     const key=itemKey(o,i);
-    const located=hasCoordinates(o);
     const cat=categoryCode(o);
-    const badge=located?'<span class="badge badge-located">位置表示あり</span>':'<span class="badge badge-unlocated">産地のみ</span>';
-    const catBadge=CATEGORY_META.some(m=>m.code===cat)?`<span class="badge badge-cat" style="color:var(--color-cat-${cat});border-color:var(--color-cat-${cat})">${esc(categoryLabel(cat))}</span>`:'';
-    const metaParts=[];
-    if(o.prefecture)metaParts.push(esc(o.prefecture));
-    if(o.place&&o.place!==o.prefecture)metaParts.push(esc(o.place));
-    const meta=metaParts.length?metaParts.join('・')+` ${catBadge}${badge}`:`${catBadge}${badge}`;
-    return `<button type="button" class="tokusan-card" data-key="${esc(key)}" ${o.qid?`data-qid="${esc(o.qid)}"`:''}>
-      <span class="card-index">${i+1}</span>
-      <span class="card-body"><span class="card-name">${esc(o.label_ja||o.label_en||o.qid)}</span><span class="card-meta">${meta}</span></span>
-    </button>`;
+    const catSpan=cat!=='none'?`<span>${esc(categoryLabel(cat))}</span>`:'';
+    const placeSpan=o.place&&o.place!==o.prefecture?`<span>${esc(o.place)}</span>`:'';
+    return `<button type="button" class="tokusan-card" data-key="${esc(key)}" aria-current="${key===selectedKey}"><span class="card-index">${String(i+1).padStart(2,'0')}</span><span><span class="card-name">${esc(o.label_ja||o.label_en||o.qid)}</span><span class="card-meta"><span>${esc(o.prefecture||'地域未登録')}</span>${catSpan}${placeSpan}</span></span></button>`;
   }).join('');
-  for(const button of list.querySelectorAll('.tokusan-card')){
-    button.addEventListener('click',()=>selectItem(button.dataset.key));
-  }
+  list.querySelectorAll('button').forEach(card=>card.addEventListener('click',()=>selectItem(card.dataset.key,'list')));
 }
 
 function markerIcon(o,selected){
@@ -135,7 +126,7 @@ function renderMarkers(){
     if(!hasCoordinates(o))return;
     const marker=L.marker([o.latitude,o.longitude],{icon:markerIcon(o,key===selectedKey),title:o.label_ja||o.label_en||o.qid});
     marker.bindTooltip(`${o.label_ja||o.label_en||o.qid}${o.prefecture?'（'+o.prefecture+'）':''}`,{direction:'top',offset:[0,-8]});
-    marker.on('click',()=>selectItem(key));
+    marker.on('click',()=>selectItem(key,'marker'));
     marker.addTo(map);
     markers.set(key,marker);
     markerItems.set(key,o);
@@ -147,12 +138,12 @@ function renderMarkers(){
   else if(bounds.length>1)map.fitBounds(L.latLngBounds(bounds).pad(0.2));
 }
 
-function selectItem(key){
+function selectItem(key,origin){
   const prevKey=selectedKey;
   const prevItem=selectedItem;
   selectedKey=key;
   const item=visible.find(o=>itemKey(o,visible.indexOf(o))===key);
-  if(!item){selectedKey=prevKey;selectedItem=prevItem;return}
+  if(!item){selectedKey=prevKey;selectedItem=prevItem;selectedOrigin=null;return}
   for(const button of document.querySelectorAll('.tokusan-card'))button.setAttribute('aria-current',button.dataset.key===key?'true':'false');
   if(prevItem&&prevKey!==key){
     const prevMarker=markers.get(prevKey);
@@ -161,20 +152,25 @@ function selectItem(key){
   const marker=markers.get(key);
   if(marker)marker.setIcon(markerIcon(item,true));
   selectedItem=item;
-  showDetail(item);
+  selectedOrigin=origin;
+  showDetail(item,origin);
   if(hasCoordinates(item)){
     map.setView([item.latitude,item.longitude],Math.max(map.getZoom(),9));
   }
+  const focusTarget=document.querySelector('#detail-title');
   document.querySelector('#detail-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+  requestAnimationFrame(()=>{map.invalidateSize();focusTarget?.focus({preventScroll:origin!=='marker'})});
 }
 
-function showDetail(o){
+function showDetail(o,origin){
   const panel=document.querySelector('#detail-panel');
   const content=document.querySelector('#detail-content');
   const located=hasCoordinates(o);
   const cat=categoryCode(o);
+  panel.hidden=false;
+  document.querySelector('.app-shell').classList.add('has-detail');
   document.querySelector('#detail-panel').hidden=false;
-  document.querySelector('#detail-origin').textContent=located?`位置：${o.prefecture||o.place||''}付近`:`産地：${o.prefecture||o.place||'不明'}`;
+  document.querySelector('#detail-origin').textContent=origin==='marker'?'地図から選択':`産地：${o.prefecture||o.place||'不明'}`;
   const catRow=CATEGORY_META.some(m=>m.code===cat)?['カテゴリ',`<span class="detail-cat" style="color:var(--color-cat-${cat})">${esc(categoryLabel(cat))}</span>`]:null;
   const rows=[
     ['品目',esc(o.label_en||'—')],
@@ -185,15 +181,13 @@ function showDetail(o){
     ['信頼度',o.confidence?`${Math.round(o.confidence*100)}%`:'—'],
     ['出典',o.source_url?`<a href="${esc(o.source_url)}" target="_blank" rel="noopener">Wikipedia</a>`:'—'],
   ];
-  content.innerHTML=`<div class="detail">
-    <h2>${esc(o.label_ja||o.label_en||o.qid)}</h2>
+  const wiki=`https://www.wikidata.org/wiki/${encodeURIComponent(o.qid)}`;
+  content.innerHTML=`<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(o.label_ja||o.label_en||o.qid)}</h2></header>
     <dl class="detail-facts">${rows.map(([dt,dd])=>`<div><dt>${dt}</dt><dd>${dd}</dd></div>`).join('')}</dl>
-    <div class="detail-section"><h3>写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></div>
-    ${o.evidence?`<div class="detail-section"><h3>根拠 (LLM 抽出)</h3><p class="detail-evidence"><span class="quote">${esc(o.evidence)}</span></p><p class="detail-note">産地は日本語 Wikipedia 記事から LLM で抽出し、座標は Nominatim でジオコードしたため、目安としてお取り決めください。</p></div>`:''}
-    <p class="detail-note">出典：<a href="${esc('https://www.wikidata.org/wiki/'+o.qid)}" target="_blank" rel="noopener">Wikidata ${esc(o.qid)}</a></p>
-  </div>`;
-  document.querySelector('#detail-panel').hidden=false;
-  panel.parentElement.classList.add('has-detail');
+    <section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section>
+    ${o.evidence?`<section class="detail-section" aria-labelledby="detail-evidence-h"><h3 id="detail-evidence-h">根拠 (LLM 抽出)</h3><p class="detail-evidence"><span class="quote">${esc(o.evidence)}</span></p><p class="detail-note">産地は日本語 Wikipedia 記事から LLM で抽出し、座標は Nominatim でジオコードしたため、目安としてお取り決めください。</p></section>`:''}
+    <section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" aria-label="出典"><a href="${esc(wiki)}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a></nav></section>
+  </article>`;
   hydrateImage(o);
 }
 
@@ -233,14 +227,22 @@ function openLightbox(url,alt){const dialog=document.querySelector('#lightbox'),
 function closeLightbox(){const dialog=document.querySelector('#lightbox');if(dialog.open)dialog.close();document.querySelector('#lightbox-image').src='';document.querySelector('#lightbox-image').removeAttribute('alt')}
 
 function closeDetail(){
-  document.querySelector('#detail-panel').hidden=true;
-  document.querySelector('.app-shell').classList.remove('has-detail');
-  if(selectedItem&&selectedKey){
+  const key=selectedKey,origin=selectedOrigin;
+  if(selectedKey&&selectedItem){
     const m=markers.get(selectedKey);
     if(m)m.setIcon(markerIcon(selectedItem,false));
   }
   selectedItem=null;
   selectedKey=null;
+  selectedOrigin=null;
+  document.querySelector('#detail-panel').hidden=true;
+  document.querySelector('.app-shell').classList.remove('has-detail');
+  document.querySelectorAll('.tokusan-card').forEach(card=>card.setAttribute('aria-current','false'));
+  requestAnimationFrame(()=>map.invalidateSize());
+  if(key){
+    const target=origin==='marker'?document.querySelector('#map'):document.querySelector(`.tokusan-card[data-key="${CSS.escape(key)}"]`);
+    target?.focus();
+  }
 }
 
 document.querySelector('#keyword').addEventListener('input',applyFilters);
