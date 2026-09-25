@@ -84,12 +84,25 @@ with tempfile.TemporaryDirectory() as tmp:
     check("reminder exit", code, 1)
 
     print("5. 200でもerror付き応答は障害として数える")
-    write_rows(root, [row(i, path="/v1/chat/completions", error="BrokenPipeError") for i in range(3)] +
+    write_rows(root, [row(i, path="/v1/chat/completions", error="IncompleteRead(0 bytes read)") for i in range(3)] +
                     [row(20 + i, path="/v1/chat/completions") for i in range(9)])
     monitor.STATE_FILE.unlink()
     code, message = monitor.run(NOW, models())
     check("exit", code, 1)
     check("error rate", "3/12 (25.0%)" in message, True)
+
+    print("5b. クライアント切断と対話キュー満杯は通知せず、切断数だけ出す")
+    write_rows(root, [row(i, path="/v1/chat/completions", error="ConnectionResetError: [Errno 104] Connection reset by peer")
+                      for i in range(5)] +
+                     [row(10 + i, status=503, error="BrokenPipeError: [Errno 32] Broken pipe") for i in range(3)] +
+                     [row(20 + i, path="/v1/chat/completions", status=503, error="interactive queue busy")
+                      for i in range(5)] +
+                     [row(30 + i, path="/v1/chat/completions") for i in range(10)])
+    monitor.STATE_FILE.unlink()
+    code, message = monitor.run(NOW, models())
+    check("exit", code, 3)
+    check("eligible", "/v1/chat/completions=0/10" in message, True)
+    check("disconnects", "client_disconnects=8" in message, True)
 
     print("6. data: [] を通知する")
     write_rows(root, [])

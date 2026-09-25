@@ -31,7 +31,12 @@ FAILURE_RATE = 0.20
 MIN_FAILURES = 3
 REMINDER = timedelta(minutes=30)
 PATHS = frozenset({"/api/generate", "/v1/chat/completions"})
-EXPECTED_QUEUE_BUSY = "generation queue busy"
+# Intentional back-pressure from this proxy's gates; not upstream failures.
+EXPECTED_QUEUE_BUSY = frozenset({"generation queue busy", "interactive queue busy"})
+# The proxy logs "<ExceptionName>: ..." when the caller hung up mid-response
+# (opencode abandoning a long wait is the common case).  Upstream loss shows up
+# as URLError/HTTP status instead, so these are reported but not alerted on.
+CLIENT_DISCONNECT_PREFIXES = ("BrokenPipeError", "ConnectionResetError")
 
 
 def _parse_ts(value: object) -> datetime | None:
@@ -105,20 +110,24 @@ def probe_models(opener=urllib.request.urlopen) -> tuple[int | None, str | None]
     return len(models), None
 
 
-def summarize(rows: list[dict[str, Any]]) -> tuple[int, int, dict[str, tuple[int, int]]]:
-    """Return eligible total, failures, and per-path (total, failures).
+def summarize(rows: list[dict[str, Any]]) -> tuple[int, int, dict[str, tuple[int, int]], int]:
+    """Return eligible total, failures, per-path (total, failures), and client disconnects.
 
-    A 503 created by this proxy's intentional one-at-a-time generation gate is
+    A 503 created by this proxy's intentional generation/interactive gates is
     not an upstream failure.  Its exact error marker is part of the proxy
-    contract, so exclude it from both numerator and denominator.
+    contract, so exclude it from both numerator and denominator.  Client
+    disconnects are excluded the same way but counted separately.
     """
-    total = failures = 0
+    total = failures = disconnects = 0
     per_path = {path: [0, 0] for path in PATHS}
     for row in rows:
         path = row["path"]
         error = str(row.get("error") or "")
         status = row.get("status")
-        if status == 503 and error == EXPECTED_QUEUE_BUSY:
+        if status == 503 and error in EXPECTED_QUEUE_BUSY:
+            continue
+        if error.startswith(CLIENT_DISCONNECT_PREFIXES):
+            disconnects += 1
             continue
         total += 1
         per_path[path][0] += 1
@@ -126,7 +135,8 @@ def summarize(rows: list[dict[str, Any]]) -> tuple[int, int, dict[str, tuple[int
         if failed:
             failures += 1
             per_path[path][1] += 1
-    return total, failures, {path: (values[0], values[1]) for path, values in per_path.items()}
+    per_path_result = {path: (values[0], values[1]) for path, values in per_path.items()}
+    return total, failures, per_path_result, disconnects
 
 
 def load_state() -> dict[str, Any]:
@@ -159,7 +169,7 @@ def run(now: datetime | None = None, opener=urllib.request.urlopen) -> tuple[int
     now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     model_count, probe_error = probe_models(opener)
     rows, malformed, log_errors = read_usage(now)
-    total, failures, per_path = summarize(rows)
+    total, failures, per_path, disconnects = summarize(rows)
     findings = list(log_errors)
     if probe_error:
         findings.append(probe_error)
@@ -173,6 +183,8 @@ def run(now: datetime | None = None, opener=urllib.request.urlopen) -> tuple[int
     details = ", ".join(
         f"{path}={failed}/{count}" for path, (count, failed) in sorted(per_path.items()))
     diagnostics = f"models={model_count if model_count is not None else 'unknown'}; {details}"
+    if disconnects:
+        diagnostics += f"; client_disconnects={disconnects}"
     if malformed:
         diagnostics += f"; skipped_malformed={malformed}"
 
