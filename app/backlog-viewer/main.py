@@ -688,7 +688,15 @@ function picked() {
 function build(kind, ids) {
   if (!ids.length) return '';
   if (kind === 'close') {
-    return 'bd close ' + ids.join(' ') + ' -r "棚卸し ' + TODAY + ': 着手されないまま滞留したため打ち切り"';
+    // 事情の違う行に同じ理由を付けないよう、理由ごとに1行ずつ出す。
+    const groups = new Map();
+    ids.forEach(id => {
+      const reason = document.querySelector('tr[data-id="' + CSS.escape(id) + '"]').dataset.closeReason;
+      if (!groups.has(reason)) groups.set(reason, []);
+      groups.get(reason).push(id);
+    });
+    return Array.from(groups, ([reason, group]) =>
+      'bd close ' + group.join(' ') + ' -r "棚卸し ' + TODAY + ': ' + reason + '"').join('\\n');
   }
   return 'bd defer ' + ids.join(' ') + ' --until=' + DEFER_UNTIL;
 }
@@ -818,6 +826,21 @@ def _return_cell(row: "BacklogRow", today: date) -> str:
     return f'<span class="{cls}">{row.defer_until:%-m/%-d}</span>'
 
 
+def _close_reason(row: "BacklogRow", today: date) -> str:
+    """打ち切る事情。行ごとに違う理由を、閉じた記録に残す。"""
+    if row.freeze_record:
+        return "凍結の記録を整理"
+    if row.deferred:
+        if row.defer_until is None:
+            return "外部待ちのまま復帰日が決まらなかったため打ち切り"
+        if row.defer_until <= today:
+            return f"外部待ちの復帰日 {row.defer_until:%-m/%-d} を過ぎても再開されなかったため打ち切り"
+        return "外部待ちの解消を待たずに打ち切り"
+    if row.started:
+        return "着手後に更新が止まったため打ち切り"
+    return "着手されないまま滞留したため打ち切り"
+
+
 def _title_cell(r: "BacklogRow", chips: str) -> str:
     """タイトルを開くと description と acceptance が読める。本文が無ければ開かせない。"""
     title = html.escape(r.title) + chips
@@ -888,7 +911,8 @@ def render_page(issues: list[Issue], today: date) -> str:
         wait_chip = '<span class="chip gray">外部待ち</span>' if show_wait and r.deferred else ""
         return (
             f'<tr data-age="{r.age_days}" data-priority="{r.priority}" '
-            f'data-id="{html.escape(r.id, quote=True)}">'
+            f'data-id="{html.escape(r.id, quote=True)}" '
+            f'data-close-reason="{html.escape(_close_reason(r, today), quote=True)}">'
             f'<td><input type="checkbox" class="pick" value="{html.escape(r.id)}" '
             f'aria-label="{html.escape(r.id)} を選択"></td>'
             f'<td class="id">{html.escape(r.id)}</td>'

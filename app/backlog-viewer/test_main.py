@@ -401,6 +401,33 @@ class TestPage:
         assert "外部待ち</span>" not in deferred_fold
         assert cold_fold.count("外部待ち</span>") == 1
 
+    def test_close_reason_follows_each_rows_circumstances(self):
+        today = date(2026, 9, 26)
+        issues = main.parse_issues([
+            issue("idle", iso(2026, 8, 1)),
+            issue("begun", iso(2026, 8, 1), status="in_progress", started=iso(2026, 8, 2)),
+            issue("overdue", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 9, 1)),
+            issue("waiting", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 12, 1)),
+            issue("open-ended", iso(2026, 8, 1), status="deferred"),
+            issue("rec", iso(2026, 8, 1), title="A を凍結中"),
+        ])
+        reasons = {r.id: main._close_reason(r, today) for r in main.backlog_rows(issues, today)}
+        assert reasons == {
+            "idle": "着手されないまま滞留したため打ち切り",
+            "begun": "着手後に更新が止まったため打ち切り",
+            "overdue": "外部待ちの復帰日 9/1 を過ぎても再開されなかったため打ち切り",
+            "waiting": "外部待ちの解消を待たずに打ち切り",
+            "open-ended": "外部待ちのまま復帰日が決まらなかったため打ち切り",
+            "rec": "凍結の記録を整理",
+        }
+        page = main.render_page(issues, today)
+        assert 'data-id="begun" data-close-reason="着手後に更新が止まったため打ち切り"' in page
+
+    def test_close_command_is_split_per_reason(self):
+        assert "dataset.closeReason" in main.JS
+        assert ".join('\\n')" in main.JS
+        assert "着手されないまま滞留したため打ち切り" not in main.JS
+
     def test_priority_chips_step_down_without_new_hues(self):
         assert 'class="chip">P1<' in main._priority_chip(1)
         assert 'class="chip gray">P2<' in main._priority_chip(2)
