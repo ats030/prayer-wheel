@@ -456,50 +456,6 @@ class TestFavicon:
         assert 'href="/favicon.svg?v=2"' in main.render_page([], date(2026, 8, 24))
 
 
-class TestWeeklySummary:
-    def test_delta_compares_with_seven_days_ago(self):
-        issues = main.parse_issues([
-            issue("old", iso(2026, 8, 1)),
-            issue("new1", iso(2026, 8, 18)),
-            issue("new2", iso(2026, 8, 19)),
-        ])
-        s = main.weekly_summary(issues, today=date(2026, 8, 21))
-        assert s["remaining"] == 3
-        assert s["delta_7d"] == 2  # 7日前は old の1件だけ
-
-    def test_delta_is_negative_when_backlog_shrank(self):
-        issues = main.parse_issues([
-            issue("a", iso(2026, 8, 1), closed=iso(2026, 8, 20), status="closed"),
-            issue("b", iso(2026, 8, 1)),
-        ])
-        s = main.weekly_summary(issues, today=date(2026, 8, 21))
-        assert s["remaining"] == 1
-        assert s["delta_7d"] == -1
-
-    def test_lists_oldest_items(self):
-        issues = main.parse_issues([
-            issue("old", iso(2026, 6, 1), title="最古"),
-            issue("new", iso(2026, 8, 20), title="最新"),
-        ])
-        s = main.weekly_summary(issues, today=date(2026, 8, 21))
-        assert s["oldest"][0].id == "old"
-        assert s["over_30_days"] == 1
-
-
-class TestNotifyMessage:
-    def test_deferred_items_are_marked_in_the_list(self):
-        import notify
-
-        issues = main.parse_issues([
-            issue("a", iso(2026, 6, 1), status="deferred", title="ライセンス照会中"),
-            issue("b", iso(2026, 7, 1), title="ただの残件"),
-        ])
-        today = date(2026, 8, 21)
-        text = notify.build_message(main.weekly_summary(issues, today), today)
-        assert "[外部待ち] ライセンス照会中" in text
-        assert "[外部待ち] ただの残件" not in text
-
-
 class TestBdBinary:
     def test_prefers_path_when_available(self, monkeypatch):
         monkeypatch.setattr(main.shutil, "which", lambda name: "/usr/bin/bd")

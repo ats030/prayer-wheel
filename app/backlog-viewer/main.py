@@ -1023,27 +1023,3 @@ def index() -> HTMLResponse:
 def healthz() -> dict:
     return {"status": "ok"}
 
-
-def weekly_summary(issues: list[Issue], today: date) -> dict:
-    """週次通知用のサマリ。
-
-    先週比はスナップショットを保存せずに出す。created_at/closed_at から
-    過去の残件数をそのまま復元できるので、状態を持つ必要がない。
-    """
-    m = metrics(issues, today)
-    week_ago = today - timedelta(days=7)
-    before = sum(1 for i in issues if i.open_on(week_ago))
-    rows = backlog_rows(issues, today)
-    return {
-        "remaining": m.remaining,
-        "deferred": m.deferred,
-        "over_30_days": m.over_30_days,
-        "median_age": m.median_age,
-        "delta_7d": m.remaining - before,
-        "by_agent": m.by_agent,
-        "by_owner": m.by_owner,
-        "by_decision": m.by_decision,
-        "freeze_expired": m.freeze_expired,
-        "freeze_undated": m.freeze_undated,
-        "oldest": rows[:5],
-    }
