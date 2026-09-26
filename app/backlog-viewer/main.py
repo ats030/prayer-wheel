@@ -27,6 +27,9 @@ JST = ZoneInfo("Asia/Tokyo")
 # 積み上げグラフの層キー。通常の層は「作成週の月曜日」(date)、
 # deferred だけは作成週から抜いてこの sentinel の層へ移す。
 DEFERRED_LAYER = "deferred"
+# 「外部待ちへ送る」で付ける期限。期限なしの defer は戻る日が来ず放置と同じなので、
+# これまで手で付けてきた3ヶ月に揃える。
+DEFER_DAYS = 90
 
 # 未クローズとみなす status。bd は closed 以外に open / in_progress / deferred を返す。
 OPEN_STATUSES = ("open", "in_progress", "deferred")
@@ -569,6 +572,9 @@ h2 { font-size: 14px; font-weight: 600; font-style: normal; margin: 0; color: va
 .tile .v { font-size: 22px; font-weight: 600; }
 .tile .k { color: var(--subtle); font-size: 12px; }
 .tile .n { color: var(--subtle); font-size: 11px; margin-top: 2px; }
+a.tile { display: block; color: inherit; text-decoration: none; }
+a.tile:hover { background: var(--hover); border-color: var(--border-strong); }
+a.tile:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
 .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
 .fold-body > .panel + .panel { margin-top: 8px; }
 .section-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin: 20px 0 8px; }
@@ -655,6 +661,7 @@ textarea:focus { outline: 2px solid var(--accent-soft); outline-offset: 1px; bor
 
 JS = """
 const TODAY = "__TODAY__";
+const DEFER_UNTIL = "__DEFER_UNTIL__";
 function picked() {
   return Array.from(document.querySelectorAll('.pick:checked')).map(e => e.value);
 }
@@ -663,7 +670,7 @@ function build(kind, ids) {
   if (kind === 'close') {
     return 'bd close ' + ids.join(' ') + ' -r "棚卸し ' + TODAY + ': 着手されないまま滞留したため打ち切り"';
   }
-  return 'bd defer ' + ids.join(' ');
+  return 'bd defer ' + ids.join(' ') + ' --until=' + DEFER_UNTIL;
 }
 function refresh() {
   const ids = picked();
@@ -708,6 +715,14 @@ function sortTables(order) {
       .forEach(row => body.appendChild(row));
   });
 }
+function showOver30(event) {
+  // 30日超は閉じた一覧に沈みやすいので、該当する一覧を開いて先頭の行へ移る。
+  event.preventDefault();
+  const rows = Array.from(document.querySelectorAll('tbody[data-sortable] tr'))
+    .filter(row => Number(row.dataset.age) > 30);
+  rows.forEach(row => { const fold = row.closest('details'); if (fold) fold.open = true; });
+  if (rows.length) rows[0].scrollIntoView({block: 'center'});
+}
 function chartToLatest(move) {
   document.querySelectorAll('.chart').forEach(el => {
     const scrollable = el.scrollWidth > el.clientWidth + 1;
@@ -726,6 +741,8 @@ document.addEventListener('DOMContentLoaded', () => {
   chartToLatest(true);
   window.addEventListener('resize', () => chartToLatest(false));
   document.querySelectorAll('.pick').forEach(e => e.addEventListener('change', refresh));
+  const over30 = document.getElementById('tile-over30');
+  if (over30) over30.addEventListener('click', showOver30);
   document.querySelectorAll('.copy').forEach(b => {
     b.dataset.label = b.textContent;
     b.addEventListener('click', () => copyFrom(b.dataset.target, b));
@@ -745,6 +762,13 @@ def _return_note(m: "Metrics") -> str:
         return "期限つきの復帰予定なし"
     day, count = m.peak_return
     return f"最大の復帰は {day:%-m/%-d} の {count}件"
+
+
+def _over30_note(action_rows, deferred_rows, cold_rows) -> str:
+    counts = [(label, sum(1 for r in rows if r.age_days > 30)) for label, rows in (
+        ("判断", action_rows), ("外部待ち", deferred_rows), ("凍結", cold_rows))]
+    parts = [f"{label} {n}" for label, n in counts if n]
+    return " · ".join(parts) if parts else "打ち切りの候補なし"
 
 
 def _return_cell(row: "BacklogRow", today: date) -> str:
@@ -770,18 +794,6 @@ def render_page(issues: list[Issue], today: date) -> str:
     rows = sorted(backlog_rows(issues, today),
                   key=lambda r: (r.priority, -r.age_days, r.id))
 
-    # 初期画面には、棚卸し判断へ直接つながる3指標だけを置く。
-    tiles = [
-        ("エージェントが進められる", str(m.by_agent),
-         f"要判断 {m.by_decision} · 所有者 {m.by_owner}"),
-        ("30日超", str(m.over_30_days), "打ち切りを先に検討"),
-        ("期限切れの外部待ち", str(m.freeze_expired), _return_note(m)),
-    ]
-    tile_html = "".join(
-        f'<div class="tile"><div class="k">{html.escape(k)}</div>'
-        f'<div class="v">{html.escape(v)}</div><div class="n">{html.escape(n)}</div></div>'
-        for k, v, n in tiles
-    )
 
     max_created = max((c.created for c in cohorts), default=1)
     cohort_html = "".join(
@@ -801,6 +813,23 @@ def render_page(issues: list[Issue], today: date) -> str:
     live_rows, cold_rows = split_rows(rows)
     action_rows = [r for r in live_rows if not r.deferred]
     deferred_rows = [r for r in live_rows if r.deferred]
+
+    # 初期画面には、棚卸し判断へ直接つながる3指標だけを置く。
+    # 30日超は閉じた一覧に偏りやすいので、どの一覧にあるかを添えて辿れるようにする。
+    tiles = [
+        ("エージェントが進められる", str(m.by_agent),
+         f"要判断 {m.by_decision} · 所有者 {m.by_owner}", ""),
+        ("30日超", str(m.over_30_days), _over30_note(action_rows, deferred_rows, cold_rows),
+         "tile-over30" if m.over_30_days else ""),
+        ("期限切れの外部待ち", str(m.freeze_expired), _return_note(m), ""),
+    ]
+    tile_html = "".join(
+        (f'<a class="tile" id="{tid}" href="#">' if tid else '<div class="tile">')
+        + f'<div class="k">{html.escape(k)}</div>'
+        f'<div class="v">{html.escape(v)}</div><div class="n">{html.escape(n)}</div>'
+        + ("</a>" if tid else "</div>")
+        for k, v, n, tid in tiles
+    )
 
     def _row(r) -> str:
         actor_chip = "" if r.deferred else {
@@ -909,7 +938,8 @@ def render_page(issues: list[Issue], today: date) -> str:
     <textarea id="cmd-defer" readonly aria-label="bd defer コマンド"></textarea>
   </div>
 </div></div>
-<script>{JS.replace("__TODAY__", today.isoformat())}</script>
+<script>{JS.replace("__TODAY__", today.isoformat()).replace(
+    "__DEFER_UNTIL__", (today + timedelta(days=DEFER_DAYS)).isoformat())}</script>
 </body></html>"""
 
 

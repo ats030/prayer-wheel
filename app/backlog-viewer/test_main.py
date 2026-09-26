@@ -338,6 +338,32 @@ class TestPage:
         assert "<strong>外部待ち</strong>" in page
         assert "dock-actions" in page and "dock-output" in page
 
+    def test_defer_command_always_carries_a_deadline(self):
+        page = main.render_page([], date(2026, 9, 26))
+        # 期限なしの defer は画面が「未設定」と警告する状態なので、ボタンから作らない
+        assert "' --until=' + DEFER_UNTIL" in main.JS
+        assert 'const DEFER_UNTIL = "2026-12-25";' in page
+
+    def test_over_30_tile_points_to_the_folds_that_hold_the_rows(self):
+        issues = main.parse_issues([
+            issue("fresh", iso(2026, 9, 20)),
+            issue("wait-old", iso(2026, 7, 1), status="deferred",
+                  defer_until=iso(2026, 11, 23)),
+            issue("record-old", iso(2026, 7, 1), status="deferred",
+                  title="record \u51cd\u7d50\u4e2d"),
+        ])
+        page = main.render_page(issues, date(2026, 9, 26))
+        assert '<a class="tile" id="tile-over30" href="#">' in page
+        assert "外部待ち 1 · 凍結 1" in page
+        assert page.count('class="tile"') == 3
+        assert "fold.open = true" in main.JS
+
+    def test_over_30_tile_is_plain_when_nothing_is_old(self):
+        issues = main.parse_issues([issue("fresh", iso(2026, 9, 20))])
+        page = main.render_page(issues, date(2026, 9, 26))
+        assert 'id="tile-over30"' not in page
+        assert "打ち切りの候補なし" in page
+
     def test_select_all_is_scoped_to_its_own_table(self):
         assert "source.closest('table').querySelectorAll('.pick')" in main.JS
 
