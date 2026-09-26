@@ -154,8 +154,8 @@ function selectItem(key,origin){
   selectedItem=item;
   selectedOrigin=origin;
   showDetail(item,origin);
-  if(hasCoordinates(item)){
-    map.setView([item.latitude,item.longitude],Math.max(map.getZoom(),9));
+  if(origin==='list'&&hasCoordinates(item)){
+    map.flyTo([item.latitude,item.longitude],Math.max(map.getZoom(),8),{duration:.55});
   }
   const focusTarget=document.querySelector('#detail-title');
   document.querySelector('#detail-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
