@@ -341,8 +341,19 @@ class TestPage:
     def test_defer_command_always_carries_a_deadline(self):
         page = main.render_page([], date(2026, 9, 26))
         # 期限なしの defer は画面が「未設定」と警告する状態なので、ボタンから作らない
-        assert "' --until=' + DEFER_UNTIL" in main.JS
-        assert 'const DEFER_UNTIL = "2026-12-25";' in page
+        assert "' --until=' + document.getElementById('defer-until').value" in main.JS
+        assert 'id="defer-until" value="2026-12-25" min="2026-09-27"' in page
+
+    def test_defer_date_shows_how_many_already_return_that_day(self):
+        issues = main.parse_issues([
+            issue("a", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 11, 23)),
+            issue("b", iso(2026, 8, 2), status="deferred", defer_until=iso(2026, 11, 23)),
+            issue("c", iso(2026, 8, 3), status="deferred", defer_until=iso(2026, 12, 1)),
+            issue("d", iso(2026, 8, 4), status="deferred"),
+        ])
+        page = main.render_page(issues, date(2026, 9, 26))
+        assert 'const RETURNS = {"2026-11-23": 2, "2026-12-01": 1};' in page
+        assert 'id="defer-load"' in page
 
     def test_over_30_tile_points_to_the_folds_that_hold_the_rows(self):
         issues = main.parse_issues([
@@ -405,7 +416,10 @@ class TestPage:
         today = date(2026, 9, 26)
         issues = main.parse_issues([
             issue("idle", iso(2026, 8, 1)),
+            issue("fresh", iso(2026, 9, 20)),
             issue("begun", iso(2026, 8, 1), status="in_progress", started=iso(2026, 8, 2)),
+            issue("busy", iso(2026, 8, 1), status="in_progress", started=iso(2026, 8, 2),
+                  updated=iso(2026, 9, 26)),
             issue("overdue", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 9, 1)),
             issue("waiting", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 12, 1)),
             issue("open-ended", iso(2026, 8, 1), status="deferred"),
@@ -414,7 +428,9 @@ class TestPage:
         reasons = {r.id: main._close_reason(r, today) for r in main.backlog_rows(issues, today)}
         assert reasons == {
             "idle": "着手されないまま滞留したため打ち切り",
+            "fresh": "着手前に打ち切り",
             "begun": "着手後に更新が止まったため打ち切り",
+            "busy": "着手中のまま打ち切り",
             "overdue": "外部待ちの復帰日 9/1 を過ぎても再開されなかったため打ち切り",
             "waiting": "外部待ちの解消を待たずに打ち切り",
             "open-ended": "外部待ちのまま復帰日が決まらなかったため打ち切り",
@@ -422,6 +438,8 @@ class TestPage:
         }
         page = main.render_page(issues, today)
         assert 'data-id="begun" data-close-reason="着手後に更新が止まったため打ち切り"' in page
+        # 作業中の行は一覧で見分けられる。未着手の行には出ない。
+        assert page.count('<span class="chip started">着手済み</span>') == 2
 
     def test_close_command_is_split_per_reason(self):
         assert "dataset.closeReason" in main.JS

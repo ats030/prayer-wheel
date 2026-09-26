@@ -14,6 +14,7 @@ import json
 import os
 import shutil
 import subprocess
+from collections import Counter
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from statistics import median
@@ -30,6 +31,8 @@ DEFERRED_LAYER = "deferred"
 # 「外部待ちへ送る」で付ける期限。期限なしの defer は戻る日が来ず放置と同じなので、
 # これまで手で付けてきた3ヶ月に揃える。
 DEFER_DAYS = 90
+# これを超えて動きが無ければ「止まった」「滞留した」とみなす。滞留日数の警告色と揃える。
+STALE_DAYS = 14
 
 # 未クローズとみなす status。bd は closed 以外に open / in_progress / deferred を返す。
 OPEN_STATUSES = ("open", "in_progress", "deferred")
@@ -613,6 +616,11 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .chip.faint { background: transparent; color: var(--subtle); box-shadow: inset 0 0 0 1px var(--border); }
 .chip.owner { background: var(--owner-wash); color: var(--owner-text); }
 .chip.decision { background: var(--decision-wash); color: var(--decision-text); }
+.chip.started { background: transparent; color: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-soft); }
+.defer-box { display: grid; gap: 6px; }
+.defer-date { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
+.defer-date input { background: var(--raised); color: var(--text); border: 1px solid var(--border-strong);
+  border-radius: 6px; padding: 3px 8px; font: inherit; color-scheme: dark; }
 .desc > summary { cursor: pointer; list-style: none; }
 .desc > summary::-webkit-details-marker { display: none; }
 .desc > summary:hover { color: var(--accent-soft); }
@@ -681,7 +689,8 @@ textarea:focus { outline: 2px solid var(--accent-soft); outline-offset: 1px; bor
 
 JS = """
 const TODAY = "__TODAY__";
-const DEFER_UNTIL = "__DEFER_UNTIL__";
+// 復帰日ごとの既存の外部待ち件数。同じ日へ積み増していないかを選ぶときに見せる。
+const RETURNS = __RETURNS__;
 function picked() {
   return Array.from(document.querySelectorAll('.pick:checked')).map(e => e.value);
 }
@@ -698,12 +707,14 @@ function build(kind, ids) {
     return Array.from(groups, ([reason, group]) =>
       'bd close ' + group.join(' ') + ' -r "棚卸し ' + TODAY + ': ' + reason + '"').join('\\n');
   }
-  return 'bd defer ' + ids.join(' ') + ' --until=' + DEFER_UNTIL;
+  return 'bd defer ' + ids.join(' ') + ' --until=' + document.getElementById('defer-until').value;
 }
 function refresh() {
   const ids = picked();
   document.getElementById('cmd-close').value = build('close', ids);
   document.getElementById('cmd-defer').value = build('defer', ids);
+  const load = RETURNS[document.getElementById('defer-until').value] || 0;
+  document.getElementById('defer-load').textContent = load ? 'この日に戻る外部待ち ' + load + '件' : 'この日に戻る外部待ちなし';
   document.getElementById('count').textContent = ids.length ? ids.length + ' 件を選択中' : 'タスクを選択';
   document.querySelectorAll('.copy').forEach(b => { b.disabled = ids.length === 0; });
   document.getElementById('dock').classList.toggle('active', ids.length > 0);
@@ -781,6 +792,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sort = document.getElementById('sort-order');
   sortTables(sort.value);
   sort.addEventListener('change', () => sortTables(sort.value));
+  document.getElementById('defer-until').addEventListener('input', refresh);
   chartToLatest(true);
   window.addEventListener('resize', () => chartToLatest(false));
   document.querySelectorAll('.pick').forEach(e => e.addEventListener('change', refresh));
@@ -836,9 +848,14 @@ def _close_reason(row: "BacklogRow", today: date) -> str:
         if row.defer_until <= today:
             return f"外部待ちの復帰日 {row.defer_until:%-m/%-d} を過ぎても再開されなかったため打ち切り"
         return "外部待ちの解消を待たずに打ち切り"
+    # 最近動いた行に「止まった」「滞留した」と書くと、事実と違う記録が残る。
     if row.started:
-        return "着手後に更新が止まったため打ち切り"
-    return "着手されないまま滞留したため打ち切り"
+        if row.idle_days > STALE_DAYS:
+            return "着手後に更新が止まったため打ち切り"
+        return "着手中のまま打ち切り"
+    if row.age_days > STALE_DAYS:
+        return "着手されないまま滞留したため打ち切り"
+    return "着手前に打ち切り"
 
 
 def _title_cell(r: "BacklogRow", chips: str) -> str:
@@ -855,7 +872,7 @@ def _title_cell(r: "BacklogRow", chips: str) -> str:
 
 
 def _age_cell(days: int) -> str:
-    cls = "hot" if days > 30 else ("warn" if days > 14 else "")
+    cls = "hot" if days > 30 else ("warn" if days > STALE_DAYS else "")
     return f'<span class="{cls}">{days}</span>'
 
 
@@ -883,6 +900,9 @@ def render_page(issues: list[Issue], today: date) -> str:
     )
 
     live_rows, cold_rows = split_rows(rows)
+    defer_until = today + timedelta(days=DEFER_DAYS)
+    returns = dict(sorted(Counter(r.defer_until.isoformat() for r in rows
+                                  if r.deferred and r.defer_until).items()))
     action_rows = [r for r in live_rows if not r.deferred]
     deferred_rows = [r for r in live_rows if r.deferred]
 
@@ -909,6 +929,8 @@ def render_page(issues: list[Issue], today: date) -> str:
             "decision": '<span class="chip decision">要判断</span>',
         }.get(r.actor, "")
         wait_chip = '<span class="chip gray">外部待ち</span>' if show_wait and r.deferred else ""
+        # 作業中の行を、未着手の行と同じ感覚で打ち切らないように。
+        started_chip = '<span class="chip started">着手済み</span>' if r.started else ""
         return (
             f'<tr data-age="{r.age_days}" data-priority="{r.priority}" '
             f'data-id="{html.escape(r.id, quote=True)}" '
@@ -921,7 +943,7 @@ def render_page(issues: list[Issue], today: date) -> str:
             + (f'<td class="num">{_return_cell(r, today)}</td>' if show_return else "")
             + f"<td>{_priority_chip(r.priority)}</td>"
             f'<td class="hide-sm">{html.escape(r.issue_type)}</td>'
-            f"<td>{_title_cell(r, wait_chip + actor_chip)}</td></tr>"
+            f"<td>{_title_cell(r, started_chip + wait_chip + actor_chip)}</td></tr>"
         )
 
     def _table(table_rows) -> str:
@@ -1012,11 +1034,15 @@ def render_page(issues: list[Issue], today: date) -> str:
   </div>
   <div class="dock-output">
     <textarea id="cmd-close" readonly aria-label="bd close コマンド"></textarea>
-    <textarea id="cmd-defer" readonly aria-label="bd defer コマンド"></textarea>
+    <div class="defer-box">
+      <label class="defer-date">復帰日<input type="date" id="defer-until" value="{defer_until}" min="{today + timedelta(days=1)}">
+        <span id="defer-load"></span></label>
+      <textarea id="cmd-defer" readonly aria-label="bd defer コマンド"></textarea>
+    </div>
   </div>
 </div></div>
 <script>{JS.replace("__TODAY__", today.isoformat()).replace(
-    "__DEFER_UNTIL__", (today + timedelta(days=DEFER_DAYS)).isoformat())}</script>
+    "__RETURNS__", json.dumps(returns))}</script>
 </body></html>"""
 
 
