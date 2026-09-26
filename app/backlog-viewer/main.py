@@ -590,7 +590,8 @@ a.tile:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2p
 .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
 .fold-body > .panel + .panel { margin-top: 8px; }
 .section-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin: 20px 0 8px; }
-.section-count { color: var(--subtle); font-size: 12px; font-variant-numeric: tabular-nums; }
+/* 狭い幅で折れるときも「所有者」などの語を割らず、区切りの空白で折る。 */
+.section-count { color: var(--subtle); font-size: 12px; font-variant-numeric: tabular-nums; word-break: keep-all; }
 .fold { border-top: 1px solid var(--border); margin-top: 24px; }
 .fold > summary { cursor: pointer; list-style: none; display: flex; align-items: baseline;
   justify-content: space-between; gap: 12px; padding: 14px 0; color: var(--muted); }
@@ -669,7 +670,7 @@ select:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2p
 th[data-sort-key].sorted::after { content: " ▾"; color: var(--accent-soft); }
 .fold-picked { color: var(--accent-soft); }
 .section-tools { display: inline-flex; align-items: baseline; gap: 12px; }
-.sort-control { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+.sort-control { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; white-space: nowrap; }
 textarea {
   width: 100%; background: var(--raised); color: var(--text); border: 1px solid var(--border);
   border-radius: 6px; padding: 8px 10px; font-family: var(--font-mono);
@@ -682,7 +683,9 @@ textarea:focus { outline: 2px solid var(--accent-soft); outline-offset: 1px; bor
   .wrap { padding: 16px 12px 76px; }
   body.has-selection .wrap { padding-bottom: 220px; }
   .tiles { grid-template-columns: 1fr; }
-  .section-head { align-items: flex-start; }
+  /* 見出し・件数・並び順を1行に詰めると語の途中で折れる。見出しの下に件数と並び順を並べる。 */
+  .section-head { flex-direction: column; align-items: stretch; gap: 6px; }
+  .section-tools { display: flex; justify-content: space-between; align-items: center; }
   .dock { padding: 8px 12px; }
   .dock-output { grid-template-columns: 1fr; gap: 6px; margin-top: 6px; }
   /* 狭い画面で折り返すと欄が伸びて一覧を覆う。1行1コマンドのまま横に送る。 */
@@ -1018,7 +1021,7 @@ def render_page(issues: list[Issue], today: date) -> str:
   <div class="tiles">{tile_html}</div>
 
   <div class="section-head">
-    <h2>いま判断するタスク</h2>
+    <h2>棚卸しするタスク</h2>
     <span class="section-tools">
       <span class="section-count">{_actor_breakdown(action_rows)}</span>
       <label class="sort-control" for="sort-order">並び順

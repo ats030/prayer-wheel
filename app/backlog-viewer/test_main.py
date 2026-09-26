@@ -334,7 +334,7 @@ class TestPage:
         ])
         page = main.render_page(issues, date(2026, 8, 24))
         assert page.count('class="tile"') == 3
-        assert page.index("いま判断するタスク") < page.index("傾向を分析する")
+        assert page.index("棚卸しするタスク") < page.index("傾向を分析する")
         assert "<strong>外部待ち</strong>" in page
         assert "dock-actions" in page and "dock-output" in page
 
@@ -450,7 +450,7 @@ class TestPage:
             issue("wait", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 11, 23)),
         ])
         page = main.render_page(issues, date(2026, 9, 26))
-        main_table = page.split("いま判断するタスク")[1].split('<details class="fold">')[0]
+        main_table = page.split("棚卸しするタスク")[1].split('<details class="fold">')[0]
         assert "復帰" not in main_table
         assert page.count('<th class="num">復帰</th>') == 1
 
@@ -522,9 +522,21 @@ class TestPage:
         assert page.count('<span class="fold-picked"></span>') == 2
         assert "all.indeterminate = n > 0 && n < boxes.length;" in main.JS
 
+    def test_list_heading_does_not_reuse_the_actor_word_for_decisions(self):
+        # 担い手の「要判断」とは別物なので、一覧の見出しは下部パネルの「棚卸し」とそろえる
+        page = main.render_page([], date(2026, 9, 26))
+        assert "<h2>棚卸しするタスク</h2>" in page
+        assert "いま判断" not in page
+
+    def test_narrow_heading_puts_count_and_sort_below_the_title(self):
+        mobile = main.CSS.split("@media (max-width: 640px)")[1]
+        assert ".section-head { flex-direction: column;" in mobile
+        assert "white-space: nowrap;" in main.CSS.split(".sort-control {")[1].split("}")[0]
+        assert "word-break: keep-all;" in main.CSS.split(".section-count {")[1].split("}")[0]
+
     def test_sort_control_sits_on_the_task_list_heading(self):
         page = main.render_page([], date(2026, 9, 26))
-        head = page.split("<h2>いま判断するタスク</h2>")[1].split("</div>")[0]
+        head = page.split("<h2>棚卸しするタスク</h2>")[1].split("</div>")[0]
         assert '<select id="sort-order"' in head
 
     def test_all_backlog_tables_support_the_shared_sort_control(self):
