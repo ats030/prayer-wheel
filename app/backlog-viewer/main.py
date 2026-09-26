@@ -79,6 +79,9 @@ class Issue:
     # blocks 依存を持つか。契機が具体的にあるもの (例: X クレジット復旧待ち) は
     # 期限ではなく依存で表現するため、期限なしでも催促しない。
     has_blocker: bool = False
+    # 打ち切るかどうかをタイトル1行で決めずに済むよう、一覧で開いて読めるようにする。
+    description: str = ""
+    acceptance: str = ""
 
     @property
     def deferred(self) -> bool:
@@ -166,6 +169,8 @@ def parse_issues(raw: list[dict]) -> list[Issue]:
                 labels=tuple(r.get("labels") or ()),
                 has_blocker=any(d.get("type") == "blocks"
                                 for d in (r.get("dependencies") or [])),
+                description=r.get("description") or "",
+                acceptance=r.get("acceptance_criteria") or "",
             )
         )
     return issues
@@ -311,6 +316,8 @@ class BacklogRow:
     freeze_record: bool = False
     actor: str = "agent"
     defer_until: date | None = None
+    description: str = ""
+    acceptance: str = ""
 
 
 def backlog_rows(issues: list[Issue], today: date) -> list[BacklogRow]:
@@ -328,6 +335,8 @@ def backlog_rows(issues: list[Issue], today: date) -> list[BacklogRow]:
             freeze_record=i.freeze_record,
             actor=i.actor,
             defer_until=i.defer_until,
+            description=i.description,
+            acceptance=i.acceptance,
         )
         for i in issues
         if i.open_on(today)
@@ -603,6 +612,13 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .chip.gray { background: var(--muted-wash); color: var(--muted); }
 .chip.owner { background: var(--owner-wash); color: var(--owner-text); }
 .chip.decision { background: var(--decision-wash); color: var(--decision-text); }
+.desc > summary { cursor: pointer; list-style: none; }
+.desc > summary::-webkit-details-marker { display: none; }
+.desc > summary:hover { color: var(--accent-soft); }
+.desc-body { margin: 6px 0 2px; padding: 8px 10px; background: var(--raised);
+  border: 1px solid var(--border); border-radius: 6px; color: var(--muted);
+  font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; max-width: 72ch; }
+.desc-label { color: var(--subtle); font-weight: 600; }
 .hot { color: var(--danger); }
 .warn { color: var(--warning); }
 .scroll { overflow-x: auto; }
@@ -782,6 +798,19 @@ def _return_cell(row: "BacklogRow", today: date) -> str:
     return f'<span class="{cls}">{row.defer_until:%-m/%-d}</span>'
 
 
+def _title_cell(r: "BacklogRow", chips: str) -> str:
+    """タイトルを開くと description と acceptance が読める。本文が無ければ開かせない。"""
+    title = html.escape(r.title) + chips
+    parts = [html.escape(r.description)] if r.description else []
+    if r.acceptance:
+        parts.append(f'<span class="desc-label">完了条件</span>\n{html.escape(r.acceptance)}')
+    if not parts:
+        return title
+    body = "\n\n".join(parts)
+    return (f'<details class="desc"><summary>{title}</summary>'
+            f'<div class="desc-body">{body}</div></details>')
+
+
 def _age_cell(days: int) -> str:
     cls = "hot" if days > 30 else ("warn" if days > 14 else "")
     return f'<span class="{cls}">{days}</span>'
@@ -831,7 +860,7 @@ def render_page(issues: list[Issue], today: date) -> str:
         for k, v, n, tid in tiles
     )
 
-    def _row(r) -> str:
+    def _row(r, show_return: bool) -> str:
         actor_chip = "" if r.deferred else {
             "owner": '<span class="chip owner">所有者</span>',
             "decision": '<span class="chip decision">要判断</span>',
@@ -845,21 +874,24 @@ def render_page(issues: list[Issue], today: date) -> str:
             f'<td class="id">{html.escape(r.id)}</td>'
             f'<td class="num">{_age_cell(r.age_days)}</td>'
             f'<td class="num hide-sm">{r.idle_days}</td>'
-            f'<td class="num">{_return_cell(r, today)}</td>'
-            f"<td>{_priority_chip(r.priority)}</td>"
+            + (f'<td class="num">{_return_cell(r, today)}</td>' if show_return else "")
+            + f"<td>{_priority_chip(r.priority)}</td>"
             f'<td class="hide-sm">{html.escape(r.issue_type)}</td>'
-            f"<td>{html.escape(r.title)}{wait_chip}{actor_chip}</td></tr>"
+            f"<td>{_title_cell(r, wait_chip + actor_chip)}</td></tr>"
         )
 
     def _table(table_rows) -> str:
         if not table_rows:
             return '<div class="panel"><p class="note">該当するタスクはない。</p></div>'
+        # 復帰日は外部待ちの行にしか無い。値の無い列で幅を使わない。
+        show_return = any(r.deferred for r in table_rows)
         return (
             '<div class="panel scroll"><table><thead><tr>'
             '<th><input type="checkbox" onchange="toggleAll(this)" aria-label="この一覧をすべて選択"></th>'
             '<th>ID</th><th class="num">滞留</th><th class="num hide-sm">無更新</th>'
-            '<th class="num">復帰</th><th>P</th><th class="hide-sm">種別</th><th>タイトル</th>'
-            f'</tr></thead><tbody data-sortable>{"".join(_row(r) for r in table_rows)}</tbody></table></div>'
+            + ('<th class="num">復帰</th>' if show_return else "")
+            + '<th>P</th><th class="hide-sm">種別</th><th>タイトル</th>'
+            f'</tr></thead><tbody data-sortable>{"".join(_row(r, show_return) for r in table_rows)}</tbody></table></div>'
         )
 
     analysis_note = (

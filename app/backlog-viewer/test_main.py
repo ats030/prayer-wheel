@@ -364,6 +364,30 @@ class TestPage:
         assert 'id="tile-over30"' not in page
         assert "打ち切りの候補なし" in page
 
+    def test_title_opens_description_and_acceptance(self):
+        raw = issue("a", iso(2026, 9, 20), title="t <x>")
+        raw["description"] = "背景 & 理由"
+        raw["acceptance_criteria"] = "テストが通る"
+        page = main.render_page(main.parse_issues([raw]), date(2026, 9, 26))
+        assert '<details class="desc"><summary>t &lt;x&gt;</summary>' in page
+        assert "背景 &amp; 理由" in page
+        assert "完了条件" in page and "テストが通る" in page
+
+    def test_title_without_body_is_not_expandable(self):
+        page = main.render_page(main.parse_issues([issue("a", iso(2026, 9, 20))]),
+                                date(2026, 9, 26))
+        assert 'class="desc"' not in page
+
+    def test_return_column_only_where_rows_can_return(self):
+        issues = main.parse_issues([
+            issue("now", iso(2026, 9, 20)),
+            issue("wait", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 11, 23)),
+        ])
+        page = main.render_page(issues, date(2026, 9, 26))
+        main_table = page.split("いま判断するタスク")[1].split('<details class="fold">')[0]
+        assert "復帰" not in main_table
+        assert page.count('<th class="num">復帰</th>') == 1
+
     def test_select_all_is_scoped_to_its_own_table(self):
         assert "source.closest('table').querySelectorAll('.pick')" in main.JS
 
