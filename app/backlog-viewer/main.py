@@ -610,6 +610,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .chip { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 11px;
   background: var(--accent-wash); color: var(--accent-soft); margin-left: 6px; }
 .chip.gray { background: var(--muted-wash); color: var(--muted); }
+.chip.faint { background: transparent; color: var(--subtle); box-shadow: inset 0 0 0 1px var(--border); }
 .chip.owner { background: var(--owner-wash); color: var(--owner-text); }
 .chip.decision { background: var(--decision-wash); color: var(--decision-text); }
 .desc > summary { cursor: pointer; list-style: none; }
@@ -769,7 +770,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 def _priority_chip(p: int) -> str:
-    cls = "chip" if p <= 1 else "chip gray"
+    # 新しい色相は足さず、濃さの段差で P0-1 / P2 / P3 以下を見分ける。
+    cls = "chip" if p <= 1 else "chip gray" if p == 2 else "chip faint"
     return f'<span class="{cls}">P{p}</span>'
 
 
@@ -860,12 +862,12 @@ def render_page(issues: list[Issue], today: date) -> str:
         for k, v, n, tid in tiles
     )
 
-    def _row(r, show_return: bool) -> str:
+    def _row(r, show_return: bool, show_wait: bool) -> str:
         actor_chip = "" if r.deferred else {
             "owner": '<span class="chip owner">所有者</span>',
             "decision": '<span class="chip decision">要判断</span>',
         }.get(r.actor, "")
-        wait_chip = '<span class="chip gray">外部待ち</span>' if r.deferred else ""
+        wait_chip = '<span class="chip gray">外部待ち</span>' if show_wait and r.deferred else ""
         return (
             f'<tr data-age="{r.age_days}" data-priority="{r.priority}" '
             f'data-id="{html.escape(r.id, quote=True)}">'
@@ -885,13 +887,15 @@ def render_page(issues: list[Issue], today: date) -> str:
             return '<div class="panel"><p class="note">該当するタスクはない。</p></div>'
         # 復帰日は外部待ちの行にしか無い。値の無い列で幅を使わない。
         show_return = any(r.deferred for r in table_rows)
+        # 全行が外部待ちの一覧では、見出しと同じことを行ごとに繰り返さない。
+        show_wait = show_return and not all(r.deferred for r in table_rows)
         return (
             '<div class="panel scroll"><table><thead><tr>'
             '<th><input type="checkbox" onchange="toggleAll(this)" aria-label="この一覧をすべて選択"></th>'
             '<th>ID</th><th class="num">滞留</th><th class="num hide-sm">無更新</th>'
             + ('<th class="num">復帰</th>' if show_return else "")
             + '<th>P</th><th class="hide-sm">種別</th><th>タイトル</th>'
-            f'</tr></thead><tbody data-sortable>{"".join(_row(r, show_return) for r in table_rows)}</tbody></table></div>'
+            f'</tr></thead><tbody data-sortable>{"".join(_row(r, show_return, show_wait) for r in table_rows)}</tbody></table></div>'
         )
 
     analysis_note = (

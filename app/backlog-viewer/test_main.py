@@ -388,6 +388,25 @@ class TestPage:
         assert "復帰" not in main_table
         assert page.count('<th class="num">復帰</th>') == 1
 
+    def test_wait_chip_only_where_it_tells_rows_apart(self):
+        issues = main.parse_issues([
+            issue("wait", iso(2026, 8, 1), status="deferred"),
+            issue("rec-wait", iso(2026, 8, 2), status="deferred", title="A を凍結中"),
+            issue("rec-open", iso(2026, 8, 3), title="B を凍結中"),
+        ])
+        page = main.render_page(issues, date(2026, 9, 26))
+        folds = page.split('<details class="fold">')
+        deferred_fold = next(f for f in folds if 'data-id="wait"' in f)
+        cold_fold = next(f for f in folds if 'data-id="rec-wait"' in f)
+        assert "外部待ち</span>" not in deferred_fold
+        assert cold_fold.count("外部待ち</span>") == 1
+
+    def test_priority_chips_step_down_without_new_hues(self):
+        assert 'class="chip">P1<' in main._priority_chip(1)
+        assert 'class="chip gray">P2<' in main._priority_chip(2)
+        assert 'class="chip faint">P3<' in main._priority_chip(3)
+        assert 'class="chip faint">P4<' in main._priority_chip(4)
+
     def test_select_all_is_scoped_to_its_own_table(self):
         assert "source.closest('table').querySelectorAll('.pick')" in main.JS
 
