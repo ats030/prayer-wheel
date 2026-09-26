@@ -10,13 +10,14 @@ import (
 )
 
 type Venue struct {
-	Name          string  `json:"name"`
-	Address       string  `json:"address,omitempty"`
-	Latitude      float64 `json:"latitude"`
-	Longitude     float64 `json:"longitude"`
-	Source        string  `json:"source"`
-	CoordinateSrc string  `json:"coordinate_source,omitempty"`
-	Precision     string  `json:"precision,omitempty"`
+	Name    string `json:"name"`
+	Address string `json:"address,omitempty"`
+	// 座標のない会場を 0,0 として返すと、フロントエンドが大西洋上に点を打つ。
+	Latitude      *float64 `json:"latitude,omitempty"`
+	Longitude     *float64 `json:"longitude,omitempty"`
+	Source        string   `json:"source"`
+	CoordinateSrc string   `json:"coordinate_source,omitempty"`
+	Precision     string   `json:"precision,omitempty"`
 }
 
 type Festival struct {
