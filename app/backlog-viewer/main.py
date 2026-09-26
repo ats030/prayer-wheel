@@ -610,7 +610,7 @@ th { text-align: left; font-weight: 500; color: var(--subtle); font-size: 12px;
 td { border-bottom: 1px solid var(--border); padding: 6px 8px; vertical-align: top; }
 tbody tr:hover { background: var(--hover); }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-.id { color: var(--accent-soft); font-family: var(--font-mono); font-size: 12px; }
+.id { color: var(--accent-soft); font-family: var(--font-mono); font-size: 12px; white-space: nowrap; }
 .chip { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 11px;
   background: var(--accent-wash); color: var(--accent-soft); margin-left: 6px; }
 .chip.gray { background: var(--muted-wash); color: var(--muted); }
@@ -682,7 +682,12 @@ textarea:focus { outline: 2px solid var(--accent-soft); outline-offset: 1px; bor
 @media (max-width: 640px) {
   .wrap { padding: 16px 12px 76px; }
   body.has-selection .wrap { padding-bottom: 220px; }
-  .tiles { grid-template-columns: 1fr; }
+  /* 縦に3枚積むと最初の画面を使い切る。名前と補足を左、数を右に置いて1枚を低くする。 */
+  .tiles { grid-template-columns: 1fr; gap: 6px; margin-bottom: 16px; }
+  .tiles .tile { display: grid; grid-template-columns: 1fr auto; column-gap: 12px; align-items: center; padding: 8px 12px; }
+  .tile .k { grid-column: 1; grid-row: 1; }
+  .tile .n { grid-column: 1; grid-row: 2; margin-top: 0; }
+  .tile .v { grid-column: 2; grid-row: 1 / 3; font-size: 20px; }
   /* 見出し・件数・並び順を1行に詰めると語の途中で折れる。見出しの下に件数と並び順を並べる。 */
   .section-head { flex-direction: column; align-items: stretch; gap: 6px; }
   .section-tools { display: flex; justify-content: space-between; align-items: center; }
@@ -693,6 +698,11 @@ textarea:focus { outline: 2px solid var(--accent-soft); outline-offset: 1px; bor
     white-space: pre; overflow-wrap: normal; overflow-x: auto; resize: none; }
   .dock #cmd-defer { height: 30px; }
   .hide-sm { display: none; }
+  /* IDを1行に保つ分の幅を、枠と列の余白から出す。長い英単語で表が枠をはみ出さないよう題名は途中でも折る。 */
+  .panel { padding: 8px; }
+  th, td { padding: 6px 4px; }
+  .hit { margin: -6px -4px; }
+  td:last-child { overflow-wrap: anywhere; }
 }
 """
 
@@ -858,10 +868,11 @@ def _expired_note(rows, today: date) -> str:
 
 
 def _over30_note(action_rows, deferred_rows, cold_rows) -> str:
+    # 一覧の見出しと同じ語で指し、「うち」を付けて一覧全体の件数ではないと分かるようにする。
     counts = [(label, sum(1 for r in rows if r.age_days > 30)) for label, rows in (
-        ("判断", action_rows), ("外部待ち", deferred_rows), ("凍結", cold_rows))]
+        ("棚卸し", action_rows), ("外部待ち", deferred_rows), ("凍結の記録", cold_rows))]
     parts = [f"{label} {n}" for label, n in counts if n]
-    return " · ".join(parts) if parts else "打ち切りの候補なし"
+    return "うち " + " · ".join(parts) if parts else "打ち切りの候補なし"
 
 
 def _return_cell(row: "BacklogRow", today: date) -> str:

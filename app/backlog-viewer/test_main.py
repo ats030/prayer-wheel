@@ -374,7 +374,7 @@ class TestPage:
         ])
         page = main.render_page(issues, date(2026, 9, 26))
         assert '<a class="tile" id="tile-over30" href="#">' in page
-        assert "外部待ち 1 · 凍結 1" in page
+        assert "うち 外部待ち 1 · 凍結の記録 1" in page
         assert page.count('class="tile"') == 3
         assert "fold.open = true" in main.JS
 
@@ -527,6 +527,13 @@ class TestPage:
         page = main.render_page([], date(2026, 9, 26))
         assert "<h2>棚卸しするタスク</h2>" in page
         assert "いま判断" not in page
+
+    def test_narrow_tiles_put_the_number_beside_the_label(self):
+        mobile = main.CSS.split("@media (max-width: 640px)")[1]
+        assert ".tiles .tile { display: grid; grid-template-columns: 1fr auto;" in mobile
+        assert "td:last-child { overflow-wrap: anywhere; }" in mobile
+        assert ".tile .v { grid-column: 2; grid-row: 1 / 3;" in mobile
+        assert "white-space: nowrap;" in main.CSS.split(".id {")[1].split("}")[0]
 
     def test_narrow_heading_puts_count_and_sort_below_the_title(self):
         mobile = main.CSS.split("@media (max-width: 640px)")[1]
