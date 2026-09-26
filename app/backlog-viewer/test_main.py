@@ -535,16 +535,22 @@ class TestPage:
         assert ".tile .v { grid-column: 2; grid-row: 1 / 3;" in mobile
         assert "white-space: nowrap;" in main.CSS.split(".id {")[1].split("}")[0]
 
+    def test_started_mark_has_no_frame_so_actor_chips_stand_out(self):
+        rule = main.CSS.split(".chip.started {")[1].split("}")[0]
+        assert "box-shadow" not in rule
+        assert "color: var(--subtle);" in rule
+
     def test_narrow_heading_puts_count_and_sort_below_the_title(self):
         mobile = main.CSS.split("@media (max-width: 640px)")[1]
         assert ".section-head { flex-direction: column;" in mobile
-        assert "white-space: nowrap;" in main.CSS.split(".sort-control {")[1].split("}")[0]
         assert "word-break: keep-all;" in main.CSS.split(".section-count {")[1].split("}")[0]
 
-    def test_sort_control_sits_on_the_task_list_heading(self):
-        page = main.render_page([], date(2026, 9, 26))
-        head = page.split("<h2>棚卸しするタスク</h2>")[1].split("</div>")[0]
-        assert '<select id="sort-order"' in head
+    def test_sorting_is_done_only_from_the_column_headings(self):
+        issues = main.parse_issues([issue("a", iso(2026, 8, 1))])
+        page = main.render_page(issues, date(2026, 9, 26))
+        assert "<select" not in page.split("<h2>棚卸しするタスク</h2>")[1].split("<table")[0]
+        assert '<button type="button" class="sort" title="滞留の長い順に並べる">滞留</button>' in page
+        assert "b.addEventListener('click', () => sortTables(b.closest('th').dataset.sortKey));" in main.JS
 
     def test_all_backlog_tables_support_the_shared_sort_control(self):
         issues = main.parse_issues([
@@ -555,17 +561,14 @@ class TestPage:
                   title="record \u51cd\u7d50\u4e2d"),
         ])
         page = main.render_page(issues, date(2026, 8, 24))
-        assert "<select id=\"sort-order\"" in page
-        assert "<option value=\"age\">\u6ede\u7559\u9806</option>" in page
-        assert "<option value=\"priority\" selected>\u512a\u5148\u9806</option>" in page
         assert page.count("<tbody data-sortable>") == 3
         assert page.index("data-id=\"p0-new\"") < page.index("data-id=\"p2-old\"")
         assert "data-age=\"54\" data-priority=\"2\" data-id=\"p2-old\"" in page
         assert "function compareRows(left, right, order)" in main.JS
         assert "return priority || age || left.dataset.id.localeCompare(right.dataset.id);" in main.JS
-        assert "sortTables(sort.value);" in main.JS
-        assert page.count('<th class="num" data-sort-key="age">') == 3
-        assert page.count('<th data-sort-key="priority">') == 3
+        assert "sortTables('priority');" in main.JS
+        assert page.count('<th class="num" data-sort-key="age"><button') == 3
+        assert page.count('<th data-sort-key="priority"><button') == 3
         assert "localStorage" not in main.JS
 
     def test_deferred_deadline_is_visible_on_the_page(self, monkeypatch):

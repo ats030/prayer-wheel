@@ -617,7 +617,8 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .chip.faint { background: transparent; color: var(--subtle); box-shadow: inset 0 0 0 1px var(--border); }
 .chip.owner { background: var(--owner-wash); color: var(--owner-text); }
 .chip.decision { background: var(--decision-wash); color: var(--decision-text); }
-.chip.started { background: transparent; color: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-soft); }
+/* 着手済みは一覧の半数を超えることがある。枠を付けず淡い文字にして、担い手の印を埋もれさせない。 */
+.chip.started { background: transparent; color: var(--subtle); padding: 0; }
 .defer-box { display: grid; gap: 6px; }
 .defer-date { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
 .defer-date input { background: var(--raised); color: var(--text); border: 1px solid var(--border-strong);
@@ -667,10 +668,14 @@ select {
   border-radius: 6px; padding: 5px 28px 5px 10px; font: inherit; cursor: pointer;
 }
 select:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
-th[data-sort-key].sorted::after { content: " ▾"; color: var(--accent-soft); }
+/* 並べ替えは列見出しだけで行う。押せる見出しには薄い印、今の並びには濃い印を付ける。 */
+th .sort { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; }
+th .sort:hover { color: var(--text); }
+th .sort::after { content: " ▿"; color: var(--border-strong); }
+th.sorted .sort { color: var(--text); }
+th.sorted .sort::after { content: " ▾"; color: var(--accent-soft); }
 .fold-picked { color: var(--accent-soft); }
 .section-tools { display: inline-flex; align-items: baseline; gap: 12px; }
-.sort-control { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; white-space: nowrap; }
 textarea {
   width: 100%; background: var(--raised); color: var(--text); border: 1px solid var(--border);
   border-radius: 6px; padding: 8px 10px; font-family: var(--font-mono);
@@ -688,9 +693,8 @@ textarea:focus { outline: 2px solid var(--accent-soft); outline-offset: 1px; bor
   .tile .k { grid-column: 1; grid-row: 1; }
   .tile .n { grid-column: 1; grid-row: 2; margin-top: 0; }
   .tile .v { grid-column: 2; grid-row: 1 / 3; font-size: 20px; }
-  /* 見出し・件数・並び順を1行に詰めると語の途中で折れる。見出しの下に件数と並び順を並べる。 */
+  /* 見出しと件数を1行に詰めると語の途中で折れる。件数は見出しの下に置く。 */
   .section-head { flex-direction: column; align-items: stretch; gap: 6px; }
-  .section-tools { display: flex; justify-content: space-between; align-items: center; }
   .dock { padding: 8px 12px; }
   .dock-output { grid-template-columns: 1fr; gap: 6px; margin-top: 6px; }
   /* 狭い画面で折り返すと欄が伸びて一覧を覆う。1行1コマンドのまま横に送る。 */
@@ -808,9 +812,10 @@ function chartToLatest(move) {
   });
 }
 document.addEventListener('DOMContentLoaded', () => {
-  const sort = document.getElementById('sort-order');
-  sortTables(sort.value);
-  sort.addEventListener('change', () => sortTables(sort.value));
+  sortTables('priority');
+  document.querySelectorAll('th[data-sort-key] .sort').forEach(b => {
+    b.addEventListener('click', () => sortTables(b.closest('th').dataset.sortKey));
+  });
   document.getElementById('defer-until').addEventListener('input', refresh);
   chartToLatest(true);
   window.addEventListener('resize', () => chartToLatest(false));
@@ -1007,9 +1012,9 @@ def render_page(issues: list[Issue], today: date) -> str:
         return (
             '<div class="panel scroll"><table><thead><tr>'
             '<th><label class="hit"><input type="checkbox" class="pick-all" onchange="toggleAll(this)" aria-label="この一覧をすべて選択"></label></th>'
-            '<th>ID</th><th class="num" data-sort-key="age">滞留</th><th class="num hide-sm">無更新</th>'
+            '<th>ID</th><th class="num" data-sort-key="age"><button type="button" class="sort" title="滞留の長い順に並べる">滞留</button></th><th class="num hide-sm">無更新</th>'
             + ('<th class="num">復帰</th>' if show_return else "")
-            + '<th data-sort-key="priority">P</th><th class="hide-sm">種別</th><th>タイトル</th>'
+            + '<th data-sort-key="priority"><button type="button" class="sort" title="優先度の高い順に並べる">P</button></th><th class="hide-sm">種別</th><th>タイトル</th>'
             f'</tr></thead><tbody data-sortable>{"".join(_row(r, show_return, show_wait) for r in table_rows)}</tbody></table></div>'
         )
 
@@ -1035,12 +1040,6 @@ def render_page(issues: list[Issue], today: date) -> str:
     <h2>棚卸しするタスク</h2>
     <span class="section-tools">
       <span class="section-count">{_actor_breakdown(action_rows)}</span>
-      <label class="sort-control" for="sort-order">並び順
-        <select id="sort-order" aria-label="すべてのタスク一覧の並び順">
-          <option value="age">滞留順</option>
-          <option value="priority" selected>優先順</option>
-        </select>
-      </label>
     </span>
   </div>
   {_table(action_rows)}
