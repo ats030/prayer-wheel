@@ -677,11 +677,15 @@ textarea:focus { outline: 2px solid var(--accent-soft); outline-offset: 1px; bor
 .err { border-color: var(--danger); color: var(--danger); }
 @media (max-width: 640px) {
   .wrap { padding: 16px 12px 76px; }
-  body.has-selection .wrap { padding-bottom: 260px; }
+  body.has-selection .wrap { padding-bottom: 220px; }
   .tiles { grid-template-columns: 1fr; }
   .section-head { align-items: flex-start; }
   .dock { padding: 8px 12px; }
-  .dock-output { grid-template-columns: 1fr; }
+  .dock-output { grid-template-columns: 1fr; gap: 6px; margin-top: 6px; }
+  /* 狭い画面で折り返すと欄が伸びて一覧を覆う。1行1コマンドのまま横に送る。 */
+  .dock textarea { min-height: 0; height: 44px; padding: 5px 8px; font-size: 11px;
+    white-space: pre; overflow-wrap: normal; overflow-x: auto; resize: none; }
+  .dock #cmd-defer { height: 30px; }
   .hide-sm { display: none; }
 }
 """
@@ -773,11 +777,10 @@ function sortTables(order) {
     else th.removeAttribute('aria-sort');
   });
 }
-function showOver30(event) {
-  // 30日超は閉じた一覧に沈みやすいので、該当する一覧を開いて先頭の行へ移る。
+function showRows(event, test) {
+  // 該当する行は閉じた一覧に沈みやすいので、その一覧を開いて先頭の行へ移る。
   event.preventDefault();
-  const rows = Array.from(document.querySelectorAll('tbody[data-sortable] tr'))
-    .filter(row => Number(row.dataset.age) > 30);
+  const rows = Array.from(document.querySelectorAll('tbody[data-sortable] tr')).filter(test);
   rows.forEach(row => { const fold = row.closest('details'); if (fold) fold.open = true; });
   if (rows.length) rows[0].scrollIntoView({block: 'center'});
 }
@@ -797,7 +800,9 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', () => chartToLatest(false));
   document.querySelectorAll('.pick').forEach(e => e.addEventListener('change', refresh));
   const over30 = document.getElementById('tile-over30');
-  if (over30) over30.addEventListener('click', showOver30);
+  if (over30) over30.addEventListener('click', e => showRows(e, row => Number(row.dataset.age) > 30));
+  const expired = document.getElementById('tile-expired');
+  if (expired) expired.addEventListener('click', e => showRows(e, row => 'expired' in row.dataset));
   document.getElementById('clear-picks').addEventListener('click', () => {
     document.querySelectorAll('.pick:checked').forEach(e => { e.checked = false; });
     refresh();
@@ -819,9 +824,21 @@ def _priority_chip(p: int) -> str:
 
 def _return_note(m: "Metrics") -> str:
     if m.peak_return is None:
-        return "期限つきの復帰予定なし"
+        return ""
     day, count = m.peak_return
-    return f"最大の復帰は {day:%-m/%-d} の {count}件"
+    return f" · 最大の復帰 {day:%-m/%-d} に {count}件"
+
+
+def _is_expired(row: "BacklogRow", today: date) -> bool:
+    return row.deferred and row.defer_until is not None and row.defer_until <= today
+
+
+def _expired_note(rows, today: date) -> str:
+    days = [r.defer_until for r in rows if _is_expired(r, today)]
+    if not days:
+        return "期限切れなし"
+    oldest = min(days)
+    return f"最も古い期限 {oldest:%-m/%-d}({(today - oldest).days}日超過)"
 
 
 def _over30_note(action_rows, deferred_rows, cold_rows) -> str:
@@ -917,7 +934,8 @@ def render_page(issues: list[Issue], today: date) -> str:
          f"要判断 {m.by_decision} · 所有者 {m.by_owner}", ""),
         ("30日超", str(m.over_30_days), _over30_note(action_rows, deferred_rows, cold_rows),
          "tile-over30" if m.over_30_days else ""),
-        ("期限切れの外部待ち", str(m.freeze_expired), _return_note(m), ""),
+        ("期限切れの外部待ち", str(m.freeze_expired), _expired_note(rows, today),
+         "tile-expired" if m.freeze_expired else ""),
     ]
     tile_html = "".join(
         (f'<a class="tile" id="{tid}" href="#">' if tid else '<div class="tile">')
@@ -935,9 +953,11 @@ def render_page(issues: list[Issue], today: date) -> str:
         wait_chip = '<span class="chip gray">外部待ち</span>' if show_wait and r.deferred else ""
         # 作業中の行を、未着手の行と同じ感覚で打ち切らないように。
         started_chip = '<span class="chip started">着手済み</span>' if r.started else ""
+        # 期限切れタイルから辿る目印。
+        expired_attr = "data-expired " if _is_expired(r, today) else ""
         return (
             f'<tr data-age="{r.age_days}" data-priority="{r.priority}" '
-            f'data-id="{html.escape(r.id, quote=True)}" '
+            f'data-id="{html.escape(r.id, quote=True)}" {expired_attr}'
             f'data-close-reason="{html.escape(_close_reason(r, today), quote=True)}">'
             f'<td><input type="checkbox" class="pick" value="{html.escape(r.id)}" '
             f'aria-label="{html.escape(r.id)} を選択"></td>'
@@ -999,7 +1019,7 @@ def render_page(issues: list[Issue], today: date) -> str:
   {_table(action_rows)}
 
   <details class="fold">
-    <summary><strong>外部待ち</strong><span><span class="fold-picked"></span>{len(deferred_rows)}件 · 期限切れ {m.freeze_expired}件</span></summary>
+    <summary><strong>外部待ち</strong><span><span class="fold-picked"></span>{len(deferred_rows)}件 · 期限切れ {m.freeze_expired}件{_return_note(m)}</span></summary>
     <div class="fold-body">{_table(deferred_rows)}</div>
   </details>
 

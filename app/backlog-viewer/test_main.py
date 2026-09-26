@@ -378,6 +378,29 @@ class TestPage:
         assert page.count('class="tile"') == 3
         assert "fold.open = true" in main.JS
 
+    def test_expired_tile_describes_the_expired_rows_and_points_to_them(self):
+        issues = main.parse_issues([
+            issue("late", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 9, 1)),
+            issue("later", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 9, 20)),
+            issue("wait", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 11, 23)),
+        ])
+        page = main.render_page(issues, date(2026, 9, 26))
+        assert '<a class="tile" id="tile-expired" href="#">' in page
+        assert "最も古い期限 9/1(25日超過)" in page
+        assert page.count("data-expired ") == 2
+        assert "'expired' in row.dataset" in main.JS
+        # 復帰の山は期限切れと関係ないので、外部待ちの一覧の見出しへ移す
+        assert "期限切れ 2件 · 最大の復帰 11/23 に 1件</span>" in page
+
+    def test_expired_tile_is_plain_when_nothing_is_expired(self):
+        issues = main.parse_issues([
+            issue("wait", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 11, 23)),
+        ])
+        page = main.render_page(issues, date(2026, 9, 26))
+        assert 'id="tile-expired"' not in page
+        assert "期限切れなし" in page
+        assert "data-expired" not in page
+
     def test_over_30_tile_is_plain_when_nothing_is_old(self):
         issues = main.parse_issues([issue("fresh", iso(2026, 9, 20))])
         page = main.render_page(issues, date(2026, 9, 26))
