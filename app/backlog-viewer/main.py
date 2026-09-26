@@ -655,6 +655,9 @@ select {
   border-radius: 6px; padding: 5px 28px 5px 10px; font: inherit; cursor: pointer;
 }
 select:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
+th[data-sort-key].sorted::after { content: " ▾"; color: var(--accent-soft); }
+.fold-picked { color: var(--accent-soft); }
+.section-tools { display: inline-flex; align-items: baseline; gap: 12px; }
 .sort-control { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
 textarea {
   width: 100%; background: var(--raised); color: var(--text); border: 1px solid var(--border);
@@ -697,6 +700,18 @@ function refresh() {
   document.querySelectorAll('.copy').forEach(b => { b.disabled = ids.length === 0; });
   document.getElementById('dock').classList.toggle('active', ids.length > 0);
   document.body.classList.toggle('has-selection', ids.length > 0);
+  // 見出しの全選択は、個別の選択に合わせて全部/一部/なしを示す。
+  document.querySelectorAll('.pick-all').forEach(all => {
+    const boxes = Array.from(all.closest('table').querySelectorAll('.pick'));
+    const n = boxes.filter(e => e.checked).length;
+    all.checked = n > 0 && n === boxes.length;
+    all.indeterminate = n > 0 && n < boxes.length;
+  });
+  // 閉じた一覧の中の選択も、見出しから見えるようにする。
+  document.querySelectorAll('.fold-picked').forEach(el => {
+    const n = el.closest('details').querySelectorAll('.pick:checked').length;
+    el.textContent = n ? n + '件選択中 · ' : '';
+  });
 }
 async function copyFrom(id, button) {
   const el = document.getElementById(id);
@@ -731,6 +746,13 @@ function sortTables(order) {
     Array.from(body.rows).sort((left, right) => compareRows(left, right, order))
       .forEach(row => body.appendChild(row));
   });
+  // どの一覧でも、何の順に並んでいるかを列見出しで示す。
+  document.querySelectorAll('th[data-sort-key]').forEach(th => {
+    const on = th.dataset.sortKey === order;
+    th.classList.toggle('sorted', on);
+    if (on) th.setAttribute('aria-sort', order === 'age' ? 'descending' : 'ascending');
+    else th.removeAttribute('aria-sort');
+  });
 }
 function showOver30(event) {
   // 30日超は閉じた一覧に沈みやすいので、該当する一覧を開いて先頭の行へ移る。
@@ -750,11 +772,7 @@ function chartToLatest(move) {
 document.addEventListener('DOMContentLoaded', () => {
   const sort = document.getElementById('sort-order');
   sortTables(sort.value);
-  sort.addEventListener('change', () => {
-    sortTables(sort.value);
-    document.getElementById('sort-description').textContent =
-      sort.value === 'priority' ? '優先順' : '滞留順';
-  });
+  sort.addEventListener('change', () => sortTables(sort.value));
   chartToLatest(true);
   window.addEventListener('resize', () => chartToLatest(false));
   document.querySelectorAll('.pick').forEach(e => e.addEventListener('change', refresh));
@@ -891,10 +909,10 @@ def render_page(issues: list[Issue], today: date) -> str:
         show_wait = show_return and not all(r.deferred for r in table_rows)
         return (
             '<div class="panel scroll"><table><thead><tr>'
-            '<th><input type="checkbox" onchange="toggleAll(this)" aria-label="この一覧をすべて選択"></th>'
-            '<th>ID</th><th class="num">滞留</th><th class="num hide-sm">無更新</th>'
+            '<th><input type="checkbox" class="pick-all" onchange="toggleAll(this)" aria-label="この一覧をすべて選択"></th>'
+            '<th>ID</th><th class="num" data-sort-key="age">滞留</th><th class="num hide-sm">無更新</th>'
             + ('<th class="num">復帰</th>' if show_return else "")
-            + '<th>P</th><th class="hide-sm">種別</th><th>タイトル</th>'
+            + '<th data-sort-key="priority">P</th><th class="hide-sm">種別</th><th>タイトル</th>'
             f'</tr></thead><tbody data-sortable>{"".join(_row(r, show_return, show_wait) for r in table_rows)}</tbody></table></div>'
         )
 
@@ -917,27 +935,26 @@ def render_page(issues: list[Issue], today: date) -> str:
   <div class="tiles">{tile_html}</div>
 
   <div class="section-head">
-    <label class="sort-control" for="sort-order">並び順
-      <select id="sort-order" aria-label="タスク一覧の並び順">
-        <option value="age">滞留順</option>
-        <option value="priority" selected>優先順</option>
-      </select>
-    </label>
-  </div>
-
-  <div class="section-head">
     <h2>いま判断するタスク</h2>
-    <span class="section-count">{len(action_rows)}件 · <span id="sort-description">優先順</span></span>
+    <span class="section-tools">
+      <span class="section-count">{len(action_rows)}件</span>
+      <label class="sort-control" for="sort-order">並び順
+        <select id="sort-order" aria-label="すべてのタスク一覧の並び順">
+          <option value="age">滞留順</option>
+          <option value="priority" selected>優先順</option>
+        </select>
+      </label>
+    </span>
   </div>
   {_table(action_rows)}
 
   <details class="fold">
-    <summary><strong>外部待ち</strong><span>{len(deferred_rows)}件 · 期限切れ {m.freeze_expired}件</span></summary>
+    <summary><strong>外部待ち</strong><span><span class="fold-picked"></span>{len(deferred_rows)}件 · 期限切れ {m.freeze_expired}件</span></summary>
     <div class="fold-body">{_table(deferred_rows)}</div>
   </details>
 
   <details class="fold">
-    <summary><strong>凍結の記録</strong><span>{len(cold_rows)}件</span></summary>
+    <summary><strong>凍結の記録</strong><span><span class="fold-picked"></span>{len(cold_rows)}件</span></summary>
     <div class="fold-body">{_table(cold_rows)}</div>
   </details>
 

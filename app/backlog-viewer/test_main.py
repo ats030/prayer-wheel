@@ -410,6 +410,23 @@ class TestPage:
     def test_select_all_is_scoped_to_its_own_table(self):
         assert "source.closest('table').querySelectorAll('.pick')" in main.JS
 
+    def test_selection_state_is_visible_from_headers(self):
+        issues = main.parse_issues([
+            issue("now", iso(2026, 9, 20)),
+            issue("wait", iso(2026, 8, 1), status="deferred"),
+            issue("rec", iso(2026, 8, 2), status="deferred", title="A を凍結中"),
+        ])
+        page = main.render_page(issues, date(2026, 9, 26))
+        assert page.count('class="pick-all"') == 3
+        # 閉じられる2つの一覧は、見出しに選択件数の置き場がある
+        assert page.count('<span class="fold-picked"></span>') == 2
+        assert "all.indeterminate = n > 0 && n < boxes.length;" in main.JS
+
+    def test_sort_control_sits_on_the_task_list_heading(self):
+        page = main.render_page([], date(2026, 9, 26))
+        head = page.split("<h2>いま判断するタスク</h2>")[1].split("</div>")[0]
+        assert '<select id="sort-order"' in head
+
     def test_all_backlog_tables_support_the_shared_sort_control(self):
         issues = main.parse_issues([
             issue("p2-old", iso(2026, 7, 1), priority=2),
@@ -428,7 +445,8 @@ class TestPage:
         assert "function compareRows(left, right, order)" in main.JS
         assert "return priority || age || left.dataset.id.localeCompare(right.dataset.id);" in main.JS
         assert "sortTables(sort.value);" in main.JS
-        assert "sort-description" in main.JS
+        assert page.count('<th class="num" data-sort-key="age">') == 3
+        assert page.count('<th data-sort-key="priority">') == 3
         assert "localStorage" not in main.JS
 
     def test_deferred_deadline_is_visible_on_the_page(self, monkeypatch):
