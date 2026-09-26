@@ -604,6 +604,8 @@ a.tile:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2p
 .legend-item { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
 .legend-item i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
 .note { color: var(--subtle); font-size: 11px; margin-top: 10px; }
+/* 一覧の数と色の読み方。表の直前に1行で置く。 */
+.key { color: var(--subtle); font-size: 11px; margin: 0 0 6px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { text-align: left; font-weight: 500; color: var(--subtle); font-size: 12px;
   border-bottom: 1px solid var(--border); padding: 6px 8px; }
@@ -1013,10 +1015,12 @@ def render_page(issues: list[Issue], today: date) -> str:
         return (
             '<div class="panel scroll"><table><thead><tr>'
             '<th><label class="hit"><input type="checkbox" class="pick-all" onchange="toggleAll(this)" aria-label="この一覧をすべて選択"></label></th>'
-            '<th>ID</th><th class="num" data-sort-key="age"><button type="button" class="sort" title="滞留の長い順に並べる">滞留</button></th><th class="num hide-sm">無更新</th>'
-            + ('<th class="num">復帰</th>' if show_return else "")
+            '<th>ID</th><th class="num" data-sort-key="age"><button type="button" class="sort" title="滞留の長い順に並べる">滞留</button></th><th class="num hide-sm" title="最後に更新されてからの日数">無更新</th>'
+            + ('<th class="num" title="外部待ちから戻る日">復帰</th>' if show_return else "")
             + '<th data-sort-key="priority"><button type="button" class="sort" title="優先度の高い順に並べる">P</button></th><th class="hide-sm">種別</th><th>タイトル</th>'
             f'</tr></thead><tbody data-sortable>{"".join(_row(r, show_return, show_wait) for r in table_rows)}</tbody></table></div>'
+            + (f'<p class="note">復帰: <span class="hot">赤</span>は復帰日を過ぎたもの · '
+               '<span class="warn">未設定</span>は戻る日が決まっていないもの</p>' if show_return else "")
         )
 
     analysis_note = (
@@ -1043,6 +1047,8 @@ def render_page(issues: list[Issue], today: date) -> str:
       <span class="section-count">{_actor_breakdown(action_rows)}</span>
     </span>
   </div>
+  <p class="key">滞留は作成からの日数<span class="hide-sm">、無更新は最後の更新からの日数</span> ·
+    <span class="warn">{STALE_DAYS + 1}〜30日</span> · <span class="hot">30日超</span></p>
   {_table(action_rows)}
 
   <details class="fold">

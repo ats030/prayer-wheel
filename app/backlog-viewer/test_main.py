@@ -440,6 +440,17 @@ class TestPage:
                 'テストが通る</div>背景 &amp; 理由</div>') in page
         assert "max-height: min(16em, 40vh); overflow-y: auto;" in main.CSS
 
+    def test_list_explains_age_colors_and_idle_days(self):
+        issues = main.parse_issues([
+            issue("a", iso(2026, 8, 1)),
+            issue("w", iso(2026, 8, 1), status="deferred"),
+        ])
+        page = main.render_page(issues, date(2026, 9, 26))
+        key = page.split("<h2>棚卸しするタスク</h2>")[1].split("<table")[0]
+        assert "滞留は作成からの日数" in key and "無更新は最後の更新からの日数" in key
+        assert '<span class="warn">15〜30日</span> · <span class="hot">30日超</span>' in key
+        assert page.count("は復帰日を過ぎたもの") == 1
+
     def test_close_copy_is_not_emphasized_over_defer_copy(self):
         page = main.render_page([], date(2026, 9, 26))
         assert '<button class="copy" data-target="cmd-close">' in page
@@ -458,7 +469,7 @@ class TestPage:
         page = main.render_page(issues, date(2026, 9, 26))
         main_table = page.split("棚卸しするタスク")[1].split('<details class="fold">')[0]
         assert "復帰" not in main_table
-        assert page.count('<th class="num">復帰</th>') == 1
+        assert page.count('<th class="num" title="外部待ちから戻る日">復帰</th>') == 1
 
     def test_wait_chip_only_where_it_tells_rows_apart(self):
         issues = main.parse_issues([
