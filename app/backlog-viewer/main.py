@@ -635,7 +635,10 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .scroll-hint { display: none; color: var(--subtle); font-size: 11px; margin: 8px 0 0; }
 .chart.scrollable ~ .scroll-hint { display: block; }
 .bar { display: inline-block; height: 8px; border-radius: 2px; background: var(--accent); vertical-align: middle; }
-input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; cursor: pointer; }
+/* セル全体を押せるようにし、タッチでも外さない広さを取る。セルの余白は打ち消して行を高くしない。 */
+.hit { display: flex; align-items: center; justify-content: center;
+  min-width: 36px; min-height: 36px; margin: -6px -8px; cursor: pointer; }
 .dock {
   position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface);
   border-top: 1px solid var(--border-strong); padding: 10px 24px;
@@ -829,6 +832,16 @@ def _return_note(m: "Metrics") -> str:
     return f" · 最大の復帰 {day:%-m/%-d} に {count}件"
 
 
+def _actor_breakdown(rows) -> str:
+    """一覧の件数を担い手ごとに割る。タイルの「エージェントが進められる」と足し合わせで合う。"""
+    counts = Counter(r.actor for r in rows)
+    parts = [f"{label} {counts[actor]}" for actor, label in (
+        ("agent", "エージェント"), ("decision", "要判断"), ("owner", "所有者")) if counts[actor]]
+    if len(parts) < 2:
+        return f"{len(rows)}件"
+    return f"{len(rows)}件({' · '.join(parts)})"
+
+
 def _is_expired(row: "BacklogRow", today: date) -> bool:
     return row.deferred and row.defer_until is not None and row.defer_until <= today
 
@@ -959,8 +972,8 @@ def render_page(issues: list[Issue], today: date) -> str:
             f'<tr data-age="{r.age_days}" data-priority="{r.priority}" '
             f'data-id="{html.escape(r.id, quote=True)}" {expired_attr}'
             f'data-close-reason="{html.escape(_close_reason(r, today), quote=True)}">'
-            f'<td><input type="checkbox" class="pick" value="{html.escape(r.id)}" '
-            f'aria-label="{html.escape(r.id)} を選択"></td>'
+            f'<td><label class="hit"><input type="checkbox" class="pick" value="{html.escape(r.id)}" '
+            f'aria-label="{html.escape(r.id)} を選択"></label></td>'
             f'<td class="id">{html.escape(r.id)}</td>'
             f'<td class="num">{_age_cell(r.age_days)}</td>'
             f'<td class="num hide-sm">{r.idle_days}</td>'
@@ -979,7 +992,7 @@ def render_page(issues: list[Issue], today: date) -> str:
         show_wait = show_return and not all(r.deferred for r in table_rows)
         return (
             '<div class="panel scroll"><table><thead><tr>'
-            '<th><input type="checkbox" class="pick-all" onchange="toggleAll(this)" aria-label="この一覧をすべて選択"></th>'
+            '<th><label class="hit"><input type="checkbox" class="pick-all" onchange="toggleAll(this)" aria-label="この一覧をすべて選択"></label></th>'
             '<th>ID</th><th class="num" data-sort-key="age">滞留</th><th class="num hide-sm">無更新</th>'
             + ('<th class="num">復帰</th>' if show_return else "")
             + '<th data-sort-key="priority">P</th><th class="hide-sm">種別</th><th>タイトル</th>'
@@ -1007,7 +1020,7 @@ def render_page(issues: list[Issue], today: date) -> str:
   <div class="section-head">
     <h2>いま判断するタスク</h2>
     <span class="section-tools">
-      <span class="section-count">{len(action_rows)}件</span>
+      <span class="section-count">{_actor_breakdown(action_rows)}</span>
       <label class="sort-control" for="sort-order">並び順
         <select id="sort-order" aria-label="すべてのタスク一覧の並び順">
           <option value="age">滞留順</option>

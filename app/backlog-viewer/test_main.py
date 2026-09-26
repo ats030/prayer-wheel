@@ -401,6 +401,29 @@ class TestPage:
         assert "期限切れなし" in page
         assert "data-expired" not in page
 
+    def test_list_count_is_split_by_actor_to_match_the_tile(self):
+        issues = main.parse_issues([
+            issue("a", iso(2026, 9, 20)),
+            issue("b", iso(2026, 9, 20)),
+            issue("o", iso(2026, 9, 20), labels=["human"]),
+        ])
+        page = main.render_page(issues, date(2026, 9, 26))
+        # タイルは「エージェントが進められる 2」、一覧は3件。差の内訳を見出しで示す
+        assert '<div class="v">2</div>' in page
+        assert '<span class="section-count">3件(エージェント 2 · 所有者 1)</span>' in page
+
+    def test_list_count_stays_plain_when_one_actor_holds_everything(self):
+        issues = main.parse_issues([issue("a", iso(2026, 9, 20))])
+        page = main.render_page(issues, date(2026, 9, 26))
+        assert '<span class="section-count">1件</span>' in page
+
+    def test_checkboxes_are_wrapped_in_a_cell_wide_hit_area(self):
+        page = main.render_page(main.parse_issues([issue("a", iso(2026, 9, 20))]),
+                                date(2026, 9, 26))
+        assert '<label class="hit"><input type="checkbox" class="pick" value="a"' in page
+        assert '<label class="hit"><input type="checkbox" class="pick-all"' in page
+        assert "width: 18px; height: 18px" in main.CSS
+
     def test_over_30_tile_is_plain_when_nothing_is_old(self):
         issues = main.parse_issues([issue("fresh", iso(2026, 9, 20))])
         page = main.render_page(issues, date(2026, 9, 26))
