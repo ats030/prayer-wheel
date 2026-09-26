@@ -435,9 +435,15 @@ class TestPage:
         raw["description"] = "背景 & 理由"
         raw["acceptance_criteria"] = "テストが通る"
         page = main.render_page(main.parse_issues([raw]), date(2026, 9, 26))
-        assert '<details class="desc"><summary>t &lt;x&gt;</summary>' in page
-        assert "背景 &amp; 理由" in page
-        assert "完了条件" in page and "テストが通る" in page
+        assert '<details class="desc" name="desc"><summary>t &lt;x&gt;</summary>' in page
+        assert ('<div class="desc-body"><div class="desc-accept"><span class="desc-label">完了条件</span>\n'
+                'テストが通る</div>背景 &amp; 理由</div>') in page
+        assert "max-height: min(16em, 40vh); overflow-y: auto;" in main.CSS
+
+    def test_close_copy_is_not_emphasized_over_defer_copy(self):
+        page = main.render_page([], date(2026, 9, 26))
+        assert '<button class="copy" data-target="cmd-close">' in page
+        assert "primary" not in page
 
     def test_title_without_body_is_not_expandable(self):
         page = main.render_page(main.parse_issues([issue("a", iso(2026, 9, 20))]),

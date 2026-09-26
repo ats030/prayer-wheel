@@ -560,10 +560,10 @@ CSS = """
   --border: #242633; --border-strong: #343747; --text: #f4f4f5;
   --muted: #a1a1aa; --subtle: #71717a; --accent: #7c3aed; --accent-soft: #a78bfa;
   --success: #34d399; --warning: #fbbf24; --danger: #fb7185;
-  --accent-hover: #6d28d9; --accent-wash: rgba(124,58,237,.16);
+  --accent-wash: rgba(124,58,237,.16);
   --muted-wash: rgba(161,161,170,.14); --owner-wash: rgba(244,63,94,.16);
   --owner-text: #fda4af; --decision-wash: rgba(245,158,11,.16);
-  --decision-text: #fcd34d; --on-accent: #fff;
+  --decision-text: #fcd34d;
   --font-body: Inter, "SF Pro", "Segoe UI", Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
@@ -628,8 +628,12 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .desc > summary:hover { color: var(--accent-soft); }
 .desc-body { margin: 6px 0 2px; padding: 8px 10px; background: var(--raised);
   border: 1px solid var(--border); border-radius: 6px; color: var(--muted);
-  font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; max-width: 72ch; }
+  font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; max-width: 72ch;
+  /* 長い本文で次の行を画面外へ押し出さない。続きは枠の中で読む。 */
+  max-height: min(16em, 40vh); overflow-y: auto; }
 .desc-label { color: var(--subtle); font-weight: 600; }
+/* 棚卸しで最初に見たい完了条件を、本文の前に区別して置く。 */
+.desc-accept { margin-bottom: 8px; padding-left: 8px; border-left: 2px solid var(--accent-soft); color: var(--text); }
 .hot { color: var(--danger); }
 .warn { color: var(--warning); }
 .scroll { overflow-x: auto; }
@@ -660,8 +664,6 @@ button:hover { background: var(--hover); }
 button:focus-visible, summary:focus-visible, input:focus-visible {
   outline: 2px solid var(--accent-soft); outline-offset: 2px;
 }
-button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-button.primary:hover { background: var(--accent-hover); }
 button:disabled { opacity: .55; cursor: not-allowed; }
 select {
   background: var(--raised); color: var(--text); border: 1px solid var(--border-strong);
@@ -912,16 +914,15 @@ def _close_reason(row: "BacklogRow", today: date) -> str:
 
 
 def _title_cell(r: "BacklogRow", chips: str) -> str:
-    """タイトルを開くと description と acceptance が読める。本文が無ければ開かせない。"""
+    """タイトルを開くと acceptance と description が読める。本文が無ければ開かせない。"""
     title = html.escape(r.title) + chips
-    parts = [html.escape(r.description)] if r.description else []
-    if r.acceptance:
-        parts.append(f'<span class="desc-label">完了条件</span>\n{html.escape(r.acceptance)}')
-    if not parts:
+    if not (r.description or r.acceptance):
         return title
-    body = "\n\n".join(parts)
-    return (f'<details class="desc"><summary>{title}</summary>'
-            f'<div class="desc-body">{body}</div></details>')
+    accept = (f'<div class="desc-accept"><span class="desc-label">完了条件</span>\n'
+              f'{html.escape(r.acceptance)}</div>') if r.acceptance else ""
+    # name を揃えると、別の行を開いたときに前の行が閉じる。
+    return (f'<details class="desc" name="desc"><summary>{title}</summary>'
+            f'<div class="desc-body">{accept}{html.escape(r.description)}</div></details>')
 
 
 def _age_cell(days: int) -> str:
@@ -1079,7 +1080,7 @@ def render_page(issues: list[Issue], today: date) -> str:
     <strong>棚卸し</strong><span class="count" id="count">タスクを選択</span>
     <div class="dock-actions">
       <button class="clear" id="clear-picks">選択を解除</button>
-      <button class="copy primary" data-target="cmd-close">打ち切りをコピー</button>
+      <button class="copy" data-target="cmd-close">打ち切りをコピー</button>
       <button class="copy" data-target="cmd-defer">外部待ちをコピー</button>
     </div>
   </div>
