@@ -28,7 +28,7 @@ JST = ZoneInfo("Asia/Tokyo")
 # 積み上げグラフの層キー。通常の層は「作成週の月曜日」(date)、
 # deferred だけは作成週から抜いてこの sentinel の層へ移す。
 DEFERRED_LAYER = "deferred"
-# 「外部待ちへ送る」で付ける期限。期限なしの defer は戻る日が来ず放置と同じなので、
+# 外部待ちへ送る defer に付ける復帰日の初期値。期限なしの defer は戻る日が来ず放置と同じなので、
 # これまで手で付けてきた3ヶ月に揃える。
 DEFER_DAYS = 90
 # これを超えて動きが無ければ「止まった」「滞留した」とみなす。滞留日数の警告色と揃える。
@@ -798,6 +798,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.pick').forEach(e => e.addEventListener('change', refresh));
   const over30 = document.getElementById('tile-over30');
   if (over30) over30.addEventListener('click', showOver30);
+  document.getElementById('clear-picks').addEventListener('click', () => {
+    document.querySelectorAll('.pick:checked').forEach(e => { e.checked = false; });
+    refresh();
+  });
   document.querySelectorAll('.copy').forEach(b => {
     b.dataset.label = b.textContent;
     b.addEventListener('click', () => copyFrom(b.dataset.target, b));
@@ -1028,8 +1032,9 @@ def render_page(issues: list[Issue], today: date) -> str:
   <div class="dock-row">
     <strong>棚卸し</strong><span class="count" id="count">タスクを選択</span>
     <div class="dock-actions">
+      <button class="clear" id="clear-picks">選択を解除</button>
       <button class="copy primary" data-target="cmd-close">打ち切りをコピー</button>
-      <button class="copy" data-target="cmd-defer">外部待ちへ送る</button>
+      <button class="copy" data-target="cmd-defer">外部待ちをコピー</button>
     </div>
   </div>
   <div class="dock-output">

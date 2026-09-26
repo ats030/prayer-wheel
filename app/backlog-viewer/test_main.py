@@ -344,6 +344,15 @@ class TestPage:
         assert "' --until=' + document.getElementById('defer-until').value" in main.JS
         assert 'id="defer-until" value="2026-12-25" min="2026-09-27"' in page
 
+    def test_dock_buttons_only_copy_and_can_clear_the_selection(self):
+        page = main.render_page([], date(2026, 9, 26))
+        # どちらもコピーするだけなので、実行したように読める文言にしない
+        assert ">打ち切りをコピー</button>" in page
+        assert ">外部待ちをコピー</button>" in page
+        assert "外部待ちへ送る</button>" not in page
+        assert 'id="clear-picks">選択を解除</button>' in page
+        assert "querySelectorAll('.pick:checked').forEach(e => { e.checked = false; })" in main.JS
+
     def test_defer_date_shows_how_many_already_return_that_day(self):
         issues = main.parse_issues([
             issue("a", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 11, 23)),
