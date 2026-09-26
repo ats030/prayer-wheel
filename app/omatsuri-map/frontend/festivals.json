@@ -21424,8 +21424,8 @@
     "prefecture": "群馬県",
     "latitude": 36.522034,
     "longitude": 139.033249,
-    "description": "",
-    "date": "日付未定",
+    "description": "前橋まつりは、前橋まつり実施委員会が主催し、市民総参加のもと、鼓笛パレード、祇園山車、御神輿、前橋だんべぇ踊りなどの行事で、中心市街地を中心に全市が盛り上がる前橋市のまつりです。",
+    "date": "2026-10-10〜2026-10-11",
     "wikipedia_title": "前橋まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -21436,6 +21436,20 @@
     "jalan_sml_name": "赤城",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://maebashi-festival.jp/about/",
+    "venue": {
+      "name": "中心市街地一帯",
+      "source": "https://maebashi-festival.jp/about/",
+      "address": "群馬県前橋市"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-10",
+        "end": "2026-10-11",
+        "source": "https://maebashi-festival.jp/about/"
+      }
     ]
   },
   {
@@ -21445,8 +21459,8 @@
     "prefecture": "群馬県",
     "latitude": 36.522034,
     "longitude": 139.033249,
-    "description": "",
-    "date": "日付未定",
+    "description": "大胡祇園まつりは、古くから栄えた赤城南麓、上州大胡の地で行われる祭りです。暴れ獅子をはじめ、企業神輿や上州大胡風神太鼓の演奏などが行われます。",
+    "date": "2026-07-25〜2026-07-26",
     "wikipedia_title": "大胡祇園まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -21457,6 +21471,20 @@
     "jalan_sml_name": "赤城",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.maebashi-cvb.com/event/2008",
+    "venue": {
+      "name": "下町通り・JA前橋市大胡支所広場・大善駐車場・上電大胡駅駐車場",
+      "source": "https://www.maebashi-cvb.com/event/2008",
+      "address": "群馬県前橋市大胡町"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-25",
+        "end": "2026-07-26",
+        "source": "https://www.maebashi-cvb.com/event/2008"
+      }
     ]
   },
   {
@@ -21466,7 +21494,7 @@
     "prefecture": "群馬県",
     "latitude": 36.522034,
     "longitude": 139.033249,
-    "description": "",
+    "description": "尾島ねぷたまつりは、青森県弘前市と太田市との歴史的なつながりがあり昭和61年から始まりました。「ヤーヤドー」の掛け声とともに約10台のねぷたが会場を練り歩き、高さ7メートルにもおよぶ扇ねぷたとねぷた太鼓の隊列は勇壮そのものです。クライマックスはねぷた太鼓とまつり囃子の大合奏です。尾島ねぷたまつり実行委員会が主催します。",
     "date": "日付未定",
     "wikipedia_title": "尾島ねぷた",
     "coordinate_source": "prefecture_centroid",
@@ -21478,7 +21506,13 @@
     "jalan_sml_name": "赤城",
     "categories": [
       "山車・屋台"
-    ]
+    ],
+    "description_source": "https://www.city.ota.gunma.jp/site/kankou/1037648.html",
+    "venue": {
+      "name": "尾島商店街大通り（県道142号線）及び周辺",
+      "source": "https://www.city.ota.gunma.jp/site/kankou/1037648.html",
+      "address": "群馬県太田市"
+    }
   },
   {
     "qid": "Q18458829",
@@ -21508,8 +21542,8 @@
     "prefecture": "群馬県",
     "latitude": 36.522034,
     "longitude": 139.033249,
-    "description": "",
-    "date": "日付未定",
+    "description": "高崎まつりは、群馬県高崎市の夏の祭りで、山車巡行、神輿渡御、大花火大会、和太鼓や阿波踊りなどの伝統文化が楽しめます。2026年は第52回として8月22日（土）・23日（日）に開催されます。",
+    "date": "2026-08-22〜2026-08-23",
     "wikipedia_title": "高崎まつり",
     "coordinate_source": "prefecture_centroid",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -21520,6 +21554,20 @@
     "jalan_sml_name": "赤城",
     "categories": [
       "行事"
+    ],
+    "description_source": "https://www.takasaki-matsuri.jp/",
+    "venue": {
+      "name": "高崎市",
+      "source": "https://www.takasaki-matsuri.jp/",
+      "address": "群馬県高崎市"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-22",
+        "end": "2026-08-23",
+        "source": "https://www.takasaki-matsuri.jp/"
+      }
     ]
   },
   {
