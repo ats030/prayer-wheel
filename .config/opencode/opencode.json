@@ -21,7 +21,7 @@
           "limit": {
             "context": 98304,
             "input": 98304,
-            "output": 8192
+            "output": 16384
           }
         },
         "qwen3.8:27b": {
