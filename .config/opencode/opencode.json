@@ -29,7 +29,7 @@
           "limit": {
             "context": 65536,
             "input": 65536,
-            "output": 8192
+            "output": 16384
           }
         }
       }
@@ -57,7 +57,7 @@
   "compaction": {
     "auto": true,
     "prune": true,
-    "reserved": 8192,
+    "reserved": 16384,
     "preserve_recent_tokens": 6000,
     "tail_turns": 6
   },
