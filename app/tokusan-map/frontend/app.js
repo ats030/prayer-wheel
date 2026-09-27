@@ -104,7 +104,7 @@ function renderList(){
     const key=itemKey(o,i);
     const cat=categoryCode(o);
     const catSpan=cat!=='none'?`<span>${esc(categoryLabel(cat))}</span>`:'';
-    const placeSpan=o.place&&o.place!==o.prefecture?`<span>${esc(o.place)}</span>`:'';
+    const placeSpan=o.prefecture_level?'<span>都道府県単位</span>':o.place&&o.place!==o.prefecture?`<span>${esc(o.place)}</span>`:'';
     return `<button type="button" class="tokusan-card" data-key="${esc(key)}" aria-current="${key===selectedKey}"><span class="card-index">${String(i+1).padStart(2,'0')}</span><span><span class="card-name">${esc(o.label_ja||o.label_en||o.qid)}</span><span class="card-meta"><span>${esc(o.prefecture||'地域未登録')}</span>${catSpan}${placeSpan}</span></span></button>`;
   }).join('');
   list.querySelectorAll('button').forEach(card=>card.addEventListener('click',()=>selectItem(card.dataset.key,'list')));
@@ -125,7 +125,7 @@ function renderMarkers(){
     const key=itemKey(o,i);
     if(!hasCoordinates(o))return;
     const marker=L.marker([o.latitude,o.longitude],{icon:markerIcon(o,key===selectedKey),title:o.label_ja||o.label_en||o.qid});
-    marker.bindTooltip(`${o.label_ja||o.label_en||o.qid}${o.prefecture?'（'+o.prefecture+'）':''}`,{direction:'top',offset:[0,-8]});
+    marker.bindTooltip(`${o.label_ja||o.label_en||o.qid}${o.prefecture?'（'+o.prefecture+(o.prefecture_level?'・都道府県単位':'')+'）':''}`,{direction:'top',offset:[0,-8]});
     marker.on('click',()=>selectItem(key,'marker'));
     marker.addTo(map);
     markers.set(key,marker);
@@ -162,31 +162,41 @@ function selectItem(key,origin){
   requestAnimationFrame(()=>{map.invalidateSize();focusTarget?.focus({preventScroll:origin!=='marker'})});
 }
 
+const DETAIL_SECTIONS=[['about',o=>`${o.label_ja||'この特産物'}について`],['history',()=>'歴史'],['production',()=>'産地・製法'],['visit',()=>'購入・観光']];
+function renderSections(o){
+  const sections=o.sections&&typeof o.sections==='object'?o.sections:{};
+  return DETAIL_SECTIONS.map(([key,heading])=>{
+    const text=String(sections[key]||'').trim();
+    if(!text)return'';
+    return `<section class="detail-section" aria-labelledby="detail-${key}"><h3 id="detail-${key}">${esc(heading(o))}</h3><p class="detail-summary">${esc(text)}</p></section>`;
+  }).join('');
+}
+function placeFact(o){
+  if(o.prefecture_level)return `${esc(o.prefecture||o.place||'—')}<span class="detail-note">都道府県単位。地図上は都道府県庁の位置に表示しています。</span>`;
+  return `${esc(o.place||o.prefecture||'—')}<span class="detail-note">${hasCoordinates(o)?'推定。地図上の位置は目安です。':'推定。地図上には表示していません。'}</span>`;
+}
+
 function showDetail(o,origin){
   const panel=document.querySelector('#detail-panel');
   const content=document.querySelector('#detail-content');
-  const located=hasCoordinates(o);
   const cat=categoryCode(o);
   panel.hidden=false;
   document.querySelector('.app-shell').classList.add('has-detail');
-  document.querySelector('#detail-panel').hidden=false;
-  document.querySelector('#detail-origin').textContent=origin==='marker'?'地図から選択':`産地：${o.prefecture||o.place||'不明'}`;
-  const catRow=CATEGORY_META.some(m=>m.code===cat)?['カテゴリ',`<span class="detail-cat" style="color:var(--color-cat-${cat})">${esc(categoryLabel(cat))}</span>`]:null;
+  document.querySelector('#detail-origin').textContent=origin==='marker'?'地図から選択':`産地：${o.place||o.prefecture||'不明'}`;
+  const badge=cat!=='none'?`<p class="badge-line"><span class="badge" style="color:var(--color-cat-${cat});border-color:var(--color-cat-${cat})">${esc(categoryLabel(cat))}</span></p>`:'';
   const rows=[
-    ['品目',esc(o.label_en||'—')],
-    ...(catRow?[catRow]:[]),
-    ['産地',esc(o.place||o.prefecture||'—')],
+    ['産地',placeFact(o)],
     ['都道府県',esc(o.prefecture||'—')],
-    ['市町村',esc(o.city||'—')],
-    ['信頼度',o.confidence?`${Math.round(o.confidence*100)}%`:'—'],
-    ['出典',o.source_url?`<a href="${esc(o.source_url)}" target="_blank" rel="noopener">Wikipedia</a>`:'—'],
   ];
-  const wiki=`https://www.wikidata.org/wiki/${encodeURIComponent(o.qid)}`;
-  content.innerHTML=`<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(o.label_ja||o.label_en||o.qid)}</h2></header>
+  const links=[
+    o.source_url?['Wikipedia',o.source_url]:null,
+    o.qid?['Wikidata',`https://www.wikidata.org/wiki/${encodeURIComponent(o.qid)}`]:null,
+  ].filter(Boolean);
+  content.innerHTML=`<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(o.label_ja||o.label_en||o.qid)}</h2>${badge}</header>
     <dl class="detail-facts">${rows.map(([dt,dd])=>`<div><dt>${dt}</dt><dd>${dd}</dd></div>`).join('')}</dl>
     <section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section>
-    ${o.evidence?`<section class="detail-section" aria-labelledby="detail-evidence-h"><h3 id="detail-evidence-h">根拠 (LLM 抽出)</h3><p class="detail-evidence"><span class="quote">${esc(o.evidence)}</span></p><p class="detail-note">産地は日本語 Wikipedia 記事から LLM で抽出し、座標は Nominatim でジオコードしたため、目安としてお取り決めください。</p></section>`:''}
-    <section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" aria-label="出典"><a href="${esc(wiki)}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a></nav></section>
+    ${renderSections(o)}
+    ${links.length?`<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${links.map(([label,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label}<span aria-hidden="true">↗</span></a>`).join('')}</nav></section>`:''}
   </article>`;
   hydrateImage(o);
 }
