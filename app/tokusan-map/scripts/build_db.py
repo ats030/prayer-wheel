@@ -18,6 +18,7 @@ SRC = ROOT / "frontend" / "tokusan.json"
 CURATION = ROOT / "data" / "curation.json"
 DST = ROOT / "frontend" / "tokusan.db"
 CATEGORIES = {"sa", "te", "ui", "sa2", "am", "ko", "ry", "ta", "or", "ri"}
+SEASONS = {"春", "夏", "秋", "冬"}
 sys.path.insert(0, str(ROOT.parent / "omatsuri-map" / "scripts"))
 SCHEMA = """
 DROP TABLE IF EXISTS tokusan;
@@ -35,6 +36,7 @@ CREATE TABLE tokusan (
   confidence REAL NOT NULL DEFAULT 0,
   source_url TEXT NOT NULL DEFAULT '',
   category TEXT NOT NULL DEFAULT '',
+  seasons TEXT NOT NULL DEFAULT '',
   prefecture_level INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX idx_tokusan_prefecture ON tokusan(prefecture);
@@ -65,6 +67,9 @@ def validate(rows, curation):
             errors.append(f"{q}: 不正なカテゴリ {e.get('category')!r}")
         if not e.get("wiki_title"):
             errors.append(f"{q}: wiki_title が空")
+        seasons = e.get("seasons", [])
+        if not isinstance(seasons, list) or any(s not in SEASONS for s in seasons):
+            errors.append(f"{q}: 不正な seasons {seasons!r}")
         lat, lng = e.get("lat") or 0, e.get("lng") or 0
         if not lat or not lng:
             errors.append(f"{q}: 座標がない")
@@ -95,8 +100,8 @@ def main():
         con.execute(
             "INSERT INTO tokusan (qid, label_ja, label_en, place, prefecture,"
             " city, lat, lng, evidence, confidence, source_url, category,"
-            " prefecture_level)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " seasons, prefecture_level)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 r["qid"],
                 e.get("label") or r.get("label_ja", ""),
@@ -110,6 +115,7 @@ def main():
                 float(r.get("confidence") or 0) if same_place else 0.0,
                 "https://ja.wikipedia.org/wiki/" + quote(e["wiki_title"].replace(" ", "_")),
                 e["category"],
+                ",".join(e.get("seasons", [])),
                 1 if e.get("prefecture_level") else 0,
             ),
         )

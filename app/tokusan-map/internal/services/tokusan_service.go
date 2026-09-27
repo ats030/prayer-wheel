@@ -21,6 +21,8 @@ type Tokusan struct {
 	Confidence float64 `json:"confidence"`
 	SourceURL  string  `json:"source_url,omitempty"`
 	Category   string  `json:"category,omitempty"`
+	// Seasons は旬の季節（春・夏・秋・冬）の組み合わせ。空配列は表示しない。
+	Seasons         []string `json:"seasons,omitempty"`
 	// PrefectureLevel は産地が都道府県までしか分からず、座標が都道府県庁であることを示す。
 	PrefectureLevel bool `json:"prefecture_level"`
 }
@@ -64,11 +66,13 @@ func (s *TokusanService) collect(query string, args ...any) ([]Tokusan, error) {
 	result := make([]Tokusan, 0)
 	for rows.Next() {
 		var t Tokusan
+		var seasons string
 		if err := rows.Scan(&t.QID, &t.LabelJA, &t.LabelEN, &t.Place, &t.Prefecture,
 			&t.City, &t.Latitude, &t.Longitude, &t.Evidence, &t.Confidence, &t.SourceURL,
-			&t.Category, &t.PrefectureLevel); err != nil {
+			&t.Category, &seasons, &t.PrefectureLevel); err != nil {
 			return nil, err
 		}
+		t.Seasons = parseSeasons(seasons)
 		result = append(result, t)
 	}
 	if err := rows.Err(); err != nil {
@@ -77,9 +81,25 @@ func (s *TokusanService) collect(query string, args ...any) ([]Tokusan, error) {
 	return result, nil
 }
 
+func parseSeasons(csv string) []string {
+	csv = strings.TrimSpace(csv)
+	if csv == "" {
+		return nil
+	}
+	parts := strings.Split(csv, ",")
+	seasons := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			seasons = append(seasons, p)
+		}
+	}
+	return seasons
+}
+
 func (s *TokusanService) GetAll() []Tokusan {
 	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture," +
-		" city, lat, lng, evidence, confidence, source_url, category, prefecture_level FROM tokusan t")
+		" city, lat, lng, evidence, confidence, source_url, category, seasons, prefecture_level FROM tokusan t")
 	if list == nil {
 		list = []Tokusan{}
 	}
@@ -87,8 +107,8 @@ func (s *TokusanService) GetAll() []Tokusan {
 }
 
 func (s *TokusanService) GetByPrefecture(prefecture string) []Tokusan {
-	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture,"+
-		" city, lat, lng, evidence, confidence, source_url, category, prefecture_level FROM tokusan t WHERE t.prefecture = ?", prefecture)
+	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture," +
+		" city, lat, lng, evidence, confidence, source_url, category, seasons, prefecture_level FROM tokusan t WHERE t.prefecture = ?", prefecture)
 	if list == nil {
 		list = []Tokusan{}
 	}
@@ -99,8 +119,8 @@ func (s *TokusanService) GetByQID(qid string) *Tokusan {
 	if qid == "" {
 		return nil
 	}
-	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture,"+
-		" city, lat, lng, evidence, confidence, source_url, category, prefecture_level FROM tokusan t WHERE t.qid = ?", qid)
+	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture," +
+		" city, lat, lng, evidence, confidence, source_url, category, seasons, prefecture_level FROM tokusan t WHERE t.qid = ?", qid)
 	if len(list) == 0 {
 		return nil
 	}

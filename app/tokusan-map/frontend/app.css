@@ -31,6 +31,7 @@ input,select{width:100%;min-width:0;height:2.5rem;border:1px solid var(--color-r
 .card-index{color:var(--color-ink-2);font-size:.72rem;font-variant-numeric:tabular-nums}
 .card-name{display:block;font-family:var(--font-display);font-weight:700;line-height:1.35;overflow-wrap:anywhere}
 .card-meta{display:flex;flex-wrap:wrap;gap:.25rem var(--space-sm);margin-top:var(--space-xs);color:var(--color-ink-2);font-size:.75rem}
+.card-season{border-radius:999px;padding:.05rem .5rem;background:var(--color-accent);color:var(--color-accent-ink);font-weight:700}
 .empty-state{padding:var(--space-xl) var(--space-lg);color:var(--color-ink-2);line-height:1.6}
 
 .map-region{position:relative;min-width:0;min-height:0}

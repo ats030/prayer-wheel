@@ -9,7 +9,8 @@
    "lat": 33.559709,
    "lng": 133.531133,
    "prefecture_level": true,
-   "wiki_title": "皿鉢料理"
+   "wiki_title": "皿鉢料理",
+   "seasons": []
   },
   "Q1051852": {
    "label": "ソーキ",
@@ -20,7 +21,8 @@
    "lat": 26.212418,
    "lng": 127.681191,
    "prefecture_level": true,
-   "wiki_title": "ソーキ"
+   "wiki_title": "ソーキ",
+   "seasons": []
   },
   "Q106113671": {
    "label": "川通り餅",
@@ -31,7 +33,8 @@
    "lat": 34.395331,
    "lng": 132.482483,
    "prefecture_level": false,
-   "wiki_title": "川通り餅"
+   "wiki_title": "川通り餅",
+   "seasons": []
   },
   "Q106702187": {
    "label": "瀬戸の染飯",
@@ -42,7 +45,8 @@
    "lat": 34.867417,
    "lng": 138.257722,
    "prefecture_level": false,
-   "wiki_title": "瀬戸の染飯"
+   "wiki_title": "瀬戸の染飯",
+   "seasons": []
   },
   "Q106807449": {
    "label": "加勢以多",
@@ -53,7 +57,8 @@
    "lat": 32.79041,
    "lng": 130.742154,
    "prefecture_level": true,
-   "wiki_title": "加勢以多"
+   "wiki_title": "加勢以多",
+   "seasons": []
   },
   "Q108035185": {
    "label": "冷しラーメン",
@@ -64,7 +69,8 @@
    "lat": 38.255339,
    "lng": 140.340021,
    "prefecture_level": false,
-   "wiki_title": "冷やしラーメン"
+   "wiki_title": "冷やしラーメン",
+   "seasons": []
   },
   "Q10855366": {
    "label": "五平餅",
@@ -75,7 +81,8 @@
    "lat": 36.651389,
    "lng": 138.180921,
    "prefecture_level": true,
-   "wiki_title": "五平餅"
+   "wiki_title": "五平餅",
+   "seasons": []
   },
   "Q10861386": {
    "label": "柿の葉寿司",
@@ -86,7 +93,8 @@
    "lat": 34.685285,
    "lng": 135.832882,
    "prefecture_level": true,
-   "wiki_title": "柿の葉寿司"
+   "wiki_title": "柿の葉寿司",
+   "seasons": []
   },
   "Q109359870": {
    "label": "東洋美人",
@@ -97,7 +105,8 @@
    "lat": 34.407482,
    "lng": 131.399194,
    "prefecture_level": false,
-   "wiki_title": "東洋美人"
+   "wiki_title": "東洋美人",
+   "seasons": []
   },
   "Q109361773": {
    "label": "万木かぶ",
@@ -108,7 +117,8 @@
    "lat": 35.334094,
    "lng": 136.026379,
    "prefecture_level": false,
-   "wiki_title": "万木かぶ"
+   "wiki_title": "万木かぶ",
+   "seasons": []
   },
   "Q11151345": {
    "label": "海軍カレー",
@@ -119,7 +129,8 @@
    "lat": 35.281478,
    "lng": 139.67196,
    "prefecture_level": false,
-   "wiki_title": "海軍カレー"
+   "wiki_title": "海軍カレー",
+   "seasons": []
   },
   "Q11257243": {
    "label": "あさりせんべい (田原)",
@@ -130,7 +141,8 @@
    "lat": 34.66903,
    "lng": 137.263713,
    "prefecture_level": false,
-   "wiki_title": "あさりせんべい (田原)"
+   "wiki_title": "あさりせんべい (田原)",
+   "seasons": []
   },
   "Q11258608": {
    "label": "ハーバー",
@@ -141,7 +153,8 @@
    "lat": 35.444695,
    "lng": 139.642101,
    "prefecture_level": false,
-   "wiki_title": "ハーバー (菓子)"
+   "wiki_title": "ハーバー (菓子)",
+   "seasons": []
   },
   "Q11258799": {
    "label": "あんかけスパゲッティ",
@@ -152,7 +165,8 @@
    "lat": 35.185105,
    "lng": 136.899844,
    "prefecture_level": false,
-   "wiki_title": "あんかけスパゲッティ"
+   "wiki_title": "あんかけスパゲッティ",
+   "seasons": []
   },
   "Q11259099": {
    "label": "いきなり団子",
@@ -163,7 +177,8 @@
    "lat": 32.79041,
    "lng": 130.742154,
    "prefecture_level": true,
-   "wiki_title": "いきなり団子"
+   "wiki_title": "いきなり団子",
+   "seasons": []
   },
   "Q11260632": {
    "label": "うなぎパイ",
@@ -174,7 +189,8 @@
    "lat": 34.710979,
    "lng": 137.725943,
    "prefecture_level": false,
-   "wiki_title": "うなぎパイ"
+   "wiki_title": "うなぎパイ",
+   "seasons": []
   },
   "Q11264544": {
    "label": "かんずり",
@@ -185,7 +201,8 @@
    "lat": 37.025247,
    "lng": 138.253635,
    "prefecture_level": false,
-   "wiki_title": "かんずり"
+   "wiki_title": "かんずり",
+   "seasons": []
   },
   "Q11264794": {
    "label": "雪うさぎ",
@@ -196,7 +213,8 @@
    "lat": 33.561563,
    "lng": 130.426438,
    "prefecture_level": false,
-   "wiki_title": "雪うさぎ (銘菓)"
+   "wiki_title": "雪うさぎ (銘菓)",
+   "seasons": []
   },
   "Q11272312": {
    "label": "つけナポリタン",
@@ -207,7 +225,8 @@
    "lat": 35.161852,
    "lng": 138.676386,
    "prefecture_level": false,
-   "wiki_title": "つけナポリタン"
+   "wiki_title": "つけナポリタン",
+   "seasons": []
   },
   "Q11274767": {
    "label": "にしんそば",
@@ -218,7 +237,8 @@
    "lat": 35.011575,
    "lng": 135.768144,
    "prefecture_level": false,
-   "wiki_title": "にしんそば"
+   "wiki_title": "にしんそば",
+   "seasons": []
   },
   "Q11275121": {
    "label": "ねりくり",
@@ -229,7 +249,8 @@
    "lat": 31.560307,
    "lng": 130.557998,
    "prefecture_level": true,
-   "wiki_title": "ねりくり"
+   "wiki_title": "ねりくり",
+   "seasons": []
   },
   "Q11279243": {
    "label": "みみ",
@@ -240,7 +261,8 @@
    "lat": 35.561111,
    "lng": 138.461389,
    "prefecture_level": false,
-   "wiki_title": "みみ"
+   "wiki_title": "みみ",
+   "seasons": []
   },
   "Q11280099": {
    "label": "もみじ",
@@ -251,7 +273,8 @@
    "lat": 33.321165,
    "lng": 130.941132,
    "prefecture_level": false,
-   "wiki_title": "もみじ (郷土料理)"
+   "wiki_title": "もみじ (郷土料理)",
+   "seasons": []
   },
   "Q11295996": {
    "label": "ガタタン",
@@ -262,7 +285,8 @@
    "lat": 43.518329,
    "lng": 142.189828,
    "prefecture_level": false,
-   "wiki_title": "ガタタン"
+   "wiki_title": "ガタタン",
+   "seasons": []
   },
   "Q11299458": {
    "label": "クリームボックス",
@@ -273,7 +297,8 @@
    "lat": 37.404937,
    "lng": 140.333381,
    "prefecture_level": false,
-   "wiki_title": "クリームボックス"
+   "wiki_title": "クリームボックス",
+   "seasons": []
   },
   "Q11305289": {
    "label": "サラダパン",
@@ -284,7 +309,8 @@
    "lat": 35.57422,
    "lng": 136.286377,
    "prefecture_level": false,
-   "wiki_title": "サラダパン"
+   "wiki_title": "サラダパン",
+   "seasons": []
   },
   "Q113067305": {
    "label": "十日町友禅",
@@ -295,7 +321,8 @@
    "lat": 37.387636,
    "lng": 138.837392,
    "prefecture_level": false,
-   "wiki_title": "十日町友禅"
+   "wiki_title": "十日町友禅",
+   "seasons": []
   },
   "Q11339419": {
    "label": "ポンポン焼き",
@@ -306,7 +333,8 @@
    "lat": 40.512239,
    "lng": 141.488296,
    "prefecture_level": false,
-   "wiki_title": "ポンポン焼き"
+   "wiki_title": "ポンポン焼き",
+   "seasons": []
   },
   "Q11342927": {
    "label": "ミルクケーキ",
@@ -317,7 +345,8 @@
    "lat": 38.002602,
    "lng": 140.189063,
    "prefecture_level": false,
-   "wiki_title": "ミルクケーキ"
+   "wiki_title": "ミルクケーキ",
+   "seasons": []
   },
   "Q11353947": {
    "label": "万願寺とうがらし",
@@ -328,7 +357,10 @@
    "lat": 35.474727,
    "lng": 135.386034,
    "prefecture_level": false,
-   "wiki_title": "万願寺とうがらし"
+   "wiki_title": "万願寺とうがらし",
+   "seasons": [
+    "夏"
+   ]
   },
   "Q11358501": {
    "label": "上刈ミカン",
@@ -339,7 +371,10 @@
    "lat": 37.039034,
    "lng": 137.862794,
    "prefecture_level": false,
-   "wiki_title": "上刈ミカン"
+   "wiki_title": "上刈ミカン",
+   "seasons": [
+    "冬"
+   ]
   },
   "Q11366547": {
    "label": "中海七珍",
@@ -350,7 +385,8 @@
    "lat": 35.427641,
    "lng": 133.331459,
    "prefecture_level": false,
-   "wiki_title": "中海七珍"
+   "wiki_title": "中海七珍",
+   "seasons": []
   },
   "Q11370409": {
    "label": "九条葱",
@@ -361,7 +397,8 @@
    "lat": 34.976652,
    "lng": 135.746404,
    "prefecture_level": false,
-   "wiki_title": "九条葱"
+   "wiki_title": "九条葱",
+   "seasons": []
   },
   "Q11390756": {
    "label": "八女茶",
@@ -372,7 +409,8 @@
    "lat": 33.211672,
    "lng": 130.557971,
    "prefecture_level": false,
-   "wiki_title": "八女茶"
+   "wiki_title": "八女茶",
+   "seasons": []
   },
   "Q11398680": {
    "label": "加治木饅頭",
@@ -383,7 +421,8 @@
    "lat": 31.728282,
    "lng": 130.627657,
    "prefecture_level": false,
-   "wiki_title": "加治木饅頭"
+   "wiki_title": "加治木饅頭",
+   "seasons": []
   },
   "Q11404893": {
    "label": "十勝ワイン",
@@ -394,7 +433,8 @@
    "lat": 42.928765,
    "lng": 143.448454,
    "prefecture_level": false,
-   "wiki_title": "十勝ワイン"
+   "wiki_title": "十勝ワイン",
+   "seasons": []
   },
   "Q11451826": {
    "label": "宍道湖七珍",
@@ -405,7 +445,8 @@
    "lat": 35.468115,
    "lng": 133.048768,
    "prefecture_level": false,
-   "wiki_title": "宍道湖七珍"
+   "wiki_title": "宍道湖七珍",
+   "seasons": []
   },
   "Q11458898": {
    "label": "小倉トースト",
@@ -416,7 +457,8 @@
    "lat": 35.185105,
    "lng": 136.899844,
    "prefecture_level": false,
-   "wiki_title": "小倉トースト"
+   "wiki_title": "小倉トースト",
+   "seasons": []
   },
   "Q11462941": {
    "label": "小田原どん",
@@ -427,7 +469,8 @@
    "lat": 35.26453,
    "lng": 139.152246,
    "prefecture_level": false,
-   "wiki_title": "小田原どん"
+   "wiki_title": "小田原どん",
+   "seasons": []
   },
   "Q11476054": {
    "label": "峠の釜めし",
@@ -438,7 +481,8 @@
    "lat": 36.325613,
    "lng": 138.889634,
    "prefecture_level": false,
-   "wiki_title": "峠の釜めし"
+   "wiki_title": "峠の釜めし",
+   "seasons": []
   },
   "Q11498711": {
    "label": "播州織",
@@ -449,7 +493,8 @@
    "lat": 35.012575,
    "lng": 134.996262,
    "prefecture_level": false,
-   "wiki_title": "播州織"
+   "wiki_title": "播州織",
+   "seasons": []
   },
   "Q11529313": {
    "label": "松前昆布",
@@ -460,7 +505,8 @@
    "lat": 41.430042,
    "lng": 140.110392,
    "prefecture_level": false,
-   "wiki_title": "松前昆布"
+   "wiki_title": "松前昆布",
+   "seasons": []
   },
   "Q11547227": {
    "label": "母恋めし",
@@ -471,7 +517,8 @@
    "lat": 42.315246,
    "lng": 140.974073,
    "prefecture_level": false,
-   "wiki_title": "母恋めし"
+   "wiki_title": "母恋めし",
+   "seasons": []
   },
   "Q115483255": {
    "label": "おせき餅",
@@ -482,7 +529,8 @@
    "lat": 34.936065,
    "lng": 135.761328,
    "prefecture_level": false,
-   "wiki_title": "おせき餅"
+   "wiki_title": "おせき餅",
+   "seasons": []
   },
   "Q11554329": {
    "label": "油味噌かつサンド",
@@ -493,7 +541,8 @@
    "lat": 26.212235,
    "lng": 127.679145,
    "prefecture_level": false,
-   "wiki_title": "油味噌かつサンド"
+   "wiki_title": "油味噌かつサンド",
+   "seasons": []
   },
   "Q11558743": {
    "label": "海人がつくる壺川駅前弁当",
@@ -504,7 +553,8 @@
    "lat": 26.212235,
    "lng": 127.679145,
    "prefecture_level": false,
-   "wiki_title": "海人がつくる壺川駅前弁当"
+   "wiki_title": "海人がつくる壺川駅前弁当",
+   "seasons": []
   },
   "Q11567691": {
    "label": "焼鯖そうめん",
@@ -515,7 +565,8 @@
    "lat": 35.380862,
    "lng": 136.278507,
    "prefecture_level": false,
-   "wiki_title": "焼鯖そうめん"
+   "wiki_title": "焼鯖そうめん",
+   "seasons": []
   },
   "Q11567931": {
    "label": "熊本ラーメン",
@@ -526,7 +577,8 @@
    "lat": 32.803391,
    "lng": 130.708274,
    "prefecture_level": false,
-   "wiki_title": "熊本ラーメン"
+   "wiki_title": "熊本ラーメン",
+   "seasons": []
   },
   "Q11592112": {
    "label": "福山酢",
@@ -537,7 +589,8 @@
    "lat": 31.741015,
    "lng": 130.763241,
    "prefecture_level": false,
-   "wiki_title": "福山酢"
+   "wiki_title": "福山酢",
+   "seasons": []
   },
   "Q11614575": {
    "label": "芋棒",
@@ -548,7 +601,8 @@
    "lat": 34.997093,
    "lng": 135.776464,
    "prefecture_level": false,
-   "wiki_title": "芋棒"
+   "wiki_title": "芋棒",
+   "seasons": []
   },
   "Q11620280": {
    "label": "萩の月",
@@ -559,7 +613,8 @@
    "lat": 38.267755,
    "lng": 140.86915,
    "prefecture_level": false,
-   "wiki_title": "萩の月"
+   "wiki_title": "萩の月",
+   "seasons": []
   },
   "Q11674333": {
    "label": "鰹のタタキ",
@@ -570,7 +625,8 @@
    "lat": 33.559709,
    "lng": 133.531133,
    "prefecture_level": true,
-   "wiki_title": "鰹のタタキ"
+   "wiki_title": "鰹のタタキ",
+   "seasons": []
   },
   "Q11676485": {
    "label": "鹿児島ラーメン",
@@ -581,7 +637,8 @@
    "lat": 31.596793,
    "lng": 130.557195,
    "prefecture_level": false,
-   "wiki_title": "鹿児島ラーメン"
+   "wiki_title": "鹿児島ラーメン",
+   "seasons": []
   },
   "Q11677965": {
    "label": "黒はんぺん",
@@ -592,7 +649,8 @@
    "lat": 34.86723,
    "lng": 138.322843,
    "prefecture_level": false,
-   "wiki_title": "黒はんぺん"
+   "wiki_title": "黒はんぺん",
+   "seasons": []
   },
   "Q117207661": {
    "label": "しおA字フライ",
@@ -603,7 +661,8 @@
    "lat": 43.061936,
    "lng": 141.354292,
    "prefecture_level": false,
-   "wiki_title": "しおA字フライ"
+   "wiki_title": "しおA字フライ",
+   "seasons": []
   },
   "Q117209489": {
    "label": "矢賀うり",
@@ -614,7 +673,8 @@
    "lat": 34.395331,
    "lng": 132.482483,
    "prefecture_level": false,
-   "wiki_title": "矢賀うり"
+   "wiki_title": "矢賀うり",
+   "seasons": []
   },
   "Q1185324": {
    "label": "讃岐うどん",
@@ -625,7 +685,8 @@
    "lat": 34.340097,
    "lng": 134.04334,
    "prefecture_level": true,
-   "wiki_title": "讃岐うどん"
+   "wiki_title": "讃岐うどん",
+   "seasons": []
   },
   "Q122335037": {
    "label": "へらずし",
@@ -636,7 +697,8 @@
    "lat": 32.758572,
    "lng": 132.783004,
    "prefecture_level": false,
-   "wiki_title": "へらずし"
+   "wiki_title": "へらずし",
+   "seasons": []
   },
   "Q122974670": {
    "label": "辛麺",
@@ -647,7 +709,8 @@
    "lat": 32.582306,
    "lng": 131.664903,
    "prefecture_level": false,
-   "wiki_title": "辛麺"
+   "wiki_title": "辛麺",
+   "seasons": []
   },
   "Q123015526": {
    "label": "あんバタサン",
@@ -658,7 +721,8 @@
    "lat": 42.994277,
    "lng": 143.198146,
    "prefecture_level": false,
-   "wiki_title": "あんバタサン"
+   "wiki_title": "あんバタサン",
+   "seasons": []
   },
   "Q123143629": {
    "label": "群来太郎丼",
@@ -669,7 +733,8 @@
    "lat": 43.190681,
    "lng": 140.994602,
    "prefecture_level": false,
-   "wiki_title": "群来太郎丼"
+   "wiki_title": "群来太郎丼",
+   "seasons": []
   },
   "Q123511586": {
    "label": "のうさば",
@@ -680,7 +745,8 @@
    "lat": 33.805564,
    "lng": 130.540687,
    "prefecture_level": false,
-   "wiki_title": "のうさば"
+   "wiki_title": "のうさば",
+   "seasons": []
   },
   "Q124715774": {
    "label": "とうへい鍋",
@@ -691,7 +757,8 @@
    "lat": 33.805564,
    "lng": 130.540687,
    "prefecture_level": false,
-   "wiki_title": "とうへい鍋"
+   "wiki_title": "とうへい鍋",
+   "seasons": []
   },
   "Q128382071": {
    "label": "奥久慈しゃも",
@@ -702,7 +769,8 @@
    "lat": 36.764775,
    "lng": 140.363961,
    "prefecture_level": false,
-   "wiki_title": "奥久慈しゃも"
+   "wiki_title": "奥久慈しゃも",
+   "seasons": []
   },
   "Q131355057": {
    "label": "やたら",
@@ -713,7 +781,8 @@
    "lat": 36.741614,
    "lng": 138.369291,
    "prefecture_level": false,
-   "wiki_title": "やたら"
+   "wiki_title": "やたら",
+   "seasons": []
   },
   "Q132859089": {
    "label": "オオカミの桃",
@@ -724,7 +793,8 @@
    "lat": 43.843317,
    "lng": 142.354421,
    "prefecture_level": false,
-   "wiki_title": "オオカミの桃"
+   "wiki_title": "オオカミの桃",
+   "seasons": []
   },
   "Q134257497": {
    "label": "あみめし",
@@ -735,7 +805,8 @@
    "lat": 33.598279,
    "lng": 131.188322,
    "prefecture_level": false,
-   "wiki_title": "あみめし"
+   "wiki_title": "あみめし",
+   "seasons": []
   },
   "Q136374444": {
    "label": "三島ゴム焼きそば",
@@ -746,7 +817,8 @@
    "lat": 35.118538,
    "lng": 138.918444,
    "prefecture_level": false,
-   "wiki_title": "三島ゴム焼きそば"
+   "wiki_title": "三島ゴム焼きそば",
+   "seasons": []
   },
   "Q136396484": {
    "label": "ゴム焼きそば",
@@ -757,7 +829,8 @@
    "lat": 35.2967,
    "lng": 135.126643,
    "prefecture_level": false,
-   "wiki_title": "ゴム焼きそば"
+   "wiki_title": "ゴム焼きそば",
+   "seasons": []
   },
   "Q136438204": {
    "label": "笹かまぼこ",
@@ -768,7 +841,8 @@
    "lat": 38.267762,
    "lng": 140.871836,
    "prefecture_level": true,
-   "wiki_title": "笹かまぼこ"
+   "wiki_title": "笹かまぼこ",
+   "seasons": []
   },
   "Q138808636": {
    "label": "掛川芋汁",
@@ -779,7 +853,8 @@
    "lat": 34.768835,
    "lng": 137.998643,
    "prefecture_level": false,
-   "wiki_title": "掛川芋汁"
+   "wiki_title": "掛川芋汁",
+   "seasons": []
   },
   "Q139970745": {
    "label": "もろこしうどん",
@@ -790,7 +865,8 @@
    "lat": 34.954878,
    "lng": 137.172823,
    "prefecture_level": false,
-   "wiki_title": "もろこしうどん"
+   "wiki_title": "もろこしうどん",
+   "seasons": []
   },
   "Q17192072": {
    "label": "アリランラーメン",
@@ -801,7 +877,8 @@
    "lat": 35.41041,
    "lng": 140.370695,
    "prefecture_level": false,
-   "wiki_title": "アリランラーメン"
+   "wiki_title": "アリランラーメン",
+   "seasons": []
   },
   "Q17213750": {
    "label": "下山千歳白菜",
@@ -812,7 +889,8 @@
    "lat": 35.646903,
    "lng": 139.652531,
    "prefecture_level": false,
-   "wiki_title": "下山千歳白菜"
+   "wiki_title": "下山千歳白菜",
+   "seasons": []
   },
   "Q18455759": {
    "label": "いかだばえ",
@@ -823,7 +901,8 @@
    "lat": 35.423095,
    "lng": 136.762753,
    "prefecture_level": false,
-   "wiki_title": "いかだばえ"
+   "wiki_title": "いかだばえ",
+   "seasons": []
   },
   "Q20042953": {
    "label": "味間いも",
@@ -834,7 +913,8 @@
    "lat": 34.55667,
    "lng": 135.794554,
    "prefecture_level": false,
-   "wiki_title": "味間いも"
+   "wiki_title": "味間いも",
+   "seasons": []
   },
   "Q22123623": {
    "label": "筒井れんこん",
@@ -845,7 +925,8 @@
    "lat": 34.649618,
    "lng": 135.78295,
    "prefecture_level": false,
-   "wiki_title": "筒井れんこん"
+   "wiki_title": "筒井れんこん",
+   "seasons": []
   },
   "Q22127051": {
    "label": "川連漆器",
@@ -856,7 +937,8 @@
    "lat": 39.164302,
    "lng": 140.495747,
    "prefecture_level": false,
-   "wiki_title": "川連漆器"
+   "wiki_title": "川連漆器",
+   "seasons": []
   },
   "Q24898518": {
    "label": "島豆腐",
@@ -867,7 +949,8 @@
    "lat": 26.212418,
    "lng": 127.681191,
    "prefecture_level": true,
-   "wiki_title": "島豆腐"
+   "wiki_title": "島豆腐",
+   "seasons": []
   },
   "Q2596949": {
    "label": "玉緑茶",
@@ -878,7 +961,8 @@
    "lat": 33.127911,
    "lng": 130.059907,
    "prefecture_level": false,
-   "wiki_title": "玉緑茶"
+   "wiki_title": "玉緑茶",
+   "seasons": []
   },
   "Q263351": {
    "label": "家系ラーメン",
@@ -889,7 +973,8 @@
    "lat": 35.450338,
    "lng": 139.63438,
    "prefecture_level": false,
-   "wiki_title": "家系ラーメン"
+   "wiki_title": "家系ラーメン",
+   "seasons": []
   },
   "Q28154239": {
    "label": "犬山焼",
@@ -900,7 +985,8 @@
    "lat": 35.360973,
    "lng": 136.984549,
    "prefecture_level": false,
-   "wiki_title": "犬山焼"
+   "wiki_title": "犬山焼",
+   "seasons": []
   },
   "Q55521772": {
    "label": "きみごろも",
@@ -911,7 +997,8 @@
    "lat": 34.528225,
    "lng": 135.952689,
    "prefecture_level": false,
-   "wiki_title": "きみごろも"
+   "wiki_title": "きみごろも",
+   "seasons": []
   },
   "Q56346823": {
    "label": "ビルマ汁",
@@ -922,7 +1009,10 @@
    "lat": 36.46735,
    "lng": 140.093597,
    "prefecture_level": false,
-   "wiki_title": "ビルマ汁"
+   "wiki_title": "ビルマ汁",
+   "seasons": [
+    "夏"
+   ]
   },
   "Q60997026": {
    "label": "オニササ",
@@ -933,7 +1023,8 @@
    "lat": 24.344444,
    "lng": 124.185186,
    "prefecture_level": false,
-   "wiki_title": "オニササ"
+   "wiki_title": "オニササ",
+   "seasons": []
   },
   "Q86737140": {
    "label": "追分羊かん",
@@ -944,7 +1035,8 @@
    "lat": 35.015942,
    "lng": 138.489561,
    "prefecture_level": false,
-   "wiki_title": "追分羊かん"
+   "wiki_title": "追分羊かん",
+   "seasons": []
   },
   "Q97311516": {
    "label": "せんさら",
@@ -955,7 +1047,8 @@
    "lat": 31.495308,
    "lng": 131.045648,
    "prefecture_level": false,
-   "wiki_title": "せんさら"
+   "wiki_title": "せんさら",
+   "seasons": []
   }
  },
  "exclude": {
