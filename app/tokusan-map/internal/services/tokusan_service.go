@@ -2,6 +2,8 @@ package services
 
 import (
 	"database/sql"
+	"net/url"
+	"strings"
 
 	_ "modernc.org/sqlite"
 )
@@ -103,4 +105,18 @@ func (s *TokusanService) GetByQID(qid string) *Tokusan {
 		return nil
 	}
 	return &list[0]
+}
+
+// WikipediaTitle returns the Japanese Wikipedia article title encoded in
+// SourceURL, or "" when SourceURL is not a ja.wikipedia.org article link.
+func (t Tokusan) WikipediaTitle() string {
+	const prefix = "https://ja.wikipedia.org/wiki/"
+	if !strings.HasPrefix(t.SourceURL, prefix) {
+		return ""
+	}
+	title, err := url.PathUnescape(strings.TrimPrefix(t.SourceURL, prefix))
+	if err != nil {
+		return ""
+	}
+	return strings.ReplaceAll(title, "_", " ")
 }

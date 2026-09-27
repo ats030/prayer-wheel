@@ -163,12 +163,47 @@ function selectItem(key,origin){
 }
 
 const DETAIL_SECTIONS=[['about',o=>`${o.label_ja||'この特産物'}について`],['history',()=>'歴史'],['production',()=>'産地・製法'],['visit',()=>'購入・観光']];
-function renderSections(o){
-  const sections=o.sections&&typeof o.sections==='object'?o.sections:{};
+const sectionsCache=new Map();
+async function hydrateSections(o){
+  const qid=o.qid,container=document.querySelector('#detail-sections');
+  if(!qid||!container)return;
+  let data=sectionsCache.get(qid);
+  if(!data){
+    try{data=await fetchJSONWithRetry(`/api/sections/${encodeURIComponent(qid)}`)}
+    catch(error){console.warn(`Sections could not be loaded for ${qid}`,error);data=null}
+    if(data&&!data.sections_unavailable&&!data.sections_retry)sectionsCache.set(qid,data);
+  }
+  if(selectedItem!==o)return;
+  if(!data||data.sections_unavailable){container.innerHTML='<p class="detail-image-status">解説を読み込めませんでした。もう一度開いてください。</p>';return}
+  container.innerHTML=renderSections(o,data.sections&&typeof data.sections==='object'?data.sections:{});
+}
+function renderSections(o,sections){
+  const link=(url,label)=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label}<span aria-hidden="true">↗</span></a>`;
   return DETAIL_SECTIONS.map(([key,heading])=>{
-    const text=String(sections[key]||'').trim();
-    if(!text)return'';
-    return `<section class="detail-section" aria-labelledby="detail-${key}"><h3 id="detail-${key}">${esc(heading(o))}</h3><p class="detail-summary">${esc(text)}</p></section>`;
+    const payload=sections[key]||{};
+    const summary=String(payload.summary||'').trim();
+    const items=Array.isArray(payload.items)?payload.items:[];
+    const blocks=Array.isArray(payload.blocks)?payload.blocks:[];
+    if(!summary&&!items.length&&!blocks.length)return'';
+    const itemsMarkup=items.map(item=>{
+      const from=String(item.from||'').trim(),to=String(item.to||'').trim();
+      const text=[from&&to?`${from} → ${to}`:'',String(item.value||'').trim()].filter(Boolean).join(' ');
+      return `<div><dt>${esc(String(item.label||'').trim())}</dt><dd>${esc(text)}</dd></div>`;
+    }).join('');
+    const blockMarkup=blocks.map(b=>{
+      const h=String(b.heading||'').trim();
+      return (h?`<p class="detail-subheading">${esc(h)}</p>`:'')+`<p>${esc(String(b.text||''))}</p>`;
+    }).join('');
+    const source=safeUrl(payload.source_url)||safeUrl(o.source_url);
+    const attribution=[summary||items.length?'AIによる要約':'編集あり'];
+    if(source)attribution.push(link(source,'Wikipedia'));
+    attribution.push(link('https://creativecommons.org/licenses/by-sa/4.0/deed.ja','CC BY-SA 4.0'));
+    const body=[
+      summary?`<p class="detail-summary">${esc(summary)}</p>`:'',
+      items.length?`<dl class="section-items">${itemsMarkup}</dl>`:'',
+      blockMarkup?(summary||items.length?`<details class="section-source"><summary>原文を読む</summary>${blockMarkup}</details>`:`<div class="section-source-text">${blockMarkup}</div>`):'',
+    ].join('');
+    return `<section class="detail-section" aria-labelledby="detail-${key}"><h3 id="detail-${key}">${esc(heading(o))}</h3>${body}<p class="image-license">${attribution.join(' · ')}</p></section>`;
   }).join('');
 }
 function placeFact(o){
@@ -195,10 +230,11 @@ function showDetail(o,origin){
   content.innerHTML=`<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(o.label_ja||o.label_en||o.qid)}</h2>${badge}</header>
     <dl class="detail-facts">${rows.map(([dt,dd])=>`<div><dt>${dt}</dt><dd>${dd}</dd></div>`).join('')}</dl>
     <section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section>
-    ${renderSections(o)}
+    <div id="detail-sections" aria-live="polite"></div>
     ${links.length?`<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${links.map(([label,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label}<span aria-hidden="true">↗</span></a>`).join('')}</nav></section>`:''}
   </article>`;
   hydrateImage(o);
+  hydrateSections(o);
 }
 
 async function hydrateImage(o){

@@ -42,6 +42,7 @@ func main() {
 		tokusanHandler.GetByQID(w, r)
 	})
 	mux.HandleFunc("/api/tokusan", tokusanHandler.GetAll)
+	mux.HandleFunc("/api/sections/", tokusanHandler.GetSections)
 
 	wikidataHandler := handlers.NewWikidataHandler()
 	mux.HandleFunc("/api/wikiimage", wikidataHandler.GetWikidataImage)

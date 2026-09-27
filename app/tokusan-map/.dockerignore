@@ -1,6 +1,7 @@
 app-server
 *.exe
-data/
+data/*
+!data/summaries.json
 .git/
 __pycache__/
 *.log

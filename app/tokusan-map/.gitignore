@@ -6,6 +6,7 @@ build/
 # データ生成キャッシュ
 data/*.json
 !data/curation.json
+!data/summaries.json
 data/*.json.tmp
 
 # Python
