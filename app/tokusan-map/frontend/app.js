@@ -221,7 +221,6 @@ function showDetail(o,origin){
   const badge=cat!=='none'?`<p class="badge-line"><span class="badge" style="color:var(--color-cat-${cat});border-color:var(--color-cat-${cat})">${esc(categoryLabel(cat))}</span></p>`:'';
   const rows=[
     ['産地',placeFact(o)],
-    ['都道府県',esc(o.prefecture||'—')],
   ];
   const links=[
     o.source_url?['Wikipedia',o.source_url]:null,
