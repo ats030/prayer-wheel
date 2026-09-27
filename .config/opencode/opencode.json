@@ -9,7 +9,7 @@
       "name": "Ollama",
       "options": {
         "baseURL": "http://localhost:11434/v1",
-        "timeout": 600000,
+        "timeout": 1800000,
         "chunkTimeout": 300000,
         "headers": {
           "X-Client-App": "opencode"
@@ -25,10 +25,10 @@
           }
         },
         "qwen3.8:27b": {
-          "name": "Qwen 3.8 27B (32k)",
+          "name": "Qwen 3.8 27B (64k)",
           "limit": {
-            "context": 32768,
-            "input": 32768,
+            "context": 65536,
+            "input": 65536,
             "output": 8192
           }
         }
@@ -58,7 +58,7 @@
     "auto": true,
     "prune": true,
     "reserved": 8192,
-    "preserve_recent_tokens": 16000,
+    "preserve_recent_tokens": 6000,
     "tail_turns": 6
   },
   "tool_output": {
