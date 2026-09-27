@@ -26,6 +26,7 @@ import re
 import sys
 import time
 from pathlib import Path
+from urllib.parse import quote
 
 import requests
 
@@ -99,7 +100,7 @@ PROMPT = """あなたは日本の食文化の編集者です。
 
 
 def fetch_labels(qids):
-    """wikidata API で ja/en ラベルを取得して {qid: (ja, en)} を返す."""
+    """wikidata API で ja/en ラベルと jawiki 記事名を取得して {qid: (ja, en, title)} を返す."""
     labels = {}
     for i in range(0, len(qids), 50):
         chunk = qids[i:i + 50]
@@ -107,7 +108,7 @@ def fetch_labels(qids):
             try:
                 resp = requests.get(WIKIDATA_LABELS_API, headers=HEADERS, params={
                     "action": "wbgetentities", "format": "json",
-                    "ids": "|".join(chunk), "languages": "ja|en", "props": "labels",
+                    "ids": "|".join(chunk), "languages": "ja|en", "props": "labels|sitelinks", "sitefilter": "jawiki",
                 }, timeout=60)
                 resp.raise_for_status()
                 for qid, ent in resp.json().get("entities", {}).items():
@@ -115,6 +116,7 @@ def fetch_labels(qids):
                     labels[qid] = (
                         lab.get("ja", {}).get("value", ""),
                         lab.get("en", {}).get("value", ""),
+                        ent.get("sitelinks", {}).get("jawiki", {}).get("title", ""),
                     )
                 break
             except requests.RequestException:
@@ -124,8 +126,6 @@ def fetch_labels(qids):
 
 def sparql_fetch():
     """品目の (qid, label_ja, label_en) を取得する."""
-    from urllib.parse import quote
-
     url = f"{SPARQL_ENDPOINT}?query={quote(SPARQL)}"
     last_err = None
     rows = None
@@ -152,8 +152,9 @@ def sparql_fetch():
     labels = fetch_labels(items)
     items = [{
         "qid": qid,
-        "label_ja": labels.get(qid, ("", ""))[0],
-        "label_en": labels.get(qid, ("", ""))[1],
+        "label_ja": labels.get(qid, ("", "", ""))[0],
+        "label_en": labels.get(qid, ("", "", ""))[1],
+        "wiki_title": labels.get(qid, ("", "", ""))[2],
     } for qid in items]
     items.sort(key=lambda x: (x["label_ja"] or x["label_en"] or x["qid"], x["qid"]))
     return items
@@ -208,7 +209,9 @@ def ask_llm(label, text):
                 confidence = 0
             evidence = " ".join(str(obj.get("evidence") or "").split())[:160]
             place = re.sub(r"\s+", "", place)
-            if place and not re.search(r"[県府道]", place):
+            # 「東京都世田谷区県」のような誤った「県」を取り除き、都道府県名が無いときだけ補う
+            place = re.sub(r"(?<=[市区町村])県$", "", place)
+            if place and not re.search(r"[都道府県]", place):
                 place += "県"
             return {"place": place, "confidence": confidence, "evidence": evidence}
         except (requests.RequestException, ValueError, json.JSONDecodeError) as exc:
@@ -356,7 +359,9 @@ def save_cache(cache):
 def process_row(item, cache, prefecture_features):
     """既存のキャッシュがあればそれを返す。無ければ LLM -> Nominatim で追加抽出する."""
     label_ja = item["label_ja"] or item["label_en"] or item["qid"]
-    text = jawiki_extract(label_ja)
+    # ラベル名で記事を引くと同名の別記事に当たるため、sitelink の記事名だけを使う
+    wiki_title = item.get("wiki_title", "")
+    text = jawiki_extract(wiki_title) if wiki_title else ""
     key = make_key(item["qid"], label_ja, text)
 
     if key in cache:
@@ -383,7 +388,9 @@ def process_row(item, cache, prefecture_features):
         "lat": 0.0, "lng": 0.0,
         "prefecture": "",
         "city": "",
-        "source_url": f"https://ja.wikipedia.org/wiki/{label_ja}",
+        "wiki_title": wiki_title,
+        "source_url": (f"https://ja.wikipedia.org/wiki/{quote(wiki_title.replace(' ', '_'))}"
+                       if wiki_title else ""),
     }
     if not place or confidence < MIN_CONFIDENCE:
         return row
