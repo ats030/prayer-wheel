@@ -229,6 +229,8 @@ function showDetail(o,origin){
     ['産地',placeFact(o)],
   ];
   if(seasons.length)rows.push(['旬の季節',`<span class="detail-season">${seasons.map(esc).join('・')}</span>`]);
+  const maker=(typeof o.maker==='string')?o.maker.trim():'';
+  if(maker)rows.push(['生産者・ブランド',esc(maker)]);
   const links=[
     o.source_url?['Wikipedia',o.source_url]:null,
     o.qid?['Wikidata',`https://www.wikidata.org/wiki/${encodeURIComponent(o.qid)}`]:null,

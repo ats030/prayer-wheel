@@ -37,6 +37,7 @@ CREATE TABLE tokusan (
   source_url TEXT NOT NULL DEFAULT '',
   category TEXT NOT NULL DEFAULT '',
   seasons TEXT NOT NULL DEFAULT '',
+  maker TEXT NOT NULL DEFAULT '',
   prefecture_level INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX idx_tokusan_prefecture ON tokusan(prefecture);
@@ -70,6 +71,9 @@ def validate(rows, curation):
         seasons = e.get("seasons", [])
         if not isinstance(seasons, list) or any(s not in SEASONS for s in seasons):
             errors.append(f"{q}: 不正な seasons {seasons!r}")
+        maker = e.get("maker", "")
+        if not isinstance(maker, str):
+            errors.append(f"{q}: maker は文字列であるべき {maker!r}")
         lat, lng = e.get("lat") or 0, e.get("lng") or 0
         if not lat or not lng:
             errors.append(f"{q}: 座標がない")
@@ -100,8 +104,8 @@ def main():
         con.execute(
             "INSERT INTO tokusan (qid, label_ja, label_en, place, prefecture,"
             " city, lat, lng, evidence, confidence, source_url, category,"
-            " seasons, prefecture_level)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " seasons, maker, prefecture_level)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 r["qid"],
                 e.get("label") or r.get("label_ja", ""),
@@ -116,6 +120,7 @@ def main():
                 "https://ja.wikipedia.org/wiki/" + quote(e["wiki_title"].replace(" ", "_")),
                 e["category"],
                 ",".join(e.get("seasons", [])),
+                e.get("maker", ""),
                 1 if e.get("prefecture_level") else 0,
             ),
         )
