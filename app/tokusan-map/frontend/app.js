@@ -74,16 +74,13 @@ function renderLegend(){
   legend.innerHTML=CATEGORY_META.map(meta=>`<span><span class="legend-dot" style="background:var(--color-cat-${meta.code})"></span>${esc(meta.label)}</span>`).join('');
 }
 
-function hasSeason(o,season){const seasons=Array.isArray(o.seasons)?o.seasons:[];return seasons.includes(season)}
 function applyFilters(){
   const keyword=document.querySelector('#keyword').value.trim().toLowerCase();
   const prefecture=document.querySelector('#prefecture').value;
   const category=document.querySelector('#category').value;
-  const season=document.querySelector('#season').value;
   visible=tokusan.filter(o=>{
     if(prefecture&&o.prefecture!==prefecture)return false;
     if(category&&categoryCode(o)!==category)return false;
-    if(season&&!hasSeason(o,season))return false;
     if(keyword){
       const haystack=[o.label_ja,o.label_en,o.place,o.prefecture,o.city,categoryLabel(categoryCode(o))].filter(Boolean).join(' ').toLowerCase();
       if(!haystack.includes(keyword))return false;
@@ -107,10 +104,8 @@ function renderList(){
     const key=itemKey(o,i);
     const cat=categoryCode(o);
     const catSpan=cat!=='none'?`<span>${esc(categoryLabel(cat))}</span>`:'';
-    const seasons=Array.isArray(o.seasons)?o.seasons:[];
-    const seasonSpan=seasons.length?`<span class="card-season">${seasons.map(esc).join('・')}</span>`:'';
     const placeSpan=o.prefecture_level?'<span>都道府県単位</span>':o.place&&o.place!==o.prefecture?`<span>${esc(o.place)}</span>`:'';
-    return `<button type="button" class="tokusan-card" data-key="${esc(key)}" aria-current="${key===selectedKey}"><span class="card-index">${String(i+1).padStart(2,'0')}</span><span><span class="card-name">${esc(o.label_ja||o.label_en||o.qid)}</span><span class="card-meta"><span>${esc(o.prefecture||'地域未登録')}</span>${catSpan}${seasonSpan}${placeSpan}</span></span></button>`;
+    return `<button type="button" class="tokusan-card" data-key="${esc(key)}" aria-current="${key===selectedKey}"><span class="card-index">${String(i+1).padStart(2,'0')}</span><span><span class="card-name">${esc(o.label_ja||o.label_en||o.qid)}</span><span class="card-meta"><span>${esc(o.prefecture||'地域未登録')}</span>${catSpan}${placeSpan}</span></span></button>`;
   }).join('');
   list.querySelectorAll('button').forEach(card=>card.addEventListener('click',()=>selectItem(card.dataset.key,'list')));
 }
@@ -224,11 +219,9 @@ function showDetail(o,origin){
   document.querySelector('.app-shell').classList.add('has-detail');
   document.querySelector('#detail-origin').textContent=origin==='marker'?'地図から選択':`産地：${o.place||o.prefecture||'不明'}`;
   const badge=cat!=='none'?`<p class="badge-line"><span class="badge" style="color:var(--color-cat-${cat});border-color:var(--color-cat-${cat})">${esc(categoryLabel(cat))}</span></p>`:'';
-  const seasons=Array.isArray(o.seasons)?o.seasons:[];
   const rows=[
     ['産地',placeFact(o)],
   ];
-  if(seasons.length)rows.push(['旬の季節',`<span class="detail-season">${seasons.map(esc).join('・')}</span>`]);
   const maker=(typeof o.maker==='string')?o.maker.trim():'';
   if(maker)rows.push(['生産者・ブランド',esc(maker)]);
   const links=[
@@ -302,8 +295,7 @@ function closeDetail(){
 document.querySelector('#keyword').addEventListener('input',applyFilters);
 document.querySelector('#prefecture').addEventListener('change',applyFilters);
 document.querySelector('#category').addEventListener('change',applyFilters);
-document.querySelector('#season').addEventListener('change',applyFilters);
-document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';document.querySelector('#category').value='';document.querySelector('#season').value='';applyFilters();document.querySelector('#keyword').focus()});
+document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';document.querySelector('#category').value='';applyFilters();document.querySelector('#keyword').focus()});
 document.querySelector('.detail-close').addEventListener('click',closeDetail);
 document.querySelector('.lightbox-close').addEventListener('click',closeLightbox);
 document.querySelector('#lightbox').addEventListener('click',e=>{if(e.target.id==='lightbox')closeLightbox()});
