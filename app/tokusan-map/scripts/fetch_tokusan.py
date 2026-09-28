@@ -51,18 +51,24 @@ SPARQL = """
 PREFIX wd: <http://www.wikidata.org/entity/>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 SELECT ?item WHERE {
-  ?item wdt:P31 ?t .
-  { ?t wdt:P279* wd:Q2095 } UNION
-  { ?t wdt:P279* wd:Q13464614 } UNION
-  { ?t wdt:P279* wd:Q28823 } UNION
-  { ?t wdt:P279* wd:Q368972 } .
-  ?item wdt:P17 wd:Q17 .
+  {
+    ?item wdt:P31 ?t .
+    { ?t wdt:P279* wd:Q2095 } UNION
+    { ?t wdt:P279* wd:Q13464614 } UNION
+    { ?t wdt:P279* wd:Q28823 } UNION
+    { ?t wdt:P279* wd:Q368972 } .
+    ?item wdt:P17 wd:Q17 .
+  } UNION {
+    # 伝統的工芸品 (経済産業大臣指定)。指定が日本に限られるため P17 は問わない
+    { ?item wdt:P31/wdt:P279* wd:Q11606456 } UNION { ?item wdt:P1435 wd:Q11606456 }
+  }
 }
-LIMIT 500
+LIMIT 1000
 """
 
 # LLM が選択するカテゴリ (code -> 表示名)。
-# 食品 8 + 工芸 3 = 11 分類。工芸は Q13464614 (陶芸品) / Q28823 (織物) / Q368972 (漆器)。
+# 食品 7 + 工芸 4 = 11 分類。工芸は Q13464614 (陶芸品) / Q28823 (織物) / Q368972 (漆器) と、
+# 伝統的工芸品 (Q11606456) のうちそれ以外 (その他工芸)。
 CATEGORIES = [
     ("sa",  "酒・醸造"),
     ("te",  "茶・飲料"),
@@ -74,6 +80,7 @@ CATEGORIES = [
     ("ta",  "陶磁器"),
     ("or",  "織物"),
     ("ri",  "漆器"),
+    ("kg",  "その他工芸"),
 ]
 CATEGORY_CODES = [c for c, _ in CATEGORIES]
 CATEGORY_PROMPT_CODES = "、".join(f"{c} ({name})" for c, name in CATEGORIES)

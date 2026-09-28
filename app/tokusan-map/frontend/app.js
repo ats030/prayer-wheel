@@ -43,6 +43,7 @@ const CATEGORY_META=[
   {code:'ta',label:'陶磁器'},
   {code:'or',label:'織物'},
   {code:'ri',label:'漆器'},
+  {code:'kg',label:'その他工芸'},
 ];
 function categoryCode(o){return CATEGORY_META.some(m=>m.code===o.category)?String(o.category):'none'}
 function categoryLabel(code){const meta=CATEGORY_META.find(m=>m.code===code);return meta?meta.label:'未分類'}

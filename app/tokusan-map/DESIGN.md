@@ -32,6 +32,7 @@ modern-minimal。地図と特産物の情報そのものを主役にし、装飾
 - `--color-cat-ta` 陶磁器
 - `--color-cat-or` 織物
 - `--color-cat-ri` 漆器
+- `--color-cat-kg` その他工芸（伝統的工芸品のうち陶磁器・織物・漆器以外）
 
 未分類の品目は掲載しません（`data/curation.json` で必ず分類します）。
 

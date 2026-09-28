@@ -21,7 +21,7 @@
   --radius: .35rem;
   --ease-out: cubic-bezier(.16, 1, .3, 1);
 
-  /* カテゴリ別マーカーカラー (10種) */
+  /* カテゴリ別マーカーカラー (11種) */
   --color-cat-sa: #7a4a1a;   /* 酒・醸造 */
   --color-cat-te: #3f6b3a;   /* 茶・飲料 */
   --color-cat-ui: #2f4a8f;   /* 魚介 */
@@ -32,5 +32,6 @@
   --color-cat-ta: #4a5a8a;   /* 陶磁器 */
   --color-cat-or: #a04a3a;   /* 織物 */
   --color-cat-ri: #3a2a2a;   /* 漆器 */
+  --color-cat-kg: #2f7a7a;   /* その他工芸 */
   --color-cat-none: var(--color-accent); /* 未分類 */
 }

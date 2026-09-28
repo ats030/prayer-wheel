@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "frontend" / "tokusan.json"
 CURATION = ROOT / "data" / "curation.json"
 DST = ROOT / "frontend" / "tokusan.db"
-CATEGORIES = {"sa", "te", "ui", "sa2", "am", "ko", "ry", "ta", "or", "ri"}
+CATEGORIES = {"sa", "te", "ui", "sa2", "am", "ko", "ry", "ta", "or", "ri", "kg"}
 sys.path.insert(0, str(ROOT.parent / "omatsuri-map" / "scripts"))
 SCHEMA = """
 DROP TABLE IF EXISTS tokusan;

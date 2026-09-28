@@ -1043,6 +1043,1794 @@
    "prefecture_level": false,
    "wiki_title": "せんさら",
    "maker": ""
+  },
+  "Q11267184": {
+   "label": "ごっくん馬路村",
+   "category": "te",
+   "place": "高知県馬路村",
+   "prefecture": "高知県",
+   "city": "馬路村",
+   "lat": 33.635136,
+   "lng": 134.097052,
+   "prefecture_level": false,
+   "wiki_title": "ごっくん馬路村",
+   "maker": "馬路村農業協同組合"
+  },
+  "Q11294620": {
+   "label": "カブトビール",
+   "category": "sa",
+   "place": "愛知県半田市",
+   "prefecture": "愛知県",
+   "city": "半田市",
+   "lat": 34.893814,
+   "lng": 136.936952,
+   "prefecture_level": false,
+   "wiki_title": "カブトビール",
+   "maker": ""
+  },
+  "Q10863813": {
+   "label": "一位一刀彫",
+   "category": "kg",
+   "place": "岐阜県高山市",
+   "prefecture": "岐阜県",
+   "city": "高山市",
+   "lat": 36.139625,
+   "lng": 137.251032,
+   "prefecture_level": false,
+   "wiki_title": "一位一刀彫",
+   "maker": ""
+  },
+  "Q11353474": {
+   "label": "七尾仏壇",
+   "category": "kg",
+   "place": "石川県七尾市",
+   "prefecture": "石川県",
+   "city": "七尾市",
+   "lat": 37.052108,
+   "lng": 136.946461,
+   "prefecture_level": false,
+   "wiki_title": "七尾仏壇",
+   "maker": ""
+  },
+  "Q11355340": {
+   "label": "三川内焼",
+   "category": "ta",
+   "place": "長崎県佐世保市",
+   "prefecture": "長崎県",
+   "city": "佐世保市",
+   "lat": 33.179997,
+   "lng": 129.715287,
+   "prefecture_level": false,
+   "wiki_title": "三川内焼",
+   "maker": ""
+  },
+  "Q96473485": {
+   "label": "三河仏壇",
+   "category": "kg",
+   "place": "愛知県",
+   "prefecture": "愛知県",
+   "city": "",
+   "lat": 34.999164,
+   "lng": 137.254574,
+   "prefecture_level": true,
+   "wiki_title": "三河仏壇",
+   "maker": ""
+  },
+  "Q4691202": {
+   "label": "上野焼",
+   "category": "ta",
+   "place": "福岡県福智町",
+   "prefecture": "福岡県",
+   "city": "福智町",
+   "lat": 33.683161,
+   "lng": 130.780181,
+   "prefecture_level": false,
+   "wiki_title": "上野焼",
+   "maker": ""
+  },
+  "Q11367984": {
+   "label": "丸亀うちわ",
+   "category": "kg",
+   "place": "香川県丸亀市",
+   "prefecture": "香川県",
+   "city": "丸亀市",
+   "lat": 34.288813,
+   "lng": 133.798242,
+   "prefecture_level": false,
+   "wiki_title": "丸亀うちわ",
+   "maker": ""
+  },
+  "Q10454723": {
+   "label": "丹波立杭焼",
+   "category": "ta",
+   "place": "兵庫県丹波篠山市",
+   "prefecture": "兵庫県",
+   "city": "丹波篠山市",
+   "lat": 35.075757,
+   "lng": 135.219337,
+   "prefecture_level": false,
+   "wiki_title": "丹波立杭焼",
+   "maker": ""
+  },
+  "Q11369541": {
+   "label": "久留米絣",
+   "category": "or",
+   "place": "福岡県久留米市",
+   "prefecture": "福岡県",
+   "city": "久留米市",
+   "lat": 33.319654,
+   "lng": 130.508062,
+   "prefecture_level": false,
+   "wiki_title": "久留米絣",
+   "maker": ""
+  },
+  "Q6443797": {
+   "label": "久米島紬",
+   "category": "or",
+   "place": "沖縄県久米島町",
+   "prefecture": "沖縄県",
+   "city": "久米島町",
+   "lat": 26.358439,
+   "lng": 126.77173,
+   "prefecture_level": false,
+   "wiki_title": "久米島紬",
+   "maker": ""
+  },
+  "Q6448340": {
+   "label": "九谷焼",
+   "category": "ta",
+   "place": "石川県能美市",
+   "prefecture": "石川県",
+   "city": "能美市",
+   "lat": 36.439226,
+   "lng": 136.542441,
+   "prefecture_level": false,
+   "wiki_title": "九谷焼",
+   "maker": ""
+  },
+  "Q23716891": {
+   "label": "二風谷イタ",
+   "category": "kg",
+   "place": "北海道平取町",
+   "prefecture": "北海道",
+   "city": "平取町",
+   "lat": 42.584939,
+   "lng": 142.12839,
+   "prefecture_level": false,
+   "wiki_title": "二風谷イタ",
+   "maker": ""
+  },
+  "Q30925344": {
+   "label": "井波彫刻",
+   "category": "kg",
+   "place": "富山県南砺市",
+   "prefecture": "富山県",
+   "city": "南砺市",
+   "lat": 36.588218,
+   "lng": 136.919208,
+   "prefecture_level": false,
+   "wiki_title": "井波彫刻",
+   "maker": ""
+  },
+  "Q108568106": {
+   "label": "京人形",
+   "category": "kg",
+   "place": "京都府京都市",
+   "prefecture": "京都府",
+   "city": "京都市",
+   "lat": 35.011575,
+   "lng": 135.768144,
+   "prefecture_level": false,
+   "wiki_title": "京人形 (人形)",
+   "maker": ""
+  },
+  "Q11374240": {
+   "label": "京友禅",
+   "category": "or",
+   "place": "京都府京都市",
+   "prefecture": "京都府",
+   "city": "京都市",
+   "lat": 35.011575,
+   "lng": 135.768144,
+   "prefecture_level": false,
+   "wiki_title": "京友禅",
+   "maker": ""
+  },
+  "Q122906467": {
+   "label": "京小紋",
+   "category": "or",
+   "place": "京都府京都市",
+   "prefecture": "京都府",
+   "city": "京都市",
+   "lat": 35.011575,
+   "lng": 135.768144,
+   "prefecture_level": false,
+   "wiki_title": "京小紋",
+   "maker": ""
+  },
+  "Q11374563": {
+   "label": "京漆器",
+   "category": "ri",
+   "place": "京都府京都市",
+   "prefecture": "京都府",
+   "city": "京都市",
+   "lat": 35.011575,
+   "lng": 135.768144,
+   "prefecture_level": false,
+   "wiki_title": "京漆器",
+   "maker": ""
+  },
+  "Q96473438": {
+   "label": "仙台箪笥",
+   "category": "kg",
+   "place": "宮城県仙台市",
+   "prefecture": "宮城県",
+   "city": "仙台市",
+   "lat": 38.267755,
+   "lng": 140.86915,
+   "prefecture_level": false,
+   "wiki_title": "仙台箪笥",
+   "maker": ""
+  },
+  "Q11379011": {
+   "label": "伊勢崎絣",
+   "category": "or",
+   "place": "群馬県伊勢崎市",
+   "prefecture": "群馬県",
+   "city": "伊勢崎市",
+   "lat": 36.311173,
+   "lng": 139.196808,
+   "prefecture_level": false,
+   "wiki_title": "伊勢崎絣",
+   "maker": ""
+  },
+  "Q6079548": {
+   "label": "伊勢形紙",
+   "category": "kg",
+   "place": "三重県鈴鹿市",
+   "prefecture": "三重県",
+   "city": "鈴鹿市",
+   "lat": 34.88171,
+   "lng": 136.583652,
+   "prefecture_level": false,
+   "wiki_title": "伊勢形紙",
+   "maker": ""
+  },
+  "Q11380667": {
+   "label": "伊賀焼",
+   "category": "ta",
+   "place": "三重県伊賀市",
+   "prefecture": "三重県",
+   "city": "伊賀市",
+   "lat": 34.749776,
+   "lng": 136.142336,
+   "prefecture_level": false,
+   "wiki_title": "伊賀焼",
+   "maker": ""
+  },
+  "Q11381249": {
+   "label": "会津本郷焼",
+   "category": "ta",
+   "place": "福島県会津美里町",
+   "prefecture": "福島県",
+   "city": "会津美里町",
+   "lat": 37.459888,
+   "lng": 139.841009,
+   "prefecture_level": false,
+   "wiki_title": "会津本郷焼",
+   "maker": ""
+  },
+  "Q4253290": {
+   "label": "会津漆器",
+   "category": "ri",
+   "place": "福島県会津若松市",
+   "prefecture": "福島県",
+   "city": "会津若松市",
+   "lat": 37.494749,
+   "lng": 139.929745,
+   "prefecture_level": false,
+   "wiki_title": "会津漆器",
+   "maker": ""
+  },
+  "Q11567336": {
+   "label": "佐渡無名異焼",
+   "category": "ta",
+   "place": "新潟県佐渡市",
+   "prefecture": "新潟県",
+   "city": "佐渡市",
+   "lat": 38.018258,
+   "lng": 138.3684,
+   "prefecture_level": false,
+   "wiki_title": "無名異焼",
+   "maker": ""
+  },
+  "Q11386112": {
+   "label": "信州紬",
+   "category": "or",
+   "place": "長野県",
+   "prefecture": "長野県",
+   "city": "",
+   "lat": 36.114395,
+   "lng": 138.031902,
+   "prefecture_level": true,
+   "wiki_title": "信州紬",
+   "maker": ""
+  },
+  "Q7496308": {
+   "label": "信楽焼",
+   "category": "ta",
+   "place": "滋賀県甲賀市",
+   "prefecture": "滋賀県",
+   "city": "甲賀市",
+   "lat": 34.966239,
+   "lng": 136.166872,
+   "prefecture_level": false,
+   "wiki_title": "信楽焼",
+   "maker": ""
+  },
+  "Q3736596": {
+   "label": "備前焼",
+   "category": "ta",
+   "place": "岡山県備前市",
+   "prefecture": "岡山県",
+   "city": "備前市",
+   "lat": 34.744987,
+   "lng": 134.188263,
+   "prefecture_level": false,
+   "wiki_title": "備前焼",
+   "maker": ""
+  },
+  "Q11390752": {
+   "label": "八女提灯",
+   "category": "kg",
+   "place": "福岡県八女市",
+   "prefecture": "福岡県",
+   "city": "八女市",
+   "lat": 33.211672,
+   "lng": 130.557971,
+   "prefecture_level": false,
+   "wiki_title": "八女提灯",
+   "maker": ""
+  },
+  "Q11391785": {
+   "label": "八重山ミンサー",
+   "category": "or",
+   "place": "沖縄県竹富町",
+   "prefecture": "沖縄県",
+   "city": "竹富町",
+   "lat": 24.329896,
+   "lng": 124.087955,
+   "prefecture_level": false,
+   "wiki_title": "八重山ミンサー",
+   "maker": ""
+  },
+  "Q85876886": {
+   "label": "八重山上布",
+   "category": "or",
+   "place": "沖縄県石垣市",
+   "prefecture": "沖縄県",
+   "city": "石垣市",
+   "lat": 24.344444,
+   "lng": 124.185186,
+   "prefecture_level": false,
+   "wiki_title": "八重山上布",
+   "maker": ""
+  },
+  "Q11395763": {
+   "label": "出石焼",
+   "category": "ta",
+   "place": "兵庫県豊岡市",
+   "prefecture": "兵庫県",
+   "city": "豊岡市",
+   "lat": 35.544674,
+   "lng": 134.820113,
+   "prefecture_level": false,
+   "wiki_title": "出石焼",
+   "maker": ""
+  },
+  "Q11396741": {
+   "label": "別府竹細工",
+   "category": "kg",
+   "place": "大分県別府市",
+   "prefecture": "大分県",
+   "city": "別府市",
+   "lat": 33.284575,
+   "lng": 131.491306,
+   "prefecture_level": false,
+   "wiki_title": "別府竹細工",
+   "maker": ""
+  },
+  "Q96473475": {
+   "label": "加茂桐箪笥",
+   "category": "kg",
+   "place": "新潟県加茂市",
+   "prefecture": "新潟県",
+   "city": "加茂市",
+   "lat": 37.666185,
+   "lng": 139.04018,
+   "prefecture_level": false,
+   "wiki_title": "加茂桐箪笥",
+   "maker": ""
+  },
+  "Q11399657": {
+   "label": "加賀友禅",
+   "category": "or",
+   "place": "石川県金沢市",
+   "prefecture": "石川県",
+   "city": "金沢市",
+   "lat": 36.561627,
+   "lng": 136.656882,
+   "prefecture_level": false,
+   "wiki_title": "加賀友禅",
+   "maker": ""
+  },
+  "Q11408622": {
+   "label": "南部鉄器",
+   "category": "kg",
+   "place": "岩手県盛岡市",
+   "prefecture": "岩手県",
+   "city": "盛岡市",
+   "lat": 39.702133,
+   "lng": 141.15454,
+   "prefecture_level": false,
+   "wiki_title": "南部鉄器",
+   "maker": ""
+  },
+  "Q3782485": {
+   "label": "博多人形",
+   "category": "kg",
+   "place": "福岡県福岡市",
+   "prefecture": "福岡県",
+   "city": "福岡市",
+   "lat": 33.589899,
+   "lng": 130.401751,
+   "prefecture_level": false,
+   "wiki_title": "博多人形",
+   "maker": ""
+  },
+  "Q11408964": {
+   "label": "博多織",
+   "category": "or",
+   "place": "福岡県福岡市",
+   "prefecture": "福岡県",
+   "city": "福岡市",
+   "lat": 33.589899,
+   "lng": 130.401751,
+   "prefecture_level": false,
+   "wiki_title": "博多織",
+   "maker": ""
+  },
+  "Q6368803": {
+   "label": "唐津焼",
+   "category": "ta",
+   "place": "佐賀県唐津市",
+   "prefecture": "佐賀県",
+   "city": "唐津市",
+   "lat": 33.450341,
+   "lng": 129.967935,
+   "prefecture_level": false,
+   "wiki_title": "唐津焼",
+   "maker": ""
+  },
+  "Q11614938": {
+   "label": "喜如嘉の芭蕉布",
+   "category": "or",
+   "place": "沖縄県大宜味村",
+   "prefecture": "沖縄県",
+   "city": "大宜味村",
+   "lat": 26.701771,
+   "lng": 128.12016,
+   "prefecture_level": false,
+   "wiki_title": "喜如嘉の芭蕉布",
+   "maker": ""
+  },
+  "Q18457672": {
+   "label": "因州和紙",
+   "category": "kg",
+   "place": "鳥取県鳥取市",
+   "prefecture": "鳥取県",
+   "city": "鳥取市",
+   "lat": 35.494395,
+   "lng": 134.221928,
+   "prefecture_level": false,
+   "wiki_title": "因州和紙",
+   "maker": ""
+  },
+  "Q122114454": {
+   "label": "土佐和紙",
+   "category": "kg",
+   "place": "高知県いの町",
+   "prefecture": "高知県",
+   "city": "いの町",
+   "lat": 33.545677,
+   "lng": 133.428405,
+   "prefecture_level": false,
+   "wiki_title": "土佐和紙",
+   "maker": ""
+  },
+  "Q11423029": {
+   "label": "土佐打刃物",
+   "category": "kg",
+   "place": "高知県香美市",
+   "prefecture": "高知県",
+   "city": "香美市",
+   "lat": 33.603777,
+   "lng": 133.686008,
+   "prefecture_level": false,
+   "wiki_title": "土佐打刃物",
+   "maker": ""
+  },
+  "Q11428292": {
+   "label": "堺打刃物",
+   "category": "kg",
+   "place": "大阪府堺市",
+   "prefecture": "大阪府",
+   "city": "堺市",
+   "lat": 34.573736,
+   "lng": 135.482887,
+   "prefecture_level": false,
+   "wiki_title": "堺打刃物",
+   "maker": ""
+  },
+  "Q11428769": {
+   "label": "塩沢紬",
+   "category": "or",
+   "place": "新潟県南魚沼市",
+   "prefecture": "新潟県",
+   "city": "南魚沼市",
+   "lat": 37.065572,
+   "lng": 138.876099,
+   "prefecture_level": false,
+   "wiki_title": "塩沢紬",
+   "maker": ""
+  },
+  "Q11429685": {
+   "label": "壺屋焼",
+   "category": "ta",
+   "place": "沖縄県那覇市",
+   "prefecture": "沖縄県",
+   "city": "那覇市",
+   "lat": 26.212235,
+   "lng": 127.679145,
+   "prefecture_level": false,
+   "wiki_title": "壺屋焼",
+   "maker": ""
+  },
+  "Q17212329": {
+   "label": "多摩織",
+   "category": "or",
+   "place": "東京都八王子市",
+   "prefecture": "東京都",
+   "city": "八王子市",
+   "lat": 35.666359,
+   "lng": 139.316365,
+   "prefecture_level": false,
+   "wiki_title": "多摩織",
+   "maker": ""
+  },
+  "Q22124544": {
+   "label": "大内塗",
+   "category": "ri",
+   "place": "山口県山口市",
+   "prefecture": "山口県",
+   "city": "山口市",
+   "lat": 34.178132,
+   "lng": 131.473708,
+   "prefecture_level": false,
+   "wiki_title": "大内塗",
+   "maker": ""
+  },
+  "Q7667605": {
+   "label": "大堀相馬焼",
+   "category": "ta",
+   "place": "福島県浪江町",
+   "prefecture": "福島県",
+   "city": "浪江町",
+   "lat": 37.494562,
+   "lng": 141.000584,
+   "prefecture_level": false,
+   "wiki_title": "大堀相馬焼",
+   "maker": ""
+  },
+  "Q11261517": {
+   "label": "大島紬",
+   "category": "or",
+   "place": "鹿児島県奄美市",
+   "prefecture": "鹿児島県",
+   "city": "奄美市",
+   "lat": 28.377661,
+   "lng": 129.493899,
+   "prefecture_level": false,
+   "wiki_title": "大島紬",
+   "maker": ""
+  },
+  "Q8081759": {
+   "label": "大谷焼",
+   "category": "ta",
+   "place": "徳島県鳴門市",
+   "prefecture": "徳島県",
+   "city": "鳴門市",
+   "lat": 34.172578,
+   "lng": 134.608408,
+   "prefecture_level": false,
+   "wiki_title": "大谷焼",
+   "maker": ""
+  },
+  "Q96473490": {
+   "label": "大阪唐木指物",
+   "category": "kg",
+   "place": "大阪府大阪市",
+   "prefecture": "大阪府",
+   "city": "大阪市",
+   "lat": 34.693757,
+   "lng": 135.501454,
+   "prefecture_level": false,
+   "wiki_title": "大阪唐木指物",
+   "maker": ""
+  },
+  "Q11441504": {
+   "label": "大阪泉州桐箪笥",
+   "category": "kg",
+   "place": "大阪府",
+   "prefecture": "大阪府",
+   "city": "",
+   "lat": 34.619881,
+   "lng": 135.490357,
+   "prefecture_level": true,
+   "wiki_title": "大阪泉州桐箪笥",
+   "maker": ""
+  },
+  "Q11441509": {
+   "label": "大阪浪華錫器",
+   "category": "kg",
+   "place": "大阪府大阪市",
+   "prefecture": "大阪府",
+   "city": "大阪市",
+   "lat": 34.693757,
+   "lng": 135.501454,
+   "prefecture_level": false,
+   "wiki_title": "大阪浪華錫器",
+   "maker": ""
+  },
+  "Q96473410": {
+   "label": "大阪金剛簾",
+   "category": "kg",
+   "place": "大阪府富田林市",
+   "prefecture": "大阪府",
+   "city": "富田林市",
+   "lat": 34.49981,
+   "lng": 135.597295,
+   "prefecture_level": false,
+   "wiki_title": "大阪金剛簾",
+   "maker": ""
+  },
+  "Q11441923": {
+   "label": "大館曲げわっぱ",
+   "category": "kg",
+   "place": "秋田県大館市",
+   "prefecture": "秋田県",
+   "city": "大館市",
+   "lat": 40.271695,
+   "lng": 140.56524,
+   "prefecture_level": false,
+   "wiki_title": "大館曲げわっぱ",
+   "maker": ""
+  },
+  "Q11443556": {
+   "label": "天草陶磁器",
+   "category": "ta",
+   "place": "熊本県天草市",
+   "prefecture": "熊本県",
+   "city": "天草市",
+   "lat": 32.458513,
+   "lng": 130.193049,
+   "prefecture_level": false,
+   "wiki_title": "天草陶磁器",
+   "maker": ""
+  },
+  "Q85868694": {
+   "label": "奥会津昭和からむし織",
+   "category": "or",
+   "place": "福島県昭和村",
+   "prefecture": "福島県",
+   "city": "昭和村",
+   "lat": 37.335257,
+   "lng": 139.610561,
+   "prefecture_level": false,
+   "wiki_title": "奥会津昭和からむし織",
+   "maker": ""
+  },
+  "Q96473417": {
+   "label": "奥会津編み組細工",
+   "category": "kg",
+   "place": "福島県三島町",
+   "prefecture": "福島県",
+   "city": "三島町",
+   "lat": 37.470224,
+   "lng": 139.644303,
+   "prefecture_level": false,
+   "wiki_title": "奥会津編み組細工",
+   "maker": ""
+  },
+  "Q11453454": {
+   "label": "宮古上布",
+   "category": "or",
+   "place": "沖縄県宮古島市",
+   "prefecture": "沖縄県",
+   "city": "宮古島市",
+   "lat": 24.805465,
+   "lng": 125.28113,
+   "prefecture_level": false,
+   "wiki_title": "宮古上布",
+   "maker": ""
+  },
+  "Q23716927": {
+   "label": "宮城伝統こけし",
+   "category": "kg",
+   "place": "宮城県",
+   "prefecture": "宮城県",
+   "city": "",
+   "lat": 38.388016,
+   "lng": 140.976102,
+   "prefecture_level": true,
+   "wiki_title": "宮城伝統こけし",
+   "maker": ""
+  },
+  "Q96473380": {
+   "label": "宮島細工",
+   "category": "kg",
+   "place": "広島県廿日市市",
+   "prefecture": "広島県",
+   "city": "廿日市市",
+   "lat": 34.349924,
+   "lng": 132.330606,
+   "prefecture_level": false,
+   "wiki_title": "宮島細工",
+   "maker": ""
+  },
+  "Q11458839": {
+   "label": "小代焼",
+   "category": "ta",
+   "place": "熊本県荒尾市",
+   "prefecture": "熊本県",
+   "city": "荒尾市",
+   "lat": 32.986758,
+   "lng": 130.433403,
+   "prefecture_level": false,
+   "wiki_title": "小代焼",
+   "maker": ""
+  },
+  "Q11459181": {
+   "label": "小千谷縮",
+   "category": "or",
+   "place": "新潟県小千谷市",
+   "prefecture": "新潟県",
+   "city": "小千谷市",
+   "lat": 37.314271,
+   "lng": 138.795133,
+   "prefecture_level": false,
+   "wiki_title": "小千谷縮",
+   "maker": ""
+  },
+  "Q11462139": {
+   "label": "小樽ビール",
+   "category": "sa",
+   "place": "北海道小樽市",
+   "prefecture": "北海道",
+   "city": "小樽市",
+   "lat": 43.190681,
+   "lng": 140.994602,
+   "prefecture_level": false,
+   "wiki_title": "小樽ビール",
+   "maker": ""
+  },
+  "Q22128928": {
+   "label": "小田原漆器",
+   "category": "ri",
+   "place": "神奈川県小田原市",
+   "prefecture": "神奈川県",
+   "city": "小田原市",
+   "lat": 35.26453,
+   "lng": 139.152246,
+   "prefecture_level": false,
+   "wiki_title": "小田原漆器",
+   "maker": ""
+  },
+  "Q11463263": {
+   "label": "小石原焼",
+   "category": "ta",
+   "place": "福岡県東峰村",
+   "prefecture": "福岡県",
+   "city": "東峰村",
+   "lat": 33.397065,
+   "lng": 130.873089,
+   "prefecture_level": false,
+   "wiki_title": "小石原焼",
+   "maker": ""
+  },
+  "Q96473407": {
+   "label": "尾張七宝",
+   "category": "kg",
+   "place": "愛知県あま市",
+   "prefecture": "愛知県",
+   "city": "あま市",
+   "lat": 35.191379,
+   "lng": 136.793513,
+   "prefecture_level": false,
+   "wiki_title": "尾張七宝",
+   "maker": ""
+  },
+  "Q11466137": {
+   "label": "山中塗",
+   "category": "ri",
+   "place": "石川県加賀市",
+   "prefecture": "石川県",
+   "city": "加賀市",
+   "lat": 36.302762,
+   "lng": 136.315116,
+   "prefecture_level": false,
+   "wiki_title": "山中塗",
+   "maker": ""
+  },
+  "Q11468675": {
+   "label": "山形鋳物",
+   "category": "kg",
+   "place": "山形県山形市",
+   "prefecture": "山形県",
+   "city": "山形市",
+   "lat": 38.255339,
+   "lng": 140.340021,
+   "prefecture_level": false,
+   "wiki_title": "山形鋳物",
+   "maker": ""
+  },
+  "Q5560126": {
+   "label": "岐阜和傘",
+   "category": "kg",
+   "place": "岐阜県岐阜市",
+   "prefecture": "岐阜県",
+   "city": "岐阜市",
+   "lat": 35.423095,
+   "lng": 136.762753,
+   "prefecture_level": false,
+   "wiki_title": "岐阜和傘",
+   "maker": ""
+  },
+  "Q5560115": {
+   "label": "岐阜提灯",
+   "category": "kg",
+   "place": "岐阜県岐阜市",
+   "prefecture": "岐阜県",
+   "city": "岐阜市",
+   "lat": 35.423095,
+   "lng": 136.762753,
+   "prefecture_level": false,
+   "wiki_title": "岐阜提灯",
+   "maker": ""
+  },
+  "Q24871923": {
+   "label": "岩槻人形",
+   "category": "kg",
+   "place": "埼玉県さいたま市岩槻区",
+   "prefecture": "埼玉県",
+   "city": "さいたま市岩槻区",
+   "lat": 35.950013,
+   "lng": 139.694393,
+   "prefecture_level": false,
+   "wiki_title": "岩槻人形",
+   "maker": ""
+  },
+  "Q11475636": {
+   "label": "岩谷堂箪笥",
+   "category": "kg",
+   "place": "岩手県奥州市",
+   "prefecture": "岩手県",
+   "city": "奥州市",
+   "lat": 39.144275,
+   "lng": 141.139238,
+   "prefecture_level": false,
+   "wiki_title": "岩谷堂箪笥",
+   "maker": ""
+  },
+  "Q30930819": {
+   "label": "川尻筆",
+   "category": "kg",
+   "place": "広島県呉市",
+   "prefecture": "広島県",
+   "city": "呉市",
+   "lat": 34.248449,
+   "lng": 132.56525,
+   "prefecture_level": false,
+   "wiki_title": "川尻筆",
+   "maker": ""
+  },
+  "Q56349031": {
+   "label": "川辺仏壇",
+   "category": "kg",
+   "place": "鹿児島県南九州市",
+   "prefecture": "鹿児島県",
+   "city": "南九州市",
+   "lat": 31.378284,
+   "lng": 130.441675,
+   "prefecture_level": false,
+   "wiki_title": "川辺仏壇",
+   "maker": ""
+  },
+  "Q11481449": {
+   "label": "常滑焼",
+   "category": "ta",
+   "place": "愛知県常滑市",
+   "prefecture": "愛知県",
+   "city": "常滑市",
+   "lat": 34.895858,
+   "lng": 136.838323,
+   "prefecture_level": false,
+   "wiki_title": "常滑焼",
+   "maker": ""
+  },
+  "Q11481721": {
+   "label": "常陸野ネストビール",
+   "category": "sa",
+   "place": "茨城県那珂市",
+   "prefecture": "茨城県",
+   "city": "那珂市",
+   "lat": 36.457227,
+   "lng": 140.487177,
+   "prefecture_level": false,
+   "wiki_title": "常陸野ネストビール",
+   "maker": "木内酒造"
+  },
+  "Q96473347": {
+   "label": "広島仏壇",
+   "category": "kg",
+   "place": "広島県広島市",
+   "prefecture": "広島県",
+   "city": "広島市",
+   "lat": 34.391724,
+   "lng": 132.451759,
+   "prefecture_level": false,
+   "wiki_title": "広島仏壇",
+   "maker": ""
+  },
+  "Q11487109": {
+   "label": "弓浜絣",
+   "category": "or",
+   "place": "鳥取県米子市",
+   "prefecture": "鳥取県",
+   "city": "米子市",
+   "lat": 35.427641,
+   "lng": 133.331459,
+   "prefecture_level": false,
+   "wiki_title": "弓浜絣",
+   "maker": ""
+  },
+  "Q11487929": {
+   "label": "彦根仏壇",
+   "category": "kg",
+   "place": "滋賀県彦根市",
+   "prefecture": "滋賀県",
+   "city": "彦根市",
+   "lat": 35.274407,
+   "lng": 136.259654,
+   "prefecture_level": false,
+   "wiki_title": "彦根仏壇",
+   "maker": ""
+  },
+  "Q11496684": {
+   "label": "房州うちわ",
+   "category": "kg",
+   "place": "千葉県南房総市",
+   "prefecture": "千葉県",
+   "city": "南房総市",
+   "lat": 35.038749,
+   "lng": 139.83714,
+   "prefecture_level": false,
+   "wiki_title": "房州うちわ",
+   "maker": ""
+  },
+  "Q17222379": {
+   "label": "播州そろばん",
+   "category": "kg",
+   "place": "兵庫県小野市",
+   "prefecture": "兵庫県",
+   "city": "小野市",
+   "lat": 34.861365,
+   "lng": 134.954779,
+   "prefecture_level": false,
+   "wiki_title": "播州そろばん",
+   "maker": ""
+  },
+  "Q11498708": {
+   "label": "播州三木打刃物",
+   "category": "kg",
+   "place": "兵庫県三木市",
+   "prefecture": "兵庫県",
+   "city": "三木市",
+   "lat": 34.796887,
+   "lng": 134.990198,
+   "prefecture_level": false,
+   "wiki_title": "播州三木打刃物",
+   "maker": ""
+  },
+  "Q11502973": {
+   "label": "新潟漆器",
+   "category": "ri",
+   "place": "新潟県新潟市",
+   "prefecture": "新潟県",
+   "city": "新潟市",
+   "lat": 37.916376,
+   "lng": 139.036506,
+   "prefecture_level": false,
+   "wiki_title": "新潟漆器",
+   "maker": ""
+  },
+  "Q11516498": {
+   "label": "有松・鳴海絞り",
+   "category": "or",
+   "place": "愛知県名古屋市緑区",
+   "prefecture": "愛知県",
+   "city": "名古屋市緑区",
+   "lat": 35.071648,
+   "lng": 136.951416,
+   "prefecture_level": false,
+   "wiki_title": "有松・鳴海絞り",
+   "maker": ""
+  },
+  "Q11518575": {
+   "label": "木曽漆器",
+   "category": "ri",
+   "place": "長野県塩尻市",
+   "prefecture": "長野県",
+   "city": "塩尻市",
+   "lat": 36.124957,
+   "lng": 137.952801,
+   "prefecture_level": false,
+   "wiki_title": "木曽漆器",
+   "maker": ""
+  },
+  "Q11677722": {
+   "label": "本場黄八丈",
+   "category": "or",
+   "place": "東京都八丈町",
+   "prefecture": "東京都",
+   "city": "八丈町",
+   "lat": 33.12116,
+   "lng": 139.783774,
+   "prefecture_level": false,
+   "wiki_title": "黄八丈",
+   "maker": ""
+  },
+  "Q11519967": {
+   "label": "本塩沢",
+   "category": "or",
+   "place": "新潟県南魚沼市",
+   "prefecture": "新潟県",
+   "city": "南魚沼市",
+   "lat": 37.065572,
+   "lng": 138.876099,
+   "prefecture_level": false,
+   "wiki_title": "本塩沢",
+   "maker": ""
+  },
+  "Q22127425": {
+   "label": "村上木彫堆朱",
+   "category": "ri",
+   "place": "新潟県村上市",
+   "prefecture": "新潟県",
+   "city": "村上市",
+   "lat": 38.224053,
+   "lng": 139.479964,
+   "prefecture_level": false,
+   "wiki_title": "村上木彫堆朱",
+   "maker": ""
+  },
+  "Q11523107": {
+   "label": "村山大島紬",
+   "category": "or",
+   "place": "東京都武蔵村山市",
+   "prefecture": "東京都",
+   "city": "武蔵村山市",
+   "lat": 35.756509,
+   "lng": 139.385637,
+   "prefecture_level": false,
+   "wiki_title": "村山大島紬",
+   "maker": ""
+  },
+  "Q122906461": {
+   "label": "東京染小紋",
+   "category": "or",
+   "place": "東京都",
+   "prefecture": "東京都",
+   "city": "",
+   "lat": 35.67686,
+   "lng": 139.763895,
+   "prefecture_level": true,
+   "wiki_title": "東京染小紋",
+   "maker": ""
+  },
+  "Q107348908": {
+   "label": "桐生織",
+   "category": "or",
+   "place": "群馬県桐生市",
+   "prefecture": "群馬県",
+   "city": "桐生市",
+   "lat": 36.405737,
+   "lng": 139.330837,
+   "prefecture_level": false,
+   "wiki_title": "桐生織",
+   "maker": ""
+  },
+  "Q6343976": {
+   "label": "樺細工",
+   "category": "kg",
+   "place": "秋田県仙北市",
+   "prefecture": "秋田県",
+   "city": "仙北市",
+   "lat": 39.700082,
+   "lng": 140.730767,
+   "prefecture_level": false,
+   "wiki_title": "樺細工",
+   "maker": ""
+  },
+  "Q11550994": {
+   "label": "江戸切子",
+   "category": "kg",
+   "place": "東京都",
+   "prefecture": "東京都",
+   "city": "",
+   "lat": 35.67686,
+   "lng": 139.763895,
+   "prefecture_level": true,
+   "wiki_title": "江戸切子",
+   "maker": ""
+  },
+  "Q11551002": {
+   "label": "江戸和竿",
+   "category": "kg",
+   "place": "東京都",
+   "prefecture": "東京都",
+   "city": "",
+   "lat": 35.67686,
+   "lng": 139.763895,
+   "prefecture_level": true,
+   "wiki_title": "江戸和竿",
+   "maker": ""
+  },
+  "Q96473424": {
+   "label": "江戸木版画",
+   "category": "kg",
+   "place": "東京都",
+   "prefecture": "東京都",
+   "city": "",
+   "lat": 35.67686,
+   "lng": 139.763895,
+   "prefecture_level": true,
+   "wiki_title": "江戸木版画",
+   "maker": ""
+  },
+  "Q11555436": {
+   "label": "波佐見焼",
+   "category": "ta",
+   "place": "長崎県波佐見町",
+   "prefecture": "長崎県",
+   "city": "波佐見町",
+   "lat": 33.132835,
+   "lng": 129.899912,
+   "prefecture_level": false,
+   "wiki_title": "波佐見焼",
+   "maker": ""
+  },
+  "Q22123096": {
+   "label": "津軽漆器",
+   "category": "ri",
+   "place": "青森県弘前市",
+   "prefecture": "青森県",
+   "city": "弘前市",
+   "lat": 40.603054,
+   "lng": 140.464039,
+   "prefecture_level": false,
+   "wiki_title": "津軽漆器",
+   "maker": ""
+  },
+  "Q11556858": {
+   "label": "浄法寺漆",
+   "category": "ri",
+   "place": "岩手県二戸市",
+   "prefecture": "岩手県",
+   "city": "二戸市",
+   "lat": 40.271082,
+   "lng": 141.304674,
+   "prefecture_level": false,
+   "wiki_title": "浄法寺漆",
+   "maker": ""
+  },
+  "Q11568970": {
+   "label": "熊野筆",
+   "category": "kg",
+   "place": "広島県熊野町",
+   "prefecture": "広島県",
+   "city": "熊野町",
+   "lat": 34.335918,
+   "lng": 132.584584,
+   "prefecture_level": false,
+   "wiki_title": "熊野筆",
+   "maker": ""
+  },
+  "Q11570254": {
+   "label": "牛首紬",
+   "category": "or",
+   "place": "石川県白山市",
+   "prefecture": "石川県",
+   "city": "白山市",
+   "lat": 36.51435,
+   "lng": 136.565807,
+   "prefecture_level": false,
+   "wiki_title": "牛首紬",
+   "maker": ""
+  },
+  "Q97207647": {
+   "label": "球磨焼酎",
+   "category": "sa",
+   "place": "熊本県人吉市",
+   "prefecture": "熊本県",
+   "city": "人吉市",
+   "lat": 32.205664,
+   "lng": 130.760139,
+   "prefecture_level": false,
+   "wiki_title": "球磨焼酎",
+   "maker": ""
+  },
+  "Q96473394": {
+   "label": "甲州印伝",
+   "category": "kg",
+   "place": "山梨県甲府市",
+   "prefecture": "山梨県",
+   "city": "甲府市",
+   "lat": 35.665248,
+   "lng": 138.571044,
+   "prefecture_level": false,
+   "wiki_title": "甲州印伝",
+   "maker": ""
+  },
+  "Q11581187": {
+   "label": "益子焼",
+   "category": "ta",
+   "place": "栃木県益子町",
+   "prefecture": "栃木県",
+   "city": "益子町",
+   "lat": 36.46735,
+   "lng": 140.093597,
+   "prefecture_level": false,
+   "wiki_title": "益子焼",
+   "maker": ""
+  },
+  "Q11586439": {
+   "label": "石州和紙",
+   "category": "kg",
+   "place": "島根県浜田市",
+   "prefecture": "島根県",
+   "city": "浜田市",
+   "lat": 34.899198,
+   "lng": 132.079998,
+   "prefecture_level": false,
+   "wiki_title": "石州和紙",
+   "maker": ""
+  },
+  "Q11587186": {
+   "label": "石見焼",
+   "category": "ta",
+   "place": "島根県江津市",
+   "prefecture": "島根県",
+   "city": "江津市",
+   "lat": 35.011117,
+   "lng": 132.221327,
+   "prefecture_level": false,
+   "wiki_title": "石見焼",
+   "maker": ""
+  },
+  "Q9087972": {
+   "label": "砥部焼",
+   "category": "ta",
+   "place": "愛媛県砥部町",
+   "prefecture": "愛媛県",
+   "city": "砥部町",
+   "lat": 33.744698,
+   "lng": 132.790104,
+   "prefecture_level": false,
+   "wiki_title": "砥部焼",
+   "maker": ""
+  },
+  "Q11594558": {
+   "label": "秀衡塗",
+   "category": "ri",
+   "place": "岩手県平泉町",
+   "prefecture": "岩手県",
+   "city": "平泉町",
+   "lat": 38.986546,
+   "lng": 141.113824,
+   "prefecture_level": false,
+   "wiki_title": "秀衡塗",
+   "maker": ""
+  },
+  "Q86743668": {
+   "label": "秋田杉桶樽",
+   "category": "kg",
+   "place": "秋田県能代市",
+   "prefecture": "秋田県",
+   "city": "能代市",
+   "lat": 40.211842,
+   "lng": 140.027152,
+   "prefecture_level": false,
+   "wiki_title": "秋田杉桶樽",
+   "maker": ""
+  },
+  "Q11599993": {
+   "label": "笠間焼",
+   "category": "ta",
+   "place": "茨城県笠間市",
+   "prefecture": "茨城県",
+   "city": "笠間市",
+   "lat": 36.345224,
+   "lng": 140.304226,
+   "prefecture_level": false,
+   "wiki_title": "笠間焼",
+   "maker": ""
+  },
+  "Q15894888": {
+   "label": "箱根寄木細工",
+   "category": "kg",
+   "place": "神奈川県箱根町",
+   "prefecture": "神奈川県",
+   "city": "箱根町",
+   "lat": 35.232366,
+   "lng": 139.106885,
+   "prefecture_level": false,
+   "wiki_title": "寄木細工",
+   "maker": ""
+  },
+  "Q96473431": {
+   "label": "紀州へら竿",
+   "category": "kg",
+   "place": "和歌山県橋本市",
+   "prefecture": "和歌山県",
+   "city": "橋本市",
+   "lat": 34.325829,
+   "lng": 135.619003,
+   "prefecture_level": false,
+   "wiki_title": "紀州へら竿",
+   "maker": ""
+  },
+  "Q11605049": {
+   "label": "紀州漆器",
+   "category": "ri",
+   "place": "和歌山県海南市",
+   "prefecture": "和歌山県",
+   "city": "海南市",
+   "lat": 34.154866,
+   "lng": 135.209279,
+   "prefecture_level": false,
+   "wiki_title": "紀州漆器",
+   "maker": ""
+  },
+  "Q96473391": {
+   "label": "紀州箪笥",
+   "category": "kg",
+   "place": "和歌山県和歌山市",
+   "prefecture": "和歌山県",
+   "city": "和歌山市",
+   "lat": 34.234293,
+   "lng": 135.178355,
+   "prefecture_level": false,
+   "wiki_title": "紀州箪笥",
+   "maker": ""
+  },
+  "Q8062732": {
+   "label": "結城紬",
+   "category": "or",
+   "place": "茨城県結城市",
+   "prefecture": "茨城県",
+   "city": "結城市",
+   "lat": 36.305295,
+   "lng": 139.87714,
+   "prefecture_level": false,
+   "wiki_title": "結城紬",
+   "maker": ""
+  },
+  "Q11609218": {
+   "label": "美濃和紙",
+   "category": "kg",
+   "place": "岐阜県美濃市",
+   "prefecture": "岐阜県",
+   "city": "美濃市",
+   "lat": 35.544262,
+   "lng": 136.907518,
+   "prefecture_level": false,
+   "wiki_title": "美濃和紙",
+   "maker": ""
+  },
+  "Q11609247": {
+   "label": "美濃焼",
+   "category": "ta",
+   "place": "岐阜県多治見市",
+   "prefecture": "岐阜県",
+   "city": "多治見市",
+   "lat": 35.332996,
+   "lng": 137.131946,
+   "prefecture_level": false,
+   "wiki_title": "美濃焼",
+   "maker": ""
+  },
+  "Q96473420": {
+   "label": "羽越しな布",
+   "category": "or",
+   "place": "山形県鶴岡市",
+   "prefecture": "山形県",
+   "city": "鶴岡市",
+   "lat": 38.727219,
+   "lng": 139.826629,
+   "prefecture_level": false,
+   "wiki_title": "羽越しな布",
+   "maker": ""
+  },
+  "Q11616615": {
+   "label": "若狭めのう細工",
+   "category": "kg",
+   "place": "福井県小浜市",
+   "prefecture": "福井県",
+   "city": "小浜市",
+   "lat": 35.493828,
+   "lng": 135.744661,
+   "prefecture_level": false,
+   "wiki_title": "若狭めのう細工",
+   "maker": ""
+  },
+  "Q11616623": {
+   "label": "若狭塗",
+   "category": "ri",
+   "place": "福井県小浜市",
+   "prefecture": "福井県",
+   "city": "小浜市",
+   "lat": 35.493828,
+   "lng": 135.744661,
+   "prefecture_level": false,
+   "wiki_title": "若狭塗",
+   "maker": ""
+  },
+  "Q1568647": {
+   "label": "萩焼",
+   "category": "ta",
+   "place": "山口県萩市",
+   "prefecture": "山口県",
+   "city": "萩市",
+   "lat": 34.407482,
+   "lng": 131.399194,
+   "prefecture_level": false,
+   "wiki_title": "萩焼",
+   "maker": ""
+  },
+  "Q3087182": {
+   "label": "薩摩焼",
+   "category": "ta",
+   "place": "鹿児島県",
+   "prefecture": "鹿児島県",
+   "city": "",
+   "lat": 31.560307,
+   "lng": 130.557998,
+   "prefecture_level": true,
+   "wiki_title": "薩摩焼",
+   "maker": ""
+  },
+  "Q96473444": {
+   "label": "行田足袋",
+   "category": "kg",
+   "place": "埼玉県行田市",
+   "prefecture": "埼玉県",
+   "city": "行田市",
+   "lat": 36.138605,
+   "lng": 139.4559,
+   "prefecture_level": false,
+   "wiki_title": "行田足袋",
+   "maker": ""
+  },
+  "Q5952107": {
+   "label": "西陣織",
+   "category": "or",
+   "place": "京都府京都市",
+   "prefecture": "京都府",
+   "city": "京都市",
+   "lat": 35.011575,
+   "lng": 135.768144,
+   "prefecture_level": false,
+   "wiki_title": "西陣織",
+   "maker": ""
+  },
+  "Q11633469": {
+   "label": "豊岡杞柳細工",
+   "category": "kg",
+   "place": "兵庫県豊岡市",
+   "prefecture": "兵庫県",
+   "city": "豊岡市",
+   "lat": 35.544674,
+   "lng": 134.820113,
+   "prefecture_level": false,
+   "wiki_title": "豊岡杞柳細工",
+   "maker": ""
+  },
+  "Q65283068": {
+   "label": "豊島屋の白酒",
+   "category": "sa",
+   "place": "東京都千代田区",
+   "prefecture": "東京都",
+   "city": "千代田区",
+   "lat": 35.694054,
+   "lng": 139.753501,
+   "prefecture_level": false,
+   "wiki_title": "豊島屋の白酒",
+   "maker": "豊島屋本店"
+  },
+  "Q11633854": {
+   "label": "豊橋筆",
+   "category": "kg",
+   "place": "愛知県豊橋市",
+   "prefecture": "愛知県",
+   "city": "豊橋市",
+   "lat": 34.769123,
+   "lng": 137.391461,
+   "prefecture_level": false,
+   "wiki_title": "豊橋筆",
+   "maker": ""
+  },
+  "Q11635786": {
+   "label": "赤津焼",
+   "category": "ta",
+   "place": "愛知県瀬戸市",
+   "prefecture": "愛知県",
+   "city": "瀬戸市",
+   "lat": 35.22386,
+   "lng": 137.084001,
+   "prefecture_level": false,
+   "wiki_title": "赤津焼",
+   "maker": ""
+  },
+  "Q11636412": {
+   "label": "越前和紙",
+   "category": "kg",
+   "place": "福井県越前市",
+   "prefecture": "福井県",
+   "city": "越前市",
+   "lat": 35.903457,
+   "lng": 136.168932,
+   "prefecture_level": false,
+   "wiki_title": "越前和紙",
+   "maker": ""
+  },
+  "Q96473349": {
+   "label": "越前打刃物",
+   "category": "kg",
+   "place": "福井県越前市",
+   "prefecture": "福井県",
+   "city": "越前市",
+   "lat": 35.903457,
+   "lng": 136.168932,
+   "prefecture_level": false,
+   "wiki_title": "越前打刃物",
+   "maker": ""
+  },
+  "Q21652568": {
+   "label": "越前漆器",
+   "category": "ri",
+   "place": "福井県鯖江市",
+   "prefecture": "福井県",
+   "city": "鯖江市",
+   "lat": 35.95651,
+   "lng": 136.184359,
+   "prefecture_level": false,
+   "wiki_title": "越前漆器",
+   "maker": ""
+  },
+  "Q11636432": {
+   "label": "越前焼",
+   "category": "ta",
+   "place": "福井県越前町",
+   "prefecture": "福井県",
+   "city": "越前町",
+   "lat": 35.974772,
+   "lng": 136.123489,
+   "prefecture_level": false,
+   "wiki_title": "越前焼",
+   "maker": ""
+  },
+  "Q96473433": {
+   "label": "越前箪笥",
+   "category": "kg",
+   "place": "福井県越前市",
+   "prefecture": "福井県",
+   "city": "越前市",
+   "lat": 35.903457,
+   "lng": 136.168932,
+   "prefecture_level": false,
+   "wiki_title": "越前箪笥",
+   "maker": ""
+  },
+  "Q11636489": {
+   "label": "越後上布",
+   "category": "or",
+   "place": "新潟県南魚沼市",
+   "prefecture": "新潟県",
+   "city": "南魚沼市",
+   "lat": 37.065572,
+   "lng": 138.876099,
+   "prefecture_level": false,
+   "wiki_title": "越後上布",
+   "maker": ""
+  },
+  "Q96473389": {
+   "label": "越後与板打刃物",
+   "category": "kg",
+   "place": "新潟県長岡市",
+   "prefecture": "新潟県",
+   "city": "長岡市",
+   "lat": 37.446996,
+   "lng": 138.85122,
+   "prefecture_level": false,
+   "wiki_title": "越後与板打刃物",
+   "maker": ""
+  },
+  "Q11637708": {
+   "label": "輪島塗",
+   "category": "ri",
+   "place": "石川県輪島市",
+   "prefecture": "石川県",
+   "city": "輪島市",
+   "lat": 37.390938,
+   "lng": 136.89957,
+   "prefecture_level": false,
+   "wiki_title": "輪島塗",
+   "maker": ""
+  },
+  "Q11647505": {
+   "label": "金沢漆器",
+   "category": "ri",
+   "place": "石川県金沢市",
+   "prefecture": "石川県",
+   "city": "金沢市",
+   "lat": 36.561627,
+   "lng": 136.656882,
+   "prefecture_level": false,
+   "wiki_title": "金沢漆器",
+   "maker": ""
+  },
+  "Q11649486": {
+   "label": "鈴鹿墨",
+   "category": "kg",
+   "place": "三重県鈴鹿市",
+   "prefecture": "三重県",
+   "city": "鈴鹿市",
+   "lat": 34.88171,
+   "lng": 136.583652,
+   "prefecture_level": false,
+   "wiki_title": "鈴鹿墨",
+   "maker": ""
+  },
+  "Q6355321": {
+   "label": "鎌倉彫",
+   "category": "ri",
+   "place": "神奈川県鎌倉市",
+   "prefecture": "神奈川県",
+   "city": "鎌倉市",
+   "lat": 35.319281,
+   "lng": 139.546963,
+   "prefecture_level": false,
+   "wiki_title": "鎌倉彫",
+   "maker": ""
+  },
+  "Q11657496": {
+   "label": "阿波しじら織",
+   "category": "or",
+   "place": "徳島県徳島市",
+   "prefecture": "徳島県",
+   "city": "徳島市",
+   "lat": 34.069831,
+   "lng": 134.555035,
+   "prefecture_level": false,
+   "wiki_title": "阿波しじら織",
+   "maker": ""
+  },
+  "Q11659193": {
+   "label": "雄勝硯",
+   "category": "kg",
+   "place": "宮城県石巻市",
+   "prefecture": "宮城県",
+   "city": "石巻市",
+   "lat": 38.434128,
+   "lng": 141.302809,
+   "prefecture_level": false,
+   "wiki_title": "雄勝石",
+   "maker": ""
+  },
+  "Q11662930": {
+   "label": "静岡割り",
+   "category": "sa",
+   "place": "静岡県",
+   "prefecture": "静岡県",
+   "city": "",
+   "lat": 34.933249,
+   "lng": 138.09554,
+   "prefecture_level": true,
+   "wiki_title": "静岡割り",
+   "maker": ""
+  },
+  "Q11665905": {
+   "label": "飛騨春慶",
+   "category": "ri",
+   "place": "岐阜県高山市",
+   "prefecture": "岐阜県",
+   "city": "高山市",
+   "lat": 36.139625,
+   "lng": 137.251032,
+   "prefecture_level": false,
+   "wiki_title": "飛騨春慶",
+   "maker": ""
+  },
+  "Q11667314": {
+   "label": "香川漆器",
+   "category": "ri",
+   "place": "香川県高松市",
+   "prefecture": "香川県",
+   "city": "高松市",
+   "lat": 34.342559,
+   "lng": 134.046534,
+   "prefecture_level": false,
+   "wiki_title": "香川漆器",
+   "maker": ""
+  },
+  "Q96473480": {
+   "label": "駿河竹千筋細工",
+   "category": "kg",
+   "place": "静岡県静岡市",
+   "prefecture": "静岡県",
+   "city": "静岡市",
+   "lat": 34.975197,
+   "lng": 138.38317,
+   "prefecture_level": false,
+   "wiki_title": "駿河竹千筋細工",
+   "maker": ""
+  },
+  "Q11669529": {
+   "label": "高岡漆器",
+   "category": "ri",
+   "place": "富山県高岡市",
+   "prefecture": "富山県",
+   "city": "高岡市",
+   "lat": 36.736215,
+   "lng": 137.018731,
+   "prefecture_level": false,
+   "wiki_title": "高岡漆器",
+   "maker": ""
+  },
+  "Q11669563": {
+   "label": "高岡銅器",
+   "category": "kg",
+   "place": "富山県高岡市",
+   "prefecture": "富山県",
+   "city": "高岡市",
+   "lat": 36.736215,
+   "lng": 137.018731,
+   "prefecture_level": false,
+   "wiki_title": "高岡銅器",
+   "maker": ""
+  },
+  "Q22127666": {
+   "label": "鳴子漆器",
+   "category": "ri",
+   "place": "宮城県大崎市",
+   "prefecture": "宮城県",
+   "city": "大崎市",
+   "lat": 38.577657,
+   "lng": 140.955722,
+   "prefecture_level": false,
+   "wiki_title": "鳴子漆器",
+   "maker": ""
   }
  },
  "exclude": {
@@ -1621,6 +3409,690 @@
   "Q91239334": {
    "label": "埴輪 挂甲武人",
    "reason": "美術品・考古資料の個体であり、特産品ではない"
+  },
+  "Q31240778": {
+   "label": "10ants Brewing",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q125547004": {
+   "label": "EZIGEN",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31285023": {
+   "label": "あくらビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q132174455": {
+   "label": "いずみガラス",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31208491": {
+   "label": "いわて蔵ビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202468": {
+   "label": "うしとらブルワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q33076534": {
+   "label": "こぶし花ビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31203501": {
+   "label": "みちのく福島路ビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202728": {
+   "label": "やくらいビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202738": {
+   "label": "やまぐち鳴滝高原ブルワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31204072": {
+   "label": "ろまんちっく村クラフトブルワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q33076659": {
+   "label": "アウトサイダーブルーイング",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q3624753": {
+   "label": "アサヒスーパードライ",
+   "reason": "全国で販売される商品で、特定の地域に結びつかない"
+  },
+  "Q130736857": {
+   "label": "アップルキャラメルフラッペ",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q11290199": {
+   "label": "エチゴビール",
+   "reason": "企業・店舗であり、品目ではない"
+  },
+  "Q124340650": {
+   "label": "エビオス",
+   "reason": "全国で販売される商品で、特定の地域に結びつかない"
+  },
+  "Q31203580": {
+   "label": "オラホビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q133879007": {
+   "label": "オリオン ザ・ドラフト",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q130899820": {
+   "label": "オレオ クッキー チョコフラッペ",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202717": {
+   "label": "クロアアートクラフトビア",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q11301885": {
+   "label": "コエドブルワリー",
+   "reason": "企業・店舗であり、品目ではない"
+  },
+  "Q105336426": {
+   "label": "サッポロ 開拓使麦酒仕立て",
+   "reason": "全国で販売される商品で、特定の地域に結びつかない"
+  },
+  "Q11305532": {
+   "label": "サンクトガーレン",
+   "reason": "企業・店舗であり、品目ではない"
+  },
+  "Q31284353": {
+   "label": "シャトーカミヤ牛久ブルワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q130899796": {
+   "label": "ショコラオレンジフラッペ",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q949948": {
+   "label": "スポーツドリンク",
+   "reason": "全国に広まった一般的な料理・食品で、特定の地域に結びつかない"
+  },
+  "Q31238355": {
+   "label": "スワンレイクビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q131336696": {
+   "label": "ダブルチョコストロベリーフラッペ",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q131336920": {
+   "label": "ダブルチョコストロベリーフラッペ with マカロンチョコレート",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202474": {
+   "label": "ティーワイハーバーブルワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31203682": {
+   "label": "デビルクラフトトーキョーブルワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31225884": {
+   "label": "ノースアイランドビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202720": {
+   "label": "ヘリオスブルワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q130899801": {
+   "label": "ホワイトスノーチョコフラッペ",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q130899825": {
+   "label": "マンゴースムージー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q936040": {
+   "label": "ヤクルト",
+   "reason": "全国で販売される商品で、特定の地域に結びつかない"
+  },
+  "Q30922912": {
+   "label": "ロコビア",
+   "reason": "企業・店舗であり、品目ではない"
+  },
+  "Q31229222": {
+   "label": "ワイマーケットブルーイング",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31239370": {
+   "label": "ヴィルゴビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q132177804": {
+   "label": "三州鬼瓦工芸品",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473363": {
+   "label": "三条仏壇",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473399": {
+   "label": "与那国織",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q111604856": {
+   "label": "二風谷アットゥシ",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473493": {
+   "label": "京うちわ",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473476": {
+   "label": "京くみひも",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473463": {
+   "label": "京仏具",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473464": {
+   "label": "京仏壇",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473469": {
+   "label": "京指物",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473486": {
+   "label": "京焼・清水焼",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473375": {
+   "label": "京石工芸品",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473477": {
+   "label": "京繍",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473412": {
+   "label": "京表具",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31227736": {
+   "label": "京都醸造",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31228366": {
+   "label": "京都麦酒",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473461": {
+   "label": "京鹿の子絞",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473356": {
+   "label": "京黒紋付染",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31279090": {
+   "label": "仙南クラフトビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473489": {
+   "label": "伊万里焼・有田焼",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31208378": {
+   "label": "伊勢角屋麦酒",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473474": {
+   "label": "伊賀くみひも",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473376": {
+   "label": "信州打刃物",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473487": {
+   "label": "八女福島仏壇",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q11392439": {
+   "label": "六甲のおいしい水",
+   "reason": "全国で販売される商品で、特定の地域に結びつかない"
+  },
+  "Q96473467": {
+   "label": "内山紙",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473466": {
+   "label": "出雲石燈ろう",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473402": {
+   "label": "加賀繍",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473355": {
+   "label": "勝山竹細工",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473378": {
+   "label": "十日町明石ちぢみ",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473379": {
+   "label": "十日町絣",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31224781": {
+   "label": "南信州ビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473359": {
+   "label": "南木曽ろくろ細工",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473442": {
+   "label": "南風原花織",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473483": {
+   "label": "名古屋仏壇",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473383": {
+   "label": "名古屋友禅",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473374": {
+   "label": "名古屋桐箪笥",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q110963772": {
+   "label": "名古屋節句飾",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473382": {
+   "label": "名古屋黒紋付染",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q30922864": {
+   "label": "呉ビール",
+   "reason": "企業・店舗であり、品目ではない"
+  },
+  "Q31202714": {
+   "label": "呑龍夢麦酒",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473352": {
+   "label": "四日市萬古焼",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31208444": {
+   "label": "國乃長ビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31238828": {
+   "label": "城山ブルワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q30932951": {
+   "label": "城端麦酒",
+   "reason": "企業・店舗であり、品目ではない"
+  },
+  "Q96473492": {
+   "label": "大洲和紙",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473377": {
+   "label": "大阪仏壇",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473454": {
+   "label": "大阪欄間",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473408": {
+   "label": "天童将棋駒",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473443": {
+   "label": "奈良墨",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473494": {
+   "label": "奈良筆",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31204003": {
+   "label": "宇都宮ブルワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202493": {
+   "label": "宮崎ひでじビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q11456082": {
+   "label": "富士桜高原麦酒",
+   "reason": "企業・店舗であり、品目ではない"
+  },
+  "Q96473456": {
+   "label": "小千谷紬",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473440": {
+   "label": "尾張仏具",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q3176373": {
+   "label": "屠蘇",
+   "reason": "全国に広まった一般的な料理・食品で、特定の地域に結びつかない"
+  },
+  "Q96473361": {
+   "label": "山形仏壇",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473435": {
+   "label": "山鹿灯籠",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473353": {
+   "label": "岡崎石工品",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473348": {
+   "label": "庄川挽物木地",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31225308": {
+   "label": "志賀高原ビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202731": {
+   "label": "所沢ビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473397": {
+   "label": "播州毛鉤",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473368": {
+   "label": "新潟・白根仏壇",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473354": {
+   "label": "春日部桐箪笥",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202724": {
+   "label": "木曽路ビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473439": {
+   "label": "東京アンチモニー工芸品",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q132174443": {
+   "label": "東京三味線",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q140050006": {
+   "label": "東京手彫り印章",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473357": {
+   "label": "東京手描友禅",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q132174448": {
+   "label": "東京本染注染",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q132177793": {
+   "label": "東京無地染",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q132174444": {
+   "label": "東京琴",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473350": {
+   "label": "東京銀器",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473465": {
+   "label": "松本家具",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31209308": {
+   "label": "松江ビアへるん",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31226511": {
+   "label": "氷川ブリュワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473414": {
+   "label": "江戸からかみ",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473437": {
+   "label": "江戸べっ甲",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473445": {
+   "label": "江戸押絵",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473411": {
+   "label": "江戸指物",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473495": {
+   "label": "江戸木目込人形",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473436": {
+   "label": "江戸硝子",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473422": {
+   "label": "江戸節句人形",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q132174447": {
+   "label": "江戸表具",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473447": {
+   "label": "浪華本染め",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473413": {
+   "label": "瀬戸染付焼",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473372": {
+   "label": "燕鎚起銅器",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202744": {
+   "label": "独歩ビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202491": {
+   "label": "猪苗代地ビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473385": {
+   "label": "琉球びんがた",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473384": {
+   "label": "琉球絣",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31203828": {
+   "label": "田沢湖ビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473415": {
+   "label": "甲州手彫印章",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473470": {
+   "label": "甲州水晶貴石細工",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q30923723": {
+   "label": "盛田金しゃちビール",
+   "reason": "企業・店舗であり、品目ではない"
+  },
+  "Q96473409": {
+   "label": "真壁石燈籠",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473429": {
+   "label": "知花花織",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473387": {
+   "label": "福山琴",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473434": {
+   "label": "秩父銘仙",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473458": {
+   "label": "置賜紬",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473416": {
+   "label": "肥後象がん",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202710": {
+   "label": "胎内高原ビール",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q135646306": {
+   "label": "膳",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q11613646": {
+   "label": "舞浜地ビール工房ハーヴェスト・ムーン",
+   "reason": "企業・店舗であり、品目ではない"
+  },
+  "Q138830419": {
+   "label": "葛湯",
+   "reason": "全国に広まった一般的な料理・食品で、特定の地域に結びつかない"
+  },
+  "Q96473472": {
+   "label": "読谷山ミンサー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473471": {
+   "label": "読谷山花織",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473473": {
+   "label": "赤間硯",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473400": {
+   "label": "越中和紙",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q132177800": {
+   "label": "越中福岡の菅笠",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473427": {
+   "label": "越後三条打刃物",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202752": {
+   "label": "越生ブリュワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q11358988": {
+   "label": "近江上布",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202786": {
+   "label": "遠野麦酒ZUMONA",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473406": {
+   "label": "都城大弓",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473468": {
+   "label": "金沢仏壇",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473488": {
+   "label": "金沢箔",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473365": {
+   "label": "長岡仏壇",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473441": {
+   "label": "長崎べっ甲",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q65291974": {
+   "label": "阿波和紙",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473386": {
+   "label": "雲州そろばん",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31230110": {
+   "label": "霧の蔵ブルワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q5750772": {
+   "label": "響 (ウイスキー)",
+   "reason": "全国で販売される商品で、特定の地域に結びつかない"
+  },
+  "Q96473451": {
+   "label": "飯山仏壇",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473381": {
+   "label": "首里織",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473405": {
+   "label": "駿河雛人形",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473404": {
+   "label": "駿河雛具",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q96473446": {
+   "label": "高山茶筌",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q11672025": {
+   "label": "高田ドブロク事件",
+   "reason": "食品・工芸品ではない(行事・人物・寺院・技術・一般名詞)"
+  },
+  "Q31202726": {
+   "label": "鳴子の風",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
+  },
+  "Q31202498": {
+   "label": "麦雑穀工房マイクロブルワリー",
+   "reason": "日本語版ウィキペディアの記事がなく、産地を確認できない"
   }
  }
 }
