@@ -49,6 +49,16 @@ function categoryTags(o){
   if(list.length)return list;
   return ['その他'];
 }
+const CATEGORY_COLORS=new Map([
+  ['社寺・宗教遺跡','religious'],['城跡','castle'],['橋','bridge'],
+  ['古墳','burial'],['遺跡','archaeological'],['史跡','historic'],
+  ['庭園','garden'],['港','port'],['旧跡','former'],['その他','other']
+]);
+function categoryColorToken(o){return `--color-category-${CATEGORY_COLORS.get(categoryTags(o)[0])||'other'}`}
+function categoryColor(o){return getComputedStyle(document.documentElement).getPropertyValue(categoryColorToken(o)).trim()}
+document.querySelector('.map-legend').innerHTML=[...CATEGORY_COLORS].map(([label])=>
+  `<span><span class="legend-dot" style="background:var(${categoryColorToken({categories:[label]})})" aria-hidden="true"></span>${esc(label)}</span>`
+).join('');
 function categoryText(o){return categoryTags(o).join('・')}
 function categoryDetailText(o){
   return categoryTags(o).join('・');
@@ -189,13 +199,13 @@ function renderList(){
   }).join('');
   list.querySelectorAll('button').forEach(card=>card.addEventListener('click',()=>selectShiseki(card.dataset.key,'list')));
 }
-function icon(selected,shiseki){return L.divIcon({className:'',html:`<span class="shiseki-marker${selected?' selected':''} designation-${designationRank(shiseki)}"></span>`,iconSize:[22,22],iconAnchor:[11,11],popupAnchor:[0,-12]})}
+function icon(selected,shiseki){return L.divIcon({className:'',html:`<span class="shiseki-marker${selected?' selected':''}" style="background:var(${categoryColorToken(shiseki)})"></span>`,iconSize:[22,22],iconAnchor:[11,11],popupAnchor:[0,-12]})}
 // Thousands of DOM markers make panning slow, so unselected points are drawn on
 // the shared canvas and only the selected point keeps the DOM icon.
 const markerLayer=L.layerGroup().addTo(map);
 function markerStyle(o){
-  const css=getComputedStyle(document.documentElement),rank=designationRank(o);
-  const fill=css.getPropertyValue(['special','national','local'].includes(rank)?`--color-${rank}`:'--color-ink').trim();
+  const css=getComputedStyle(document.documentElement);
+  const fill=categoryColor(o);
   return {radius:9,weight:2,color:css.getPropertyValue('--color-paper').trim(),fillColor:fill,fillOpacity:1};
 }
 function renderMarkers(){

@@ -10,6 +10,16 @@
   --color-special: #7b2946;
   --color-national: #305f86;
   --color-local: #56713d;
+  --color-category-religious: #7b2946;
+  --color-category-castle: #305f86;
+  --color-category-bridge: #007e87;
+  --color-category-burial: #976500;
+  --color-category-archaeological: #9a4b27;
+  --color-category-historic: #6854a0;
+  --color-category-garden: #56713d;
+  --color-category-port: #287ca8;
+  --color-category-former: #b54770;
+  --color-category-other: #526573;
   --color-shadow: rgb(23 43 58 / 12%);
   --color-marker-shadow: rgb(23 43 58 / 35%);
   --color-backdrop: rgb(12 24 33 / 94%);
