@@ -16,10 +16,12 @@ CACHE_FILE = Path(__file__).resolve().parent.parent / "data" / "wikipedia_cache"
 BATCH = 50
 
 # 優先順。創建・築城など成立を表す欄を、竣工・開通など完成を表す欄より先に見る。
-FIELDS = ("創建", "創建年", "建立", "築城年", "築造時期", "竣工", "完成", "開通", "時代")
+# build_y は日本の城郭概要表、建設は橋のインフォボックスの欄名。
+FIELDS = ("創建", "創建年", "建立", "築城年", "build_y", "築造時期", "建設", "竣工", "完成", "開通", "時代")
 REJECT_WORDS = ("伝", "以前", "以降", "?", "？", "不詳", "不明", "諸説", "説", "推定", "再建", "再興",
                 "移転", "中興", "遷座", "再築", "改築", "頃", "ごろ", "年代",
-                "戦国")  # 戦国時代は室町時代と安土桃山時代にまたがる
+                "戦国",  # 戦国時代は室町時代と安土桃山時代にまたがる
+                "初代")  # 架け替えられた橋では現存する橋の年と異なる
 ERA_NAMES = ("飛鳥時代", "奈良時代", "平安時代", "鎌倉時代", "南北朝時代", "室町時代", "安土桃山時代",
              "江戸時代", "明治時代", "大正時代", "昭和時代", "平成時代", "令和時代")
 # 南北朝は ERA_STARTS の区分では室町時代に含まれるため、年との照合用に揃える。
@@ -77,6 +79,9 @@ def value_era(value, era_of_year):
 def fields_era(fields, era_of_year):
     """優先順で最初に値のある欄だけを使う。その欄で決まらなければ下位の欄へは進まない。"""
     for name in FIELDS:
+        # 橋の建設欄には施工者名だけのことがあるため、年や時代を含まない値は欄がないものとみなす。
+        if name == "建設" and name in fields and not re.search(r"\d|時代", fields[name]):
+            continue
         if name in fields:
             era = value_era(fields[name], era_of_year)
             return (era, name) if era else None
@@ -84,8 +89,11 @@ def fields_era(fields, era_of_year):
 
 
 def load_cache():
+    """対象欄が前回と同じときだけキャッシュを使う。欄を足したら全記事を取り直す。"""
     if CACHE_FILE.exists():
-        return json.loads(CACHE_FILE.read_text(encoding="utf-8"))
+        data = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
+        if data.get("fields") == list(FIELDS):
+            return data["pages"]
     return {}
 
 
@@ -128,7 +136,8 @@ def collect_infobox_fields(titles):
     for start in range(0, len(pending), BATCH):
         cache.update(fetch_batch(pending[start:start + BATCH]))
         CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
-        CACHE_FILE.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+        CACHE_FILE.write_text(json.dumps({"fields": list(FIELDS), "pages": cache}, ensure_ascii=False),
+                              encoding="utf-8")
         time.sleep(0.2)
     if pending:
         print(f"fetched infobox fields for {len(pending)} titles")

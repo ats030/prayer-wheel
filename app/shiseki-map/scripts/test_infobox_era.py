@@ -49,6 +49,17 @@ class InfoboxEraTest(unittest.TestCase):
         self.assertIsNone(fields_era(fields, era_of_year))
         self.assertEqual(fields_era({"竣工": "1996年（平成8年）"}, era_of_year), ("平成時代", "竣工"))
 
+    def test_castle_and_bridge_fields(self):
+        fields = infobox_fields("{{日本の城郭概要表\n|build_y = [[天正]]10年（[[1582年]]）\n}}")
+        self.assertEqual(fields, {"build_y": "天正10年（1582年）"})
+        self.assertEqual(fields_era(fields, era_of_year), ("安土桃山時代", "build_y"))
+        fields = infobox_fields("{{橋\n|建設 = [[1979年]]（[[昭和]]54年）\n|建設年 = x\n}}")
+        self.assertEqual(fields_era(fields, era_of_year), ("昭和時代", "建設"))
+        self.assertIsNone(era("初代：1920年、現橋：1985年"))
+        fields = infobox_fields("{{橋\n|建設 = [[三菱重工業]]\n|竣工 = 1998年\n}}")
+        self.assertEqual(fields["建設"], "三菱重工業")
+        self.assertEqual(fields_era(fields, era_of_year), ("平成時代", "竣工"))
+
 
 if __name__ == "__main__":
     unittest.main()
