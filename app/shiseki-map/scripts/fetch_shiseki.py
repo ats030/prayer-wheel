@@ -145,6 +145,14 @@ def nearest_prefecture(lon, lat, features):
 # ただし名称の末尾そのもの(○○橋の「橋」)は施設の種類を表すので名称でも判定する。
 PROPER_NAME_SUFFIXES = ("駅", "橋", "館", "古墳", "古墳群")
 PROPER_NAME_NEEDLES = ("寺", "神社", "城", "橋")
+# 「橋」は前橋城・船橋東照宮・栗橋宿のように地名として名称の途中に現れやすいので、
+# 曖昧さ回避の括弧を除いた名称が橋そのものを指す場合だけ名称で判定する。
+BRIDGE_NAME_SUFFIXES = ("橋", "橋梁", "橋跡", "橋址")
+
+
+def is_bridge_name(label):
+    base = re.sub(r"\s*(\([^)]*\)|（[^）]*）|「[^」]*」)$", "", label.strip())
+    return base.endswith(BRIDGE_NAME_SUFFIXES)
 
 
 def category(types, label):
@@ -166,6 +174,8 @@ def category(types, label):
     type_lower = type_text.lower()
     for needle, value in rules:
         place_name = name_only and needle in PROPER_NAME_NEEDLES and not label.endswith(needle)
+        if needle == "橋":
+            place_name = not is_bridge_name(label)
         haystack = type_lower if place_name else lower
         if needle.lower() in haystack and value not in found:
             found.append(value)
