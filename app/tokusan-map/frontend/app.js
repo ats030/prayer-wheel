@@ -56,6 +56,34 @@ function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;'
 function itemKey(o,index=0){return o.qid||`${o.label_ja}-${o.latitude}-${o.longitude}-${index}`}
 function hasCoordinates(o){const lat=Number(o.latitude),lng=Number(o.longitude);return Number.isFinite(lat)&&Number.isFinite(lng)&&(lat!==0||lng!==0)}
 
+// Keep source areas intact: a product spanning several places must not be
+// assigned to only the first municipality in its source.
+function regionLabel(o){
+  const source=String(o.production_area||o.city||o.place||'').trim();
+  if(!source||source===o.prefecture)return o.production_area?'県全域':'県内の地域未詳';
+  const label=source.split(o.prefecture||'\u0000').join('').replace(/\s+/g,' ').trim();
+  if(/^(?:県|都|道|府)?内(?:全域)?$/.test(label)||label==='全域')return '県全域';
+  return label||'県内の地域未詳';
+}
+function groupByRegion(entries){
+  const groups=new Map();
+  for(const entry of entries){
+    const label=regionLabel(entry.item);
+    if(!groups.has(label))groups.set(label,[]);
+    groups.get(label).push(entry);
+  }
+  return [...groups.entries()].sort(([a],[b])=>a.localeCompare(b,'ja'));
+}
+function populateRegions(){
+  const select=document.querySelector('#region');
+  const prefecture=document.querySelector('#prefecture').value;
+  select.replaceChildren(new Option(prefecture?'すべて':'都道府県を選択',''));
+  select.disabled=!prefecture;
+  if(!prefecture)return;
+  const entries=tokusan.filter(o=>o.prefecture===prefecture).map(item=>({item}));
+  for(const [label,items] of groupByRegion(entries))select.add(new Option(`${label}（${items.length}件）`,label));
+}
+
 function populatePrefectures(){
   const list=document.querySelector('#prefecture');
   const prefectures=Array.from(new Set(tokusan.map(o=>o.prefecture).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
@@ -82,9 +110,11 @@ function renderLegend(){
 function applyFilters(){
   const keyword=document.querySelector('#keyword').value.trim().toLowerCase();
   const prefecture=document.querySelector('#prefecture').value;
+  const region=document.querySelector('#region').value;
   const category=document.querySelector('#category').value;
   visible=tokusan.filter(o=>{
     if(prefecture&&o.prefecture!==prefecture)return false;
+    if(region&&regionLabel(o)!==region)return false;
     if(category&&categoryCode(o)!==category)return false;
     if(keyword){
       const haystack=[o.label_ja,o.label_en,o.place,o.prefecture,o.city,o.production_area,o.maker,categoryLabel(categoryCode(o))].filter(Boolean).join(' ').toLowerCase();
@@ -109,7 +139,7 @@ function renderList(){
     const key=itemKey(o,i);
     const cat=categoryCode(o);
     const catSpan=cat!=='none'?`<span>${esc(categoryLabel(cat))}</span>`:'';
-    const placeSpan=o.prefecture_level?'<span>都道府県単位</span>':o.place&&o.place!==o.prefecture?`<span>${esc(o.place)}</span>`:'';
+    const placeSpan=`<span>${esc(regionLabel(o))}</span>${o.prefecture_level?'<span>都道府県代表位置</span>':''}`;
     return `<button type="button" class="tokusan-card" data-key="${esc(key)}" aria-current="${key===selectedKey}"><span class="card-index">${String(i+1).padStart(2,'0')}</span><span><span class="card-name">${esc(o.label_ja||o.label_en||o.qid)}</span><span class="card-meta"><span>${esc(o.prefecture||'地域未登録')}</span>${catSpan}${placeSpan}</span></span></button>`;
   }).join('');
   list.querySelectorAll('button').forEach(card=>card.addEventListener('click',()=>selectItem(card.dataset.key,'list')));
@@ -138,18 +168,38 @@ function renderMarkers(){
   });
   for(const group of groups.values()){
     const {key,item:o}=group[0],count=group.length;
-    const label=count>1?`${o.prefecture||o.place} ${count}件`:o.label_ja||o.label_en||o.qid;
+    const regions=groupByRegion(group);
+    const label=count>1?`${o.prefecture||o.place} ${regions.length}地域・${count}件`:o.label_ja||o.label_en||o.qid;
     const marker=L.marker([o.latitude,o.longitude],{icon:markerIcon(o,group.some(entry=>entry.key===selectedKey),count),title:label,zIndexOffset:count>1?1000:0});
     marker.groupCount=count;
     marker.bindTooltip(`${label}${o.prefecture_level?'（都道府県単位）':''}`,{direction:'top',offset:[0,-8]});
     if(count===1)marker.on('click',()=>selectItem(key,'marker'));
     else{
       const choices=document.createElement('div');choices.className='marker-choices';
-      for(const entry of group){
-        const button=document.createElement('button');button.type='button';button.textContent=entry.item.label_ja;button.dataset.key=entry.key;
-        button.addEventListener('click',()=>{map.closePopup();selectItem(entry.key,'marker')});choices.appendChild(button);
-      }
+      const heading=document.createElement('p');heading.className='marker-choices-heading';
+      const content=document.createElement('div');content.className='marker-choices-content';
+      choices.append(heading,content);
+      const showRegions=()=>{
+        heading.textContent=`${o.prefecture||o.place} — 地域を選択`;
+        content.replaceChildren();choices.scrollTop=0;
+        for(const [region,entries] of regions){
+          const button=document.createElement('button');button.type='button';button.className='marker-region';
+          button.textContent=`${region}（${entries.length}件）`;
+          button.addEventListener('click',()=>{
+            heading.textContent=region;content.replaceChildren();choices.scrollTop=0;
+            const back=document.createElement('button');back.type='button';back.className='marker-region-back';back.textContent='← 地域一覧に戻る';
+            back.addEventListener('click',()=>{showRegions();content.querySelector('button')?.focus()});content.append(back);
+            for(const entry of entries){
+              const itemButton=document.createElement('button');itemButton.type='button';itemButton.textContent=entry.item.label_ja;itemButton.dataset.key=entry.key;
+              itemButton.addEventListener('click',()=>{map.closePopup();selectItem(entry.key,'marker')});content.append(itemButton);
+            }
+            content.querySelector('[data-key]')?.focus();
+          });content.append(button);
+        }
+      };
+      showRegions();
       marker.bindPopup(choices,{maxWidth:280});
+      marker.on('popupopen',showRegions);
     }
     marker.addTo(map);
     for(const entry of group)markers.set(entry.key,marker);
@@ -325,9 +375,10 @@ function closeDetail(){
 }
 
 document.querySelector('#keyword').addEventListener('input',applyFilters);
-document.querySelector('#prefecture').addEventListener('change',applyFilters);
+document.querySelector('#prefecture').addEventListener('change',()=>{populateRegions();applyFilters()});
+document.querySelector('#region').addEventListener('change',applyFilters);
 document.querySelector('#category').addEventListener('change',applyFilters);
-document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';document.querySelector('#category').value='';applyFilters();document.querySelector('#keyword').focus()});
+document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';document.querySelector('#category').value='';populateRegions();applyFilters();document.querySelector('#keyword').focus()});
 document.querySelector('.detail-close').addEventListener('click',closeDetail);
 document.querySelector('.lightbox-close').addEventListener('click',closeLightbox);
 document.querySelector('#lightbox').addEventListener('click',e=>{if(e.target.id==='lightbox')closeLightbox()});
@@ -337,6 +388,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
 fetch('/api/tokusan/').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{
   tokusan=Array.isArray(data)?data:[];
   populatePrefectures();
+  populateRegions();
   populateCategories();
   renderLegend();
   applyFilters();
