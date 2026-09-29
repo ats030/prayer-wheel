@@ -10,7 +10,7 @@ pricing_url: null
 free_condition: Public endpoints and file hotlinks; no paid API, key, or subscription
 restrictions:
   - Keep each file's Commons source URL, author, credit, attribution, and exact license URL.
-  - Only accept CC BY / BY-SA versions 1.0, 2.0, 2.5, 3.0, 4.0 or explicitly marked CC0/public domain.
+  - Only accept CC BY / BY-SA versions 1.0, 2.0, 2.5, 3.0, 4.0, reviewed Japanese CC BY / BY-SA 2.1 jp, or explicitly marked CC0/public domain.
   - Do not register NC, ND, unknown licenses, non-Commons local Wikipedia files, or CC files without an author.
   - Use the Commons thumbnail and the unmodified original of the same file as fallback; no edits or crops.
   - Share-alike conditions apply to future adaptations; re-review rights before adapting a file.
@@ -21,6 +21,7 @@ evidence:
   - https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia
   - https://creativecommons.org/licenses/by/4.0/
   - https://creativecommons.org/licenses/by-sa/4.0/
+  - https://creativecommons.org/licenses/by-sa/2.1/jp/deed.en
   - https://creativecommons.org/publicdomain/zero/1.0/
   - https://www.mediawiki.org/wiki/API:Etiquette
 evidence_retrieved: 2026-09-29

@@ -17,9 +17,9 @@ from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
-from build_images import ROOT, USER_AGENT
+from build_images import ROOT, USER_AGENT, MAFF_ZIP_PERMISSIONS
 
-PERMISSION = 'ZIPファイルをダウンロードできる画像は許可なく使用することができます。'
+PERMISSION = MAFF_ZIP_PERMISSIONS[0]
 LICENSE_URL = 'https://www.digital.go.jp/resources/open_data/public_data_license_v1.0'
 MAX_BYTES = 12 * 1024 * 1024
 
@@ -28,26 +28,40 @@ def normalized(value):
     return re.sub(r'[\s／/（）()]+', '', value)
 
 
-def zip_candidates(html, item):
+def zip_candidates(html, item, reviewed=None):
     soup = BeautifulSoup(html, 'html.parser')
-    headings = [heading.get_text(' ', strip=True) for heading in soup.find_all('h2')]
+    headings = [heading.get_text(' ', strip=True) for heading in soup.find_all(['h2', 'h3'])]
     text = soup.get_text(' ', strip=True)
-    if (PERMISSION not in text or item['prefecture'] not in headings
-            or not any(normalized(item['label']) in normalized(heading) for heading in headings)):
+    permission = next((value for value in MAFF_ZIP_PERMISSIONS
+                      if re.sub(r'\s+', '', value) in re.sub(r'\s+', '', text)), '')
+    linked_terms = any(urljoin(item['source_url'], link['href']) == 'https://www.maff.go.jp/j/use/link.html'
+                       for link in soup.select('a[href]'))
+    names = [normalized(name) for name in [item['label']] + re.split('[／/]', item['label'])]
+    if (not permission or (permission != PERMISSION and not linked_terms)
+            or item['prefecture'] not in headings
+            or not any(name in normalized(heading) for name in names for heading in headings)):
         return []
     result = []
     for box in soup.select('div.js_modal01'):
         image = box.select_one('.dl_img img')
-        if not image or normalized(image.get('alt', '')) != normalized(item['label']):
+        if not image:
             continue
         for link in box.select('a[href]'):
             url = urljoin(item['source_url'], link['href'])
             parsed = urlparse(url)
+            approval = (reviewed or {}).get(item['id'], {})
+            manual_match = (approval.get('zip_url') == url
+                            and approval.get('evidence_url') == item['source_url']
+                            and approval.get('image_alt') == image.get('alt', '')
+                            and bool(approval.get('reason', '').strip()))
+            if normalized(image.get('alt', '')) not in names and not manual_match:
+                continue
             if (parsed.scheme == 'https' and parsed.hostname == 'www.maff.go.jp'
                     and parsed.path.startswith('/j/keikaku/syokubunka/k_ryouri/img/')
                     and parsed.path.endswith('.zip') and '著作権' in link.get_text()):
-                result.append({'zip_url': url, 'alt': image['alt'],
-                               'credit': ' '.join(credit.get_text(' ', strip=True) for credit in box.select('.dl_copy'))})
+                result.append({'zip_url': url, 'alt': image['alt'], 'permission': permission,
+                               'credit': ' '.join(credit.get_text(' ', strip=True)
+                                                  for credit in box.select('.dl_copy'))})
     return result
 
 
@@ -99,6 +113,7 @@ def main():
     registry = json.loads((ROOT / 'data/images.json').read_text())
     manifest_path = ROOT / 'data/maff_images.json'
     old = json.loads(manifest_path.read_text()).get('photos', {}) if manifest_path.exists() else {}
+    reviewed = json.loads((ROOT / 'data/image_review.json').read_text()).get('approved_maff_photos', {})
     items = [item for item in json.loads((ROOT / 'data/official.json').read_text())
              if item['source_kind'] == 'cuisine' and (item['id'] not in registry['photos'] or item['id'] in old)]
     session = requests.Session()
@@ -106,7 +121,7 @@ def main():
     photos = {}
     for index, item in enumerate(items, 1):
         page = fetch_cached(session, item['source_url'], args.cache, '.html')
-        choices = zip_candidates(page, item)
+        choices = zip_candidates(page, item, reviewed)
         if choices:
             chosen = choices[0]
             blob = fetch_cached(session, chosen['zip_url'], args.cache, '.zip')
@@ -122,7 +137,7 @@ def main():
                 'source_url': item['source_url'], 'evidence_url': item['source_url'],
                 'file_name': member, 'match_method': 'maff_zip', 'checked_at': args.checked_at,
                 'caption': '', 'label': item['label'], 'prefecture': item['prefecture'],
-                'permission': PERMISSION, 'zip_url': chosen['zip_url'],
+                'permission': chosen['permission'], 'zip_url': chosen['zip_url'],
                 'page_sha256': hashlib.sha256(page).hexdigest(),
                 'zip_sha256': hashlib.sha256(blob).hexdigest(), 'image_sha256': digest}
         if index % 10 == 0:

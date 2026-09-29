@@ -365,7 +365,7 @@ function imageFailure(container,o,message){
 async function loadImageCatalog(){
   if(imageCatalogLoad)return imageCatalogLoad;
   imageCatalogLoad=(async()=>{
-    const data=await fetchJSONWithRetry('/images.json?v=2026092910',10000);
+    const data=await fetchJSONWithRetry('/images.json?v=2026092911',10000);
     if(!data.photos||typeof data.photos!=='object'||Array.isArray(data.photos)||!Array.isArray(data.blocked_fallback))throw new Error('Invalid image catalog');
     imageCatalog=data.photos;
     blockedImageFallback=new Set(data.blocked_fallback);

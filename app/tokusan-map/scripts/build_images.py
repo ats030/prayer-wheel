@@ -20,6 +20,10 @@ from bs4 import BeautifulSoup
 ROOT = Path(__file__).resolve().parent.parent
 USER_AGENT = 'TokusanMap/1.0 (https://tokusan-map-736831430371.asia-northeast1.run.app/; catalog photo audit)'
 ALLOWED_MIME = {'image/jpeg', 'image/png', 'image/webp'}
+MAFF_ZIP_PERMISSIONS = (
+    'ZIPファイルをダウンロードできる画像は許可なく使用することができます。',
+    '※ダウンロード可能な画像を使用する場合は「リンク・著作権について」をご一読の上、出典を農林水産省「うちの郷土料理」と明記し、ご利用ください。なお、画像提供元の記載がある場合は画像提供元も併せてご記載ください。',
+)
 
 
 def plain(value):
@@ -39,7 +43,7 @@ def licensed_photo(info):
     url = urlparse(license_url)
     license_name = value('LicenseShortName') or value('License')
     cc = url.hostname == 'creativecommons.org' and bool(re.fullmatch(
-        r'/licenses/by(?:-sa)?/(?:1\.0|2\.0|2\.5|3\.0|4\.0)/?', url.path))
+        r'/licenses/by(?:-sa)?/(?:(?:1\.0|2\.0|2\.5|3\.0|4\.0)/?|2\.1/jp/(?:deed\.(?:en|ja))?)', url.path))
     public_domain = value('License') in {'pd', 'cc-zero', 'cc0'} and license_name in {'Public domain', 'CC0', 'CC0 1.0'}
     if not cc and not public_domain:
         return None, 'unsupported_license'
@@ -168,7 +172,6 @@ def category_file(api, category):
 def approved_maff_photos(manifest, official, frontend):
     """Validate the individually permitted, unchanged local ZIP-photo records."""
     catalog = {item['id']: item for item in official}
-    permission = 'ZIPファイルをダウンロードできる画像は許可なく使用することができます。'
     result = {}
     for item_id, photo in manifest.get('photos', {}).items():
         item = catalog.get(item_id, {})
@@ -180,7 +183,7 @@ def approved_maff_photos(manifest, official, frontend):
                 or photo.get('evidence_url') != item.get('source_url')
                 or photo.get('label') != item.get('label')
                 or photo.get('prefecture') != item.get('prefecture')
-                or photo.get('permission') != permission
+                or photo.get('permission') not in MAFF_ZIP_PERMISSIONS
                 or photo.get('license_url') != 'https://www.digital.go.jp/resources/open_data/public_data_license_v1.0'
                 or photo.get('source_name') != '農林水産省'
                 or photo.get('license') != 'PDL 1.0（ZIP配布写真）'

@@ -6,7 +6,7 @@ import unittest
 import zipfile
 from pathlib import Path
 
-from build_images import ROOT, approved_maff_photos
+from build_images import ROOT, approved_maff_photos, MAFF_ZIP_PERMISSIONS
 from build_maff_images import PERMISSION, LICENSE_URL, archive_photo, zip_candidates
 
 
@@ -49,6 +49,37 @@ class MaffImagesTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             archive_photo(blob.getvalue())
 
+    def test_alt_variants_require_review_of_the_same_zip_and_page(self):
+        item = self.item()
+        html = self.html().replace('alt="料理／別名"', 'alt=""')
+        self.assertEqual(zip_candidates(html, item), [])
+        entry = {'zip_url': 'https://www.maff.go.jp/j/keikaku/syokubunka/k_ryouri/img/allowed.zip',
+                 'evidence_url': item['source_url'], 'image_alt': '', 'reason': '配布原本と料理を個別確認'}
+        self.assertEqual(len(zip_candidates(html, item, {item['id']: entry})), 1)
+        for field, wrong in [('zip_url', 'https://example.org/other.zip'),
+                             ('evidence_url', 'https://www.maff.go.jp/other.html'),
+                             ('image_alt', '別画像'), ('reason', '')]:
+            self.assertEqual(zip_candidates(html, item, {item['id']: dict(entry, **{field: wrong})}), [])
+        self.assertEqual(zip_candidates(html.replace(PERMISSION, ''), item, {item['id']: entry}), [])
+        self.assertEqual(len(zip_candidates(self.html().replace('alt="料理／別名"', 'alt="別名"'), item)), 1)
+
+    def test_download_usage_notice_requires_full_terms_and_box_credit(self):
+        permission = MAFF_ZIP_PERMISSIONS[1]
+        html = self.html(permission.replace('「リンク', '「 リンク'))
+        self.assertEqual(zip_candidates(html, self.item()), [])
+        html += '<a href="/j/use/link.html">リンク・著作権について</a>'
+        html = html.replace('</a></div>', '</a><div class="dl_copy">画像提供元：料理研究会</div></div>', 1)
+        result = zip_candidates(html, self.item())
+        self.assertEqual(result[0]['permission'], permission)
+        self.assertEqual(result[0]['credit'], '画像提供元：料理研究会')
+        self.assertEqual(zip_candidates(html.replace('<h2>埼玉県</h2>', '<h3>埼玉県</h3>'), self.item()), result)
+        self.assertEqual(zip_candidates(html.replace('<h2>埼玉県</h2>', '<h3>宮崎県</h3>'), self.item()), [])
+        for changed in [html.replace('なお、画像提供元の記載がある場合は画像提供元も併せてご記載ください。', ''),
+                        html.replace('/j/use/link.html', 'https://example.org/terms'),
+                        html.replace(permission.replace('「リンク', '「 リンク'),
+                                     '画像の無断利用はできません。利用する場合は、リンク・著作権についてをご確認ください。')]:
+            self.assertEqual(zip_candidates(changed, self.item()), [])
+
     def test_registry_validates_identity_permission_paths_and_original_hash(self):
         item = self.item();content = b'\xff\xd8\xfforiginal-photo';digest = hashlib.sha256(content).hexdigest()
         url = '/photos/maff/' + item['id'] + '-' + digest[:16] + '.jpg'
@@ -66,6 +97,9 @@ class MaffImagesTest(unittest.TestCase):
             frontend = Path(directory);file = frontend / url.lstrip('/')
             file.parent.mkdir(parents=True);file.write_bytes(content)
             self.assertEqual(approved_maff_photos(manifest(photo), [item], frontend)[item['id']]['url'], url)
+            for permission in MAFF_ZIP_PERMISSIONS:
+                self.assertEqual(approved_maff_photos(manifest(dict(photo, permission=permission)),
+                                                     [item], frontend)[item['id']]['url'], url)
             for key, wrong in [('permission', ''), ('label', '別料理'), ('prefecture', '宮崎県'),
                                ('source_url', 'https://example.org'), ('license_url', ''),
                                ('url', '/photos/maff/../../other.jpg'), ('image_sha256', 'a'*64),

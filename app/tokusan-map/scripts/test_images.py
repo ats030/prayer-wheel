@@ -24,6 +24,10 @@ class ImagesTest(unittest.TestCase):
         self.assertEqual(photo['url'], 'https://thumb.wikimedia.org/example.jpg')
         for family in ['by-nc', 'by-nd', 'by-nc-sa']:
             self.assertEqual(licensed_photo(self.info(license_url=f'https://creativecommons.org/licenses/{family}/4.0/'))[1], 'unsupported_license')
+        for path in ['by/2.1/jp/', 'by-sa/2.1/jp/deed.en', 'by-sa/2.1/jp/deed.ja']:
+            self.assertEqual(licensed_photo(self.info(license_url='https://creativecommons.org/licenses/' + path))[1], 'available')
+        for path in ['by-nc/2.1/jp/', 'by-nd/2.1/jp/', 'by-sa/2.1/xx/', 'by-sa/2.1/jp/deed.unknown']:
+            self.assertEqual(licensed_photo(self.info(license_url='https://creativecommons.org/licenses/' + path))[1], 'unsupported_license')
         info = self.info(); info['extmetadata'].pop('Artist')
         self.assertEqual(licensed_photo(info)[1], 'missing_artist')
         info = self.info(); info['extmetadata']['Artist'] = []
