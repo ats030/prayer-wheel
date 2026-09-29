@@ -56,11 +56,17 @@
     "Hatcho-Miso Kakukyu 2019 ac (1).jpg": "味噌や醸造工程ではなく建物外観",
     "Nakaogo, Hasami 01.jpg": "陶磁器ではなく街並み",
     "Kainan kuroe01s3200.jpg": "紀州漆器の写真と確認できない地域の壁画",
-    "Kome-jochu and Awamori by Ozchin.jpg": "焼酎そのものではなく焼酎の瓶に仕込まれた梅酒"
+    "Kome-jochu and Awamori by Ozchin.jpg": "焼酎そのものではなく焼酎の瓶に仕込まれた梅酒",
+    "Far bar hitachino (5275596127).jpg": "Commonsではカクテル写真に分類され、常陸野ネストビールと確認できない",
+    "Otaru Beer Brewery 01.jpg": "ビールではなく醸造所外観",
+    "Miki hardware Festival 01.JPG": "刃物の実物ではなくイベント会場全景",
+    "Papermaking factory of Sekishukan Hall.jpg": "紙や製造工程ではなく建物外観",
+    "MET 2001 428 39 mon komon.jpg": "東京染小紋の産地・技法との対応を確認できない小袖"
   },
   "excluded_items": {
     "local-cfc537e0cedc6558": "埼玉のすったてではなく宮崎の冷や汁候補",
-    "local-be8abc00071acee2": "熊本だご汁に対して大分だんご汁の写真で地域の調理差を確認できない"
+    "local-be8abc00071acee2": "熊本だご汁に対して大分だんご汁の写真で地域の調理差を確認できない",
+    "Q136396484": "京都府福知山市のゴム焼きそばに静岡県三島市の写真を使わない"
   },
   "captions": {
     "local-db04677b0bb07d3b": "八女伝統本玉露の茶畑",
@@ -84,5 +90,343 @@
     "Q11568970": "展示されている巨大な熊野筆",
     "Q11358501": "上刈ミカンの若木",
     "local-0540eeda3060236b": "飼育されている但馬牛"
+  },
+  "approved_photos": {
+    "Q10433119": {
+      "file_name": "SawachiDish Sashimi01.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/皿鉢料理",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: SAWACHI-RYORI (a dish of SASHIMI), local dish of Kochi , Japan (SAWACHI means \"Big Dishes\")",
+      "caption": "皿鉢料理の刺身盛り"
+    },
+    "Q128382071": {
+      "file_name": "奥久慈しゃも弁当.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/奥久慈しゃも",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: 常陸大子駅 で販売されている駅弁「奥久慈しゃも弁当」.",
+      "caption": "奥久慈しゃもを使った駅弁"
+    },
+    "Q17192072": {
+      "file_name": "アリランラーメン.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/アリランラーメン",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: 八平の食堂が提供する ja:アリランラーメン",
+      "caption": ""
+    },
+    "Q11294620": {
+      "file_name": "Kabuto-Beer-1.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/カブトビール",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: カブトビール。半田赤レンガ建物にて。",
+      "caption": ""
+    },
+    "Q108568106": {
+      "file_name": "平安光義舞妓衣裳人形.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/京人形 (人形)",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: ​平安光義舞技衣裳人形，新北市鶯歌區南靖里（南靖厝）",
+      "caption": "京人形の舞妓衣裳人形"
+    },
+    "Q11567336": {
+      "file_name": "無名異焼展示販売.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/Category:Mumyōi ware",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: 無名異焼展示販売",
+      "caption": "展示されている無名異焼"
+    },
+    "Q11518575": {
+      "file_name": "Kiso-Hirasawa10s5s3200.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/木曽漆器",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: Kiso-Hirasawa , Shiojiri , Nagano prefecture , Japan",
+      "caption": "木曽平沢で販売されている木曽漆器"
+    },
+    "Q11581187": {
+      "file_name": "Teller - Mashiko-yaki.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/Category:Mashiko ware",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: Picture of an plate, iron-brand, prduced at Mashiko. Japan",
+      "caption": "益子焼の皿"
+    },
+    "Q15894888": {
+      "file_name": "Muku Obon of Hakone Yosegi.JPG",
+      "evidence_url": "https://ja.wikipedia.org/wiki/寄木細工",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: Obon was made from solid wood material (Yosegi Zaiku at Hakone)",
+      "caption": "箱根寄木細工のお盆"
+    },
+    "Q5952107": {
+      "file_name": "Top-obi.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/西陣織",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: 西陣織の中でも格式が高く、高級とされている西陣爪掻本綴織により製作された帯地（伝統工芸士小玉紫泉作）",
+      "caption": "西陣爪掻本綴織の帯地"
+    },
+    "local-c63d046954de15b6": {
+      "file_name": "Miwa Somen ac.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/三輪素麺",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: 奈良県桜井市などで生産される三輪素麺。木箱に入った状態。",
+      "caption": ""
+    },
+    "local-c49cb56f003bf391": {
+      "file_name": "Kagamaruimo.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/加賀丸いも",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: 加賀丸いも　加賀野菜　石川県金沢",
+      "caption": ""
+    },
+    "local-d12c0dab5ec9230e": {
+      "file_name": "Hatcho-Miso-Kakukyu-6.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/八丁味噌",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: カクキューの八丁味噌",
+      "caption": ""
+    },
+    "local-b197b0701967b125": {
+      "file_name": "八幡号 1938.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/比婆牛",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: 比婆牛の八幡号",
+      "caption": "1938年の比婆牛「八幡号」"
+    },
+    "local-332d3c135b4fd589": {
+      "file_name": "220722 Historical Village of Hokkaido Sapporo Hokkaido Japan88s5.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/いももち",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: At Historical Village of Hokkaido in Sapporo , Hokkaido prefecture , Japan",
+      "caption": ""
+    },
+    "local-8da4da4daa700706": {
+      "file_name": "Aburafu-don.JPG",
+      "evidence_url": "https://ja.wikipedia.org/wiki/油麩",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: Aburafu-don, Tome City, Miyagi pref., Japan",
+      "caption": "油麩を使った油麩丼"
+    },
+    "local-5da88f5c84ab3a07": {
+      "file_name": "Nara Cha-meshi 奈良茶飯 茶亭有翠 Jan 10, 2010.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/奈良茶飯",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: Nara Cha-meshi is a dish of rice boiled in tea with beans and chestnuts.",
+      "caption": ""
+    },
+    "local-be199442b47a7619": {
+      "file_name": "Taimesi 20250218 1.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/鯛めし",
+      "reason": "品目記事または専用カテゴリにある写真。説明と実画像を照合: 鯛めし　伊予水軍",
+      "caption": "愛媛県の鯛めし（炊き込み）"
+    },
+    "local-342fc43b41222475": {
+      "file_name": "ChanChanYaki 20190426.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/ちゃんちゃん焼き",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: ChanChanYaki",
+      "caption": ""
+    },
+    "local-ff35c9c28ca553e2": {
+      "file_name": "Jappa jiru - an miso soup from Aomori, Japan.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/じゃっぱ汁",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: 青森県弘前市『あいや』のじゃっぱ汁。- \"Jappa-jiru\", a fishy miso soup from Hirosaki, Aomori. Up and Down Japan (Author's another URL: here ) 青森名物じゃっぱ汁",
+      "caption": ""
+    },
+    "local-0618af9af286e811": {
+      "file_name": "Hatahatazushi in Akita 2024 Mar 28 02-42PM.jpeg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/ハタハタ寿司",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: ハタハタ寿司 (Hatahatazushi)",
+      "caption": ""
+    },
+    "local-adeecaf2845e6e58": {
+      "file_name": "Dashi(Japan Yamagata Prefecture's traditional Vegetable salad)2.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/だし (郷土料理)",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: Dashi(Japan Yamagata Prefecture's traditional Vegetable salad. Chop the eggplant, cucumber, okra, ginger and myoga ginger and marinate in soy sauce.",
+      "caption": ""
+    },
+    "local-b918e4fd7a4530b9": {
+      "file_name": "Komakata Dozeu6.JPG",
+      "evidence_url": "https://ja.wikipedia.org/wiki/どぜう鍋",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: （2009年10月17日撮影）",
+      "caption": "どじょう鍋（駒形どぜう）"
+    },
+    "local-7f72e609e80239e3": {
+      "file_name": "Namashirasudon.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/しらす丼",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: 生しらす丼",
+      "caption": ""
+    },
+    "local-1398f7759985703e": {
+      "file_name": "Kōfu Torimotsuni.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/甲府鳥もつ煮",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: 甲府鳥もつ煮（蕎麦屋「奥藤」本店にて）",
+      "caption": ""
+    },
+    "local-dff5c164bfecd07b": {
+      "file_name": "Hobazushi-Tohno.JPG",
+      "evidence_url": "https://ja.wikipedia.org/wiki/朴葉寿司",
+      "reason": "農林水産省の品目ページは飲食方法として東濃地域の具材をのせた朴葉ずしも明示している（https://www.maff.go.jp/j/keikaku/syokubunka/k_ryouri/search_menu/menu/38_1_gifu.html）。Commons説明の東濃の家庭料理と実画像（朴葉・酢飯・具材）を照合。",
+      "caption": "岐阜県東濃地方の朴葉ずし"
+    },
+    "local-5f08d3c36587f4fa": {
+      "file_name": "Fried Kurohanpen（Shizuoka Soul food）.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/黒はんぺん",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: 静岡県焼津市の名物である黒はんぺんのフライ",
+      "caption": ""
+    },
+    "local-0a11fcdb72e8cd14": {
+      "file_name": "Tekone-zushi 01.JPG",
+      "evidence_url": "https://ja.wikipedia.org/wiki/手こね寿司",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: A local cuisine of vinegared rice and fish, which would be mixed with fingers just before eating it, called `Tekone-zusi,' is a kind of Sushi in Shima-shi, Mie-ken, Japan.",
+      "caption": ""
+    },
+    "local-5d1144f861ecd685": {
+      "file_name": "丹波黒豆 コーヒー＆煮豆.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/黒豆",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: 京都府南丹市美山町の店で提供された地元(京都丹波高原)産無農薬有機栽培の丹波黒豆を用いた黒豆コーヒー(雑穀飲料)と煮豆",
+      "caption": "京都丹波産の黒豆を使った煮豆"
+    },
+    "local-b1975690d7c95250": {
+      "file_name": "Shiromiso zouni.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/雑煮",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: 銀閣寺 㐂み家の京風白味噌雑煮",
+      "caption": ""
+    },
+    "local-4924f0055af964fc": {
+      "file_name": "Ikanago 2.JPG",
+      "evidence_url": "https://ja.wikipedia.org/wiki/釘煮",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: own picture from digital camera, January 2005",
+      "caption": ""
+    },
+    "local-de4376e444f3281c": {
+      "file_name": "Wani sashimi.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/ワニ料理",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: ワニの刺身",
+      "caption": ""
+    },
+    "local-1650601b03ec2832": {
+      "file_name": "香川県の正月料理である餡餅雑煮の中の餡餅（An-mochi in zoni (rice cake with red bean paste), a New Year's dish in Kagawa Prefecture）.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/餡餅雑煮",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: A traditional New Year's dish of rice cake with bean jam zoni in Kagawa prefecture, mainly in the southwestern area.An-mochi: sweet bean paste boiled in sugar is used for zoni.",
+      "caption": "香川県の餡餅雑煮"
+    },
+    "local-043e2162c1900f7e": {
+      "file_name": "Satsumaage.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/薩摩揚げ",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: Satsuma age .",
+      "caption": ""
+    },
+    "local-5a7cf615967de592": {
+      "file_name": "Sathumajiru.jpg",
+      "evidence_url": "https://ja.wikipedia.org/wiki/薩摩汁",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: 薩摩汁",
+      "caption": ""
+    },
+    "Q60997026": {
+      "file_name": "Onisasa Ishigaki 01.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Onisasa_Ishigaki_01.jpg",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: Onisasa on Ishigaki Island, a local snack made by combining onigiri and fried chicken tenderloin",
+      "caption": ""
+    },
+    "Q30930819": {
+      "file_name": "☆ D8A3593 拡大.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:%E2%98%86_D8A3593_%E6%8B%A1%E5%A4%A7.jpg",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: 川尻筆伝統工芸士第一号畑義幸\n熟成した皮つき原毛の選別を行っている （2016年6月）",
+      "caption": "川尻筆の原毛を選別する制作工程"
+    },
+    "local-5162a532ba9ac76d": {
+      "file_name": "Minakuchi Kanpyō (Dried gourd).jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Minakuchi_Kanpy%C5%8D_(Dried_gourd).jpg",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: Minakuchi Kanpyō (Dried gourd) collected in Minakuchi, Koka, Shiga, Japan",
+      "caption": ""
+    },
+    "local-7675d8a5f742dffb": {
+      "file_name": "Nankan-somen Kumamoto.JPG",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Nankan-somen_Kumamoto.JPG",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: Nankan-somen Kumamoto. 熊本県南関町の名産品「南関素麺」, Nankan.",
+      "caption": ""
+    },
+    "local-35f8c7b9388a6f8f": {
+      "file_name": "石川県産加賀れんこん---2023-11-20 01.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:%E7%9F%B3%E5%B7%9D%E7%9C%8C%E7%94%A3%E5%8A%A0%E8%B3%80%E3%82%8C%E3%82%93%E3%81%93%E3%82%93---2023-11-20_01.jpg",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: 石川県産の加賀れんこん",
+      "caption": ""
+    },
+    "local-ac72b9973ef50afb": {
+      "file_name": "Kiritanpo nabe z.JPG",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Kiritanpo_nabe_z.JPG",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: kiritanpo nabe, akita",
+      "caption": ""
+    },
+    "local-63aa689e57d08a72": {
+      "file_name": "Tango Barazushi.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Tango_Barazushi.jpg",
+      "reason": "写真説明と実画像を確認し、品目・地域または調理方法が一致: A section view of sliced Bara-zushi, a type of chirashi-zushi. Traditional local cuisine of the Tango district in northern Kyoto, Japan.",
+      "caption": ""
+    },
+    "local-6f7ce70071a9a442": {
+      "file_name": "Bateira - バッテラ - Flickr - Kanko.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Bateira_-_%E3%83%90%E3%83%83%E3%83%86%E3%83%A9_-_Flickr_-_Kanko.jpg",
+      "reason": "品目の説明・地域と実画像を照合: bateira / バッテラ",
+      "caption": ""
+    },
+    "local-ac76448ab4aa0e68": {
+      "file_name": "Akashiyaki Tamagoyaki.JPG",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Akashiyaki_Tamagoyaki.JPG",
+      "reason": "品目の説明・地域と実画像を照合: Akashiyaki",
+      "caption": ""
+    },
+    "local-5b42983161e583a8": {
+      "file_name": "Grilled fish with vinegar (2856243602).jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Grilled_fish_with_vinegar_(2856243602).jpg",
+      "reason": "品目の説明・地域と実画像を照合: At Hamayoshi, in Kurashiki, Japan. ママカリの酢漬け",
+      "caption": ""
+    },
+    "local-dd81ba3d0f392c26": {
+      "file_name": "ぼうぜの姿寿司.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:%E3%81%BC%E3%81%86%E3%81%9C%E3%81%AE%E5%A7%BF%E5%AF%BF%E5%8F%B8.jpg",
+      "reason": "品目の説明・地域と実画像を照合: 徳島の名物えぼだい（ぼうぜ）の姿寿司、カボス載せ",
+      "caption": ""
+    },
+    "local-202889b14deb6a3f": {
+      "file_name": "Pork miso somen by yomi955.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Pork_miso_somen_by_yomi955.jpg",
+      "reason": "品目の説明・地域と実画像を照合: Handa Soumen（noodle）, pork, miso, tenmenjyan, suger, sake, water, ginger, shiso 肉味噌そうめん",
+      "caption": "半田そうめんを使った肉味噌そうめん"
+    },
+    "local-73053ce794683aa9": {
+      "file_name": "Hakata zoni.jpeg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Hakata_zoni.jpeg",
+      "reason": "品目の説明・地域と実画像を照合: 博多雑煮 : Zoni soup in Hakata (Fukuoka)",
+      "caption": ""
+    },
+    "local-c1151c7faa380261": {
+      "file_name": "須古ずし1.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:%E9%A0%88%E5%8F%A4%E3%81%9A%E3%81%971.jpg",
+      "reason": "品目の説明・地域と実画像を照合: Suko-zushi, a local dish of Suko, Shiroishi-cho, Kishima-gun, Saga Prefecture",
+      "caption": ""
+    },
+    "local-be8abc00071acee2": {
+      "file_name": "Takana meshi set by woinary in Aso, Kumamoto.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Takana_meshi_set_by_woinary_in_Aso,_Kumamoto.jpg",
+      "reason": "品目の説明・地域と実画像を照合: We eat a lunch in restaurant \"Aso-ji\" (mean the road of Aso). 昼食は国道沿いの「あそ路」でたかなめし定食をいただきました。 手前左がたかなめし。手前右は豚モツ煮。奥真ん中左寄りがだご汁。奥右はおからです。 Takana rice set / たかなめし定食",
+      "caption": "熊本県阿蘇市「あそ路」の定食。奥中央がだご汁。"
+    },
+    "local-f484084d913440cf": {
+      "file_name": "Yamaoyaji 01.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Yamaoyaji_01.jpg",
+      "reason": "品目の説明・地域と実画像を照合: Yamaoyaji (Japanese sweets)",
+      "caption": ""
+    },
+    "Q11258608": {
+      "file_name": "Rogers Centre Toronto July 2, 2026 202607021615 IMG 6116.jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/Category:Harbour (confectionery)",
+      "reason": "品目専用カテゴリまたは作品説明と実画像を照合: Hinatazaka46 7th Year Memorial Live「Welcome to HINATAZAKA ROCKESTRA」collaboration Harbour at Rogers Centre （July 2, 2026, PM04:15） This photo was taken with iPhone 12 Pro",
+      "caption": "ハーバーの限定コラボ商品（包装）"
+    },
+    "Q96473424": {
+      "file_name": "Edo Woodblock Print (3766966171).jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Edo_Woodblock_Print_(3766966171).jpg",
+      "reason": "品目専用カテゴリまたは作品説明と実画像を照合: This is a famous woodblock print.  Notice three important features:  Nihonbashi Bridge, the Palace and Mt. Fuji.",
+      "caption": "江戸木版画の作品"
+    },
+    "local-d461ef18e1056074": {
+      "file_name": "Sanma zushi.JPG",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:Sanma_zushi.JPG",
+      "reason": "品目・地域の説明と実画像を照合: Sanma-zushi at Kii Nagashima",
+      "caption": "三重県紀伊長島のさんま寿司"
+    },
+    "local-36711358a81c0f04": {
+      "file_name": "芋炊き(愛媛).jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:%E8%8A%8B%E7%82%8A%E3%81%8D(%E6%84%9B%E5%AA%9B).jpg",
+      "reason": "品目・地域の説明と実画像を照合: バイキング会場の季節メニューにて",
+      "caption": "愛媛県のいもたき"
+    },
+    "local-4951c985e093abae": {
+      "file_name": "伊予さつま汁定食 (2350296306).jpg",
+      "evidence_url": "https://commons.wikimedia.org/wiki/File:%E4%BC%8A%E4%BA%88%E3%81%95%E3%81%A4%E3%81%BE%E6%B1%81%E5%AE%9A%E9%A3%9F_(2350296306).jpg",
+      "reason": "品目・地域の説明と実画像を照合: 松山の店で食べた伊予さつま汁定食。さつま汁というのは、伊予国(愛媛県)の漁師料理だったかと思います。伊予なのに「さつま」なのは、さつまから伝わったものだかららしい。宮崎の冷や汁に似ている。左下は別注文した小魚の南蛮漬け。右上はエビとはぜの天ぷら。ボリューム的には今市だが、それなりにおいしかった。",
+      "caption": "愛媛県松山市の伊予さつま定食"
+    }
   }
 }

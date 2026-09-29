@@ -309,7 +309,7 @@ async function hydrateImage(o){
   }
   if(imageCatalog[qid]){
     const data=imageCatalog[qid];
-    renderImage(container,{url:safeUrl(data.url),originalUrl:safeUrl(data.original_url),license:data.license,licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),attribution:plainText(data.attribution),sourceUrl:safeUrl(data.source_url),caption:data.caption},o);
+    renderImage(container,{url:registeredPhotoUrl(data.url),originalUrl:registeredPhotoUrl(data.original_url),license:data.license,licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),attribution:plainText(data.attribution),sourceUrl:safeUrl(data.source_url),caption:data.caption,sourceName:plainText(data.source_name)},o);
     return;
   }
   if(!/^Q\d+$/.test(qid||'')||blockedImageFallback.has(qid)){
@@ -335,13 +335,19 @@ async function hydrateImage(o){
     imageFailure(container,o,'写真を取得できませんでした。');
   }
 }
+function registeredPhotoUrl(value){
+  if(typeof value==='string'&&/^\/photos\/maff\/local-[a-f0-9]{16}-[a-f0-9]{16}\.(jpg|png)$/.test(value))return new URL(value,location.origin).href;
+  return safeUrl(value);
+}
 function renderImage(container,result,o){
   const source=result.sourceUrl||commonsFilePage(result.url);
+  const sourceName=result.sourceName||'Commons';
+  const sourceLabel=sourceName==='Commons'?'Wikimedia Commons の画像出典':`${sourceName} の画像出典`;
   const license=result.licenseUrl?`<a href="${esc(result.licenseUrl)}" target="_blank" rel="noopener noreferrer">${esc(result.license)}<span aria-hidden="true">↗</span></a>`:esc(result.license);
   const creator=[result.artist,result.credit,result.attribution].filter((value,index,all)=>value&&all.indexOf(value)===index).join(' · ');
   const name=o.label_ja||o.label_en||'特産物';
   const caption=result.caption||`${name}の画像`;
-  container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(caption)}を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(caption)}"></button>${result.caption?`<p class="image-license">${esc(result.caption)}</p>`:''}<p class="image-license">${creator?`${esc(creator)} · `:''}${license}${source?` · <a href="${esc(source)}" target="_blank" rel="noopener noreferrer" aria-label="Wikimedia Commons の画像出典">Commons<span aria-hidden="true">↗</span></a>`:''}</p>`;
+  container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(caption)}を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(caption)}"></button>${result.caption?`<p class="image-license">${esc(result.caption)}</p>`:''}<p class="image-license">${creator?`${esc(creator)} · `:''}${license}${source?` · <a href="${esc(source)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(sourceLabel)}">${esc(sourceName)}<span aria-hidden="true">↗</span></a>`:''}</p>`;
   const img=container.querySelector('img');
   img.addEventListener('error',()=>{
     if(selectedItem!==o)return;
@@ -359,7 +365,7 @@ function imageFailure(container,o,message){
 async function loadImageCatalog(){
   if(imageCatalogLoad)return imageCatalogLoad;
   imageCatalogLoad=(async()=>{
-    const data=await fetchJSONWithRetry('/images.json?v=202609297',10000);
+    const data=await fetchJSONWithRetry('/images.json?v=2026092910',10000);
     if(!data.photos||typeof data.photos!=='object'||Array.isArray(data.photos)||!Array.isArray(data.blocked_fallback))throw new Error('Invalid image catalog');
     imageCatalog=data.photos;
     blockedImageFallback=new Set(data.blocked_fallback);

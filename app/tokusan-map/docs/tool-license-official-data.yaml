@@ -10,7 +10,8 @@ pricing_url: null
 restrictions:
   - Link each item to its actual official source and identify the publisher.
   - Mark edited descriptions as edited; do not imply government endorsement.
-  - Do not reuse photographs, recipes attributed to third parties, logos, or GI marks.
+  - This metadata review does not authorize photographs, third-party recipes, logos, or GI marks.
+  - Explicitly permitted recipe ZIP photos require the separate tool-license-maff-photos.yaml review.
   - Forestry text follows https://www.rinya.maff.go.jp/tohoku/use/link.html
   - METI text follows https://www.meti.go.jp/main/rules.html
 evidence_retrieved: 2026-09-29

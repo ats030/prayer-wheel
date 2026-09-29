@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Audit photo coverage and publish verified Commons images for catalog IDs.
 
-Candidates come from existing Wikidata claims and exact Wikipedia article titles.
-No fuzzy search, generic ingredient substitutes, or made-up Wikidata IDs are used.
+Candidates come from Wikidata claims, exact Wikipedia titles, and reviewed files.
+Search results are never published without an explicit per-product review.
 API responses are cached outside the repository for reproducible audits.
 """
 import argparse
@@ -117,7 +117,7 @@ def article_matches(title, page, review):
 
 
 def candidate_rejection(item_id, filename, method, titles, pages, review):
-    if item_id in review.get('excluded_items', {}):
+    if item_id in review.get('excluded_items', {}) and method != 'reviewed_product':
         return 'unconfirmed_product_variant'
     if filename.replace('_', ' ') in review.get('excluded_files', {}):
         return 'unrelated_photo'
@@ -127,6 +127,26 @@ def candidate_rejection(item_id, filename, method, titles, pages, review):
         if article_entities and item_id not in article_entities:
             return 'article_entity_mismatch'
     return ''
+
+
+def reviewed_candidates(review, catalog_ids):
+    """Only explicit, evidenced approvals can promote discovered candidate files."""
+    result = {}
+    for item_id, entry in review.get('approved_photos', {}).items():
+        if item_id not in catalog_ids:
+            raise ValueError(f'Unknown catalog ID in photo review: {item_id}')
+        filename = entry.get('file_name', '')
+        evidence = entry.get('evidence_url', '')
+        url = urlparse(evidence)
+        if (not filename or not entry.get('reason', '').strip()
+                or url.scheme != 'https'
+                or url.hostname not in {'commons.wikimedia.org', 'ja.wikipedia.org'}
+                or not url.path.startswith('/wiki/')):
+            raise ValueError(f'Incomplete product photo review: {item_id}')
+        if filename.replace('_', ' ') in review.get('excluded_files', {}):
+            raise ValueError(f'Excluded file cannot be approved: {item_id}')
+        result[item_id] = [(filename, 'reviewed_product', evidence)]
+    return result
 
 
 def category_file(api, category):
@@ -142,6 +162,48 @@ def category_file(api, category):
         if got > score:
             best, score = name, got
     return best
+
+
+
+def approved_maff_photos(manifest, official, frontend):
+    """Validate the individually permitted, unchanged local ZIP-photo records."""
+    catalog = {item['id']: item for item in official}
+    permission = 'ZIPファイルをダウンロードできる画像は許可なく使用することができます。'
+    result = {}
+    for item_id, photo in manifest.get('photos', {}).items():
+        item = catalog.get(item_id, {})
+        zip_url = urlparse(photo.get('zip_url', ''))
+        relative = photo.get('url', '')
+        digest = photo.get('image_sha256', '')
+        if (item.get('source_kind') != 'cuisine'
+                or photo.get('source_url') != item.get('source_url')
+                or photo.get('evidence_url') != item.get('source_url')
+                or photo.get('label') != item.get('label')
+                or photo.get('prefecture') != item.get('prefecture')
+                or photo.get('permission') != permission
+                or photo.get('license_url') != 'https://www.digital.go.jp/resources/open_data/public_data_license_v1.0'
+                or photo.get('source_name') != '農林水産省'
+                or photo.get('license') != 'PDL 1.0（ZIP配布写真）'
+                or photo.get('match_method') != 'maff_zip'
+                or not photo.get('credit') or not photo.get('checked_at')
+                or zip_url.scheme != 'https' or zip_url.hostname != 'www.maff.go.jp'
+                or not zip_url.path.startswith('/j/keikaku/syokubunka/k_ryouri/img/')
+                or not zip_url.path.endswith('.zip')
+                or not re.fullmatch(r'/photos/maff/' + re.escape(item_id) + r'-[a-f0-9]{16}\.(?:jpg|png)', relative)
+                or photo.get('original_url') != relative
+                or any(not re.fullmatch('[a-f0-9]{64}', photo.get(field, ''))
+                       for field in ['image_sha256', 'page_sha256', 'zip_sha256'])
+                or digest[:16] not in relative):
+            raise ValueError(f'Invalid individual MAFF photo permission: {item_id}')
+        content = (frontend / relative.lstrip('/')).read_bytes()
+        if hashlib.sha256(content).hexdigest() != digest:
+            raise ValueError(f'MAFF photo content changed: {item_id}')
+        if not (content.startswith(b'\xff\xd8\xff') or content.startswith(b'\x89PNG\r\n\x1a\n')):
+            raise ValueError(f'MAFF file is not a supported image: {item_id}')
+        result[item_id] = {key: photo[key] for key in [
+            'url', 'original_url', 'license', 'license_url', 'artist', 'credit', 'attribution',
+            'source_name', 'source_url', 'evidence_url', 'file_name', 'match_method', 'checked_at', 'caption']}
+    return result
 
 
 def main():
@@ -190,8 +252,15 @@ def main():
             if filename:
                 choices.append((filename, 'exact_article', 'https://ja.wikipedia.org/wiki/' + quote(page['title'].replace(' ', '_'))))
         candidates[item_id] = choices
+    approved = reviewed_candidates(review, titles)
+    original_names = [name for choices in candidates.values() for name, _, _ in choices]
+    for item_id, choices in approved.items():
+        candidates[item_id] = choices + candidates[item_id]
     infos = {}
-    for batch in batches(name for choices in candidates.values() for name, _, _ in choices):
+    # Keep the original batches reproducible; inspect reviewed additions separately.
+    file_batches = list(batches(original_names)) + list(batches(
+        name for choices in approved.values() for name, _, _ in choices if name not in original_names))
+    for batch in file_batches:
         data = api.query('commons.wikimedia.org', action='query', titles='|'.join('File:' + name for name in batch),
                          prop='imageinfo', iiprop='url|extmetadata|mime', iiurlwidth=800)
         for page in data.get('query', {}).get('pages', {}).values():
@@ -210,7 +279,7 @@ def main():
             if rejected or not old_photo:
                 blocked_fallback.append(item_id)
         # The curated product article is more specific than a manufacturer's P18.
-        for filename, method, evidence in sorted(choices, key=lambda c: c[1] != 'exact_article'):
+        for filename, method, evidence in sorted(choices, key=lambda c: {'reviewed_product': 0, 'exact_article': 1}.get(c[1], 2)):
             rejected = candidate_rejection(item_id, filename, method, titles, pages, review)
             if method == 'exact_article' and not any(
                     article_matches(t, pages.get(t, {}), review)
@@ -223,13 +292,21 @@ def main():
             if photo:
                 photos[item_id] = dict(photo, file_name=filename, match_method=method,
                                        evidence_url=evidence, checked_at=review['reviewed_at'],
-                                       caption=review.get('captions', {}).get(item_id, ''))
+                                       caption=review.get('approved_photos', {}).get(item_id, {}).get('caption', '')
+                                       if method == 'reviewed_product' else review.get('captions', {}).get(item_id, ''))
                 break
         audit[item_id] = 'available' if item_id in photos else reason
         if item_id.startswith('Q') and choices and item_id not in photos and item_id not in blocked_fallback:
             blocked_fallback.append(item_id)
+    maff_path = ROOT / 'data/maff_images.json'
+    maff = approved_maff_photos(json.loads(maff_path.read_text()), official, ROOT / 'frontend') if maff_path.exists() else {}
+    for item_id, photo in maff.items():
+        if item_id not in photos:
+            photos[item_id] = photo
+            audit[item_id] = 'available'
     stats = {'total': len(titles), 'old_resolvable': baseline, 'registered': len(photos),
              'registered_official': sum(key.startswith('local-') for key in photos),
+             'registered_maff': sum(photo.get('match_method') == 'maff_zip' for photo in photos.values()),
              'reasons': dict(collections.Counter(audit.values()))}
     output = {'version': review['reviewed_at'].replace('-', ''), 'stats': stats, 'photos': photos, 'audit': audit,
               'blocked_fallback': blocked_fallback}
