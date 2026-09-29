@@ -38,6 +38,11 @@ input,select{width:100%;min-width:0;height:2.5rem;border:1px solid var(--color-r
 .map-count{position:absolute;z-index:450;top:var(--space-md);right:var(--space-md);border:1px solid var(--color-rule);border-radius:var(--radius);background:var(--color-paper);padding:var(--space-xs) var(--space-sm);box-shadow:0 2px 12px var(--color-shadow);font-size:.75rem;font-weight:700}
 .tokusan-marker{display:grid;width:1.4rem;height:1.4rem;place-items:center;border:2px solid var(--color-paper);border-radius:50%;background:var(--color-cat-none);box-shadow:0 1px 5px var(--color-marker-shadow)}
 .tokusan-marker:after{width:.32rem;height:.32rem;border-radius:50%;background:var(--color-paper);content:""}
+.tokusan-marker-group{background:var(--color-ink-2)!important;color:var(--color-paper);font-size:.65rem;font-weight:700;line-height:1}
+.tokusan-marker-group:after{display:none}
+.marker-choices{display:grid;max-height:14rem;overflow-y:auto;gap:.25rem;min-width:10rem}
+.marker-choices button{border:1px solid var(--color-rule);border-radius:var(--radius);padding:.5rem .65rem;background:var(--color-paper);color:var(--color-ink);font:inherit;text-align:left;cursor:pointer}
+.marker-choices button:hover{background:var(--color-paper-2)}
 .tokusan-marker.selected{background:var(--color-accent);transform:scale(1.18)}
 .tokusan-marker.cat-sa{background:var(--color-cat-sa)}
 .tokusan-marker.cat-te{background:var(--color-cat-te)}

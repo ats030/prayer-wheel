@@ -115,29 +115,46 @@ function renderList(){
   list.querySelectorAll('button').forEach(card=>card.addEventListener('click',()=>selectItem(card.dataset.key,'list')));
 }
 
-function markerIcon(o,selected){
-  const className=`tokusan-marker cat-${categoryCode(o||null)}${selected?' selected':''}`;
-  return L.divIcon({className:'',html:`<div class="${className}"></div>`,iconSize:[22,22],iconAnchor:[11,11]});
+function markerIcon(o,selected,count=1){
+  const className=`tokusan-marker cat-${categoryCode(o||null)}${count>1?' tokusan-marker-group':''}${selected?' selected':''}`;
+  return L.divIcon({className:'',html:`<div class="${className}">${count>1?count:''}</div>`,iconSize:[22,22],iconAnchor:[11,11]});
 }
 
 function renderMarkers(){
-  for(const [key,marker] of markers)map.removeLayer(marker);
+  for(const marker of new Set(markers.values()))map.removeLayer(marker);
   markers.clear();
   markerItems.clear();
   let locatedCount=0;
   const bounds=[];
+  const groups=new Map();
   visible.forEach((o,i)=>{
     const key=itemKey(o,i);
     if(!hasCoordinates(o))return;
-    const marker=L.marker([o.latitude,o.longitude],{icon:markerIcon(o,key===selectedKey),title:o.label_ja||o.label_en||o.qid});
-    marker.bindTooltip(`${o.label_ja||o.label_en||o.qid}${o.prefecture?'（'+o.prefecture+(o.prefecture_level?'・都道府県単位':'')+'）':''}`,{direction:'top',offset:[0,-8]});
-    marker.on('click',()=>selectItem(key,'marker'));
-    marker.addTo(map);
-    markers.set(key,marker);
+    const position=o.prefecture_level?`pref:${o.prefecture}`:`${o.latitude},${o.longitude}`;
+    if(!groups.has(position))groups.set(position,[]);
+    groups.get(position).push({key,item:o});
     markerItems.set(key,o);
-    bounds.push([o.latitude,o.longitude]);
     locatedCount+=1;
   });
+  for(const group of groups.values()){
+    const {key,item:o}=group[0],count=group.length;
+    const label=count>1?`${o.prefecture||o.place} ${count}件`:o.label_ja||o.label_en||o.qid;
+    const marker=L.marker([o.latitude,o.longitude],{icon:markerIcon(o,group.some(entry=>entry.key===selectedKey),count),title:label,zIndexOffset:count>1?1000:0});
+    marker.groupCount=count;
+    marker.bindTooltip(`${label}${o.prefecture_level?'（都道府県単位）':''}`,{direction:'top',offset:[0,-8]});
+    if(count===1)marker.on('click',()=>selectItem(key,'marker'));
+    else{
+      const choices=document.createElement('div');choices.className='marker-choices';
+      for(const entry of group){
+        const button=document.createElement('button');button.type='button';button.textContent=entry.item.label_ja;button.dataset.key=entry.key;
+        button.addEventListener('click',()=>{map.closePopup();selectItem(entry.key,'marker')});choices.appendChild(button);
+      }
+      marker.bindPopup(choices,{maxWidth:280});
+    }
+    marker.addTo(map);
+    for(const entry of group)markers.set(entry.key,marker);
+    bounds.push([o.latitude,o.longitude]);
+  }
   document.querySelector('#map-count').textContent=`${visible.length} 件中 ${locatedCount} 件の位置を表示`;
   if(bounds.length===1)map.setView(bounds[0],9);
   else if(bounds.length>1)map.fitBounds(L.latLngBounds(bounds).pad(0.2));
@@ -152,10 +169,10 @@ function selectItem(key,origin){
   for(const button of document.querySelectorAll('.tokusan-card'))button.setAttribute('aria-current',button.dataset.key===key?'true':'false');
   if(prevItem&&prevKey!==key){
     const prevMarker=markers.get(prevKey);
-    if(prevMarker)prevMarker.setIcon(markerIcon(prevItem,false));
+    if(prevMarker)prevMarker.setIcon(markerIcon(prevItem,false,prevMarker.groupCount));
   }
   const marker=markers.get(key);
-  if(marker)marker.setIcon(markerIcon(item,true));
+  if(marker)marker.setIcon(markerIcon(item,true,marker.groupCount));
   selectedItem=item;
   selectedOrigin=origin;
   showDetail(item,origin);
@@ -291,7 +308,7 @@ function closeDetail(){
   const key=selectedKey,origin=selectedOrigin;
   if(selectedKey&&selectedItem){
     const m=markers.get(selectedKey);
-    if(m)m.setIcon(markerIcon(selectedItem,false));
+    if(m)m.setIcon(markerIcon(selectedItem,false,m.groupCount));
   }
   selectedItem=null;
   selectedKey=null;
