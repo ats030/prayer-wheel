@@ -17,6 +17,7 @@ class CategoryTest(unittest.TestCase):
         self.assertEqual(category(["城"], "前橋城"), ["城跡"])
         self.assertEqual(category(["神社"], "熊野神社 (船橋市)"), ["社寺・宗教遺跡"])
         self.assertEqual(category([], "栗橋宿"), ["その他"])
+        self.assertEqual(category([], "橋野高炉跡"), ["遺跡"])
 
     def test_disambiguated_bridge_name_is_bridge(self):
         self.assertEqual(category([], "五月橋 (名張川)"), ["橋"])
