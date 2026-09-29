@@ -10,6 +10,8 @@ from pathlib import Path
 
 import requests
 
+from gengo import gengo_spans
+
 API = "https://ja.wikipedia.org/w/api.php"
 HEADERS = {"User-Agent": "shiseki-map/1.0 (ats030@gmail.com)"}
 CACHE_FILE = Path(__file__).resolve().parent.parent / "data" / "wikipedia_cache" / "infobox_fields.json"
@@ -19,7 +21,7 @@ BATCH = 50
 # build_y は日本の城郭概要表、建設は橋のインフォボックスの欄名。
 FIELDS = ("創建", "創建年", "建立", "築城年", "build_y", "築造時期", "建設", "竣工", "完成", "開通", "時代")
 REJECT_WORDS = ("伝", "以前", "以降", "?", "？", "不詳", "不明", "諸説", "説", "推定", "再建", "再興",
-                "移転", "中興", "遷座", "再築", "改築", "頃", "ごろ", "年代",
+                "移転", "中興", "遷座", "再築", "改築", "頃", "ごろ", "年代", "未詳",
                 "戦国",  # 戦国時代は室町時代と安土桃山時代にまたがる
                 "初代")  # 架け替えられた橋では現存する橋の年と異なる
 ERA_NAMES = ("飛鳥時代", "奈良時代", "平安時代", "鎌倉時代", "南北朝時代", "室町時代", "安土桃山時代",
@@ -53,9 +55,18 @@ def infobox_fields(wikitext):
     return fields
 
 
+def gengo_year_era(gengo, year, era_of_year):
+    """元号から求めた年の時代。改元の年は元号そのものでどちらの時代か決める。"""
+    for name, era in GENGO_BOUNDARIES.get(year, ()):
+        if name == gengo:
+            return era
+    return era_of_year(year)
+
+
 def value_era(value, era_of_year):
     """欄の値から時代を1つに決められるときだけ返す。"""
-    if any(word in value for word in REJECT_WORDS):
+    # 「永享年間か」のような推量も採用しない。
+    if any(word in value for word in REJECT_WORDS) or re.search(r"年間?\s*か(?=$|[、。）)\s])", value):
         return None
     eras = set()
     for name in ERA_NAMES:
@@ -67,6 +78,10 @@ def value_era(value, era_of_year):
             eras.update(named if len(named) == 1 else {None})
         else:
             eras.add(era_of_year(year))
+    # 西暦のない「宝永2年」「天正年間」も元号の表で年に直す。年数が元号の期間を超える値は採用しない。
+    for gengo, first, last in gengo_spans(value):
+        for year in {first, last}:
+            eras.add(gengo_year_era(gengo, year, era_of_year) if year else None)
     for century in re.findall(r"(?<!\d)(\d{1,2})世紀", value):
         first = (int(century) - 1) * 100 + 1
         eras.add(era_of_year(first))

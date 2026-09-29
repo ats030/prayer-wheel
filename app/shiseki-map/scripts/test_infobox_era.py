@@ -27,7 +27,6 @@ class InfoboxEraTest(unittest.TestCase):
         self.assertIsNone(era("永正3年（1506年）?"))
         self.assertIsNone(era("天正12年(1584年)以前"))
         self.assertIsNone(era("不詳"))
-        self.assertIsNone(era("天平年間"))
         self.assertIsNone(era("戦国時代末期"))
 
     def test_gengo_decides_transition_year(self):
@@ -59,6 +58,27 @@ class InfoboxEraTest(unittest.TestCase):
         fields = infobox_fields("{{橋\n|建設 = [[三菱重工業]]\n|竣工 = 1998年\n}}")
         self.assertEqual(fields["建設"], "三菱重工業")
         self.assertEqual(fields_era(fields, era_of_year), ("平成時代", "竣工"))
+
+    def test_gengo_only_values(self):
+        self.assertEqual(era("宝永2年"), "江戸時代")
+        self.assertEqual(era("天平九年"), "奈良時代")
+        self.assertEqual(era("寛永元（1624）年"), "江戸時代")
+        self.assertEqual(era("弘仁年間（810–824）"), "平安時代")
+        self.assertEqual(era("天正年間"), "安土桃山時代")
+        self.assertEqual(era("正平3年"), "室町時代")
+        self.assertEqual(era("慶応4年"), "江戸時代")
+        self.assertEqual(era("明治元年"), "明治時代")
+
+    def test_gengo_values_spanning_eras_or_out_of_range_are_rejected(self):
+        self.assertIsNone(era("慶長年間"))
+        self.assertIsNone(era("天平二十三年"))
+        self.assertIsNone(era("明応4年（1945年）"))
+        self.assertIsNone(era("元亀・天正年間"))
+        self.assertIsNone(era("永享年間か"))
+        self.assertEqual(era("永正年間（1504年から1521年）"), "室町時代")
+        self.assertEqual(era("1900年着工、3年かけて完成"), "明治時代")
+        self.assertIsNone(era("白雉30年"))
+        self.assertIsNone(era("未詳（開山は応永年間）"))
 
 
 if __name__ == "__main__":
