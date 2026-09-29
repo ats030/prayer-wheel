@@ -145,70 +145,78 @@ function renderList(){
   list.querySelectorAll('button').forEach(card=>card.addEventListener('click',()=>selectItem(card.dataset.key,'list')));
 }
 
-function markerIcon(o,selected,count=1){
-  const className=`tokusan-marker cat-${categoryCode(o||null)}${count>1?' tokusan-marker-group':''}${selected?' selected':''}`;
-  return L.divIcon({className:'',html:`<div class="${className}">${count>1?count:''}</div>`,iconSize:[22,22],iconAnchor:[11,11]});
+function markerIcon(o,selected,offset={x:0,y:0}){
+  const className=`tokusan-marker cat-${categoryCode(o||null)}${selected?' selected':''}`;
+  const label=o.label_ja||o.label_en||o.qid;
+  return L.divIcon({className:'tokusan-marker-anchor',html:`<div class="marker-offset" style="transform:translate(${offset.x}px,${offset.y}px)"><button type="button" class="${className}" aria-label="${esc(label)}"></button></div>`,iconSize:[22,22],iconAnchor:[11,11]});
+}
+
+function markerOffset(index){
+  if(index===0)return {x:0,y:0};
+  let ring=1,remaining=index-1;
+  while(remaining>=6*ring){remaining-=6*ring;ring++}
+  const angle=2*Math.PI*remaining/(6*ring),radius=32*ring;
+  return {x:Math.round(Math.cos(angle)*radius),y:Math.round(Math.sin(angle)*radius)};
 }
 
 function renderMarkers(){
-  for(const marker of new Set(markers.values()))map.removeLayer(marker);
+  for(const marker of markers.values())map.removeLayer(marker);
   markers.clear();
   markerItems.clear();
-  let locatedCount=0;
   const bounds=[];
-  const groups=new Map();
   visible.forEach((o,i)=>{
-    const key=itemKey(o,i);
     if(!hasCoordinates(o))return;
-    const position=o.prefecture_level?`pref:${o.prefecture}`:`${o.latitude},${o.longitude}`;
-    if(!groups.has(position))groups.set(position,[]);
-    groups.get(position).push({key,item:o});
-    markerItems.set(key,o);
-    locatedCount+=1;
-  });
-  for(const group of groups.values()){
-    const {key,item:o}=group[0],count=group.length;
-    const regions=groupByRegion(group);
-    const label=count>1?`${o.prefecture||o.place} ${regions.length}地域・${count}件`:o.label_ja||o.label_en||o.qid;
-    const marker=L.marker([o.latitude,o.longitude],{icon:markerIcon(o,group.some(entry=>entry.key===selectedKey),count),title:label,zIndexOffset:count>1?1000:0});
-    marker.groupCount=count;
-    marker.bindTooltip(`${label}${o.prefecture_level?'（都道府県単位）':''}`,{direction:'top',offset:[0,-8]});
-    if(count===1)marker.on('click',()=>selectItem(key,'marker'));
-    else{
-      const choices=document.createElement('div');choices.className='marker-choices';
-      const heading=document.createElement('p');heading.className='marker-choices-heading';
-      const content=document.createElement('div');content.className='marker-choices-content';
-      choices.append(heading,content);
-      const showRegions=()=>{
-        heading.textContent=`${o.prefecture||o.place} — 地域を選択`;
-        content.replaceChildren();choices.scrollTop=0;
-        for(const [region,entries] of regions){
-          const button=document.createElement('button');button.type='button';button.className='marker-region';
-          button.textContent=`${region}（${entries.length}件）`;
-          button.addEventListener('click',()=>{
-            heading.textContent=region;content.replaceChildren();choices.scrollTop=0;
-            const back=document.createElement('button');back.type='button';back.className='marker-region-back';back.textContent='← 地域一覧に戻る';
-            back.addEventListener('click',()=>{showRegions();content.querySelector('button')?.focus()});content.append(back);
-            for(const entry of entries){
-              const itemButton=document.createElement('button');itemButton.type='button';itemButton.textContent=entry.item.label_ja;itemButton.dataset.key=entry.key;
-              itemButton.addEventListener('click',()=>{map.closePopup();selectItem(entry.key,'marker')});content.append(itemButton);
-            }
-            content.querySelector('[data-key]')?.focus();
-          });content.append(button);
-        }
-      };
-      showRegions();
-      marker.bindPopup(choices,{maxWidth:280});
-      marker.on('popupopen',showRegions);
-    }
+    const key=itemKey(o,i),offset={x:0,y:0};
+    const label=o.label_ja||o.label_en||o.qid;
+    const marker=L.marker([o.latitude,o.longitude],{icon:markerIcon(o,key===selectedKey,offset),title:label,keyboard:false});
+    marker.displayOffset=offset;
+    marker.bindTooltip(`${label}${o.prefecture_level?'（都道府県代表位置）':''}`,{direction:'top',offset:[offset.x,offset.y-8]});
+    marker.on('click',()=>selectItem(key,'marker'));
     marker.addTo(map);
-    for(const entry of group)markers.set(entry.key,marker);
+    markers.set(key,marker);
+    markerItems.set(key,o);
     bounds.push([o.latitude,o.longitude]);
-  }
-  document.querySelector('#map-count').textContent=`${visible.length} 件中 ${locatedCount} 件の位置を表示`;
-  if(bounds.length===1)map.setView(bounds[0],9);
-  else if(bounds.length>1)map.fitBounds(L.latLngBounds(bounds).pad(0.2));
+  });
+  if(bounds.length===1)map.setView(bounds[0],9,{animate:false});
+  else if(bounds.length>1)map.fitBounds(L.latLngBounds(bounds).pad(0.2),{animate:false});
+  separateMarkers();
 }
+
+// Separate nearby screen positions as well as identical source coordinates.
+// Only the icon is moved; every Leaflet marker keeps its original lat/lng.
+function separateMarkers(){
+  const occupied=new Map(),spacing=28;
+  let displaced=false;
+  const cell=(x,y)=>`${Math.floor(x/spacing)},${Math.floor(y/spacing)}`;
+  const free=(x,y)=>{
+    const cx=Math.floor(x/spacing),cy=Math.floor(y/spacing);
+    for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){
+      for(const p of occupied.get(`${cx+dx},${cy+dy}`)||[]){
+        if(Math.hypot(p.x-x,p.y-y)<spacing)return false;
+      }
+    }
+    return true;
+  };
+  for(const [key,marker] of markers){
+    const o=markerItems.get(key),base=map.latLngToLayerPoint(marker.getLatLng());
+    let index=0,offset=markerOffset(index);
+    while(!free(base.x+offset.x,base.y+offset.y))offset=markerOffset(++index);
+    const point={x:base.x+offset.x,y:base.y+offset.y},bucket=cell(point.x,point.y);
+    if(!occupied.has(bucket))occupied.set(bucket,[]);
+    occupied.get(bucket).push(point);
+    displaced ||= index>0;
+    marker.displayOffset=offset;
+    marker.setIcon(markerIcon(o,key===selectedKey,offset));
+    marker.getTooltip().options.offset=L.point(offset.x,offset.y-8);
+    marker.closeTooltip();
+  }
+  const count=document.querySelector('#map-count');
+  count.textContent=`${visible.length} 件中 ${markers.size} 件の位置を表示`;
+  if(displaced){
+    const note=document.createElement('span');note.className='map-position-note';note.textContent='重なる点は表示上ずらしています';count.append(note);
+  }
+}
+map.on('zoomend',separateMarkers);
 
 function selectItem(key,origin){
   const prevKey=selectedKey;
@@ -219,10 +227,10 @@ function selectItem(key,origin){
   for(const button of document.querySelectorAll('.tokusan-card'))button.setAttribute('aria-current',button.dataset.key===key?'true':'false');
   if(prevItem&&prevKey!==key){
     const prevMarker=markers.get(prevKey);
-    if(prevMarker)prevMarker.setIcon(markerIcon(prevItem,false,prevMarker.groupCount));
+    if(prevMarker)prevMarker.setIcon(markerIcon(prevItem,false,prevMarker.displayOffset));
   }
   const marker=markers.get(key);
-  if(marker)marker.setIcon(markerIcon(item,true,marker.groupCount));
+  if(marker)marker.setIcon(markerIcon(item,true,marker.displayOffset));
   selectedItem=item;
   selectedOrigin=origin;
   showDetail(item,origin);
@@ -359,7 +367,7 @@ function closeDetail(){
   const key=selectedKey,origin=selectedOrigin;
   if(selectedKey&&selectedItem){
     const m=markers.get(selectedKey);
-    if(m)m.setIcon(markerIcon(selectedItem,false,m.groupCount));
+    if(m)m.setIcon(markerIcon(selectedItem,false,m.displayOffset));
   }
   selectedItem=null;
   selectedKey=null;
