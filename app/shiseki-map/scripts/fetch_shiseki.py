@@ -92,10 +92,44 @@ SELECT DISTINCT ?item ?itemLabel ?itemDescription ?coord ?article ?eraLabel WHER
 }
 """ % REGISTERED_QID
 
+# 産業遺産。認定制度(選奨土木遺産・近代化産業遺産・機械遺産)と産業遺産型・その構成資産に加え、
+# 文化財指定(P1435)のある灯台・工場・ダム・発電所・鉱山を含める。稼働中の現代施設を避けるため
+# 種類だけでの取得はしない。重いクエリを避けるためパターンごとに分けてキャッシュする。
+INDUSTRIAL_TYPE = "産業遺産"
+INDUSTRIAL_PATTERNS = {
+    "certified": "?item wdt:P1435 ?cert. VALUES ?cert { wd:Q11423672 wd:Q11638384 wd:Q6804492 }",
+    "heritage": "?item wdt:P31/wdt:P279* wd:Q1569871.",
+    "heritage_part": "?item wdt:P361 ?whole. ?whole wdt:P31/wdt:P279* wd:Q1569871.",
+    "designated_facility": "VALUES ?kind { wd:Q39715 wd:Q83405 wd:Q12323 wd:Q159719 wd:Q820477 } "
+                           "?item wdt:P31/wdt:P279* ?kind; wdt:P1435 ?any.",
+}
+# 産業遺産の世界遺産に含まれるが産業施設ではない構成資産。産業遺産として扱わない。
+NON_INDUSTRIAL_PARTS = {
+    "Q1064830": "萩城",
+    "Q24563718": "萩城下町",
+    "Q2326743": "松下村塾",
+    "Q63465": "グラバー園",
+}
+INDUSTRIAL_QUERY = r"""
+SELECT DISTINCT ?item ?itemLabel ?itemDescription ?coord ?article ?eraLabel WHERE {
+  %s
+  ?item wdt:P17 wd:Q17; wdt:P625 ?coord.
+  ?article schema:about ?item; schema:isPartOf <https://ja.wikipedia.org/>.
+  OPTIONAL { ?item wdt:P2348 ?era. }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
+}
+"""
+
 # 地図に出さないQIDと理由。検証済み補足レコードと訪問点が重なるものに限る。
 EXCLUDED_QIDS = {
     # 宿場町全体の項目だが座標は日野宿脇本陣跡(tokyo:130001:0000000136)と約24mで同一訪問点
     "Q11510578": "日野宿",
+    # 複数県にまたがる世界遺産全体の項目で、座標は構成資産(恵美須ヶ鼻造船所跡)と約60mで同一訪問点
+    "Q7751872": "明治日本の産業革命遺産 製鉄・鉄鋼、造船、石炭産業",
+    # 世界遺産全体の項目で、座標は構成資産の富岡製糸場と約46mで同一訪問点
+    "Q7769551": "富岡製糸場と絹産業遺産群",
+    # 世界遺産全体の項目で、座標は佐渡鉱山と約215mで同一訪問点
+    "Q127378385": "佐渡島の金山",
 }
 
 
@@ -143,7 +177,7 @@ def nearest_prefecture(lon, lat, features):
 # 駅・橋・城館・古墳の名称に含まれる「寺」「神社」「城」「橋」は地名由来の固有名なので
 # (岩水寺駅・久宝寺橋・聖寿寺館・前橋二子山古墳)、これらはtypeだけで判定する。
 # ただし名称の末尾そのもの(○○橋の「橋」)は施設の種類を表すので名称でも判定する。
-PROPER_NAME_SUFFIXES = ("駅", "橋", "館", "古墳", "古墳群")
+PROPER_NAME_SUFFIXES = ("駅", "橋", "館", "古墳", "古墳群", "窯跡")
 PROPER_NAME_NEEDLES = ("寺", "神社", "城", "橋")
 # 「橋」は前橋城・船橋東照宮・栗橋宿のように地名として名称の途中に現れやすいので、
 # 曖昧さ回避の括弧を除いた名称が橋そのものを指す場合だけ名称で判定する。
@@ -166,6 +200,8 @@ def category(types, label):
              ("古墳", "古墳"),
              ("城", "城跡"), ("館跡", "城跡"),
              ("寺", "社寺・宗教遺跡"), ("神社", "社寺・宗教遺跡"),
+             # 産業遺産は城下町などの構成資産を含むため、城跡・社寺の色を優先する。
+             ("産業遺産", "産業遺産"), ("高炉跡", "産業遺産"),
              ("建築", "歴史的建造物"), ("建造物", "歴史的建造物"), ("遺跡", "遺跡"), ("史跡", "史跡"),
              ("ruin", "遺跡"), ("archaeological", "遺跡"), ("castle", "城跡"),
              ("宿場", "史跡"), ("本陣", "史跡"), ("関所", "史跡"), ("一里塚", "史跡"),
@@ -309,10 +345,21 @@ def collect_registered():
     return query_cached("registered_" + REGISTERED_QID, REGISTERED_QUERY)
 
 
+def collect_industrial():
+    bindings = []
+    for key, pattern in INDUSTRIAL_PATTERNS.items():
+        rows = query_cached("industrial_" + key, INDUSTRIAL_QUERY % pattern)
+        print(f"using {len(rows)} rows for industrial {key}")
+        bindings.extend(rows)
+        time.sleep(0.5)
+    return bindings
+
+
 def main():
     designations = collect_designations()
     broad = collect_broad()
     registered = collect_registered()
+    industrial = collect_industrial()
     features = fetch_features()
 
     grouped = {}
@@ -344,6 +391,17 @@ def main():
         current["registered"] = True
         if "歴史的建造物" not in current["types"]:
             current["types"].append("歴史的建造物")
+        era = binding.get("eraLabel", {}).get("value", "")
+        if era and era not in current["eras"]:
+            current["eras"].append(era)
+
+    for binding in industrial:
+        qid = binding["item"]["value"].rsplit("/", 1)[-1]
+        if qid in NON_INDUSTRIAL_PARTS:
+            continue
+        current = grouped.setdefault(qid, {"binding": binding, "ranks": [], "types": [], "eras": []})
+        if INDUSTRIAL_TYPE not in current["types"]:
+            current["types"].append(INDUSTRIAL_TYPE)
         era = binding.get("eraLabel", {}).get("value", "")
         if era and era not in current["eras"]:
             current["eras"].append(era)

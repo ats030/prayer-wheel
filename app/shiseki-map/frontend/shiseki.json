@@ -1740,6 +1740,7 @@
     "description": "日本の三重県志摩市にある灯台",
     "title_ja": "大王埼灯台",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "昭和時代",
@@ -2025,6 +2026,7 @@
     "description": "三重県志摩市にある灯台",
     "title_ja": "安乗埼灯台",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "昭和時代",
@@ -5789,6 +5791,7 @@
     "description": "三重県鳥羽市にある灯台",
     "title_ja": "菅島灯台",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "明治時代",
@@ -7241,6 +7244,26 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11353186",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11353186"
+  },
+  {
+    "qid": "Q17212014",
+    "label_ja": "七条大橋",
+    "label_en": "",
+    "prefecture": "京都府",
+    "latitude": 34.9893,
+    "longitude": 135.7672,
+    "description": "京都市の橋",
+    "title_ja": "七条大橋",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q17212014",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q17212014"
   },
   {
     "qid": "Q11354048",
@@ -20261,6 +20284,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11635401"
   },
   {
+    "qid": "Q28691887",
+    "label_ja": "蹴上発電所",
+    "label_en": "",
+    "prefecture": "京都府",
+    "latitude": 35.010222,
+    "longitude": 135.788444,
+    "description": "",
+    "title_ja": "蹴上発電所",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q28691887",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q28691887"
+  },
+  {
     "qid": "Q11637305",
     "label_ja": "車折神社",
     "label_en": "",
@@ -21869,7 +21911,7 @@
     "description": "佐賀県佐賀市にある、佐賀藩が設立した蒸気船等の修理・造船施設",
     "title_ja": "三重津海軍所",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "江戸時代",
     "designation": "national",
@@ -23915,6 +23957,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q28683054"
   },
   {
+    "qid": "Q11668113",
+    "label_ja": "馬頭サイフォン",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.258194444,
+    "longitude": 129.958777777,
+    "description": "日本の佐賀県伊万里市にある灌漑施設",
+    "title_ja": "馬頭サイフォン",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11668113",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11668113"
+  },
+  {
     "qid": "Q11668746",
     "label_ja": "高伝寺",
     "label_en": "",
@@ -24084,6 +24145,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11278786",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11278786"
+  },
+  {
+    "qid": "Q11318285",
+    "label_ja": "チャータードビル",
+    "label_en": "",
+    "prefecture": "兵庫県",
+    "latitude": 34.68638889,
+    "longitude": 135.19277778,
+    "description": "兵庫県神戸市中央区海岸通にある歴史的建造物",
+    "title_ja": "チャータードビル",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11318285",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11318285"
   },
   {
     "qid": "Q11336594",
@@ -26318,6 +26398,7 @@
     "description": "兵庫県神戸市の和田岬から須磨海浜公園に移設された灯台",
     "title_ja": "和田岬灯台",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "明治時代",
@@ -26831,7 +26912,7 @@
     "description": "日本の銀山の鉱山遺跡",
     "title_ja": "多田銀銅山",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "平安時代中期",
     "designation": "national",
@@ -28799,6 +28880,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11479374"
   },
   {
+    "qid": "Q367282",
+    "label_ja": "布引五本松ダム",
+    "label_en": "",
+    "prefecture": "兵庫県",
+    "latitude": 34.71111111,
+    "longitude": 135.19027778,
+    "description": "兵庫県神戸市にある、日本最初の重力式コンクリートダム",
+    "title_ja": "布引五本松ダム",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q367282",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q367282"
+  },
+  {
     "qid": "Q17215442",
     "label_ja": "常光寺",
     "label_en": "",
@@ -30199,6 +30299,7 @@
     "description": "兵庫県丹波市山南町上滝地区の川代渓谷沿いにある発電所記念館",
     "title_ja": "旧上久下村営上滝発電所記念館",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "大正時代",
@@ -30264,6 +30365,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11511082",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11511082"
+  },
+  {
+    "qid": "Q20043942",
+    "label_ja": "旧波門崎燈籠堂",
+    "label_en": "",
+    "prefecture": "兵庫県",
+    "latitude": 34.64219444,
+    "longitude": 134.99008333,
+    "description": "兵庫県明石市の明石港にある旧灯台",
+    "title_ja": "旧波門崎燈籠堂",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "江戸時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q20043942",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q20043942"
   },
   {
     "qid": "Q11511903",
@@ -31767,6 +31887,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q17209374",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q17209374"
+  },
+  {
+    "qid": "Q5396696",
+    "label_ja": "江埼灯台",
+    "label_en": "",
+    "prefecture": "兵庫県",
+    "latitude": 34.60638889,
+    "longitude": 134.99333333,
+    "description": "兵庫県淡路市にある灯台",
+    "title_ja": "江埼灯台",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q5396696",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q5396696"
   },
   {
     "qid": "Q122833158",
@@ -37557,6 +37696,7 @@
     "description": "北海道余市郡余市町にあるジャパニーズ・ウイスキーの蒸留所",
     "title_ja": "余市蒸溜所",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "昭和時代",
@@ -37603,6 +37743,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q22118945",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q22118945"
+  },
+  {
+    "qid": "Q55527030",
+    "label_ja": "元町配水場",
+    "label_en": "",
+    "prefecture": "北海道",
+    "latitude": 41.76166667,
+    "longitude": 140.71305556,
+    "description": "北海道函館市にある水道施設",
+    "title_ja": "元町配水場",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q55527030",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q55527030"
   },
   {
     "qid": "Q11388319",
@@ -37776,6 +37935,26 @@
     "source_url": "https://www.wikidata.org/wiki/Q17226399"
   },
   {
+    "qid": "Q11398076",
+    "label_ja": "創成橋",
+    "label_en": "",
+    "prefecture": "北海道",
+    "latitude": 43.05969444,
+    "longitude": 141.35747222,
+    "description": "札幌市の橋",
+    "title_ja": "創成橋",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11398076",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11398076"
+  },
+  {
     "qid": "Q11400470",
     "label_ja": "勝福寺",
     "label_en": "",
@@ -37945,6 +38124,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11404351",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11404351"
+  },
+  {
+    "qid": "Q11404374",
+    "label_ja": "北防波堤ドーム",
+    "label_en": "",
+    "prefecture": "北海道",
+    "latitude": 45.420222222,
+    "longitude": 141.680444444,
+    "description": "building in Hokkaidō, Japan",
+    "title_ja": "北防波堤ドーム",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11404374",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11404374"
   },
   {
     "qid": "Q103810663",
@@ -39677,6 +39875,26 @@
     "source_url": "https://www.wikidata.org/wiki/Q11511717"
   },
   {
+    "qid": "Q11511817",
+    "label_ja": "旭橋",
+    "label_en": "",
+    "prefecture": "北海道",
+    "latitude": 43.778333333,
+    "longitude": 142.36,
+    "description": "北海道旭川市にある橋",
+    "title_ja": "旭橋 (旭川市)",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11511817",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11511817"
+  },
+  {
     "qid": "Q11511822",
     "label_ja": "旭沢橋梁",
     "label_en": "",
@@ -39961,6 +40179,44 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11521185",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11521185"
+  },
+  {
+    "qid": "Q1140619",
+    "label_ja": "札幌市時計台",
+    "label_en": "",
+    "prefecture": "北海道",
+    "latitude": 43.062602,
+    "longitude": 141.353681,
+    "description": "北海道札幌市にある歴史的建造物",
+    "title_ja": "札幌市時計台",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q1140619",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q1140619"
+  },
+  {
+    "qid": "Q11521277",
+    "label_ja": "札幌市水道記念館",
+    "label_en": "",
+    "prefecture": "北海道",
+    "latitude": 43.032997,
+    "longitude": 141.328778,
+    "description": "札幌市が設置する水道事業の普及啓発施設",
+    "title_ja": "札幌市水道記念館",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11521277",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11521277"
   },
   {
     "qid": "Q20044567",
@@ -44185,6 +44441,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11396902"
   },
   {
+    "qid": "Q11396915",
+    "label_ja": "利根運河",
+    "label_en": "",
+    "prefecture": "千葉県",
+    "latitude": 35.93209,
+    "longitude": 139.95594,
+    "description": "千葉県の運河",
+    "title_ja": "利根運河",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11396915",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11396915"
+  },
+  {
     "qid": "Q17218106",
     "label_ja": "割見塚古墳",
     "label_en": "",
@@ -47448,7 +47723,8 @@
     "description": "千葉県松戸市にあるレンガ橋",
     "title_ja": "小山樋門",
     "categories": [
-      "橋"
+      "橋",
+      "産業遺産"
     ],
     "era": "明治時代",
     "designation": "undesig",
@@ -50748,6 +51024,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11533858"
   },
   {
+    "qid": "Q11534148",
+    "label_ja": "柳原水閘",
+    "label_en": "",
+    "prefecture": "千葉県",
+    "latitude": 35.752,
+    "longitude": 139.89198,
+    "description": "千葉県松戸市にある河川の水門",
+    "title_ja": "柳原水閘",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11534148",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11534148"
+  },
+  {
     "qid": "Q11534690",
     "label_ja": "柴崎神社 (我孫子市)",
     "label_en": "",
@@ -50822,6 +51117,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q54153003",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q54153003"
+  },
+  {
+    "qid": "Q11535945",
+    "label_ja": "栗山配水塔",
+    "label_en": "",
+    "prefecture": "千葉県",
+    "latitude": 35.75522,
+    "longitude": 139.89779,
+    "description": "千葉県松戸市にある上水道施設",
+    "title_ja": "栗山配水塔",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11535945",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11535945"
   },
   {
     "qid": "Q65271653",
@@ -51593,6 +51907,7 @@
     "description": "千葉県館山市の洲崎に立つ灯台",
     "title_ja": "洲埼灯台",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "大正時代",
@@ -52439,6 +52754,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11571122"
   },
   {
+    "qid": "Q6059232",
+    "label_ja": "犬吠埼灯台",
+    "label_en": "",
+    "prefecture": "千葉県",
+    "latitude": 35.70777778,
+    "longitude": 140.86861111,
+    "description": "千葉県銚子市にある灯台",
+    "title_ja": "犬吠埼灯台",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q6059232",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q6059232"
+  },
+  {
     "qid": "Q11572147",
     "label_ja": "猿田神社",
     "label_en": "",
@@ -52874,6 +53208,26 @@
     "designation_source": "https://www.wikidata.org/wiki/Q110993994",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q110993994"
+  },
+  {
+    "qid": "Q11583701",
+    "label_ja": "眺尾橋",
+    "label_en": "",
+    "prefecture": "千葉県",
+    "latitude": 34.911666666,
+    "longitude": 139.871666666,
+    "description": "千葉県南房総市にある橋",
+    "title_ja": "眺尾橋",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11583701",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11583701"
   },
   {
     "qid": "Q11583714",
@@ -55452,6 +55806,7 @@
     "description": "千葉県南房総市にある灯台",
     "title_ja": "野島埼灯台",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "明治時代",
@@ -58229,6 +58584,7 @@
     "description": "和歌山県和歌山市沖の沖ノ島にある灯台",
     "title_ja": "友ヶ島灯台",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "明治時代",
@@ -59219,7 +59575,7 @@
     "description": "和歌山県広川町にある防浪堤防",
     "title_ja": "広村堤防",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "江戸時代",
     "designation": "national",
@@ -59923,7 +60279,7 @@
     "description": "和歌山県串本町の紀伊大島にある灯台",
     "title_ja": "樫野埼灯台",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "明治時代",
     "designation": "national",
@@ -89611,6 +89967,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q10359310"
   },
   {
+    "qid": "Q6884889",
+    "label_ja": "水ノ子島灯台",
+    "label_en": "",
+    "prefecture": "大分県",
+    "latitude": 33.04361111,
+    "longitude": 132.17722222,
+    "description": "豊後水道の水ノ子島にある灯台",
+    "title_ja": "水ノ子島灯台",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q6884889",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q6884889"
+  },
+  {
     "qid": "Q11549997",
     "label_ja": "永山城",
     "label_en": "",
@@ -99342,7 +99717,7 @@
     "description": "大阪府堺市にある灯台跡",
     "title_ja": "旧堺燈台",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "明治時代",
     "designation": "national",
@@ -110764,6 +111139,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q42707007"
   },
   {
+    "qid": "Q8056195",
+    "label_ja": "吉野ロープウェイ",
+    "label_en": "",
+    "prefecture": "奈良県",
+    "latitude": 34.3738,
+    "longitude": 135.855,
+    "description": "aerial tramway in Nara, Japan",
+    "title_ja": "吉野ロープウェイ",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q8056195",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q8056195"
+  },
+  {
     "qid": "Q1036938",
     "label_ja": "吉野山",
     "label_en": "",
@@ -111769,6 +112163,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11445443",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11445443"
+  },
+  {
+    "qid": "Q1150978",
+    "label_ja": "奈良駅",
+    "label_en": "",
+    "prefecture": "奈良県",
+    "latitude": 34.68066111,
+    "longitude": 135.81902222,
+    "description": "日本の鉄道駅",
+    "title_ja": "奈良駅",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q1150978",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q1150978"
   },
   {
     "qid": "Q56349697",
@@ -117902,6 +118315,26 @@
     "source_url": "https://www.wikidata.org/wiki/Q11632552"
   },
   {
+    "qid": "Q11633037",
+    "label_ja": "谷瀬の吊り橋",
+    "label_en": "",
+    "prefecture": "奈良県",
+    "latitude": 34.101291,
+    "longitude": 135.763121,
+    "description": "奈良県の橋",
+    "title_ja": "谷瀬の吊り橋",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11633037",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11633037"
+  },
+  {
     "qid": "Q65283016",
     "label_ja": "谷脇古墳",
     "label_en": "",
@@ -120110,6 +120543,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11383253"
   },
   {
+    "qid": "Q7403152",
+    "label_ja": "作並駅",
+    "label_en": "",
+    "prefecture": "宮城県",
+    "latitude": 38.317780555,
+    "longitude": 140.632641666,
+    "description": "宮城県仙台市青葉区作並にある東日本旅客鉄道の駅",
+    "title_ja": "作並駅",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q7403152",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q7403152"
+  },
+  {
     "qid": "Q11388448",
     "label_ja": "光明院",
     "label_en": "",
@@ -120355,6 +120807,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q65249271",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q65249271"
+  },
+  {
+    "qid": "Q6385327",
+    "label_ja": "化女沼ダム",
+    "label_en": "",
+    "prefecture": "宮城県",
+    "latitude": 38.626944444,
+    "longitude": 140.963888888,
+    "description": "dam in Miyagi Prefecture, Japan",
+    "title_ja": "化女沼ダム",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q6385327",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q6385327"
   },
   {
     "qid": "Q134484975",
@@ -123486,6 +123957,7 @@
     "description": "宮城県石巻市にある灯台",
     "title_ja": "金華山灯台",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "明治時代",
@@ -124037,6 +124509,7 @@
     "description": "宮城県涌谷町にある奈良時代の遺跡",
     "title_ja": "黄金山産金遺跡",
     "categories": [
+      "産業遺産",
       "遺跡"
     ],
     "era": "",
@@ -125855,6 +126328,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q70552915"
   },
   {
+    "qid": "Q137825287",
+    "label_ja": "鞍埼灯台",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 31.5143,
+    "longitude": 131.4158,
+    "description": "Lighthouse in Japan",
+    "title_ja": "鞍埼灯台",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q137825287",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q137825287"
+  },
+  {
     "qid": "Q844044",
     "label_ja": "飫肥城",
     "label_en": "",
@@ -126463,6 +126955,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11377353",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11377353"
+  },
+  {
+    "qid": "Q11377678",
+    "label_ja": "仙人谷ダム",
+    "label_en": "",
+    "prefecture": "富山県",
+    "latitude": 36.649444444,
+    "longitude": 137.681944444,
+    "description": "富山県黒部市にある関西電力のダム",
+    "title_ja": "仙人谷ダム",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11377678",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11377678"
   },
   {
     "qid": "Q108428780",
@@ -128055,6 +128566,7 @@
     "description": "富山県砺波市にあるダム",
     "title_ja": "小牧ダム",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "大正時代",
@@ -131452,6 +131964,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q135506091"
   },
   {
+    "qid": "Q1208749",
+    "label_ja": "黒部ダム",
+    "label_en": "",
+    "prefecture": "富山県",
+    "latitude": 36.56642,
+    "longitude": 137.66212,
+    "description": "富山県立山町中新川郡にある発電用ダム",
+    "title_ja": "黒部ダム",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q1208749",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q1208749"
+  },
+  {
     "qid": "Q85884824",
     "label_ja": "黒部大橋",
     "label_en": "",
@@ -132337,6 +132868,7 @@
     "description": "山口県萩市にある江戸時代の製鉄所跡",
     "title_ja": "大板山たたら製鉄遺跡",
     "categories": [
+      "産業遺産",
       "遺跡"
     ],
     "era": "江戸時代",
@@ -132755,7 +133287,7 @@
     "description": "山口県萩市にある長州藩が洋式帆船を建造した造船所跡",
     "title_ja": "恵美須ヶ鼻造船所跡",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "江戸時代",
     "designation": "national",
@@ -132763,6 +133295,26 @@
     "designation_source": "https://kunishitei.bunka.go.jp/bsys/index",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q20043361"
+  },
+  {
+    "qid": "Q11492971",
+    "label_ja": "惣郷川橋梁",
+    "label_en": "",
+    "prefecture": "山口県",
+    "latitude": 34.58730556,
+    "longitude": 131.55597222,
+    "description": "山口県阿武町にある山陰本線の橋",
+    "title_ja": "惣郷川橋梁",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11492971",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11492971"
   },
   {
     "qid": "Q11495398",
@@ -133611,7 +134163,7 @@
     "description": "山口県萩市にある反射炉跡",
     "title_ja": "萩反射炉",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "江戸時代",
     "designation": "national",
@@ -133916,7 +134468,7 @@
     "description": "山口県美祢市にある鉱山",
     "title_ja": "長登銅山",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "",
     "designation": "national",
@@ -145150,7 +145702,7 @@
     "description": "岐阜県海津市にある松が植えられた堤防",
     "title_ja": "千本松原 (岐阜県)",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "",
     "designation": "national",
@@ -161580,7 +162132,6 @@
     "description": "archaeological site in Japan",
     "title_ja": "万富東大寺瓦窯跡",
     "categories": [
-      "社寺・宗教遺跡",
       "遺跡"
     ],
     "era": "",
@@ -169327,6 +169878,7 @@
     "description": "岩手県宮古市にあるかつての酒造店",
     "title_ja": "旧東屋酒造店",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "",
@@ -169650,6 +170202,7 @@
     "description": "岩手県釜石市にある高炉跡",
     "title_ja": "橋野高炉跡",
     "categories": [
+      "産業遺産",
       "遺跡"
     ],
     "era": "江戸時代",
@@ -171859,6 +172412,7 @@
     "description": "島根県出雲市にある灯台",
     "title_ja": "出雲日御碕灯台",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "明治時代",
@@ -173930,6 +174484,7 @@
     "description": "日本の島根県大田市にある銀山の遺跡、日本にある世界遺産のひとつ",
     "title_ja": "石見銀山",
     "categories": [
+      "産業遺産",
       "遺跡"
     ],
     "era": "室町時代",
@@ -174101,6 +174656,7 @@
     "description": "島根県松江市にある灯台",
     "title_ja": "美保関灯台",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "明治時代",
@@ -174795,6 +175351,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11260091"
   },
   {
+    "qid": "Q17192369",
+    "label_ja": "アレイからすこじま",
+    "label_en": "",
+    "prefecture": "広島県",
+    "latitude": 34.22594444,
+    "longitude": 132.54952778,
+    "description": "広島県呉市にある公園",
+    "title_ja": "アレイからすこじま",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q17192369",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q17192369"
+  },
+  {
     "qid": "Q11620461",
     "label_ja": "万代橋",
     "label_en": "",
@@ -175127,7 +175702,8 @@
     "description": "広島県海田町にある橋",
     "title_ja": "九十九橋 (広島県)",
     "categories": [
-      "橋"
+      "橋",
+      "産業遺産"
     ],
     "era": "昭和時代",
     "designation": "undesig",
@@ -175230,6 +175806,26 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11372739",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11372739"
+  },
+  {
+    "qid": "Q11374506",
+    "label_ja": "京橋",
+    "label_en": "",
+    "prefecture": "広島県",
+    "latitude": 34.39416667,
+    "longitude": 132.47,
+    "description": "広島市の橋",
+    "title_ja": "京橋 (広島市)",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11374506",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11374506"
   },
   {
     "qid": "Q11376313",
@@ -176012,6 +176608,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11415863"
   },
   {
+    "qid": "Q85880790",
+    "label_ja": "呉鎮守府地下施設群",
+    "label_en": "",
+    "prefecture": "広島県",
+    "latitude": 34.236916666,
+    "longitude": 132.559472222,
+    "description": "広島県呉市の海上自衛隊呉地方総監部敷地内にある遺構",
+    "title_ja": "呉鎮守府地下施設群",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q85880790",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q85880790"
+  },
+  {
     "qid": "Q11418170",
     "label_ja": "和知八幡神社",
     "label_en": "",
@@ -176371,6 +176986,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11436709",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11436709"
+  },
+  {
+    "qid": "Q24258482",
+    "label_ja": "大浜埼灯台",
+    "label_en": "",
+    "prefecture": "広島県",
+    "latitude": 34.35796,
+    "longitude": 133.1737,
+    "description": "日本の灯台",
+    "title_ja": "大浜埼灯台",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q24258482",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q24258482"
   },
   {
     "qid": "Q48764224",
@@ -177410,7 +178044,7 @@
     "description": "かつて広島県広島市にあった官営の紡績会社",
     "title_ja": "広島紡績所",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "",
     "designation": "local",
@@ -179017,6 +179651,26 @@
     "source_url": "https://www.wikidata.org/wiki/Q56347601"
   },
   {
+    "qid": "Q11572140",
+    "label_ja": "猿猴橋",
+    "label_en": "",
+    "prefecture": "広島県",
+    "latitude": 34.394778,
+    "longitude": 132.474778,
+    "description": "広島市の橋",
+    "title_ja": "猿猴橋",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11572140",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11572140"
+  },
+  {
     "qid": "Q104660635",
     "label_ja": "甘南備神社",
     "label_en": "",
@@ -179539,7 +180193,8 @@
     "description": "広島県廿日市市の厳島にある砂防施設",
     "title_ja": "紅葉谷川庭園砂防施設",
     "categories": [
-      "庭園"
+      "庭園",
+      "産業遺産"
     ],
     "era": "昭和時代",
     "designation": "undesig",
@@ -190544,6 +191199,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q135399620"
   },
   {
+    "qid": "Q7850304",
+    "label_ja": "釣島灯台",
+    "label_en": "",
+    "prefecture": "愛媛県",
+    "latitude": 33.89300556,
+    "longitude": 132.63874444,
+    "description": "愛媛県松山市の釣島にある灯台",
+    "title_ja": "釣島灯台",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q7850304",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q7850304"
+  },
+  {
     "qid": "Q17209377",
     "label_ja": "鎌大師",
     "label_en": "",
@@ -191665,6 +192339,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q134732280"
   },
   {
+    "qid": "Q11364967",
+    "label_ja": "中川運河",
+    "label_en": "",
+    "prefecture": "愛知県",
+    "latitude": 35.09063,
+    "longitude": 136.87613,
+    "description": "名古屋市にある運河",
+    "title_ja": "中川運河",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11364967",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11364967"
+  },
+  {
     "qid": "Q28068418",
     "label_ja": "中村公園記念館",
     "label_en": "",
@@ -192378,7 +193071,6 @@
     "description": "archaeological site in Japan",
     "title_ja": "伊良湖東大寺瓦窯跡",
     "categories": [
-      "社寺・宗教遺跡",
       "遺跡"
     ],
     "era": "",
@@ -199476,6 +200168,7 @@
     "description": "愛知県と岐阜県の県境に位置する中央本線の廃トンネル群",
     "title_ja": "愛岐トンネル群",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "",
@@ -208221,6 +208914,7 @@
     "description": "lighthouse in Japan",
     "title_ja": "野間埼灯台",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "大正時代",
@@ -210866,7 +211560,7 @@
     "description": "新潟県佐渡市にある世界遺産",
     "title_ja": "佐渡島の金山",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "",
     "designation": "national",
@@ -214327,6 +215021,7 @@
     "description": "新潟県新潟市にある日本酒メーカー",
     "title_ja": "樋木酒造",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "江戸時代",
@@ -215820,6 +216515,26 @@
     "source_url": "https://www.wikidata.org/wiki/Q100651180"
   },
   {
+    "qid": "Q4854329",
+    "label_ja": "萬代橋",
+    "label_en": "",
+    "prefecture": "新潟県",
+    "latitude": 37.91944444,
+    "longitude": 139.05305556,
+    "description": "新潟県新潟市中央区を流れる信濃川に架かる国道7号の道路橋",
+    "title_ja": "萬代橋",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q4854329",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q4854329"
+  },
+  {
     "qid": "Q108871838",
     "label_ja": "萬盛橋",
     "label_en": "",
@@ -216047,6 +216762,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11626059",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11626059"
+  },
+  {
+    "qid": "Q118342381",
+    "label_ja": "西三川砂金山",
+    "label_en": "",
+    "prefecture": "新潟県",
+    "latitude": 37.9125965,
+    "longitude": 138.3246014,
+    "description": "佐渡島にあった金山",
+    "title_ja": "西三川砂金山",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q118342381",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q118342381"
   },
   {
     "qid": "Q99516751",
@@ -222682,6 +223416,26 @@
     "source_url": "https://www.wikidata.org/wiki/Q106836632"
   },
   {
+    "qid": "Q4844361",
+    "label_ja": "勝鬨橋",
+    "label_en": "",
+    "prefecture": "東京都",
+    "latitude": 35.661944,
+    "longitude": 139.775,
+    "description": "東京都の橋",
+    "title_ja": "勝鬨橋",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q4844361",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q4844361"
+  },
+  {
     "qid": "Q11401352",
     "label_ja": "北大谷古墳",
     "label_en": "",
@@ -223554,6 +224308,26 @@
     "designation_source": "https://www.wikidata.org/wiki/Q107391031",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q107391031"
+  },
+  {
+    "qid": "Q11408792",
+    "label_ja": "南高橋",
+    "label_en": "",
+    "prefecture": "東京都",
+    "latitude": 35.67297222,
+    "longitude": 139.78141667,
+    "description": "東京都の橋",
+    "title_ja": "南高橋",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11408792",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11408792"
   },
   {
     "qid": "Q97613628",
@@ -233527,6 +234301,26 @@
     "source_url": "https://www.wikidata.org/wiki/Q54152985"
   },
   {
+    "qid": "Q11481526",
+    "label_ja": "常盤橋",
+    "label_en": "",
+    "prefecture": "東京都",
+    "latitude": 35.68527778,
+    "longitude": 139.77083333,
+    "description": "東京都の橋",
+    "title_ja": "常盤橋 (日本橋川)",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11481526",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11481526"
+  },
+  {
     "qid": "Q97276840",
     "label_ja": "常福寺",
     "label_en": "",
@@ -236595,6 +237389,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q3789149",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q3789149"
+  },
+  {
+    "qid": "Q11508443",
+    "label_ja": "日本水準原点",
+    "label_en": "",
+    "prefecture": "東京都",
+    "latitude": 35.677237,
+    "longitude": 139.747855,
+    "description": "",
+    "title_ja": "日本水準原点",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11508443",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11508443"
   },
   {
     "qid": "Q97478963",
@@ -243211,7 +244024,8 @@
     "description": "東京都の橋",
     "title_ja": "永代橋",
     "categories": [
-      "橋"
+      "橋",
+      "産業遺産"
     ],
     "era": "江戸時代",
     "designation": "undesig",
@@ -243553,7 +244367,7 @@
     "description": "かつて東京都港区にあった日本国有鉄道の駅",
     "title_ja": "汐留駅 (国鉄)",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "明治時代",
     "designation": "national",
@@ -246321,6 +247135,26 @@
     "designation_source": "https://www.wikidata.org/wiki/Q28685861",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q28685861"
+  },
+  {
+    "qid": "Q11561268",
+    "label_ja": "清洲橋",
+    "label_en": "",
+    "prefecture": "東京都",
+    "latitude": 35.6825,
+    "longitude": 139.79194,
+    "description": "東京都の橋",
+    "title_ja": "清洲橋",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11561268",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11561268"
   },
   {
     "qid": "Q97613680",
@@ -252218,6 +253052,26 @@
     "designation_source": "https://www.wikidata.org/wiki/Q111694098",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q111694098"
+  },
+  {
+    "qid": "Q11611065",
+    "label_ja": "聖橋",
+    "label_en": "",
+    "prefecture": "東京都",
+    "latitude": 35.69972222,
+    "longitude": 139.76555556,
+    "description": "東京都の橋",
+    "title_ja": "聖橋",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11611065",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11611065"
   },
   {
     "qid": "Q106836702",
@@ -266790,7 +267644,7 @@
     "description": "栃木県日光市にあった銅山",
     "title_ja": "足尾銅山",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "室町時代",
     "designation": "national",
@@ -268178,7 +269032,7 @@
     "description": "沖縄県北大東村にあったリン鉱石の鉱山",
     "title_ja": "北大東島のリン鉱山",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "大正時代",
     "designation": "national",
@@ -273714,7 +274568,7 @@
     "description": "琵琶湖と京都を結ぶ疏水",
     "title_ja": "琵琶湖疏水",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "",
     "designation": "national",
@@ -281960,7 +282814,7 @@
     "description": "石川県金沢市を流れる用水路",
     "title_ja": "辰巳用水",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "江戸時代",
     "designation": "national",
@@ -284692,6 +285546,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11395867",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11395867"
+  },
+  {
+    "qid": "Q96694693",
+    "label_ja": "函嶺洞門",
+    "label_en": "",
+    "prefecture": "神奈川県",
+    "latitude": 35.232583333,
+    "longitude": 139.096416666,
+    "description": "神奈川県箱根町にある洞門",
+    "title_ja": "函嶺洞門",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q96694693",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q96694693"
   },
   {
     "qid": "Q109599029",
@@ -290728,6 +291601,26 @@
     "source_url": "https://www.wikidata.org/wiki/Q11087074"
   },
   {
+    "qid": "Q97999811",
+    "label_ja": "旭橋",
+    "label_en": "",
+    "prefecture": "神奈川県",
+    "latitude": 35.231944444,
+    "longitude": 139.099722222,
+    "description": "神奈川県箱根町の橋",
+    "title_ja": "旭橋 (箱根町)",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q97999811",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q97999811"
+  },
+  {
     "qid": "Q114020267",
     "label_ja": "昌清院",
     "label_en": "",
@@ -292707,6 +293600,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q140469774"
   },
   {
+    "qid": "Q5363823",
+    "label_ja": "横浜赤レンガ倉庫",
+    "label_en": "",
+    "prefecture": "神奈川県",
+    "latitude": 35.4522,
+    "longitude": 139.643,
+    "description": "横浜市の新港埠頭にある歴史的建造物",
+    "title_ja": "横浜赤レンガ倉庫",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q5363823",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q5363823"
+  },
+  {
     "qid": "Q140478711",
     "label_ja": "樹源寺",
     "label_en": "",
@@ -292955,6 +293867,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11548437",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11548437"
+  },
+  {
+    "qid": "Q1186344",
+    "label_ja": "氷川丸",
+    "label_en": "",
+    "prefecture": "神奈川県",
+    "latitude": 35.446682,
+    "longitude": 139.651252,
+    "description": "横浜港にある博物館船",
+    "title_ja": "氷川丸",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q1186344",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q1186344"
   },
   {
     "qid": "Q38277009",
@@ -298822,6 +299753,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q5214583"
   },
   {
+    "qid": "Q859202",
+    "label_ja": "鎌倉高校前駅",
+    "label_en": "",
+    "prefecture": "神奈川県",
+    "latitude": 35.30666667,
+    "longitude": 139.50055556,
+    "description": "神奈川県鎌倉市腰越にある江ノ島電鉄の駅",
+    "title_ja": "鎌倉高校前駅",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q859202",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q859202"
+  },
+  {
     "qid": "Q2972149",
     "label_ja": "長勝寺",
     "label_en": "",
@@ -301544,6 +302494,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q2969496"
   },
   {
+    "qid": "Q27972379",
+    "label_ja": "小刀根トンネル",
+    "label_en": "",
+    "prefecture": "福井県",
+    "latitude": 35.60272222,
+    "longitude": 136.13688889,
+    "description": "福井県敦賀市にあるトンネル",
+    "title_ja": "小刀根トンネル",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q27972379",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q27972379"
+  },
+  {
     "qid": "Q909308",
     "label_ja": "小浜城",
     "label_en": "",
@@ -302905,6 +303874,7 @@
     "description": "福井県敦賀市にある灯台",
     "title_ja": "立石岬灯台",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "明治時代",
@@ -303760,7 +304730,7 @@
     "description": "福岡県大牟田市・みやま市及び熊本県荒尾市にあった炭鉱",
     "title_ja": "三井三池炭鉱",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "江戸時代",
     "designation": "national",
@@ -303969,6 +304939,7 @@
     "description": "福岡県福智町にある記念館",
     "title_ja": "九州マクセル赤煉瓦記念館",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "",
@@ -304710,7 +305681,8 @@
     "description": "bridge in Yahatahigashi-ku, Japan",
     "title_ja": "南河内橋",
     "categories": [
-      "橋"
+      "橋",
+      "産業遺産"
     ],
     "era": "",
     "designation": "undesig",
@@ -304901,6 +305873,7 @@
     "title_ja": "名島橋",
     "categories": [
       "橋",
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "昭和時代",
@@ -305690,6 +306663,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11451922",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11451922"
+  },
+  {
+    "qid": "Q2943310",
+    "label_ja": "官営八幡製鐵所",
+    "label_en": "",
+    "prefecture": "福岡県",
+    "latitude": 33.9028,
+    "longitude": 130.83,
+    "description": "明治時代に操業を開始した福岡県北九州市にある世界遺産・近代化産業遺産としての製鉄所",
+    "title_ja": "官営八幡製鐵所",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q2943310",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q2943310"
   },
   {
     "qid": "Q11452604",
@@ -309762,6 +310754,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q43595281"
   },
   {
+    "qid": "Q58889640",
+    "label_ja": "遠賀川水源地ポンプ室",
+    "label_en": "",
+    "prefecture": "福岡県",
+    "latitude": 33.8111271,
+    "longitude": 130.7068367,
+    "description": "福岡県中間市にある八幡製鐵所のポンプ室",
+    "title_ja": "遠賀川水源地ポンプ室",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q58889640",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q58889640"
+  },
+  {
     "qid": "Q24874492",
     "label_ja": "選擇寺",
     "label_en": "",
@@ -313029,6 +314040,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q11451159",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q11451159"
+  },
+  {
+    "qid": "Q11451162",
+    "label_ja": "安積疏水",
+    "label_en": "",
+    "prefecture": "福島県",
+    "latitude": 37.47006835,
+    "longitude": 140.296105106,
+    "description": "猪苗代湖より取水し、福島県郡山市とその周辺地域の安積原野に農業用水・工業用水・飲用水を供給している疏水",
+    "title_ja": "安積疏水",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11451162",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11451162"
   },
   {
     "qid": "Q55525370",
@@ -321175,6 +322205,7 @@
     "description": "群馬県みどり市大間々町上神梅にあるわたらせ渓谷鐵道の駅",
     "title_ja": "上神梅駅",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "大正時代",
@@ -321526,6 +322557,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q118354786",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q118354786"
+  },
+  {
+    "qid": "Q11368383",
+    "label_ja": "丸沼ダム",
+    "label_en": "",
+    "prefecture": "群馬県",
+    "latitude": 36.823888888,
+    "longitude": 139.339722222,
+    "description": "群馬県片品村にあるダム",
+    "title_ja": "丸沼ダム",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11368383",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11368383"
   },
   {
     "qid": "Q86743604",
@@ -322982,6 +324032,7 @@
     "description": "群馬県前橋市茂木町にある上毛電気鉄道の駅",
     "title_ja": "大胡駅",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "昭和時代",
@@ -323058,6 +324109,7 @@
     "description": "群馬県みどり市大間々町大間々にあるわたらせ渓谷鐵道の駅",
     "title_ja": "大間々駅",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "明治時代",
@@ -323628,7 +324680,7 @@
     "description": "群馬県富岡市にある器械製糸工場跡",
     "title_ja": "富岡製糸場",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "明治時代",
     "designation": "national",
@@ -324398,6 +325450,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q3482271",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q3482271"
+  },
+  {
+    "qid": "Q11503811",
+    "label_ja": "新町紡績所",
+    "label_en": "",
+    "prefecture": "群馬県",
+    "latitude": 36.277777777,
+    "longitude": 139.100555555,
+    "description": "群馬県高崎市にある官営模範工場",
+    "title_ja": "新町紡績所",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11503811",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11503811"
   },
   {
     "qid": "Q115414657",
@@ -325722,7 +326793,7 @@
     "description": "群馬県伊勢崎市境島村にある歴史的建造物",
     "title_ja": "田島弥平旧宅",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "江戸時代",
     "designation": "national",
@@ -326007,6 +327078,7 @@
     "description": "群馬県みどり市東町神戸にあるわたらせ渓谷鐵道の駅",
     "title_ja": "神戸駅 (群馬県)",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "大正時代",
@@ -326378,6 +327450,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11609908"
   },
   {
+    "qid": "Q11609917",
+    "label_ja": "群馬鉄山",
+    "label_en": "",
+    "prefecture": "群馬県",
+    "latitude": 36.653083,
+    "longitude": 138.597083,
+    "description": "abandoned mine now a park, in Japan",
+    "title_ja": "群馬鉄山",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "昭和時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11609917",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11609917"
+  },
+  {
     "qid": "Q11611098",
     "label_ja": "聖眼寺",
     "label_en": "",
@@ -326520,7 +327611,7 @@
     "description": "群馬県下仁田町にある蚕種貯蔵施設",
     "title_ja": "荒船風穴",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "",
     "designation": "national",
@@ -327799,7 +328890,7 @@
     "description": "1884年に設立された養蚕業の研究所・教育機関",
     "title_ja": "高山社",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "明治時代",
     "designation": "national",
@@ -333190,6 +334281,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11602876"
   },
   {
+    "qid": "Q6924212",
+    "label_ja": "筑波山鋼索鉄道線",
+    "label_en": "",
+    "prefecture": "茨城県",
+    "latitude": 36.219722222,
+    "longitude": 140.104166666,
+    "description": "Funicular on Mount Tsukuba in Ibaraki Prefecture, Japan.",
+    "title_ja": "筑波観光鉄道筑波山鋼索鉄道線",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q6924212",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q6924212"
+  },
+  {
     "qid": "Q17229236",
     "label_ja": "篆刻美術館",
     "label_en": "",
@@ -334983,6 +336093,44 @@
     "source_url": "https://www.wikidata.org/wiki/Q56760791"
   },
   {
+    "qid": "Q11357147",
+    "label_ja": "三菱重工業長崎造船所",
+    "label_en": "",
+    "prefecture": "長崎県",
+    "latitude": 32.742194,
+    "longitude": 129.858528,
+    "description": "長崎市にある造船所",
+    "title_ja": "三菱重工業長崎造船所",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11357147",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11357147"
+  },
+  {
+    "qid": "Q11357149",
+    "label_ja": "三菱重工業長崎造船所史料館",
+    "label_en": "",
+    "prefecture": "長崎県",
+    "latitude": 32.74304,
+    "longitude": 129.85565,
+    "description": "長崎県長崎市にある企業博物館",
+    "title_ja": "三菱重工業長崎造船所史料館",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11357149",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11357149"
+  },
+  {
     "qid": "Q11368122",
     "label_ja": "丸尾神社",
     "label_en": "",
@@ -335267,6 +336415,26 @@
     "designation_source": "https://kunishitei.bunka.go.jp/bsys/index",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q640267"
+  },
+  {
+    "qid": "Q11395617",
+    "label_ja": "出島橋",
+    "label_en": "",
+    "prefecture": "長崎県",
+    "latitude": 32.743472222,
+    "longitude": 129.874138888,
+    "description": "長崎市の橋",
+    "title_ja": "出島橋",
+    "categories": [
+      "橋",
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11395617",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11395617"
   },
   {
     "qid": "Q11400349",
@@ -336172,7 +337340,7 @@
     "description": "長崎県長崎市小菅町にある国の史跡",
     "title_ja": "小菅修船場跡",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "明治時代",
     "designation": "national",
@@ -337447,7 +338615,7 @@
     "description": "「軍艦島」とも通称される、日本の長崎県長崎市にある島",
     "title_ja": "端島 (長崎県)",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "",
     "designation": "national",
@@ -338093,7 +339261,7 @@
     "description": "長崎県長崎市高島にあった炭鉱",
     "title_ja": "高島炭鉱",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "",
     "designation": "national",
@@ -344755,6 +345923,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11570074"
   },
   {
+    "qid": "Q11570076",
+    "label_ja": "牛伏川フランス式階段工",
+    "label_en": "",
+    "prefecture": "長野県",
+    "latitude": 36.161431,
+    "longitude": 138.023428,
+    "description": "長野県松本市にある砂防施設",
+    "title_ja": "牛伏川フランス式階段工",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11570076",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11570076"
+  },
+  {
     "qid": "Q17218032",
     "label_ja": "牟礼神社",
     "label_en": "",
@@ -346807,6 +347994,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q28688017"
   },
   {
+    "qid": "Q11631643",
+    "label_ja": "読書発電所",
+    "label_en": "",
+    "prefecture": "長野県",
+    "latitude": 35.588044444,
+    "longitude": 137.592005555,
+    "description": "長野県南木曽町にある水力発電所",
+    "title_ja": "読書発電所",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "大正時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11631643",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11631643"
+  },
+  {
     "qid": "Q218813",
     "label_ja": "諏訪大社",
     "label_en": "",
@@ -347349,6 +348555,7 @@
     "description": "長野県松本市にあるダム",
     "title_ja": "釜ヶ渕堰堤",
     "categories": [
+      "産業遺産",
       "歴史的建造物"
     ],
     "era": "昭和時代",
@@ -349164,6 +350371,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q106852429",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q106852429"
+  },
+  {
+    "qid": "Q56042093",
+    "label_ja": "吉野町煉瓦倉庫",
+    "label_en": "",
+    "prefecture": "青森県",
+    "latitude": 40.598222222,
+    "longitude": 140.472805555,
+    "description": "青森県弘前市にある歴史的な産業遺産。旧日本酒貯蔵倉庫。",
+    "title_ja": "吉野町煉瓦倉庫",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q56042093",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q56042093"
   },
   {
     "qid": "Q11417254",
@@ -358337,6 +359563,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11561048"
   },
   {
+    "qid": "Q11561057",
+    "label_ja": "清水灯台",
+    "label_en": "",
+    "prefecture": "静岡県",
+    "latitude": 35.01055556,
+    "longitude": 138.53055556,
+    "description": "lighthouse in Japan",
+    "title_ja": "清水灯台",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11561057",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11561057"
+  },
+  {
     "qid": "Q17215540",
     "label_ja": "清浄寺",
     "label_en": "",
@@ -359240,7 +360485,7 @@
     "description": "静岡県下田市にある灯台",
     "title_ja": "神子元島灯台",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "明治時代",
     "designation": "national",
@@ -361692,6 +362937,7 @@
     "description": "日本の静岡県伊豆の国市にある反射炉跡",
     "title_ja": "韮山反射炉",
     "categories": [
+      "産業遺産",
       "史跡"
     ],
     "era": "江戸時代",
@@ -364363,6 +365609,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11577737"
   },
   {
+    "qid": "Q11578158",
+    "label_ja": "男木島灯台",
+    "label_en": "",
+    "prefecture": "香川県",
+    "latitude": 34.43375,
+    "longitude": 134.06069444,
+    "description": "lighthouse in Japan",
+    "title_ja": "男木島灯台",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11578158",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11578158"
+  },
+  {
     "qid": "Q11579589",
     "label_ja": "白山神社",
     "label_en": "",
@@ -366265,6 +367530,25 @@
     "designation_source": "https://www.wikidata.org/wiki/Q17993521",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q17993521"
+  },
+  {
+    "qid": "Q11453015",
+    "label_ja": "室戸岬灯台",
+    "label_en": "",
+    "prefecture": "高知県",
+    "latitude": 33.24722222,
+    "longitude": 134.17555556,
+    "description": "高知県室戸市にある灯台",
+    "title_ja": "室戸岬灯台",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "明治時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11453015",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11453015"
   },
   {
     "qid": "Q11455633",
@@ -369581,6 +370865,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11615785"
   },
   {
+    "qid": "Q69388358",
+    "label_ja": "若松鉱山",
+    "label_en": "",
+    "prefecture": "鳥取県",
+    "latitude": 35.092777777,
+    "longitude": 133.208472222,
+    "description": "mine in Nichinan, Japan",
+    "title_ja": "若松鉱山",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q69388358",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q69388358"
+  },
+  {
     "qid": "Q11616547",
     "label_ja": "若桜宿",
     "label_en": "",
@@ -371046,6 +372349,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11455054"
   },
   {
+    "qid": "Q21653676",
+    "label_ja": "寺山炭窯跡",
+    "label_en": "",
+    "prefecture": "鹿児島県",
+    "latitude": 31.66427806,
+    "longitude": 130.60110194,
+    "description": "鹿児島県鹿児島市吉野町にある薩摩藩によって建造された炭窯跡",
+    "title_ja": "寺山炭窯跡",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "江戸時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q21653676",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q21653676"
+  },
+  {
     "qid": "Q28685365",
     "label_ja": "射楯兵主神社",
     "label_en": "",
@@ -372434,6 +373756,25 @@
     "source_url": "https://www.wikidata.org/wiki/Q11651590"
   },
   {
+    "qid": "Q20045209",
+    "label_ja": "関吉の疎水溝",
+    "label_en": "",
+    "prefecture": "鹿児島県",
+    "latitude": 31.64708333,
+    "longitude": 130.55219444,
+    "description": "鹿児島県鹿児島市下田町にある用水路",
+    "title_ja": "関吉の疎水溝",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "江戸時代",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q20045209",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q20045209"
+  },
+  {
     "qid": "Q127869849",
     "label_ja": "阿多貝塚",
     "label_en": "",
@@ -372470,6 +373811,25 @@
     "designation_source": "https://kunishitei.bunka.go.jp/bsys/index",
     "heritage_id": "",
     "source_url": "https://www.wikidata.org/wiki/Q1591823"
+  },
+  {
+    "qid": "Q11659317",
+    "label_ja": "集成館事業",
+    "label_en": "",
+    "prefecture": "鹿児島県",
+    "latitude": 31.6178,
+    "longitude": 130.5781,
+    "description": "part of a World Heritage site in Japan",
+    "title_ja": "集成館事業",
+    "categories": [
+      "産業遺産"
+    ],
+    "era": "",
+    "designation": "undesig",
+    "designation_label": "未指定",
+    "designation_source": "https://www.wikidata.org/wiki/Q11659317",
+    "heritage_id": "",
+    "source_url": "https://www.wikidata.org/wiki/Q11659317"
   },
   {
     "qid": "Q704622",
@@ -372766,7 +374126,7 @@
     "description": "鹿児島県鹿児島市吉野町にあった日本初の紡績工場",
     "title_ja": "鹿児島紡績所",
     "categories": [
-      "その他"
+      "産業遺産"
     ],
     "era": "江戸時代",
     "designation": "national",
