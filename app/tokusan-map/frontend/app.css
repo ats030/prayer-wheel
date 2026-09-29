@@ -64,6 +64,7 @@ input,select{width:100%;min-width:0;height:2.5rem;border:1px solid var(--color-r
 .tokusan-marker.cat-se{background:var(--color-cat-se)}
 .tokusan-marker.cat-ka{background:var(--color-cat-ka)}
 .map-legend{position:absolute;z-index:450;top:calc(var(--space-md) + 2.4rem);right:var(--space-md);display:grid;gap:.35rem;border:1px solid var(--color-rule);border-radius:var(--radius);background:var(--color-paper);padding:.55rem .75rem;box-shadow:0 2px 12px var(--color-shadow);font-size:.72rem;font-weight:700;color:var(--color-ink-2)}
+.map-region:has(.leaflet-popup) .map-legend,.map-region:has(.leaflet-popup) .map-count{visibility:hidden}
 .legend-dot{display:inline-block;width:.6rem;height:.6rem;margin-right:.45rem;border:1.5px solid var(--color-paper);border-radius:50%;vertical-align:middle}
 
 .detail-panel{min-width:0;min-height:0;overflow-y:auto;border-left:1px solid var(--color-rule);background:var(--color-accent-ink);box-shadow:-10px 0 28px var(--color-shadow)}
