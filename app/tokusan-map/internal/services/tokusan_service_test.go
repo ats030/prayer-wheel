@@ -27,6 +27,9 @@ func TestProductionCoordinatesAcrossQueries(t *testing.T) {
 	if flower.CoordinateSourceURL == "" || flower.CoordinateSourceName == "" || flower.ProductionArea == "" {
 		t.Fatal("missing evidence")
 	}
+	if flower.RegionScope != "regional" || len(flower.RegionIDs) != 2 || flower.RegionIDs[0] != "23-06" || flower.RegionIDs[1] != "23-07" {
+		t.Fatalf("lost multi-region membership: %+v", flower)
+	}
 	one := s.GetByQID(flower.QID)
 	if one == nil || one.CoordinateLabel != flower.CoordinateLabel {
 		t.Fatal("QID query lost point")

@@ -9,6 +9,7 @@ data/*.json
 !data/summaries.json
 !data/official.json
 !data/production_points.json
+!data/regions.json
 data/*.json.tmp
 
 # Python

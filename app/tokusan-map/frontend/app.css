@@ -19,6 +19,7 @@ h1{min-width:0;margin:0;font-family:var(--font-display);font-size:clamp(1.4rem,3
 .filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--space-sm);padding:var(--space-md) var(--space-lg);border-bottom:1px solid var(--color-rule)}
 .field{display:grid;min-width:0;gap:.25rem;color:var(--color-ink-2);font-size:.72rem;font-weight:700}
 .field-wide{grid-column:1/-1}
+.region-source{margin:0;color:var(--color-ink-2);font-size:.72rem;line-height:1.5}
 input,select{width:100%;min-width:0;height:2.5rem;border:1px solid var(--color-rule);border-radius:var(--radius);background:var(--color-accent-ink);padding:0 var(--space-sm)}
 
 .result-bar{display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-sm);padding:var(--space-sm) var(--space-lg);border-bottom:1px solid var(--color-rule)}

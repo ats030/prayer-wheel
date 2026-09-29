@@ -56,32 +56,39 @@ function itemKey(o,index=0){return o.qid||`${o.label_ja}-${o.latitude}-${o.longi
 function hasCoordinates(o){const lat=Number(o.latitude),lng=Number(o.longitude);return Number.isFinite(lat)&&Number.isFinite(lng)&&(lat!==0||lng!==0)}
 function positionLabel(o){return o.coordinate_kind==='municipality_office'?'産地代表位置':o.prefecture_level?'都道府県代表位置':''}
 
-// Keep source areas intact: a product spanning several places must not be
-// assigned to only the first municipality in its source.
+// Region membership follows source areas, never the marker's representative point.
+let regionsByPrefecture=new Map();
 function regionLabel(o){
-  const source=String(o.production_area||o.city||o.place||'').trim();
-  if(!source||source===o.prefecture)return o.production_area?'県全域':'県内の地域未詳';
-  const label=source.split(o.prefecture||'\u0000').join('').replace(/\s+/g,' ').trim();
-  if(/^(?:県|都|道|府)?内(?:全域)?$/.test(label)||label==='全域')return '県全域';
-  return label||'県内の地域未詳';
+  if(o.region_scope==='prefecture')return '県全域';
+  const regions=regionsByPrefecture.get(o.prefecture)?.regions||[];
+  const names=regions.filter(r=>(o.region_ids||[]).includes(r.id)).map(r=>r.label);
+  return names.length?names.join(' ／ '):'地域未詳';
 }
-function groupByRegion(entries){
-  const groups=new Map();
-  for(const entry of entries){
-    const label=regionLabel(entry.item);
-    if(!groups.has(label))groups.set(label,[]);
-    groups.get(label).push(entry);
-  }
-  return [...groups.entries()].sort(([a],[b])=>a.localeCompare(b,'ja'));
+function matchesRegion(o,region){
+  if(!region)return true;
+  if(region==='prefecture'||region==='unknown')return o.region_scope===region;
+  return o.region_scope==='prefecture'||(o.region_ids||[]).includes(region);
 }
 function populateRegions(){
   const select=document.querySelector('#region');
   const prefecture=document.querySelector('#prefecture').value;
   select.replaceChildren(new Option(prefecture?'すべて':'都道府県を選択',''));
   select.disabled=!prefecture;
+  const sourceNote=document.querySelector('#region-source');
+  const definition=regionsByPrefecture.get(prefecture);
+  const sourceUrl=safeUrl(definition?.source_url);
+  sourceNote.hidden=!prefecture||!sourceUrl;
+  sourceNote.innerHTML=sourceUrl?`<a href="${esc(sourceUrl)}" target="_blank" rel="noopener noreferrer">地域区分の出典</a> · 県全域の品目は各地域でも表示します。`:'';
   if(!prefecture)return;
-  const entries=tokusan.filter(o=>o.prefecture===prefecture).map(item=>({item}));
-  for(const [label,items] of groupByRegion(entries))select.add(new Option(`${label}（${items.length}件）`,label));
+  const items=tokusan.filter(o=>o.prefecture===prefecture);
+  for(const region of regionsByPrefecture.get(prefecture)?.regions||[]){
+    const count=items.filter(o=>matchesRegion(o,region.id)).length;
+    select.add(new Option(`${region.label}（${count}件）`,region.id));
+  }
+  for(const [scope,label] of [['prefecture','県全域'],['unknown','地域未詳']]){
+    const count=items.filter(o=>o.region_scope===scope).length;
+    if(count)select.add(new Option(`${label}（${count}件）`,scope));
+  }
 }
 
 function populatePrefectures(){
@@ -114,7 +121,7 @@ function applyFilters(){
   const category=document.querySelector('#category').value;
   visible=tokusan.filter(o=>{
     if(prefecture&&o.prefecture!==prefecture)return false;
-    if(region&&regionLabel(o)!==region)return false;
+    if(!matchesRegion(o,region))return false;
     if(category&&categoryCode(o)!==category)return false;
     if(keyword){
       const haystack=[o.label_ja,o.label_en,o.place,o.prefecture,o.city,o.production_area,o.maker,categoryLabel(categoryCode(o))].filter(Boolean).join(' ').toLowerCase();
@@ -350,7 +357,9 @@ document.querySelector('#lightbox').addEventListener('click',e=>{if(e.target.id=
 document.querySelector('#lightbox').addEventListener('cancel',closeLightbox);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
 
-fetch('/api/tokusan/').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{
+Promise.all([fetchJSONWithRetry('/api/tokusan/'),fetchJSONWithRetry('/regions.json?v=202609296')]).then(([data,regions])=>{
+  if(!Array.isArray(regions))throw new Error('Invalid region definitions');
+  regionsByPrefecture=new Map(regions.map(p=>[p.prefecture,p]));
   tokusan=Array.isArray(data)?data:[];
   populatePrefectures();
   populateRegions();
@@ -359,6 +368,6 @@ fetch('/api/tokusan/').then(response=>{if(!response.ok)throw new Error(`HTTP ${r
   applyFilters();
 }).catch(error=>{
   console.error('Tokusan data could not be loaded',error);
-  document.querySelector('#tokusan-list').innerHTML='<p class="empty-state">特産物の情報を読み込めませんでした。fetch_tokusan.py と build_db.py を実行してデータベースを作成してください。</p>';
+  document.querySelector('#tokusan-list').innerHTML='<p class="empty-state">特産物の情報を読み込めませんでした。時間をおいて再読み込みしてください。</p>';
   document.querySelector('#map-count').textContent='読み込み失敗';
 });

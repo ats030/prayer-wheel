@@ -16,6 +16,7 @@ import tempfile
 from pathlib import Path
 from urllib.parse import quote, urlparse
 from import_production_points import apply_points
+from classify_regions import classify, export_public, load_regions
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "frontend" / "tokusan.json"
@@ -48,7 +49,10 @@ CREATE TABLE tokusan (
   coordinate_kind TEXT NOT NULL DEFAULT '',
   coordinate_label TEXT NOT NULL DEFAULT '',
   coordinate_source_url TEXT NOT NULL DEFAULT '',
-  coordinate_source_name TEXT NOT NULL DEFAULT ''
+  coordinate_source_name TEXT NOT NULL DEFAULT '',
+  region_ids TEXT NOT NULL DEFAULT '[]',
+  region_scope TEXT NOT NULL DEFAULT 'unknown',
+  region_basis TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX idx_tokusan_prefecture ON tokusan(prefecture);
 CREATE INDEX idx_tokusan_category ON tokusan(category);
@@ -173,6 +177,12 @@ def main():
                         (e['city'], e['coordinate_kind'], e['coordinate_label'],
                          e['coordinate_source_url'], e['coordinate_source_name'], e['id']))
     con.execute("UPDATE tokusan SET source_name = 'Wikipedia' WHERE source_name = ''")
+    definitions = load_regions()
+    by_prefecture = {p['prefecture']: p for p in definitions}
+    for qid, prefecture, area, city, place in con.execute('SELECT qid, prefecture, production_area, city, place FROM tokusan').fetchall():
+        region_ids, scope, basis = classify(area or city or place, prefecture, by_prefecture[prefecture])
+        con.execute('UPDATE tokusan SET region_ids=?, region_scope=?, region_basis=? WHERE qid=?',
+                    (json.dumps(region_ids), scope, basis, qid))
     con.commit()
     count = con.execute("SELECT COUNT(*) FROM tokusan").fetchone()[0]
     pref = con.execute(
@@ -184,6 +194,7 @@ def main():
     # Cloud Run's distroless image runs as nonroot; COPY preserves this mode.
     os.chmod(temporary, 0o644)
     os.replace(temporary, DST)
+    export_public(definitions)
     print(f"tokusan.db: 品目 {count} 件 (都道府県単位 {pref} 件、除外 {len(curation['exclude'])} 件) -> {DST}")
     print(f"  カテゴリ: {cat_str}")
 

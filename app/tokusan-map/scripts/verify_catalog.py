@@ -13,6 +13,7 @@ from pathlib import Path
 
 import requests
 from import_production_points import apply_points
+from classify_regions import classify, load_regions
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -41,6 +42,16 @@ def main():
     assert len(counts) == 47 and min(counts.values()) >= 5, counts
     assert len({r['id'] for r in official}) == len(official), 'Duplicate IDs'
     assert len({r['label'] for r in official}) == len(official), 'Duplicate names'
+    definitions = {p['prefecture']: p for p in load_regions()}
+    public = json.loads((ROOT / 'frontend/regions.json').read_text())
+    expected = [dict(pref, regions=[{'id': r['id'], 'label': r['label']} for r in pref['regions']])
+                for pref in definitions.values()]
+    assert public == expected, 'Published region definitions differ from canonical data'
+    for row in rows.values():
+        ids, scope, basis = classify(row['production_area'] or row['city'] or row['place'],
+                                     row['prefecture'], definitions[row['prefecture']])
+        assert json.loads(row['region_ids']) == ids and row['region_scope'] == scope
+        assert row['region_basis'] == basis and len(ids) == len(set(ids))
     for e in official:
         row = rows[e['id']]
         for target, source in [('label_ja', 'label'), ('source_url', 'source_url'),
@@ -84,6 +95,7 @@ def main():
         print(f'Official source snapshots checked: {len(snapshots)} pages / {len(official)} items')
     print(f'Catalog OK: {len(rows)} items, {len(counts)} prefectures, minimum {min(counts.values())} per prefecture')
     print('Categories:', dict(sorted(collections.Counter(r['category'] for r in rows.values()).items())))
+    print('Region scopes:', dict(collections.Counter(r['region_scope'] for r in rows.values())))
 
 
 if __name__ == '__main__':

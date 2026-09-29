@@ -2,6 +2,7 @@ package services
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/url"
 	"strings"
 
@@ -10,27 +11,29 @@ import (
 
 type Tokusan struct {
 	// QID is the legacy API key; official-source items use a stable local-* ID.
-	QID                  string  `json:"qid"`
-	LabelJA              string  `json:"label_ja"`
-	LabelEN              string  `json:"label_en,omitempty"`
-	Place                string  `json:"place"`
-	Prefecture           string  `json:"prefecture"`
-	City                 string  `json:"city,omitempty"`
-	Latitude             float64 `json:"latitude"`
-	Longitude            float64 `json:"longitude"`
-	Evidence             string  `json:"evidence,omitempty"`
-	Confidence           float64 `json:"confidence"`
-	SourceURL            string  `json:"source_url,omitempty"`
-	SourceName           string  `json:"source_name,omitempty"`
-	Description          string  `json:"description,omitempty"`
-	ProductionArea       string  `json:"production_area,omitempty"`
-	CoordinateKind       string  `json:"coordinate_kind,omitempty"`
-	CoordinateLabel      string  `json:"coordinate_label,omitempty"`
-	CoordinateSourceURL  string  `json:"coordinate_source_url,omitempty"`
-	CoordinateSourceName string  `json:"coordinate_source_name,omitempty"`
-	AffiliateURL         string  `json:"affiliate_url,omitempty"`
-	ShoppingURL          string  `json:"shopping_url,omitempty"`
-	Category             string  `json:"category,omitempty"`
+	QID                  string   `json:"qid"`
+	LabelJA              string   `json:"label_ja"`
+	LabelEN              string   `json:"label_en,omitempty"`
+	Place                string   `json:"place"`
+	Prefecture           string   `json:"prefecture"`
+	City                 string   `json:"city,omitempty"`
+	Latitude             float64  `json:"latitude"`
+	Longitude            float64  `json:"longitude"`
+	Evidence             string   `json:"evidence,omitempty"`
+	Confidence           float64  `json:"confidence"`
+	SourceURL            string   `json:"source_url,omitempty"`
+	SourceName           string   `json:"source_name,omitempty"`
+	Description          string   `json:"description,omitempty"`
+	ProductionArea       string   `json:"production_area,omitempty"`
+	CoordinateKind       string   `json:"coordinate_kind,omitempty"`
+	CoordinateLabel      string   `json:"coordinate_label,omitempty"`
+	CoordinateSourceURL  string   `json:"coordinate_source_url,omitempty"`
+	CoordinateSourceName string   `json:"coordinate_source_name,omitempty"`
+	RegionIDs            []string `json:"region_ids"`
+	RegionScope          string   `json:"region_scope"`
+	AffiliateURL         string   `json:"affiliate_url,omitempty"`
+	ShoppingURL          string   `json:"shopping_url,omitempty"`
+	Category             string   `json:"category,omitempty"`
 	// Maker は生産者・ブランド・製造元の一覧。空文字列は表示しない。
 	Maker string `json:"maker,omitempty"`
 	// PrefectureLevel indicates a prefectural representative coordinate, not geographic coverage.
@@ -77,10 +80,14 @@ func (s *TokusanService) collect(query string, args ...any) ([]Tokusan, error) {
 	result := make([]Tokusan, 0)
 	for rows.Next() {
 		var t Tokusan
+		var regionIDs string
 		if err := rows.Scan(&t.QID, &t.LabelJA, &t.LabelEN, &t.Place, &t.Prefecture,
 			&t.City, &t.Latitude, &t.Longitude, &t.Evidence, &t.Confidence, &t.SourceURL,
 			&t.Category, &t.Maker, &t.PrefectureLevel, &t.SourceName, &t.Description, &t.ProductionArea,
-			&t.CoordinateKind, &t.CoordinateLabel, &t.CoordinateSourceURL, &t.CoordinateSourceName); err != nil {
+			&t.CoordinateKind, &t.CoordinateLabel, &t.CoordinateSourceURL, &t.CoordinateSourceName, &regionIDs, &t.RegionScope); err != nil {
+			return nil, err
+		}
+		if err := json.Unmarshal([]byte(regionIDs), &t.RegionIDs); err != nil {
 			return nil, err
 		}
 		t.AffiliateURL = amazonSearchURL(s.affiliate, t.LabelJA)
@@ -95,7 +102,7 @@ func (s *TokusanService) collect(query string, args ...any) ([]Tokusan, error) {
 
 func (s *TokusanService) GetAll() []Tokusan {
 	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture," +
-		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level, source_name, description, production_area, coordinate_kind, coordinate_label, coordinate_source_url, coordinate_source_name FROM tokusan t")
+		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level, source_name, description, production_area, coordinate_kind, coordinate_label, coordinate_source_url, coordinate_source_name, region_ids, region_scope FROM tokusan t")
 	if list == nil {
 		list = []Tokusan{}
 	}
@@ -104,7 +111,7 @@ func (s *TokusanService) GetAll() []Tokusan {
 
 func (s *TokusanService) GetByPrefecture(prefecture string) []Tokusan {
 	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture,"+
-		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level, source_name, description, production_area, coordinate_kind, coordinate_label, coordinate_source_url, coordinate_source_name FROM tokusan t WHERE t.prefecture = ?", prefecture)
+		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level, source_name, description, production_area, coordinate_kind, coordinate_label, coordinate_source_url, coordinate_source_name, region_ids, region_scope FROM tokusan t WHERE t.prefecture = ?", prefecture)
 	if list == nil {
 		list = []Tokusan{}
 	}
@@ -116,7 +123,7 @@ func (s *TokusanService) GetByQID(qid string) *Tokusan {
 		return nil
 	}
 	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture,"+
-		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level, source_name, description, production_area, coordinate_kind, coordinate_label, coordinate_source_url, coordinate_source_name FROM tokusan t WHERE t.qid = ?", qid)
+		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level, source_name, description, production_area, coordinate_kind, coordinate_label, coordinate_source_url, coordinate_source_name, region_ids, region_scope FROM tokusan t WHERE t.qid = ?", qid)
 	if len(list) == 0 {
 		return nil
 	}
