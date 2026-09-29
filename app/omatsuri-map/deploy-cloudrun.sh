@@ -116,8 +116,9 @@ DEPLOY_ARGS+=(--set-env-vars OMATSURI_SUMMARY_DISABLE=1)
 "$GCLOUD" run services update-traffic "$SERVICE" \
     --project "$PROJECT" --region "$REGION" --to-latest --clear-tags
 
-URL=$("$GCLOUD" run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" \
-      --format='value(status.url)')
+# 公開URLはプロジェクト番号入りの決定的URLに固定する (canonical/sitemap と一致させる)。
+# status.url は旧形式のハッシュURLを返すため使わない。どちらも同じサービスを指す。
+URL="https://$SERVICE-$PROJECT_NUMBER.$REGION.run.app"
 
 # Smoke check: confirm production actually serves the new revision with HTTP
 # 200. Retry once before failing so cold starts don't cause a false alarm.
