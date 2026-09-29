@@ -35,7 +35,6 @@ function festivalKey(f,index=0){return f.qid||`${f.label_ja}-${f.latitude}-${f.l
 function wikidataQID(f){return /^Q[1-9][0-9]*$/.test(f.qid||'')?f.qid:''}
 function wikipediaTitle(f){return f.wikipedia_title||(wikidataQID(f)?f.label_ja:'')}
 function lifecycleStatus(f){return f.lifecycle?.status||'legacy'}
-function lifecycleLabel(f){return {active:'継続開催の案内あり',ended:'開催終了',suspended:'休止中',unknown:'継続不明',legacy:'継続未確認'}[lifecycleStatus(f)]||'継続不明'}
 function matchesLifecycle(f,filter){
   const status=lifecycleStatus(f);
   if(filter==='all')return true;
@@ -267,7 +266,7 @@ function renderList(){
   if(!visible.length){list.innerHTML='<p class="empty-state">条件に合う祭りがありません。日付や地域を変えてお試しください。</p>';return}
   list.innerHTML=visible.map((f,index)=>{
     const key=festivalKey(f,index);
-    return `<button class="festival-card" type="button" data-key="${esc(key)}" aria-current="${key===selectedKey}"><span class="card-index">${String(index+1).padStart(2,'0')}</span><span><span class="card-name">${esc(f.label_ja||f.label_en||'名称未登録')}</span><span class="card-meta"><span>${esc(f.prefecture||'地域未登録')}</span><span>${esc(nextDateLabel(f))}</span><span>${esc(lifecycleLabel(f))}</span></span></span></button>`;
+    return `<button class="festival-card" type="button" data-key="${esc(key)}" aria-current="${key===selectedKey}"><span class="card-index">${String(index+1).padStart(2,'0')}</span><span><span class="card-name">${esc(f.label_ja||f.label_en||'名称未登録')}</span><span class="card-meta"><span>${esc(f.prefecture||'地域未登録')}</span><span>${esc(nextDateLabel(f))}</span></span></span></button>`;
   }).join('');
   list.querySelectorAll('button').forEach(card=>card.addEventListener('click',()=>selectFestival(card.dataset.key,'list')));
 }
