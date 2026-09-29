@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """出典と座標を持つ日本の史跡候補をWikidataから収集する。"""
+import hashlib
 import json
 import math
 import re
@@ -169,6 +170,58 @@ def category(types, label):
     return found or ["その他"]
 
 
+# 創建年(P571)を時代名へ換算する境界年(開始年)。593年より前は社寺の創建伝承や時代区分の諸説が多いため換算しない。
+ERA_STARTS = ((593, "飛鳥時代"), (710, "奈良時代"), (794, "平安時代"), (1185, "鎌倉時代"),
+              (1336, "室町時代"), (1573, "安土桃山時代"), (1603, "江戸時代"), (1868, "明治時代"),
+              (1912, "大正時代"), (1926, "昭和時代"), (1989, "平成時代"), (2019, "令和時代"))
+# Wikidata timePrecision: 7=世紀, 8=10年, 9=年, 10=月, 11=日
+PRECISION_CENTURY, PRECISION_DECADE, PRECISION_YEAR = 7, 8, 9
+
+
+def era_of_year(year):
+    name = None
+    for start, era in ERA_STARTS:
+        if year < start:
+            break
+        name = era
+    return name
+
+
+def era_from_date(value, precision):
+    """P571の日時と精度を時代名にする。期間が時代の境をまたぐ・精度が粗い場合はNone。"""
+    match = re.match(r"([+-]?)(\d+)-", value)
+    if not match or precision < PRECISION_CENTURY:
+        return None
+    year = int(match.group(2)) * (-1 if match.group(1) == "-" else 1)
+    if precision >= PRECISION_YEAR:
+        first, last = year, year
+    elif precision == PRECISION_DECADE:
+        first = year - year % 10
+        last = first + 9
+    else:
+        # N世紀は N*100 または (N-1)*100+1 で格納されるため、どちらも (N-1)*100+1〜N*100 に揃える
+        century = (year - 1) // 100 if year % 100 else year // 100 - 1
+        first, last = century * 100 + 1, century * 100 + 100
+    era = era_of_year(first)
+    return era if era and era == era_of_year(last) else None
+
+
+def inception_era(dates):
+    """複数のP571値が同じ時代を指すときだけ採用する。"""
+    eras = {era_from_date(value, precision) for value, precision in dates}
+    return eras.pop() if len(eras) == 1 else None
+
+
+def row_era(qid, group, inceptions):
+    """P2348(時代)がない行を、創建年→古墳の種別の順で補う。"""
+    era = inception_era(inceptions.get(qid, []))
+    if era:
+        return era
+    if any("古墳" in t for t in group.get("types", [])):
+        return "古墳時代"
+    return ""
+
+
 def highest_rank(ranks):
     if not ranks:
         return "undesig", "未指定"
@@ -216,6 +269,29 @@ def collect_broad():
     return bindings
 
 
+INCEPTION_QUERY = r"""
+SELECT ?item ?time ?precision WHERE {
+  VALUES ?item { %s }
+  ?item p:P571/psv:P571 [ wikibase:timeValue ?time; wikibase:timePrecision ?precision ].
+}
+"""
+INCEPTION_BATCH = 400
+
+
+def collect_inceptions(qids):
+    """QIDごとの創建年(P571)の (日時, 精度) を返す。キャッシュキーはバッチ内容のハッシュ。"""
+    ordered = sorted(qids)
+    dates = {}
+    for i in range(0, len(ordered), INCEPTION_BATCH):
+        batch = ordered[i:i + INCEPTION_BATCH]
+        digest = hashlib.sha1(" ".join(batch).encode()).hexdigest()[:12]
+        rows = query_cached("inception_" + digest, INCEPTION_QUERY % " ".join("wd:" + q for q in batch))
+        for row in rows:
+            qid = row["item"]["value"].rsplit("/", 1)[-1]
+            dates.setdefault(qid, []).append((row["time"]["value"], int(row["precision"]["value"])))
+    return dates
+
+
 def collect_registered():
     return query_cached("registered_" + REGISTERED_QID, REGISTERED_QUERY)
 
@@ -259,6 +335,7 @@ def main():
         if era and era not in current["eras"]:
             current["eras"].append(era)
 
+    inceptions = collect_inceptions(grouped)
     rows = []
     for qid, group in grouped.items():
         if qid in EXCLUDED_QIDS:
@@ -284,7 +361,7 @@ def main():
             "description": binding.get("itemDescription", {}).get("value", ""),
             "title_ja": title or label,
             "categories": category(group.get("types", []), label),
-            "era": "・".join(group.get("eras", [])),
+            "era": "・".join(group.get("eras", [])) or row_era(qid, group, inceptions),
             "designation": rank, "designation_label": rank_label,
             "designation_source": source,
             "heritage_id": "", "source_url": "https://www.wikidata.org/wiki/" + qid,
