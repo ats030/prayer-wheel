@@ -64,7 +64,38 @@ BROAD_ROOTS = (
     "Q12280",    # 橋
     "Q845945",   # 神社
     "Q5393308",  # 仏教寺院
+    "Q908908",   # 陣屋
+    "Q1152199",  # 貝塚
+    "Q846760",   # 一里塚
+    "Q4895508",  # 戦場
+    "Q10856363", # 台場
+    "Q994817",   # 本陣
 )
+# P31直下では取りこぼしが大きい種別は P279 サブクラスをたどる(宿場87→205件)。
+BROAD_SUBCLASS_ROOTS = (
+    "Q1209783",  # 宿場
+    "Q3368243",  # 関所
+)
+BROAD_SUBCLASS_QUERY = BROAD_QUERY.replace("wdt:P31 ?type.", "wdt:P31/wdt:P279* ?type.")
+
+# 登録有形文化財 (P1435)。「指定」ではなく「登録」なので designation は undesig のまま、
+# designation_label で区別する。
+REGISTERED_QID = "Q11579194"
+REGISTERED_LABEL = "登録有形文化財"
+REGISTERED_QUERY = r"""
+SELECT DISTINCT ?item ?itemLabel ?itemDescription ?coord ?article ?eraLabel WHERE {
+  ?item wdt:P17 wd:Q17; wdt:P625 ?coord; wdt:P1435 wd:%s.
+  ?article schema:about ?item; schema:isPartOf <https://ja.wikipedia.org/>.
+  OPTIONAL { ?item wdt:P2348 ?era. }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
+}
+""" % REGISTERED_QID
+
+# 地図に出さないQIDと理由。検証済み補足レコードと訪問点が重なるものに限る。
+EXCLUDED_QIDS = {
+    # 宿場町全体の項目だが座標は日野宿脇本陣跡(tokyo:130001:0000000136)と約24mで同一訪問点
+    "Q11510578": "日野宿",
+}
 
 
 def point(value):
@@ -117,8 +148,10 @@ def category(types, label):
              ("古墳", "古墳"),
              ("城", "城跡"), ("館跡", "城跡"),
              ("寺", "社寺・宗教遺跡"), ("神社", "社寺・宗教遺跡"),
-             ("建築", "歴史的建造物"), ("遺跡", "遺跡"), ("史跡", "史跡"),
-             ("ruin", "遺跡"), ("archaeological", "遺跡"), ("castle", "城跡"))
+             ("建築", "歴史的建造物"), ("建造物", "歴史的建造物"), ("遺跡", "遺跡"), ("史跡", "史跡"),
+             ("ruin", "遺跡"), ("archaeological", "遺跡"), ("castle", "城跡"),
+             ("宿場", "史跡"), ("本陣", "史跡"), ("関所", "史跡"), ("一里塚", "史跡"),
+             ("陣屋", "史跡"), ("台場", "史跡"), ("戦場", "史跡"), ("貝塚", "遺跡"))
     lower = text.lower()
     for needle, value in rules:
         if needle.lower() in lower and value not in found:
@@ -165,12 +198,22 @@ def collect_broad():
         print(f"using {len(rows)} rows for {root}")
         bindings.extend(rows)
         time.sleep(0.5)
+    for root in BROAD_SUBCLASS_ROOTS:
+        rows = query_cached("broad_sub_" + root, BROAD_SUBCLASS_QUERY % root)
+        print(f"using {len(rows)} rows for {root} (with subclasses)")
+        bindings.extend(rows)
+        time.sleep(0.5)
     return bindings
+
+
+def collect_registered():
+    return query_cached("registered_" + REGISTERED_QID, REGISTERED_QUERY)
 
 
 def main():
     designations = collect_designations()
     broad = collect_broad()
+    registered = collect_registered()
     features = fetch_features()
 
     grouped = {}
@@ -196,11 +239,25 @@ def main():
         if "ranks" not in current or not current["ranks"]:
             current["binding"] = binding
 
+    for binding in registered:
+        qid = binding["item"]["value"].rsplit("/", 1)[-1]
+        current = grouped.setdefault(qid, {"binding": binding, "ranks": [], "types": [], "eras": []})
+        current["registered"] = True
+        if "歴史的建造物" not in current["types"]:
+            current["types"].append("歴史的建造物")
+        era = binding.get("eraLabel", {}).get("value", "")
+        if era and era not in current["eras"]:
+            current["eras"].append(era)
+
     rows = []
     for qid, group in grouped.items():
+        if qid in EXCLUDED_QIDS:
+            continue
         binding = group["binding"]
         lat, lon = point(binding["coord"]["value"])
         rank, rank_label = highest_rank(group.get("ranks", []))
+        if rank == "undesig" and group.get("registered"):
+            rank_label = REGISTERED_LABEL
         article = binding.get("article", {}).get("value", "")
         title = requests.utils.unquote(article.rsplit("/", 1)[-1]).replace("_", " ") if article else ""
         label = binding["itemLabel"]["value"]

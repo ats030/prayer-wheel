@@ -52,7 +52,7 @@ function categoryTags(o){
 const CATEGORY_COLORS=new Map([
   ['社寺・宗教遺跡','religious'],['城跡','castle'],['橋','bridge'],
   ['古墳','burial'],['遺跡','archaeological'],['史跡','historic'],
-  ['庭園','garden'],['港','port'],['旧跡','former'],['その他','other']
+  ['庭園','garden'],['港','port'],['旧跡','former'],['歴史的建造物','building'],['その他','other']
 ]);
 function categoryColorToken(o){return `--color-category-${CATEGORY_COLORS.get(categoryTags(o)[0])||'other'}`}
 function categoryColor(o){return getComputedStyle(document.documentElement).getPropertyValue(categoryColorToken(o)).trim()}
