@@ -1,6 +1,7 @@
 package services
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -390,6 +391,22 @@ func (v *extValue) UnmarshalJSON(data []byte) error {
 	return fmt.Errorf("extmetadata value: unsupported shape %s", trimmed)
 }
 
+// decodeExtmetadata parses the raw "extmetadata" value of an imageinfo entry into
+// a Go map of field name to value. The Commons API usually returns an object keyed
+// by field name, but when the requested filter matches no field it returns an
+// empty array ([]); both shapes are tolerated and normalized to an empty map.
+func decodeExtmetadata(raw json.RawMessage) map[string]extValue {
+	out := map[string]extValue{}
+	trimmed := bytes.TrimSpace(raw)
+	if len(trimmed) == 0 || trimmed[0] != '{' {
+		return out
+	}
+	if err := json.Unmarshal(trimmed, &out); err != nil {
+		return out
+	}
+	return out
+}
+
 func fetchCommonsImageInfoOnce(ctx context.Context, fileName string) (string, string, error) {
 	apiURL := fmt.Sprintf(
 		"%s/w/api.php?action=query&titles=File:%s&prop=imageinfo&iiprop=url|extmetadata|size&iiextmetadatafilter=License&iiurlwidth=800&format=json",
@@ -422,9 +439,9 @@ func fetchCommonsImageInfoOnce(ctx context.Context, fileName string) (string, st
 			Pages map[string]struct {
 				Missing   bool `json:"missing"`
 				ImageInfo []struct {
-					ThumbURL    string              `json:"thumburl"`
-					URL         string              `json:"url"`
-					Extmetadata map[string]extValue `json:"extmetadata"`
+					ThumbURL    string          `json:"thumburl"`
+					URL         string          `json:"url"`
+					Extmetadata json.RawMessage `json:"extmetadata"`
 				} `json:"imageinfo"`
 			} `json:"pages"`
 		} `json:"query"`
@@ -446,7 +463,7 @@ func fetchCommonsImageInfoOnce(ctx context.Context, fileName string) (string, st
 				continue
 			}
 			license := ""
-			if lic, ok := info.Extmetadata["License"]; ok {
+			if lic, ok := decodeExtmetadata(info.Extmetadata)["License"]; ok {
 				license = lic.Value
 			}
 			return stripUTM(u), license, nil

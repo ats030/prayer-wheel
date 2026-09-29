@@ -109,12 +109,10 @@ func parseCommonsAttribution(body []byte) (CommonsAttribution, error) {
 		Query struct {
 			Pages map[string]struct {
 				ImageInfo []struct {
-					URL            string `json:"url"`
-					ThumbURL       string `json:"thumburl"`
-					DescriptionURL string `json:"descriptionurl"`
-					Extmetadata    map[string]struct {
-						Value string `json:"value"`
-					} `json:"extmetadata"`
+					URL            string          `json:"url"`
+					ThumbURL       string          `json:"thumburl"`
+					DescriptionURL string          `json:"descriptionurl"`
+					Extmetadata    json.RawMessage `json:"extmetadata"`
 				} `json:"imageinfo"`
 			} `json:"pages"`
 		} `json:"query"`
@@ -124,7 +122,8 @@ func parseCommonsAttribution(body []byte) (CommonsAttribution, error) {
 	}
 	for _, page := range data.Query.Pages {
 		for _, info := range page.ImageInfo {
-			value := func(key string) string { return strings.TrimSpace(info.Extmetadata[key].Value) }
+			ext := decodeExtmetadata(info.Extmetadata)
+			value := func(key string) string { return strings.TrimSpace(ext[key].Value) }
 			license := value("LicenseShortName")
 			if license == "" {
 				license = value("License")
