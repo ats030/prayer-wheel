@@ -9,6 +9,13 @@ class CategoryTest(unittest.TestCase):
         self.assertEqual(category(["橋"], "久宝寺橋"), ["橋"])
         self.assertEqual(category(["橋"], "城光寺橋"), ["橋"])
 
+    def test_place_name_in_kofun_name_is_not_category(self):
+        self.assertEqual(category(["前方後円墳"], "前橋二子山古墳"), ["古墳"])
+        self.assertEqual(category(["古墳"], "寺山古墳群"), ["古墳"])
+
+    def test_bridge_suffix_still_counts_without_bridge_type(self):
+        self.assertEqual(category(["歴史的建造物"], "眼鏡橋"), ["橋", "歴史的建造物"])
+
     def test_religious_type_still_counts_for_facility_suffix(self):
         self.assertEqual(category(["仏教寺院"], "東本願寺真宗会館"), ["社寺・宗教遺跡"])
 

@@ -140,10 +140,11 @@ def nearest_prefecture(lon, lat, features):
     return best_name
 
 
-# 駅・橋・城館の名称に含まれる「寺」「神社」「城」は地名由来の固有名なので(岩水寺駅・久宝寺橋・聖寿寺館)、
-# これらはtypeだけで判定する。
-PROPER_NAME_SUFFIXES = ("駅", "橋", "館")
-PROPER_NAME_NEEDLES = ("寺", "神社", "城")
+# 駅・橋・城館・古墳の名称に含まれる「寺」「神社」「城」「橋」は地名由来の固有名なので
+# (岩水寺駅・久宝寺橋・聖寿寺館・前橋二子山古墳)、これらはtypeだけで判定する。
+# ただし名称の末尾そのもの(○○橋の「橋」)は施設の種類を表すので名称でも判定する。
+PROPER_NAME_SUFFIXES = ("駅", "橋", "館", "古墳", "古墳群")
+PROPER_NAME_NEEDLES = ("寺", "神社", "城", "橋")
 
 
 def category(types, label):
@@ -164,7 +165,8 @@ def category(types, label):
     lower = text.lower()
     type_lower = type_text.lower()
     for needle, value in rules:
-        haystack = type_lower if name_only and needle in PROPER_NAME_NEEDLES else lower
+        place_name = name_only and needle in PROPER_NAME_NEEDLES and not label.endswith(needle)
+        haystack = type_lower if place_name else lower
         if needle.lower() in haystack and value not in found:
             found.append(value)
     return found or ["その他"]
