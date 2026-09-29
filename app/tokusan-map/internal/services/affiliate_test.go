@@ -25,3 +25,13 @@ func TestAffiliateExplicitDisable(t *testing.T) {
 		t.Fatal("empty explicit configuration must disable local fallback")
 	}
 }
+
+func TestAmazonProductSearchWithoutAffiliate(t *testing.T) {
+	u, err := url.Parse(amazonProductSearchURL("わかさいも & 北海道"))
+	if err != nil || u.Query().Get("k") != "わかさいも & 北海道" || u.Query().Has("tag") {
+		t.Fatal("ordinary search must preserve the item name without an associate tag")
+	}
+	if amazonSearchURL("", "わかさいも") != "" {
+		t.Fatal("an unset affiliate template must not create an affiliate link")
+	}
+}

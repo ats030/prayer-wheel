@@ -264,9 +264,10 @@ function showDetail(o,origin){
 }
 
 function amazonLink(o){
-  const url=safeUrl(o.affiliate_url);
+  const affiliate=Boolean(safeUrl(o.affiliate_url));
+  const url=safeUrl(o.affiliate_url)||safeUrl(o.shopping_url);
   if(!url||new URL(url).hostname!=='www.amazon.co.jp')return'';
-  return `<section class="detail-section detail-affiliate" aria-labelledby="detail-shopping"><h3 id="detail-shopping">関連商品 <span class="detail-note-inline">広告</span></h3><a href="${esc(url)}" target="_blank" rel="sponsored noopener noreferrer">Amazonで「${esc(o.label_ja)}」を探す <span aria-hidden="true">↗</span></a><p class="detail-note">品目名による検索です。検索結果には関連する商品も含まれます。</p><p class="image-license">Amazonのアソシエイトとして、特産物マップは適格販売により収入を得ています。</p></section>`;
+  return `<section class="detail-section detail-affiliate" aria-labelledby="detail-shopping"><h3 id="detail-shopping">関連商品${affiliate?' <span class="detail-note-inline">広告</span>':''}</h3><a href="${esc(url)}" target="_blank" rel="${affiliate?'sponsored ':''}noopener noreferrer">Amazonで「${esc(o.label_ja)}」を探す <span aria-hidden="true">↗</span></a><p class="detail-note">品目名による検索です。検索結果には関連する商品も含まれます。</p>${affiliate?'<p class="image-license">Amazonのアソシエイトとして、特産物マップは適格販売により収入を得ています。</p>':''}</section>`;
 }
 
 async function hydrateImage(o){

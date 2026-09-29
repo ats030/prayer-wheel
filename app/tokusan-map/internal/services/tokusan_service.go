@@ -25,6 +25,7 @@ type Tokusan struct {
 	Description    string  `json:"description,omitempty"`
 	ProductionArea string  `json:"production_area,omitempty"`
 	AffiliateURL   string  `json:"affiliate_url,omitempty"`
+	ShoppingURL    string  `json:"shopping_url,omitempty"`
 	Category       string  `json:"category,omitempty"`
 	// Maker は生産者・ブランド・製造元の一覧。空文字列は表示しない。
 	Maker string `json:"maker,omitempty"`
@@ -78,6 +79,7 @@ func (s *TokusanService) collect(query string, args ...any) ([]Tokusan, error) {
 			return nil, err
 		}
 		t.AffiliateURL = amazonSearchURL(s.affiliate, t.LabelJA)
+		t.ShoppingURL = amazonProductSearchURL(t.LabelJA)
 		result = append(result, t)
 	}
 	if err := rows.Err(); err != nil {

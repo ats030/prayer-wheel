@@ -36,6 +36,13 @@ func affiliateTemplate() string {
 
 var affiliateTag = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
 
+func amazonProductSearchURL(label string) string {
+	if label == "" {
+		return ""
+	}
+	return "https://www.amazon.co.jp/s?" + url.Values{"k": {label}}.Encode()
+}
+
 func amazonSearchURL(template, label string) string {
 	u, err := url.Parse(template)
 	if err != nil || u.Scheme != "https" || u.Host != "www.amazon.co.jp" || u.Path != "/s" || u.User != nil || u.Fragment != "" || label == "" {
