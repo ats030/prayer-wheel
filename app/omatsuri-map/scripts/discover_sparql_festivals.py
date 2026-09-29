@@ -115,6 +115,7 @@ def resolved_coordinate(entity, places):
 
 
 def fetch_entities(session, qids, props="labels|descriptions|claims|sitelinks"):
+    qids = [qid for qid in qids if re.fullmatch(r"Q[1-9][0-9]*", qid)]
     result = {}
     qids = sorted({qid for qid in qids if qid})
     for batch in batches(qids):

@@ -143,7 +143,7 @@ def main():
     rows = json.loads(args.data.read_text(encoding="utf-8"))
     session = requests.Session()
     session.headers["User-Agent"] = USER_AGENT
-    festival_entities = request_entities(session, [row["qid"] for row in rows if row.get("qid")], "claims")
+    festival_entities = request_entities(session, [row["qid"] for row in rows if re.fullmatch(r"Q[1-9][0-9]*", row.get("qid", ""))], "claims")
     calendar_qids = {qid for entity in festival_entities.values() for qid in p837_qids(entity)}
     calendar_entities = request_entities(session, calendar_qids, "labels")
     schedules = schedules_by_festival(festival_entities, calendar_entities)

@@ -8,6 +8,7 @@ venue・occurrences・annual_schedule・cultural_relaw は構造が単一オブ�
 
 import json
 import sqlite3
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -35,6 +36,7 @@ CREATE TABLE festival (
     occurrences_json  TEXT NOT NULL DEFAULT '',
     annual_schedule_json TEXT NOT NULL DEFAULT '',
     cultural_relaw_json TEXT NOT NULL DEFAULT '',
+    lifecycle_json  TEXT NOT NULL DEFAULT '',
     description_source TEXT NOT NULL DEFAULT '',
     coordinate_source TEXT NOT NULL DEFAULT '',
     coordinate_prefecture TEXT NOT NULL DEFAULT '',
@@ -93,7 +95,7 @@ def build():
                 float(e.get("longitude") or 0),
                 e.get("date") or "",
                 e.get("description") or "",
-                e.get("wikipedia_title") or (e.get("label_ja") or ""),
+                e.get("wikipedia_title") or (e.get("label_ja", "") if re.fullmatch(r"Q[1-9][0-9]*", qid) else ""),
                 dump(e.get("venue")),
                 dump(e.get("occurrences")),
                 dump(e.get("annual_schedule")),
@@ -106,13 +108,14 @@ def build():
                 e.get("jalan_lrg_name") or "",
                 e.get("jalan_sml_code") or "",
                 e.get("jalan_sml_name") or "",
+                dump(e.get("lifecycle")),
             )
             columns = (
                 "qid,label_ja,label_en,prefecture,latitude,longitude,"
                 "date,description,wikipedia_title,venue_json,occurrences_json,"
                 "annual_schedule_json,cultural_relaw_json,description_source,coordinate_source,"
                 "coordinate_prefecture,coordinate_validation_source,"
-                "jalan_lrg_code,jalan_lrg_name,jalan_sml_code,jalan_sml_name"
+                "jalan_lrg_code,jalan_lrg_name,jalan_sml_code,jalan_sml_name,lifecycle_json"
             ).split(",")
             if len(columns) != len(values):
                 raise SystemExit(

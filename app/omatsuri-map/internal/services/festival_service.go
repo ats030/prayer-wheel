@@ -13,36 +13,47 @@ type Venue struct {
 	Name    string `json:"name"`
 	Address string `json:"address,omitempty"`
 	// 座標のない会場を 0,0 として返すと、フロントエンドが大西洋上に点を打つ。
-	Latitude      *float64 `json:"latitude,omitempty"`
-	Longitude     *float64 `json:"longitude,omitempty"`
-	Source        string   `json:"source"`
-	CoordinateSrc string   `json:"coordinate_source,omitempty"`
-	Precision     string   `json:"precision,omitempty"`
+	Latitude       *float64 `json:"latitude,omitempty"`
+	Longitude      *float64 `json:"longitude,omitempty"`
+	Source         string   `json:"source"`
+	CoordinateSrc  string   `json:"coordinate_source,omitempty"`
+	Precision      string   `json:"precision,omitempty"`
+	CoordinateNote string   `json:"coordinate_note,omitempty"`
+}
+
+// Lifecycle describes the evidence for continuation, not a promise of a future date.
+type Lifecycle struct {
+	Status       string `json:"status"`
+	Source       string `json:"source"`
+	CheckedOn    string `json:"checked_on"`
+	Evidence     string `json:"evidence"`
+	LastHeldYear int    `json:"last_held_year,omitempty"`
 }
 
 type Festival struct {
-	QID                         string           `json:"qid"`
-	LabelJA                     string           `json:"label_ja"`
-	LabelEN                     string           `json:"label_en"`
-	Prefecture                  string           `json:"prefecture"`
-	Latitude                    float64          `json:"latitude"`
-	Longitude                   float64          `json:"longitude"`
-	Date                        string           `json:"date"`
-	Description                 string           `json:"description"`
-	WikipediaTitle              string           `json:"wikipedia_title,omitempty"`
-	Venue                       *Venue           `json:"venue,omitempty"`
-	Occurrence                  []map[string]any `json:"occurrences,omitempty"`
-	AnnualSchedule              []map[string]any `json:"annual_schedule,omitempty"`
-	CulturalRelaw               *map[string]any  `json:"cultural_relaw,omitempty"`
-	Categories                  []string         `json:"categories"`
-	DescriptionSource           string           `json:"description_source,omitempty"`
-	CoordinateSource            string           `json:"coordinate_source,omitempty"`
-	CoordinatePrefecture        string           `json:"coordinate_prefecture,omitempty"`
-	CoordinateValidationSource  string           `json:"coordinate_validation_source,omitempty"`
-	JALANLRGCode                string           `json:"jalan_lrg_code,omitempty"`
-	JALANLRGName                string           `json:"jalan_lrg_name,omitempty"`
-	JALANSMLCode                string           `json:"jalan_sml_code,omitempty"`
-	JALANSMLName                string           `json:"jalan_sml_name,omitempty"`
+	QID                        string           `json:"qid"`
+	LabelJA                    string           `json:"label_ja"`
+	LabelEN                    string           `json:"label_en"`
+	Prefecture                 string           `json:"prefecture"`
+	Latitude                   float64          `json:"latitude"`
+	Longitude                  float64          `json:"longitude"`
+	Date                       string           `json:"date"`
+	Description                string           `json:"description"`
+	WikipediaTitle             string           `json:"wikipedia_title,omitempty"`
+	Venue                      *Venue           `json:"venue,omitempty"`
+	Occurrence                 []map[string]any `json:"occurrences,omitempty"`
+	AnnualSchedule             []map[string]any `json:"annual_schedule,omitempty"`
+	CulturalRelaw              *map[string]any  `json:"cultural_relaw,omitempty"`
+	Categories                 []string         `json:"categories"`
+	DescriptionSource          string           `json:"description_source,omitempty"`
+	Lifecycle                  *Lifecycle       `json:"lifecycle,omitempty"`
+	CoordinateSource           string           `json:"coordinate_source,omitempty"`
+	CoordinatePrefecture       string           `json:"coordinate_prefecture,omitempty"`
+	CoordinateValidationSource string           `json:"coordinate_validation_source,omitempty"`
+	JALANLRGCode               string           `json:"jalan_lrg_code,omitempty"`
+	JALANLRGName               string           `json:"jalan_lrg_name,omitempty"`
+	JALANSMLCode               string           `json:"jalan_sml_code,omitempty"`
+	JALANSMLName               string           `json:"jalan_sml_name,omitempty"`
 }
 
 type FestivalService struct {
@@ -65,6 +76,7 @@ CREATE TABLE IF NOT EXISTS festival (
     occurrences_json  TEXT NOT NULL DEFAULT '',
     annual_schedule_json TEXT NOT NULL DEFAULT '',
     cultural_relaw_json TEXT NOT NULL DEFAULT '',
+    lifecycle_json  TEXT NOT NULL DEFAULT '',
     description_source TEXT NOT NULL DEFAULT '',
     coordinate_source TEXT NOT NULL DEFAULT '',
     coordinate_prefecture TEXT NOT NULL DEFAULT '',
@@ -87,13 +99,12 @@ CREATE TABLE IF NOT EXISTS festival_categories (
 CREATE INDEX IF NOT EXISTS idx_festival_categories_type ON festival_categories (type_id);
 `
 
-const festivalColumns =
-	"f.id, f.qid, f.label_ja, f.label_en, f.prefecture," +
+const festivalColumns = "f.id, f.qid, f.label_ja, f.label_en, f.prefecture," +
 	" f.latitude, f.longitude, f.date, f.description, f.wikipedia_title," +
 	" f.venue_json, f.occurrences_json, f.annual_schedule_json, f.cultural_relaw_json," +
 	" f.description_source, f.coordinate_source, f.coordinate_prefecture," +
 	" f.coordinate_validation_source," +
-	" f.jalan_lrg_code, f.jalan_lrg_name, f.jalan_sml_code, f.jalan_sml_name"
+	" f.jalan_lrg_code, f.jalan_lrg_name, f.jalan_sml_code, f.jalan_sml_name, f.lifecycle_json"
 
 func NewFestivalService(dbPath string) (*FestivalService, error) {
 	db, err := sql.Open("sqlite", dbPath)
@@ -103,6 +114,38 @@ func NewFestivalService(dbPath string) (*FestivalService, error) {
 	if _, err := db.Exec(festivalBaseSchema); err != nil {
 		db.Close()
 		return nil, err
+	}
+	// Existing databases predate lifecycle_json; preserve their rows during migration.
+	columns, err := db.Query("PRAGMA table_info(festival)")
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
+	hasLifecycle := false
+	for columns.Next() {
+		var cid, notNull, pk int
+		var name, typ string
+		var defaultValue any
+		if err := columns.Scan(&cid, &name, &typ, &notNull, &defaultValue, &pk); err != nil {
+			columns.Close()
+			db.Close()
+			return nil, err
+		}
+		if name == "lifecycle_json" {
+			hasLifecycle = true
+		}
+	}
+	err = columns.Err()
+	columns.Close()
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
+	if !hasLifecycle {
+		if _, err := db.Exec("ALTER TABLE festival ADD COLUMN lifecycle_json TEXT NOT NULL DEFAULT ''"); err != nil {
+			db.Close()
+			return nil, err
+		}
 	}
 	if _, err := db.Exec("SELECT 1 FROM festival LIMIT 1"); err != nil {
 		db.Close()
@@ -116,7 +159,7 @@ func (s *FestivalService) Close() error {
 }
 
 func (s *FestivalService) collect(query string, args ...any) ([]Festival, error) {
-	rows, err := s.db.Query(query + " ORDER BY f.label_ja COLLATE NOCASE", args...)
+	rows, err := s.db.Query(query+" ORDER BY f.label_ja COLLATE NOCASE", args...)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +170,7 @@ func (s *FestivalService) collect(query string, args ...any) ([]Festival, error)
 	for rows.Next() {
 		var f Festival
 		var id int
-		var venueJSON, occJSON, annJSON, culJSON string
+		var venueJSON, occJSON, annJSON, culJSON, lifecycleJSON string
 		if err := rows.Scan(
 			&id, &f.QID, &f.LabelJA, &f.LabelEN, &f.Prefecture,
 			&f.Latitude, &f.Longitude, &f.Date, &f.Description, &f.WikipediaTitle,
@@ -135,11 +178,19 @@ func (s *FestivalService) collect(query string, args ...any) ([]Festival, error)
 			&f.DescriptionSource, &f.CoordinateSource, &f.CoordinatePrefecture,
 			&f.CoordinateValidationSource,
 			&f.JALANLRGCode, &f.JALANLRGName, &f.JALANSMLCode, &f.JALANSMLName,
+			&lifecycleJSON,
 		); err != nil {
 			return nil, err
 		}
 		idToIndex[id] = len(out)
 		f.Categories = []string{}
+		if lifecycleJSON != "" {
+			var lifecycle Lifecycle
+			if err := json.Unmarshal([]byte(lifecycleJSON), &lifecycle); err != nil {
+				return nil, err
+			}
+			f.Lifecycle = &lifecycle
+		}
 		if f.Venue = decodeVenue(venueJSON); f.Venue == nil {
 			f.Venue = nil
 		}

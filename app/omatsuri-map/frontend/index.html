@@ -26,6 +26,7 @@
         <label class="field field-wide">祭り名・地域<input id="keyword" type="search" placeholder="例：ねぶた、青森" autocomplete="off"></label>
         <label class="field">都道府県<select id="prefecture"><option value="">すべて</option></select></label>
         <label class="field">種類<select id="category"><option value="">すべて</option></select></label>
+        <label class="field field-wide">開催状態<select id="lifecycle"><option value="current">継続開催・既存の未確認分</option><option value="active">継続開催の案内あり</option><option value="ended">開催終了</option><option value="suspended">休止中</option><option value="unknown">継続不明</option><option value="legacy">既存の継続未確認分</option><option value="all">すべて</option></select></label>
         <label class="field field-wide date-range-field">開催期間<span class="date-range"><input id="festival-date-start" type="date" aria-label="開催期間の開始日"><span class="date-range-sep" aria-hidden="true">〜</span><input id="festival-date-end" type="date" aria-label="開催期間の終了日"></span></label>
       </div>
       <div class="result-bar" aria-live="polite"><span><strong id="result-count">0</strong> 件の祭り</span><button id="clear-filters" type="button">条件をクリア</button></div>
@@ -40,6 +41,6 @@
   <dialog id="lightbox" aria-label="祭りの画像"><button class="lightbox-close" type="button" aria-label="画像を閉じる">×</button><img id="lightbox-image" alt=""></dialog>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="http://ubuntu-server-app:8526/v.js" data-site="omatsuri-map" defer></script>
-  <script src="/app.js?v=20260923b"></script>
+  <script src="/app.js?v=20260929"></script>
 </body>
 </html>

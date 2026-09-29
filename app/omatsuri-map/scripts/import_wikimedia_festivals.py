@@ -117,6 +117,7 @@ def resolved_coordinate(entity, places):
 
 
 def fetch_entities(session, qids):
+    qids = [qid for qid in qids if re.fullmatch(r"Q[1-9][0-9]*", qid)]
     result = {}
     for batch in batches(sorted(set(qids))):
         data = request_json(session, WIKIDATA_API, {

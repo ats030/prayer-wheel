@@ -32,6 +32,20 @@ function persist(key,value){
   saveTimers[key]=setTimeout(()=>{try{localStorage.setItem(key,JSON.stringify(value))}catch(error){console.warn(`Cache ${key} could not be saved`,error)}},500);
 }
 function festivalKey(f,index=0){return f.qid||`${f.label_ja}-${f.latitude}-${f.longitude}-${index}`}
+function wikidataQID(f){return /^Q[1-9][0-9]*$/.test(f.qid||'')?f.qid:''}
+function wikipediaTitle(f){return f.wikipedia_title||(wikidataQID(f)?f.label_ja:'')}
+function lifecycleStatus(f){return f.lifecycle?.status||'legacy'}
+function lifecycleLabel(f){return {active:'継続開催の案内あり',ended:'開催終了',suspended:'休止中',unknown:'継続不明',legacy:'継続未確認'}[lifecycleStatus(f)]||'継続不明'}
+function matchesLifecycle(f,filter){
+  const status=lifecycleStatus(f);
+  if(filter==='all')return true;
+  if(filter==='current')return status==='active'||status==='legacy';
+  return status===filter;
+}
+function lifecycleMarkup(f){
+  const state=f.lifecycle,source=safeUrl(state?.source);
+  return `${esc(lifecycleLabel(f))}${state?.checked_on?`<span class="location-status">${esc(state.checked_on)} 確認</span>`:''}${state?.evidence?`<span class="location-status">${esc(state.evidence)}</span>`:''}${source?`<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">開催情報の出典<span aria-hidden="true">↗</span></a>`:''}`;
+}
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}}
 function plainText(value){const document=new DOMParser().parseFromString(String(value||''),'text/html');return document.body.textContent.trim()}
@@ -54,7 +68,7 @@ function mapCoordinates(f){
 function locationCacheKey(f){const point=mapCoordinates(f);return point?`${point.latitude.toFixed(5)},${point.longitude.toFixed(5)}`:''}
 function locationPrecisionLabel(f){
   const venue=venueData(f);
-  if(venuePoint(venue))return venue.precision==='exact'?'会場位置を確認済み':'会場周辺';
+  if(venuePoint(venue))return venue.coordinate_note||(venue.precision==='exact'?'会場位置を確認済み':'会場周辺');
   if(f.coordinate_source==='administrative_area')return'位置は行政区域の目安';
   if(f.coordinate_source==='venue')return'会場データ由来（未検証）';
   return'位置は目安';
@@ -103,11 +117,11 @@ async function fetchJSONWithRetry(url){
   throw lastError;
 }
 async function loadWikipediaContent(f){
-  const title=f.wikipedia_title||f.label_ja;if(!title)return null;
+  const title=wikipediaTitle(f);if(!title)return null;
   const cacheKey=`${f.qid||''}:${title}`;
   if(wikiContentCache[cacheKey])return wikiContentCache[cacheKey];
   if(wikiContentQueue[cacheKey])return wikiContentQueue[cacheKey];
-  wikiContentQueue[cacheKey]=fetchJSONWithRetry(`/api/wiki/content?title=${encodeURIComponent(title)}&qid=${encodeURIComponent(f.qid||'')}`)
+  wikiContentQueue[cacheKey]=fetchJSONWithRetry(`/api/wiki/content?title=${encodeURIComponent(title)}&qid=${encodeURIComponent(wikidataQID(f))}`)
     .then(data=>wikiContentCache[cacheKey]=data)
     .catch(error=>{console.warn(`Wikipedia content could not be loaded for ${title}`,error);return null})
     .finally(()=>delete wikiContentQueue[cacheKey]);
@@ -240,13 +254,14 @@ function applyFilters(){
   const q=document.querySelector('#keyword').value.trim().toLocaleLowerCase('ja');
   const prefecture=document.querySelector('#prefecture').value;
   const category=document.querySelector('#category').value;
+  const lifecycle=document.querySelector('#lifecycle').value;
   const dateStart=document.querySelector('#festival-date-start').value;
   const dateEnd=document.querySelector('#festival-date-end').value;
   visible=festivals.filter(f=>{
     const text=[f.label_ja,f.label_en,f.prefecture,f.description].filter(Boolean).join(' ').toLocaleLowerCase('ja');
     const prefectureMatches=!prefecture||(f.prefecture===prefecture&&f.coordinate_prefecture===prefecture);
     const categoryMatches=!category||categoryCode(f)===category;
-    return text.includes(q)&&prefectureMatches&&categoryMatches&&matchesDate(f,dateStart,dateEnd);
+    return text.includes(q)&&prefectureMatches&&categoryMatches&&matchesLifecycle(f,lifecycle)&&matchesDate(f,dateStart,dateEnd);
   }).sort(compareByNextOccurrence);
   renderList();renderMarkers();
   document.querySelector('#result-count').textContent=visible.length;
@@ -257,7 +272,7 @@ function renderList(){
   if(!visible.length){list.innerHTML='<p class="empty-state">条件に合う祭りがありません。日付や地域を変えてお試しください。</p>';return}
   list.innerHTML=visible.map((f,index)=>{
     const key=festivalKey(f,index);
-    return `<button class="festival-card" type="button" data-key="${esc(key)}" aria-current="${key===selectedKey}"><span class="card-index">${String(index+1).padStart(2,'0')}</span><span><span class="card-name">${esc(f.label_ja||f.label_en||'名称未登録')}</span><span class="card-meta"><span>${esc(f.prefecture||'地域未登録')}</span><span>${esc(nextDateLabel(f))}</span></span></span></button>`;
+    return `<button class="festival-card" type="button" data-key="${esc(key)}" aria-current="${key===selectedKey}"><span class="card-index">${String(index+1).padStart(2,'0')}</span><span><span class="card-name">${esc(f.label_ja||f.label_en||'名称未登録')}</span><span class="card-meta"><span>${esc(f.prefecture||'地域未登録')}</span><span>${esc(nextDateLabel(f))}</span><span>${esc(lifecycleLabel(f))}</span></span></span></button>`;
   }).join('');
   list.querySelectorAll('button').forEach(card=>card.addEventListener('click',()=>selectFestival(card.dataset.key,'list')));
 }
@@ -320,13 +335,13 @@ function heritageBadge(f){
   return `<p class="badge-line"><span class="badge badge--heritage" role="note">文化財指定｜${esc(type)}</span>${url?`<a class="badge-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">文化遺産詳細登録情報<span aria-hidden="true">↗</span></a>`:''}</p>`;
 }
 function detail(f){
-  const wiki=f.qid?`https://www.wikidata.org/wiki/${encodeURIComponent(f.qid)}`:'';
-  const wikipediaTitle=f.wikipedia_title||f.label_ja;
-  const pedia=wikipediaTitle?`https://ja.wikipedia.org/wiki/${encodeURIComponent(wikipediaTitle)}`:'';
+  const qid=wikidataQID(f),title=wikipediaTitle(f);
+  const wiki=qid?`https://www.wikidata.org/wiki/${encodeURIComponent(qid)}`:'';
+  const pedia=title?`https://ja.wikipedia.org/wiki/${encodeURIComponent(title)}`:'';
   const culture=safeUrl(f.cultural_relaw?.url);
   const about=groundedDescription(f);
   const aboutBody=about.locationAware?`${esc(about.body)}「<span id="detail-about-location">${esc(f.prefecture||'地域未登録')}</span>」付近に登録されています。正確な会場は確認中です。`:esc(about.body);
-  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2>${heritageBadge(f)}</header><dl class="detail-facts"><div><dt>開催地</dt><dd id="detail-location">${locationMarkup(f.prefecture||'地域未登録',f)}${venueData(f)?'':'<span class="location-loading">詳細を確認中…</span>'}</dd></div><div><dt>次回開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status">${esc(about.status)}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section" id="detail-history-section" aria-labelledby="detail-history"><h3 id="detail-history">歴史</h3><div class="detail-history" id="detail-history-body"></div><p class="detail-history-status" id="detail-history-status">読み込んでいます…</p></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" id="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section><section class="detail-section detail-affiliate" id="detail-affiliate-section" aria-labelledby="detail-affiliate-heading"><h3 id="detail-affiliate-heading">近くの宿</h3><div class="affiliate" id="detail-affiliate" aria-label="広告"><p class="detail-affiliate-status">近くの宿を検索しています…</p></div></section></article>`;
+  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(f.label_ja||f.label_en||'名称未登録')}</h2>${heritageBadge(f)}</header><dl class="detail-facts"><div><dt>開催地</dt><dd id="detail-location">${locationMarkup(f.prefecture||'地域未登録',f)}${venueData(f)?'':'<span class="location-loading">詳細を確認中…</span>'}</dd></div><div><dt>開催状態</dt><dd>${lifecycleMarkup(f)}</dd></div><div><dt>次回開催日</dt><dd>${occurrenceMarkup(f)}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">祭りについて</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status">${esc(about.status)}</p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section" id="detail-history-section" aria-labelledby="detail-history"><h3 id="detail-history">歴史</h3><div class="detail-history" id="detail-history-body"></div><p class="detail-history-status" id="detail-history-status">読み込んでいます…</p></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" id="detail-links" aria-label="出典">${safeUrl(f.description_source)?`<a href="${esc(safeUrl(f.description_source))}" target="_blank" rel="noopener noreferrer">公式情報（概要・開催地）<span aria-hidden="true">↗</span></a>`:''}${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}${culture?`<a href="${esc(culture)}" target="_blank" rel="noopener noreferrer">文化庁<span aria-hidden="true">↗</span></a>`:''}</nav></section><section class="detail-section detail-affiliate" id="detail-affiliate-section" aria-labelledby="detail-affiliate-heading"><h3 id="detail-affiliate-heading">近くの宿</h3><div class="affiliate" id="detail-affiliate" aria-label="広告"><p class="detail-affiliate-status">近くの宿を検索しています…</p></div></section></article>`;
 }
 function selectFestival(key,origin){
   const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;
@@ -441,7 +456,7 @@ async function hydrateImage(f,key){
   let result=contentIsRelevant?imageCache[f.qid]:null,loadError=null;
   if(typeof result==='string'||(result?.url&&!result.license)){delete imageCache[f.qid];persist(CACHE_KEY,imageCache);result=null}
   if(!result&&wikipediaContent?.image_url&&contentIsRelevant){result={url:safeUrl(wikipediaContent.image_url),license:String(wikipediaContent.license||'').trim(),licenseUrl:safeUrl(wikipediaContent.license_url),artist:plainText(wikipediaContent.artist),credit:plainText(wikipediaContent.credit),sourceUrl:safeUrl(wikipediaContent.image_source_url)};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
-  if(!result&&f.qid&&contentIsRelevant){
+  if(!result&&wikidataQID(f)&&contentIsRelevant){
     try{const data=await fetchJSONWithRetry(`/api/wiki/image?qid=${encodeURIComponent(f.qid)}`);result={url:safeUrl(data.url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),sourceUrl:safeUrl(data.source_url)};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
     catch(error){loadError=error}
   }
@@ -456,7 +471,7 @@ async function hydrateImage(f,key){
   container.querySelector('button').addEventListener('click',()=>openLightbox(result.url,f.label_ja));
 }
 async function hydrateLinks(f,key){
-  if(!f.qid)return;
+  if(!wikidataQID(f))return;
   let links=linksCache[f.qid];
   if(!links){
     try{
@@ -481,9 +496,10 @@ function closeLightbox(){const dialog=document.querySelector('#lightbox');if(dia
 document.querySelector('#keyword').addEventListener('input',applyFilters);
 document.querySelector('#prefecture').addEventListener('change',applyFilters);
 document.querySelector('#category').addEventListener('change',applyFilters);
+document.querySelector('#lifecycle').addEventListener('change',applyFilters);
 document.querySelector('#festival-date-start').addEventListener('change',applyFilters);
 document.querySelector('#festival-date-end').addEventListener('change',applyFilters);
-document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';document.querySelector('#category').value='';document.querySelector('#festival-date-start').value='';document.querySelector('#festival-date-end').value='';applyFilters();document.querySelector('#keyword').focus()});
+document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';document.querySelector('#category').value='';document.querySelector('#lifecycle').value='current';document.querySelector('#festival-date-start').value='';document.querySelector('#festival-date-end').value='';applyFilters();document.querySelector('#keyword').focus()});
 document.querySelector('.detail-close').addEventListener('click',()=>closeDetail());
 document.querySelector('.lightbox-close').addEventListener('click',closeLightbox);
 document.querySelector('#lightbox').addEventListener('click',event=>{if(event.target.id==='lightbox')closeLightbox()});

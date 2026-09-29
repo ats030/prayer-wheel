@@ -1,0 +1,203 @@
+[
+  {
+    "qid": "local-kochi-hamono",
+    "label_ja": "刃物まつり＆山田のかかしコンテスト",
+    "label_en": "",
+    "prefecture": "高知県",
+    "latitude": 33.61902,
+    "longitude": 133.7187,
+    "description": "香美市の鏡野公園で開かれる祭り。土佐打ち刃物の展示販売や研ぎ、かかしの展示、地域の食品の出店が行われる。",
+    "description_source": "https://kochi-tabi.jp/search_event.html?id=18200",
+    "date": "2026-10-17～2026-10-18",
+    "coordinate_source": "official_venue",
+    "categories": [
+      "博覧会・市"
+    ],
+    "venue": {
+      "name": "高知県立鏡野公園",
+      "latitude": 33.61902,
+      "longitude": 133.7187,
+      "source": "https://kochi-tabi.jp/search_event.html?id=18200",
+      "coordinate_source": "https://kochi-tabi.jp/search_event.html?id=18200",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://kochi-tabi.jp/search_event.html?id=18200",
+      "checked_on": "2026-09-29",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-17",
+        "end": "2026-10-18",
+        "status": "scheduled",
+        "source": "https://kochi-tabi.jp/search_event.html?id=18200"
+      }
+    ]
+  },
+  {
+    "qid": "local-tottori-uradome",
+    "label_ja": "浦富海岸元気フェスティバル（いわみ花火祭り）",
+    "label_en": "",
+    "prefecture": "鳥取県",
+    "latitude": 35.5900899,
+    "longitude": 134.3281722,
+    "description": "岩美町の浦富海水浴場で行われる夏の祭り。町内の食品の出店やステージがあり、海上から花火が打ち上げられる。",
+    "description_source": "https://www.torican.jp/festival/detail_1454.html",
+    "date": "2026-07-25",
+    "coordinate_source": "official_venue",
+    "categories": [
+      "花火",
+      "行事"
+    ],
+    "venue": {
+      "name": "浦富海水浴場",
+      "latitude": 35.5900899,
+      "longitude": 134.3281722,
+      "source": "https://www.torican.jp/festival/detail_1454.html",
+      "coordinate_source": "https://www.torican.jp/festival/detail_1454.html",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.torican.jp/festival/detail_1454.html",
+      "checked_on": "2026-09-29",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-25",
+        "end": "2026-07-25",
+        "status": "past",
+        "source": "https://www.torican.jp/festival/detail_1454.html"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-obi",
+    "label_ja": "飫肥城下まつり",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 31.628854025676738,
+    "longitude": 131.3516085029717,
+    "description": "日南市の飫肥城周辺で開かれる祭り。泰平踊などの郷土芸能と、武者行列を含む時代絵巻パレードが行われる。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1181",
+    "date": "2026-10-17～2026-10-18",
+    "coordinate_source": "official_venue",
+    "categories": [
+      "行列・渡御",
+      "演舞・盆踊り"
+    ],
+    "venue": {
+      "name": "飫肥城周辺",
+      "latitude": 31.628854025676738,
+      "longitude": 131.3516085029717,
+      "source": "https://www.kanko-miyazaki.jp/event/1181",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1181",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1181",
+      "checked_on": "2026-09-29",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-17",
+        "end": "2026-10-18",
+        "status": "scheduled",
+        "source": "https://www.kanko-miyazaki.jp/event/1181"
+      }
+    ]
+  },
+  {
+    "qid": "local-kagoshima-takaono",
+    "label_ja": "高尾野秋祭り",
+    "label_en": "",
+    "prefecture": "鹿児島県",
+    "latitude": 32.0615736,
+    "longitude": 130.3021529,
+    "description": "出水市高尾野町で行われる祭り。従来の高尾野夏祭りから開催時期と名称が変わり、子どもみこしや総踊り、太鼓、花火などが催される。",
+    "description_source": "https://www.kagoshima-kankou.com/event/20300",
+    "date": "2026-09-26",
+    "coordinate_source": "official_venue",
+    "categories": [
+      "演舞・盆踊り",
+      "花火"
+    ],
+    "venue": {
+      "name": "JA鹿児島いずみ高尾野事業所駐車場周辺",
+      "latitude": 32.0615736,
+      "longitude": 130.3021529,
+      "source": "https://www.kagoshima-kankou.com/event/20300",
+      "coordinate_source": "https://www.kagoshima-kankou.com/event/20300",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kagoshima-kankou.com/event/20300",
+      "checked_on": "2026-09-29",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-26",
+        "end": "2026-09-26",
+        "status": "past",
+        "source": "https://www.kagoshima-kankou.com/event/20300"
+      }
+    ],
+    "aliases": [
+      "高尾野夏祭り"
+    ]
+  },
+  {
+    "qid": "local-kochi-nanohana",
+    "label_ja": "入田ヤナギ林 菜の花まつり",
+    "label_en": "",
+    "prefecture": "高知県",
+    "latitude": 32.993633,
+    "longitude": 132.92126,
+    "description": "四万十市入田の四万十川河川敷で行われる花のイベント。菜の花の開花時期に、食の催しやコンサートが開かれる。",
+    "description_source": "https://kochi-tabi.jp/search_event.html?id=18504",
+    "date": "2026-02-28～2026-03-15",
+    "coordinate_source": "official_venue",
+    "categories": [
+      "行事"
+    ],
+    "venue": {
+      "name": "入田ヤナギ林",
+      "latitude": 32.993633,
+      "longitude": 132.92126,
+      "source": "https://kochi-tabi.jp/search_event.html?id=18504",
+      "coordinate_source": "https://kochi-tabi.jp/search_event.html?id=18504",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://kochi-tabi.jp/search_event.html?id=18504",
+      "checked_on": "2026-09-29",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-02-28",
+        "end": "2026-03-15",
+        "status": "past",
+        "source": "https://kochi-tabi.jp/search_event.html?id=18504"
+      }
+    ]
+  }
+]
