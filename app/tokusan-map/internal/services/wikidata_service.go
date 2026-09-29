@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 var client = &http.Client{Timeout: 10 * time.Second}
@@ -40,9 +41,16 @@ func FetchWikidataImage(qid string) (string, string, error) {
 		return "", "", err
 	}
 
-	fileName, err := extractP18FileName(body, qid)
-	if err != nil {
-		return "", "", err
+	fileName := ""
+	if p18, perr := extractP18FileName(body, qid); perr == nil && p18 != "" {
+		fileName = p18
+	} else if cat, cerr := extractP373Category(body, qid); cerr == nil && cat != "" {
+		fctx, fcancel := context.WithTimeout(ctx, stepTimeout)
+		defer fcancel()
+		fileName = pickCommonsCategoryFile(fctx, cat)
+	}
+	if fileName == "" {
+		return "", "", fmt.Errorf("no image found for QID %s (P18 and P373 fallback both empty)", qid)
 	}
 
 	commonsCtx, commonsCancel := context.WithTimeout(ctx, stepTimeout)
@@ -134,6 +142,133 @@ func extractP18FileName(body []byte, qid string) (string, error) {
 		return v, nil
 	}
 	return "", fmt.Errorf("no image found for QID %s", qid)
+}
+
+// extractP373Category returns the P373 (Commons category) claim value if present.
+func extractP373Category(body []byte, qid string) (string, error) {
+	claims, err := extractClaims(body, qid)
+	if err != nil {
+		return "", err
+	}
+	if v := firstClaimString(claims, "P373"); v != "" {
+		return v, nil
+	}
+	return "", fmt.Errorf("no P373 category found for QID %s", qid)
+}
+
+// imageExtensions are the file extensions we consider usable as a product photo.
+var imageExtensions = []string{".jpg", ".jpeg", ".png", ".svg", ".webp", ".gif"}
+
+func isImageFile(title string) bool {
+	lower := strings.ToLower(title)
+	for _, ext := range imageExtensions {
+		if strings.HasSuffix(lower, ext) {
+			return true
+		}
+	}
+	return false
+}
+
+// categoryWords extracts lowercase Latin word tokens from a Commons category name,
+// dropping short tokens that carry no identifying signal (e.g. "of", "in").
+func categoryWords(category string) []string {
+	var words []string
+	for _, w := range strings.FieldsFunc(strings.ToLower(category), func(r rune) bool {
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
+	}) {
+		if len(w) < 3 {
+			continue
+		}
+		words = append(words, w)
+	}
+	return words
+}
+
+// pickCommonsCategoryFile picks the image in the given Commons category whose name
+// best matches the category. Files matching none of the category's tokens are
+// rejected so we never surface an unrelated photo (e.g. the wrong building).
+func pickCommonsCategoryFile(ctx context.Context, category string) string {
+	u := fmt.Sprintf(
+		"%s/w/api.php?action=query&list=categorymembers&cmtitle=%s&cmtype=file&cmlimit=100&format=json&subcats=1",
+		commonsAPIBase,
+		url.QueryEscape("Category:"+category),
+	)
+	var candidates []string
+	backoff := initialBackoff
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		if attempt > 0 {
+			log.Printf("tokusan-map: Commons category lookup retry %d/%d for %s", attempt, maxRetries, category)
+			select {
+			case <-time.After(backoff):
+			case <-ctx.Done():
+				return ""
+			}
+			backoff *= 2
+		}
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+		if err != nil {
+			return ""
+		}
+		req.Header.Set("User-Agent", wikimediaUserAgent)
+		resp, err := client.Do(req)
+		if err != nil {
+			continue
+		}
+		body, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			continue
+		}
+		if resp.StatusCode != http.StatusOK {
+			if !isRetryableAPIError(&apiStatusError{status: resp.StatusCode}) {
+				return ""
+			}
+			continue
+		}
+		var data struct {
+			Query struct {
+				CategoryMembers []struct {
+					Title string `json:"title"`
+				} `json:"categorymembers"`
+			} `json:"query"`
+		}
+		if err := json.Unmarshal(body, &data); err != nil {
+			continue
+		}
+		candidates = make([]string, 0, len(data.Query.CategoryMembers))
+		for _, m := range data.Query.CategoryMembers {
+			if !isImageFile(m.Title) {
+				continue
+			}
+			candidates = append(candidates, strings.TrimPrefix(m.Title, "File:"))
+		}
+		break
+	}
+	if len(candidates) == 0 {
+		return ""
+	}
+
+	words := categoryWords(category)
+	bestName := ""
+	bestScore := 0
+	for _, name := range candidates {
+		score := 0
+		lower := strings.ToLower(name)
+		for _, w := range words {
+			if strings.Contains(lower, w) {
+				score++
+			}
+		}
+		if score > bestScore {
+			bestScore = score
+			bestName = name
+		}
+	}
+	if bestScore == 0 {
+		// No file reliably associated with this category; refuse to guess.
+		return ""
+	}
+	return bestName
 }
 
 func extractClaims(body []byte, qid string) (map[string]interface{}, error) {
@@ -287,8 +422,8 @@ func fetchCommonsImageInfoOnce(ctx context.Context, fileName string) (string, st
 			Pages map[string]struct {
 				Missing   bool `json:"missing"`
 				ImageInfo []struct {
-					ThumbURL    string             `json:"thumburl"`
-					URL         string             `json:"url"`
+					ThumbURL    string              `json:"thumburl"`
+					URL         string              `json:"url"`
 					Extmetadata map[string]extValue `json:"extmetadata"`
 				} `json:"imageinfo"`
 			} `json:"pages"`
