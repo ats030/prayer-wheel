@@ -269,14 +269,17 @@ def main():
     baseline = sum(bool((info := infos.get(name.replace('_', ' '), {})).get('thumburl') or info.get('url')) and
                    bool(plain((info.get('extmetadata') or {}).get('License', {}).get('value', '')))
                    for name in existing_files.values() if name)
-    photos, audit, blocked_fallback = {}, {}, []
+    photos, audit = {}, {}
+    # A denied product must not reach the legacy resolver even with no current claims.
+    blocked_fallback = [key for key in review.get('excluded_items', {})
+                        if key.startswith('Q') and key in titles]
     for item_id, choices in candidates.items():
-        reason = 'no_exact_article_photo'
+        reason = 'unconfirmed_product_variant' if item_id in review.get('excluded_items', {}) else 'no_exact_article_photo'
         old_file = existing_files.get(item_id)
         if old_file:
             rejected = candidate_rejection(item_id, old_file, 'wikidata_claim', titles, pages, review)
             old_photo, _ = licensed_photo(infos.get(old_file.replace('_', ' '), {}))
-            if rejected or not old_photo:
+            if (rejected or not old_photo) and item_id not in blocked_fallback:
                 blocked_fallback.append(item_id)
         # The curated product article is more specific than a manufacturer's P18.
         for filename, method, evidence in sorted(choices, key=lambda c: {'reviewed_product': 0, 'exact_article': 1}.get(c[1], 2)):

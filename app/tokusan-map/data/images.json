@@ -9,7 +9,8 @@
     "reasons": {
       "available": 326,
       "unrelated_photo": 13,
-      "no_exact_article_photo": 293,
+      "no_exact_article_photo": 292,
+      "unconfirmed_product_variant": 1,
       "not_a_photo": 1,
       "generic_article_redirect": 17,
       "unsupported_license": 1
@@ -5017,7 +5018,7 @@
     "Q132859089": "available",
     "Q134257497": "no_exact_article_photo",
     "Q136374444": "available",
-    "Q136396484": "no_exact_article_photo",
+    "Q136396484": "unconfirmed_product_variant",
     "Q136438204": "available",
     "Q138808636": "available",
     "Q139970745": "available",
@@ -5602,6 +5603,7 @@
     "local-019a3893cf9012a0": "no_exact_article_photo"
   },
   "blocked_fallback": [
+    "Q136396484",
     "Q10433119",
     "Q106702187",
     "Q108035185",

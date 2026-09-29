@@ -111,6 +111,8 @@ class ImagesTest(unittest.TestCase):
         self.assertEqual(data['photos']['local-b197b0701967b125']['file_name'], '八幡号 1938.jpg')
         self.assertEqual(data['photos']['local-be8abc00071acee2']['file_name'], 'Takana meshi set by woinary in Aso, Kumamoto.jpg')
         self.assertIn('Q11258608', data['blocked_fallback'])
+        self.assertIn('Q136396484', data['blocked_fallback'])
+        self.assertEqual(data['audit']['Q136396484'], 'unconfirmed_product_variant')
         self.assertEqual(data['photos']['Q17192072']['file_name'], 'アリランラーメン.jpg')
         self.assertEqual(data['photos']['Q6368803']['file_name'], 'Aichi_Prefectural_Ceramic_Museum_(38).jpg')
         self.assertIn('local-3f1a02a8d3cb5416', data['photos'])  # official Yubari melon
