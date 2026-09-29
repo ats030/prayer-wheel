@@ -10,14 +10,18 @@ import json
 import sqlite3
 import sys
 import time
+import re
+import os
+import tempfile
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "frontend" / "tokusan.json"
 CURATION = ROOT / "data" / "curation.json"
+OFFICIAL = ROOT / "data" / "official.json"
 DST = ROOT / "frontend" / "tokusan.db"
-CATEGORIES = {"sa", "te", "ui", "sa2", "am", "ko", "ry", "ta", "or", "ri", "kg"}
+CATEGORIES = {"sa", "te", "ui", "sa2", "am", "ko", "ry", "ta", "or", "ri", "kg", "nk", "sz", "se", "ka"}
 sys.path.insert(0, str(ROOT.parent / "omatsuri-map" / "scripts"))
 SCHEMA = """
 DROP TABLE IF EXISTS tokusan;
@@ -36,14 +40,17 @@ CREATE TABLE tokusan (
   source_url TEXT NOT NULL DEFAULT '',
   category TEXT NOT NULL DEFAULT '',
   maker TEXT NOT NULL DEFAULT '',
-  prefecture_level INTEGER NOT NULL DEFAULT 0
+  prefecture_level INTEGER NOT NULL DEFAULT 0,
+  source_name TEXT NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
+  production_area TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX idx_tokusan_prefecture ON tokusan(prefecture);
 CREATE INDEX idx_tokusan_category ON tokusan(category);
 """
 
 
-def validate(rows, curation):
+def validate(rows, curation, official=()):
     """選別の漏れ・不正値を列挙する。問題がなければ空リストを返す."""
     from validate_prefecture_coordinates import containing_prefecture, fetch_features
 
@@ -76,6 +83,29 @@ def validate(rows, curation):
         got = containing_prefecture(lng, lat, features)
         if got != e.get("prefecture"):
             errors.append(f"{q}: 座標が {got} にあり、prefecture={e.get('prefecture')} と一致しない")
+    ids = set(qids)
+    labels = {e.get('label') or r.get('label_ja', '') for r in rows if (e := include.get(r['qid']))}
+    for e in official:
+        item_id = e.get('id', '')
+        if not re.fullmatch(r'local-[a-f0-9]{16}', item_id) or item_id in ids:
+            errors.append(f'{item_id}: 不正または重複したID')
+        ids.add(item_id)
+        for key in ('label', 'prefecture', 'place', 'description', 'source_name', 'source_checked_at', 'production_area'):
+            if not isinstance(e.get(key), str) or not e[key].strip():
+                errors.append(f'{item_id}: {key} が空')
+        if e.get('label') in labels:
+            errors.append(f'{item_id}: 品目名が重複 {e.get("label")}')
+        labels.add(e.get('label'))
+        source = urlparse(e.get('source_url', ''))
+        if source.scheme != 'https' or not source.hostname or source.username or source.password:
+            errors.append(f'{item_id}: 不正な出典URL')
+        if e.get('category') not in CATEGORIES:
+            errors.append(f'{item_id}: 不正なカテゴリ')
+        got = containing_prefecture(e.get('lng', 0), e.get('lat', 0), features)
+        if got != e.get('prefecture'):
+            errors.append(f'{item_id}: 座標が {got} にあり、prefecture={e.get("prefecture")} と一致しない')
+        if not e.get('prefecture_level'):
+            errors.append(f'{item_id}: 公式追加品目は県単位の代表座標を使う')
     return errors
 
 
@@ -84,11 +114,16 @@ def main():
         raise SystemExit(f"入力ファイルが見つからない: {SRC}")
     rows = json.loads(SRC.read_text(encoding="utf-8"))
     curation = json.loads(CURATION.read_text(encoding="utf-8"))
-    errors = validate(rows, curation)
+    official = json.loads(OFFICIAL.read_text(encoding="utf-8"))
+    errors = validate(rows, curation, official)
     if errors:
         raise SystemExit("curation.json の検証に失敗:\n  " + "\n  ".join(errors))
     include = curation["include"]
-    con = sqlite3.connect(DST)
+    # Build beside the deployed DB, then replace it atomically. Existing readers
+    # keep their old snapshot until the server restarts.
+    fd, temporary = tempfile.mkstemp(prefix='tokusan-', suffix='.db', dir=DST.parent)
+    os.close(fd)
+    con = sqlite3.connect(temporary)
     con.executescript(SCHEMA)
     for r in rows:
         e = include.get(r["qid"])
@@ -118,6 +153,14 @@ def main():
                 1 if e.get("prefecture_level") else 0,
             ),
         )
+    for e in official:
+        con.execute(
+            'INSERT INTO tokusan (qid, label_ja, place, prefecture, lat, lng, source_url, category,'
+            ' prefecture_level, source_name, description, production_area, maker) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            (e['id'], e['label'], e['place'], e['prefecture'], e['lat'], e['lng'], e['source_url'],
+             e['category'], int(e['prefecture_level']), e['source_name'], e['description'], e['production_area'], e.get('maker', '')),
+        )
+    con.execute("UPDATE tokusan SET source_name = 'Wikipedia' WHERE source_name = ''")
     con.commit()
     count = con.execute("SELECT COUNT(*) FROM tokusan").fetchone()[0]
     pref = con.execute(
@@ -126,6 +169,9 @@ def main():
     cats = con.execute("SELECT category, COUNT(*) FROM tokusan GROUP BY category ORDER BY category")
     cat_str = ", ".join(f"{c[0] or '(空)' }={c[1]}" for c in cats)
     con.close()
+    # Cloud Run's distroless image runs as nonroot; COPY preserves this mode.
+    os.chmod(temporary, 0o644)
+    os.replace(temporary, DST)
     print(f"tokusan.db: 品目 {count} 件 (都道府県単位 {pref} 件、除外 {len(curation['exclude'])} 件) -> {DST}")
     print(f"  カテゴリ: {cat_str}")
 

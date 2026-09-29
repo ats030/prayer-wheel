@@ -44,6 +44,10 @@ const CATEGORY_META=[
   {code:'or',label:'織物'},
   {code:'ri',label:'漆器'},
   {code:'kg',label:'その他工芸'},
+  {code:'nk',label:'畜産・乳製品'},
+  {code:'sz',label:'木材・自然素材'},
+  {code:'se',label:'生活用品'},
+  {code:'ka',label:'花卉'},
 ];
 function categoryCode(o){return CATEGORY_META.some(m=>m.code===o.category)?String(o.category):'none'}
 function categoryLabel(code){const meta=CATEGORY_META.find(m=>m.code===code);return meta?meta.label:'未分類'}
@@ -83,7 +87,7 @@ function applyFilters(){
     if(prefecture&&o.prefecture!==prefecture)return false;
     if(category&&categoryCode(o)!==category)return false;
     if(keyword){
-      const haystack=[o.label_ja,o.label_en,o.place,o.prefecture,o.city,categoryLabel(categoryCode(o))].filter(Boolean).join(' ').toLowerCase();
+      const haystack=[o.label_ja,o.label_en,o.place,o.prefecture,o.city,o.production_area,o.maker,categoryLabel(categoryCode(o))].filter(Boolean).join(' ').toLowerCase();
       if(!haystack.includes(keyword))return false;
     }
     return true;
@@ -196,9 +200,11 @@ function renderSections(o,sections){
       return (h?`<p class="detail-subheading">${esc(h)}</p>`:'')+`<p>${esc(String(b.text||''))}</p>`;
     }).join('');
     const source=safeUrl(payload.source_url)||safeUrl(o.source_url);
-    const attribution=[summary||items.length?'AIによる要約':'編集あり'];
-    if(source)attribution.push(link(source,'Wikipedia'));
-    attribution.push(link('https://creativecommons.org/licenses/by-sa/4.0/deed.ja','CC BY-SA 4.0'));
+    const official=Boolean(o.description);
+    const attribution=[official?'出典をもとに編集':summary||items.length?'AIによる要約':'編集あり'];
+    if(source)attribution.push(link(source,official?o.source_name||'公式情報':'Wikipedia'));
+    if(official&&source&&['www.maff.go.jp','www.rinya.maff.go.jp','www.meti.go.jp'].includes(new URL(source).hostname))attribution.push(link('https://www.digital.go.jp/resources/open_data/public_data_license_v1.0','PDL1.0'));
+    if(!official)attribution.push(link('https://creativecommons.org/licenses/by-sa/4.0/deed.ja','CC BY-SA 4.0'));
     const body=[
       summary?`<p class="detail-summary">${esc(summary)}</p>`:'',
       items.length?`<dl class="section-items">${itemsMarkup}</dl>`:'',
@@ -208,7 +214,7 @@ function renderSections(o,sections){
   }).join('');
 }
 function placeFact(o){
-  if(o.prefecture_level)return `${esc(o.prefecture||o.place||'—')}<span class="detail-note">都道府県単位。地図上は都道府県庁の位置に表示しています。</span>`;
+  if(o.prefecture_level)return `${esc(o.prefecture||o.place||'—')}${o.production_area?`<span class="detail-note">出典の産地・伝承地域：${esc(o.production_area)}</span>`:''}<span class="detail-note">都道府県単位。地図上は都道府県庁の位置に表示しています。</span>`;
   return `${esc(o.place||o.prefecture||'—')}<span class="detail-note">${hasCoordinates(o)?'推定。地図上の位置は目安です。':'推定。地図上には表示していません。'}</span>`;
 }
 
@@ -226,22 +232,29 @@ function showDetail(o,origin){
   const maker=(typeof o.maker==='string')?o.maker.trim():'';
   if(maker)rows.push(['生産者・ブランド',esc(maker)]);
   const links=[
-    o.source_url?['Wikipedia',o.source_url]:null,
-    o.qid?['Wikidata',`https://www.wikidata.org/wiki/${encodeURIComponent(o.qid)}`]:null,
+    safeUrl(o.source_url)?[o.source_name||'出典',safeUrl(o.source_url)]:null,
+    /^Q\d+$/.test(o.qid||'')?['Wikidata',`https://www.wikidata.org/wiki/${encodeURIComponent(o.qid)}`]:null,
   ].filter(Boolean);
   content.innerHTML=`<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(o.label_ja||o.label_en||o.qid)}</h2>${badge}</header>
     <dl class="detail-facts">${rows.map(([dt,dd])=>`<div><dt>${dt}</dt><dd>${dd}</dd></div>`).join('')}</dl>
-    <section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section>
+    ${/^Q\d+$/.test(o.qid||'')?'<section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section>':''}
     <div id="detail-sections" aria-live="polite"></div>
+    ${amazonLink(o)}
     ${links.length?`<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${links.map(([label,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label}<span aria-hidden="true">↗</span></a>`).join('')}</nav></section>`:''}
   </article>`;
   hydrateImage(o);
   hydrateSections(o);
 }
 
+function amazonLink(o){
+  const url=safeUrl(o.affiliate_url);
+  if(!url||new URL(url).hostname!=='www.amazon.co.jp')return'';
+  return `<section class="detail-section detail-affiliate" aria-labelledby="detail-shopping"><h3 id="detail-shopping">関連商品 <span class="detail-note-inline">広告</span></h3><a href="${esc(url)}" target="_blank" rel="sponsored noopener noreferrer">Amazonで「${esc(o.label_ja)}」を探す <span aria-hidden="true">↗</span></a><p class="detail-note">品目名による検索です。検索結果には関連する商品も含まれます。</p><p class="image-license">Amazonのアソシエイトとして、特産物マップは適格販売により収入を得ています。</p></section>`;
+}
+
 async function hydrateImage(o){
   const qid=o.qid;
-  if(!qid)return;
+  if(!/^Q\d+$/.test(qid||''))return;
   const container=document.querySelector('#detail-image');
   if(!container)return;
   if(imageCache[qid]){

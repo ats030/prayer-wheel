@@ -84,7 +84,12 @@ func (h *TokusanHandler) GetSections(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp := sectionsResponse{Sections: map[string]services.PanelSection{}}
-	if title := row.WikipediaTitle(); title != "" {
+	if row.Description != "" {
+		resp.Sections["about"] = services.PanelSection{
+			Blocks:    []services.WikipediaTextBlock{{Text: row.Description}},
+			SourceURL: row.SourceURL,
+		}
+	} else if title := row.WikipediaTitle(); title != "" {
 		sections, transient, err := services.FetchPanelSections(r.Context(), title)
 		if err != nil {
 			log.Printf("tokusan-map: sections for %s (%s): %v", qid, title, err)

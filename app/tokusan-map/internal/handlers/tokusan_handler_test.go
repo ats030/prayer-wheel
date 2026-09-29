@@ -1,0 +1,63 @@
+package handlers
+
+import (
+	"encoding/json"
+	"net/http/httptest"
+	"testing"
+
+	"tokusan-map/internal/services"
+)
+
+func TestOfficialItemSections(t *testing.T) {
+	t.Setenv("TOKUSAN_AMAZON_URL", "https://www.amazon.co.jp/s?k={query}&tag=test-22")
+	service, err := services.NewTokusanService("../../frontend/tokusan.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer service.Close()
+	handler := NewTokusanHandler(service)
+	var official *services.Tokusan
+	for _, row := range service.GetAll() {
+		if row.Description != "" {
+			copy := row
+			official = &copy
+			break
+		}
+	}
+	if official == nil {
+		t.Fatal("catalog has no official-source items")
+	}
+	if official.WikipediaTitle() != "" {
+		t.Fatal("official source mistaken for Wikipedia")
+	}
+	if official.AffiliateURL == "" {
+		t.Fatal("official item has no configured search link")
+	}
+	request := httptest.NewRequest("GET", "/api/sections/"+official.QID, nil)
+	response := httptest.NewRecorder()
+	handler.GetSections(response, request)
+	if response.Code != 200 {
+		t.Fatalf("sections status %d", response.Code)
+	}
+	var body sectionsResponse
+	if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	about := body.Sections["about"]
+	if len(about.Blocks) != 1 || about.Blocks[0].Text != official.Description || about.SourceURL != official.SourceURL {
+		t.Fatalf("official explanation or attribution lost: %+v", about)
+	}
+	if about.Summary != "" || body.SectionsUnavailable || body.SectionsRetry {
+		t.Fatal("official explanation must not require LLM or Wikipedia availability")
+	}
+	response = httptest.NewRecorder()
+	handler.GetByQID(response, httptest.NewRequest("GET", "/api/tokusan/"+official.QID, nil))
+	if response.Code != 200 {
+		t.Fatalf("stable local ID lookup status %d", response.Code)
+	}
+	response = httptest.NewRecorder()
+	handler.GetSections(response, httptest.NewRequest("GET", "/api/sections/local-missing", nil))
+	if response.Code != 404 {
+		t.Fatalf("missing item status %d", response.Code)
+	}
+}

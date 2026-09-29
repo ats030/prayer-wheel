@@ -9,18 +9,23 @@ import (
 )
 
 type Tokusan struct {
-	QID        string  `json:"qid"`
-	LabelJA    string  `json:"label_ja"`
-	LabelEN    string  `json:"label_en,omitempty"`
-	Place      string  `json:"place"`
-	Prefecture string  `json:"prefecture"`
-	City       string  `json:"city,omitempty"`
-	Latitude   float64 `json:"latitude"`
-	Longitude  float64 `json:"longitude"`
-	Evidence   string  `json:"evidence,omitempty"`
-	Confidence float64 `json:"confidence"`
-	SourceURL  string  `json:"source_url,omitempty"`
-	Category   string  `json:"category,omitempty"`
+	// QID is the legacy API key; official-source items use a stable local-* ID.
+	QID            string  `json:"qid"`
+	LabelJA        string  `json:"label_ja"`
+	LabelEN        string  `json:"label_en,omitempty"`
+	Place          string  `json:"place"`
+	Prefecture     string  `json:"prefecture"`
+	City           string  `json:"city,omitempty"`
+	Latitude       float64 `json:"latitude"`
+	Longitude      float64 `json:"longitude"`
+	Evidence       string  `json:"evidence,omitempty"`
+	Confidence     float64 `json:"confidence"`
+	SourceURL      string  `json:"source_url,omitempty"`
+	SourceName     string  `json:"source_name,omitempty"`
+	Description    string  `json:"description,omitempty"`
+	ProductionArea string  `json:"production_area,omitempty"`
+	AffiliateURL   string  `json:"affiliate_url,omitempty"`
+	Category       string  `json:"category,omitempty"`
 	// Maker は生産者・ブランド・製造元の一覧。空文字列は表示しない。
 	Maker string `json:"maker,omitempty"`
 	// PrefectureLevel は産地が都道府県までしか分からず、座標が都道府県庁であることを示す。
@@ -28,7 +33,8 @@ type Tokusan struct {
 }
 
 type TokusanService struct {
-	db *sql.DB
+	db        *sql.DB
+	affiliate string
 }
 
 func NewTokusanService(dbPath string) (*TokusanService, error) {
@@ -49,7 +55,7 @@ func NewTokusanService(dbPath string) (*TokusanService, error) {
 		db.Close()
 		return nil, sql.ErrNoRows
 	}
-	return &TokusanService{db: db}, nil
+	return &TokusanService{db: db, affiliate: affiliateTemplate()}, nil
 }
 
 func (s *TokusanService) Close() error {
@@ -68,9 +74,10 @@ func (s *TokusanService) collect(query string, args ...any) ([]Tokusan, error) {
 		var t Tokusan
 		if err := rows.Scan(&t.QID, &t.LabelJA, &t.LabelEN, &t.Place, &t.Prefecture,
 			&t.City, &t.Latitude, &t.Longitude, &t.Evidence, &t.Confidence, &t.SourceURL,
-			&t.Category, &t.Maker, &t.PrefectureLevel); err != nil {
+			&t.Category, &t.Maker, &t.PrefectureLevel, &t.SourceName, &t.Description, &t.ProductionArea); err != nil {
 			return nil, err
 		}
+		t.AffiliateURL = amazonSearchURL(s.affiliate, t.LabelJA)
 		result = append(result, t)
 	}
 	if err := rows.Err(); err != nil {
@@ -81,7 +88,7 @@ func (s *TokusanService) collect(query string, args ...any) ([]Tokusan, error) {
 
 func (s *TokusanService) GetAll() []Tokusan {
 	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture," +
-		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level FROM tokusan t")
+		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level, source_name, description, production_area FROM tokusan t")
 	if list == nil {
 		list = []Tokusan{}
 	}
@@ -90,7 +97,7 @@ func (s *TokusanService) GetAll() []Tokusan {
 
 func (s *TokusanService) GetByPrefecture(prefecture string) []Tokusan {
 	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture,"+
-		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level FROM tokusan t WHERE t.prefecture = ?", prefecture)
+		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level, source_name, description, production_area FROM tokusan t WHERE t.prefecture = ?", prefecture)
 	if list == nil {
 		list = []Tokusan{}
 	}
@@ -102,7 +109,7 @@ func (s *TokusanService) GetByQID(qid string) *Tokusan {
 		return nil
 	}
 	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture,"+
-		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level FROM tokusan t WHERE t.qid = ?", qid)
+		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level, source_name, description, production_area FROM tokusan t WHERE t.qid = ?", qid)
 	if len(list) == 0 {
 		return nil
 	}

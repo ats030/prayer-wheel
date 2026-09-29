@@ -33,5 +33,9 @@
   --color-cat-or: #a04a3a;   /* 織物 */
   --color-cat-ri: #3a2a2a;   /* 漆器 */
   --color-cat-kg: #2f7a7a;   /* その他工芸 */
+  --color-cat-nk: #936350;   /* 畜産・乳製品 */
+  --color-cat-sz: #596944;   /* 木材・自然素材 */
+  --color-cat-se: #68678a;   /* 生活用品 */
+  --color-cat-ka: #8e5673;   /* 花卉 */
   --color-cat-none: var(--color-accent); /* 未分類 */
 }

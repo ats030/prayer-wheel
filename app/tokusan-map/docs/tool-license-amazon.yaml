@@ -1,0 +1,21 @@
+tool: Amazon Associates Japan search links
+version_or_plan: Existing operator associate account; text search links only
+category: service
+status: conditional
+license: proprietary-terms
+commercial_use: permitted under the Associates operating agreement
+license_url: https://affiliate.amazon.co.jp/help/operating/agreement/
+terms_url: https://affiliate.amazon.co.jp/help/operating/policies/
+pricing_url: https://affiliate.amazon.co.jp/help/operating/agreement/
+restrictions:
+  - Use an active operator associate tag and register this site's URL in the account.
+  - Clearly identify advertising and display the Amazon Associate disclosure.
+  - Do not claim that the named regional product is stocked or that results are endorsed.
+  - No Amazon product data, prices, images, API credentials, or product API are used.
+evidence_retrieved: 2026-09-29
+reviewer: Codex
+notes: >-
+  Search-link generation makes no paid API calls and requires no additional
+  dependency. It reuses the enabled ikimono-note search template locally, with
+  TOKUSAN_AMAZON_URL as an explicit override. Account approval and site registration
+  are operator-account conditions and cannot be inferred from a configured tag.
