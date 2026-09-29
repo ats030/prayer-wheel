@@ -14,6 +14,7 @@ OUTPUT = ROOT / "frontend" / "shiseki.json"
 CACHE = ROOT / "data" / "wikidata_cache"
 sys.path.insert(0, str(ROOT.parent / "omatsuri-map" / "scripts"))
 from validate_prefecture_coordinates import containing_prefecture, fetch_features  # noqa:E402
+from infobox_era import collect_infobox_fields, fields_era  # noqa:E402
 
 ENDPOINT = "https://query.wikidata.org/sparql"
 HEADERS = {"User-Agent": "ShisekiMap/1.0 (https://github.com/ats030/shiseki-map)"}
@@ -262,13 +263,25 @@ def inception_era(dates):
 
 
 def row_era(qid, group, inceptions):
-    """P2348(時代)がない行を、創建年→古墳の種別の順で補う。"""
+    """(時代, 出典)を返す。P2348(時代)→創建年→古墳の種別の順で採り、上位があれば下位は見ない。"""
+    if group.get("eras"):
+        return "・".join(group["eras"]), "wikidata"
     era = inception_era(inceptions.get(qid, []))
     if era:
-        return era
+        return era, "inception"
     if any("古墳" in t for t in group.get("types", [])):
-        return "古墳時代"
-    return ""
+        return "古墳時代", "kofun_type"
+    return "", ""
+
+
+def fill_infobox_eras(rows, articles):
+    """Wikidata で時代が決まらない行を ja.wikipedia のインフォボックスで補う。"""
+    titles = {row["qid"]: articles[row["qid"]] for row in rows if not row["era"] and articles.get(row["qid"])}
+    fields = collect_infobox_fields(list(titles.values()))
+    for row in rows:
+        found = fields_era(fields.get(titles.get(row["qid"]), {}), era_of_year) if row["qid"] in titles else None
+        if found:
+            row["era"], row["era_source"] = found[0], "wikipedia_infobox:" + found[1]
 
 
 def highest_rank(ranks):
@@ -408,6 +421,7 @@ def main():
 
     inceptions = collect_inceptions(grouped)
     rows = []
+    articles = {}
     for qid, group in grouped.items():
         if qid in EXCLUDED_QIDS:
             continue
@@ -419,12 +433,14 @@ def main():
         article = binding.get("article", {}).get("value", "")
         title = requests.utils.unquote(article.rsplit("/", 1)[-1]).replace("_", " ") if article else ""
         label = binding["itemLabel"]["value"]
+        articles[qid] = title
         if title and not re.search(r"[ぁ-んァ-ン一-龯]", label):
             label = title
         if rank in ("national", "special"):
             source = NATIONAL_SOURCE
         else:
             source = "https://www.wikidata.org/wiki/" + qid
+        era, era_source = row_era(qid, group, inceptions)
         rows.append({
             "qid": qid, "label_ja": label, "label_en": "",
             "prefecture": containing_prefecture(lon, lat, features) or nearest_prefecture(lon, lat, features) or "",
@@ -432,11 +448,12 @@ def main():
             "description": binding.get("itemDescription", {}).get("value", ""),
             "title_ja": title or label,
             "categories": category(group.get("types", []), label),
-            "era": "・".join(group.get("eras", [])) or row_era(qid, group, inceptions),
+            "era": era, "era_source": era_source,
             "designation": rank, "designation_label": rank_label,
             "designation_source": source,
             "heritage_id": "", "source_url": "https://www.wikidata.org/wiki/" + qid,
         })
+    fill_infobox_eras(rows, articles)
     from merge_public_sites import merge_rows
 
     rows = merge_rows(rows)

@@ -28,9 +28,9 @@ class EraTest(unittest.TestCase):
         self.assertEqual(inception_era([("+1609-01-01T00:00:00Z", 9), ("+1610-01-01T00:00:00Z", 9)]), "江戸時代")
 
     def test_kofun_type_fallback(self):
-        self.assertEqual(row_era("Q1", {"types": ["前方後円墳・古墳"]}, {}), "古墳時代")
-        self.assertEqual(row_era("Q1", {"types": ["古墳"]}, {"Q1": [("+0650-01-01T00:00:00Z", 9)]}), "飛鳥時代")
-        self.assertEqual(row_era("Q1", {"types": ["神社"]}, {}), "")
+        self.assertEqual(row_era("Q1", {"types": ["前方後円墳・古墳"]}, {}), ("古墳時代", "kofun_type"))
+        self.assertEqual(row_era("Q1", {"types": ["古墳"]}, {"Q1": [("+0650-01-01T00:00:00Z", 9)]}), ("飛鳥時代", "inception"))
+        self.assertEqual(row_era("Q1", {"types": ["神社"]}, {}), ("", ""))
 
 
 if __name__ == "__main__":
