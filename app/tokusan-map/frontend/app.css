@@ -42,7 +42,6 @@ input,select{width:100%;min-width:0;height:2.5rem;border:1px solid var(--color-r
 .leaflet-marker-pane .tokusan-marker-anchor{pointer-events:none}
 .tokusan-marker-anchor .tokusan-marker{pointer-events:auto;padding:0;cursor:pointer}
 .tokusan-marker-anchor:focus-visible .tokusan-marker{outline:3px solid var(--color-focus);outline-offset:2px}
-.map-position-note{display:block;margin-top:.2rem;font-size:.68rem;font-weight:400}
 .tokusan-marker.selected{background:var(--color-accent);transform:scale(1.18)}
 .tokusan-marker.cat-sa{background:var(--color-cat-sa)}
 .tokusan-marker.cat-te{background:var(--color-cat-te)}
