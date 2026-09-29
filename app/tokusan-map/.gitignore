@@ -10,6 +10,8 @@ data/*.json
 !data/official.json
 !data/production_points.json
 !data/regions.json
+!data/images.json
+!data/image_review.json
 data/*.json.tmp
 
 # Python

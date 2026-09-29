@@ -8,7 +8,11 @@ let selectedKey=null;
 let selectedOrigin=null;
 let selectedItem=null;
 
-const IMAGE_CACHE_KEY='tokusan-map-image-cache-v1';
+const IMAGE_CACHE_KEY='tokusan-map-image-cache-v2';
+let imageCatalog={};
+let imageCatalogReady=false;
+let imageCatalogLoad=null;
+let blockedImageFallback=new Set();
 const imageCache={};
 try{Object.assign(imageCache,JSON.parse(localStorage.getItem(IMAGE_CACHE_KEY)||'{}'))}catch{}
 
@@ -22,10 +26,12 @@ function commonsFilePage(value){
     return fileName?`https://commons.wikimedia.org/wiki/File:${encodeURIComponent(fileName)}`:'';
   }catch{return''}
 }
-async function fetchJSONWithRetry(url){
+async function fetchJSONWithRetry(url,timeout){
   let lastError;
   for(let attempt=0;attempt<2;attempt++){
-    try{const response=await fetch(url);if(response.ok)return response.json();lastError=new Error(`HTTP ${response.status}`)}catch(error){lastError=error}
+    const controller=timeout?new AbortController():null;
+    const timer=timeout?setTimeout(()=>controller.abort(),timeout):null;
+    try{const response=await fetch(url,controller?{signal:controller.signal}:undefined);if(response.ok)return await response.json();lastError=new Error(`HTTP ${response.status}`)}catch(error){lastError=error}finally{if(timer)clearTimeout(timer)}
     if(attempt===0)await new Promise(resolve=>setTimeout(resolve,500));
   }
   throw lastError;
@@ -276,7 +282,7 @@ function showDetail(o,origin){
   ].filter(Boolean);
   content.innerHTML=`<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(o.label_ja||o.label_en||o.qid)}</h2>${badge}</header>
     <dl class="detail-facts">${rows.map(([dt,dd])=>`<div><dt>${dt}</dt><dd>${dd}</dd></div>`).join('')}</dl>
-    ${/^Q\d+$/.test(o.qid||'')?'<section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section>':''}
+    <section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section>
     <div id="detail-sections" aria-live="polite"></div>
     ${amazonLink(o)}
     ${links.length?`<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${links.map(([label,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label}<span aria-hidden="true">↗</span></a>`).join('')}</nav></section>`:''}
@@ -294,16 +300,29 @@ function amazonLink(o){
 
 async function hydrateImage(o){
   const qid=o.qid;
-  if(!/^Q\d+$/.test(qid||''))return;
   const container=document.querySelector('#detail-image');
   if(!container)return;
-  if(imageCache[qid]){
+  if(!imageCatalogReady){
+    try{await loadImageCatalog();if(selectedItem===o)hydrateImage(o)}
+    catch{if(selectedItem===o)imageFailure(container,o,'写真の登録情報を取得できませんでした。')}
+    return;
+  }
+  if(imageCatalog[qid]){
+    const data=imageCatalog[qid];
+    renderImage(container,{url:safeUrl(data.url),originalUrl:safeUrl(data.original_url),license:data.license,licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),attribution:plainText(data.attribution),sourceUrl:safeUrl(data.source_url),caption:data.caption},o);
+    return;
+  }
+  if(!/^Q\d+$/.test(qid||'')||blockedImageFallback.has(qid)){
+    container.innerHTML='<p class="detail-image-status">この品目の写真はまだ確認できていません。</p>';
+    return;
+  }
+  if(imageCache[qid]&&Date.now()-imageCache[qid].checkedAt<7*24*60*60*1000){
     const cached=imageCache[qid];
     if(cached.url&&cached.license){renderImage(container,cached,o);return}
   }
   try{
     const data=await fetchJSONWithRetry(`/api/wikiimage?qid=${encodeURIComponent(qid)}`);
-    const result={url:safeUrl(data.url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),sourceUrl:safeUrl(data.source_url)};
+    const result={url:safeUrl(data.url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),sourceUrl:safeUrl(data.source_url),checkedAt:Date.now()};
     imageCache[qid]=result;
     try{localStorage.setItem(IMAGE_CACHE_KEY,JSON.stringify(imageCache))}catch{}
     if(selectedItem!==o)return;
@@ -313,16 +332,40 @@ async function hydrateImage(o){
   }catch(error){
     console.warn(`Image could not be loaded for ${qid}`,error);
     if(selectedItem!==o)return;
-    container.innerHTML='<p class="detail-image-status">表示できる画像が登録されていません。</p>';
+    imageFailure(container,o,'写真を取得できませんでした。');
   }
 }
 function renderImage(container,result,o){
   const source=result.sourceUrl||commonsFilePage(result.url);
   const license=result.licenseUrl?`<a href="${esc(result.licenseUrl)}" target="_blank" rel="noopener noreferrer">${esc(result.license)}<span aria-hidden="true">↗</span></a>`:esc(result.license);
-  const creator=result.artist||result.credit;
+  const creator=[result.artist,result.credit,result.attribution].filter((value,index,all)=>value&&all.indexOf(value)===index).join(' · ');
   const name=o.label_ja||o.label_en||'特産物';
-  container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(name)}の画像を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(name)}の画像"></button><p class="image-license">${creator?`${esc(creator)} · `:''}${license}${source?` · <a href="${esc(source)}" target="_blank" rel="noopener noreferrer" aria-label="Wikimedia Commons の画像出典">Commons<span aria-hidden="true">↗</span></a>`:''}</p>`;
-  container.querySelector('button').addEventListener('click',()=>openLightbox(result.url,name));
+  const caption=result.caption||`${name}の画像`;
+  container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(caption)}を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(caption)}"></button>${result.caption?`<p class="image-license">${esc(result.caption)}</p>`:''}<p class="image-license">${creator?`${esc(creator)} · `:''}${license}${source?` · <a href="${esc(source)}" target="_blank" rel="noopener noreferrer" aria-label="Wikimedia Commons の画像出典">Commons<span aria-hidden="true">↗</span></a>`:''}</p>`;
+  const img=container.querySelector('img');
+  img.addEventListener('error',()=>{
+    if(selectedItem!==o)return;
+    if(result.originalUrl&&img.src!==result.originalUrl){img.src=result.originalUrl;return}
+    delete imageCache[o.qid];
+    try{localStorage.setItem(IMAGE_CACHE_KEY,JSON.stringify(imageCache))}catch{}
+    imageFailure(container,o,'写真を読み込めませんでした。');
+  });
+  container.querySelector('button').addEventListener('click',()=>openLightbox(img.currentSrc||img.src,caption));
+}
+function imageFailure(container,o,message){
+  container.innerHTML=`<p class="detail-image-status">${esc(message)} <button type="button">再読み込み</button></p>`;
+  container.querySelector('button').addEventListener('click',()=>{if(selectedItem===o)hydrateImage(o)});
+}
+async function loadImageCatalog(){
+  if(imageCatalogLoad)return imageCatalogLoad;
+  imageCatalogLoad=(async()=>{
+    const data=await fetchJSONWithRetry('/images.json?v=202609297',10000);
+    if(!data.photos||typeof data.photos!=='object'||Array.isArray(data.photos)||!Array.isArray(data.blocked_fallback))throw new Error('Invalid image catalog');
+    imageCatalog=data.photos;
+    blockedImageFallback=new Set(data.blocked_fallback);
+    imageCatalogReady=true;
+  })();
+  try{await imageCatalogLoad}finally{imageCatalogLoad=null}
 }
 function openLightbox(url,alt){const dialog=document.querySelector('#lightbox'),image=document.querySelector('#lightbox-image');image.src=url;image.alt=`${alt||'特産物'}の拡大画像`;dialog.showModal()}
 function closeLightbox(){const dialog=document.querySelector('#lightbox');if(dialog.open)dialog.close();document.querySelector('#lightbox-image').src='';document.querySelector('#lightbox-image').removeAttribute('alt')}
@@ -357,6 +400,7 @@ document.querySelector('#lightbox').addEventListener('click',e=>{if(e.target.id=
 document.querySelector('#lightbox').addEventListener('cancel',closeLightbox);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
 
+loadImageCatalog().catch(()=>{});
 Promise.all([fetchJSONWithRetry('/api/tokusan/'),fetchJSONWithRetry('/regions.json?v=202609296')]).then(([data,regions])=>{
   if(!Array.isArray(regions))throw new Error('Invalid region definitions');
   regionsByPrefecture=new Map(regions.map(p=>[p.prefecture,p]));
