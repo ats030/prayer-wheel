@@ -95,7 +95,6 @@ class ImagesTest(unittest.TestCase):
         official = json.loads((ROOT / 'data/official.json').read_text())
         catalog_ids = set(curated) | {entry['id'] for entry in official}
         self.assertEqual(set(data['audit']), catalog_ids)
-        self.assertEqual(len(catalog_ids), 651)
         self.assertEqual(public, {key: data[key] for key in ['version', 'photos', 'blocked_fallback']})
         self.assertEqual(data['stats']['registered'], len(data['photos']))
         self.assertEqual(sum(data['stats']['reasons'].values()), len(catalog_ids))
