@@ -31,6 +31,10 @@ class MaffImagesTest(unittest.TestCase):
                      self.html().replace('allowed.zip', 'allowed.jpg')]:
             self.assertEqual(zip_candidates(html, self.item()), [])
 
+    def test_provider_credit_after_zip_link_is_preserved(self):
+        html = self.html().replace('</a></div>', '</a><div class="dl_copy">画像提供元：提供者</div></div>')
+        self.assertEqual(zip_candidates(html, self.item())[0]['credit'], '画像提供元：提供者')
+
     def test_zip_original_is_retained_and_unsupported_files_rejected(self):
         content = b'\xff\xd8\xfforiginal-photo'
         blob = io.BytesIO()

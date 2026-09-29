@@ -47,7 +47,7 @@ def zip_candidates(html, item):
                     and parsed.path.startswith('/j/keikaku/syokubunka/k_ryouri/img/')
                     and parsed.path.endswith('.zip') and '著作権' in link.get_text()):
                 result.append({'zip_url': url, 'alt': image['alt'],
-                               'credit': box.get_text(' ', strip=True).split('「リンクについて')[0].strip()})
+                               'credit': ' '.join(credit.get_text(' ', strip=True) for credit in box.select('.dl_copy'))})
     return result
 
 
