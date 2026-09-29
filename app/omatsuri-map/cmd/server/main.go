@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -68,8 +69,15 @@ func main() {
 	})
 
 	// Static file server for frontend
+	// HTML は毎回再検証させる。ヒューリスティックキャッシュで古い HTML/JS が
+	// 組み合わさると、削除した要素を参照してページが止まる。
 	fs := http.FileServer(http.Dir("frontend"))
-	mux.Handle("/", fs)
+	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" || strings.HasSuffix(r.URL.Path, ".html") {
+			w.Header().Set("Cache-Control", "no-cache")
+		}
+		fs.ServeHTTP(w, r)
+	}))
 
 	// Port for cloud platforms (Cloud Run, App Engine) via PORT env var, defaulting to 8527.
 	port := os.Getenv("PORT")
