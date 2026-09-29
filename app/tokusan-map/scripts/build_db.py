@@ -15,6 +15,7 @@ import os
 import tempfile
 from pathlib import Path
 from urllib.parse import quote, urlparse
+from import_production_points import apply_points
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "frontend" / "tokusan.json"
@@ -43,7 +44,11 @@ CREATE TABLE tokusan (
   prefecture_level INTEGER NOT NULL DEFAULT 0,
   source_name TEXT NOT NULL DEFAULT '',
   description TEXT NOT NULL DEFAULT '',
-  production_area TEXT NOT NULL DEFAULT ''
+  production_area TEXT NOT NULL DEFAULT '',
+  coordinate_kind TEXT NOT NULL DEFAULT '',
+  coordinate_label TEXT NOT NULL DEFAULT '',
+  coordinate_source_url TEXT NOT NULL DEFAULT '',
+  coordinate_source_name TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX idx_tokusan_prefecture ON tokusan(prefecture);
 CREATE INDEX idx_tokusan_category ON tokusan(category);
@@ -104,8 +109,8 @@ def validate(rows, curation, official=()):
         got = containing_prefecture(e.get('lng', 0), e.get('lat', 0), features)
         if got != e.get('prefecture'):
             errors.append(f'{item_id}: 座標が {got} にあり、prefecture={e.get("prefecture")} と一致しない')
-        if not e.get('prefecture_level'):
-            errors.append(f'{item_id}: 公式追加品目は県単位の代表座標を使う')
+        if not e.get('prefecture_level') and e.get('coordinate_kind') != 'municipality_office':
+            errors.append(f'{item_id}: 産地代表座標の根拠がない')
     return errors
 
 
@@ -115,6 +120,8 @@ def main():
     rows = json.loads(SRC.read_text(encoding="utf-8"))
     curation = json.loads(CURATION.read_text(encoding="utf-8"))
     official = json.loads(OFFICIAL.read_text(encoding="utf-8"))
+    points = json.loads((ROOT / 'data/production_points.json').read_text(encoding='utf-8'))
+    official = apply_points(official, points)
     errors = validate(rows, curation, official)
     if errors:
         raise SystemExit("curation.json の検証に失敗:\n  " + "\n  ".join(errors))
@@ -160,6 +167,11 @@ def main():
             (e['id'], e['label'], e['place'], e['prefecture'], e['lat'], e['lng'], e['source_url'],
              e['category'], int(e['prefecture_level']), e['source_name'], e['description'], e['production_area'], e.get('maker', '')),
         )
+        if e.get('coordinate_kind'):
+            con.execute('UPDATE tokusan SET city=?, coordinate_kind=?, coordinate_label=?, '
+                        'coordinate_source_url=?, coordinate_source_name=? WHERE qid=?',
+                        (e['city'], e['coordinate_kind'], e['coordinate_label'],
+                         e['coordinate_source_url'], e['coordinate_source_name'], e['id']))
     con.execute("UPDATE tokusan SET source_name = 'Wikipedia' WHERE source_name = ''")
     con.commit()
     count = con.execute("SELECT COUNT(*) FROM tokusan").fetchone()[0]

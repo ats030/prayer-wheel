@@ -54,6 +54,7 @@ function categoryLabel(code){const meta=CATEGORY_META.find(m=>m.code===code);ret
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function itemKey(o,index=0){return o.qid||`${o.label_ja}-${o.latitude}-${o.longitude}-${index}`}
 function hasCoordinates(o){const lat=Number(o.latitude),lng=Number(o.longitude);return Number.isFinite(lat)&&Number.isFinite(lng)&&(lat!==0||lng!==0)}
+function positionLabel(o){return o.coordinate_kind==='municipality_office'?'産地代表位置':o.prefecture_level?'都道府県代表位置':''}
 
 // Keep source areas intact: a product spanning several places must not be
 // assigned to only the first municipality in its source.
@@ -138,7 +139,7 @@ function renderList(){
     const key=itemKey(o,i);
     const cat=categoryCode(o);
     const catSpan=cat!=='none'?`<span>${esc(categoryLabel(cat))}</span>`:'';
-    const placeSpan=`<span>${esc(regionLabel(o))}</span>${o.prefecture_level?'<span>都道府県代表位置</span>':''}`;
+    const placeSpan=`<span>${esc(regionLabel(o))}</span>${positionLabel(o)?`<span>${esc(positionLabel(o))}</span>`:''}`;
     return `<button type="button" class="tokusan-card" data-key="${esc(key)}" aria-current="${key===selectedKey}"><span class="card-index">${String(i+1).padStart(2,'0')}</span><span><span class="card-name">${esc(o.label_ja||o.label_en||o.qid)}</span><span class="card-meta"><span>${esc(o.prefecture||'地域未登録')}</span>${catSpan}${placeSpan}</span></span></button>`;
   }).join('');
   list.querySelectorAll('button').forEach(card=>card.addEventListener('click',()=>selectItem(card.dataset.key,'list')));
@@ -159,7 +160,7 @@ function renderMarkers(){
     const key=itemKey(o,i);
     const label=o.label_ja||o.label_en||o.qid;
     const marker=L.marker([o.latitude,o.longitude],{icon:markerIcon(o,key===selectedKey),title:label,keyboard:false});
-    marker.bindTooltip(`${label}${o.prefecture_level?'（都道府県代表位置）':''}`,{direction:'top',offset:[0,-8]});
+    marker.bindTooltip(`${label}${positionLabel(o)?`（${positionLabel(o)}）`:''}`,{direction:'top',offset:[0,-8]});
     marker.on('click',()=>selectItem(key,'marker'));
     marker.addTo(map);
     markers.set(key,marker);
@@ -241,6 +242,10 @@ function renderSections(o,sections){
   }).join('');
 }
 function placeFact(o){
+  if(o.coordinate_kind==='municipality_office'){
+    const source=safeUrl(o.coordinate_source_url);
+    return `${esc(o.coordinate_label||o.city||o.prefecture)}<span class="detail-note">出典の産地・伝承地域：${esc(o.production_area)}</span><span class="detail-note">産地の代表位置。${esc(o.coordinate_label||o.city)}の役場位置を使っています。実際の生産地点ではありません。</span>${source?`<span class="detail-note">位置の出典：<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">${esc(o.coordinate_source_name)}</a>（CC BY 4.0）をもとに代表点を選定。</span>`:''}`;
+  }
   if(o.prefecture_level)return `${esc(o.prefecture||o.place||'—')}${o.production_area?`<span class="detail-note">出典の産地・伝承地域：${esc(o.production_area)}</span>`:''}<span class="detail-note">都道府県単位。地図上は都道府県庁の位置に表示しています。</span>`;
   return `${esc(o.place||o.prefecture||'—')}<span class="detail-note">${hasCoordinates(o)?'推定。地図上の位置は目安です。':'推定。地図上には表示していません。'}</span>`;
 }

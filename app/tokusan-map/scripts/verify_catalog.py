@@ -12,6 +12,7 @@ import unicodedata
 from pathlib import Path
 
 import requests
+from import_production_points import apply_points
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -27,6 +28,7 @@ def main():
     parser.add_argument('--source-cache', type=Path, help='Optional HTML snapshot cache')
     args = parser.parse_args()
     official = json.loads((ROOT / 'data/official.json').read_text())
+    official = apply_points(official, json.loads((ROOT / 'data/production_points.json').read_text()))
     curation = json.loads((ROOT / 'data/curation.json').read_text())
     con = sqlite3.connect(f'file:{ROOT / "frontend/tokusan.db"}?mode=ro', uri=True)
     con.row_factory = sqlite3.Row
@@ -46,7 +48,9 @@ def main():
                                ('category', 'category'), ('production_area', 'production_area'),
                                ('prefecture', 'prefecture'), ('lat', 'lat'), ('lng', 'lng')]:
             assert row[target] == e[source], (e['id'], target)
-        assert row['prefecture_level'] == 1
+        assert row['prefecture_level'] == int(e['prefecture_level'])
+        for field in ('coordinate_kind', 'coordinate_label', 'coordinate_source_url', 'coordinate_source_name'):
+            assert row[field] == e.get(field, ''), (e['id'], field)
     if args.check_sources:
         snapshots = {}
         for e in official:

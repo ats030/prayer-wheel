@@ -8,6 +8,7 @@ data/*.json
 !data/curation.json
 !data/summaries.json
 !data/official.json
+!data/production_points.json
 data/*.json.tmp
 
 # Python
