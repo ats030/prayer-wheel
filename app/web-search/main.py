@@ -21,6 +21,7 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse
+from engine import engine_client, engine_search
 
 load_dotenv(Path.home() / ".env")
 CONFIG_PATH = Path(os.environ.get("WEB_SEARCH_CONFIG", Path(__file__).with_name("sources.json")))
@@ -137,7 +138,10 @@ def site_search(source: dict, query: str, limit: int) -> tuple[list[dict], str]:
     try:
         with httpx.Client(timeout=TIMEOUT, headers={"User-Agent": UA}) as client:
             kind = source["kind"]
-            if kind == "sphinx":
+            if kind == "opensearch-engine":
+                with engine_client() as engine:
+                    hits = engine_search(engine, source, query, limit)
+            elif kind == "sphinx":
                 hits = sphinx_search(client, source, query, limit)
             else:
                 endpoint = source["endpoint"].replace("{searchTerms}", quote(query, safe="")).replace("{count}", str(limit))

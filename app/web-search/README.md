@@ -30,14 +30,65 @@ explicit URL prefixes are queried. The initial sources are Python's official
 English documentation and MediaWiki.org. Their reuse obligations are recorded
 in `tool-license.yaml` and accompany each result.
 
-OpenSearch is the external-site protocol, not the OpenSearch indexing product.
-For an OpenSearch source, register the results URL template from its description
-document using `{searchTerms}` and `{count}`. The adapter accepts Suggestions
-JSON (`[query,titles,descriptions,urls]`), RSS, and Atom. HTML-only search pages
-and Elasticsearch/OpenSearch product APIs are not this adapter's input.
-MediaWiki's OpenSearch is a title-prefix search, so short page-title queries
-work better than long natural-language examination questions.
+Designated-site search now uses the **OpenSearch indexing product** from
+https://opensearch.org/downloads/, not the unrelated OpenSearch Suggestions
+protocol. Both registered sources use `kind=opensearch-engine`, a fixed index
+alias, and an explicit `seed_urls` list. Initial coverage is 13 Python tutorial/
+library pages and three MediaWiki API pages, not either complete site.
 
+The official 3.9.0 image is version/digest pinned in `opensearch.yml`. It is a
+single node with a 1 GiB heap, 3 GiB memory limit, two CPUs and bounded logs.
+Only `127.0.0.1:9200` is published; no Dashboards, public port or new scheduler
+is installed. The API uses a dedicated read-only user scoped to `websearch-*`.
+The operator's admin credential is used only for manual ingestion. Credentials
+are under `~/.config/web-search-opensearch` (700 directory, 600 env files),
+excluded from Git. HTTP TLS uses a privately generated certificate with
+localhost/127.0.0.1 SANs; certificate and hostname verification stay enabled.
+The certificate lasts 365 days: renew it and restart OpenSearch/API before
+expiry. Bootstrap removes the bundled demo users, retaining only admin and
+web_search_reader. The default Compose configuration also disables the known
+demo admin certificate DN. Transport-layer demo TLS remains inside the
+single-node container; port 9300 is not published. Replace transport TLS and
+review network/user access before any multi-node or externally exposed setup.
+
+Bootstrap (do not print the private env files or expanded Compose config):
+
+```
+.venv/bin/python app/web-search/prepare-opensearch.py
+OPENSEARCH_BOOTSTRAP_ADMIN_DN='CN=kirk,OU=client,O=client,L=test,C=DE' \
+  OPENSEARCH_BOOTSTRAP_CA=root-ca.pem \
+  docker compose -f app/web-search/opensearch.yml up -d
+# Wait for authenticated HTTPS readiness, then remove demo users once:
+.venv/bin/python app/web-search/harden-opensearch.py
+docker compose -f app/web-search/opensearch.yml up -d
+.venv/bin/python app/web-search/ingest-opensearch.py
+```
+
+`harden-opensearch.py` is a one-time bootstrap operation, not a refresh command.
+It refuses unknown custom accounts and preserves the generated initial user
+configuration in the private directory before replacement. On ordinary
+restarts use only `docker compose ... up -d`, without the bootstrap DN.
+
+Ingestion respects robots.txt, URL prefixes, reviewed source conditions, and a
+one-second delay; redirects and incomplete/non-HTML pages stop the refresh.
+It stores source URL, title, page text, fetched time and the terms snapshot.
+Each source is rebuilt in a fresh index and its alias switches only after all
+seed pages and bulk writes succeed. Deleted seeds disappear from the active
+alias at the next successful refresh. Previous indices remain for rollback;
+their disk usage should be monitored. No automatic refresh is configured:
+edit reviewed seeds and rerun the ingestion command explicitly. Results expose
+`engine=opensearch` and `indexed_at`; displayed `terms` are the current registry
+conditions, not a blanket publication clearance.
+
+Data persists in the Compose `opensearch-data` volume. Stop only this service
+with `docker compose -f app/web-search/opensearch.yml stop opensearch`; do not
+use `down -v` or `--remove-orphans` (the existing YaCy container is unrelated).
+Rollback can point each alias at its retained previous index with `_aliases`,
+or restore the prior registry/code and restart the API. Stopping the engine
+makes site searches fail closed; YaCy and explicit SearXNG remain independent.
+
+Legacy adapters are retained for compatibility but not selected by the initial
+registry. `kind=opensearch` means Suggestions JSON/RSS/Atom, **not the product**.
 `kind=json` supports a site-specific JSON API with `results_path` (dot-separated
 object keys), `url_key`, `title_key`, and `content_key`. `kind=sphinx` searches a
 static Sphinx index (`endpoint`, `base_url`) using exact English title tokens
@@ -89,10 +140,9 @@ with `WEB_SEARCH_API_URL=http://127.0.0.1:8527`; exam-trainer's service sets thi
 explicitly. `EXAM_TRAINER_SEARCH_SCOPE` defaults to `sites`. Other apps can
 migrate independently; their current direct SearXNG connections remain usable.
 
-The service is JSON-only, so it has no HTML entry point or visit-log tag.
-Deploy with `VISIT_LOG_EXEMPT_REASON='Internal JSON search API, no HTML entry
-point' app/deploy.sh web-search 8527`. This reason is also recorded on the
-implementation issue. No generated HTML or CSP modifications are used.
+The `/ui` HTML entry point includes the required visit-log tag. Deployment
+checks rendered HTML with `app/deploy.sh web-search 8527`. No generated HTML
+or CSP modifications are used.
 
 Exam-trainer persists the selected route on each job, excludes old Web-wide
 cache rows from designated-site mode, and rechecks site cache metadata against

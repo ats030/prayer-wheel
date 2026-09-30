@@ -24,6 +24,7 @@
 # 利用者のメールアドレスと課金される鍵を履歴に残す理由は無い。
 /.config/*/settings.json
 /.config/web-search-yacy/
+/.config/web-search-opensearch/
 /data/
 /cache/
 

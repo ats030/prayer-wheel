@@ -1,10 +1,12 @@
 import importlib.util
+import sys
 from pathlib import Path
 
 import httpx
 import pytest
 from fastapi.testclient import TestClient
 
+sys.path.insert(0, str(Path(__file__).parents[1]))
 spec = importlib.util.spec_from_file_location("shared_search", Path(__file__).parents[1] / "main.py")
 search = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(search)
@@ -166,3 +168,101 @@ def test_ui_renders_escaped_results(monkeypatch):
     assert "argparse &lt;x&gt;" in page and "<code>" not in page
     assert ">すべて</option>" in page
     assert 'value="&lt;b&gt;"' in page
+
+
+def test_engine_query_and_result_provenance(monkeypatch, source):
+    from engine import engine_search
+    calls = []
+    def handle(request):
+        import json
+        calls.append((request.url.path, json.loads(request.content)))
+        return httpx.Response(200, json={"hits": {"hits": [{"_source": {
+            "url": "https://docs.example.org/manual/a", "title": "Doc", "body": "Python text",
+            "fetched_at": "2026-09-30T00:00:00Z"}}]}, "_shards": {"failed": 0}})
+    source.update(kind="opensearch-engine", index="websearch-docs")
+    def client():
+        return httpx.Client(base_url="https://localhost:9200", transport=httpx.MockTransport(handle))
+    monkeypatch.setattr(search, "engine_client", client)
+    hits, error = search.site_search(source, "Python", 3)
+    assert not error and hits[0]["engine"] == "opensearch"
+    assert hits[0]["indexed_at"] == "2026-09-30T00:00:00Z"
+    assert hits[0]["terms"] == source["terms"]
+    assert calls[0][0] == "/websearch-docs/_search"
+    assert calls[0][1]["query"]["bool"]["filter"] == [{"term": {"source_id": "docs"}}]
+
+
+@pytest.mark.parametrize("payload", [{"timed_out": True}, {"_shards": {"failed": 1}}])
+def test_engine_partial_results_fail_closed(monkeypatch, source, payload):
+    source.update(kind="opensearch-engine", index="websearch-docs")
+    monkeypatch.setattr(search, "engine_client", lambda: httpx.Client(base_url="https://localhost:9200",
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, json=payload))))
+    hits, error = search.site_search(source, "Python", 3)
+    assert not hits and error
+
+
+def test_ingestion_switches_alias_only_after_success(monkeypatch, source):
+    spec = importlib.util.spec_from_file_location("ingest_engine", Path(__file__).parents[1] / "ingest-opensearch.py")
+    ingest = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ingest)
+    monkeypatch.setattr(ingest.time, "sleep", lambda *a: None)
+    source.update(kind="opensearch-engine", index="websearch-docs",
+                  seed_urls=["https://docs.example.org/manual/a"])
+    calls = []
+    fail_bulk = [False]
+    def handle(request):
+        calls.append(request.url.path)
+        if request.url.path == "/_bulk":
+            return httpx.Response(200, json={"errors": fail_bulk[0]})
+        if request.url.path == "/_alias/websearch-docs":
+            return httpx.Response(404)
+        return httpx.Response(200, json={"acknowledged": True})
+    def page(request):
+        if request.url.path == "/robots.txt":
+            return httpx.Response(200, text="User-agent: *\nAllow: /\n")
+        return httpx.Response(200, text="<html><title>Doc</title><body>" + "Python programming " * 30 + "</body></html>",
+                              headers={"content-type": "text/html"})
+    with httpx.Client(base_url="https://localhost:9200", transport=httpx.MockTransport(handle)) as engine, \
+            httpx.Client(transport=httpx.MockTransport(page)) as web:
+        assert ingest.refresh_source(engine, web, source) == 1
+        assert calls[-1] == "/_aliases"
+        calls.clear()
+        fail_bulk[0] = True
+        with pytest.raises(ValueError, match="Bulk"):
+            ingest.refresh_source(engine, web, source)
+        assert "/_aliases" not in calls
+        calls.clear()
+        source["seed_urls"] = ["http://127.0.0.1/private"]
+        with pytest.raises(ValueError, match="outside"):
+            ingest.refresh_source(engine, web, source)
+        assert not calls
+
+
+def test_hardening_refuses_custom_accounts(monkeypatch, tmp_path):
+    spec = importlib.util.spec_from_file_location("harden_engine", Path(__file__).parents[1] / "harden-opensearch.py")
+    harden = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(harden)
+    monkeypatch.setattr(harden, "PRIVATE", tmp_path)
+    monkeypatch.setattr(harden, "engine_client", lambda **kw: httpx.Client(base_url="https://localhost:9200",
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, json={"admin": {}, "custom": {}}))))
+    monkeypatch.setattr(harden.subprocess, "check_output", lambda *a, **kw: pytest.fail("must preserve custom users"))
+    with pytest.raises(ValueError, match="Unknown custom"):
+        harden.harden()
+    assert not list(tmp_path.iterdir())
+
+
+def test_reader_connection_keeps_tls_and_has_no_admin_secret(monkeypatch, tmp_path):
+    import engine
+    import ssl
+    (tmp_path / "reader.env").write_text("PASSWORD=test-reader\n")
+    monkeypatch.setattr(engine, "PRIVATE", tmp_path)
+    context = ssl.create_default_context()
+    paths = []
+    monkeypatch.setattr(engine.ssl, "create_default_context", lambda **kw: (paths.append(kw) or context))
+    arguments = []
+    monkeypatch.setattr(engine.httpx, "Client", lambda **kw: arguments.append(kw))
+    engine.engine_client()
+    assert arguments[0]["auth"] == ("web_search_reader", "test-reader")
+    assert arguments[0]["base_url"] == "https://127.0.0.1:9200"
+    assert arguments[0]["verify"].check_hostname
+    assert arguments[0]["verify"].verify_mode == ssl.CERT_REQUIRED
+    assert not arguments[0]["trust_env"]

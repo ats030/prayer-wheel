@@ -1,6 +1,23 @@
 reviewed_at: 2026-09-30
 intended_use: Internal source research for commercial IT articles and teaching materials
 decisions:
+  - tool: OpenSearch indexing product
+    version: 3.9.0, official Docker image listed on the downloads page
+    artifact: opensearchproject/opensearch:3.9.0@sha256:adfa61f85025d06b4aeb562e7e74fde7e31c437039c93c3862c17e9acebd6c7c
+    decision: conditional
+    spdx: Apache-2.0
+    cost: Self-hosted open source; no software licence fee, infrastructure costs remain
+    commercial_use: Commercial software use permitted under Apache-2.0; indexed content retains its own terms
+    conditions:
+      - Retain licences, copyright and NOTICE when redistributing; mark modified files
+      - Bundled dependencies and plugins retain their respective notices
+      - No trademark rights or endorsement; hosted paid services are outside scope
+      - Loopback-only authenticated internal deployment; unique HTTP TLS and disabled demo admin DN
+      - Transport demo TLS stays within the single container; replace before multi-node/public exposure
+    sources:
+      - https://opensearch.org/downloads/
+      - https://github.com/opensearch-project/OpenSearch/blob/3.9.0/LICENSE.txt
+      - https://docs.opensearch.org/latest/install-and-configure/install-opensearch/docker/
   - tool: YaCy search server
     version: 1.942, official Docker image
     artifact: yacy/yacy_search_server@sha256:55c5e5dd928f312cf47a57afa8d645df37366f15678e0983c8b7fdbe3b5f6475
@@ -17,11 +34,11 @@ decisions:
     sources:
       - https://github.com/yacy/yacy_search_server#license
       - https://github.com/yacy/yacy_search_server/blob/master/docker/Dockerfile
-  - tool: Python documentation static Sphinx index
-    version: Public Python 3 documentation, fetched index may update
+  - tool: Python documentation indexed seed pages
+    version: Public Python 3 documentation; explicit seed list refreshed manually
     decision: conditional
     spdx: PSF-2.0
-    cost: Public static documentation, no paid API
+    cost: Public documentation, no paid API
     commercial_use: Royalty-free reuse subject to PSF notices and third-party exceptions
     conditions:
       - Retain applicable licence and copyright notices on reused documentation
@@ -29,11 +46,11 @@ decisions:
       - Inspect page-specific third-party notices; no trademark endorsement
     sources:
       - https://docs.python.org/3/license.html
-  - tool: MediaWiki.org OpenSearch endpoint
-    version: Public Action API, no authenticated or paid plan
+  - tool: MediaWiki.org indexed seed pages
+    version: Public documentation; explicit seed list refreshed manually
     decision: conditional
     spdx: CC-BY-SA-4.0
-    cost: Public endpoint subject to rate limits
+    cost: Public documentation; no paid service used
     commercial_use: Licensed text allows commercial reuse subject to attribution and ShareAlike obligations
     conditions:
       - Attribute source authors and pages, link licence and identify changes when reusing text

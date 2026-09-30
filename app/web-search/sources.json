@@ -2,25 +2,26 @@
   "sources": [
     {
       "id": "python-docs",
-      "kind": "sphinx",
+      "kind": "opensearch-engine",
+      "index": "websearch-python-docs",
+      "seed_urls": ["https://docs.python.org/3/tutorial/index.html", "https://docs.python.org/3/tutorial/introduction.html", "https://docs.python.org/3/tutorial/controlflow.html", "https://docs.python.org/3/tutorial/datastructures.html", "https://docs.python.org/3/tutorial/modules.html", "https://docs.python.org/3/tutorial/inputoutput.html", "https://docs.python.org/3/tutorial/errors.html", "https://docs.python.org/3/tutorial/classes.html", "https://docs.python.org/3/library/logging.html", "https://docs.python.org/3/library/asyncio.html", "https://docs.python.org/3/library/json.html", "https://docs.python.org/3/library/sqlite3.html", "https://docs.python.org/3/library/pathlib.html"],
       "enabled": true,
-      "endpoint": "https://docs.python.org/3/searchindex.js",
-      "base_url": "https://docs.python.org/3/",
       "url_prefixes": ["https://docs.python.org/3/"],
       "terms": {
         "status": "conditional",
         "checked_at": "2026-09-30",
         "license": "PSF-2.0; documentation examples additionally 0BSD",
-        "cost": "Public documentation and static search index; no paid API",
+        "cost": "Public documentation; manually indexed in self-hosted OpenSearch, no paid API",
         "links": ["https://docs.python.org/3/license.html"],
         "conditions": "Documentation reuse requires retaining applicable licence and copyright notices; examples from 3.8.6 onward also allow 0BSD. Check incorporated third-party material individually. No trademark endorsement."
       }
     },
     {
       "id": "mediawiki-docs",
-      "kind": "opensearch",
+      "kind": "opensearch-engine",
+      "index": "websearch-mediawiki-docs",
+      "seed_urls": ["https://www.mediawiki.org/wiki/API:Main_page", "https://www.mediawiki.org/wiki/API:Query", "https://www.mediawiki.org/wiki/API:REST_API"],
       "enabled": true,
-      "endpoint": "https://www.mediawiki.org/w/api.php?action=opensearch&format=json&namespace=0&search={searchTerms}&limit={count}",
       "url_prefixes": ["https://www.mediawiki.org/wiki/"],
       "terms": {
         "status": "conditional",
