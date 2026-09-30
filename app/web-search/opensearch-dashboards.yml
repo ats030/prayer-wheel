@@ -8,11 +8,9 @@ opensearch.ssl.certificateAuthorities: ["/usr/share/opensearch-dashboards/config
 # kibanaserver keeps the security plugin's reserved kibana_server role mapping.
 opensearch.username: kibanaserver
 opensearch.password: "${OPENSEARCH_DASHBOARDS_SERVER_PASSWORD}"
-opensearch.requestHeadersWhitelist: [authorization, securitytenant]
+opensearch.requestHeadersAllowlist: [authorization, securitytenant]
 opensearch_security.multitenancy.enabled: false
 opensearch_security.readonly_mode.roles: [kibana_read_only]
 # Served over plain HTTP on the tailnet (WireGuard-encrypted), not HTTPS.
 opensearch_security.cookie.secure: false
-telemetry.enabled: false
-telemetry.allowChangingOptInStatus: false
 home.disableWelcomeScreen: true
