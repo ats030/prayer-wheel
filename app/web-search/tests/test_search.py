@@ -164,4 +164,5 @@ def test_ui_renders_escaped_results(monkeypatch):
     page = TestClient(search.app).get("/ui", params={"q": "<b>"}).text
     assert 'data-site="web-search"' in page
     assert "argparse &lt;x&gt;" in page and "<code>" not in page
+    assert ">すべて</option>" in page
     assert 'value="&lt;b&gt;"' in page

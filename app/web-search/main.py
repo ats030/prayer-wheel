@@ -284,8 +284,8 @@ def _plain(text: str) -> str:
 @app.get("/ui", response_class=HTMLResponse)
 def ui(q: str = Query(default="", max_length=500), source: str = "") -> str:
     ids = [s["id"] for s in config()["sources"] if enabled(s)]
-    options = "".join(f'<option value="{html.escape(i)}"{" selected" if i == source else ""}>{html.escape(i)}</option>'
-                      for i in [""] + ids).replace('<option value="">', '<option value="">すべて', 1)
+    options = "".join(f'<option value="{html.escape(i)}"{" selected" if i == source else ""}>{html.escape(i or "すべて")}</option>'
+                      for i in [""] + ids)
     body = ""
     if q.strip():
         try:
