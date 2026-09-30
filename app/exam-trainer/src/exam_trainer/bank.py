@@ -145,16 +145,17 @@ def add_question(
     status: str = "draft",
     origin: str = "manual",
     hold_reason: str = "",
+    source_details: list[dict] | None = None,
 ) -> int:
     with db.transaction() as conn:
         cur = conn.execute(
             "INSERT INTO question (exam_id, node_path, stem, choices, answer,"
-            " explanation, evidence, source_refs, status, hold_reason, origin, created_at)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " explanation, evidence, source_refs, status, hold_reason, origin, created_at, source_details)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 exam_id, node_path.strip(), stem.strip(), db.dumps(choices), int(answer),
                 explanation.strip(), evidence.strip(), db.dumps(source_refs or []),
-                status, hold_reason, origin, _now(),
+                status, hold_reason, origin, _now(), db.dumps(source_details or []),
             ),
         )
     return int(cur.lastrowid)
@@ -164,6 +165,7 @@ def _question_row(row) -> dict:
     item = dict(row)
     item["choices"] = db.loads(item["choices"])
     item["source_refs"] = db.loads(item["source_refs"])
+    item["source_details"] = db.loads(item["source_details"])
     return item
 
 

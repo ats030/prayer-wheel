@@ -236,13 +236,14 @@
       status.textContent = 'ジョブを登録中…';
       try {
         const target = numberOf('genTarget', 5);
+        const search_scope = document.getElementById('genSearchScope').value;
         if (bulk) {
           const data = await postJSON(`/api/exams/${EXAM_ID}/generate-missing`, {
-            target, limit: numberOf('genLimit', 8),
+            target, limit: numberOf('genLimit', 8), search_scope,
           });
           toast(`${data.count}項目をキューに積みました。画面を閉じても続きます`, 4000);
         } else {
-          await postJSON(`/api/exams/${EXAM_ID}/generate`, { node_path: node.value, target });
+          await postJSON(`/api/exams/${EXAM_ID}/generate`, { node_path: node.value, target, search_scope });
           toast('生成を開始しました。画面を閉じても続きます');
         }
         genModal.classList.remove('show');

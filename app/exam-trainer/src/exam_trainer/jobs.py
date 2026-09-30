@@ -17,7 +17,7 @@ import json
 import logging
 import threading
 
-from . import db, generate
+from . import db, generate, web
 
 logger = logging.getLogger(__name__)
 
@@ -49,23 +49,30 @@ def _now() -> str:
 def init() -> None:
     with db.transaction() as conn:
         conn.executescript(_SCHEMA)
+        if "search_scope" not in {row[1] for row in conn.execute("PRAGMA table_info(job)")}:
+            conn.execute("ALTER TABLE job ADD COLUMN search_scope TEXT NOT NULL DEFAULT 'searxng'")
 
 
-def enqueue(exam_id: int, node_path: str, target: int = 5) -> dict:
+def enqueue(exam_id: int, node_path: str, target: int = 5, search_scope: str | None = None) -> dict:
+    scope = search_scope or web.current_scope()
+    if scope not in {option["id"] for option in web.scope_options()}:
+        raise ValueError("検索範囲を選び直してください")
     init()
     with db.transaction() as conn:
         # One queued/running job per node. Pressing the button twice should not
         # double-generate; it should join the run already happening.
         row = conn.execute(
-            "SELECT id FROM job WHERE exam_id = ? AND node_path = ?"
+            "SELECT id, search_scope FROM job WHERE exam_id = ? AND node_path = ?"
             " AND status IN ('queued', 'running')",
             (exam_id, node_path),
         ).fetchone()
         if row:
+            if row["search_scope"] != scope:
+                raise ValueError("この項目は別の検索範囲で生成中です。終了後に再実行してください")
             return get(row["id"])
         cur = conn.execute(
-            "INSERT INTO job (exam_id, node_path, target, created_at) VALUES (?, ?, ?, ?)",
-            (exam_id, node_path, int(target), _now()),
+            "INSERT INTO job (exam_id, node_path, target, created_at, search_scope) VALUES (?, ?, ?, ?, ?)",
+            (exam_id, node_path, int(target), _now(), scope),
         )
         job_id = int(cur.lastrowid)
     start_worker()
@@ -127,10 +134,11 @@ def _claim() -> dict | None:
 def _run(job: dict) -> None:
     job_id = job["id"]
     try:
-        summary = generate.generate_for_node(
-            job["exam_id"], job["node_path"], target=job["target"],
-            progress=lambda text: _set(job_id, status_text=text),
-        )
+        with web.search_mode(job["search_scope"]):
+            summary = generate.generate_for_node(
+                job["exam_id"], job["node_path"], target=job["target"],
+                progress=lambda text: _set(job_id, status_text=text),
+            )
         _set(
             job_id,
             status="done",

@@ -23,6 +23,7 @@
 # されておらず、git add -A 一発で入りうる状態だった。非公開リポジトリでも、
 # 利用者のメールアドレスと課金される鍵を履歴に残す理由は無い。
 /.config/*/settings.json
+/.config/web-search-yacy/
 /data/
 /cache/
 

@@ -17,6 +17,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Resp
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
+from typing import Literal
 from pydantic import BaseModel
 
 from . import bank, db, jobs, ollama_client, web
@@ -181,6 +182,8 @@ def bank_page(
         syllabus=bank.list_syllabus(exam["id"]) if exam else [],
         jobs=jobs.list_for_exam(exam["id"], 5) if exam else [],
         has_web=web.available(),
+        search_options=web.scope_options(),
+        search_default=web.current_scope(),
         # Set when arriving from a weakness-tree branch that has no questions,
         # so the dialog is already open on the node that sent you here.
         open_generate=bool(generate) and bool(node),
@@ -383,28 +386,30 @@ def affiliate_click(resource_id: int, question_id: int | None = None) -> Redirec
 class GenerateIn(BaseModel):
     node_path: str
     target: int = 5
+    search_scope: Literal["sites", "yacy", "searxng"] | None = None
+
+
+def _check_search(scope: str | None) -> str:
+    scope = scope or web.current_scope()
+    if scope not in {option["id"] for option in web.scope_options()}:
+        raise HTTPException(400, "検索範囲を選び直してください")
+    with web.search_mode(scope):
+        if not web.available():
+            raise HTTPException(400, "検索先が未設定です（WEB_SEARCH_API_URL / SEARXNG_API_URL）")
+        if not web.reachable():
+            raise HTTPException(400, "検索基盤に接続できません。サービスの稼働を確認してください")
+    return scope
 
 
 @app.post("/api/exams/{exam_id}/generate")
 def start_generation(exam_id: int, payload: GenerateIn) -> JSONResponse:
-    if not web.available():
-        raise HTTPException(
-            status_code=400,
-            detail="SEARXNG_API_URL が未設定です。根拠を集められないため生成できません",
-        )
-    # Told here rather than after a multi-minute job that quietly collects
-    # nothing. The two causes need different fixes, so they get different text.
-    if not web.reachable():
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                f"SearXNG ({settings.searxng_url}) に接続できません。"
-                "URL と searxng.service の稼働を確認してください"
-            ),
-        )
+    scope = _check_search(payload.search_scope)
     if not payload.node_path.strip():
         raise HTTPException(status_code=400, detail="シラバス項目を選んでください")
-    job = jobs.enqueue(exam_id, payload.node_path.strip(), payload.target)
+    try:
+        job = jobs.enqueue(exam_id, payload.node_path.strip(), payload.target, search_scope=scope)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
     return JSONResponse(job)
 
 
@@ -413,23 +418,12 @@ class FillIn(BaseModel):
     # The worker runs one job at a time and each takes minutes, so an unbounded
     # queue would be hours deep and unclear when it would end.
     limit: int = 8
+    search_scope: Literal["sites", "yacy", "searxng"] | None = None
 
 
 @app.post("/api/exams/{exam_id}/generate-missing")
 def start_bulk_generation(exam_id: int, payload: FillIn) -> JSONResponse:
-    if not web.available():
-        raise HTTPException(
-            status_code=400,
-            detail="SEARXNG_API_URL が未設定です。根拠を集められないため生成できません",
-        )
-    if not web.reachable():
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                f"SearXNG ({settings.searxng_url}) に接続できません。"
-                "URL と searxng.service の稼働を確認してください"
-            ),
-        )
+    scope = _check_search(payload.search_scope)
     target = max(1, payload.target)
     pending = bank.nodes_needing_questions(exam_id, target, limit=max(1, payload.limit))
     if not pending:
@@ -437,12 +431,19 @@ def start_bulk_generation(exam_id: int, payload: FillIn) -> JSONResponse:
             status_code=400,
             detail=f"すべての項目が目標の{target}問に達しています",
         )
-    queued = [
-        {"node_path": node["path"], "title": node["title"], "job_id": jobs.enqueue(
-            exam_id, node["path"], target,
-        )["id"]}
-        for node in pending
-    ]
+    conflicts = [job for job in jobs.active(exam_id)
+                 if job["node_path"] in {node["path"] for node in pending} and job["search_scope"] != scope]
+    if conflicts:
+        raise HTTPException(409, "別の検索範囲で生成中の項目があります。終了後に再実行してください")
+    try:
+        queued = [
+            {"node_path": node["path"], "title": node["title"], "job_id": jobs.enqueue(
+                exam_id, node["path"], target, search_scope=scope,
+            )["id"]}
+            for node in pending
+        ]
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
     return JSONResponse({"queued": queued, "count": len(queued)})
 
 

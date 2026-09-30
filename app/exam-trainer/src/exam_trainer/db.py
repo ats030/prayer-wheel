@@ -117,6 +117,11 @@ _MIGRATIONS: list[str] = [
     );
     CREATE INDEX idx_affiliate_event_resource ON affiliate_event (resource_id, event_type, occurred_at);
     """,
+    """
+    ALTER TABLE material ADD COLUMN search_scope TEXT NOT NULL DEFAULT 'legacy';
+    ALTER TABLE material ADD COLUMN provenance TEXT NOT NULL DEFAULT '{}';
+    ALTER TABLE question ADD COLUMN source_details TEXT NOT NULL DEFAULT '[]';
+    """,
 ]
 
 

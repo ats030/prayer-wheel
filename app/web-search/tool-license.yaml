@@ -1,0 +1,55 @@
+reviewed_at: 2026-09-30
+intended_use: Internal source research for commercial IT articles and teaching materials
+decisions:
+  - tool: YaCy search server
+    version: 1.942, official Docker image
+    artifact: yacy/yacy_search_server@sha256:55c5e5dd928f312cf47a57afa8d645df37366f15678e0983c8b7fdbe3b5f6475
+    decision: conditional
+    spdx: GPL-2.0-or-later
+    cost: Self-hosted open source; no software licence fee, operator bears infrastructure costs
+    commercial_use: Software allows commercial use under GPL; does not grant rights to indexed content
+    conditions:
+      - Retain copyright and licence notices; distributing modified binaries requires corresponding source under GPL
+      - Individual bundled files have other licences, including LGPL; retain their notices
+      - Internal HTTP integration does not copy YaCy code into the API
+      - No trademark endorsement; optional paid maintainer services are outside scope
+      - Public-network membership requires the operator's explicit mode choice
+    sources:
+      - https://github.com/yacy/yacy_search_server#license
+      - https://github.com/yacy/yacy_search_server/blob/master/docker/Dockerfile
+  - tool: Python documentation static Sphinx index
+    version: Public Python 3 documentation, fetched index may update
+    decision: conditional
+    spdx: PSF-2.0
+    cost: Public static documentation, no paid API
+    commercial_use: Royalty-free reuse subject to PSF notices and third-party exceptions
+    conditions:
+      - Retain applicable licence and copyright notices on reused documentation
+      - Documentation code examples from Python 3.8.6 also allow 0BSD
+      - Inspect page-specific third-party notices; no trademark endorsement
+    sources:
+      - https://docs.python.org/3/license.html
+  - tool: MediaWiki.org OpenSearch endpoint
+    version: Public Action API, no authenticated or paid plan
+    decision: conditional
+    spdx: CC-BY-SA-4.0
+    cost: Public endpoint subject to rate limits
+    commercial_use: Licensed text allows commercial reuse subject to attribution and ShareAlike obligations
+    conditions:
+      - Attribute source authors and pages, link licence and identify changes when reusing text
+      - Adapted licensed text may require ShareAlike; Help namespace and individual pages have exceptions
+      - Respect User-Agent policy, rate limits and API usage policy
+      - Do not infer that every generated publication is automatically cleared
+    sources:
+      - https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use
+      - https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_API_Usage_Guidelines
+      - https://www.mediawiki.org/wiki/API:Opensearch
+  - tool: Existing SearXNG search route
+    version: Existing local service; upstream selection varies
+    decision: review_required
+    cost: No new paid service introduced
+    commercial_use: Upstream search and destination-content terms remain unverified
+    conditions:
+      - Explicit legacy discovery route only; not a cleared commercial source
+    sources:
+      - https://docs.searxng.org/

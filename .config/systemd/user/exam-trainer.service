@@ -6,6 +6,7 @@ After=network-online.target
 Type=simple
 WorkingDirectory=/home/ats030
 EnvironmentFile=-/home/ats030/.env
+Environment=WEB_SEARCH_API_URL=http://127.0.0.1:8527
 ExecStart=/home/ats030/app/exam-trainer.sh
 Restart=on-failure
 RestartSec=10

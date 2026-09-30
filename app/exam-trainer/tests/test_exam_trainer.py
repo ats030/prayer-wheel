@@ -51,6 +51,143 @@ def test_schema_is_created_on_first_use():
     assert bank.list_exams()[0]["slug"] == "g"
 
 
+def test_shared_search_routes_are_explicit_and_do_not_fallback(monkeypatch):
+    from exam_trainer import web
+    from exam_trainer.config import settings
+    import httpx
+    monkeypatch.setattr(settings, "web_search_url", "http://127.0.0.1:8527")
+    calls = []
+    def handler(request):
+        calls.append(request)
+        return httpx.Response(200, json={"ok": False, "results": [], "errors": ["YaCy unavailable"]})
+    real_client = httpx.Client
+    monkeypatch.setattr(web.httpx, "Client", lambda **kw: real_client(transport=httpx.MockTransport(handler), **kw))
+    with web.search_mode("yacy"):
+        assert web.search_urls("Python") == []
+        assert "YaCy unavailable" in web.last_search_note()
+    assert len(calls) == 1 and calls[0].url.params["scope"] == "yacy"
+
+
+def test_sites_never_reuse_general_or_legacy_material(monkeypatch):
+    from exam_trainer import materials, web
+    from exam_trainer.config import settings
+    exam_id = bank.create_exam("IT")
+    materials.save(exam_id, "1", "https://example.org/legacy", "Old", "body")
+    materials.save(exam_id, "1", "https://example.org/yacy", "General", "body", {"scope": "yacy"})
+    monkeypatch.setattr(settings, "web_search_url", "http://127.0.0.1:8527")
+    monkeypatch.setattr(web, "reviewed_sources", lambda: [])
+    queries = []
+    monkeypatch.setattr(web, "gather", lambda q, **kw: queries.append(q) or [])
+    with web.search_mode("sites"):
+        assert materials.ensure(exam_id, {"path": "1", "title": "Python", "keywords": ""}, "IT") == []
+    assert queries == ["Python"]
+
+
+def test_site_cache_invalidated_when_terms_change(monkeypatch):
+    from exam_trainer import materials, web
+    from exam_trainer.config import settings
+    exam_id = bank.create_exam("IT")
+    source = {"id": "docs", "url_prefixes": ["https://docs.example.org/"], "terms": {"status": "conditional", "checked_at": "today"}}
+    provenance = {"scope": "sites", "provider": "docs", **{k: source[k] for k in ("terms", "url_prefixes")}}
+    materials.save(exam_id, "1", "https://docs.example.org/topic", "Topic", "body", provenance)
+    monkeypatch.setattr(settings, "web_search_url", "http://127.0.0.1:8527")
+    monkeypatch.setattr(web, "reviewed_sources", lambda: [source])
+    monkeypatch.setattr(web, "gather", lambda *a, **kw: [])
+    node = {"path": "1", "title": "Python", "keywords": ""}
+    with web.search_mode("sites"):
+        assert len(materials.ensure(exam_id, node, "IT")) == 1
+        source["terms"] = {"status": "conditional", "checked_at": "tomorrow"}
+        assert materials.ensure(exam_id, node, "IT") == []
+
+
+def test_manual_site_material_receives_current_review(monkeypatch):
+    from exam_trainer import materials, web
+    from exam_trainer.config import settings
+    exam_id = bank.create_exam("IT")
+    materials.save(exam_id, "1", "https://docs.example.org/topic", "Topic", "body",
+                   {"scope": "manual", "fetched_url": "https://docs.example.org/topic"})
+    source = {"id": "docs", "url_prefixes": ["https://docs.example.org/"], "terms": {"status": "conditional"}}
+    monkeypatch.setattr(settings, "web_search_url", "http://127.0.0.1:8527")
+    monkeypatch.setattr(web, "reviewed_sources", lambda: [source])
+    with web.search_mode("sites"):
+        got = materials.ensure(exam_id, {"path": "1", "title": "Python"}, "IT")
+    assert got[0]["provenance"]["provider"] == "docs"
+    assert got[0]["fetched_at"]
+
+
+def test_job_persists_scope_and_worker_uses_it(monkeypatch):
+    from exam_trainer import jobs, generate, web
+    from exam_trainer.config import settings
+    monkeypatch.setattr(settings, "web_search_url", "http://127.0.0.1:8527")
+    monkeypatch.setattr(jobs, "start_worker", lambda: None)
+    exam_id = bank.create_exam("IT")
+    job = jobs.enqueue(exam_id, "1", search_scope="yacy")
+    assert job["search_scope"] == "yacy"
+    with pytest.raises(ValueError):
+        jobs.enqueue(exam_id, "1", search_scope="sites")
+    seen = []
+    monkeypatch.setattr(generate, "generate_for_node", lambda *a, **kw:
+                        seen.append(web.current_scope()) or {"verified": 0, "held": 0, "dropped": 0})
+    jobs._run(job)
+    assert seen == ["yacy"]
+    assert web.current_scope() == "sites"
+
+
+def test_question_source_details_are_immutable_snapshot():
+    from exam_trainer import materials
+    exam_id = bank.create_exam("IT")
+    details = [{"url": "https://example.org/a", "fetched_at": "2026-01-01", "terms": {"checked_at": "2026-01-01"}}]
+    question_id = bank.add_question(exam_id, "1", "Question", ["A", "B"], 0, source_details=details)
+    materials.save(exam_id, "1", "https://example.org/a", "A", "new content", {"terms": {"checked_at": "2026-09-30"}})
+    assert bank.get_question(question_id)["source_details"] == details
+
+
+def test_manual_redirect_cannot_acquire_original_sites_terms(monkeypatch):
+    from exam_trainer import materials, web
+    from exam_trainer.config import settings
+    exam_id = bank.create_exam("IT")
+    monkeypatch.setattr(web, "extract_url", lambda url: web.Material(
+        url="https://other.example.org/article", title="Outside", text="outside body"))
+    materials.add_from_urls(exam_id, "1", ["https://docs.example.org/redirect"])
+    assert materials.list_for_node(exam_id, "1")[0]["url"] == "https://other.example.org/article"
+    monkeypatch.setattr(settings, "web_search_url", "http://127.0.0.1:8527")
+    monkeypatch.setattr(web, "reviewed_sources", lambda: [{"id": "docs", "url_prefixes": ["https://docs.example.org/"], "terms": {"status": "conditional"}}])
+    monkeypatch.setattr(web, "gather", lambda *a, **kw: [])
+    with web.search_mode("sites"):
+        assert materials.ensure(exam_id, {"path": "1", "title": "Python", "keywords": ""}, "IT") == []
+
+
+def test_terms_review_hold_is_counted_as_held(monkeypatch):
+    from exam_trainer import generate, materials
+    from exam_trainer.config import settings
+    exam_id = bank.create_exam("IT")
+    bank.set_syllabus(exam_id, [{"path": "1", "title": "Python"}])
+    monkeypatch.setattr(settings, "web_search_url", "http://127.0.0.1:8527")
+    monkeypatch.setattr(materials, "ensure", lambda *a, **kw: [{
+        "url": "https://example.org/a", "text": "source text", "fetched_at": "2026-09-30",
+        "provenance": {"scope": "yacy", "terms": {"status": "review_required"}}}])
+    monkeypatch.setattr(generate, "questions_from_passage", lambda *a, **kw: [{
+        "stem": "Question", "choices": ["A", "B"], "answer": 0, "explanation": "E", "evidence": "source text"}])
+    monkeypatch.setattr(generate, "screen", lambda *a: ("ok", ""))
+    monkeypatch.setattr(generate, "verify", lambda *a, **kw: (True, ""))
+    result = generate.generate_for_node(exam_id, "1")
+    assert result["verified"] == 0 and result["held"] == 1
+    assert bank.list_questions(exam_id)[0]["status"] == "held"
+
+
+def test_new_schema_migrates_existing_material_and_questions(tmp_path):
+    import sqlite3
+    conn = sqlite3.connect(tmp_path / "bank.sqlite")
+    conn.executescript(db._SCHEMA + db._MIGRATIONS[0] + "PRAGMA user_version=1;")
+    conn.execute("INSERT INTO exam(id,slug,name,created_at) VALUES(1,'old','Old','2026-01-01')")
+    conn.execute("INSERT INTO material(exam_id,node_path,url,text,fetched_at) VALUES(1,'1','https://example.org/a','Old text','2026-01-01')")
+    conn.commit()
+    conn.close()
+    db.close()
+    row = db.connection().execute("SELECT * FROM material").fetchone()
+    assert row["text"] == "Old text" and row["search_scope"] == "legacy"
+
+
 def test_deleting_an_exam_takes_its_questions_and_history():
     exam_id, question_id = _exam_with_question()
     bank.answer(question_id, 0)

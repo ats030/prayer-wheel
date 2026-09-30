@@ -1,0 +1,51 @@
+{
+  "sources": [
+    {
+      "id": "python-docs",
+      "kind": "sphinx",
+      "enabled": true,
+      "endpoint": "https://docs.python.org/3/searchindex.js",
+      "base_url": "https://docs.python.org/3/",
+      "url_prefixes": ["https://docs.python.org/3/"],
+      "terms": {
+        "status": "conditional",
+        "checked_at": "2026-09-30",
+        "license": "PSF-2.0; documentation examples additionally 0BSD",
+        "cost": "Public documentation and static search index; no paid API",
+        "links": ["https://docs.python.org/3/license.html"],
+        "conditions": "Documentation reuse requires retaining applicable licence and copyright notices; examples from 3.8.6 onward also allow 0BSD. Check incorporated third-party material individually. No trademark endorsement."
+      }
+    },
+    {
+      "id": "mediawiki-docs",
+      "kind": "opensearch",
+      "enabled": true,
+      "endpoint": "https://www.mediawiki.org/w/api.php?action=opensearch&format=json&namespace=0&search={searchTerms}&limit={count}",
+      "url_prefixes": ["https://www.mediawiki.org/wiki/"],
+      "terms": {
+        "status": "conditional",
+        "checked_at": "2026-09-30",
+        "license": "CC-BY-SA-4.0; page-specific exceptions",
+        "cost": "Public Action API; no paid plan used",
+        "links": ["https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use", "https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_API_Usage_Guidelines", "https://www.mediawiki.org/wiki/API:Opensearch"],
+        "conditions": "Attribute original pages and authors, link the applicable licence and mark changes when reusing licensed text. Adapted text may require ShareAlike. Respect User-Agent and rate limits. Check each page's notices; this is not blanket permission for generated publications."
+      }
+    }
+  ],
+  "general_terms": {
+    "yacy": {
+      "status": "review_required",
+      "checked_at": "2026-09-30",
+      "license": "Search software GPL-2.0-or-later; destination content varies",
+      "links": ["https://github.com/yacy/yacy_search_server#license"],
+      "conditions": "Discovery only. Check each destination's retrieval and content reuse conditions before publishing. YaCy's software licence does not license indexed pages."
+    },
+    "searxng": {
+      "status": "review_required",
+      "checked_at": "2026-09-30",
+      "license": "Existing service; upstream and destination terms vary",
+      "links": ["https://docs.searxng.org/"],
+      "conditions": "Legacy discovery only. Upstream search-service terms and destination-content conditions need individual review."
+    }
+  }
+}

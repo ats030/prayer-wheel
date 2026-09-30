@@ -49,6 +49,8 @@ class Settings(BaseModel):
     fast_model: str = "gemma4:12b"
     embed_model: str = "nomic-embed-text"
     searxng_url: str = ""
+    web_search_url: str = ""
+    search_default_scope: str = "sites"
     # How many questions a single session serves before it stops asking.
     session_size: int = 20
     admin_token: str = ""
@@ -70,6 +72,8 @@ def load() -> Settings:
         fast_model=_env("EXAM_TRAINER_FAST_MODEL", "gemma4:12b"),
         embed_model=_env("EXAM_TRAINER_EMBED_MODEL", "nomic-embed-text"),
         searxng_url=_env("SEARXNG_API_URL", ""),
+        web_search_url=_env("WEB_SEARCH_API_URL", ""),
+        search_default_scope=_env("EXAM_TRAINER_SEARCH_SCOPE", "sites"),
         session_size=_int("EXAM_TRAINER_SESSION_SIZE", 20),
         admin_token=_env("EXAM_TRAINER_ADMIN_TOKEN", ""),
         secure_cookies=_env("EXAM_TRAINER_SECURE_COOKIES", "").lower() in {"1", "true", "yes"},

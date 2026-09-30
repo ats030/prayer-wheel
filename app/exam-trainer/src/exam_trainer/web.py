@@ -11,6 +11,10 @@ from __future__ import annotations
 import logging
 import time
 import urllib.parse
+import ipaddress
+import socket
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
 
 import httpx
@@ -66,11 +70,60 @@ class Material:
     url: str
     title: str
     text: str
+    provenance: dict | None = None
+
+
+_scope: ContextVar[str | None] = ContextVar("search_scope", default=None)
+_note: ContextVar[str] = ContextVar("search_note", default="")
+
+
+def current_scope() -> str:
+    return _scope.get() or (settings.search_default_scope if settings.web_search_url else "searxng")
+
+
+@contextmanager
+def search_mode(scope: str):
+    if scope not in {"sites", "yacy", "searxng"}:
+        raise ValueError("未知の検索範囲です")
+    token = _scope.set(scope)
+    note_token = _note.set("")
+    try:
+        yield
+    finally:
+        _scope.reset(token)
+        _note.reset(note_token)
+
+
+def scope_options() -> list[dict]:
+    if settings.web_search_url:
+        return [{"id": "sites", "label": "指定サイト（公式資料）"},
+                {"id": "yacy", "label": "Web全般（YaCy）"},
+                {"id": "searxng", "label": "Web全般（SearXNG・移行用）"}]
+    return [{"id": "searxng", "label": "Web全般（SearXNG）"}]
+
+
+def reviewed_sources() -> list[dict]:
+    """Revalidate cached pages against today's operator registry."""
+    with httpx.Client(timeout=5) as client:
+        response = client.get(settings.web_search_url.rstrip("/") + "/sources")
+        response.raise_for_status()
+        sources = response.json()["sources"]
+    if not isinstance(sources, list):
+        raise ValueError("検索先の設定を確認できません")
+    return [source for source in sources if source.get("enabled")]
+
+
+def matches_source(url: str, source: dict) -> bool:
+    p = urllib.parse.urlsplit(url)
+    return any(p.scheme == urllib.parse.urlsplit(prefix).scheme
+               and p.netloc == urllib.parse.urlsplit(prefix).netloc
+               and p.path.startswith(urllib.parse.urlsplit(prefix).path)
+               for prefix in source.get("url_prefixes", []))
 
 
 def available() -> bool:
     """Is search configured? Says nothing about whether it answers."""
-    return bool(settings.searxng_url)
+    return bool(settings.web_search_url or (current_scope() == "searxng" and settings.searxng_url))
 
 
 # Reachability is cached briefly: /health and the generate endpoint both ask,
@@ -89,7 +142,15 @@ def reachable(force: bool = False) -> bool:
     this instead.
     """
     global _reachable_cache
-    if not settings.searxng_url:
+    if settings.web_search_url:
+        try:
+            with httpx.Client(timeout=5) as client:
+                resp = client.get(settings.web_search_url.rstrip("/") + "/health")
+                resp.raise_for_status()
+                return resp.json().get("ok") is True
+        except (httpx.HTTPError, ValueError):
+            return False
+    if not available():
         return False
     now = time.monotonic()
     if not force and _reachable_cache and now - _reachable_cache[0] < _REACHABLE_TTL_SEC:
@@ -117,12 +178,34 @@ _last_search_note = ""
 
 
 def last_search_note() -> str:
-    return _last_search_note
+    return _note.get() if settings.web_search_url else _last_search_note
 
 
 def search_urls(query: str, limit: int = 6) -> list[dict]:
     global _last_search_note
     _last_search_note = ""
+    _note.set("")
+    if settings.web_search_url:
+        try:
+            with httpx.Client(timeout=20) as client:
+                resp = client.get(settings.web_search_url.rstrip("/") + "/search",
+                                  params={"q": query, "scope": current_scope(), "limit": min(20, limit)})
+                resp.raise_for_status()
+                payload = resp.json()
+            if not payload.get("ok") or payload.get("errors"):
+                _note.set(" / ".join(payload.get("errors") or [
+                    "選択した検索範囲で資料が見つかりません。検索語を変えるか検索範囲を選び直してください"
+                ]))
+                return []
+            results = payload["results"]
+            if not isinstance(results, list):
+                raise ValueError("results must be a list")
+            return [hit for hit in results if isinstance(hit, dict)
+                    and isinstance(hit.get("url"), str)
+                    and not _blocked(hit["url"]) and not _unusable(hit["url"])][:limit]
+        except (httpx.HTTPError, ValueError, KeyError, TypeError):
+            _note.set("選択した検索先に接続できません。検索範囲を選び直すか時間をおいて再実行してください")
+            return []
     if not settings.searxng_url:
         logger.info("SEARXNG_API_URL not set; skipping search")
         return []
@@ -191,18 +274,44 @@ def _unusable(url: str) -> bool:
     return split.path.endswith(".pdf")
 
 
-def extract_url(url: str) -> Material | None:
+def _safe_result_url(url: str, prefixes: list[str] | None) -> bool:
+    """Keep fetched redirects within site scope and reject private targets."""
+    try:
+        p = urllib.parse.urlsplit(url)
+        if p.scheme not in {"http", "https"} or not p.hostname or p.username or p.password:
+            return False
+        if prefixes and not any(p.scheme == urllib.parse.urlsplit(prefix).scheme
+                                and p.netloc == urllib.parse.urlsplit(prefix).netloc
+                                and p.path.startswith(urllib.parse.urlsplit(prefix).path) for prefix in prefixes):
+            return False
+        addresses = socket.getaddrinfo(p.hostname, p.port or (443 if p.scheme == "https" else 80), type=socket.SOCK_STREAM)
+        return bool(addresses) and all(ipaddress.ip_address(a[4][0]).is_global for a in addresses)
+    except (ValueError, OSError):
+        return False
+
+
+def extract_url(url: str, *, prefixes: list[str] | None = None, checked: bool = False) -> Material | None:
     try:
         with httpx.Client(
-            timeout=_FETCH_TIMEOUT, follow_redirects=True, headers={"User-Agent": _UA}
+            timeout=_FETCH_TIMEOUT, follow_redirects=not checked, headers={"User-Agent": _UA}
         ) as client:
-            resp = client.get(url)
+            target = url
+            for _ in range(6):
+                if checked and not _safe_result_url(target, prefixes):
+                    return None
+                resp = client.get(target)
+                if not checked or not resp.is_redirect:
+                    break
+                target = urllib.parse.urljoin(target, resp.headers.get("location", ""))
+            else:
+                return None
             resp.raise_for_status()
         # Bytes, not resp.text: pages that omit charset from Content-Type make
         # httpx guess utf-8, and a Shift_JIS page then decodes to mojibake that
         # still looks like 6000 usable characters. trafilatura detects the
         # encoding itself when handed the raw bytes.
         html = resp.content
+        fetched_url = str(resp.url) if getattr(resp, "url", None) else target
     except httpx.HTTPError as exc:
         logger.warning("Download failed for %s: %s", url, exc)
         return None
@@ -219,7 +328,7 @@ def extract_url(url: str) -> Material | None:
     if looks_garbled(text):
         logger.warning("Discarding garbled extraction from %s", url)
         return None
-    return Material(url=url, title=title, text=text)
+    return Material(url=fetched_url, title=title, text=text)
 
 
 # Replacement chars and the CJK-compatibility block are what a mis-decoded
@@ -255,7 +364,13 @@ def gather(query: str, limit: int = 4, max_chars: int = 6000) -> list[Material]:
         url = hit.get("url")
         if not url:
             continue
-        material = extract_url(url)
+        if settings.web_search_url:
+            prefixes = hit.get("url_prefixes") or []
+            if current_scope() == "sites" and not prefixes:
+                continue
+            material = extract_url(url, prefixes=prefixes, checked=True)
+        else:
+            material = extract_url(url)
         if material is None:
             continue
         # A page can extract cleanly and still be a stub — a video description,
@@ -265,6 +380,8 @@ def gather(query: str, limit: int = 4, max_chars: int = 6000) -> list[Material]:
             logger.info("Skipping %s: only %d characters", url, len(material.text))
             continue
         material.text = material.text[:max_chars]
+        material.provenance = {"scope": current_scope(), "provider": hit.get("provider", "searxng"),
+                               "terms": hit.get("terms", {}), "url_prefixes": hit.get("url_prefixes", [])}
         materials.append(material)
     return materials
 

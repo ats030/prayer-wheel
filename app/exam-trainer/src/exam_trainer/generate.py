@@ -364,6 +364,9 @@ def generate_for_node(
                     model=model, node_title=node["title"], keywords=node["keywords"],
                 )
                 status = "verified" if agrees else "held"
+                if settings.web_search_url and material.get("provenance", {}).get("terms", {}).get("status") not in {"approved", "conditional"}:
+                    status = "held"
+                    disagreement = (disagreement + " / " if disagreement else "") + "公開前に情報源の利用条件を確認してください"
                 bank.add_question(
                     exam_id, node_path, candidate["stem"], candidate["choices"],
                     candidate["answer"],
@@ -373,9 +376,11 @@ def generate_for_node(
                     status=status,
                     origin="generated",
                     hold_reason=disagreement,
+                    source_details=[{"url": material["url"], "fetched_at": material.get("fetched_at", ""),
+                                     **material.get("provenance", {})}],
                 )
                 existing.append(candidate["stem"])
-                summary["verified" if agrees else "held"] += 1
+                summary["verified" if status == "verified" else "held"] += 1
                 report(
                     f"採用 {summary['verified']} / 要確認 {summary['held']} / 破棄 {summary['dropped']}"
                 )

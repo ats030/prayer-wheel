@@ -10,7 +10,7 @@
     <button class="btn btn-secondary" id="addBtn" {% if not exam %}disabled{% endif %}>問題を追加</button>
     <button class="btn btn-primary" id="generateBtn"
             {% if not exam or not has_web %}disabled{% endif %}
-            title="{% if not has_web %}SEARXNG_API_URL が未設定のため生成できません{% else %}シラバス項目から根拠つきで生成します{% endif %}">
+            title="{% if not has_web %}検索先が未設定のため生成できません{% else %}シラバス項目から根拠つきで生成します{% endif %}">
       生成する
     </button>
   </div>
@@ -94,6 +94,17 @@
         {% for url in item.source_refs %}<a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ url }}</a>{% endfor %}
       </div>
       {% endif %}
+      {% for source in item.source_details %}
+      <details class="evidence" style="margin-top:8px;">
+        <summary>情報源の記録（{{ source.provider or source.scope or '手動' }}）</summary>
+        <p>取得日時: {{ source.fetched_at }}</p>
+        {% if source.terms %}
+        <p>{{ source.terms.license }} / {{ source.terms.status }} / 確認日: {{ source.terms.checked_at }}</p>
+        <p>{{ source.terms.conditions }}</p>
+        {% for url in source.terms.links %}<a href="{{ url }}" target="_blank" rel="noopener noreferrer">利用条件</a>{% endfor %}
+        {% else %}<p>利用条件の確認記録はありません。公開前に確認してください。</p>{% endif %}
+      </details>
+      {% endfor %}
     </div>
     {% endfor %}
     {% endif %}
@@ -106,7 +117,7 @@
     <h3>素材を追加</h3>
     <p class="muted" style="margin-top:-8px;font-size:13px;">
       問題の根拠にするページを直接指定します。検索が使えないときや、公式の解説ページを
-      確実に根拠にしたいときに使います。素材がある項目では、生成時に検索が走りません。
+      確実に根拠にしたいときに使います。指定サイト検索では、登録済みサイトの素材だけを使います。
     </p>
     <div class="field">
       <label for="matNode">シラバス項目</label>
@@ -134,6 +145,15 @@
 <div class="modal-bg" id="generateModal">
   <div class="modal">
     <h3>問題を生成する</h3>
+    <div class="field">
+      <label for="genSearchScope">検索範囲</label>
+      <select id="genSearchScope">
+        {% for option in search_options %}
+        <option value="{{ option.id }}" {% if option.id == search_default %}selected{% endif %}>{{ option.label }}</option>
+        {% endfor %}
+      </select>
+      <p class="muted">資料不足や接続障害時には停止します。Web全般へ自動では切り替えません。商用公開前には情報源の利用条件を確認してください。</p>
+    </div>
     <p class="muted" style="margin-top:-8px;font-size:13px;">
       シラバス項目のキーワードで Web を検索し、取れた本文の抜粋だけを根拠に作ります。
       抜粋から答えが決まらない問題、引用が本文に見つからない問題は捨てます。

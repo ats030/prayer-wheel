@@ -1,0 +1,25 @@
+services:
+  yacy:
+    image: yacy/yacy_search_server@sha256:55c5e5dd928f312cf47a57afa8d645df37366f15678e0983c8b7fdbe3b5f6475
+    container_name: web-search-yacy
+    restart: unless-stopped
+    # Data belongs to the workspace user; no host-root ownership needed.
+    user: "1000:1000"
+    environment:
+      YACY_NETWORK_MODE: ${YACY_NETWORK_MODE:?Choose webportal or approved freeworld}
+      HOME: /tmp
+    ports:
+      - "127.0.0.1:8090:8090"
+    volumes:
+      - /home/ats030/data/web-search-yacy:/opt/yacy_search_server/DATA
+      - ./yacy-entrypoint.sh:/opt/web-search-entrypoint.sh:ro
+    entrypoint: ["/bin/sh", "/opt/web-search-entrypoint.sh"]
+    mem_limit: 1536m
+    cpus: 2
+    pids_limit: 256
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "2"

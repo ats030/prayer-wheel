@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import datetime as dt
 import logging
+import json
 
 from . import db, web
 
@@ -26,21 +27,24 @@ def _now() -> str:
 
 def list_for_node(exam_id: int, node_path: str) -> list[dict]:
     rows = db.connection().execute(
-        "SELECT url, title, text, fetched_at FROM material"
+        "SELECT url, title, text, fetched_at, search_scope, provenance FROM material"
         " WHERE exam_id = ? AND node_path = ? ORDER BY fetched_at DESC",
         (exam_id, node_path),
     ).fetchall()
-    return [dict(row) for row in rows]
+    return [{**dict(row), "provenance": json.loads(row["provenance"])} for row in rows]
 
 
-def save(exam_id: int, node_path: str, url: str, title: str, text: str) -> None:
+def save(exam_id: int, node_path: str, url: str, title: str, text: str,
+         provenance: dict | None = None) -> None:
+    provenance = provenance or {}
     with db.transaction() as conn:
         conn.execute(
-            "INSERT INTO material (exam_id, node_path, url, title, text, fetched_at)"
-            " VALUES (?, ?, ?, ?, ?, ?)"
+            "INSERT INTO material (exam_id, node_path, url, title, text, fetched_at, search_scope, provenance)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
             " ON CONFLICT(exam_id, node_path, url) DO UPDATE SET"
-            " title = excluded.title, text = excluded.text, fetched_at = excluded.fetched_at",
-            (exam_id, node_path, url, title, text, _now()),
+            " title = excluded.title, text = excluded.text, fetched_at = excluded.fetched_at,"
+            " search_scope = excluded.search_scope, provenance = excluded.provenance",
+            (exam_id, node_path, url, title, text, _now(), provenance.get("scope", "manual"), json.dumps(provenance, ensure_ascii=False)),
         )
 
 
@@ -90,7 +94,8 @@ def add_from_urls(exam_id: int, node_path: str, urls: list[str]) -> dict:
             # failed fetch and a page with no extractable body.
             failed.append({"url": url, "reason": "本文を取り出せませんでした"})
             continue
-        save(exam_id, node_path, material.url, material.title, material.text)
+        save(exam_id, node_path, material.url, material.title, material.text,
+             {"scope": "manual", "fetched_url": material.url})
         added.append({"url": material.url, "title": material.title, "chars": len(material.text)})
     return {"added": added, "failed": failed}
 
@@ -106,11 +111,34 @@ def counts_by_node(exam_id: int) -> dict[str, int]:
 def ensure(exam_id: int, node: dict, exam_name: str, limit: int = 4) -> list[dict]:
     """Return usable material for a node, collecting it first if needed."""
     existing = _fresh(list_for_node(exam_id, node["path"]))
+    if web.settings.web_search_url:
+        scope = web.current_scope()
+        if scope == "sites":
+            sources = web.reviewed_sources()
+            kept = []
+            for row in existing:
+                source = next((s for s in sources if web.matches_source(row["url"], s)
+                               and ((row["search_scope"] == "manual"
+                                     and row["provenance"].get("fetched_url") == row["url"]) or
+                                    (row["search_scope"] == "sites"
+                                     and row["provenance"].get("provider") == s["id"]
+                                     and row["provenance"].get("terms") == s["terms"]))), None)
+                if source:
+                    row["provenance"] = {"scope": "sites", "provider": source["id"],
+                                         "terms": source["terms"], "url_prefixes": source["url_prefixes"]}
+                    kept.append(row)
+            existing = kept
+        else:
+            existing = [row for row in existing if row["search_scope"] in {scope, "manual"}]
     if existing:
         return existing
     if not web.available():
         logger.info("SEARXNG_API_URL not set; no material can be collected")
         return []
-    for material in web.gather(search_query(exam_name, node), limit=limit):
-        save(exam_id, node["path"], material.url, material.title, material.text)
-    return list_for_node(exam_id, node["path"])
+    # Site indexes should receive the topic, not an unrelated examination name.
+    query = search_query("" if web.current_scope() == "sites" else exam_name, node)
+    collected = web.gather(query, limit=limit)
+    for material in collected:
+        save(exam_id, node["path"], material.url, material.title, material.text, material.provenance)
+    urls = {material.url for material in collected}
+    return [row for row in list_for_node(exam_id, node["path"]) if row["url"] in urls]
