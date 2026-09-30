@@ -1,9 +1,10 @@
 # Shared web search
 
 Internal JSON API on `127.0.0.1:8527`. `web-search-tailnet.service`
-(`tailnet_forward.py`) forwards it, YaCy and OpenSearch Dashboards from evo-x2's
-Tailnet IP to loopback for app-portal (the `/ui` search page, the YaCy UI and
-Dashboards on 5601); nothing listens on the LAN, and
+(`tailnet_forward.py`) forwards it, YaCy, OpenSearch Dashboards and llm-stack's
+SearXNG from evo-x2's Tailnet IP to loopback for app-portal (the `/ui` search
+page, the YaCy UI, Dashboards on 5601 and SearXNG on 8081); nothing listens on
+the LAN, and
 local callers do not depend on Tailscale. The default route is designated-site
 search. YaCy is the Web-wide route; SearXNG is an explicit migration option.
 There is no automatic fallback between them.

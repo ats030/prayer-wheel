@@ -299,3 +299,8 @@ def test_dashboards_is_loopback_only_and_forwarded_to_tailnet():
     assert '"127.0.0.1:5601:5601"' in compose and 'network_mode: "service:opensearch"' in compose
     assert "verificationMode: full" in config and "Aa1!" not in config
     assert 5601 in tailnet_forward.PORTS
+
+
+def test_searxng_is_forwarded_to_tailnet_for_app_portal():
+    import tailnet_forward
+    assert 8081 in tailnet_forward.PORTS

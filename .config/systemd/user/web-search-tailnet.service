@@ -1,5 +1,5 @@
 [Unit]
-Description=Forward web-search API and YaCy to the Tailnet IP for app-portal
+Description=Forward web-search API, YaCy, Dashboards and SearXNG to the Tailnet IP for app-portal
 After=network-online.target web-search.service
 
 [Service]
