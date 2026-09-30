@@ -175,7 +175,34 @@ function markerIcon(o,selected){
   return L.divIcon({className:'tokusan-marker-anchor',html:`<button type="button" class="${className}" aria-label="${esc(label)}"></button>`,iconSize:[22,22],iconAnchor:[11,11]});
 }
 
+// zoomToShowLayer keeps its listeners until they fire, so a newer selection or a
+// re-render could spiderfy a stale cluster. Track one pending reveal and drop it instead.
+// Mirrors zoomToShowLayer from the pinned markercluster 1.5.3, including its private fields.
+let cancelReveal=()=>{};
+function revealMarker(marker){
+  cancelReveal();
+  const parent=marker.__parent;
+  if(!parent)return;
+  const latlng=marker.getLatLng();
+  if(marker._icon&&map.getBounds().contains(latlng))return;
+  const show=()=>{
+    if(clusterLayer._inZoomAnimation||!(marker._icon||parent._icon))return;
+    cancelReveal();
+    if(!marker._icon)parent.spiderfy();
+  };
+  map.on('moveend',show);
+  clusterLayer.on('animationend',show);
+  cancelReveal=()=>{
+    map.off('moveend',show);
+    clusterLayer.off('animationend',show);
+    cancelReveal=()=>{};
+  };
+  if(parent._zoom<Math.round(map.getZoom()))map.panTo(latlng);
+  else parent.zoomToBounds();
+}
+
 function renderMarkers(){
+  cancelReveal();
   clusterLayer.clearLayers();
   markers.clear();
   const bounds=[];
@@ -196,6 +223,7 @@ function renderMarkers(){
 }
 
 function selectItem(key,origin){
+  cancelReveal();
   const prevKey=selectedKey;
   const prevItem=selectedItem;
   selectedKey=key;
@@ -212,7 +240,7 @@ function selectItem(key,origin){
   selectedOrigin=origin;
   showDetail(item,origin);
   if(origin==='list'&&marker){
-    clusterLayer.zoomToShowLayer(marker);
+    revealMarker(marker);
   }else if(origin==='list'&&hasCoordinates(item)){
     map.flyTo([item.latitude,item.longitude],Math.max(map.getZoom(),8),{duration:.55});
   }
