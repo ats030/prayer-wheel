@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -266,3 +267,35 @@ def test_reader_connection_keeps_tls_and_has_no_admin_secret(monkeypatch, tmp_pa
     assert arguments[0]["verify"].check_hostname
     assert arguments[0]["verify"].verify_mode == ssl.CERT_REQUIRED
     assert not arguments[0]["trust_env"]
+
+
+def test_dashboards_server_user_uses_private_password_and_reserved_mapping(monkeypatch, tmp_path):
+    spec = importlib.util.spec_from_file_location("provision_dashboards",
+                                                  Path(__file__).parents[1] / "provision-dashboards.py")
+    provision = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(provision)
+    (tmp_path / "dashboards.env").write_text("OPENSEARCH_DASHBOARDS_SERVER_PASSWORD=test-dash\n")
+    monkeypatch.setattr(provision, "PRIVATE", tmp_path)
+    requests = []
+
+    def reply(request):
+        requests.append(request)
+        if request.method == "GET":
+            return httpx.Response(200, json={"kibana_server": {"users": ["kibanaserver"]}})
+        return httpx.Response(200, json={"status": "OK"})
+    with httpx.Client(base_url="https://localhost:9200", transport=httpx.MockTransport(reply)) as engine:
+        provision.provision_dashboards(engine)
+    assert requests[0].url.path == "/_plugins/_security/api/internalusers/kibanaserver"
+    assert json.loads(requests[0].content) == {"password": "test-dash"}
+    (tmp_path / "dashboards.env").write_text("")
+    with pytest.raises(ValueError, match="not configured"):
+        provision.provision_dashboards(None)
+
+
+def test_dashboards_is_loopback_only_and_forwarded_to_tailnet():
+    import tailnet_forward
+    compose = (Path(__file__).parents[1] / "opensearch.yml").read_text()
+    config = (Path(__file__).parents[1] / "opensearch-dashboards.yml").read_text()
+    assert '"127.0.0.1:5601:5601"' in compose and 'network_mode: "service:opensearch"' in compose
+    assert "verificationMode: full" in config and "Aa1!" not in config
+    assert 5601 in tailnet_forward.PORTS

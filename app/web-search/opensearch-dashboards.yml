@@ -1,0 +1,18 @@
+# OpenSearch Dashboards 3.9.0 for web-search. No secrets here: the server
+# password comes from dashboards.env through ${...} substitution.
+server.host: "0.0.0.0"  # inside OpenSearch's namespace; published only on 127.0.0.1
+server.name: web-search-dashboards
+opensearch.hosts: ["https://localhost:9200"]
+opensearch.ssl.verificationMode: full
+opensearch.ssl.certificateAuthorities: ["/usr/share/opensearch-dashboards/config/opensearch-ca.pem"]
+# kibanaserver keeps the security plugin's reserved kibana_server role mapping.
+opensearch.username: kibanaserver
+opensearch.password: "${OPENSEARCH_DASHBOARDS_SERVER_PASSWORD}"
+opensearch.requestHeadersWhitelist: [authorization, securitytenant]
+opensearch_security.multitenancy.enabled: false
+opensearch_security.readonly_mode.roles: [kibana_read_only]
+# Served over plain HTTP on the tailnet (WireGuard-encrypted), not HTTPS.
+opensearch_security.cookie.secure: false
+telemetry.enabled: false
+telemetry.allowChangingOptInStatus: false
+home.disableWelcomeScreen: true

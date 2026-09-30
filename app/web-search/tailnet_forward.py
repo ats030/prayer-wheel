@@ -1,6 +1,7 @@
-"""Forward the API (8527) and YaCy (8090) from the host's Tailnet IPv4 to loopback.
+"""Forward the API (8527), YaCy (8090) and OpenSearch Dashboards (5601) from the
+host's Tailnet IPv4 to loopback.
 
-app-portal reaches both over Tailscale. They keep listening only on 127.0.0.1,
+app-portal reaches them over Tailscale. They keep listening only on 127.0.0.1,
 so local callers (exam-trainer, the API's YaCy route) never depend on Tailscale
 timing. This process waits for the Tailnet IP at boot and exits non-zero when it
 cannot bind, so systemd retries. 0.0.0.0 is avoided so nothing is on the LAN.
@@ -12,7 +13,7 @@ import subprocess
 import sys
 import time
 
-PORTS = (8527, 8090)
+PORTS = (8527, 8090, 5601)
 IP_WAIT_SECONDS = 600
 
 

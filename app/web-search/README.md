@@ -1,8 +1,9 @@
 # Shared web search
 
 Internal JSON API on `127.0.0.1:8527`. `web-search-tailnet.service`
-(`tailnet_forward.py`) forwards it and YaCy from evo-x2's Tailnet IP to loopback
-for app-portal (the `/ui` search page and the YaCy UI); nothing listens on the LAN, and
+(`tailnet_forward.py`) forwards it, YaCy and OpenSearch Dashboards from evo-x2's
+Tailnet IP to loopback for app-portal (the `/ui` search page, the YaCy UI and
+Dashboards on 5601); nothing listens on the LAN, and
 local callers do not depend on Tailscale. The default route is designated-site
 search. YaCy is the Web-wide route; SearXNG is an explicit migration option.
 There is no automatic fallback between them.
@@ -38,15 +39,15 @@ library pages and three MediaWiki API pages, not either complete site.
 
 The official 3.9.0 image is version/digest pinned in `opensearch.yml`. It is a
 single node with a 1 GiB heap, 3 GiB memory limit, two CPUs and bounded logs.
-Only `127.0.0.1:9200` is published; no Dashboards, public port or new scheduler
-is installed. The API uses a dedicated read-only user scoped to `websearch-*`.
+Only `127.0.0.1:9200` and Dashboards' `127.0.0.1:5601` are published; no public
+port or new scheduler is installed. The API uses a dedicated read-only user scoped to `websearch-*`.
 The operator's admin credential is used only for manual ingestion. Credentials
 are under `~/.config/web-search-opensearch` (700 directory, 600 env files),
 excluded from Git. HTTP TLS uses a privately generated certificate with
 localhost/127.0.0.1 SANs; certificate and hostname verification stay enabled.
 The certificate lasts 365 days: renew it and restart OpenSearch/API before
 expiry. Bootstrap removes the bundled demo users, retaining only admin and
-web_search_reader. The default Compose configuration also disables the known
+web_search_reader (plus kibanaserver once Dashboards is provisioned). The default Compose configuration also disables the known
 demo admin certificate DN. Transport-layer demo TLS remains inside the
 single-node container; port 9300 is not published. Replace transport TLS and
 review network/user access before any multi-node or externally exposed setup.
@@ -62,6 +63,23 @@ OPENSEARCH_BOOTSTRAP_ADMIN_DN='CN=kirk,OU=client,O=client,L=test,C=DE' \
 .venv/bin/python app/web-search/harden-opensearch.py
 docker compose -f app/web-search/opensearch.yml up -d
 .venv/bin/python app/web-search/ingest-opensearch.py
+```
+
+OpenSearch Dashboards 3.9.0 (digest pinned, 1.5 GiB memory limit, one CPU) runs
+as the `dashboards` service in the same Compose file. It shares OpenSearch's
+network namespace so it connects to `https://localhost:9200` with full
+certificate and hostname verification against the private certificate. Its
+server user is `kibanaserver`, because the security plugin's reserved
+`kibana_server` role mapping names it; the demo password is replaced by a random
+one in `dashboards.env`. People sign in as `admin` (password in `server.env`).
+Settings are in `opensearch-dashboards.yml` without secrets. Setup, after the
+bootstrap above (re-run `provision-dashboards.py` if `harden-opensearch.py` is
+ever run again, since it removes all other users):
+
+```
+.venv/bin/python app/web-search/prepare-opensearch.py   # adds dashboards.env only
+cd app/web-search && ../../.venv/bin/python provision-dashboards.py
+docker compose -f opensearch.yml up -d
 ```
 
 `harden-opensearch.py` is a one-time bootstrap operation, not a refresh command.

@@ -9,7 +9,8 @@ PRIVATE = Path.home() / ".config/web-search-opensearch"
 def prepare():
     PRIVATE.mkdir(mode=0o700, parents=True, exist_ok=True)
     for filename, key in [("server.env", "OPENSEARCH_INITIAL_ADMIN_PASSWORD"),
-                          ("reader.env", "PASSWORD")]:
+                          ("reader.env", "PASSWORD"),
+                          ("dashboards.env", "OPENSEARCH_DASHBOARDS_SERVER_PASSWORD")]:
         target = PRIVATE / filename
         if target.exists():
             continue
