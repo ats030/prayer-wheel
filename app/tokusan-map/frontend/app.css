@@ -93,3 +93,9 @@ dialog#lightbox img{max-width:92vw;max-height:86vh}
 @media(prefers-reduced-motion:reduce){
   *,*:before,*:after{scroll-behavior:auto!important;transition:none!important}
 }
+.stack-popup .leaflet-popup-content{margin:var(--space-sm) var(--space-md);min-width:12rem}
+.stack-list h2{margin:0 0 var(--space-xs);font-size:.9rem;color:var(--color-ink)}
+.stack-list h3{margin:var(--space-xs) 0 .25rem;font-size:.75rem;color:var(--color-ink-2)}
+.stack-list ul{margin:0;padding:0;list-style:none}
+.stack-list button{display:block;width:100%;padding:.2rem 0;border:0;background:none;color:var(--color-located);font:inherit;text-align:left;cursor:pointer}
+.stack-list button:hover,.stack-list button:focus-visible{text-decoration:underline}

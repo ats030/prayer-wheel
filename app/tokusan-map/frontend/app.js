@@ -9,12 +9,58 @@ const clusterLayer=L.markerClusterGroup({
   maxClusterRadius:40,
   showCoverageOnHover:false,
   spiderfyDistanceMultiplier:1.3,
+  // Clicks are handled below so tall stacks can open a list instead of a spiral.
+  spiderfyOnMaxZoom:false,
+  zoomToBoundsOnClick:false,
   iconCreateFunction:cluster=>{
     const count=cluster.getChildCount();
     const size=count<10?30:count<100?36:42;
     return L.divIcon({className:'tokusan-cluster-anchor',html:`<span class="tokusan-cluster" aria-label="${count}件の特産物">${count}</span>`,iconSize:[size,size]});
   },
 }).addTo(map);
+// Prefecture representative points stack up to dozens of items whose spiral is unreadable,
+// so a tall stack of identical coordinates lists its items by source region instead.
+const STACK_LIST_MIN=9;
+let itemByKey=new Map();
+clusterLayer.on('clusterclick clusterkeypress',e=>{
+  if(e.type==='clusterkeypress'&&e.originalEvent?.keyCode!==13)return;
+  const cluster=e.layer;
+  const children=cluster.getAllChildMarkers();
+  const point=children[0].getLatLng();
+  const stacked=children.every(marker=>marker.getLatLng().equals(point));
+  // Zooming cannot split a stack, nor anything at maximum zoom.
+  const listed=(stacked||map.getZoom()>=map.getMaxZoom())&&children.length>=STACK_LIST_MIN;
+  if(listed)openStackList(stacked?point:cluster.getLatLng(),children,stacked);
+  else if(!stacked&&map.getZoom()<map.getMaxZoom())cluster.zoomToBounds();
+  else cluster.spiderfy();
+  // Keyboard focus would fall to the page when the focused cluster icon is replaced.
+  if(e.type==='clusterkeypress')(listed?document.querySelector('.stack-list button'):map.getContainer()).focus();
+});
+function entriesPrefecture(keys){
+  const prefectures=new Set(keys.map(key=>itemByKey.get(key).prefecture));
+  return prefectures.size===1?`${[...prefectures][0]} `:'';
+}
+function openStackList(point,children,stacked){
+  const keys=children.map(marker=>marker.options.itemKey);
+  const groups=new Map();
+  for(const key of keys){
+    const o=itemByKey.get(key);
+    const label=regionLabel(o);
+    if(!groups.has(label))groups.set(label,[]);
+    groups.get(label).push([key,o]);
+  }
+  const rank=label=>label==='県全域'?0:label==='地域未詳'?2:1;
+  const sorted=[...groups].sort(([a],[b])=>rank(a)-rank(b)||a.localeCompare(b,'ja'));
+  const first=itemByKey.get(keys[0]);
+  const place=first.coordinate_kind==='municipality_office'?first.coordinate_label||first.city:first.prefecture;
+  const heading=stacked?`${esc(place||'')}（${esc(positionLabel(first)||'同じ位置')}）の ${keys.length} 件`:`${esc(entriesPrefecture(keys))}この付近の ${keys.length} 件`;
+  const body=sorted.map(([label,entries])=>`<section><h3>${esc(label)}（${entries.length}件）</h3><ul>${entries.map(([key,o])=>`<li><button type="button" data-key="${esc(key)}">${esc(o.label_ja||o.label_en||o.qid)}</button></li>`).join('')}</ul></section>`).join('');
+  const content=document.createElement('div');
+  content.className='stack-list';
+  content.innerHTML=`<h2>${heading}</h2>${body}`;
+  content.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>selectItem(button.dataset.key,'marker')));
+  L.popup({maxHeight:320,className:'stack-popup'}).setLatLng(point).setContent(content).openOn(map);
+}
 let selectedKey=null;
 let selectedOrigin=null;
 let selectedItem=null;
@@ -203,17 +249,20 @@ function revealMarker(marker){
 
 function renderMarkers(){
   cancelReveal();
+  map.closePopup();
   clusterLayer.clearLayers();
   markers.clear();
+  itemByKey.clear();
   const bounds=[];
   visible.forEach((o,i)=>{
     if(!hasCoordinates(o))return;
     const key=itemKey(o,i);
     const label=o.label_ja||o.label_en||o.qid;
-    const marker=L.marker([o.latitude,o.longitude],{icon:markerIcon(o,key===selectedKey),title:label,keyboard:false});
+    const marker=L.marker([o.latitude,o.longitude],{icon:markerIcon(o,key===selectedKey),title:label,keyboard:false,itemKey:key});
     marker.bindTooltip(`${label}${positionLabel(o)?`（${positionLabel(o)}）`:''}`,{direction:'top',offset:[0,-8]});
     marker.on('click',()=>selectItem(key,'marker'));
     markers.set(key,marker);
+    itemByKey.set(key,o);
     bounds.push([o.latitude,o.longitude]);
   });
   clusterLayer.addLayers([...markers.values()]);
