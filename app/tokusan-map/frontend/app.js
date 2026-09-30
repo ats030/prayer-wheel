@@ -1,9 +1,20 @@
-const map=L.map('map',{preferCanvas:true}).setView([36.2,138.2],5);
+const map=L.map('map',{preferCanvas:true,maxZoom:18}).setView([36.2,138.2],5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
 
 let tokusan=[];
 let visible=[];
 let markers=new Map();
+// Nearby markers cluster by zoom; identical coordinates spiderfy with legs to the registered point.
+const clusterLayer=L.markerClusterGroup({
+  maxClusterRadius:40,
+  showCoverageOnHover:false,
+  spiderfyDistanceMultiplier:1.3,
+  iconCreateFunction:cluster=>{
+    const count=cluster.getChildCount();
+    const size=count<10?30:count<100?36:42;
+    return L.divIcon({className:'tokusan-cluster-anchor',html:`<span class="tokusan-cluster" aria-label="${count}件の特産物">${count}</span>`,iconSize:[size,size]});
+  },
+}).addTo(map);
 let selectedKey=null;
 let selectedOrigin=null;
 let selectedItem=null;
@@ -165,7 +176,7 @@ function markerIcon(o,selected){
 }
 
 function renderMarkers(){
-  for(const marker of markers.values())map.removeLayer(marker);
+  clusterLayer.clearLayers();
   markers.clear();
   const bounds=[];
   visible.forEach((o,i)=>{
@@ -175,10 +186,10 @@ function renderMarkers(){
     const marker=L.marker([o.latitude,o.longitude],{icon:markerIcon(o,key===selectedKey),title:label,keyboard:false});
     marker.bindTooltip(`${label}${positionLabel(o)?`（${positionLabel(o)}）`:''}`,{direction:'top',offset:[0,-8]});
     marker.on('click',()=>selectItem(key,'marker'));
-    marker.addTo(map);
     markers.set(key,marker);
     bounds.push([o.latitude,o.longitude]);
   });
+  clusterLayer.addLayers([...markers.values()]);
   if(bounds.length===1)map.setView(bounds[0],9,{animate:false});
   else if(bounds.length>1)map.fitBounds(L.latLngBounds(bounds).pad(0.2),{animate:false});
   document.querySelector('#map-count').textContent=`${visible.length} 件中 ${markers.size} 件の位置を表示`;
@@ -200,7 +211,9 @@ function selectItem(key,origin){
   selectedItem=item;
   selectedOrigin=origin;
   showDetail(item,origin);
-  if(origin==='list'&&hasCoordinates(item)){
+  if(origin==='list'&&marker){
+    clusterLayer.zoomToShowLayer(marker);
+  }else if(origin==='list'&&hasCoordinates(item)){
     map.flyTo([item.latitude,item.longitude],Math.max(map.getZoom(),8),{duration:.55});
   }
   const focusTarget=document.querySelector('#detail-title');
