@@ -153,3 +153,15 @@ def test_yacy_preparation_keeps_password_private_and_network_isolated(monkeypatc
     assert (prepare.PRIVATE / "admin-password").stat().st_mode & 0o777 == 0o600
     with pytest.raises(SystemExit):
         prepare.prepare()
+
+
+def test_ui_renders_escaped_results(monkeypatch):
+    monkeypatch.setattr(search, "config", lambda: {"sources": [{"id": "docs", "enabled": True}]})
+    monkeypatch.setattr(search, "enabled", lambda s: True)
+    monkeypatch.setattr(search, "search", lambda q, scope, limit, source: {
+        "results": [{"url": "https://docs.example.org/manual/a", "title": "<code>argparse</code> &lt;x&gt;",
+                     "content": "", "provider": "docs", "terms": {"license": "MIT"}}], "errors": []})
+    page = TestClient(search.app).get("/ui", params={"q": "<b>"}).text
+    assert 'data-site="web-search"' in page
+    assert "argparse &lt;x&gt;" in page and "<code>" not in page
+    assert 'value="&lt;b&gt;"' in page

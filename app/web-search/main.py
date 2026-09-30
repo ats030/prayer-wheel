@@ -20,6 +20,7 @@ from xml.etree import ElementTree as ET
 import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import HTMLResponse
 
 load_dotenv(Path.home() / ".env")
 CONFIG_PATH = Path(os.environ.get("WEB_SEARCH_CONFIG", Path(__file__).with_name("sources.json")))
@@ -240,3 +241,62 @@ def search(q: str = Query(min_length=1, max_length=500),
     return {"scope": scope, "results": hits, "errors": errors,
             "ok": bool(hits) and not errors,
             "searched_at": dt.datetime.now(dt.UTC).isoformat(timespec="seconds")}
+
+
+UI_PAGE = """<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenSearch 検索</title>
+<script src="http://ubuntu-server-app:8526/v.js" data-site="web-search" defer></script>
+<style>
+:root {{ --bg: #fafaf9; --fg: #1c1917; --muted: #78716c; --line: #e7e5e4; --link: #1d4ed8; }}
+@media (prefers-color-scheme: dark) {{
+  :root {{ --bg: #1c1917; --fg: #f5f5f4; --muted: #a8a29e; --line: #44403c; --link: #93c5fd; }}
+}}
+body {{ margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 system-ui, sans-serif; }}
+main {{ max-width: 760px; margin: 0 auto; padding: 24px 16px; }}
+form {{ display: flex; gap: 8px; flex-wrap: wrap; }}
+input, select, button {{ font: inherit; padding: 6px 10px; border: 1px solid var(--line);
+  border-radius: 6px; background: var(--bg); color: var(--fg); }}
+input {{ flex: 1 1 240px; min-width: 0; }}
+a {{ color: var(--link); }}
+li {{ margin: 14px 0; overflow-wrap: anywhere; }}
+.meta, .note {{ color: var(--muted); font-size: 13px; }}
+.error {{ color: #b91c1c; }}
+</style></head><body><main>
+<h1>OpenSearch 検索</h1>
+<form method="get" action="/ui">
+<input name="q" value="{q}" placeholder="検索語" required autofocus>
+<select name="source">{options}</select>
+<button>検索</button>
+</form>
+<p class="note">登録済みの検索先だけを検索します。再利用時は各結果の利用条件に従ってください。
+<a href="/sources">検索先一覧 (JSON)</a></p>
+{body}
+</main></body></html>"""
+
+
+def _plain(text: str) -> str:
+    # Sphinx titles carry markup; show them as text.
+    return html.escape(html.unescape(re.sub(r"<[^>]+>", "", text or "")))
+
+
+@app.get("/ui", response_class=HTMLResponse)
+def ui(q: str = Query(default="", max_length=500), source: str = "") -> str:
+    ids = [s["id"] for s in config()["sources"] if enabled(s)]
+    options = "".join(f'<option value="{html.escape(i)}"{" selected" if i == source else ""}>{html.escape(i)}</option>'
+                      for i in [""] + ids).replace('<option value="">', '<option value="">すべて', 1)
+    body = ""
+    if q.strip():
+        try:
+            data = search(q, "sites", 10, source if source in ids else "")
+        except HTTPException as exc:
+            data = {"results": [], "errors": [str(exc.detail)]}
+        items = "".join(
+            f'<li><a href="{html.escape(r["url"])}" rel="noreferrer">{_plain(r.get("title")) or html.escape(r["url"])}</a>'
+            f'<div class="meta">{html.escape(r.get("provider", ""))} · {html.escape(r["terms"].get("license", ""))}</div>'
+            + (f'<div>{_plain(r["content"])}</div>' if r.get("content") else "") + "</li>"
+            for r in data["results"])
+        errors = "".join(f'<p class="error">{html.escape(e)}</p>' for e in data["errors"])
+        body = errors + (f"<ol>{items}</ol>" if items else "<p>該当なし</p>")
+    return UI_PAGE.format(q=html.escape(q), options=options, body=body)
