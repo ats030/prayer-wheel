@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"tokusan-map/internal/services"
@@ -49,6 +50,60 @@ func TestOfficialItemSections(t *testing.T) {
 	}
 	if about.Summary != "" || body.SectionsUnavailable || body.SectionsRetry {
 		t.Fatal("official explanation must not require LLM or Wikipedia availability")
+	}
+	if _, ok := body.Sections["history"]; ok != (service.GetHistory(official.QID) != "") {
+		t.Fatal("history section must follow the stored history text")
+	}
+	var withHistory *services.Tokusan
+	for _, row := range service.GetAll() {
+		if row.Description != "" && service.GetHistory(row.QID) != "" {
+			copy := row
+			withHistory = &copy
+			break
+		}
+	}
+	if withHistory == nil {
+		t.Fatal("catalog has no official history text")
+	}
+	response = httptest.NewRecorder()
+	handler.GetSections(response, httptest.NewRequest("GET", "/api/sections/"+withHistory.QID, nil))
+	body = sectionsResponse{}
+	if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	history := body.Sections["history"]
+	if len(history.Blocks) == 0 || history.SourceURL != withHistory.SourceURL || history.Summary != "" {
+		t.Fatalf("official history or attribution lost: %+v", history)
+	}
+	for _, block := range history.Blocks {
+		if block.Text == "" || strings.Contains(block.Text, "\n") {
+			t.Fatalf("history paragraph not split: %q", block.Text)
+		}
+	}
+	var withProduction *services.Tokusan
+	for _, row := range service.GetAll() {
+		if row.Description != "" && service.GetProduction(row.QID) != "" {
+			copy := row
+			withProduction = &copy
+			break
+		}
+	}
+	if withProduction == nil {
+		t.Fatal("catalog has no official production text")
+	}
+	response = httptest.NewRecorder()
+	handler.GetSections(response, httptest.NewRequest("GET", "/api/sections/"+withProduction.QID, nil))
+	body = sectionsResponse{}
+	if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	production := body.Sections["production"]
+	if len(production.Blocks) == 0 || production.SourceURL != withProduction.SourceURL || production.Summary != "" {
+		t.Fatalf("official production or attribution lost: %+v", production)
+	}
+	listed, _ := json.Marshal(service.GetAll()[:1])
+	if strings.Contains(string(listed), "history") {
+		t.Fatal("history text must stay out of the list payload")
 	}
 	response = httptest.NewRecorder()
 	handler.GetByQID(response, httptest.NewRequest("GET", "/api/tokusan/"+official.QID, nil))

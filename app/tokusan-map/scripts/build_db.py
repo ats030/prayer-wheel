@@ -22,6 +22,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "frontend" / "tokusan.json"
 CURATION = ROOT / "data" / "curation.json"
 OFFICIAL = ROOT / "data" / "official.json"
+HISTORY = ROOT / "data" / "history.json"
+PRODUCTION = ROOT / "data" / "production.json"
 DST = ROOT / "frontend" / "tokusan.db"
 CATEGORIES = {"sa", "te", "ui", "sa2", "am", "ko", "ry", "ta", "or", "ri", "kg", "nk", "sz", "se", "ka"}
 sys.path.insert(0, str(ROOT.parent / "omatsuri-map" / "scripts"))
@@ -45,7 +47,9 @@ CREATE TABLE tokusan (
   prefecture_level INTEGER NOT NULL DEFAULT 0,
   source_name TEXT NOT NULL DEFAULT '',
   description TEXT NOT NULL DEFAULT '',
-  production_area TEXT NOT NULL DEFAULT '',
+    history TEXT NOT NULL DEFAULT '',
+    production TEXT NOT NULL DEFAULT '',
+    production_area TEXT NOT NULL DEFAULT '',
   coordinate_kind TEXT NOT NULL DEFAULT '',
   coordinate_label TEXT NOT NULL DEFAULT '',
   coordinate_source_url TEXT NOT NULL DEFAULT '',
@@ -118,6 +122,12 @@ def validate(rows, curation, official=()):
     return errors
 
 
+def history_text(description, history):
+    """Drop history paragraphs that the displayed description already repeats."""
+    kept = [p for p in history.split('\n') if p and p not in description and p[:40] not in description]
+    return '\n'.join(kept)
+
+
 def main():
     if not SRC.exists():
         raise SystemExit(f"入力ファイルが見つからない: {SRC}")
@@ -126,6 +136,8 @@ def main():
     official = json.loads(OFFICIAL.read_text(encoding="utf-8"))
     points = json.loads((ROOT / 'data/production_points.json').read_text(encoding='utf-8'))
     official = apply_points(official, points)
+    histories = json.loads(HISTORY.read_text(encoding="utf-8")) if HISTORY.exists() else {}
+    productions = json.loads(PRODUCTION.read_text(encoding="utf-8")) if PRODUCTION.exists() else {}
     errors = validate(rows, curation, official)
     if errors:
         raise SystemExit("curation.json の検証に失敗:\n  " + "\n  ".join(errors))
@@ -167,9 +179,13 @@ def main():
     for e in official:
         con.execute(
             'INSERT INTO tokusan (qid, label_ja, place, prefecture, lat, lng, source_url, category,'
-            ' prefecture_level, source_name, description, production_area, maker) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            ' prefecture_level, source_name, description, history, production, production_area, maker)'
+            ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             (e['id'], e['label'], e['place'], e['prefecture'], e['lat'], e['lng'], e['source_url'],
-             e['category'], int(e['prefecture_level']), e['source_name'], e['description'], e['production_area'], e.get('maker', '')),
+             e['category'], int(e['prefecture_level']), e['source_name'], e['description'],
+             history_text(e['description'], histories.get(e['source_url'], {}).get('history', '')),
+             productions.get(e['source_url'], {}).get('production', ''),
+             e['production_area'], e.get('maker', '')),
         )
         if e.get('coordinate_kind'):
             con.execute('UPDATE tokusan SET city=?, coordinate_kind=?, coordinate_label=?, '
@@ -188,6 +204,8 @@ def main():
     pref = con.execute(
         "SELECT COUNT(*) FROM tokusan WHERE prefecture_level = 1"
     ).fetchone()[0]
+    with_history = con.execute("SELECT COUNT(*) FROM tokusan WHERE history != ''").fetchone()[0]
+    with_production = con.execute("SELECT COUNT(*) FROM tokusan WHERE production != ''").fetchone()[0]
     cats = con.execute("SELECT category, COUNT(*) FROM tokusan GROUP BY category ORDER BY category")
     cat_str = ", ".join(f"{c[0] or '(空)' }={c[1]}" for c in cats)
     con.close()
@@ -197,6 +215,8 @@ def main():
     export_public(definitions)
     print(f"tokusan.db: 品目 {count} 件 (都道府県単位 {pref} 件、除外 {len(curation['exclude'])} 件) -> {DST}")
     print(f"  カテゴリ: {cat_str}")
+    print(f"  歴史テキスト: {with_history} 件")
+    print(f"  製造方法: {with_production} 件")
 
 
 if __name__ == "__main__":

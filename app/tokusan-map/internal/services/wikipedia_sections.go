@@ -342,6 +342,33 @@ type wikipediaHeading struct {
 	Level int
 }
 
+// OfficialSectionSpecs returns the label and prompt instruction for each
+// official-source section (officialSummarySections) so the official-warm tool
+// and the handler share the same wording the Wikipedia path uses. Sections not
+// in officialSummarySections are omitted, so an item with no history or
+// production text simply has no stored entry for that key.
+func OfficialSectionSpecs() map[string]struct {
+	Label       string
+	Instruction string
+} {
+	specs := map[string]struct {
+		Label       string
+		Instruction string
+	}{}
+	for _, key := range officialSummarySections {
+		for _, s := range sectionSpecs {
+			if s.key == key {
+				specs[key] = struct {
+					Label       string
+					Instruction string
+				}{Label: s.label, Instruction: s.instruction}
+				break
+			}
+		}
+	}
+	return specs
+}
+
 func matchSectionHeading(headings []wikipediaHeading, candidates []string) *wikipediaHeading {
 	for _, candidate := range candidates {
 		for i, heading := range headings {

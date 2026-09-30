@@ -130,6 +130,27 @@ func (s *TokusanService) GetByQID(qid string) *Tokusan {
 	return &list[0]
 }
 
+// GetHistory returns the official-source history text for one item, or "".
+// It stays out of Tokusan so the list payload does not carry long texts.
+func (s *TokusanService) GetHistory(qid string) string {
+	var history string
+	if err := s.db.QueryRow("SELECT history FROM tokusan WHERE qid = ?", qid).Scan(&history); err != nil {
+		return ""
+	}
+	return history
+}
+
+// GetProduction returns the official-source production method (製造方法) text
+// for one item, or "". It stays out of Tokusan for the same reason as
+// GetHistory: the list payload must not carry long texts.
+func (s *TokusanService) GetProduction(qid string) string {
+	var production string
+	if err := s.db.QueryRow("SELECT production FROM tokusan WHERE qid = ?", qid).Scan(&production); err != nil {
+		return ""
+	}
+	return production
+}
+
 // WikipediaTitle returns the Japanese Wikipedia article title encoded in
 // SourceURL, or "" when SourceURL is not a ja.wikipedia.org article link.
 func (t Tokusan) WikipediaTitle() string {

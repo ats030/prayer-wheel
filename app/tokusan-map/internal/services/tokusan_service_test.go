@@ -9,7 +9,7 @@ func TestProductionCoordinatesAcrossQueries(t *testing.T) {
 	}
 	defer s.Close()
 	all := s.GetAll()
-	if len(all) != 651 {
+	if len(all) != 1919 {
 		t.Fatalf("catalog count = %d", len(all))
 	}
 	var flower *Tokusan
