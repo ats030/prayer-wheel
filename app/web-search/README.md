@@ -82,6 +82,13 @@ cd app/web-search && ../../.venv/bin/python provision-dashboards.py
 docker compose -f opensearch.yml up -d
 ```
 
+Because Dashboards joins OpenSearch's network namespace, restart them together
+with `docker compose -f app/web-search/opensearch.yml up -d` (or restart
+Dashboards after OpenSearch); a lone `docker restart web-search-opensearch`
+leaves Dashboards without a network. The private certificate renewal above also
+applies to Dashboards. Dashboards is third-party UI, so it carries no visit-log
+tag (code is not injected into it).
+
 `harden-opensearch.py` is a one-time bootstrap operation, not a refresh command.
 It refuses unknown custom accounts and preserves the generated initial user
 configuration in the private directory before replacement. On ordinary
