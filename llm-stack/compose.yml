@@ -62,6 +62,21 @@ services:
       - ollama_data:/root/.ollama
     restart: unless-stopped
 
+  searxng:
+    image: searxng/searxng@sha256:a07a5cd2da2c63d66e559f9e4d3a3db106cfc6c32fb0ac70abe91cc28bcd7350
+    container_name: searxng
+    ports:
+      - "127.0.0.1:8081:8080"
+    volumes:
+      - ./searxng:/etc/searxng
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/"]
+      interval: 10s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+    restart: unless-stopped
+
 volumes:
   ollama_data:
     external: true
