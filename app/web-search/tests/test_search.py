@@ -104,12 +104,14 @@ def test_yacy_global_request_and_normalization(monkeypatch):
     calls = []
     def get(client, url, params=None):
         calls.append((url, params))
-        return response({"channels": [{"items": [{"link": "https://example.org/a", "title": "Title", "description": "Desc"}]}]})
+        return response({"channels": [{"items": [{"link": "https://example.org/a?x=1&amp;y=2", "title": "A &amp; B", "description": "Desc"}]}]})
     monkeypatch.setattr(search, "fetch", get)
     terms = {"status": "review_required"}
     hits, errors = search.general_search("yacy", "python", 6, {"general_terms": {"yacy": terms}})
     assert not errors and hits[0]["provider"] == "yacy"
     assert hits[0]["terms"] == terms
+    assert hits[0]["url"] == "https://example.org/a?x=1&y=2"
+    assert hits[0]["title"] == "A & B"
     assert calls[0][1]["resource"] == "global"
     assert calls[0][0].endswith("/yacysearch.json")
 

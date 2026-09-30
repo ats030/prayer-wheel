@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import datetime as dt
 import ipaddress
+import html
 import json
 import os
 import re
@@ -176,7 +177,11 @@ def general_search(kind: str, query: str, limit: int, cfg: dict) -> tuple[list[d
             payload = fetch(client, endpoint, params).json()
         if kind == "yacy":
             hits = payload["channels"][0]["items"]
-            results = [{"url": row["link"], "title": row.get("title", ""), "content": row.get("description", "")} for row in hits]
+            # YaCy's JSON feed carries HTML-escaped links and text. Decode
+            # entities before validating or fetching URLs with query strings.
+            results = [{"url": html.unescape(row["link"]),
+                        "title": html.unescape(str(row.get("title", ""))),
+                        "content": html.unescape(str(row.get("description", "")))} for row in hits]
         else:
             results = payload["results"]
             if not results and payload.get("unresponsive_engines"):
