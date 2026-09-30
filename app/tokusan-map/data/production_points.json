@@ -4,7 +4,7 @@
   "license": "CC BY 4.0",
   "source_checked_at": "2026-09-29",
   "archive_sha256": "3056d3e0d02248143f1f2c9a5e62fd37717eb761a7257106b5d252415aef4cdc",
-  "processing": "施設分類1の単一役場を産地記載順で選択。産地の代表点として加工。",
+  "processing": "施設分類1の単一役場を産地記載順で選択。旧町名・誤記は municipality_aliases.json で現行市町村へ対応。産地の代表点として加工。",
   "points": {
     "local-ca05c5be30630dd5": {
       "municipality": "青森市",
@@ -278,6 +278,17 @@
       "lat": 35.29888772,
       "lng": 135.2588034,
       "prefecture": "京都府",
+      "kind": "municipality_office",
+      "selection": "first_municipality_in_source"
+    },
+    "local-7af73a738b8a3763": {
+      "municipality": "茨城町",
+      "office": "茨城町役場",
+      "address": "茨城町小堤1080",
+      "municipality_code": "08302",
+      "lat": 36.286919122592984,
+      "lng": 140.42452803438425,
+      "prefecture": "茨城県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
@@ -2328,12 +2339,12 @@
       "selection": "first_municipality_in_source"
     },
     "local-8337e546f3295df7": {
-      "municipality": "函館市",
-      "office": "函館市役所",
-      "address": "函館市東雲町4-13",
-      "municipality_code": "01202",
-      "lat": 41.768712,
-      "lng": 140.729108,
+      "municipality": "石狩市",
+      "office": "石狩市役所",
+      "address": "石狩市花川北6条1-30-2",
+      "municipality_code": "01235",
+      "lat": 43.171365,
+      "lng": 141.315514,
       "prefecture": "北海道",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
@@ -5440,6 +5451,19 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-94e62ca3e96353cf": {
+      "municipality": "三豊市",
+      "office": "三豊市役所",
+      "address": "三豊市高瀬町下勝間2373-1",
+      "municipality_code": "37208",
+      "lat": 34.18264471,
+      "lng": 133.71510308,
+      "prefecture": "香川県",
+      "kind": "municipality_office",
+      "selection": "first_municipality_in_source",
+      "source_text": "豊中町",
+      "alias_source_url": "https://www.city.mitoyo.lg.jp/kakuka/soumu/somu/6/879.html"
+    },
     "local-1be3dcc11a3d525f": {
       "municipality": "三豊市",
       "office": "三豊市役所",
@@ -5560,6 +5584,19 @@
       "prefecture": "高知県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-f7ec422765f25dd1": {
+      "municipality": "いの町",
+      "office": "いの町役場",
+      "address": "いの町1700-1",
+      "municipality_code": "39386",
+      "lat": 33.5486794016,
+      "lng": 133.427766087,
+      "prefecture": "高知県",
+      "kind": "municipality_office",
+      "selection": "first_municipality_in_source",
+      "source_text": "伊野町",
+      "alias_source_url": "https://www.town.ino.kochi.jp/igh/"
     },
     "local-5ee506c960fb5845": {
       "municipality": "大豊町",
@@ -5890,6 +5927,19 @@
       "prefecture": "熊本県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-f6f755ed3f6e5909": {
+      "municipality": "山都町",
+      "office": "山都町役場",
+      "address": "山都町浜町6",
+      "municipality_code": "43447",
+      "lat": 32.685337,
+      "lng": 130.990218,
+      "prefecture": "熊本県",
+      "kind": "municipality_office",
+      "selection": "first_municipality_in_source",
+      "source_text": "上益城郡山都市",
+      "alias_source_url": "https://www.town.kumamoto-yamato.lg.jp/kiji0034551/index.html"
     },
     "local-b8e7e668af9b5c76": {
       "municipality": "佐伯市",

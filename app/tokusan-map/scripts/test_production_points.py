@@ -36,6 +36,27 @@ class ProductionPointsTest(unittest.TestCase):
                 self.assertTrue(updated['prefecture_level'])
         self.assertEqual(items, json.loads((ROOT / 'data/official.json').read_text()))
 
+    def test_duplicate_office_with_foreign_address_and_aliases(self):
+        items = json.loads((ROOT / 'data/official.json').read_text())
+        registry = json.loads((ROOT / 'data/production_points.json').read_text())
+        by_label = {x['label']: x for x in apply_points(items, registry)}
+        # P05-22 also lists 茨城町役場 at 土浦市; the address-consistent record wins.
+        self.assertAlmostEqual(by_label['飯沼栗']['lat'], 36.286919122592984)
+        self.assertEqual(by_label['ルイベ']['city'], '石狩市')
+        for label, city in [('いもべらあずき', 'いの町'), ('えびみそ汁', '三豊市'), ('巻柿', '山都町')]:
+            self.assertEqual(by_label[label]['city'], city)
+            self.assertFalse(by_label[label]['prefecture_level'])
+
+    def test_reject_alias_without_evidence(self):
+        items = json.loads((ROOT / 'data/official.json').read_text())
+        registry = json.loads((ROOT / 'data/production_points.json').read_text())
+        item = next(x for x in items if x['label'] == 'いもべらあずき')
+        for mutate in [lambda p: p.pop('alias_source_url'), lambda p: p.update(source_text='吾北村')]:
+            bad = copy.deepcopy(registry)
+            mutate(bad['points'][item['id']])
+            with self.assertRaises(AssertionError):
+                apply_points(items, bad)
+
     def test_reject_points_outside_source_area_or_wrong_prefecture(self):
         items = json.loads((ROOT / 'data/official.json').read_text())
         registry = json.loads((ROOT / 'data/production_points.json').read_text())

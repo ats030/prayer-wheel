@@ -62,8 +62,15 @@ def read_offices(archive):
                         'address': props['P05_004'], 'municipality_code': props['P05_001'],
                         'lat': lat, 'lng': lng,
                     })
-    # Several main buildings are not resolved by arbitrary input order.
-    return {key: values[0] for key, values in offices.items() if len(values) == 1}
+    # A duplicate whose address names another municipality is a source error
+    # (茨城町役場 under 土浦市); other ties are not resolved by arbitrary input order.
+    resolved = {}
+    for key, values in offices.items():
+        if len(values) > 1:
+            values = [v for v in values if v['address'].startswith(key[1])]
+        if len(values) == 1:
+            resolved[key] = values[0]
+    return resolved
 
 
 def apply_points(items, registry):
@@ -73,7 +80,9 @@ def apply_points(items, registry):
         assert item_id in by_id, f'Unknown production point: {item_id}'
         item = by_id[item_id]
         assert point['prefecture'] == item['prefecture'], item_id
-        assert point['municipality'] in normalize(item['production_area']), item_id
+        # An alias point names its source text; the registry keeps the alias evidence URL.
+        assert point.get('source_text', point['municipality']) in normalize(item['production_area']), item_id
+        assert ('source_text' in point) == ('alias_source_url' in point), item_id
         assert not explicitly_prefecture_wide(item['production_area'], item['prefecture']), item_id
         assert point['kind'] == 'municipality_office', item_id
         assert point['selection'] == 'first_municipality_in_source', item_id
@@ -91,23 +100,29 @@ def main():
     parser.add_argument('--archive', type=Path, required=True)
     args = parser.parse_args()
     offices = read_offices(args.archive)
+    aliases = json.loads((ROOT / 'data/municipality_aliases.json').read_text())['aliases']
     items = json.loads((ROOT / 'data/official.json').read_text())
     points = {}
     for item in items:
         if explicitly_prefecture_wide(item['production_area'], item['prefecture']):
             continue
+        renamed = {a['text']: a for a in aliases if a['prefecture'] == item['prefecture']}
         names = [name for pref, name in offices if pref == item['prefecture']]
-        name = first_municipality(item['production_area'], names)
+        name = first_municipality(item['production_area'], names + list(renamed))
         if not name:
             continue
-        points[item['id']] = dict(offices[(item['prefecture'], name)],
-                                 prefecture=item['prefecture'], kind='municipality_office',
-                                 selection='first_municipality_in_source')
+        alias = renamed.get(name)
+        point = dict(offices[(item['prefecture'], alias['municipality'] if alias else name)],
+                     prefecture=item['prefecture'], kind='municipality_office',
+                     selection='first_municipality_in_source')
+        if alias:
+            point.update(source_text=name, alias_source_url=alias['source_url'])
+        points[item['id']] = point
     output = {
         'source_name': '国土交通省 国土数値情報 市町村役場等及び公的集会施設（2022年4月）',
         'source_url': SOURCE, 'license': 'CC BY 4.0', 'source_checked_at': '2026-09-29',
         'archive_sha256': hashlib.sha256(args.archive.read_bytes()).hexdigest(),
-        'processing': '施設分類1の単一役場を産地記載順で選択。産地の代表点として加工。',
+        'processing': '施設分類1の単一役場を産地記載順で選択。旧町名・誤記は municipality_aliases.json で現行市町村へ対応。産地の代表点として加工。',
         'points': points,
     }
     (ROOT / 'data/production_points.json').write_text(json.dumps(output, ensure_ascii=False, indent=2) + '\n')

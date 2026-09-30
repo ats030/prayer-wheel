@@ -9,6 +9,7 @@ data/*.json
 !data/summaries.json
 !data/official.json
 !data/production_points.json
+!data/municipality_aliases.json
 !data/regions.json
 !data/images.json
 !data/maff_images.json
