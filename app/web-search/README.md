@@ -1,7 +1,9 @@
 # Shared web search
 
-Internal JSON API on `127.0.0.1:8527` and the host's Tailnet IPv4 (`serve.py`;
-never `0.0.0.0`, so it is not on the LAN; app-portal links `/sources`). The default route is designated-site
+Internal JSON API on `127.0.0.1:8527`. `web-search-tailnet.service`
+(`tailnet_forward.py`) forwards it and YaCy from evo-x2's Tailnet IP to loopback
+for app-portal (`/sources` and the YaCy UI); nothing listens on the LAN, and
+local callers do not depend on Tailscale. The default route is designated-site
 search. YaCy is the Web-wide route; SearXNG is an explicit migration option.
 There is no automatic fallback between them.
 
@@ -46,10 +48,8 @@ Register another site's retrieval and content-use conditions before enabling it.
 ## YaCy
 
 The official image is pinned by digest in `compose.yml` (inspected version
-1.942). Its UI is on port 8090 at loopback and
-evo-x2's Tailnet IP `100.104.252.110` for app-portal; it is not on the LAN.
-Docker does not wait for tailscaled, so if the Tailnet bind fails after boot,
-run `docker start web-search-yacy`. Resource limits are 1.5 GiB memory,
+1.942). Its UI is on loopback port 8090, reachable
+from the tailnet through the forwarder above. Resource limits are 1.5 GiB memory,
 768 MiB Java heap, two CPUs, and bounded logs. Persistent state is under
 `/home/ats030/data/web-search-yacy`; no index is committed to Git.
 

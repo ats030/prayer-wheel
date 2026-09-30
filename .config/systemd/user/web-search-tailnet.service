@@ -1,0 +1,14 @@
+[Unit]
+Description=Forward web-search API and YaCy to the Tailnet IP for app-portal
+After=network-online.target web-search.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ats030/app/web-search
+ExecStart=/home/ats030/.venv/bin/python tailnet_forward.py
+Restart=on-failure
+RestartSec=30
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

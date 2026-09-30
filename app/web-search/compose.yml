@@ -10,9 +10,6 @@ services:
       HOME: /tmp
     ports:
       - "127.0.0.1:8090:8090"
-      # evo-x2 Tailnet IP for app-portal. Docker does not wait for tailscaled;
-      # if boot races, `docker start web-search-yacy` once Tailscale is up.
-      - "100.104.252.110:8090:8090"
     volumes:
       - /home/ats030/data/web-search-yacy:/opt/yacy_search_server/DATA
       - ./yacy-entrypoint.sh:/opt/web-search-entrypoint.sh:ro
