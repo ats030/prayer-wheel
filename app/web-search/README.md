@@ -66,6 +66,13 @@ isolated and searches only the locally collected index. UPnP is disabled and
 no public port or router mapping is created by this setup. Stop with the same
 compose file's `stop` command; data is retained.
 
+The operator approved public-network membership on 2026-09-30. The deployed
+container uses `freeworld`, including global peer search, with automatic restart
+enabled. Live checks confirmed peer discovery, search through the shared API,
+and page extraction through exam-trainer. Search ranking and coverage still
+vary with the query and the available peers; this is not a commercial-content
+clearance check.
+
 `YACY_API_URL` defaults to `http://127.0.0.1:8090`. YaCy's GPL software licence
 does not grant permission to reuse indexed page content. Web-wide discoveries
 carry `review_required` content status until their conditions are checked.
