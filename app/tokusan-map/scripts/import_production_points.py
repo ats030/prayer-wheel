@@ -9,6 +9,7 @@ import hashlib
 import io
 import json
 import re
+import unicodedata
 import zipfile
 from pathlib import Path
 
@@ -21,13 +22,19 @@ PREFECTURES = ('北海道 青森県 岩手県 宮城県 秋田県 山形県 福�
 SOURCE = 'https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-P05-2022.html'
 
 
+def normalize(text):
+    """Fold compatibility forms such as Kangxi radicals (⼤⽥市) into ordinary kanji."""
+    return unicodedata.normalize('NFKC', text)
+
+
 def explicitly_prefecture_wide(area, prefecture):
-    text = area.replace(prefecture, '県').replace(' ', '')
+    text = normalize(area).replace(prefecture, '県').replace(' ', '')
     return bool(re.search(r'(?:県|都|道|府)内全域|(?:県|都|道|府)全域|全県|(?:^|[、,（(])全域(?:$|[、,）)])', text))
 
 
 def first_municipality(area, names):
     """Use source order, never a coordinate or product-name inference."""
+    area = normalize(area)
     hits = [(area.index(name), -len(name), name) for name in names if name in area]
     return min(hits)[2] if hits else None
 
@@ -66,7 +73,7 @@ def apply_points(items, registry):
         assert item_id in by_id, f'Unknown production point: {item_id}'
         item = by_id[item_id]
         assert point['prefecture'] == item['prefecture'], item_id
-        assert point['municipality'] in item['production_area'], item_id
+        assert point['municipality'] in normalize(item['production_area']), item_id
         assert not explicitly_prefecture_wide(item['production_area'], item['prefecture']), item_id
         assert point['kind'] == 'municipality_office', item_id
         assert point['selection'] == 'first_municipality_in_source', item_id

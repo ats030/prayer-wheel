@@ -10,6 +10,9 @@ class ProductionPointsTest(unittest.TestCase):
                                            ['新城市', '豊川市', '豊橋市']), '豊橋市')
         self.assertIsNone(first_municipality('愛知県', ['豊橋市']))
 
+    def test_kangxi_radicals_match_ordinary_kanji(self):
+        self.assertEqual(first_municipality('島根県⼤⽥市三瓶町', ['大田市']), '大田市')
+
     def test_explicit_whole_prefecture_survives_municipality_examples(self):
         for text in ['県内全域（白石市）', '米沢市、山形県全域', '鹿島市、全域', '県内全域']:
             self.assertTrue(explicitly_prefecture_wide(text, '山形県'), text)
