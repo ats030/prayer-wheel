@@ -52,8 +52,13 @@ function openStackList(point,children,stacked){
   const rank=label=>label==='県全域'?0:label==='地域未詳'?2:1;
   const sorted=[...groups].sort(([a],[b])=>rank(a)-rank(b)||a.localeCompare(b,'ja'));
   const first=itemByKey.get(keys[0]);
-  const place=first.coordinate_kind==='municipality_office'?first.coordinate_label||first.city:first.prefecture;
-  const heading=stacked?`${esc(place||'')}（${esc(positionLabel(first)||'同じ位置')}）の ${keys.length} 件`:`${esc(entriesPrefecture(keys))}この付近の ${keys.length} 件`;
+  const office=o=>o.coordinate_kind==='municipality_office'||o.coordinate_kind==='named_area_office';
+  const placeOf=o=>office(o)?o.coordinate_label||o.city:o.prefecture;
+  // A named area often shares its office with the same-named municipality (八代地域 / 八代市).
+  const uniform=keys.every(key=>{const o=itemByKey.get(key);return o.coordinate_kind===first.coordinate_kind&&placeOf(o)===placeOf(first)});
+  const place=uniform||!office(first)?placeOf(first):first.city;
+  const kind=uniform?positionLabel(first):office(first)?'役場位置':'';
+  const heading=stacked?`${esc(place||'')}（${esc(kind||'同じ位置')}）の ${keys.length} 件`:`${esc(entriesPrefecture(keys))}この付近の ${keys.length} 件`;
   const body=sorted.map(([label,entries])=>`<section><h3>${esc(label)}（${entries.length}件）</h3><ul>${entries.map(([key,o])=>`<li><button type="button" data-key="${esc(key)}">${esc(o.label_ja||o.label_en||o.qid)}</button></li>`).join('')}</ul></section>`).join('');
   const content=document.createElement('div');
   content.className='stack-list';
@@ -117,7 +122,7 @@ function categoryLabel(code){const meta=CATEGORY_META.find(m=>m.code===code);ret
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function itemKey(o,index=0){return o.qid||`${o.label_ja}-${o.latitude}-${o.longitude}-${index}`}
 function hasCoordinates(o){const lat=Number(o.latitude),lng=Number(o.longitude);return Number.isFinite(lat)&&Number.isFinite(lng)&&(lat!==0||lng!==0)}
-function positionLabel(o){return o.coordinate_kind==='municipality_office'?'産地代表位置':o.prefecture_level?'都道府県代表位置':''}
+function positionLabel(o){return o.coordinate_kind==='municipality_office'?'産地代表位置':o.coordinate_kind==='named_area_office'?'地域代表位置':o.prefecture_level?'都道府県代表位置':''}
 
 // Region membership follows source areas, never the marker's representative point.
 let regionsByPrefecture=new Map();
@@ -174,7 +179,7 @@ function populateCategories(){
 function renderLegend(){
   const legend=document.querySelector('#map-legend');
   if(!legend||legend.childElementCount)return;
-  legend.innerHTML=CATEGORY_META.map(meta=>`<span><span class="legend-dot" style="background:var(--color-cat-${meta.code})"></span>${esc(meta.label)}</span>`).join('');
+  legend.innerHTML=CATEGORY_META.map(meta=>`<span><span class="legend-dot" style="background:var(--color-cat-${meta.code})"></span>${esc(meta.label)}</span>`).join('')+'<span><span class="legend-dot area"></span>破線：地域代表位置</span>';
 }
 
 function applyFilters(){
@@ -216,7 +221,7 @@ function renderList(){
 }
 
 function markerIcon(o,selected){
-  const className=`tokusan-marker cat-${categoryCode(o||null)}${selected?' selected':''}`;
+  const className=`tokusan-marker cat-${categoryCode(o||null)}${o?.coordinate_kind==='named_area_office'?' area':''}${selected?' selected':''}`;
   const label=o.label_ja||o.label_en||o.qid;
   return L.divIcon({className:'tokusan-marker-anchor',html:`<button type="button" class="${className}" aria-label="${esc(label)}"></button>`,iconSize:[22,22],iconAnchor:[11,11]});
 }
@@ -348,6 +353,10 @@ function placeFact(o){
   if(o.coordinate_kind==='municipality_office'){
     const source=safeUrl(o.coordinate_source_url);
     return `${esc(o.coordinate_label||o.city||o.prefecture)}<span class="detail-note">出典の産地・伝承地域：${esc(o.production_area)}</span><span class="detail-note">産地の代表位置。${esc(o.coordinate_label||o.city)}の役場位置を使っています。実際の生産地点ではありません。</span>${source?`<span class="detail-note">位置の出典：<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">${esc(o.coordinate_source_name)}</a>（CC BY 4.0）をもとに代表点を選定。</span>`:''}`;
+  }
+  if(o.coordinate_kind==='named_area_office'){
+    const source=safeUrl(o.coordinate_source_url);
+    return `${esc(o.coordinate_label)}<span class="detail-note">出典の産地・伝承地域：${esc(o.production_area)}</span><span class="detail-note">地域の代表位置。産地の最初の地名「${esc(o.coordinate_label)}」を、同名の${esc(o.city)}の役場位置で表しています。地域の範囲や実際の生産地点ではありません。</span>${source?`<span class="detail-note">位置の出典：<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">${esc(o.coordinate_source_name)}</a>（CC BY 4.0）をもとに代表点を選定。</span>`:''}`;
   }
   if(o.prefecture_level)return `${esc(o.prefecture||o.place||'—')}${o.production_area?`<span class="detail-note">出典の産地・伝承地域：${esc(o.production_area)}</span>`:''}<span class="detail-note">都道府県単位。地図上は都道府県庁の位置に表示しています。</span>`;
   return `${esc(o.place||o.prefecture||'—')}<span class="detail-note">${hasCoordinates(o)?'推定。地図上の位置は目安です。':'推定。地図上には表示していません。'}</span>`;

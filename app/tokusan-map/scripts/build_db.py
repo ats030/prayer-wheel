@@ -113,7 +113,7 @@ def validate(rows, curation, official=()):
         got = containing_prefecture(e.get('lng', 0), e.get('lat', 0), features)
         if got != e.get('prefecture'):
             errors.append(f'{item_id}: 座標が {got} にあり、prefecture={e.get("prefecture")} と一致しない')
-        if not e.get('prefecture_level') and e.get('coordinate_kind') != 'municipality_office':
+        if not e.get('prefecture_level') and e.get('coordinate_kind') not in ('municipality_office', 'named_area_office'):
             errors.append(f'{item_id}: 産地代表座標の根拠がない')
     return errors
 

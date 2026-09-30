@@ -4,7 +4,7 @@
   "license": "CC BY 4.0",
   "source_checked_at": "2026-09-29",
   "archive_sha256": "3056d3e0d02248143f1f2c9a5e62fd37717eb761a7257106b5d252415aef4cdc",
-  "processing": "施設分類1の単一役場を産地記載順で選択。旧町名・誤記は municipality_aliases.json で現行市町村へ対応。産地の代表点として加工。",
+  "processing": "施設分類1の単一役場を産地記載順で選択。旧町名・誤記は municipality_aliases.json で現行市町村へ対応。最初の地名が named_areas.json で採用した地域名なら同名市町村の役場を地域代表点とする。産地の代表点として加工。",
   "points": {
     "local-ca05c5be30630dd5": {
       "municipality": "青森市",
@@ -1370,6 +1370,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-96463bfa677dba17": {
+      "municipality": "留萌市",
+      "office": "留萌市役所",
+      "address": "留萌市幸町1-11",
+      "municipality_code": "01212",
+      "lat": 43.940987,
+      "lng": 141.637009,
+      "prefecture": "北海道",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "留萌地方"
+    },
     "local-09cfacf24acc12e9": {
       "municipality": "松前町",
       "office": "松前町役場",
@@ -1700,6 +1712,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-bb45547d683f65d0": {
+      "municipality": "小浜市",
+      "office": "小浜市役所",
+      "address": "小浜市大手町6-3",
+      "municipality_code": "18204",
+      "lat": 35.49559293513218,
+      "lng": 135.74664735918319,
+      "prefecture": "福井県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "小浜地区"
+    },
     "local-e5afccc6c06c39d1": {
       "municipality": "上野原市",
       "office": "上野原市役所",
@@ -1855,15 +1879,16 @@
       "selection": "first_municipality_in_source"
     },
     "local-64b47e480618f743": {
-      "municipality": "松阪市",
-      "office": "松阪市役所",
-      "address": "松阪市殿町1340-1",
-      "municipality_code": "24204",
-      "lat": 34.577902,
-      "lng": 136.527707,
+      "municipality": "伊賀市",
+      "office": "伊賀市役所",
+      "address": "伊賀市四十九町3184",
+      "municipality_code": "24216",
+      "lat": 34.768829,
+      "lng": 136.129908,
       "prefecture": "三重県",
-      "kind": "municipality_office",
-      "selection": "first_municipality_in_source"
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "伊賀食文化圏"
     },
     "local-78ac931d278c8ef7": {
       "municipality": "宇治市",
@@ -1875,6 +1900,18 @@
       "prefecture": "京都府",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-5d1144f861ecd685": {
+      "municipality": "南丹市",
+      "office": "南丹市役所",
+      "address": "南丹市園部町小桜町47",
+      "municipality_code": "26213",
+      "lat": 35.10712857,
+      "lng": 135.4698667,
+      "prefecture": "京都府",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "南丹地域"
     },
     "local-5a0eed1c1b1e119e": {
       "municipality": "京都市",
@@ -2085,6 +2122,30 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-92d2f840273ea11c": {
+      "municipality": "萩市",
+      "office": "萩市役所",
+      "address": "萩市大字江向510",
+      "municipality_code": "35204",
+      "lat": 34.408107,
+      "lng": 131.399104,
+      "prefecture": "山口県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "萩地域"
+    },
+    "local-565d3bc7b665179e": {
+      "municipality": "周南市",
+      "office": "周南市役所",
+      "address": "周南市岐山通1-1",
+      "municipality_code": "35215",
+      "lat": 34.0516872,
+      "lng": 131.8087241,
+      "prefecture": "山口県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "周南地域"
+    },
     "local-de5b01add88e091a": {
       "municipality": "三好市",
       "office": "三好市役所",
@@ -2107,6 +2168,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-cc929459bb5425e1": {
+      "municipality": "今治市",
+      "office": "今治市役所",
+      "address": "今治市別宮町1-4-1",
+      "municipality_code": "38202",
+      "lat": 34.0660971,
+      "lng": 132.997867,
+      "prefecture": "愛媛県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "今治地域"
+    },
     "local-0ffb60eaae9f430b": {
       "municipality": "北九州市",
       "office": "北九州市役所",
@@ -2117,6 +2190,18 @@
       "prefecture": "福岡県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-d4f4d45eae1ea024": {
+      "municipality": "福岡市",
+      "office": "福岡市役所",
+      "address": "福岡市中央区天神1-8-1",
+      "municipality_code": "40133",
+      "lat": 33.590322,
+      "lng": 130.401728,
+      "prefecture": "福岡県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "福岡地方"
     },
     "local-5e3612780beeb93e": {
       "municipality": "福岡市",
@@ -2195,6 +2280,42 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-2bafd5910feb4d40": {
+      "municipality": "熊本市",
+      "office": "熊本市役所",
+      "address": "熊本市中央区手取本町1-1",
+      "municipality_code": "43101",
+      "lat": 32.803078,
+      "lng": 130.707897,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "熊本地域"
+    },
+    "local-fdab3a9b5d1cb98b": {
+      "municipality": "人吉市",
+      "office": "人吉市役所",
+      "address": "人吉市西間下町7-1",
+      "municipality_code": "43203",
+      "lat": 32.210038,
+      "lng": 130.762554,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "人吉"
+    },
+    "local-66e224e288af2fb4": {
+      "municipality": "天草市",
+      "office": "天草市役所",
+      "address": "天草市東浜町8-1",
+      "municipality_code": "43215",
+      "lat": 32.45888175,
+      "lng": 130.1932625,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "天草地域"
+    },
     "local-92f5753c5222a4dd": {
       "municipality": "南関町",
       "office": "南関町役場",
@@ -2249,6 +2370,18 @@
       "prefecture": "宮崎県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-e84505ef959283e6": {
+      "municipality": "奄美市",
+      "office": "奄美市役所",
+      "address": "奄美市名瀬幸町25-8",
+      "municipality_code": "46222",
+      "lat": 28.377273,
+      "lng": 129.49378,
+      "prefecture": "鹿児島県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "奄美地域"
     },
     "local-7bacfcab0c36bcf9": {
       "municipality": "八代市",
@@ -3032,15 +3165,16 @@
       "selection": "first_municipality_in_source"
     },
     "local-703fbb85f15755b2": {
-      "municipality": "さいたま市",
-      "office": "さいたま市役所",
-      "address": "さいたま市浦和区常盤6-4-4",
-      "municipality_code": "11107",
-      "lat": 35.86164774048978,
-      "lng": 139.64552050305585,
+      "municipality": "秩父市",
+      "office": "秩父市役所",
+      "address": "秩父市熊木町8-15",
+      "municipality_code": "11207",
+      "lat": 35.991680587525245,
+      "lng": 139.08547879512722,
       "prefecture": "埼玉県",
-      "kind": "municipality_office",
-      "selection": "first_municipality_in_source"
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "秩父地方"
     },
     "local-6e08eb26cf9e5827": {
       "municipality": "深谷市",
@@ -3063,6 +3197,30 @@
       "prefecture": "埼玉県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-7d0dc2bc69a25837": {
+      "municipality": "秩父市",
+      "office": "秩父市役所",
+      "address": "秩父市熊木町8-15",
+      "municipality_code": "11207",
+      "lat": 35.991680587525245,
+      "lng": 139.08547879512722,
+      "prefecture": "埼玉県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "秩父地域"
+    },
+    "local-6eeaa5ff27735f7b": {
+      "municipality": "秩父市",
+      "office": "秩父市役所",
+      "address": "秩父市熊木町8-15",
+      "municipality_code": "11207",
+      "lat": 35.991680587525245,
+      "lng": 139.08547879512722,
+      "prefecture": "埼玉県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "秩父地方"
     },
     "local-8e49976d6d6e5101": {
       "municipality": "越生町",
@@ -3087,15 +3245,16 @@
       "selection": "first_municipality_in_source"
     },
     "local-5bc2f8d9cccc51f2": {
-      "municipality": "本庄市",
-      "office": "本庄市役所",
-      "address": "本庄市本庄3-5-3",
-      "municipality_code": "11211",
-      "lat": 36.24332080652405,
-      "lng": 139.19064629360318,
+      "municipality": "秩父市",
+      "office": "秩父市役所",
+      "address": "秩父市熊木町8-15",
+      "municipality_code": "11207",
+      "lat": 35.991680587525245,
+      "lng": 139.08547879512722,
       "prefecture": "埼玉県",
-      "kind": "municipality_office",
-      "selection": "first_municipality_in_source"
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "秩父地域"
     },
     "local-718ac6d4e80b55fd": {
       "municipality": "寄居町",
@@ -3130,16 +3289,53 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
-    "local-df55f280c4b1559d": {
-      "municipality": "加須市",
-      "office": "加須市役所",
-      "address": "加須市三俣2-1-1",
-      "municipality_code": "11210",
-      "lat": 36.131437524551494,
-      "lng": 139.60178080390037,
+    "local-757002f15efb5b8d": {
+      "municipality": "秩父市",
+      "office": "秩父市役所",
+      "address": "秩父市熊木町8-15",
+      "municipality_code": "11207",
+      "lat": 35.991680587525245,
+      "lng": 139.08547879512722,
       "prefecture": "埼玉県",
-      "kind": "municipality_office",
-      "selection": "first_municipality_in_source"
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "秩父地域"
+    },
+    "local-df55f280c4b1559d": {
+      "municipality": "秩父市",
+      "office": "秩父市役所",
+      "address": "秩父市熊木町8-15",
+      "municipality_code": "11207",
+      "lat": 35.991680587525245,
+      "lng": 139.08547879512722,
+      "prefecture": "埼玉県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "秩父地域"
+    },
+    "local-06d82e82b0fc5016": {
+      "municipality": "秩父市",
+      "office": "秩父市役所",
+      "address": "秩父市熊木町8-15",
+      "municipality_code": "11207",
+      "lat": 35.991680587525245,
+      "lng": 139.08547879512722,
+      "prefecture": "埼玉県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "秩父地域"
+    },
+    "local-8f2c97e8e27f5ca1": {
+      "municipality": "秩父市",
+      "office": "秩父市役所",
+      "address": "秩父市熊木町8-15",
+      "municipality_code": "11207",
+      "lat": 35.991680587525245,
+      "lng": 139.08547879512722,
+      "prefecture": "埼玉県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "秩父地域"
     },
     "local-53505299d37c5262": {
       "municipality": "さいたま市",
@@ -3163,6 +3359,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-ec1579a4039d5a1a": {
+      "municipality": "香取市",
+      "office": "香取市役所",
+      "address": "香取市佐原ロ2127",
+      "municipality_code": "12236",
+      "lat": 35.89774171203515,
+      "lng": 140.4992501533851,
+      "prefecture": "千葉県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "香取"
+    },
     "local-73cd7b7cb62f59f8": {
       "municipality": "富津市",
       "office": "富津市役所",
@@ -3173,6 +3381,18 @@
       "prefecture": "千葉県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-4aa40476a77d5157": {
+      "municipality": "南房総市",
+      "office": "南房総市役所",
+      "address": "南房総市富浦町青木28",
+      "municipality_code": "12234",
+      "lat": 35.043148582715624,
+      "lng": 139.8399969145619,
+      "prefecture": "千葉県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "南房総地域"
     },
     "local-33d436f76f8252a7": {
       "municipality": "成田市",
@@ -3283,6 +3503,30 @@
       "prefecture": "東京都",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-1c73afcf09ed5957": {
+      "municipality": "奥多摩町",
+      "office": "奥多摩町役場",
+      "address": "奥多摩町氷川215-6",
+      "municipality_code": "13308",
+      "lat": 35.80951355866773,
+      "lng": 139.096231494996,
+      "prefecture": "東京都",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "奥多摩地域"
+    },
+    "local-02882ec426f65357": {
+      "municipality": "奥多摩町",
+      "office": "奥多摩町役場",
+      "address": "奥多摩町氷川215-6",
+      "municipality_code": "13308",
+      "lat": 35.80951355866773,
+      "lng": 139.096231494996,
+      "prefecture": "東京都",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "奥多摩地域"
     },
     "local-51a2ac2cf5b05adb": {
       "municipality": "墨田区",
@@ -3624,6 +3868,78 @@
       "prefecture": "山梨県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-089d0b172f2d5633": {
+      "municipality": "諏訪市",
+      "office": "諏訪市役所",
+      "address": "諏訪市高島1-22-30",
+      "municipality_code": "20206",
+      "lat": 36.039174703998285,
+      "lng": 138.11398630117594,
+      "prefecture": "長野県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "諏訪地域"
+    },
+    "local-fb905a33e63150b7": {
+      "municipality": "諏訪市",
+      "office": "諏訪市役所",
+      "address": "諏訪市高島1-22-30",
+      "municipality_code": "20206",
+      "lat": 36.039174703998285,
+      "lng": 138.11398630117594,
+      "prefecture": "長野県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "諏訪地域"
+    },
+    "local-6bb617814a7154e9": {
+      "municipality": "松本市",
+      "office": "松本市役所",
+      "address": "松本市丸の内3-7",
+      "municipality_code": "20202",
+      "lat": 36.238095506196636,
+      "lng": 137.97199479098637,
+      "prefecture": "長野県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "松本地域"
+    },
+    "local-e1e0105221da5de2": {
+      "municipality": "木曽町",
+      "office": "木曽町役場",
+      "address": "木曽町福島2326-6",
+      "municipality_code": "20432",
+      "lat": 35.842454680029995,
+      "lng": 137.69153541194598,
+      "prefecture": "長野県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "木曽地域"
+    },
+    "local-fe9ff689f50a5031": {
+      "municipality": "木曽町",
+      "office": "木曽町役場",
+      "address": "木曽町福島2326-6",
+      "municipality_code": "20432",
+      "lat": 35.842454680029995,
+      "lng": 137.69153541194598,
+      "prefecture": "長野県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "木曽地域"
+    },
+    "local-abb9f893e36a5d41": {
+      "municipality": "佐久市",
+      "office": "佐久市役所",
+      "address": "佐久市中込3056",
+      "municipality_code": "20217",
+      "lat": 36.248820719011576,
+      "lng": 138.47685451958438,
+      "prefecture": "長野県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "佐久地域"
     },
     "local-06dee88d25645d43": {
       "municipality": "飯山市",
@@ -4032,6 +4348,42 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-60571ea936e550be": {
+      "municipality": "伊賀市",
+      "office": "伊賀市役所",
+      "address": "伊賀市四十九町3184",
+      "municipality_code": "24216",
+      "lat": 34.768829,
+      "lng": 136.129908,
+      "prefecture": "三重県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "伊賀食文化圏"
+    },
+    "local-32fdd496e4ac5878": {
+      "municipality": "伊賀市",
+      "office": "伊賀市役所",
+      "address": "伊賀市四十九町3184",
+      "municipality_code": "24216",
+      "lat": 34.768829,
+      "lng": 136.129908,
+      "prefecture": "三重県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "伊賀食文化圏"
+    },
+    "local-4998affb2d995f77": {
+      "municipality": "伊賀市",
+      "office": "伊賀市役所",
+      "address": "伊賀市四十九町3184",
+      "municipality_code": "24216",
+      "lat": 34.768829,
+      "lng": 136.129908,
+      "prefecture": "三重県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "伊賀食文化圏"
+    },
     "local-d922374fbd75521f": {
       "municipality": "熊野市",
       "office": "熊野市役所",
@@ -4042,6 +4394,42 @@
       "prefecture": "三重県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-4045ebd2cb3353eb": {
+      "municipality": "伊賀市",
+      "office": "伊賀市役所",
+      "address": "伊賀市四十九町3184",
+      "municipality_code": "24216",
+      "lat": 34.768829,
+      "lng": 136.129908,
+      "prefecture": "三重県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "伊賀食文化圏"
+    },
+    "local-f69c5caefb615849": {
+      "municipality": "近江八幡市",
+      "office": "近江八幡市役所",
+      "address": "近江八幡市桜宮町236",
+      "municipality_code": "25204",
+      "lat": 35.128214,
+      "lng": 136.097866,
+      "prefecture": "滋賀県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "近江八幡地域"
+    },
+    "local-1c76d12d42f159f0": {
+      "municipality": "守山市",
+      "office": "守山市役所",
+      "address": "守山市吉身2-5-22",
+      "municipality_code": "25207",
+      "lat": 35.058663,
+      "lng": 135.99402,
+      "prefecture": "滋賀県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "守山地域"
     },
     "local-fed6786afdfd5909": {
       "municipality": "甲賀市",
@@ -4131,6 +4519,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-d39c0711c7195d48": {
+      "municipality": "南丹市",
+      "office": "南丹市役所",
+      "address": "南丹市園部町小桜町47",
+      "municipality_code": "26213",
+      "lat": 35.10712857,
+      "lng": 135.4698667,
+      "prefecture": "京都府",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "南丹地域"
+    },
     "local-0fff23ad635450d0": {
       "municipality": "京都市",
       "office": "京都市役所",
@@ -4218,6 +4618,18 @@
       "prefecture": "京都府",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-2d7418c20678527d": {
+      "municipality": "南丹市",
+      "office": "南丹市役所",
+      "address": "南丹市園部町小桜町47",
+      "municipality_code": "26213",
+      "lat": 35.10712857,
+      "lng": 135.4698667,
+      "prefecture": "京都府",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "南丹地域"
     },
     "local-08dfafe6dd585c04": {
       "municipality": "大阪市",
@@ -4405,6 +4817,18 @@
       "prefecture": "兵庫県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-46d6dbd60a69546c": {
+      "municipality": "神戸市",
+      "office": "神戸市役所",
+      "address": "神戸市中央区加納町6-5-1",
+      "municipality_code": "28110",
+      "lat": 34.689495,
+      "lng": 135.195728,
+      "prefecture": "兵庫県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "神戸"
     },
     "local-8e64c870ec8d5dcd": {
       "municipality": "養父市",
@@ -5220,6 +5644,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-d58c817cceb25557": {
+      "municipality": "柳井市",
+      "office": "柳井市役所",
+      "address": "柳井市南町1-10-2",
+      "municipality_code": "35212",
+      "lat": 33.963839,
+      "lng": 132.101597,
+      "prefecture": "山口県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "柳井地区"
+    },
     "local-1b3cd0ece67f508a": {
       "municipality": "山口市",
       "office": "山口市役所",
@@ -5231,6 +5667,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-7a57ab5c1ac25fdc": {
+      "municipality": "岩国市",
+      "office": "岩国市役所",
+      "address": "岩国市今津町1-14-51",
+      "municipality_code": "35208",
+      "lat": 34.1665714,
+      "lng": 132.2189011,
+      "prefecture": "山口県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "岩国地域"
+    },
     "local-5392e0dbc1765a58": {
       "municipality": "萩市",
       "office": "萩市役所",
@@ -5241,6 +5689,30 @@
       "prefecture": "山口県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-e3ab1608ae3c5b46": {
+      "municipality": "下関市",
+      "office": "下関市役所",
+      "address": "下関市南部町1-1",
+      "municipality_code": "35201",
+      "lat": 33.957828,
+      "lng": 130.941459,
+      "prefecture": "山口県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "下関地域"
+    },
+    "local-1b4045580f2c590b": {
+      "municipality": "下関市",
+      "office": "下関市役所",
+      "address": "下関市南部町1-1",
+      "municipality_code": "35201",
+      "lat": 33.957828,
+      "lng": 130.941459,
+      "prefecture": "山口県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "下関地域"
     },
     "local-f7df46c348fc5eff": {
       "municipality": "長門市",
@@ -5475,6 +5947,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-1ef090824d2553b9": {
+      "municipality": "小豆島町",
+      "office": "小豆島町役場",
+      "address": "小豆島町片城甲44-95",
+      "municipality_code": "37324",
+      "lat": 34.47970736,
+      "lng": 134.3082655,
+      "prefecture": "香川県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "小豆島地域"
+    },
     "local-2d4b0201200b5a7e": {
       "municipality": "三豊市",
       "office": "三豊市役所",
@@ -5497,6 +5981,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-346839b88e0059bd": {
+      "municipality": "松山市",
+      "office": "松山市役所",
+      "address": "松山市二番町4-7-2",
+      "municipality_code": "38201",
+      "lat": 33.839212,
+      "lng": 132.765579,
+      "prefecture": "愛媛県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "松山地域"
+    },
     "local-9d1693a710ec5e90": {
       "municipality": "宇和島市",
       "office": "宇和島市役所",
@@ -5507,6 +6003,18 @@
       "prefecture": "愛媛県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-aa72a7a372995e38": {
+      "municipality": "松山市",
+      "office": "松山市役所",
+      "address": "松山市二番町4-7-2",
+      "municipality_code": "38201",
+      "lat": 33.839212,
+      "lng": 132.765579,
+      "prefecture": "愛媛県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "松山地域"
     },
     "local-f637e74928755ffe": {
       "municipality": "今治市",
@@ -5541,6 +6049,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-ef1d1768176d5e31": {
+      "municipality": "松山市",
+      "office": "松山市役所",
+      "address": "松山市二番町4-7-2",
+      "municipality_code": "38201",
+      "lat": 33.839212,
+      "lng": 132.765579,
+      "prefecture": "愛媛県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "松山地域"
+    },
     "local-6c217d5c1bed555c": {
       "municipality": "宇和島市",
       "office": "宇和島市役所",
@@ -5562,6 +6082,18 @@
       "prefecture": "愛媛県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-e955be7544ca5fae": {
+      "municipality": "松山市",
+      "office": "松山市役所",
+      "address": "松山市二番町4-7-2",
+      "municipality_code": "38201",
+      "lat": 33.839212,
+      "lng": 132.765579,
+      "prefecture": "愛媛県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "松山地域"
     },
     "local-76a3c24a5cee5661": {
       "municipality": "大月町",
@@ -5653,6 +6185,30 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-81dceb86279057ea": {
+      "municipality": "福岡市",
+      "office": "福岡市役所",
+      "address": "福岡市中央区天神1-8-1",
+      "municipality_code": "40133",
+      "lat": 33.590322,
+      "lng": 130.401728,
+      "prefecture": "福岡県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "福岡地方"
+    },
+    "local-b191eaad5d0d591a": {
+      "municipality": "福岡市",
+      "office": "福岡市役所",
+      "address": "福岡市中央区天神1-8-1",
+      "municipality_code": "40133",
+      "lat": 33.590322,
+      "lng": 130.401728,
+      "prefecture": "福岡県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "福岡地区"
+    },
     "local-4d5934e6a92b5b98": {
       "municipality": "豊前市",
       "office": "豊前市役所",
@@ -5696,6 +6252,18 @@
       "prefecture": "福岡県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-840de1221baf5354": {
+      "municipality": "北九州市",
+      "office": "北九州市役所",
+      "address": "北九州市小倉北区城内1-1",
+      "municipality_code": "40106",
+      "lat": 33.8833676,
+      "lng": 130.8744411,
+      "prefecture": "福岡県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "北九州地域"
     },
     "local-1b1769edd93c5980": {
       "municipality": "朝倉市",
@@ -5851,6 +6419,54 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-4b3ada8663145d40": {
+      "municipality": "諫早市",
+      "office": "諫早市役所",
+      "address": "諫早市東小路町7-1",
+      "municipality_code": "42204",
+      "lat": 32.84339,
+      "lng": 130.05337,
+      "prefecture": "長崎県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "諫早地区"
+    },
+    "local-5e8fd94f65d45e86": {
+      "municipality": "諫早市",
+      "office": "諫早市役所",
+      "address": "諫早市東小路町7-1",
+      "municipality_code": "42204",
+      "lat": 32.84339,
+      "lng": 130.05337,
+      "prefecture": "長崎県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "諫早地区"
+    },
+    "local-e1f16028a44b5b84": {
+      "municipality": "五島市",
+      "office": "五島市役所",
+      "address": "五島市福江町1-1",
+      "municipality_code": "42211",
+      "lat": 32.69550015,
+      "lng": 128.8408911,
+      "prefecture": "長崎県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "五島地方"
+    },
+    "local-a43a21c8aba154dd": {
+      "municipality": "平戸市",
+      "office": "平戸市役所",
+      "address": "平戸市岩の上町1508-3",
+      "municipality_code": "42207",
+      "lat": 33.36830891,
+      "lng": 129.5536609,
+      "prefecture": "長崎県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "平戸地区"
+    },
     "local-414df0d743f75707": {
       "municipality": "小値賀町",
       "office": "小値賀町役場",
@@ -5917,6 +6533,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-116074367cdc5681": {
+      "municipality": "島原市",
+      "office": "島原市役所",
+      "address": "島原市上の町537",
+      "municipality_code": "42203",
+      "lat": 32.78824955,
+      "lng": 130.3708078,
+      "prefecture": "長崎県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "島原地区"
+    },
     "local-9ec5ee2070a85b99": {
       "municipality": "阿蘇市",
       "office": "阿蘇市役所",
@@ -5928,18 +6556,149 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
-    "local-f6f755ed3f6e5909": {
-      "municipality": "山都町",
-      "office": "山都町役場",
-      "address": "山都町浜町6",
-      "municipality_code": "43447",
-      "lat": 32.685337,
-      "lng": 130.990218,
+    "local-f33e921870b352c3": {
+      "municipality": "阿蘇市",
+      "office": "阿蘇市役所",
+      "address": "阿蘇市一の宮町宮地504-1",
+      "municipality_code": "43214",
+      "lat": 32.95229185,
+      "lng": 131.1212564,
       "prefecture": "熊本県",
-      "kind": "municipality_office",
-      "selection": "first_municipality_in_source",
-      "source_text": "上益城郡山都市",
-      "alias_source_url": "https://www.town.kumamoto-yamato.lg.jp/kiji0034551/index.html"
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "阿蘇地域"
+    },
+    "local-5af927807e665e5e": {
+      "municipality": "芦北町",
+      "office": "芦北町役場",
+      "address": "芦北町大字芦北2015",
+      "municipality_code": "43482",
+      "lat": 32.299102,
+      "lng": 130.493119,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "芦北"
+    },
+    "local-a965834f215e5ecd": {
+      "municipality": "八代市",
+      "office": "八代市役所",
+      "address": "八代市松江城町1-25",
+      "municipality_code": "43202",
+      "lat": 32.507412,
+      "lng": 130.601888,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "八代地域"
+    },
+    "local-4d82499e43b05a84": {
+      "municipality": "八代市",
+      "office": "八代市役所",
+      "address": "八代市松江城町1-25",
+      "municipality_code": "43202",
+      "lat": 32.507412,
+      "lng": 130.601888,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "八代"
+    },
+    "local-cc2b1e63b1f45a8b": {
+      "municipality": "天草市",
+      "office": "天草市役所",
+      "address": "天草市東浜町8-1",
+      "municipality_code": "43215",
+      "lat": 32.45888175,
+      "lng": 130.1932625,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "天草地域"
+    },
+    "local-f6f755ed3f6e5909": {
+      "municipality": "宇城市",
+      "office": "宇城市役所",
+      "address": "宇城市松橋町大野85",
+      "municipality_code": "43213",
+      "lat": 32.6483795,
+      "lng": 130.6844984,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "宇城地域"
+    },
+    "local-8ee4891515465bf4": {
+      "municipality": "天草市",
+      "office": "天草市役所",
+      "address": "天草市東浜町8-1",
+      "municipality_code": "43215",
+      "lat": 32.45888175,
+      "lng": 130.1932625,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "天草地域"
+    },
+    "local-53b8b02aa5355446": {
+      "municipality": "八代市",
+      "office": "八代市役所",
+      "address": "八代市松江城町1-25",
+      "municipality_code": "43202",
+      "lat": 32.507412,
+      "lng": 130.601888,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "八代"
+    },
+    "local-f97a24f5792f5efb": {
+      "municipality": "人吉市",
+      "office": "人吉市役所",
+      "address": "人吉市西間下町7-1",
+      "municipality_code": "43203",
+      "lat": 32.210038,
+      "lng": 130.762554,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "人吉"
+    },
+    "local-c4c0269a51cd5029": {
+      "municipality": "山鹿市",
+      "office": "山鹿市役所",
+      "address": "山鹿市山鹿987-3",
+      "municipality_code": "43208",
+      "lat": 33.017782,
+      "lng": 130.691165,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "山鹿地域"
+    },
+    "local-99226ae9ecee5ed5": {
+      "municipality": "阿蘇市",
+      "office": "阿蘇市役所",
+      "address": "阿蘇市一の宮町宮地504-1",
+      "municipality_code": "43214",
+      "lat": 32.95229185,
+      "lng": 131.1212564,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "阿蘇地域"
+    },
+    "local-301c0a67fb9653ee": {
+      "municipality": "南阿蘇村",
+      "office": "南阿蘇村役場",
+      "address": "南阿蘇村河陽1705-1",
+      "municipality_code": "43433",
+      "lat": 32.84514024,
+      "lng": 131.0176799,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "南阿蘇地域"
     },
     "local-b8e7e668af9b5c76": {
       "municipality": "佐伯市",
@@ -6050,6 +6809,30 @@
       "prefecture": "大分県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-32f6a472548359f0": {
+      "municipality": "豊後大野市",
+      "office": "豊後大野市役所",
+      "address": "豊後大野市三重町市場1200",
+      "municipality_code": "44212",
+      "lat": 32.978152,
+      "lng": 131.585011,
+      "prefecture": "大分県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "豊後大野地方"
+    },
+    "local-0e15489d185252a9": {
+      "municipality": "日田市",
+      "office": "日田市役所",
+      "address": "日田市田島2-6-1",
+      "municipality_code": "44204",
+      "lat": 33.321041,
+      "lng": 130.94131,
+      "prefecture": "大分県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "日田"
     },
     "local-624e8cf6a0d45663": {
       "municipality": "中津市",
@@ -6194,6 +6977,102 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-ea6561f63c8a5c61": {
+      "municipality": "奄美市",
+      "office": "奄美市役所",
+      "address": "奄美市名瀬幸町25-8",
+      "municipality_code": "46222",
+      "lat": 28.377273,
+      "lng": 129.49378,
+      "prefecture": "鹿児島県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "奄美地域"
+    },
+    "local-21375b021a855f91": {
+      "municipality": "奄美市",
+      "office": "奄美市役所",
+      "address": "奄美市名瀬幸町25-8",
+      "municipality_code": "46222",
+      "lat": 28.377273,
+      "lng": 129.49378,
+      "prefecture": "鹿児島県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "奄美地域"
+    },
+    "local-b0a864ab929c55b1": {
+      "municipality": "奄美市",
+      "office": "奄美市役所",
+      "address": "奄美市名瀬幸町25-8",
+      "municipality_code": "46222",
+      "lat": 28.377273,
+      "lng": 129.49378,
+      "prefecture": "鹿児島県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "奄美地域"
+    },
+    "local-1d1dab23ff495906": {
+      "municipality": "奄美市",
+      "office": "奄美市役所",
+      "address": "奄美市名瀬幸町25-8",
+      "municipality_code": "46222",
+      "lat": 28.377273,
+      "lng": 129.49378,
+      "prefecture": "鹿児島県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "奄美地域"
+    },
+    "local-ecbf1fafc3d35a96": {
+      "municipality": "奄美市",
+      "office": "奄美市役所",
+      "address": "奄美市名瀬幸町25-8",
+      "municipality_code": "46222",
+      "lat": 28.377273,
+      "lng": 129.49378,
+      "prefecture": "鹿児島県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "奄美地域"
+    },
+    "local-559516fdc9bf5896": {
+      "municipality": "奄美市",
+      "office": "奄美市役所",
+      "address": "奄美市名瀬幸町25-8",
+      "municipality_code": "46222",
+      "lat": 28.377273,
+      "lng": 129.49378,
+      "prefecture": "鹿児島県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "奄美地域"
+    },
+    "local-5c2139cdc3af5e96": {
+      "municipality": "奄美市",
+      "office": "奄美市役所",
+      "address": "奄美市名瀬幸町25-8",
+      "municipality_code": "46222",
+      "lat": 28.377273,
+      "lng": 129.49378,
+      "prefecture": "鹿児島県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "奄美地域"
+    },
+    "local-cccfa3ec25165889": {
+      "municipality": "奄美市",
+      "office": "奄美市役所",
+      "address": "奄美市名瀬幸町25-8",
+      "municipality_code": "46222",
+      "lat": 28.377273,
+      "lng": 129.49378,
+      "prefecture": "鹿児島県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "奄美地域"
+    },
     "local-e46f6cc9aa1050e2": {
       "municipality": "鹿児島市",
       "office": "鹿児島市役所",
@@ -6204,6 +7083,30 @@
       "prefecture": "鹿児島県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-aed196442ae15169": {
+      "municipality": "那覇市",
+      "office": "那覇市役所",
+      "address": "那覇市泉崎1-1-1",
+      "municipality_code": "47201",
+      "lat": 26.21231226,
+      "lng": 127.67918661999998,
+      "prefecture": "沖縄県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "那覇"
+    },
+    "local-9369a595631156cc": {
+      "municipality": "上越市",
+      "office": "上越市役所",
+      "address": "上越市木田1-1-3",
+      "municipality_code": "15222",
+      "lat": 37.14787188406701,
+      "lng": 138.23604620130445,
+      "prefecture": "新潟県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "上越地方"
     },
     "local-9fe8f0c166a153c5": {
       "municipality": "佐渡市",
@@ -6238,6 +7141,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-09e903705b4c5680": {
+      "municipality": "佐渡市",
+      "office": "佐渡市役所",
+      "address": "佐渡市千種232",
+      "municipality_code": "15224",
+      "lat": 38.01829995398106,
+      "lng": 138.36814709390015,
+      "prefecture": "新潟県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "佐渡地方"
+    },
     "local-fc0c7eb49b605681": {
       "municipality": "阿賀町",
       "office": "阿賀町役場",
@@ -6248,6 +7163,18 @@
       "prefecture": "新潟県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-716b30ad9af856be": {
+      "municipality": "上越市",
+      "office": "上越市役所",
+      "address": "上越市木田1-1-3",
+      "municipality_code": "15222",
+      "lat": 37.14787188406701,
+      "lng": 138.23604620130445,
+      "prefecture": "新潟県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "上越地方"
     },
     "local-eae5f148d36b5efc": {
       "municipality": "村上市",
@@ -7262,15 +8189,16 @@
       "selection": "first_municipality_in_source"
     },
     "local-5432f205000a5858": {
-      "municipality": "京都市",
-      "office": "京都市役所",
-      "address": "京都市中京区寺町通御池上る上本能寺前町488",
-      "municipality_code": "26104",
-      "lat": 35.01163063,
-      "lng": 135.7677208,
+      "municipality": "南丹市",
+      "office": "南丹市役所",
+      "address": "南丹市園部町小桜町47",
+      "municipality_code": "26213",
+      "lat": 35.10712857,
+      "lng": 135.4698667,
       "prefecture": "京都府",
-      "kind": "municipality_office",
-      "selection": "first_municipality_in_source"
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "南丹地域"
     },
     "local-c7160eda583f5f2d": {
       "municipality": "京都市",
@@ -7436,6 +8364,18 @@
       "prefecture": "奈良県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-16660bdc658a5a2b": {
+      "municipality": "五條市",
+      "office": "五條市役所",
+      "address": "五條市岡口1-3-1",
+      "municipality_code": "29207",
+      "lat": 34.35626378,
+      "lng": 135.69569505,
+      "prefecture": "奈良県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "五條地域"
     },
     "local-9abc1ea012025c22": {
       "municipality": "十津川村",
@@ -7679,6 +8619,18 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-90689d03f5725d2e": {
+      "municipality": "松山市",
+      "office": "松山市役所",
+      "address": "松山市二番町4-7-2",
+      "municipality_code": "38201",
+      "lat": 33.839212,
+      "lng": 132.765579,
+      "prefecture": "愛媛県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "松山地域"
+    },
     "local-7d0c785399285f18": {
       "municipality": "大豊町",
       "office": "大豊町役場",
@@ -7756,6 +8708,30 @@
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
     },
+    "local-e423020e6a6e5387": {
+      "municipality": "天草市",
+      "office": "天草市役所",
+      "address": "天草市東浜町8-1",
+      "municipality_code": "43215",
+      "lat": 32.45888175,
+      "lng": 130.1932625,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "天草地区"
+    },
+    "local-5ffffe30e68c529f": {
+      "municipality": "宇城市",
+      "office": "宇城市役所",
+      "address": "宇城市松橋町大野85",
+      "municipality_code": "43213",
+      "lat": 32.6483795,
+      "lng": 130.6844984,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "宇城地域"
+    },
     "local-d92fcbebdeb8550e": {
       "municipality": "熊本市",
       "office": "熊本市役所",
@@ -7777,6 +8753,18 @@
       "prefecture": "熊本県",
       "kind": "municipality_office",
       "selection": "first_municipality_in_source"
+    },
+    "local-611a1065fc3d5bc0": {
+      "municipality": "八代市",
+      "office": "八代市役所",
+      "address": "八代市松江城町1-25",
+      "municipality_code": "43202",
+      "lat": 32.507412,
+      "lng": 130.601888,
+      "prefecture": "熊本県",
+      "kind": "named_area_office",
+      "selection": "first_place_in_source",
+      "source_text": "八代地域"
     },
     "local-60ca4fdaed5f56cf": {
       "municipality": "霧島市",

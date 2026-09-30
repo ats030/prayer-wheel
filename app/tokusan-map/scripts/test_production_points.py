@@ -1,7 +1,7 @@
 import copy
 import json
 import unittest
-from import_production_points import ROOT, apply_points, explicitly_prefecture_wide, first_municipality
+from import_production_points import ROOT, apply_points, explicitly_prefecture_wide, first_municipality, first_place
 
 
 class ProductionPointsTest(unittest.TestCase):
@@ -43,7 +43,8 @@ class ProductionPointsTest(unittest.TestCase):
         # P05-22 also lists 茨城町役場 at 土浦市; the address-consistent record wins.
         self.assertAlmostEqual(by_label['飯沼栗']['lat'], 36.286919122592984)
         self.assertEqual(by_label['ルイベ']['city'], '石狩市')
-        for label, city in [('いもべらあずき', 'いの町'), ('えびみそ汁', '三豊市'), ('巻柿', '山都町')]:
+        # 巻柿 (宇城地域、上益城郡山都市) follows its first place, the named area 宇城地域.
+        for label, city in [('いもべらあずき', 'いの町'), ('えびみそ汁', '三豊市'), ('巻柿', '宇城市')]:
             self.assertEqual(by_label[label]['city'], city)
             self.assertFalse(by_label[label]['prefecture_level'])
 
@@ -56,6 +57,38 @@ class ProductionPointsTest(unittest.TestCase):
             mutate(bad['points'][item['id']])
             with self.assertRaises(AssertionError):
                 apply_points(items, bad)
+
+    def test_first_place_decides_named_area(self):
+        self.assertEqual(first_place('埼玉県秩父地域、本庄市', '埼玉県'), '秩父地域')
+        self.assertEqual(first_place('日田・玖珠地方', '大分県'), '日田')
+        items = json.loads((ROOT / 'data/official.json').read_text())
+        registry = json.loads((ROOT / 'data/production_points.json').read_text())
+        by_label = {x['label']: x for x in apply_points(items, registry)}
+        # 秩父地域 precedes 本庄市, so the reviewed area wins over the later municipality.
+        self.assertEqual((by_label['つみっこ']['city'], by_label['つみっこ']['coordinate_label']), ('秩父市', '秩父地域'))
+        self.assertEqual(by_label['つみっこ']['coordinate_kind'], 'named_area_office')
+        # Rejected area names keep their earlier result: 庄内町 is not the centre of 庄内地域.
+        self.assertTrue(by_label['孟宗汁']['prefecture_level'])
+        self.assertEqual(by_label['かます寿司']['city'], '久留米市')
+
+    def test_reject_named_area_that_is_not_first(self):
+        items = json.loads((ROOT / 'data/official.json').read_text())
+        registry = json.loads((ROOT / 'data/production_points.json').read_text())
+        item = next(x for x in items if x['label'] == 'つみっこ')
+        for field, value in [('source_text', '本庄市'), ('municipality', '本庄市')]:
+            bad = copy.deepcopy(registry)
+            bad['points'][item['id']][field] = value
+            with self.assertRaises(AssertionError):
+                apply_points(items, bad)
+        # A rejected area (日高地方 → 日高町) must not pass even as the first place.
+        item = next(x for x in items if first_place(x['production_area'], x['prefecture']) == '日高地方'
+                    and x['prefecture'] == '北海道')
+        bad = copy.deepcopy(registry)
+        bad['points'][item['id']] = dict(bad['points'][next(iter(bad['points']))], prefecture='北海道',
+                                         municipality='日高町', office='日高町役場', kind='named_area_office',
+                                         selection='first_place_in_source', source_text='日高地方')
+        with self.assertRaises(AssertionError):
+            apply_points(items, bad)
 
     def test_reject_points_outside_source_area_or_wrong_prefecture(self):
         items = json.loads((ROOT / 'data/official.json').read_text())
