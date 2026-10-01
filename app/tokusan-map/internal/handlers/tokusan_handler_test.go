@@ -51,8 +51,8 @@ func TestOfficialItemSections(t *testing.T) {
 	if about.Summary != "" || body.SectionsUnavailable || body.SectionsRetry {
 		t.Fatal("official explanation must not require LLM or Wikipedia availability")
 	}
-	if _, ok := body.Sections["history"]; ok != (service.GetHistory(official.QID) != "") {
-		t.Fatal("history section must follow the stored history text")
+	if _, ok := body.Sections["history"]; ok {
+		t.Fatal("history must not be shown without an LLM summary")
 	}
 	var withHistory *services.Tokusan
 	for _, row := range service.GetAll() {
@@ -65,15 +65,32 @@ func TestOfficialItemSections(t *testing.T) {
 	if withHistory == nil {
 		t.Fatal("catalog has no official history text")
 	}
-	response = httptest.NewRecorder()
-	handler.GetSections(response, httptest.NewRequest("GET", "/api/sections/"+withHistory.QID, nil))
-	body = sectionsResponse{}
-	if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
-		t.Fatal(err)
+	sections := func(qid string) sectionsResponse {
+		response := httptest.NewRecorder()
+		handler.GetSections(response, httptest.NewRequest("GET", "/api/sections/"+qid, nil))
+		var out sectionsResponse
+		if err := json.Unmarshal(response.Body.Bytes(), &out); err != nil {
+			t.Fatal(err)
+		}
+		return out
 	}
-	history := body.Sections["history"]
-	if len(history.Blocks) == 0 || history.SourceURL != withHistory.SourceURL || history.Summary != "" {
-		t.Fatalf("official history or attribution lost: %+v", history)
+	if _, ok := sections(withHistory.QID).Sections["history"]; ok {
+		t.Fatal("raw history text must not be shown without an LLM summary")
+	}
+	original := officialSummary
+	defer func() { officialSummary = original }()
+	officialSummary = func(qid, section string) (services.SectionContent, bool) {
+		if qid == withHistory.QID && section == "history" {
+			return services.SectionContent{Summary: "要約"}, true
+		}
+		return services.SectionContent{Summary: services.SummaryNone}, qid == official.QID
+	}
+	if _, ok := sections(official.QID).Sections["history"]; ok {
+		t.Fatal("a SummaryNone history must stay hidden")
+	}
+	history := sections(withHistory.QID).Sections["history"]
+	if history.Summary != "要約" || len(history.Blocks) == 0 || history.SourceURL != withHistory.SourceURL {
+		t.Fatalf("history summary, original text or attribution lost: %+v", history)
 	}
 	for _, block := range history.Blocks {
 		if block.Text == "" || strings.Contains(block.Text, "\n") {

@@ -89,16 +89,36 @@ func officialPanelSection(qid, section, sourceURL, rawText string) services.Pane
 		out.Items = content.Items
 		return out
 	}
-	if rawText != "" {
-		var blocks []services.WikipediaTextBlock
-		for _, paragraph := range strings.Split(rawText, "\n") {
-			if paragraph = strings.TrimSpace(paragraph); paragraph != "" {
-				blocks = append(blocks, services.WikipediaTextBlock{Text: paragraph})
-			}
-		}
-		out.Blocks = blocks
-	}
+	out.Blocks = paragraphBlocks(rawText)
 	return out
+}
+
+// officialSummary is the stored-summary lookup; tests replace it.
+var officialSummary = services.GetOfficialSummary
+
+// officialHistorySection requires a stored LLM summary: items without one get
+// an empty section, which the client hides. The raw text rides along as blocks
+// so the client can show it under 「原文を読む」 as the summary's evidence.
+func officialHistorySection(qid, sourceURL, rawText string) services.PanelSection {
+	out := services.PanelSection{SourceURL: sourceURL}
+	content, ok := officialSummary(qid, "history")
+	if !ok || rawText == "" || (content.Summary == services.SummaryNone && len(content.Items) == 0) {
+		return out
+	}
+	out.Summary = content.Summary
+	out.Items = content.Items
+	out.Blocks = paragraphBlocks(rawText)
+	return out
+}
+
+func paragraphBlocks(rawText string) []services.WikipediaTextBlock {
+	var blocks []services.WikipediaTextBlock
+	for _, paragraph := range strings.Split(rawText, "\n") {
+		if paragraph = strings.TrimSpace(paragraph); paragraph != "" {
+			blocks = append(blocks, services.WikipediaTextBlock{Text: paragraph})
+		}
+	}
+	return blocks
 }
 
 // GetSections returns the LLM-structured Wikipedia sections for one item.
@@ -119,7 +139,7 @@ func (h *TokusanHandler) GetSections(w http.ResponseWriter, r *http.Request) {
 			Blocks:    []services.WikipediaTextBlock{{Text: row.Description}},
 			SourceURL: row.SourceURL,
 		}
-		if section := officialPanelSection(qid, "history", row.SourceURL, h.service.GetHistory(qid)); officialPanelSectionHasContent(section) {
+		if section := officialHistorySection(qid, row.SourceURL, h.service.GetHistory(qid)); officialPanelSectionHasContent(section) {
 			resp.Sections["history"] = section
 		}
 		if section := officialPanelSection(qid, "production", row.SourceURL, h.service.GetProduction(qid)); officialPanelSectionHasContent(section) {

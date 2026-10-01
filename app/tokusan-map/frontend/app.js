@@ -337,7 +337,8 @@ function renderSections(o,sections){
     }).join('');
     const source=safeUrl(payload.source_url)||safeUrl(o.source_url);
     const official=Boolean(o.description);
-    const attribution=[official?'出典をもとに編集':summary||items.length?'AIによる要約':'編集あり'];
+    const summarized=Boolean(summary||items.length);
+    const attribution=[official&&summarized?'AIによる要約(出典をもとに編集)':official?'出典をもとに編集':summarized?'AIによる要約':'編集あり'];
     if(source)attribution.push(link(source,official?o.source_name||'公式情報':'Wikipedia'));
     if(official&&source&&['www.maff.go.jp','www.rinya.maff.go.jp','www.meti.go.jp'].includes(new URL(source).hostname))attribution.push(link('https://www.digital.go.jp/resources/open_data/public_data_license_v1.0','PDL1.0'));
     if(!official)attribution.push(link('https://creativecommons.org/licenses/by-sa/4.0/deed.ja','CC BY-SA 4.0'));

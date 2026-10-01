@@ -13,8 +13,10 @@ restrictions:
   - This metadata review does not authorize photographs, third-party recipes, logos, or GI marks.
   - Explicitly permitted recipe ZIP photos require the separate tool-license-maff-photos.yaml review.
   - History text is limited to the 「歴史・由来・関連行事」 (うちの郷土料理) and
-    「歴史・文化、関連行事」 (にっぽん伝統食図鑑) sections, shown verbatim per paragraph
-    with the source link, 「出典をもとに編集」 and PDL1.0. Sections citing third-party
+    「歴史・文化、関連行事」 (にっぽん伝統食図鑑) sections. The panel shows only a
+    local-LLM summary of that text (decided 2026-10-01), labelled 「AIによる要約
+    (出典をもとに編集)」 with the source link and PDL1.0, and keeps the verbatim
+    paragraphs under 「原文を読む」. Items without a summary show no history. Sections citing third-party
     material (資料：/出典：/提供：/引用：) are skipped. Recipes and 飲食方法 are excluded.
   - Forestry text follows https://www.rinya.maff.go.jp/tohoku/use/link.html
   - METI text follows https://www.meti.go.jp/main/rules.html
