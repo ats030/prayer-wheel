@@ -96,9 +96,9 @@ func officialPanelSection(qid, section, sourceURL, rawText string) services.Pane
 // officialSummary is the stored-summary lookup; tests replace it.
 var officialSummary = services.GetOfficialSummary
 
-// officialHistorySection requires a stored LLM summary: items without one get
-// an empty section, which the client hides. The raw text rides along as blocks
-// so the client can show it under 「原文を読む」 as the summary's evidence.
+// officialHistorySection shows only the stored LLM summary: items without one
+// get an empty section, which the client hides. The raw text only gates
+// whether a summary applies; it is not sent to the client.
 func officialHistorySection(qid, sourceURL, rawText string) services.PanelSection {
 	out := services.PanelSection{SourceURL: sourceURL}
 	content, ok := officialSummary(qid, "history")
@@ -107,7 +107,6 @@ func officialHistorySection(qid, sourceURL, rawText string) services.PanelSectio
 	}
 	out.Summary = content.Summary
 	out.Items = content.Items
-	out.Blocks = paragraphBlocks(rawText)
 	return out
 }
 

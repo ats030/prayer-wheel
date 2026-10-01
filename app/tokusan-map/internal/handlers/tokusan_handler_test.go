@@ -89,13 +89,11 @@ func TestOfficialItemSections(t *testing.T) {
 		t.Fatal("a SummaryNone history must stay hidden")
 	}
 	history := sections(withHistory.QID).Sections["history"]
-	if history.Summary != "要約" || len(history.Blocks) == 0 || history.SourceURL != withHistory.SourceURL {
-		t.Fatalf("history summary, original text or attribution lost: %+v", history)
+	if history.Summary != "要約" || history.SourceURL != withHistory.SourceURL {
+		t.Fatalf("history summary or attribution lost: %+v", history)
 	}
-	for _, block := range history.Blocks {
-		if block.Text == "" || strings.Contains(block.Text, "\n") {
-			t.Fatalf("history paragraph not split: %q", block.Text)
-		}
+	if len(history.Blocks) != 0 {
+		t.Fatal("history must show only the summary, not the original text")
 	}
 	var withProduction *services.Tokusan
 	for _, row := range service.GetAll() {
