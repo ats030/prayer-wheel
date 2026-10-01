@@ -872,12 +872,17 @@ def _is_expired(row: "BacklogRow", today: date) -> bool:
     return row.deferred and row.defer_until is not None and row.defer_until <= today
 
 
-def _expired_note(rows, today: date) -> str:
-    days = [r.defer_until for r in rows if _is_expired(r, today)]
+def _expired_note(deferred_rows, cold_rows, today: date) -> str:
+    # 凍結の記録の期限切れも見直しの合図なので数える。外部待ちの見出しと数が
+    # 食い違って見えないよう、30日超と同じく一覧ごとの内訳を添える (ats030-mmrl7)。
+    counts = [(label, [r.defer_until for r in rows if _is_expired(r, today)])
+              for label, rows in (("外部待ち", deferred_rows), ("凍結の記録", cold_rows))]
+    days = [d for _, ds in counts for d in ds]
     if not days:
         return "期限切れなし"
     oldest = min(days)
-    return f"最も古い期限 {oldest:%-m/%-d}({(today - oldest).days}日超過)"
+    parts = " · ".join(f"{label} {len(ds)}" for label, ds in counts if ds)
+    return f"うち {parts} · 最古 {oldest:%-m/%-d}({(today - oldest).days}日超過)"
 
 
 def _over30_note(action_rows, deferred_rows, cold_rows) -> str:
@@ -974,7 +979,7 @@ def render_page(issues: list[Issue], today: date) -> str:
          f"要判断 {m.by_decision} · 所有者 {m.by_owner}", ""),
         ("30日超", str(m.over_30_days), _over30_note(action_rows, deferred_rows, cold_rows),
          "tile-over30" if m.over_30_days else ""),
-        ("期限切れの外部待ち", str(m.freeze_expired), _expired_note(rows, today),
+        ("期限切れの外部待ち", str(m.freeze_expired), _expired_note(deferred_rows, cold_rows, today),
          "tile-expired" if m.freeze_expired else ""),
     ]
     tile_html = "".join(
@@ -1029,7 +1034,7 @@ def render_page(issues: list[Issue], today: date) -> str:
         )
 
     analysis_note = (
-        f"全体 {m.remaining}件 · 動かせる {m.actionable}件 · 外部待ち {len(deferred_rows)}件 · "
+        f"全体 {m.remaining}件 · 棚卸し {len(action_rows)}件 · 外部待ち {len(deferred_rows)}件 · "
         f"凍結の記録 {len(cold_rows)}件 · "
         f"滞留中央値 {m.median_age}日 · claim率 {m.claim_rate}% · "
         f"同日クローズ率 {m.same_day_close_rate}% · リードタイム中央値 "

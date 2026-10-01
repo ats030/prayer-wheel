@@ -386,7 +386,7 @@ class TestPage:
         ])
         page = main.render_page(issues, date(2026, 9, 26))
         assert '<a class="tile" id="tile-expired" href="#">' in page
-        assert "最も古い期限 9/1(25日超過)" in page
+        assert "うち 外部待ち 2 · 最古 9/1(25日超過)" in page
         assert page.count("data-expired ") == 2
         assert "'expired' in row.dataset" in main.JS
         # 復帰の山は期限切れと関係ないので、外部待ちの一覧の見出しへ移す
@@ -405,6 +405,9 @@ class TestPage:
         assert "1件 · 期限切れ 0件 · 最大の復帰 11/23 に 1件</span>" in page
         assert "外部待ち 1件 · 凍結の記録 2件 · " in page
         assert 'const RETURNS = {"2026-11-23": 1};' in page
+        # タイルは凍結の記録の期限切れも数えるので、どちらの一覧にあるかを添える (ats030-mmrl7)
+        assert "うち 凍結の記録 1 · 最古 9/1(25日超過)" in page
+        assert "全体 3件 · 棚卸し 0件 · 外部待ち 1件 · " in page
 
     def test_expired_tile_is_plain_when_nothing_is_expired(self):
         issues = main.parse_issues([
