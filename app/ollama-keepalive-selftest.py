@@ -90,14 +90,14 @@ rc, calls = run([{TARGET: SOON, OTHER: SOON}, {TARGET: FAR, OTHER: SOON}])
 check("終了コード", rc, 0)
 check("post を1回呼ぶ", calls, 1)
 
-print("9. 温める先は KEEPALIVE_BASE → INTERACTIVE_TARGETS → 既定の順で決まる")
+print("9. 温める先は KEEPALIVE_BASE だけで決まる (プロキシのワーカー一覧へ落ちない)")
 saved = {k: ka.os.environ.pop(k, None)
          for k in ("OLLAMA_KEEPALIVE_BASE", "OLLAMA_PROXY_INTERACTIVE_TARGETS")}
-check("未設定なら既定", ka.keepalive_bases(), [ka.DEFAULT_BASE])
+check("未設定なら空", ka.keepalive_bases(), [])
 ka.os.environ["OLLAMA_PROXY_INTERACTIVE_TARGETS"] = "http://a:1/, http://b:2"
-check("プロキシのワーカー一覧を使う", ka.keepalive_bases(), ["http://a:1", "http://b:2"])
-ka.os.environ["OLLAMA_KEEPALIVE_BASE"] = "http://c:3"
-check("KEEPALIVE_BASE が優先", ka.keepalive_bases(), ["http://c:3"])
+check("プロキシのワーカー一覧は使わない", ka.keepalive_bases(), [])
+ka.os.environ["OLLAMA_KEEPALIVE_BASE"] = "http://c:3/, http://d:4"
+check("KEEPALIVE_BASE を使う", ka.keepalive_bases(), ["http://c:3", "http://d:4"])
 for k, v in saved.items():
     ka.os.environ.pop(k, None)
     if v is not None:

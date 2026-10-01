@@ -62,12 +62,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 CONFIG = Path.home() / ".config" / "opencode" / "opencode.json"
-DEFAULT_BASE = "http://127.0.0.1:11434"
-# 温める先はホストごとに違う。evo-x2 は対話ワーカーを直接並べるが、
-# ubuntu-server-app にワーカーは無くローカルプロキシしか無い。unit に
-# ポートを書くと git 共有で他ホストへ漏れるため、~/.env の値を読む。
-# 優先順: OLLAMA_KEEPALIVE_BASE → プロキシと同じ OLLAMA_PROXY_INTERACTIVE_TARGETS → 既定。
-BASE = DEFAULT_BASE
+# 温める先は ~/.env の OLLAMA_KEEPALIVE_BASE だけで決める。unit にポートを
+# 書くと git 共有で他ホストへ漏れるため。evo-x2 では対話専用ワーカー
+# (ollama-interactive-b) だけを指す。
+#
+# プロキシのワーカー一覧 (OLLAMA_PROXY_INTERACTIVE_TARGETS) やプロキシ自体へ
+# 暗黙に落とさないこと。一覧には gemma 系の背景バッチも受ける本体 ollama が
+# 含まれ、プロキシ経由でも振り分け次第で本体に届く。2026-10-01 の実例: 本体に
+# qwen3.8:27b を貼り続けた結果、本体の待ち行列 (OLLAMA_MAX_QUEUE=20) が
+# 00:33 UTC からあふれ、daily-reflection の gemma4:12b 生成が 503 で全滅した。
+# 未設定のホスト (ubuntu-server-app) は何もしない。evo-x2 側が直接温める。
+BASE = ""
 PROVIDER_PREFIX = "ollama/"
 # ロードだけの要求は、GPU が空いていれば 52GB でも十数秒で返る (実測 13.7秒)。
 # それ以上待たされるのは順番待ちをしている証拠で、待てば待つほど他所の生成の
@@ -235,10 +240,8 @@ def main() -> int:
 
 
 def keepalive_bases() -> list[str]:
-    raw = (os.environ.get("OLLAMA_KEEPALIVE_BASE")
-           or os.environ.get("OLLAMA_PROXY_INTERACTIVE_TARGETS")
-           or DEFAULT_BASE)
-    return [v.strip().rstrip("/") for v in raw.split(",") if v.strip()] or [DEFAULT_BASE]
+    raw = os.environ.get("OLLAMA_KEEPALIVE_BASE", "")
+    return [v.strip().rstrip("/") for v in raw.split(",") if v.strip()]
 
 
 def run_all(bases: list[str]) -> int:
@@ -261,4 +264,8 @@ def run_all(bases: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(run_all(keepalive_bases()))
+    bases = keepalive_bases()
+    if not bases:
+        print("OLLAMA_KEEPALIVE_BASE が未設定なので何もしない", file=sys.stderr)
+        sys.exit(3)
+    sys.exit(run_all(bases))
