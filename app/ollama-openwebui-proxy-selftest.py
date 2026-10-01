@@ -32,6 +32,8 @@ SCRIPT = Path(__file__).resolve().parent / "ollama-openwebui-proxy.py"
 spec = importlib.util.spec_from_file_location("ollama_proxy", SCRIPT)
 proxy = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(proxy)
+# 実機の ~/.env に対話先があっても、偽の上流宛ての要求を本物へ逃がさない。
+proxy.ROUTE_INTERACTIVE = False
 
 failures = []
 
