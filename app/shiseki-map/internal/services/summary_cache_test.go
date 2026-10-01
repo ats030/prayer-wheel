@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -172,4 +173,49 @@ func withFakeOllama(t *testing.T, f *fakeOllama) {
 	orig := OllamaBaseURL
 	OllamaBaseURL = f.srv.URL
 	t.Cleanup(func() { OllamaBaseURL = orig })
+}
+
+// Cloud Run runs with SHISEKI_SUMMARY_DISABLE=1 and serves only what
+// cmd/summary-warm baked into data/summaries.json, so the disabled path must
+// still read both the cached heading map and the cached section summary.
+func TestDisabledPathServesWarmedSummaries(t *testing.T) {
+	useTempSummaryCache(t, 10)
+	t.Setenv("SHISEKI_SUMMARY_DISABLE", "1")
+	title := "テスト遺跡"
+	fullText := "冒頭\n発掘の経緯\n縄文時代に集落が営まれた。\n"
+	headings := []wikipediaHeading{{Line: "発掘の経緯", Level: 2}}
+	mapping, _ := json.Marshal(map[string]string{"history": "発掘の経緯"})
+	summaryCache.Put(headingMapCacheKey(title, []string{"発掘の経緯"}), string(mapping))
+	summaryCache.Put(summaryCacheKey(title, sectionSpecs[0].label, fullText), "縄文集落の要約")
+
+	headingMap := resolveSectionHeadings(context.Background(), title, headings)
+	if headingMap["history"] != "発掘の経緯" {
+		t.Fatalf("cached heading map ignored when disabled: %v", headingMap)
+	}
+	got := resolvePanelSection(context.Background(), title, fullText, headings, "src", sectionSpecs[0], headingMap)
+	if got.Summary != "縄文集落の要約" {
+		t.Fatalf("cached summary ignored when disabled: %+v", got)
+	}
+}
+
+// The self-hosted server and cmd/summary-warm each hold their own copy of the
+// same file; a flush from one must not drop what the other already wrote.
+func TestSummaryCacheFlushMergesOtherWriters(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "summaries.json")
+	server := newSummaryCache(path, 10)
+	warm := newSummaryCache(path, 10)
+	warm.Put("warmed", "要約W")
+	warm.flush()
+	server.Put("served", "要約S")
+	server.flush()
+
+	reloaded := newSummaryCache(path, 10)
+	for key, want := range map[string]string{"warmed": "要約W", "served": "要約S"} {
+		if got, ok := reloaded.Get(key); !ok || got != want {
+			t.Errorf("%s = %q, %v; want %q", key, got, ok, want)
+		}
+	}
+	if got, ok := server.Get("warmed"); !ok || got != "要約W" {
+		t.Errorf("server did not pick up the warmed entry: %q, %v", got, ok)
+	}
 }

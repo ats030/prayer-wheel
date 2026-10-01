@@ -3,9 +3,9 @@ app-server
 *.exe
 build/
 
-# LLM 要約キャッシュ
-data/summaries.json
-data/summaries.json.tmp
+# LLM 要約キャッシュ。summaries.json は cmd/summary-warm の成果物として
+# Cloud Run イメージに同梱するので追跡する。
+data/summaries.json.tmp*
 data/status_cache.json
 
 # Wikidata SPARQL 結果キャッシュ(再生成可能)

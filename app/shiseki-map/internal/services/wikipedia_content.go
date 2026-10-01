@@ -206,9 +206,9 @@ func FetchPanelSections(ctx context.Context, title string) (history, remains, ac
 
 // resolveSectionsNoSummary is the SHISEKI_SUMMARY_DISABLE path: same four
 // sections, but the LLM is never called (neither the heading-resolution fall-
-// back nor the per-section summary) and Summary is always empty. Section
-// resolution falls back entirely to the exact-match candidate pass, which is
-// the behaviour the production deployment relies on.
+// back nor the per-section summary). Heading maps and summaries come only from
+// the cache that cmd/summary-warm baked into the image; sections without one
+// fall back to the exact-match candidate pass and carry no Summary.
 func resolveSectionsNoSummary(title string) (history, remains, access, highlights PanelSection) {
 	ctx := context.Background()
 	fullText, _, err := fetchWikipediaPlainText(ctx, title)
@@ -220,10 +220,11 @@ func resolveSectionsNoSummary(title string) (history, remains, access, highlight
 		return PanelSection{}, PanelSection{}, PanelSection{}, PanelSection{}
 	}
 	sourceURL := wikipediaArticleURL(title)
-	history = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[0], nil)
-	remains = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[1], nil)
-	access = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[2], nil)
-	highlights = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[3], nil)
+	headingMap := resolveSectionHeadings(ctx, title, headings)
+	history = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[0], headingMap)
+	remains = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[1], headingMap)
+	access = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[2], headingMap)
+	highlights = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[3], headingMap)
 	return history, remains, access, highlights
 }
 
@@ -246,7 +247,7 @@ func resolveSectionHeadings(ctx context.Context, title string, headings []wikipe
 			anyMissing = true
 		}
 	}
-	if !anyMissing || SummaryDisabled() || len(headings) == 0 {
+	if !anyMissing || len(headings) == 0 {
 		return resolved
 	}
 
@@ -265,6 +266,9 @@ func resolveSectionHeadings(ctx context.Context, title string, headings []wikipe
 				resolved[k] = v
 			}
 		}
+		return resolved
+	}
+	if SummaryDisabled() {
 		return resolved
 	}
 
@@ -304,8 +308,8 @@ func resolveSectionHeadings(ctx context.Context, title string, headings []wikipe
 //     still returned as the reading fallback).
 //  4. Ask the LLM for a fresh summary. On success (including a SummaryNone
 //     verdict) record it in the cache; on failure fall back to blocks only.
-//  5. When SHISEKI_SUMMARY_DISABLE is set, skip the cache/LLM steps entirely and
-//     return blocks only.
+//  5. When SHISEKI_SUMMARY_DISABLE is set, a cache miss returns blocks only
+//     instead of calling the LLM.
 func resolvePanelSection(ctx context.Context, title, fullText string, headings []wikipediaHeading, sourceURL string, spec sectionSpec, headingMap map[string]string) PanelSection {
 	target := matchSectionHeading(headings, spec.candidates)
 	if target == nil && headingMap != nil {
@@ -326,16 +330,15 @@ func resolvePanelSection(ctx context.Context, title, fullText string, headings [
 		return PanelSection{SourceURL: sourceURL}
 	}
 
-	if SummaryDisabled() {
-		return PanelSection{Blocks: blocks, SourceURL: sourceURL}
-	}
-
 	key := summaryCacheKey(title, spec.label, fullText)
 	if cached, ok := lookupSummary(key); ok {
 		if cached == SummaryNone {
 			return PanelSection{Blocks: blocks, SourceURL: sourceURL}
 		}
 		return PanelSection{Summary: cached, Blocks: blocks, SourceURL: sourceURL}
+	}
+	if SummaryDisabled() {
+		return PanelSection{Blocks: blocks, SourceURL: sourceURL}
 	}
 
 	summary, err := generateSummary(ctx, spec.label, spec.instruction, fullText)
