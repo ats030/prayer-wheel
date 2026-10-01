@@ -65,7 +65,19 @@ INTERACTIVE_TARGETS = tuple(
     for value in env("OLLAMA_PROXY_INTERACTIVE_TARGETS", TARGET_BASE_URL).split(",")
     if value.strip()
 )
-INTERACTIVE_STICKY_WAIT = float(env("OLLAMA_PROXY_INTERACTIVE_STICKY_WAIT", "5"))
+
+
+def routes_interactive(targets: tuple[str, ...], default: str) -> bool:
+    """対話先が1つでも、既定の転送先と違えばそこへ送る。
+
+    件数で判定すると、対話専用ワーカーだけを指定したとき qwen が本体 ollama に
+    戻り、gemma の背景処理と待ち行列を奪い合う (ats030-ltlgv)。
+    """
+    return bool(targets) and targets != (default,)
+
+
+ROUTE_INTERACTIVE = routes_interactive(INTERACTIVE_TARGETS, TARGET_BASE_URL)
+INTERACTIVE_STICKY_WAIT =float(env("OLLAMA_PROXY_INTERACTIVE_STICKY_WAIT", "5"))
 INTERACTIVE_QUEUE_TIMEOUT = float(env("OLLAMA_PROXY_INTERACTIVE_QUEUE_TIMEOUT", "120"))
 REQUEST_TIMEOUT = int(env("OLLAMA_PROXY_TIMEOUT", "600"))
 GENERATION_QUEUE_TIMEOUT = float(env("OLLAMA_PROXY_QUEUE_TIMEOUT", "5"))
@@ -814,7 +826,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
                     evict_idle_competitors(request_model(body))
             if (workload == "interactive"
                     and request_model(body) == WORKLOAD_MODELS["interactive"]
-                    and len(INTERACTIVE_TARGETS) > 1):
+                    and ROUTE_INTERACTIVE):
                 interactive_index = _interactive_router.acquire(
                     session_key, INTERACTIVE_STICKY_WAIT,
                     INTERACTIVE_QUEUE_TIMEOUT,

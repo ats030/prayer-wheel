@@ -771,7 +771,44 @@ with tempfile.TemporaryDirectory() as tmp:
     upstream.shutdown()
     upstream.server_close()
 
-print("28. 状態APIはidle/生成中をJSONで返す")
+print("28. 対話先が1つだけでも既定の転送先ではなくそこへ送る")
+with tempfile.TemporaryDirectory() as tmp:
+    proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"
+    saved = proxy.INTERACTIVE_TARGETS, proxy._interactive_router, proxy.ROUTE_INTERACTIVE
+
+    class MainUpstream(FakeUpstream):
+        hits = 0
+
+        def do_POST(self):  # noqa: N802
+            type(self).hits += 1
+            super().do_POST()
+
+    class WorkerUpstream(MainUpstream):
+        hits = 0
+
+    main_server, proxy.TARGET_BASE_URL = serve(MainUpstream)
+    worker_server, worker_url = serve(WorkerUpstream)
+    proxy.INTERACTIVE_TARGETS = (worker_url,)
+    proxy._interactive_router = proxy.InteractiveRouter(proxy.INTERACTIVE_TARGETS)
+    proxy.ROUTE_INTERACTIVE = proxy.routes_interactive(
+        proxy.INTERACTIVE_TARGETS, proxy.TARGET_BASE_URL)
+    front, base = serve(proxy.ProxyHandler)
+    try:
+        status, _ = post(base, "/api/chat", b'{"model":"qwen3.8:27b"}')
+        check("単一対話先の応答コード", status, 200)
+        check("単一対話先に届く", WorkerUpstream.hits, 1)
+        check("既定の転送先には届かない", MainUpstream.hits, 0)
+        check("終了後に対話先を解放", proxy._interactive_router.active, [False])
+        check("既定と同じ対話先だけなら振り分けない",
+              proxy.routes_interactive(("http://a",), "http://a"), False)
+        check("対話先なしなら振り分けない", proxy.routes_interactive((), "http://a"), False)
+    finally:
+        proxy.INTERACTIVE_TARGETS, proxy._interactive_router, proxy.ROUTE_INTERACTIVE = saved
+        for server in (front, main_server, worker_server):
+            server.shutdown()
+            server.server_close()
+
+print("29. 状態APIはidle/生成中をJSONで返す")
 front, base = serve(proxy.ProxyHandler)
 try:
     with urllib.request.urlopen(base + "/api/opencode-status", timeout=3) as response:
