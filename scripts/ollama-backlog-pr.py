@@ -31,6 +31,8 @@ GITHUB_SSH = re.compile(r"^git@github\.com:([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+?)(
 ALLOWED_SUFFIXES = {".py", ".js", ".css", ".html", ".go", ".sh"}
 MAX_CHANGED_LINES = 80
 STATUS_URL = "http://localhost:11434/api/opencode-status"
+# 27Bに1000行超のファイルを1回で読ませると300秒では返らない (ats030-hbu8 run2)。
+MODEL_TIMEOUT = 1200
 
 
 def command(args: list[str], *, cwd: Path = ROOT, timeout: int = 30) -> subprocess.CompletedProcess[str]:
@@ -275,14 +277,14 @@ def main() -> int:
         if remote_head(repo, entry["base"]) != source_head:
             raise RuntimeError("source branch is not up to date with origin")
         cmd = [sys.executable, str(RUNNER), issue["id"], "--repo", entry["repo"],
-               "--model-timeout", "300", "--offline-tests"]
+               "--model-timeout", str(MODEL_TIMEOUT), "--offline-tests"]
         for name in entry["files"]:
             cmd += ["--one-pass-file", name, "--allowed-file", name]
         for test in entry["tests"]:
             cmd += ["--test", test]
         for name in entry["read_only"]:
             cmd += ["--read-only", name]
-        result = command(cmd, timeout=960)
+        result = command(cmd, timeout=MODEL_TIMEOUT + 660)
         try:
             outcome = json.loads(result.stdout)
         except json.JSONDecodeError:
