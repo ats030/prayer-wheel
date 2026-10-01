@@ -54,6 +54,7 @@
     "jalan_sml_name": "長崎",
     "categories": [
       "山車・屋台",
+      "神事・祭礼",
       "行事"
     ],
     "occurrences": [
@@ -388,6 +389,7 @@
     "jalan_sml_code": "137102",
     "jalan_sml_name": "お台場・汐留・竹芝",
     "categories": [
+      "博覧会・市",
       "行事"
     ]
   },
@@ -483,6 +485,7 @@
     "jalan_sml_code": "411102",
     "jalan_sml_name": "唐津・呼子・玄海",
     "categories": [
+      "山車・屋台",
       "神事・祭礼",
       "行事"
     ],
@@ -542,6 +545,7 @@
     "jalan_sml_code": "230805",
     "jalan_sml_name": "犬山・小牧・一宮",
     "categories": [
+      "演舞・盆踊り",
       "行列・渡御",
       "神事・祭礼",
       "行事"
@@ -564,6 +568,8 @@
     "jalan_sml_code": "381105",
     "jalan_sml_name": "新居浜・伊予三島",
     "categories": [
+      "山車・屋台",
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -1153,6 +1159,7 @@
     "jalan_sml_code": "273208",
     "jalan_sml_name": "住吉・長居公園",
     "categories": [
+      "演舞・盆踊り",
       "行列・渡御",
       "神事・祭礼",
       "行事"
@@ -1217,6 +1224,7 @@
     "jalan_sml_name": "和倉・七尾",
     "categories": [
       "山車・屋台",
+      "神事・祭礼",
       "灯籠・火祭り",
       "行事"
     ]
@@ -2272,6 +2280,7 @@
     "jalan_sml_code": "273802",
     "jalan_sml_name": "堺・泉大津",
     "categories": [
+      "山車・屋台",
       "神事・祭礼",
       "行事"
     ]
@@ -3397,6 +3406,7 @@
     "jalan_sml_code": "121108",
     "jalan_sml_name": "松戸・柏",
     "categories": [
+      "灯籠・火祭り",
       "行事"
     ]
   },
@@ -5496,6 +5506,7 @@
     "jalan_sml_name": "栗原・登米",
     "categories": [
       "山車・屋台",
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -5784,6 +5795,7 @@
     "jalan_sml_code": "410202",
     "jalan_sml_name": "佐賀・古湯・熊の川",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -6493,6 +6505,7 @@
     "jalan_sml_code": "030202",
     "jalan_sml_name": "盛岡・つなぎ",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -6513,7 +6526,9 @@
     "jalan_lrg_name": "盛岡",
     "jalan_sml_code": "030202",
     "jalan_sml_name": "盛岡・つなぎ",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q11625215",
@@ -6616,7 +6631,9 @@
     "jalan_lrg_name": "鳴子・大崎",
     "jalan_sml_code": "041101",
     "jalan_sml_name": "鳴子・大崎",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11428854",
@@ -6707,7 +6724,9 @@
     "jalan_lrg_name": "白神・男鹿",
     "jalan_sml_code": "050805",
     "jalan_sml_name": "男鹿",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11352731",
@@ -6796,6 +6815,8 @@
     "jalan_sml_code": "050202",
     "jalan_sml_name": "秋田",
     "categories": [
+      "山車・屋台",
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -6847,7 +6868,9 @@
     "jalan_lrg_name": "十和田湖・大館・鹿角",
     "jalan_sml_code": "050505",
     "jalan_sml_name": "八幡平・十和田湖",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11532444",
@@ -6866,7 +6889,9 @@
     "jalan_lrg_name": "十和田湖・大館・鹿角",
     "jalan_sml_code": "050505",
     "jalan_sml_name": "八幡平・十和田湖",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q125894291",
@@ -6914,7 +6939,10 @@
     "jalan_lrg_name": "田沢湖・角館・大曲",
     "jalan_sml_code": "050302",
     "jalan_sml_name": "田沢湖・角館",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り",
+      "行事"
+    ]
   },
   {
     "qid": "Q11607247",
@@ -6934,6 +6962,7 @@
     "jalan_sml_code": "050803",
     "jalan_sml_name": "鷹巣・阿仁・森吉",
     "categories": [
+      "演舞・盆踊り",
       "行列・渡御",
       "神事・祭礼",
       "行事"
@@ -6965,6 +6994,7 @@
     "jalan_sml_code": "050505",
     "jalan_sml_name": "八幡平・十和田湖",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -7289,7 +7319,8 @@
     "jalan_sml_code": "072805",
     "jalan_sml_name": "棚倉・東白川",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -7530,7 +7561,9 @@
     "jalan_lrg_name": "馬頭・茂木・益子・真岡",
     "jalan_sml_code": "081605",
     "jalan_sml_name": "益子・茂木",
-    "categories": []
+    "categories": [
+      "博覧会・市"
+    ]
   },
   {
     "qid": "Q11581191",
@@ -7558,6 +7591,7 @@
     "jalan_sml_code": "081605",
     "jalan_sml_name": "益子・茂木",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -7587,7 +7621,9 @@
     "jalan_lrg_name": "馬頭・茂木・益子・真岡",
     "jalan_sml_code": "081605",
     "jalan_sml_name": "益子・茂木",
-    "categories": []
+    "categories": [
+      "博覧会・市"
+    ]
   },
   {
     "qid": "Q24875391",
@@ -7608,6 +7644,7 @@
     "jalan_sml_name": "鹿沼",
     "categories": [
       "山車・屋台",
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -7849,6 +7886,8 @@
     "jalan_sml_code": "110502",
     "jalan_sml_name": "秩父",
     "categories": [
+      "演舞・盆踊り",
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -8039,6 +8078,7 @@
     "jalan_sml_code": "121105",
     "jalan_sml_name": "野田",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -8071,6 +8111,7 @@
     "jalan_sml_code": "121705",
     "jalan_sml_name": "銚子",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -8123,6 +8164,7 @@
     "jalan_sml_name": "世田谷",
     "categories": [
       "行列・渡御",
+      "博覧会・市",
       "行事"
     ]
   },
@@ -8468,7 +8510,9 @@
     "jalan_lrg_name": "池袋・目白・板橋・赤羽",
     "jalan_sml_code": "137705",
     "jalan_sml_name": "板橋・赤羽",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11541041",
@@ -8537,7 +8581,9 @@
     "jalan_lrg_name": "上野・浅草・両国",
     "jalan_sml_code": "137405",
     "jalan_sml_name": "浅草",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q3090688",
@@ -8587,6 +8633,7 @@
     "jalan_sml_code": "137705",
     "jalan_sml_name": "板橋・赤羽",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -8617,6 +8664,7 @@
     "jalan_sml_code": "139802",
     "jalan_sml_name": "伊豆七島・小笠原",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -8637,7 +8685,9 @@
     "jalan_lrg_name": "お茶の水・湯島・九段・後楽園・東京ドーム",
     "jalan_sml_code": "136502",
     "jalan_sml_name": "お茶の水・湯島・本郷",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q218646",
@@ -9131,6 +9181,7 @@
     "jalan_sml_code": "170208",
     "jalan_sml_name": "新潟駅周辺",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -9279,7 +9330,9 @@
     "jalan_lrg_name": "上越・糸魚川・妙高",
     "jalan_sml_code": "171705",
     "jalan_sml_name": "糸魚川",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11621265",
@@ -9408,6 +9461,7 @@
     "jalan_sml_code": "180805",
     "jalan_sml_name": "小矢部・砺波",
     "categories": [
+      "山車・屋台",
       "神事・祭礼",
       "行事"
     ]
@@ -9511,6 +9565,7 @@
     "jalan_sml_code": "180802",
     "jalan_sml_name": "氷見・高岡",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -10115,7 +10170,9 @@
     "jalan_lrg_name": "河口湖・西湖・富士吉田・精進湖・本栖湖",
     "jalan_sml_code": "150602",
     "jalan_sml_name": "河口湖・西湖・富士吉田",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11567440",
@@ -10134,7 +10191,9 @@
     "jalan_lrg_name": "大月・都留",
     "jalan_sml_code": "150302",
     "jalan_sml_name": "大月・都留",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11590283",
@@ -10279,7 +10338,10 @@
     "jalan_lrg_name": "伊那・駒ヶ根・飯田・昼神",
     "jalan_sml_code": "162612",
     "jalan_sml_name": "飯田・天竜峡",
-    "categories": []
+    "categories": [
+      "神事・祭礼",
+      "行事"
+    ]
   },
   {
     "qid": "Q75021413",
@@ -10561,6 +10623,7 @@
     "jalan_sml_name": "岐阜・羽島",
     "categories": [
       "神事・祭礼",
+      "灯籠・火祭り",
       "行事"
     ]
   },
@@ -10775,7 +10838,9 @@
     "jalan_lrg_name": "沼津・三島",
     "jalan_sml_code": "212005",
     "jalan_sml_name": "三島",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11412729",
@@ -10795,6 +10860,7 @@
     "jalan_sml_code": "212308",
     "jalan_sml_name": "富士・富士宮・朝霧",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -10876,6 +10942,7 @@
     "jalan_sml_code": "213202",
     "jalan_sml_name": "大井川・寸又峡・川根",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -10897,6 +10964,7 @@
     "jalan_sml_code": "213202",
     "jalan_sml_name": "大井川・寸又峡・川根",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -10961,6 +11029,7 @@
     "jalan_sml_code": "212902",
     "jalan_sml_name": "焼津",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -11005,6 +11074,7 @@
     "jalan_sml_code": "213202",
     "jalan_sml_name": "大井川・寸又峡・川根",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -11071,6 +11141,7 @@
     "jalan_sml_code": "230502",
     "jalan_sml_name": "奥三河・新城・湯谷",
     "categories": [
+      "演舞・盆踊り",
       "行列・渡御",
       "神事・祭礼",
       "行事"
@@ -11715,7 +11786,9 @@
     "jalan_lrg_name": "桑名・長島・四日市・鈴鹿",
     "jalan_sml_code": "240202",
     "jalan_sml_name": "桑名・長島・四日市・湯の山",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11489125",
@@ -11842,7 +11915,9 @@
     "jalan_lrg_name": "志摩",
     "jalan_sml_code": "241402",
     "jalan_sml_name": "志摩（浜島・阿児・磯部）",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11255045",
@@ -11890,7 +11965,9 @@
     "jalan_lrg_name": "伊勢・二見",
     "jalan_sml_code": "241002",
     "jalan_sml_name": "伊勢・二見",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11590187",
@@ -11997,6 +12074,7 @@
     "jalan_sml_code": "250505",
     "jalan_sml_name": "長浜",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -12285,6 +12363,7 @@
     "jalan_sml_name": "綾部・福知山",
     "categories": [
       "山車・屋台",
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -12352,6 +12431,7 @@
     "jalan_sml_code": "273805",
     "jalan_sml_name": "岸和田・貝塚",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -12373,6 +12453,7 @@
     "jalan_sml_code": "273805",
     "jalan_sml_name": "岸和田・貝塚",
     "categories": [
+      "山車・屋台",
       "神事・祭礼",
       "行事"
     ]
@@ -12395,6 +12476,7 @@
     "jalan_sml_code": "273805",
     "jalan_sml_name": "岸和田・貝塚",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -12416,6 +12498,7 @@
     "jalan_sml_code": "273802",
     "jalan_sml_name": "堺・泉大津",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -12437,6 +12520,7 @@
     "jalan_sml_code": "273802",
     "jalan_sml_name": "堺・泉大津",
     "categories": [
+      "山車・屋台",
       "神事・祭礼",
       "行事"
     ]
@@ -12459,6 +12543,7 @@
     "jalan_sml_code": "273802",
     "jalan_sml_name": "堺・泉大津",
     "categories": [
+      "山車・屋台",
       "神事・祭礼",
       "行事"
     ]
@@ -12502,6 +12587,7 @@
     "jalan_sml_code": "280805",
     "jalan_sml_name": "三木・西脇・宍粟・佐用・兵庫中部",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼"
     ]
   },
@@ -12636,7 +12722,9 @@
     "jalan_lrg_name": "淡路島",
     "jalan_sml_code": "281702",
     "jalan_sml_name": "淡路",
-    "categories": []
+    "categories": [
+      "山車・屋台"
+    ]
   },
   {
     "qid": "Q113636826",
@@ -12815,7 +12903,9 @@
     "jalan_lrg_name": "淡路島",
     "jalan_sml_code": "281702",
     "jalan_sml_name": "淡路",
-    "categories": []
+    "categories": [
+      "山車・屋台"
+    ]
   },
   {
     "qid": "Q11635899",
@@ -12863,7 +12953,9 @@
     "jalan_lrg_name": "淡路島",
     "jalan_sml_code": "281704",
     "jalan_sml_name": "洲本",
-    "categories": []
+    "categories": [
+      "山車・屋台"
+    ]
   },
   {
     "qid": "Q131904168",
@@ -12959,7 +13051,9 @@
     "jalan_lrg_name": "奈良・斑鳩・天理",
     "jalan_sml_code": "290202",
     "jalan_sml_name": "奈良・大和郡山",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q100532330",
@@ -13008,7 +13102,9 @@
     "jalan_lrg_name": "奈良・斑鳩・天理",
     "jalan_sml_code": "290202",
     "jalan_sml_name": "奈良・大和郡山",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11492970",
@@ -13081,6 +13177,7 @@
     "jalan_sml_code": "290802",
     "jalan_sml_name": "吉野・天川・洞川",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -13109,7 +13206,9 @@
     "jalan_lrg_name": "奈良・斑鳩・天理",
     "jalan_sml_code": "290205",
     "jalan_sml_name": "斑鳩・天理",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11611120",
@@ -13136,7 +13235,10 @@
     "jalan_lrg_name": "飛鳥・橿原・三輪",
     "jalan_sml_code": "290502",
     "jalan_sml_name": "飛鳥・橿原・三輪",
-    "categories": []
+    "categories": [
+      "行列・渡御",
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11644507",
@@ -13305,6 +13407,7 @@
     "jalan_sml_code": "300502",
     "jalan_sml_name": "有田",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -13435,6 +13538,8 @@
     "jalan_sml_code": "300302",
     "jalan_sml_name": "高野山・橋本",
     "categories": [
+      "演舞・盆踊り",
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -13548,6 +13653,7 @@
     "jalan_sml_code": "320102",
     "jalan_sml_name": "松江・美保関・玉造",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -13569,6 +13675,7 @@
     "jalan_sml_code": "320802",
     "jalan_sml_name": "島前",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼"
     ]
   },
@@ -13620,6 +13727,7 @@
     "jalan_sml_code": "330802",
     "jalan_sml_name": "湯原・蒜山高原",
     "categories": [
+      "山車・屋台",
       "神事・祭礼",
       "行事"
     ]
@@ -13835,6 +13943,7 @@
     "jalan_sml_code": "340602",
     "jalan_sml_name": "庄原・帝釈峡・神石高原",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -13865,7 +13974,9 @@
     "jalan_lrg_name": "庄原・三次・芸北",
     "jalan_sml_code": "340608",
     "jalan_sml_name": "芸北",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q28684334",
@@ -13884,7 +13995,9 @@
     "jalan_lrg_name": "福山・竹原・呉",
     "jalan_sml_code": "340302",
     "jalan_sml_name": "福山・尾道・しまなみ",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11451190",
@@ -13923,6 +14036,7 @@
     "jalan_sml_code": "340302",
     "jalan_sml_name": "福山・尾道・しまなみ",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -14298,7 +14412,9 @@
     "jalan_lrg_name": "高松・東讃",
     "jalan_sml_code": "370202",
     "jalan_sml_name": "高松・屋島",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11573781",
@@ -14349,6 +14465,7 @@
     "jalan_sml_code": "370502",
     "jalan_sml_name": "琴平・善通寺",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -14468,6 +14585,7 @@
     "jalan_sml_code": "381105",
     "jalan_sml_name": "新居浜・伊予三島",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -14674,7 +14792,9 @@
     "jalan_lrg_name": "佐賀・古湯・熊の川",
     "jalan_sml_code": "410202",
     "jalan_sml_name": "佐賀・古湯・熊の川",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11405696",
@@ -14875,6 +14995,7 @@
     "jalan_sml_code": "440802",
     "jalan_sml_name": "中津・耶馬渓・宇佐",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -15089,7 +15210,9 @@
     "jalan_lrg_name": "北薩・川内",
     "jalan_sml_code": "461408",
     "jalan_sml_name": "川内・いちき串木野",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q17223030",
@@ -15127,7 +15250,9 @@
     "jalan_lrg_name": "離島",
     "jalan_sml_code": "461717",
     "jalan_sml_name": "奄美大島",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q140673421",
@@ -15195,6 +15320,7 @@
     "jalan_sml_code": "461102",
     "jalan_sml_name": "霧島",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -15215,7 +15341,9 @@
     "jalan_lrg_name": "垂水・大隅",
     "jalan_sml_code": "460802",
     "jalan_sml_name": "垂水・大隅",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q7121452",
@@ -15402,7 +15530,9 @@
     "jalan_lrg_name": "那覇",
     "jalan_sml_code": "470202",
     "jalan_sml_name": "那覇",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11378915",
@@ -15617,7 +15747,9 @@
     "jalan_lrg_name": "河原町・烏丸・大宮周辺",
     "jalan_sml_code": "260205",
     "jalan_sml_name": "河原町周辺",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q11374838",
@@ -15636,7 +15768,9 @@
     "jalan_lrg_name": "嵯峨野・嵐山・高雄",
     "jalan_sml_code": "262002",
     "jalan_sml_name": "嵯峨野・嵐山・高雄",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q11374839",
@@ -15655,7 +15789,9 @@
     "jalan_lrg_name": "祇園・東山・北白川周辺",
     "jalan_sml_code": "262302",
     "jalan_sml_name": "祇園・東山",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q10855476",
@@ -15857,6 +15993,7 @@
     "jalan_sml_code": "262302",
     "jalan_sml_name": "祇園・東山",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -15936,6 +16073,7 @@
     "jalan_sml_code": "261405",
     "jalan_sml_name": "大原・鞍馬・貴船",
     "categories": [
+      "灯籠・火祭り",
       "行事"
     ]
   },
@@ -16014,7 +16152,9 @@
     "jalan_lrg_name": "尼崎・宝塚・三田・篠山",
     "jalan_sml_code": "280502",
     "jalan_sml_name": "尼崎・西宮・宝塚・武田尾",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11589725",
@@ -16143,6 +16283,7 @@
     "jalan_sml_code": "010202",
     "jalan_sml_name": "ススキノ・大通",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -16277,6 +16418,7 @@
     "jalan_sml_code": "010502",
     "jalan_sml_name": "小樽",
     "categories": [
+      "灯籠・火祭り",
       "行事"
     ]
   },
@@ -16752,6 +16894,7 @@
     "jalan_sml_code": "040202",
     "jalan_sml_name": "仙台",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -16906,6 +17049,7 @@
     "jalan_sml_code": "180802",
     "jalan_sml_name": "氷見・高岡",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -17090,6 +17234,7 @@
     "jalan_sml_code": "330202",
     "jalan_sml_name": "岡山・玉野",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -17678,7 +17823,9 @@
     "jalan_lrg_name": "新宿・中野・杉並・吉祥寺",
     "jalan_sml_code": "138002",
     "jalan_sml_name": "新宿",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11252016",
@@ -17927,7 +18074,9 @@
     "jalan_lrg_name": "お台場・汐留・新橋・品川",
     "jalan_sml_code": "137102",
     "jalan_sml_name": "お台場・汐留・竹芝",
-    "categories": []
+    "categories": [
+      "博覧会・市"
+    ]
   },
   {
     "qid": "Q11308232",
@@ -18453,7 +18602,9 @@
     "jalan_lrg_name": "那覇",
     "jalan_sml_code": "470202",
     "jalan_sml_name": "那覇",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q2276034",
@@ -18564,7 +18715,9 @@
     "jalan_lrg_name": "彦根・長浜",
     "jalan_sml_code": "250502",
     "jalan_sml_name": "彦根",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q109598617",
@@ -18997,6 +19150,7 @@
     "jalan_sml_code": "400102",
     "jalan_sml_name": "福岡市（博多駅周辺・香椎・海の中道）",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -19099,6 +19253,8 @@
     "jalan_sml_code": "400802",
     "jalan_sml_name": "北九州市（小倉・八幡・門司）",
     "categories": [
+      "演舞・盆踊り",
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -19152,6 +19308,7 @@
     "jalan_sml_name": "北九州市（小倉・八幡・門司）",
     "categories": [
       "山車・屋台",
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -19795,7 +19952,9 @@
     "jalan_lrg_name": "釧路・阿寒・根室・川湯・屈斜路",
     "jalan_sml_code": "012602",
     "jalan_sml_name": "釧路・阿寒",
-    "categories": [],
+    "categories": [
+      "行事"
+    ],
     "description_source": "https://www.joinalive.jp/",
     "venue": {
       "name": "いわみざわ公園 野外音楽堂キタオン・北海道グリーンランド遊園地",
@@ -20011,6 +20170,7 @@
     "jalan_sml_code": "030202",
     "jalan_sml_name": "盛岡・つなぎ",
     "categories": [
+      "山車・屋台",
       "行事"
     ],
     "description_source": "https://www.city.oshu.iwate.jp/kanko/event/1/433.html",
@@ -20085,6 +20245,7 @@
     "jalan_sml_code": "030202",
     "jalan_sml_name": "盛岡・つなぎ",
     "categories": [
+      "山車・屋台",
       "行事"
     ],
     "description_source": "https://www.city.hanamaki.iwate.jp/kanko/oshirase/1021701",
@@ -20124,6 +20285,7 @@
     "jalan_sml_code": "030202",
     "jalan_sml_name": "盛岡・つなぎ",
     "categories": [
+      "行列・渡御",
       "行事"
     ],
     "description_source": "https://www.town.hiraizumi.iwate.jp/%E4%BB%A4%E5%92%8C%EF%BC%98%E5%B9%B4%E3%80%8C%E6%98%A5%E3%81%AE%E8%97%A4%E5%8E%9F%E3%81%BE%E3%81%A4%E3%82%8A%E3%80%8D-37316/",
@@ -20215,6 +20377,8 @@
     "jalan_sml_code": "040502",
     "jalan_sml_name": "松島・塩竈",
     "categories": [
+      "演舞・盆踊り",
+      "行列・渡御",
       "行事"
     ],
     "description_source": "https://www.aoba-matsuri.com/outline/",
@@ -20348,6 +20512,7 @@
     "jalan_sml_code": "040502",
     "jalan_sml_name": "松島・塩竈",
     "categories": [
+      "花火",
       "行事"
     ],
     "description_source": "https://www.city.ishinomaki.lg.jp/cont/10452000b/-kanko/0011/20130225181937.html",
@@ -20382,7 +20547,9 @@
     "jalan_lrg_name": "秋田",
     "jalan_sml_code": "050202",
     "jalan_sml_name": "秋田",
-    "categories": [],
+    "categories": [
+      "灯籠・火祭り"
+    ],
     "description_source": "http://bunka.welcomenoshiro.com/culture/noshiroyakutanabata/",
     "venue": {
       "name": "能代市街地・米代川河口付近",
@@ -20464,6 +20631,7 @@
     "jalan_sml_code": "060805",
     "jalan_sml_name": "月山・朝日",
     "categories": [
+      "灯籠・火祭り",
       "行事"
     ],
     "description_source": "https://yukidourou.yonezawa-matsuri.jp/about/",
@@ -20518,6 +20686,7 @@
     "jalan_sml_name": "月山・朝日",
     "categories": [
       "花火",
+      "行列・渡御",
       "行事"
     ],
     "description_source": "https://www.town.oishida.yamagata.jp/kankou/matsuri/o-maturi.html",
@@ -20593,6 +20762,7 @@
     "jalan_sml_name": "月山・朝日",
     "categories": [
       "花火",
+      "灯籠・火祭り",
       "行事"
     ]
   },
@@ -20645,6 +20815,8 @@
     "jalan_sml_code": "060805",
     "jalan_sml_name": "月山・朝日",
     "categories": [
+      "山車・屋台",
+      "行列・渡御",
       "行事"
     ],
     "description_source": "https://sakata-kankou.com/event/30728",
@@ -20722,6 +20894,9 @@
     "jalan_sml_code": "072502",
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
     "categories": [
+      "山車・屋台",
+      "行列・渡御",
+      "神事・祭礼",
       "行事"
     ],
     "description_source": "https://www.tif.ne.jp/jp/entry/article.html?spot=7265",
@@ -20779,7 +20954,9 @@
     "jalan_lrg_name": "郡山",
     "jalan_sml_code": "072502",
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
-    "categories": [],
+    "categories": [
+      "神事・祭礼"
+    ],
     "description_source": "https://www.f-kankou.jp/event/7006",
     "venue": {
       "name": "信夫山羽黒神社",
@@ -20817,6 +20994,8 @@
     "jalan_sml_code": "072502",
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
     "categories": [
+      "山車・屋台",
+      "行列・渡御",
       "行事"
     ],
     "description_source": "http://www.asakakunituko.jp/html/page06.html",
@@ -20848,6 +21027,7 @@
     "jalan_sml_code": "072502",
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
     "categories": [
+      "神事・祭礼",
       "行事"
     ],
     "description_source": "https://www.f-kankou.jp/event/42104",
@@ -21016,6 +21196,7 @@
     "jalan_sml_code": "100508",
     "jalan_sml_name": "笠間",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -21142,6 +21323,7 @@
     "jalan_sml_code": "100508",
     "jalan_sml_name": "笠間",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -21204,7 +21386,9 @@
     "jalan_lrg_name": "水戸・笠間",
     "jalan_sml_code": "100508",
     "jalan_sml_name": "笠間",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q60997299",
@@ -21435,6 +21619,7 @@
     "jalan_sml_code": "090802",
     "jalan_sml_name": "赤城",
     "categories": [
+      "山車・屋台",
       "行事"
     ],
     "description_source": "https://maebashi-festival.jp/about/",
@@ -21470,6 +21655,7 @@
     "jalan_sml_code": "090802",
     "jalan_sml_name": "赤城",
     "categories": [
+      "神事・祭礼",
       "行事"
     ],
     "description_source": "https://www.maebashi-cvb.com/event/2008",
@@ -21505,7 +21691,8 @@
     "jalan_sml_code": "090802",
     "jalan_sml_name": "赤城",
     "categories": [
-      "山車・屋台"
+      "山車・屋台",
+      "行事"
     ],
     "description_source": "https://www.city.ota.gunma.jp/site/kankou/1037648.html",
     "venue": {
@@ -21553,6 +21740,9 @@
     "jalan_sml_code": "090802",
     "jalan_sml_name": "赤城",
     "categories": [
+      "山車・屋台",
+      "花火",
+      "行列・渡御",
       "行事"
     ],
     "description_source": "https://www.takasaki-matsuri.jp/",
@@ -21690,7 +21880,9 @@
     "jalan_lrg_name": "飯能",
     "jalan_sml_code": "110802",
     "jalan_sml_name": "飯能",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11408464",
@@ -21709,7 +21901,9 @@
     "jalan_lrg_name": "飯能",
     "jalan_sml_code": "110802",
     "jalan_sml_name": "飯能",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11425142",
@@ -21814,6 +22008,7 @@
     "jalan_sml_code": "110802",
     "jalan_sml_name": "飯能",
     "categories": [
+      "灯籠・火祭り",
       "行事"
     ]
   },
@@ -21875,6 +22070,7 @@
     "jalan_sml_code": "110802",
     "jalan_sml_name": "飯能",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -21958,7 +22154,9 @@
     "jalan_lrg_name": "飯能",
     "jalan_sml_code": "110802",
     "jalan_sml_name": "飯能",
-    "categories": []
+    "categories": [
+      "花火"
+    ]
   },
   {
     "qid": "Q11234423",
@@ -22063,6 +22261,7 @@
     "jalan_sml_code": "121708",
     "jalan_sml_name": "茂原",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -22441,7 +22640,9 @@
     "jalan_lrg_name": "柏崎・寺泊・長岡・魚沼（湯之谷）",
     "jalan_sml_code": "171102",
     "jalan_sml_name": "長岡･寺泊",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11261784",
@@ -22690,7 +22891,9 @@
     "jalan_lrg_name": "富山",
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11395741",
@@ -22710,6 +22913,8 @@
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
     "categories": [
+      "山車・屋台",
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -22731,6 +22936,7 @@
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -22794,6 +23000,7 @@
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -22985,6 +23192,7 @@
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -23006,6 +23214,7 @@
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -23048,6 +23257,7 @@
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -23090,6 +23300,7 @@
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -23153,6 +23364,7 @@
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -23351,7 +23563,9 @@
     "jalan_lrg_name": "輪島・能登",
     "jalan_sml_code": "191102",
     "jalan_sml_name": "輪島・能登",
-    "categories": []
+    "categories": [
+      "山車・屋台"
+    ]
   },
   {
     "qid": "Q11675706",
@@ -23371,6 +23585,7 @@
     "jalan_sml_code": "191102",
     "jalan_sml_name": "輪島・能登",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -23751,6 +23966,8 @@
     "jalan_sml_code": "230505",
     "jalan_sml_name": "西三河",
     "categories": [
+      "演舞・盆踊り",
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -23941,6 +24158,7 @@
     "jalan_sml_code": "240811",
     "jalan_sml_name": "松阪",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -24004,6 +24222,7 @@
     "jalan_sml_code": "250502",
     "jalan_sml_name": "彦根",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -24316,7 +24535,9 @@
     "jalan_lrg_name": "湯の花・丹波・美山",
     "jalan_sml_code": "263905",
     "jalan_sml_name": "美山",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11449469",
@@ -24462,6 +24683,7 @@
     "jalan_sml_code": "272302",
     "jalan_sml_name": "ユニバーサルシティ",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -24751,7 +24973,9 @@
     "jalan_lrg_name": "庄原・三次・芸北",
     "jalan_sml_code": "340608",
     "jalan_sml_name": "芸北",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11591996",
@@ -24813,6 +25037,7 @@
     "jalan_sml_code": "350602",
     "jalan_sml_name": "山口・湯田・防府",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -25146,7 +25371,9 @@
     "jalan_lrg_name": "太宰府・宗像",
     "jalan_sml_code": "400308",
     "jalan_sml_name": "若宮・遠賀・直方",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11390862",
@@ -25165,7 +25392,9 @@
     "jalan_lrg_name": "太宰府・宗像",
     "jalan_sml_code": "400308",
     "jalan_sml_name": "若宮・遠賀・直方",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11397692",
@@ -25185,7 +25414,8 @@
     "jalan_sml_code": "400308",
     "jalan_sml_name": "若宮・遠賀・直方",
     "categories": [
-      "山車・屋台"
+      "山車・屋台",
+      "神事・祭礼"
     ]
   },
   {
@@ -25268,7 +25498,9 @@
     "jalan_lrg_name": "太宰府・宗像",
     "jalan_sml_code": "400308",
     "jalan_sml_name": "若宮・遠賀・直方",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11673429",
@@ -25307,6 +25539,7 @@
     "jalan_sml_code": "420202",
     "jalan_sml_name": "長崎",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -25389,7 +25622,8 @@
     "jalan_sml_code": "420202",
     "jalan_sml_name": "長崎",
     "categories": [
-      "山車・屋台"
+      "山車・屋台",
+      "神事・祭礼"
     ]
   },
   {
@@ -25473,7 +25707,9 @@
     "jalan_lrg_name": "湯布院",
     "jalan_sml_code": "440602",
     "jalan_sml_name": "湯布院・湯平",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q28685120",
@@ -25511,7 +25747,9 @@
     "jalan_lrg_name": "湯布院",
     "jalan_sml_code": "440602",
     "jalan_sml_name": "湯布院・湯平",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11396697",
@@ -25655,6 +25893,7 @@
     "jalan_sml_code": "440602",
     "jalan_sml_name": "湯布院・湯平",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -25715,7 +25954,9 @@
     "jalan_lrg_name": "鹿児島・桜島",
     "jalan_sml_code": "460202",
     "jalan_sml_name": "鹿児島・桜島",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11477732",
@@ -25755,7 +25996,9 @@
     "jalan_lrg_name": "那覇",
     "jalan_sml_code": "470202",
     "jalan_sml_name": "那覇",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11552667",
@@ -25774,7 +26017,9 @@
     "jalan_lrg_name": "那覇",
     "jalan_sml_code": "470202",
     "jalan_sml_name": "那覇",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q28687310",
@@ -25815,6 +26060,7 @@
     "jalan_sml_code": "470202",
     "jalan_sml_name": "那覇",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -25835,7 +26081,10 @@
     "jalan_lrg_name": "富良野・美瑛・トマム",
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
-    "categories": [],
+    "categories": [
+      "演舞・盆踊り",
+      "行事"
+    ],
     "description_source": "https://www.hakobura.jp/events/355",
     "venue": {
       "name": "函館駅前付近・五稜郭公園前付近（函館港まつりパレード）",
@@ -25928,7 +26177,9 @@
     "jalan_lrg_name": "富良野・美瑛・トマム",
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
-    "categories": [],
+    "categories": [
+      "山車・屋台"
+    ],
     "description_source": "https://www.visit-hokkaido.jp/event/detail_11054.html",
     "venue": {
       "name": "鶴ケ岱公園",
@@ -26044,6 +26295,7 @@
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
     "categories": [
+      "花火",
       "行事"
     ],
     "description_source": "https://www.city.kushiro.lg.jp/sangyou/umisora/1006541/1006564/1006566.html",
@@ -26118,6 +26370,8 @@
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
     "categories": [
+      "演舞・盆踊り",
+      "灯籠・火祭り",
       "行事"
     ],
     "description_source": "https://kaiyoudai.jp/index.php/sightseeing/summerfestival/",
@@ -26187,7 +26441,8 @@
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "行事"
     ],
     "description_source": "https://www.htb.co.jp/event/bonodori/",
     "venue": {
@@ -26225,7 +26480,9 @@
     "jalan_lrg_name": "富良野・美瑛・トマム",
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
-    "categories": [],
+    "categories": [
+      "行事"
+    ],
     "description_source": "https://www.atca.jp/kankouspoy/%E5%8C%97%E6%B5%B7%E9%81%93%E9%9F%B3%E6%A5%BD%E5%A4%A7%E8%A1%8C%E9%80%B2/",
     "venue": {
       "name": "リベライン旭川パーク・永隆橋通",
@@ -26363,6 +26620,7 @@
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
     "categories": [
+      "山車・屋台",
       "行事"
     ],
     "description_source": "https://teuri-yagishiri.jp/7293.html",
@@ -26402,6 +26660,7 @@
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
     "categories": [
+      "花火",
       "行事"
     ],
     "description_source": "https://nishiiburi.jpn.org/noboribetugyokoumaturi/",
@@ -26470,7 +26729,10 @@
     "jalan_lrg_name": "富良野・美瑛・トマム",
     "jalan_sml_code": "012105",
     "jalan_sml_name": "富良野",
-    "categories": [],
+    "categories": [
+      "花火",
+      "行事"
+    ],
     "description_source": "https://ja.kushiro-lakeakan.com/donpaku/",
     "venue": {
       "name": "釧路川河口付近（幣舞橋下流）",
@@ -26591,6 +26853,9 @@
     "jalan_sml_code": "020202",
     "jalan_sml_name": "青森・浅虫・八甲田",
     "categories": [
+      "山車・屋台",
+      "演舞・盆踊り",
+      "行列・渡御",
       "行事"
     ],
     "description_source": "https://www.city.mutsu.lg.jp/bunka/information/kankou-oohatahatimannguureitaisai.html",
@@ -26697,7 +26962,9 @@
     "jalan_lrg_name": "三陸海岸",
     "jalan_sml_code": "030805",
     "jalan_sml_name": "宮古",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11475055",
@@ -26778,7 +27045,9 @@
     "jalan_lrg_name": "三陸海岸",
     "jalan_sml_code": "030805",
     "jalan_sml_name": "宮古",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11189529",
@@ -26797,7 +27066,9 @@
     "jalan_lrg_name": "石巻・気仙沼",
     "jalan_sml_code": "040805",
     "jalan_sml_name": "石巻・女川・牡鹿",
-    "categories": [],
+    "categories": [
+      "行事"
+    ],
     "description_source": "https://arabaki.com/about/",
     "venue": {
       "name": "国営みちのく杜の湖畔公園 北地区 エコキャンプみちのく",
@@ -26853,7 +27124,9 @@
     "jalan_lrg_name": "石巻・気仙沼",
     "jalan_sml_code": "040805",
     "jalan_sml_name": "石巻・女川・牡鹿",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q17228743",
@@ -26872,7 +27145,10 @@
     "jalan_lrg_name": "石巻・気仙沼",
     "jalan_sml_code": "040805",
     "jalan_sml_name": "石巻・女川・牡鹿",
-    "categories": [],
+    "categories": [
+      "行列・渡御",
+      "行事"
+    ],
     "description_source": "https://www.town.taiwa.miyagi.jp/soshiki/shokokanko/shokokanko/496.html",
     "venue": {
       "name": "吉岡八幡神社",
@@ -26922,7 +27198,9 @@
     "jalan_lrg_name": "石巻・気仙沼",
     "jalan_sml_code": "040805",
     "jalan_sml_name": "石巻・女川・牡鹿",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q65293925",
@@ -26941,7 +27219,9 @@
     "jalan_lrg_name": "石巻・気仙沼",
     "jalan_sml_code": "040805",
     "jalan_sml_name": "石巻・女川・牡鹿",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11261025",
@@ -26960,7 +27240,9 @@
     "jalan_lrg_name": "秋田",
     "jalan_sml_code": "050202",
     "jalan_sml_name": "秋田",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11261999",
@@ -27000,7 +27282,9 @@
     "jalan_lrg_name": "秋田",
     "jalan_sml_code": "050202",
     "jalan_sml_name": "秋田",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11353447",
@@ -27090,6 +27374,7 @@
     "jalan_sml_code": "050202",
     "jalan_sml_name": "秋田",
     "categories": [
+      "山車・屋台",
       "神事・祭礼",
       "行事"
     ],
@@ -27165,7 +27450,8 @@
     "jalan_sml_code": "050202",
     "jalan_sml_name": "秋田",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "灯籠・火祭り"
     ],
     "description_source": "https://explorekazuno.jp/event/kemanaibonodori2026/",
     "venue": {
@@ -27199,7 +27485,9 @@
     "jalan_lrg_name": "寒河江・月山",
     "jalan_sml_code": "060805",
     "jalan_sml_name": "月山・朝日",
-    "categories": [],
+    "categories": [
+      "行事"
+    ],
     "description_source": "https://nanyo-kiku.jp/",
     "venue": {
       "name": "南陽市中央花公園（花公園会場）・熊野大社周辺（宮内会場）",
@@ -27237,6 +27525,7 @@
     "jalan_sml_code": "060805",
     "jalan_sml_name": "月山・朝日",
     "categories": [
+      "行列・渡御",
       "行事"
     ],
     "description_source": "https://yonezawa.info/log/?l=449944",
@@ -27292,7 +27581,9 @@
     "jalan_lrg_name": "郡山",
     "jalan_sml_code": "072502",
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q86729404",
@@ -27332,7 +27623,9 @@
     "jalan_lrg_name": "郡山",
     "jalan_sml_code": "072502",
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q21654008",
@@ -27351,7 +27644,9 @@
     "jalan_lrg_name": "郡山",
     "jalan_sml_code": "072502",
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11410983",
@@ -27389,7 +27684,9 @@
     "jalan_lrg_name": "郡山",
     "jalan_sml_code": "072502",
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
-    "categories": [],
+    "categories": [
+      "演舞・盆踊り"
+    ],
     "description_source": "https://r.goope.jp/kankou/info/6903727",
     "venue": {
       "name": "柳橋歌舞伎伝承館 黒石荘",
@@ -27422,7 +27719,9 @@
     "jalan_lrg_name": "郡山",
     "jalan_sml_code": "072502",
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q24872903",
@@ -27441,7 +27740,9 @@
     "jalan_lrg_name": "郡山",
     "jalan_sml_code": "072502",
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
-    "categories": [],
+    "categories": [
+      "灯籠・火祭り"
+    ],
     "description_source": "https://r.goope.jp/kankou/info/6903716",
     "venue": {
       "name": "中田町海老根和紙工房 周辺",
@@ -27536,6 +27837,7 @@
     "jalan_sml_code": "072502",
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
     "categories": [
+      "山車・屋台",
       "行事"
     ],
     "description_source": "https://iizaka.com/events/",
@@ -27713,7 +28015,9 @@
     "jalan_lrg_name": "水戸・笠間",
     "jalan_sml_code": "100508",
     "jalan_sml_name": "笠間",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q109597767",
@@ -27802,7 +28106,9 @@
     "jalan_lrg_name": "渋川・伊香保",
     "jalan_sml_code": "091102",
     "jalan_sml_name": "渋川・伊香保",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q48750161",
@@ -27884,7 +28190,9 @@
     "jalan_lrg_name": "渋川・伊香保",
     "jalan_sml_code": "091102",
     "jalan_sml_name": "渋川・伊香保",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q109366488",
@@ -28008,7 +28316,9 @@
     "jalan_lrg_name": "飯能",
     "jalan_sml_code": "110802",
     "jalan_sml_name": "飯能",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q135236383",
@@ -28048,7 +28358,9 @@
     "jalan_lrg_name": "飯能",
     "jalan_sml_code": "110802",
     "jalan_sml_name": "飯能",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11666657",
@@ -28107,7 +28419,9 @@
     "jalan_lrg_name": "木更津・君津・富津",
     "jalan_sml_code": "122002",
     "jalan_sml_name": "木更津・君津",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11280360",
@@ -28165,6 +28479,7 @@
     "jalan_sml_code": "122002",
     "jalan_sml_name": "木更津・君津",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -28225,7 +28540,9 @@
     "jalan_lrg_name": "木更津・君津・富津",
     "jalan_sml_code": "122002",
     "jalan_sml_name": "木更津・君津",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11533645",
@@ -28284,7 +28601,9 @@
     "jalan_lrg_name": "木更津・君津・富津",
     "jalan_sml_code": "122002",
     "jalan_sml_name": "木更津・君津",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11260317",
@@ -28343,7 +28662,9 @@
     "jalan_lrg_name": "八王子・立川・町田・府中・調布",
     "jalan_sml_code": "139205",
     "jalan_sml_name": "立川・八王子・多摩",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11550967",
@@ -28468,7 +28789,9 @@
     "jalan_lrg_name": "八王子・立川・町田・府中・調布",
     "jalan_sml_code": "139205",
     "jalan_sml_name": "立川・八王子・多摩",
-    "categories": []
+    "categories": [
+      "博覧会・市"
+    ]
   },
   {
     "qid": "Q11655810",
@@ -28487,7 +28810,9 @@
     "jalan_lrg_name": "八王子・立川・町田・府中・調布",
     "jalan_sml_code": "139205",
     "jalan_sml_name": "立川・八王子・多摩",
-    "categories": []
+    "categories": [
+      "博覧会・市"
+    ]
   },
   {
     "qid": "Q11675254",
@@ -28506,7 +28831,9 @@
     "jalan_lrg_name": "八王子・立川・町田・府中・調布",
     "jalan_sml_code": "139205",
     "jalan_sml_name": "立川・八王子・多摩",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q86733658",
@@ -28525,7 +28852,9 @@
     "jalan_lrg_name": "湘南・鎌倉",
     "jalan_sml_code": "140808",
     "jalan_sml_name": "藤沢・茅ヶ崎",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11413465",
@@ -28544,7 +28873,9 @@
     "jalan_lrg_name": "湘南・鎌倉",
     "jalan_sml_code": "140808",
     "jalan_sml_name": "藤沢・茅ヶ崎",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q109363926",
@@ -28582,7 +28913,9 @@
     "jalan_lrg_name": "湘南・鎌倉",
     "jalan_sml_code": "140808",
     "jalan_sml_name": "藤沢・茅ヶ崎",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q11462983",
@@ -28704,7 +29037,9 @@
     "jalan_lrg_name": "湘南・鎌倉",
     "jalan_sml_code": "140808",
     "jalan_sml_name": "藤沢・茅ヶ崎",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q122355495",
@@ -28805,7 +29140,9 @@
     "jalan_lrg_name": "柏崎・寺泊・長岡・魚沼（湯之谷）",
     "jalan_sml_code": "171102",
     "jalan_sml_name": "長岡･寺泊",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q28067723",
@@ -28824,7 +29161,9 @@
     "jalan_lrg_name": "柏崎・寺泊・長岡・魚沼（湯之谷）",
     "jalan_sml_code": "171102",
     "jalan_sml_name": "長岡･寺泊",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11383274",
@@ -28843,7 +29182,9 @@
     "jalan_lrg_name": "柏崎・寺泊・長岡・魚沼（湯之谷）",
     "jalan_sml_code": "171102",
     "jalan_sml_name": "長岡･寺泊",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q48754955",
@@ -28904,7 +29245,9 @@
     "jalan_lrg_name": "柏崎・寺泊・長岡・魚沼（湯之谷）",
     "jalan_sml_code": "171102",
     "jalan_sml_name": "長岡･寺泊",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11571370",
@@ -28965,7 +29308,9 @@
     "jalan_lrg_name": "柏崎・寺泊・長岡・魚沼（湯之谷）",
     "jalan_sml_code": "171102",
     "jalan_sml_name": "長岡･寺泊",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11620925",
@@ -29068,7 +29413,9 @@
     "jalan_lrg_name": "富山",
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11449259",
@@ -29087,7 +29434,9 @@
     "jalan_lrg_name": "富山",
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11512132",
@@ -29106,7 +29455,9 @@
     "jalan_lrg_name": "富山",
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q86730882",
@@ -29188,7 +29539,9 @@
     "jalan_lrg_name": "輪島・能登",
     "jalan_sml_code": "191102",
     "jalan_sml_name": "輪島・能登",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11399730",
@@ -29207,7 +29560,9 @@
     "jalan_lrg_name": "輪島・能登",
     "jalan_sml_code": "191102",
     "jalan_sml_name": "輪島・能登",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11452663",
@@ -29269,7 +29624,9 @@
     "jalan_lrg_name": "輪島・能登",
     "jalan_sml_code": "191102",
     "jalan_sml_name": "輪島・能登",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11619954",
@@ -29309,7 +29666,9 @@
     "jalan_lrg_name": "若狭",
     "jalan_sml_code": "200502",
     "jalan_sml_name": "敦賀・若狭",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q106350888",
@@ -29349,7 +29708,9 @@
     "jalan_lrg_name": "若狭",
     "jalan_sml_code": "200502",
     "jalan_sml_name": "敦賀・若狭",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q65269929",
@@ -29389,7 +29750,9 @@
     "jalan_lrg_name": "若狭",
     "jalan_sml_code": "200502",
     "jalan_sml_name": "敦賀・若狭",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11615423",
@@ -29429,7 +29792,9 @@
     "jalan_lrg_name": "若狭",
     "jalan_sml_code": "200502",
     "jalan_sml_name": "敦賀・若狭",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q65286277",
@@ -29507,7 +29872,9 @@
     "jalan_lrg_name": "石和・勝沼・塩山",
     "jalan_sml_code": "150205",
     "jalan_sml_name": "石和・勝沼・塩山",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11577830",
@@ -29631,6 +29998,7 @@
     "jalan_sml_code": "161902",
     "jalan_sml_name": "上諏訪・下諏訪・岡谷・霧ヶ峰・美ヶ原高原",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -29652,6 +30020,7 @@
     "jalan_sml_code": "161902",
     "jalan_sml_name": "上諏訪・下諏訪・岡谷・霧ヶ峰・美ヶ原高原",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -29733,7 +30102,9 @@
     "jalan_lrg_name": "上諏訪・下諏訪・岡谷・霧ヶ峰・美ヶ原高原",
     "jalan_sml_code": "161902",
     "jalan_sml_name": "上諏訪・下諏訪・岡谷・霧ヶ峰・美ヶ原高原",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11666454",
@@ -29853,7 +30224,9 @@
     "jalan_lrg_name": "郡上・美濃・関",
     "jalan_sml_code": "220602",
     "jalan_sml_name": "郡上八幡・白鳥・高鷲・明宝",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11396068",
@@ -29933,7 +30306,9 @@
     "jalan_lrg_name": "郡上・美濃・関",
     "jalan_sml_code": "220602",
     "jalan_sml_name": "郡上八幡・白鳥・高鷲・明宝",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11471439",
@@ -29952,7 +30327,9 @@
     "jalan_lrg_name": "郡上・美濃・関",
     "jalan_sml_code": "220602",
     "jalan_sml_name": "郡上八幡・白鳥・高鷲・明宝",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q109359060",
@@ -29992,7 +30369,9 @@
     "jalan_lrg_name": "郡上・美濃・関",
     "jalan_sml_code": "220602",
     "jalan_sml_name": "郡上八幡・白鳥・高鷲・明宝",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q48750354",
@@ -30116,7 +30495,9 @@
     "jalan_lrg_name": "郡上・美濃・関",
     "jalan_sml_code": "220602",
     "jalan_sml_name": "郡上八幡・白鳥・高鷲・明宝",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11633005",
@@ -30135,7 +30516,9 @@
     "jalan_lrg_name": "郡上・美濃・関",
     "jalan_sml_code": "220602",
     "jalan_sml_name": "郡上八幡・白鳥・高鷲・明宝",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11641589",
@@ -30238,7 +30621,9 @@
     "jalan_lrg_name": "静岡・清水",
     "jalan_sml_code": "212605",
     "jalan_sml_name": "清水",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q11356852",
@@ -30258,6 +30643,7 @@
     "jalan_sml_code": "212605",
     "jalan_sml_name": "清水",
     "categories": [
+      "演舞・盆踊り",
       "神事・祭礼",
       "行事"
     ]
@@ -30300,7 +30686,9 @@
     "jalan_lrg_name": "静岡・清水",
     "jalan_sml_code": "212605",
     "jalan_sml_name": "清水",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11455851",
@@ -30340,7 +30728,9 @@
     "jalan_lrg_name": "静岡・清水",
     "jalan_sml_code": "212605",
     "jalan_sml_name": "清水",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q48764792",
@@ -30409,7 +30799,9 @@
     "jalan_lrg_name": "静岡・清水",
     "jalan_sml_code": "212605",
     "jalan_sml_name": "清水",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q86735679",
@@ -30449,7 +30841,9 @@
     "jalan_lrg_name": "静岡・清水",
     "jalan_sml_code": "212605",
     "jalan_sml_name": "清水",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q56354894",
@@ -30884,7 +31278,9 @@
     "jalan_lrg_name": "奥伊勢",
     "jalan_sml_code": "241705",
     "jalan_sml_name": "奥伊勢",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11457154",
@@ -31173,7 +31569,9 @@
     "jalan_lrg_name": "湯の花・丹波・美山",
     "jalan_sml_code": "263902",
     "jalan_sml_name": "亀岡・湯の花・丹波",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q21653411",
@@ -31213,7 +31611,10 @@
     "jalan_lrg_name": "大阪ベイエリア",
     "jalan_sml_code": "272305",
     "jalan_sml_name": "天保山・南港・住之江",
-    "categories": []
+    "categories": [
+      "山車・屋台",
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11368893",
@@ -31233,6 +31634,7 @@
     "jalan_sml_code": "272305",
     "jalan_sml_name": "天保山・南港・住之江",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -31253,7 +31655,10 @@
     "jalan_lrg_name": "大阪ベイエリア",
     "jalan_sml_code": "272305",
     "jalan_sml_name": "天保山・南港・住之江",
-    "categories": []
+    "categories": [
+      "山車・屋台",
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11408064",
@@ -31273,6 +31678,7 @@
     "jalan_sml_code": "272305",
     "jalan_sml_name": "天保山・南港・住之江",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -31294,6 +31700,7 @@
     "jalan_sml_code": "272305",
     "jalan_sml_name": "天保山・南港・住之江",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -31336,6 +31743,7 @@
     "jalan_sml_code": "272305",
     "jalan_sml_name": "天保山・南港・住之江",
     "categories": [
+      "演舞・盆踊り",
       "灯籠・火祭り"
     ]
   },
@@ -31357,6 +31765,7 @@
     "jalan_sml_code": "272305",
     "jalan_sml_name": "天保山・南港・住之江",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -31378,6 +31787,7 @@
     "jalan_sml_code": "272305",
     "jalan_sml_name": "天保山・南港・住之江",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -31399,6 +31809,7 @@
     "jalan_sml_code": "272305",
     "jalan_sml_name": "天保山・南港・住之江",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -31420,6 +31831,7 @@
     "jalan_sml_code": "272305",
     "jalan_sml_name": "天保山・南港・住之江",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -31441,6 +31853,7 @@
     "jalan_sml_code": "272305",
     "jalan_sml_name": "天保山・南港・住之江",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -31504,6 +31917,7 @@
     "jalan_sml_code": "272305",
     "jalan_sml_name": "天保山・南港・住之江",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -31587,7 +32001,9 @@
     "jalan_lrg_name": "姫路・赤穂・播磨",
     "jalan_sml_code": "280805",
     "jalan_sml_name": "三木・西脇・宍粟・佐用・兵庫中部",
-    "categories": []
+    "categories": [
+      "山車・屋台"
+    ]
   },
   {
     "qid": "Q17223197",
@@ -31732,7 +32148,9 @@
     "jalan_lrg_name": "姫路・赤穂・播磨",
     "jalan_sml_code": "280805",
     "jalan_sml_name": "三木・西脇・宍粟・佐用・兵庫中部",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11378742",
@@ -31751,7 +32169,9 @@
     "jalan_lrg_name": "姫路・赤穂・播磨",
     "jalan_sml_code": "280805",
     "jalan_sml_name": "三木・西脇・宍粟・佐用・兵庫中部",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11381623",
@@ -31812,7 +32232,9 @@
     "jalan_lrg_name": "姫路・赤穂・播磨",
     "jalan_sml_code": "280805",
     "jalan_sml_name": "三木・西脇・宍粟・佐用・兵庫中部",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q11417979",
@@ -31913,7 +32335,11 @@
     "jalan_lrg_name": "姫路・赤穂・播磨",
     "jalan_sml_code": "280805",
     "jalan_sml_name": "三木・西脇・宍粟・佐用・兵庫中部",
-    "categories": []
+    "categories": [
+      "山車・屋台",
+      "演舞・盆踊り",
+      "行列・渡御"
+    ]
   },
   {
     "qid": "Q11455615",
@@ -32015,6 +32441,7 @@
     "jalan_sml_code": "280805",
     "jalan_sml_name": "三木・西脇・宍粟・佐用・兵庫中部",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -32056,7 +32483,9 @@
     "jalan_lrg_name": "吉野・奥吉野",
     "jalan_sml_code": "290802",
     "jalan_sml_name": "吉野・天川・洞川",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q17228330",
@@ -32075,7 +32504,9 @@
     "jalan_lrg_name": "吉野・奥吉野",
     "jalan_sml_code": "290802",
     "jalan_sml_name": "吉野・天川・洞川",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11436238",
@@ -32094,7 +32525,9 @@
     "jalan_lrg_name": "吉野・奥吉野",
     "jalan_sml_code": "290802",
     "jalan_sml_name": "吉野・天川・洞川",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11658017",
@@ -32154,7 +32587,9 @@
     "jalan_lrg_name": "白浜・龍神",
     "jalan_sml_code": "300801",
     "jalan_sml_name": "龍神",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11279274",
@@ -32300,7 +32735,9 @@
     "jalan_lrg_name": "白浜・龍神",
     "jalan_sml_code": "300801",
     "jalan_sml_name": "龍神",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11642731",
@@ -32319,7 +32756,9 @@
     "jalan_lrg_name": "白浜・龍神",
     "jalan_sml_code": "300801",
     "jalan_sml_name": "龍神",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q17230686",
@@ -32359,7 +32798,9 @@
     "jalan_lrg_name": "倉吉・三朝・湯梨浜",
     "jalan_sml_code": "310508",
     "jalan_sml_name": "倉吉・関金",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11434576",
@@ -32378,7 +32819,9 @@
     "jalan_lrg_name": "倉吉・三朝・湯梨浜",
     "jalan_sml_code": "310508",
     "jalan_sml_name": "倉吉・関金",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11267103",
@@ -32498,7 +32941,9 @@
     "jalan_lrg_name": "出雲・大田・石見銀山",
     "jalan_sml_code": "320411",
     "jalan_sml_name": "大田・温泉津",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11659047",
@@ -32659,6 +33104,7 @@
     "jalan_sml_code": "330202",
     "jalan_sml_name": "岡山・玉野",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -32803,7 +33249,9 @@
     "jalan_lrg_name": "庄原・三次・芸北",
     "jalan_sml_code": "340608",
     "jalan_sml_name": "芸北",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11407328",
@@ -32961,7 +33409,9 @@
     "jalan_lrg_name": "山口・秋芳",
     "jalan_sml_code": "350602",
     "jalan_sml_name": "山口・湯田・防府",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11662674",
@@ -33000,6 +33450,7 @@
     "jalan_sml_code": "360808",
     "jalan_sml_name": "剣山・那賀",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -33164,6 +33615,7 @@
     "jalan_sml_code": "360808",
     "jalan_sml_name": "剣山・那賀",
     "categories": [
+      "山車・屋台",
       "行事"
     ]
   },
@@ -33435,6 +33887,7 @@
     "jalan_sml_code": "380802",
     "jalan_sml_name": "内子・大洲・佐田岬",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -33477,6 +33930,7 @@
     "jalan_sml_code": "380802",
     "jalan_sml_name": "内子・大洲・佐田岬",
     "categories": [
+      "演舞・盆踊り",
       "行事"
     ]
   },
@@ -33497,7 +33951,9 @@
     "jalan_lrg_name": "南予・宇和島",
     "jalan_sml_code": "380802",
     "jalan_sml_name": "内子・大洲・佐田岬",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11273882",
@@ -33558,7 +34014,9 @@
     "jalan_lrg_name": "高知・須崎・南国",
     "jalan_sml_code": "390202",
     "jalan_sml_name": "高知・春野",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11257399",
@@ -33641,6 +34099,7 @@
     "jalan_sml_code": "400302",
     "jalan_sml_name": "太宰府・二日市",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -33662,6 +34121,7 @@
     "jalan_sml_code": "400302",
     "jalan_sml_name": "太宰府・二日市",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -33683,6 +34143,7 @@
     "jalan_sml_code": "400302",
     "jalan_sml_name": "太宰府・二日市",
     "categories": [
+      "神事・祭礼",
       "行事"
     ]
   },
@@ -33767,7 +34228,8 @@
     "jalan_sml_code": "411102",
     "jalan_sml_name": "唐津・呼子・玄海",
     "categories": [
-      "山車・屋台"
+      "山車・屋台",
+      "神事・祭礼"
     ]
   },
   {
@@ -33788,7 +34250,8 @@
     "jalan_sml_code": "411102",
     "jalan_sml_name": "唐津・呼子・玄海",
     "categories": [
-      "山車・屋台"
+      "山車・屋台",
+      "神事・祭礼"
     ]
   },
   {
@@ -33808,7 +34271,9 @@
     "jalan_lrg_name": "唐津・呼子",
     "jalan_sml_code": "411102",
     "jalan_sml_name": "唐津・呼子・玄海",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q7160957",
@@ -33827,7 +34292,9 @@
     "jalan_lrg_name": "長崎",
     "jalan_sml_code": "420202",
     "jalan_sml_name": "長崎",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q11382501",
@@ -33846,7 +34313,9 @@
     "jalan_lrg_name": "長崎",
     "jalan_sml_code": "420202",
     "jalan_sml_name": "長崎",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11382517",
@@ -33865,7 +34334,9 @@
     "jalan_lrg_name": "長崎",
     "jalan_sml_code": "420202",
     "jalan_sml_name": "長崎",
-    "categories": []
+    "categories": [
+      "博覧会・市"
+    ]
   },
   {
     "qid": "Q136216045",
@@ -34031,7 +34502,9 @@
     "jalan_lrg_name": "大分",
     "jalan_sml_code": "440202",
     "jalan_sml_name": "大分",
-    "categories": []
+    "categories": [
+      "灯籠・火祭り"
+    ]
   },
   {
     "qid": "Q11432784",
@@ -34092,7 +34565,9 @@
     "jalan_lrg_name": "大分",
     "jalan_sml_code": "440202",
     "jalan_sml_name": "大分",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11467760",
@@ -34111,7 +34586,9 @@
     "jalan_lrg_name": "大分",
     "jalan_sml_code": "440202",
     "jalan_sml_name": "大分",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q128558001",
@@ -34256,7 +34733,9 @@
     "jalan_lrg_name": "宮崎・青島・日南",
     "jalan_sml_code": "450201",
     "jalan_sml_name": "西都",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q11454341",
@@ -34359,7 +34838,9 @@
     "jalan_lrg_name": "鹿児島・桜島",
     "jalan_sml_code": "460202",
     "jalan_sml_name": "鹿児島・桜島",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q2590839",
@@ -34498,7 +34979,9 @@
     "jalan_lrg_name": "西海岸・東海岸",
     "jalan_sml_code": "470805",
     "jalan_sml_name": "東海岸",
-    "categories": []
+    "categories": [
+      "行事"
+    ]
   },
   {
     "qid": "Q60995963",
@@ -34517,7 +35000,9 @@
     "jalan_lrg_name": "西海岸・東海岸",
     "jalan_sml_code": "470805",
     "jalan_sml_name": "東海岸",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q60995959",
@@ -34536,7 +35021,9 @@
     "jalan_lrg_name": "西海岸・東海岸",
     "jalan_sml_code": "470805",
     "jalan_sml_name": "東海岸",
-    "categories": []
+    "categories": [
+      "演舞・盆踊り"
+    ]
   },
   {
     "qid": "Q60995970",
