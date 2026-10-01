@@ -1,5 +1,5 @@
 [Unit]
-Description=前日の日報の「次にやること」と RSS の急増語を Discord へ送る (ats030-2mn2i)
+Description=morning-digest - 日報の次にやることと RSS 急増語を毎朝 Discord へ送る
 # 停止明けに Persistent で 00:00 の日報生成と同時に追いつくと、日報より先に走って
 # 「日報なし」を送る。順序だけ付け、起動はさせない (Wants は付けない)
 After=network-online.target daily-reflection-auto.service
