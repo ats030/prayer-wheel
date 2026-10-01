@@ -24,6 +24,7 @@ import json
 import re
 import sys
 import urllib.request
+import weather_notify
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -227,11 +228,21 @@ def main() -> int:
         print(f"RSS キャッシュを読めない: {e}", file=sys.stderr)
         return 1
 
-    if next_items is None and rss["recent_count"] == 0:
+    weather_text, weather_state = "", None
+    try:
+        weather_text, weather_state = weather_notify.morning(now)
+    except (OSError, ValueError, KeyError, TypeError, StopIteration) as e:
+        print(f"天気を取得できない: {type(e).__name__}", file=sys.stderr)
+
+    if next_items is None and rss["recent_count"] == 0 and not weather_text:
+        if weather_state is not None and not args.dry_run:
+            weather_notify.save_state("morning.json", weather_state)
         print("日報も24時間以内の RSS も無いため送らない")
         return 3
 
     text = compose(day, path, next_items, rss)
+    if weather_text:
+        text += "\n\n" + weather_text
     print(text)
     if args.dry_run:
         return 0
@@ -246,6 +257,9 @@ def main() -> int:
     except OSError as e:
         print(f"Discord への送信に失敗した: {e}", file=sys.stderr)
         return 1
+
+    if weather_state is not None:
+        weather_notify.save_state("morning.json", weather_state)
 
     # 2週間後の効果測定で、送った項目と bd の着手を突き合わせるために残す
     SENT_DIR.mkdir(parents=True, exist_ok=True)

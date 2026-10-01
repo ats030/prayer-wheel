@@ -1,0 +1,10 @@
+[Unit]
+Description=愛知県西部の警報を5分ごとに確認
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target
