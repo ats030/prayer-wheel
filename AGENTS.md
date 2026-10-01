@@ -91,6 +91,7 @@ bd close bd-42 --reason "Completed" --json
 ### Quality
 - Use `--acceptance` and `--design` fields when creating issues
 - Use `--validate` to check description completeness
+- Small code fixes that fit `scripts/ollama-backlog-pr.md` ("Opt in one issue"): write single-approach acceptance criteria and add the `ollama-draft-pr` label at creation
 
 ### Lifecycle
 - `bd defer <id>` / `bd supersede <id>` for issue management

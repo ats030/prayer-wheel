@@ -20,6 +20,12 @@ design field. If the acceptance criteria list alternatives, the model may pick
 any of them (ats030-hbu8 run 1 deleted a `REMOTE_APPS` entry instead of adding
 a cache). Rewrite the acceptance criteria to one approach before labeling.
 
+When creating a new issue that already fits these conditions, write the
+acceptance criteria for one approach, add the `ollama-draft-pr` label, add the
+`scripts/ollama-backlog-pr.json` entry in the same change, and mention the label
+in the session handoff. This builds the supply of eligible issues; the runner
+itself still never adds the label.
+
 Add an entry with the same issue ID to `scripts/ollama-backlog-pr.json`:
 
 ```json
@@ -73,12 +79,10 @@ succeeds but PR creation fails, the branch remains for manual recovery; the
 next run will not overwrite it. This experiment does not delete branches or
 old worktrees automatically.
 
-The currently running Ollama proxy process predates the source code's
-`/api/opencode-status` endpoint and returns HTML for that path. The runner
-therefore reports `busy_unknown` and stops safely until the live endpoint is
-verified (`ats030-i6la`). As of 2026-09-25, `gh auth status` also reports an
-invalid GitHub CLI token (`ats030-499b`), so PR creation cannot be exercised
-until that credential is renewed. The three manual pilots are tracked in
-`ats030-w1yb`. Do not enable a timer until three manually reviewed PRs have passed
-and the proxy busy check and cancellation behavior have been confirmed in the
-running service.
+## Timer gate
+
+The manual pilots are tracked in `ats030-w1yb`. A pilot passes when its draft
+PR merges with no or only minor edits. As of 2026-10-01 one pilot has passed
+(`ats030-hbu8`, app-portal PR #1); the busy check (exit 75) and PR creation have
+been confirmed in the running service. Create the daily timer only after three
+pilots have passed. Stop the experiment if two of the first three fail.
