@@ -1,6 +1,5 @@
 """通知条件と、失敗時に状態を進めない契約の回帰テスト。外部送信はしない。"""
 
-import copy
 import importlib.util
 import sys
 import tempfile

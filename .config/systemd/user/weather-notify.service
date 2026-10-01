@@ -10,4 +10,3 @@ Type=oneshot
 WorkingDirectory=/home/ats030
 ExecStart=/usr/bin/python3 /home/ats030/app/weather_notify.py
 TimeoutStartSec=90
-
