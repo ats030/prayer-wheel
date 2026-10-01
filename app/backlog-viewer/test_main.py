@@ -392,6 +392,20 @@ class TestPage:
         # 復帰の山は期限切れと関係ないので、外部待ちの一覧の見出しへ移す
         assert "期限切れ 2件 · 最大の復帰 11/23 に 1件</span>" in page
 
+    def test_deferred_fold_counts_only_its_own_rows_not_freeze_records(self):
+        # 凍結の記録は別の一覧に出る。外部待ちの見出しへ混ぜると行と数が合わない (ats030-tful7)
+        issues = main.parse_issues([
+            issue("wait", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 11, 23)),
+            issue("rec1", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 11, 23),
+                  title="memo を凍結中 (2026-11-23 に見直す)"),
+            issue("rec2", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 9, 1),
+                  title="x-post を凍結中 (2026-09-01 に見直す)"),
+        ])
+        page = main.render_page(issues, date(2026, 9, 26))
+        assert "1件 · 期限切れ 0件 · 最大の復帰 11/23 に 1件</span>" in page
+        assert "外部待ち 1件 · 凍結の記録 2件 · " in page
+        assert 'const RETURNS = {"2026-11-23": 1};' in page
+
     def test_expired_tile_is_plain_when_nothing_is_expired(self):
         issues = main.parse_issues([
             issue("wait", iso(2026, 8, 1), status="deferred", defer_until=iso(2026, 11, 23)),

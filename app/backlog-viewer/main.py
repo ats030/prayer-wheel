@@ -381,11 +381,15 @@ class Metrics:
 def _peak_return(remaining: list[Issue], today: date) -> tuple[date, int] | None:
     """外部待ちが最も多く戻ってくる日と件数。期限切れは別に数えるので含めない。
 
+    凍結の記録は外部待ちの一覧に出ないので数えない。混ぜると見出しの件数が
+    一覧の行と合わなくなる (ats030-tful7)。
+
     同数なら早い日を採る。まとめて defer した日の3ヶ月後に山ができるため、
     一度に何件戻るかが判らないと、その日に棚卸しが一気に必要になる。
     """
     days = [i.defer_until for i in remaining
-            if i.deferred and i.defer_until is not None and i.defer_until > today]
+            if i.deferred and not i.freeze_record
+            and i.defer_until is not None and i.defer_until > today]
     if not days:
         return None
     counts = {d: days.count(d) for d in set(days)}
@@ -957,10 +961,11 @@ def render_page(issues: list[Issue], today: date) -> str:
 
     live_rows, cold_rows = split_rows(rows)
     defer_until = today + timedelta(days=DEFER_DAYS)
-    returns = dict(sorted(Counter(r.defer_until.isoformat() for r in rows
-                                  if r.deferred and r.defer_until).items()))
     action_rows = [r for r in live_rows if not r.deferred]
     deferred_rows = [r for r in live_rows if r.deferred]
+    returns = dict(sorted(Counter(r.defer_until.isoformat() for r in deferred_rows
+                                  if r.defer_until).items()))
+    deferred_expired = sum(1 for r in deferred_rows if _is_expired(r, today))
 
     # 初期画面には、棚卸し判断へ直接つながる3指標だけを置く。
     # 30日超は閉じた一覧に偏りやすいので、どの一覧にあるかを添えて辿れるようにする。
@@ -1024,7 +1029,8 @@ def render_page(issues: list[Issue], today: date) -> str:
         )
 
     analysis_note = (
-        f"全体 {m.remaining}件 · 動かせる {m.actionable}件 · 外部待ち {m.deferred}件 · "
+        f"全体 {m.remaining}件 · 動かせる {m.actionable}件 · 外部待ち {len(deferred_rows)}件 · "
+        f"凍結の記録 {len(cold_rows)}件 · "
         f"滞留中央値 {m.median_age}日 · claim率 {m.claim_rate}% · "
         f"同日クローズ率 {m.same_day_close_rate}% · リードタイム中央値 "
         + ("即日" if m.median_lead_time == 0 else f"{m.median_lead_time}日")
@@ -1052,7 +1058,7 @@ def render_page(issues: list[Issue], today: date) -> str:
   {_table(action_rows)}
 
   <details class="fold">
-    <summary><strong>外部待ち</strong><span><span class="fold-picked"></span>{len(deferred_rows)}件 · 期限切れ {m.freeze_expired}件{_return_note(m)}</span></summary>
+    <summary><strong>外部待ち</strong><span><span class="fold-picked"></span>{len(deferred_rows)}件 · 期限切れ {deferred_expired}件{_return_note(m)}</span></summary>
     <div class="fold-body">{_table(deferred_rows)}</div>
   </details>
 
@@ -1069,7 +1075,7 @@ def render_page(issues: list[Issue], today: date) -> str:
         <div class="scroll chart">{render_stacked_svg(series, today)}</div>
         <div class="legend">{render_legend(series, today)}</div>
         <p class="scroll-hint">右端が直近。左へスクロールすると古い週が見える。</p>
-        <p class="note">高さは残件数、色は作成週。外部待ちは無彩色で示す。</p>
+        <p class="note">高さは残件数、色は作成週。外部待ちと凍結の記録は無彩色で示す。</p>
       </div>
       <div class="panel scroll">
         <table><thead><tr><th>作成週</th><th class="num">作成</th><th class="num">閉</th>
