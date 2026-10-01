@@ -1,0 +1,11 @@
+[Unit]
+Description=毎日 03:00 JST に morning-digest を送る
+# daily-reflection-auto (00:00) が前日分の日報を書き終えた後に走らせる
+
+[Timer]
+OnCalendar=*-*-* 03:00:00 Asia/Tokyo
+Persistent=true
+AccuracySec=5min
+
+[Install]
+WantedBy=timers.target
