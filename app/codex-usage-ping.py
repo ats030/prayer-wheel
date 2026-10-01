@@ -49,6 +49,18 @@ LIMIT_ID = "codex"
 PROMPT = "OK とだけ返答してください。"
 TIMEOUT_SECONDS = 170
 
+# systemd の PATH には ~/.local/bin が無く、npm 版の古い /usr/local/bin/codex
+# (0.151.0) が先に当たる。古いクライアントは新しいモデルを 400 で拒否され
+# 2026-09-23 以降の ping が全滅した (ats030-fcvvu)。対話で使っている
+# スタンドアロン版を明示的に選ぶ。
+LOCAL_CODEX = Path.home() / ".local" / "bin" / "codex"
+CODEX_BIN = str(LOCAL_CODEX) if LOCAL_CODEX.exists() else "codex"
+
+# ping の目的は rate_limits の更新だけなので、対話用の config.toml の
+# model に引きずられないよう、ChatGPT アカウントで通ると実測したモデルに
+# 固定する (config の gpt-6.1-sol は 0.157.1 でも 400 で拒否される)。
+PING_MODEL = "gpt-6-sol"
+
 # 直近何ファイルまで遡って rate_limits を探すか。最新ファイルにイベントが
 # 無い (即エラー終了した等) 場合に備えた保険で、通常は1ファイル目で見つかる。
 SCAN_FILES = 5
@@ -103,7 +115,8 @@ def run_ping() -> tuple[bool, str]:
     """軽量な codex exec を1本走らせる。(成功したか, ログ用メッセージ)"""
     SCRATCH_DIR.mkdir(parents=True, exist_ok=True)
     cmd = [
-        "codex", "-a", "never", "exec",
+        CODEX_BIN, "-a", "never", "exec",
+        "-m", PING_MODEL,
         "-C", str(SCRATCH_DIR),
         "--skip-git-repo-check",
         "--sandbox", "read-only",
