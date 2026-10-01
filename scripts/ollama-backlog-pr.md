@@ -15,6 +15,11 @@ a small child issue from a broader item when necessary. A human reviews the
 scope and then adds the `ollama-draft-pr` label. The automation never adds that
 label itself.
 
+The model sees only the issue description and acceptance criteria, not the
+design field. If the acceptance criteria list alternatives, the model may pick
+any of them (ats030-hbu8 run 1 deleted a `REMOTE_APPS` entry instead of adding
+a cache). Rewrite the acceptance criteria to one approach before labeling.
+
 Add an entry with the same issue ID to `scripts/ollama-backlog-pr.json`:
 
 ```json

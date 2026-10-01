@@ -1,4 +1,16 @@
 {
   "schema_version": 1,
-  "issues": {}
+  "issues": {
+    "ats030-hbu8": {
+      "repo": "app/app-portal",
+      "base": "main",
+      "files": [
+        "main.py"
+      ],
+      "tests": [
+        "python -m pytest -q test_main.py"
+      ],
+      "read_only": []
+    }
+  }
 }
