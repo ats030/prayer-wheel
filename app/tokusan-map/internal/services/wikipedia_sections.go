@@ -342,6 +342,8 @@ type wikipediaHeading struct {
 	Level int
 }
 
+const officialHistoryInstruction = "由来・起源、時代による変遷、食べられてきた行事や場面・風習を構造化してください。summaryは1文で歴史的・文化的な位置づけを説明してください。itemsのlabelは時代区分(例:「江戸時代」「昭和」)や「由来」「行事」「風習」などにしてください。作り方・材料・味は含めません。" + noneRule
+
 // OfficialSectionSpecs returns the label and prompt instruction for each
 // official-source section (officialSummarySections) so the official-warm tool
 // and the handler share the same wording the Wikipedia path uses. Sections not
@@ -362,6 +364,14 @@ func OfficialSectionSpecs() map[string]struct {
 					Label       string
 					Instruction string
 				}{Label: s.label, Instruction: s.instruction}
+				if key == "history" {
+					// MAFF's 「歴史・由来・関連行事」 text is mostly origins and customs
+					// without a timeline; the Wikipedia wording answers 「なし」 for it.
+					specs[key] = struct {
+						Label       string
+						Instruction string
+					}{Label: s.label, Instruction: officialHistoryInstruction}
+				}
 				break
 			}
 		}
