@@ -92,6 +92,15 @@ LLM が文章を要約・構造化しますが、節の枠組みそのものは�
 それ以外の4節は内容が無いとき(読み込み失敗を含む)節ごと隠します。
 文化財区分はバッジとして詳細パネルの上部(タイトル直下)に表示します。
 
+### 文化財区分の出典と照合
+
+- 対象は国指定の重要無形民俗文化財だけです。県・市町村指定と重要有形民俗文化財(山車などの物)は扱いません。
+- 出典は Wikipedia「重要無形民俗文化財」の版固定スナップショット `data/juyo-mukei-minzoku-bunkazai.json` です(版 ID と取得日時を含みます)。Wikidata の P1435 は登録が少なく(7件)、出典にしていません。
+- 照合は `scripts/match_cultural_designation.py` で行います。祭りの `wikipedia_title` か `label_ja` が指定名称のリンク先記事名(リンクが無い指定は指定名称)と一致し、かつ `prefecture` が指定の都道府県見出しに含まれる場合だけ付与します。総称記事(鷺舞・ねぶた)は除外し、名称の揺れは qid 単位の明示指定で結びます。
+- `cultural_relaw` には `cultural_type`(区分)・`name`(指定名称)・`designated_date`・`unesco`・`source`(スナップショットの版 URL)を入れます。`url` は文化庁 国指定文化財等データベースの詳細ページを手で確認できたものだけに入れます。
+- バッジのリンクは `url` があれば文化庁、無ければ `source` を「指定の出典」として示します。
+- 実行順: `classify_festivals.py` → `match_cultural_designation.py` → `build_db.py`。
+
 ## What pages MUST share
 
 - 藍色と朱色の役割

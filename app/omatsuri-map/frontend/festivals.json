@@ -29,13 +29,13 @@
     "description": "長崎くんちは、長崎市で行われる伝統的な秋の祭りで、江戸時代から続く「長崎さんち」とも呼ばれる行事が起源とされています。もとは長崎奉行所の職員が、長崎奉行の勤めを終える際に地域の子どもたちと楽しく過ごす「さんち」という行事が発祥とされ、後に「くんち」と呼ばれるようになり、地域の秋の風物詩として定着しました。祭りの期間中、市内の各地区が「屋台」や「山車」を動員し、太鼓や笛の音色に合わせて練り歩く様子が見どころです。特に、長崎の独特な文化が反映された「からくさ山車」や、子どもたちが担ぐ「こども山車」は、精巧な造りと活気ある動きで多くの観客を魅了します。また、各地区の山車は、それぞれ異なる曲や動きがあり、地域の連携と技術の高さが感じられます。開催時期は毎年10月中旬の祝日「体育の日」の前日から3日間程度で、長崎市街の主要な通りで行われます。祭りの中心は「くんちまつりパレード」で、多くの地元住民や訪れた観光客が、沿道で声援を送りながら、伝統と活気あふれる催しを楽しみます。長崎の歴史と文化を象徴するこの祭りは、現代まで大切に受け継がれ、地域の一体感と誇りを示す重要な行事となっています。",
     "date": "2026-10-07〜2026-10-09",
     "cultural_relaw": {
-      "id": "",
-      "name": "",
-      "prefecture": "長崎県",
-      "date": "",
       "cultural_type": "重要無形民俗文化財",
+      "name": "長崎くんちの奉納踊",
+      "prefecture": "長崎県",
+      "designated_date": "1979-02-03",
+      "unesco": false,
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/140",
-      "address": ""
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
     },
     "coordinate_prefecture": "長崎県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -91,13 +91,13 @@
       }
     ],
     "cultural_relaw": {
-      "id": "",
-      "name": "",
-      "prefecture": "青森県",
-      "date": "",
       "cultural_type": "重要無形民俗文化財",
+      "name": "青森のねぶた",
+      "prefecture": "青森県",
+      "designated_date": "1980-01-28",
+      "unesco": false,
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/3",
-      "address": ""
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
     },
     "coordinate_prefecture": "青森県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -334,13 +334,13 @@
     "description": "弘前ねぷたまつりは、青森県弘前市で毎年8月初めに開催される夏の風物詩で、弘前四大まつりの一つに数えられる。起源については諸説あり、平安時代の坂上田村麻呂の伝説や、1593年（文禄2年）の津軽為信による大燈籠の運行、江戸時代の元禄期後半からの「眠り流し」などの盆行事が融合して発展したとされる。語源は「ねむた」から「ねぷた」へと転訛し、もとは農作業の激しい夏期に襲う睡魔を払い、厄災や邪気を水に流して村を清める目的で行われた行事だった。行事の見どころは、扇ねぷた（扇型）と組ねぷた（人形型）の二種類の山車で、県内最多の約80台が市内を練り歩く様子は圧巻である。大勢の市民が「ヤーヤドー」という掛け声を響かせ、太鼓や笛の音色に合わせて力強く踊りながら、武者絵が描かれた山車を引き回す。その迫力ある動きと、色鮮やかな紙細工と照明が織りなす光の演出は、観る者の心に深く印象を残す。開催時期は毎年8月2日から5日までの4日間で、弘前城を背景にした夜の街並みが、ねぷたの光で一変する様子は、弘前ならではの夏の風景となっている。",
     "date": "2026-08-01〜2026-08-07",
     "cultural_relaw": {
-      "id": "",
-      "name": "",
-      "prefecture": "青森県",
-      "date": "",
       "cultural_type": "重要無形民俗文化財",
+      "name": "弘前のねぷた",
+      "prefecture": "青森県",
+      "designated_date": "1980-01-28",
+      "unesco": false,
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/4",
-      "address": ""
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
     },
     "occurrences": [
       {
@@ -461,13 +461,13 @@
     "description": "唐津くんちは、佐賀県唐津市の唐津神社で行われる秋季の例大祭で、その歴史は寛文年間（1661年～1673年）にさかのぼる。当初は神輿の御神幸が中心だったが、文政2年（1819年）に赤獅子という曳山が奉納されて以来、曳山を主体とした行事へと発展した。現在奉納されているのは14台で、いずれも乾漆を用いた豪華絢爛な工芸品であり、制作費は現代換算で1～2億円に上るとされる。曳山は「エンヤ、エンヤ」「ヨイサ、ヨイサ」という力強い掛け声に合わせ、笛・太鼓・鐘の囃子に導かれて、旧城下町の街並みを練り歩く様子は圧巻である。祭りの期間は、現在では11月2日から4日の3日間が中心とされ、2日の宵曳山、3日の本祭（神幸祭）、4日の町廻りが行われる。この形態は、昭和43年（1968年）に祝日である11月3日に合わせて変更されたもので、それ以前は新暦10月29日を本祭としていた。唐津くんちは、昭和33年に曳山14台が佐賀県の重要有形民俗文化財に、昭和55年には「唐津くんちの曳山行事」が国の重要無形民俗文化財に指定され、さらに平成28年にはユネスコ無形文化遺産にも登録された。祭り期間中には延べ数十万人の来場者が訪れる一大イベントであり、地域の伝統と技術が息づく貴重な文化財として、今なお脈々と受け継がれている。",
     "date": "2026-11-02〜2026-11-04",
     "cultural_relaw": {
-      "id": "",
-      "name": "",
-      "prefecture": "佐賀県",
-      "date": "",
       "cultural_type": "重要無形民俗文化財",
+      "name": "唐津くんちの曳山行事",
+      "prefecture": "佐賀県",
+      "designated_date": "1980-01-28",
+      "unesco": true,
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/138",
-      "address": ""
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
     },
     "coordinate_prefecture": "佐賀県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -624,13 +624,13 @@
     "description": "秋田県秋田市で毎年8月3日から6日にかけて開催される「秋田竿燈まつり」は、東北を代表する夏の風物詩として知られる。その起源は、古くは江戸時代以前さかのぼる「眠り流し」と呼ばれる行事に遡り、これは笹や合歓木に願い事を書いた短冊を下げ、川へ流して夏の邪気や睡魔を払う習慣だった。やがて、この行事が七夕やお盆の準備行事と結びつき、お盆に門前に立てる高灯籠を手に練り歩く形へと発展。やがて提灯の数が増加し、力を競い合ううちに、現在のような竿に多数の提灯を吊し、それを額・肩・腰などにのせて技を披露する形が確立された。竿燈という名称は、仏教典籍『景徳伝灯録』の「百尺竿頭須進歩」から着想を得て、大久保鐵作によって付けられたという。2000年までは8月4日から7日開催だったが、他祭りとの日程重複を避けるため、2001年から3日から6日に変更された。2020年と2021年は新型コロナウイルスの影響で中止となり、2022年は制限付きで、2023年からは通常開催が復活した。祭りでは、竿を額・腰・肩・平手・流しの五つの基本技でバランスよく操り、特に腰への乗せは難易度が高く、熟練を要する。竿燈全体は稲穂に、連なる提灯は米俵に見立てられ、五穀豊穣や無病息災を願う祈りの表現でもある。1980年に国の重要無形民俗文化財に指定され、青森のねぶた祭や仙台の七夕まつりと並ぶ東北三大祭りの一つ、また日本三大提灯祭りの一つにも選ばれている。",
     "date": "2026-08-03〜2026-08-06",
     "cultural_relaw": {
-      "id": "",
-      "name": "",
-      "prefecture": "秋田県",
-      "date": "",
       "cultural_type": "重要無形民俗文化財",
+      "name": "秋田の竿灯",
+      "prefecture": "秋田県",
+      "designated_date": "1980-01-28",
+      "unesco": false,
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/18",
-      "address": ""
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
     },
     "coordinate_prefecture": "秋田県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -671,13 +671,13 @@
     "description": "博多祇園山笠は、福岡市の櫛田神社で行われる伝統的な神事で、その起源は室町時代末期にさかのぼるとされ、戦乱や疫病が流行した際に、祇園社の祭礼に由来する疫病退散の行事として始まったと伝えられています。現在の形は江戸時代に整えられ、以来、600年以上にわたり博多の夏を彩る重要な行事として継承されてきました。行事は7月1日から15日まで行われ、その中でも7月15日の「山笠走り」が最も盛大で、博多の街中を高さ25メートルにも及ぶ装飾山（やま）が走り抜ける様子は圧巻です。山は「回り山」と「直し山」の2種類があり、それぞれ異なる走り方で市内を巡ります。参加するのは「立山」と呼ばれる若者たちで、山を担ぎ、曳き、力強く街を疾走する様子には、博多の誇りと連帯感が込められています。また、山の装飾は絢爛たる金箔や刺繍で施され、各山には歴史や伝説を描いた絵が施されており、その美しさも見どころの一つです。山笠の期間中は、博多の街全体が祭りの雰囲気に包まれ、地元の人々の信仰と活力が色濃く反映されています。",
     "date": "2026-07-01〜2026-07-15",
     "cultural_relaw": {
-      "id": "",
-      "name": "",
-      "prefecture": "福岡県",
-      "date": "",
       "cultural_type": "重要無形民俗文化財",
+      "name": "博多祇園山笠行事",
+      "prefecture": "福岡県",
+      "designated_date": "1979-02-03",
+      "unesco": true,
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/133",
-      "address": ""
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
     },
     "occurrences": [
       {
@@ -804,13 +804,13 @@
     "description": "高岡御車山祭は、毎年5月1日に富山県高岡市の関野神社で行われる春季例祭であり、県内で最も歴史ある曳山祭りとして知られる。その由来は、1588年（天正16年）に豊臣秀吉が聚楽第で後陽成天皇の行幸を奉行した際に使用された御所車を、前田利家が拝領。その後、1609年（慶長14年）、前田利長が高岡城を築いて町開きをした際に、城下の山町と呼ばれる10の町に山車として与えたことが始まりと伝えられている。現在は7基が残り、それぞれが安土桃山文化の面影を残す優雅な装飾を施しており、装飾金具や木部は江戸時代の名工による優れた工芸品として評価されている。祭り当日は、囃子の音色に合わせて7基の御車山が旧市街を優雅に巡行し、町衆の誇りとエネルギーが息づく光景が広がる。4月30日には宵祭りも行われ、祭りの雰囲気を先取りできる。この祭礼と御車山そのものは、それぞれ重要無形民俗文化財および重要有形民俗文化財に指定されており、全国でも数少ない両方の指定を受ける行事の一つである。さらに、ユネスコの無形文化遺産にも登録され、日本の伝統的行事として国際的にも高く評価されている。",
     "date": "2026-05-01",
     "cultural_relaw": {
-      "id": "",
-      "name": "",
-      "prefecture": "富山県",
-      "date": "",
       "cultural_type": "重要無形民俗文化財",
+      "name": "高岡御車山祭の御車山行事",
+      "prefecture": "富山県",
+      "designated_date": "1979-02-03",
+      "unesco": true,
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/56",
-      "address": ""
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
     },
     "coordinate_prefecture": "富山県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -1093,7 +1093,16 @@
       "神事・祭礼",
       "灯籠・火祭り",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "修正鬼会",
+      "prefecture": "大分県",
+      "designated_date": "1977-05-17",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11402392",
@@ -1135,13 +1144,13 @@
     "description": "住吉大社に伝わる「御田植神事」は、神功皇后が水田を設けたことにその起源をさかのぼる、古くから厳格に伝承されてきた田植行事です。日本各地で見られる田の神をまつる稲作儀礼の中でも、この御田植は特に神聖性が重視され、母なる大地に植えられるイネの苗に宿る穀霊の力を高めるため、音楽や舞、芸能を奉納する重要な役割を担っています。現在は毎年6月14日に催され、午前中は神館で植女や稚児、御稔女らが衣装を整え、神酒をいただく粉黛式と戴盃式が行われます。その後、石舞台で修祓を受けて第一本宮で奉告祭を執り行い、行列を組んで御田へと向かいます。御神水で田の四方を清めた後、早苗の授受が行われ、植女から替植女へと苗が渡されると、田植えが始まります。この間、八乙女の田舞や、紅白に分かれて陣鐘・太鼓・ほら貝を鳴らしながら六尺棒で棒打合戦を行う風流武者の演目、音頭取の歌に合わせて菅笠をかぶり団扇を打って傘の回りを踊る住吉踊りなど、多彩な民俗芸能が奉納され、おごそかな雰囲気の中、五穀豊穣を願う儀礼が執り行われます。1979年に重要無形民俗文化財に指定され、日本の稲作文化と伝統芸能を象徴する貴重な行事として、今なおその姿を今に伝えています。",
     "date": "日付未定",
     "cultural_relaw": {
-      "id": "",
-      "name": "",
-      "prefecture": "大阪府",
-      "date": "",
       "cultural_type": "重要無形民俗文化財",
+      "name": "住吉の御田植",
+      "prefecture": "大阪府",
+      "designated_date": "1979-02-03",
+      "unesco": false,
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/103",
-      "address": ""
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
     },
     "coordinate_prefecture": "大阪府",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -1307,7 +1316,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "下呂の田の神祭",
+      "prefecture": "岐阜県",
+      "designated_date": "1981-01-21",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11432381",
@@ -1339,13 +1357,13 @@
     "description": "吉田の火祭は、山梨県富士吉田市上吉田地区で行われる独特の火の祭りで、日本三奇祭のひとつとされる。毎年8月26日の「鎮火祭」と27日の「すすき祭り」の2日間にわたって実施され、北口本宮冨士浅間神社と境内社の諏訪神社の両社による例大祭として営まれる。その起源は古く、かつては旧暦7月21日に行われていたが、明治期に新暦8月21日・22日に移り、大正初期に現在の日程に定着した。祭りの背景には、富士講や御師、富士五湖地域の風俗習慣が深く根付き、神仏習合の様相も色濃く残っている。木花開耶姫命の故事に由来するとも伝えられ、夏山の富士山登拝の山仕舞いを意味する意義も持つ。祭りの最大の見どころは、金鳥居から神社に至る約1キロの本町通りに、高さ約3メートルの大松明70本から80本余りが掲げられ、夕暮れとともに次々と点火される光景。沿道の家々でも井桁状に組まれた松明が燃やされ、麓の町が火の海と化す中、富士山側の山小屋からも一斉に松明が焚かれ、山と町が火で結ばれる荘厳で熱気あふれる光景が広がる。祭りの運営は、祭典世話係と呼ばれる氏子代表と、御師家、富士講社らが担い、大松明は7月下旬から職人が製作する。また、祭事には清めの意識が強く、その年に不幸のあった者は「ブクがかかる」とされ、祭りへの参加を控え、「手間見舞い」を通じて周囲との調整が図られるなど、地域の信仰と生活が密接に結びついた伝統が今も息づいている。2000年に国の記録作成等の措置を講ずべき無形民俗文化財に選択され、2012年には国の重要無形民俗文化財に指定された。",
     "date": "2026-08-26〜2026-08-27",
     "cultural_relaw": {
-      "id": "",
-      "name": "",
-      "prefecture": "山梨県",
-      "date": "",
       "cultural_type": "重要無形民俗文化財",
+      "name": "吉田の火祭",
+      "prefecture": "山梨県",
+      "designated_date": "2012-03-08",
+      "unesco": false,
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/00000881",
-      "address": ""
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
     },
     "coordinate_prefecture": "山梨県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -5520,13 +5538,13 @@
     "description": "春日若宮おん祭は、奈良市の春日大社摂社・若宮神社の祭祀として、12月17日を中心に数日にわたって開催される伝統的な祭礼です。その起源は1136年（保延2年）、関白藤原忠通によって始められたと伝えられ、870年以上にわたり、延期や中止を経ながらも継続されてきた歴史ある行事です。祭りの中心は、若宮神を御旅所へ迎える「遷幸の儀」と、その後本殿へ還す「還幸の儀」で、いずれも夜間に執り行われ、一切の照明や撮影が禁じられた神秘的な神事です。祭礼は単なる儀礼にとどまらず、猿楽（能）、雅楽、神楽、舞楽など中世以前から伝わる芸能を奉納する「春日若宮おん祭の神事芸能」が特色で、1979年（昭和54年）に国の重要無形民俗文化財に指定されています。これらの芸能奉納は、南都雅楽の継承を支える重要な場ともされ、中世大和の宗教的・社会的秩序を反映した大祭としての意義も大きいとされています。祭りの期間中には、御旅所祭やお渡り式、松の下式、田楽、細男、競馬、流鏑馬など多様な行事が繰り広げられ、地域の信仰と文化が息づく貴重な機会となっています。",
     "date": "日付未定",
     "cultural_relaw": {
-      "id": "",
-      "name": "",
-      "prefecture": "奈良県",
-      "date": "",
       "cultural_type": "重要無形民俗文化財",
+      "name": "春日若宮おん祭の神事芸能",
+      "prefecture": "奈良県",
+      "designated_date": "1979-02-03",
+      "unesco": false,
       "url": "https://kunishitei.bunka.go.jp/heritage/detail/302/108",
-      "address": ""
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
     },
     "coordinate_prefecture": "奈良県",
     "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
@@ -5652,7 +5670,16 @@
     "categories": [
       "演舞・盆踊り",
       "灯籠・火祭り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "毛馬内の盆踊",
+      "prefecture": "秋田県",
+      "designated_date": "1998-12-16",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11572451",
@@ -5798,7 +5825,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "白鬚神社の田楽",
+      "prefecture": "佐賀県",
+      "designated_date": "2000-12-27",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11582264",
@@ -5859,7 +5895,16 @@
     "categories": [
       "演舞・盆踊り",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "西馬音内の盆踊",
+      "prefecture": "秋田県",
+      "designated_date": "1981-01-21",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11642725",
@@ -6199,7 +6244,16 @@
     "jalan_sml_name": "八戸",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "八戸のえんぶり",
+      "prefecture": "青森県",
+      "designated_date": "1979-02-03",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11372403",
@@ -6456,7 +6510,16 @@
     "jalan_lrg_name": "三陸海岸",
     "jalan_sml_code": "030802",
     "jalan_sml_name": "釜石・大船渡",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "吉浜のスネカ",
+      "prefecture": "岩手県",
+      "designated_date": "2004-02-16",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11511418",
@@ -6477,7 +6540,16 @@
     "jalan_sml_name": "花巻・北上・湯田",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "早池峰神楽",
+      "prefecture": "岩手県",
+      "designated_date": "1976-05-04",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11581335",
@@ -6726,7 +6798,16 @@
     "jalan_sml_name": "男鹿",
     "categories": [
       "神事・祭礼"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "男鹿のナマハゲ",
+      "prefecture": "秋田県",
+      "designated_date": "1978-05-22",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11352731",
@@ -6787,7 +6868,16 @@
     "jalan_sml_name": "横手・湯沢",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "保呂羽山の霜月神楽",
+      "prefecture": "秋田県",
+      "designated_date": "1977-05-17",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q7849923",
@@ -6818,7 +6908,16 @@
       "山車・屋台",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "土崎神明社祭の曳山行事",
+      "prefecture": "秋田県",
+      "designated_date": "1997-12-15",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11435600",
@@ -6870,7 +6969,16 @@
     "jalan_sml_name": "八幡平・十和田湖",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "大日堂舞楽",
+      "prefecture": "秋田県",
+      "designated_date": "1976-05-04",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11532444",
@@ -6996,7 +7104,16 @@
     "categories": [
       "演舞・盆踊り",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "花輪祭の屋台行事",
+      "prefecture": "秋田県",
+      "designated_date": "2014-03-10",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q6349714",
@@ -7025,7 +7142,16 @@
     "jalan_sml_name": "田沢湖・角館",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "角館祭りのやま行事",
+      "prefecture": "秋田県",
+      "designated_date": "1991-02-21",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11280572",
@@ -7122,7 +7248,16 @@
     "jalan_sml_name": "新庄・最上・肘折",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "新庄まつりの山車行事",
+      "prefecture": "山形県",
+      "designated_date": "2009-03-11",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q131917387",
@@ -7245,7 +7380,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "御宝殿の稚児田楽・風流",
+      "prefecture": "福島県",
+      "designated_date": "1976-05-04",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11530743",
@@ -7299,7 +7443,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "相馬野馬追",
+      "prefecture": "福島県",
+      "designated_date": "1978-05-22",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11643448",
@@ -7321,7 +7474,16 @@
     "categories": [
       "演舞・盆踊り",
       "神事・祭礼"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "都々古別神社の御田植",
+      "prefecture": "福島県",
+      "designated_date": "2004-02-06",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11431301",
@@ -7413,7 +7575,16 @@
     "jalan_lrg_name": "北茨城・奥久慈",
     "jalan_sml_code": "100203",
     "jalan_sml_name": "日立",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "日立風流物",
+      "prefecture": "茨城県",
+      "designated_date": "1977-05-17",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11565710",
@@ -7521,7 +7692,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "烏山の山あげ行事",
+      "prefecture": "栃木県",
+      "designated_date": "1979-02-03",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11388558",
@@ -7646,7 +7826,16 @@
       "山車・屋台",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "鹿沼今宮神社祭の屋台行事",
+      "prefecture": "栃木県",
+      "designated_date": "2003-02-20",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11537271",
@@ -7701,7 +7890,16 @@
     "jalan_sml_name": "伊勢崎",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "樋越神明宮の春鍬祭",
+      "prefecture": "群馬県",
+      "designated_date": "2002-02-12",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q774193",
@@ -7776,7 +7974,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "川越氷川祭の山車行事",
+      "prefecture": "埼玉県",
+      "designated_date": "2005-02-21",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11568692",
@@ -7829,7 +8036,16 @@
     "jalan_sml_name": "秩父",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "秩父祭の屋台行事と神楽",
+      "prefecture": "埼玉県",
+      "designated_date": "1979-02-03",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11596130",
@@ -7953,7 +8169,16 @@
     "jalan_sml_name": "銚子",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "佐原の山車行事",
+      "prefecture": "千葉県",
+      "designated_date": "2004-02-16",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11433116",
@@ -8384,7 +8609,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "小河内の鹿島踊",
+      "prefecture": "東京都",
+      "designated_date": "1980-01-28",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q135668368",
@@ -8512,7 +8746,16 @@
     "jalan_sml_name": "板橋・赤羽",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "板橋の田遊び",
+      "prefecture": "東京都",
+      "designated_date": "1976-05-04",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11541041",
@@ -8666,7 +8909,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "神津島のかつお釣り行事",
+      "prefecture": "東京都",
+      "designated_date": "1999-12-21",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q122272702",
@@ -8844,7 +9096,16 @@
     "jalan_lrg_name": "横須賀・三浦",
     "jalan_sml_code": "140505",
     "jalan_sml_name": "三浦",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "チャッキラコ",
+      "prefecture": "神奈川県",
+      "designated_date": "1976-05-04",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11420919",
@@ -9271,7 +9532,16 @@
       "行列・渡御",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "村上祭の屋台行事",
+      "prefecture": "新潟県",
+      "designated_date": "2018-03-08",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11566707",
@@ -9311,7 +9581,16 @@
     "jalan_lrg_name": "柏崎・寺泊・長岡・魚沼（湯之谷）",
     "jalan_sml_code": "171102",
     "jalan_sml_name": "長岡･寺泊",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "牛の角突きの習俗",
+      "prefecture": "新潟県",
+      "designated_date": "1978-05-22",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11579603",
@@ -9406,7 +9685,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "魚津のタテモン行事",
+      "prefecture": "富山県",
+      "designated_date": "1997-12-15",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11396942",
@@ -9464,7 +9752,16 @@
       "山車・屋台",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "城端神明宮祭の曳山行事",
+      "prefecture": "富山県",
+      "designated_date": "2002-02-12",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11431351",
@@ -9545,7 +9842,16 @@
     "jalan_sml_name": "滑川・魚津",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "滑川のネブタ流し",
+      "prefecture": "富山県",
+      "designated_date": "1999-12-21",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11636372",
@@ -9568,7 +9874,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "越中の稚児舞",
+      "prefecture": "富山県",
+      "designated_date": "1982-01-14",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q4663470",
@@ -9653,7 +9968,16 @@
     "jalan_lrg_name": "輪島・能登",
     "jalan_sml_code": "191102",
     "jalan_sml_name": "輪島・能登",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "奥能登のあえのこと",
+      "prefecture": "石川県",
+      "designated_date": "1976-05-04",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11404742",
@@ -10045,7 +10369,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "水海の田楽・能舞",
+      "prefecture": "福井県",
+      "designated_date": "1976-05-04",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q131932035",
@@ -10137,7 +10470,16 @@
     "jalan_lrg_name": "甲府・湯村・昇仙峡",
     "jalan_sml_code": "150105",
     "jalan_sml_name": "甲府",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "天津司舞",
+      "prefecture": "山梨県",
+      "designated_date": "1976-05-04",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11553660",
@@ -10172,7 +10514,16 @@
     "jalan_sml_name": "河口湖・西湖・富士吉田",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "河口の稚児の舞",
+      "prefecture": "山梨県",
+      "designated_date": "2017-03-03",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11567440",
@@ -10193,7 +10544,16 @@
     "jalan_sml_name": "大月・都留",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "無生野の大念仏",
+      "prefecture": "山梨県",
+      "designated_date": "1995-12-26",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11590283",
@@ -10297,7 +10657,16 @@
     "categories": [
       "演舞・盆踊り",
       "神事・祭礼"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "天竜村の霜月神楽",
+      "prefecture": "長野県",
+      "designated_date": "1978-05-22",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q131919562",
@@ -10365,7 +10734,16 @@
       "神事・祭礼",
       "灯籠・火祭り",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "雪祭",
+      "prefecture": "長野県",
+      "designated_date": "1977-05-17",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11530789",
@@ -10483,7 +10861,16 @@
     "jalan_sml_name": "白川郷・飛騨古川・荘川・清見",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "古川祭の起し太鼓・屋台行事",
+      "prefecture": "岐阜県",
+      "designated_date": "1980-01-28",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q48748967",
@@ -10543,7 +10930,16 @@
     "jalan_sml_name": "大垣・養老・揖斐",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "大垣祭の軕行事",
+      "prefecture": "岐阜県",
+      "designated_date": "2015-03-02",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q126951720",
@@ -10711,7 +11107,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "真桑人形浄瑠璃",
+      "prefecture": "岐阜県",
+      "designated_date": "1984-01-19",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11603435",
@@ -10755,7 +11160,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "能郷の能・狂言",
+      "prefecture": "岐阜県",
+      "designated_date": "1976-05-04",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q6430768",
@@ -10776,7 +11190,16 @@
     "jalan_sml_name": "郡上八幡・白鳥・高鷲・明宝",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "郡上踊",
+      "prefecture": "岐阜県",
+      "designated_date": "1996-12-20",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q7677467",
@@ -10811,7 +11234,16 @@
     "jalan_sml_name": "飛騨高山・丹生川",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "高山祭の屋台行事",
+      "prefecture": "岐阜県",
+      "designated_date": "1979-02-03",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11355330",
@@ -11032,7 +11464,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "藤守の田遊び",
+      "prefecture": "静岡県",
+      "designated_date": "1977-05-17",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11642088",
@@ -11077,7 +11518,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "遠江森町の舞楽",
+      "prefecture": "静岡県",
+      "designated_date": "1982-01-14",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11678799",
@@ -11145,7 +11595,16 @@
       "行列・渡御",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "三河の田楽",
+      "prefecture": "愛知県",
+      "designated_date": "1978-05-22",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q86726605",
@@ -11241,7 +11700,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "亀崎潮干祭の山車行事",
+      "prefecture": "愛知県",
+      "designated_date": "2006-03-15",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11396267",
@@ -11337,7 +11805,16 @@
     "jalan_sml_name": "名古屋",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "尾張津島天王祭の車楽舟行事",
+      "prefecture": "愛知県",
+      "designated_date": "1980-01-28",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q28686206",
@@ -11408,7 +11885,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "犬山祭の車山行事",
+      "prefecture": "愛知県",
+      "designated_date": "2006-03-15",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11584632",
@@ -11438,7 +11924,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "知立の山車文楽とからくり",
+      "prefecture": "愛知県",
+      "designated_date": "1990-03-29",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q3536029",
@@ -11528,7 +12023,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "豊橋神明社の鬼祭",
+      "prefecture": "愛知県",
+      "designated_date": "1980-01-28",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11634933",
@@ -11569,7 +12073,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "須成祭の車楽船行事と神葭流し",
+      "prefecture": "愛知県",
+      "designated_date": "2012-03-08",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q64539503",
@@ -11601,7 +12114,16 @@
     "categories": [
       "灯籠・火祭り",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "鳥羽の火祭り",
+      "prefecture": "愛知県",
+      "designated_date": "2004-02-16",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q17225061",
@@ -11672,7 +12194,16 @@
     "jalan_sml_name": "上野",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "上野天神祭のダンジリ行事",
+      "prefecture": "三重県",
+      "designated_date": "2002-02-12",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11378916",
@@ -11788,7 +12319,16 @@
     "jalan_sml_name": "桑名・長島・四日市・湯の山",
     "categories": [
       "神事・祭礼"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "鳥出神社の鯨船行事",
+      "prefecture": "三重県",
+      "designated_date": "1997-12-15",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11489125",
@@ -11917,7 +12457,16 @@
     "jalan_sml_name": "志摩（浜島・阿児・磯部）",
     "categories": [
       "神事・祭礼"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "磯部の御神田",
+      "prefecture": "三重県",
+      "designated_date": "1990-03-29",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11255045",
@@ -12076,7 +12625,16 @@
     "categories": [
       "山車・屋台",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "長浜曳山祭の曳山行事",
+      "prefecture": "滋賀県",
+      "designated_date": "1979-02-03",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q124342230",
@@ -12262,7 +12820,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "田原の御田",
+      "prefecture": "京都府",
+      "designated_date": "2000-12-27",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11582690",
@@ -12589,7 +13156,16 @@
     "categories": [
       "演舞・盆踊り",
       "神事・祭礼"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "上鴨川住吉神社神事舞",
+      "prefecture": "兵庫県",
+      "designated_date": "1977-05-17",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11381635",
@@ -13104,7 +13680,16 @@
     "jalan_sml_name": "奈良・大和郡山",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "奈良豆比古神社の翁舞",
+      "prefecture": "奈良県",
+      "designated_date": "2000-12-27",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11492970",
@@ -13286,7 +13871,16 @@
     "jalan_lrg_name": "奈良・斑鳩・天理",
     "jalan_sml_code": "290202",
     "jalan_sml_name": "奈良・大和郡山",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "題目立",
+      "prefecture": "奈良県",
+      "designated_date": "1976-05-04",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11665956",
@@ -13358,7 +13952,16 @@
     "jalan_sml_name": "新宮",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "新宮の速玉祭・御燈祭り",
+      "prefecture": "和歌山県",
+      "designated_date": "2016-03-02",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q3334755",
@@ -13387,7 +13990,16 @@
     "jalan_sml_name": "那智勝浦・太地",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "那智の扇祭り",
+      "prefecture": "和歌山県",
+      "designated_date": "2015-03-02",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11522359",
@@ -13410,7 +14022,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "杉野原の御田舞",
+      "prefecture": "和歌山県",
+      "designated_date": "1987-12-28",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11568918",
@@ -13468,7 +14089,16 @@
     "jalan_sml_name": "新宮",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "新宮の速玉祭・御燈祭り",
+      "prefecture": "和歌山県",
+      "designated_date": "2016-03-02",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q86727428",
@@ -13541,7 +14171,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "花園の御田舞",
+      "prefecture": "和歌山県",
+      "designated_date": "1981-01-21",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q17222071",
@@ -13625,7 +14264,16 @@
     "jalan_lrg_name": "松江・安来・玉造・奥出雲",
     "jalan_sml_code": "320102",
     "jalan_sml_name": "松江・美保関・玉造",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "五十猛のグロ",
+      "prefecture": "島根県",
+      "designated_date": "2005-02-21",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q66633854",
@@ -13655,7 +14303,16 @@
     "categories": [
       "演舞・盆踊り",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "佐陀神能",
+      "prefecture": "島根県",
+      "designated_date": "1976-05-04",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11659037",
@@ -13677,7 +14334,16 @@
     "categories": [
       "演舞・盆踊り",
       "神事・祭礼"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "隠岐の田楽と庭の舞",
+      "prefecture": "島根県",
+      "designated_date": "1992-03-11",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11368913",
@@ -13945,7 +14611,16 @@
     "categories": [
       "演舞・盆踊り",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "塩原の大山供養田植",
+      "prefecture": "広島県",
+      "designated_date": "2002-02-12",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q3307937",
@@ -13976,7 +14651,16 @@
     "jalan_sml_name": "芸北",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "壬生の花田植",
+      "prefecture": "広島県",
+      "designated_date": "1976-05-04",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q28684334",
@@ -14016,7 +14700,16 @@
     "jalan_lrg_name": "庄原・三次・芸北",
     "jalan_sml_code": "340608",
     "jalan_sml_name": "芸北",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "安芸のはやし田",
+      "prefecture": "広島県",
+      "designated_date": "1997-12-15",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q24866082",
@@ -14178,7 +14871,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "岩国行波の神舞",
+      "prefecture": "山口県",
+      "designated_date": "1979-02-03",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11620393",
@@ -14252,7 +14954,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "西祖谷の神代踊",
+      "prefecture": "徳島県",
+      "designated_date": "1976-05-04",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q4829650",
@@ -14414,7 +15125,16 @@
     "jalan_sml_name": "高松・屋島",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "滝宮の念仏踊",
+      "prefecture": "香川県",
+      "designated_date": "1977-05-17",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11573781",
@@ -14468,7 +15188,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "綾子踊",
+      "prefecture": "香川県",
+      "designated_date": "1976-05-04",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11633921",
@@ -14794,7 +15523,16 @@
     "jalan_sml_name": "佐賀・古湯・熊の川",
     "categories": [
       "神事・祭礼"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "見島のカセドリ",
+      "prefecture": "佐賀県",
+      "designated_date": "2002-02-20",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11405696",
@@ -14998,7 +15736,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "古要神社の傀儡子の舞と相撲",
+      "prefecture": "大分県",
+      "designated_date": "1983-01-11",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11413122",
@@ -15020,7 +15767,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "吉弘楽",
+      "prefecture": "大分県",
+      "designated_date": "1996-12-20",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q28685117",
@@ -15066,7 +15822,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "御嶽神楽",
+      "prefecture": "大分県",
+      "designated_date": "2007-03-07",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11509924",
@@ -15088,7 +15853,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "日田祇園の曳山行事",
+      "prefecture": "大分県",
+      "designated_date": "1996-12-20",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11454559",
@@ -15212,7 +15986,16 @@
     "jalan_sml_name": "川内・いちき串木野",
     "categories": [
       "神事・祭礼"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "甑島のトシドン",
+      "prefecture": "鹿児島県",
+      "designated_date": "1977-05-17",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q17223030",
@@ -15252,7 +16035,16 @@
     "jalan_sml_name": "奄美大島",
     "categories": [
       "神事・祭礼"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "悪石島のボゼ",
+      "prefecture": "鹿児島県",
+      "designated_date": "2017-03-03",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q140673421",
@@ -15362,7 +16154,16 @@
     "jalan_lrg_name": "離島",
     "jalan_sml_code": "471708",
     "jalan_sml_name": "宮古島",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "宮古島のパーントゥ",
+      "prefecture": "沖縄県",
+      "designated_date": "1993-12-13",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11552591",
@@ -15623,7 +16424,16 @@
     "jalan_sml_name": "桑名・長島・四日市・湯の山",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "桑名石取祭の祭車行事",
+      "prefecture": "三重県",
+      "designated_date": "2007-03-07",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q17213195",
@@ -15720,7 +16530,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "やすらい花",
+      "prefecture": "京都府",
+      "designated_date": "1987-01-08",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q2914758",
@@ -15995,7 +16814,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "京都祇園祭の山鉾行事",
+      "prefecture": "京都府",
+      "designated_date": "1979-02-03",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q109359912",
@@ -17636,7 +18464,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "瀧山寺鬼祭り",
+      "prefecture": "愛知県",
+      "designated_date": "2025-03-28",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q30925655",
@@ -18746,7 +19583,16 @@
     "jalan_sml_name": "和倉・七尾",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "熊甲二十日祭の枠旗行事",
+      "prefecture": "石川県",
+      "designated_date": "1981-01-21",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11416021",
@@ -18851,7 +19697,16 @@
     "jalan_sml_name": "和倉・七尾",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "青柏祭の曳山行事",
+      "prefecture": "石川県",
+      "designated_date": "1983-01-11",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q132449320",
@@ -19212,7 +20067,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "博多松囃子",
+      "prefecture": "福岡県",
+      "designated_date": "2020-03-16",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11423189",
@@ -19256,7 +20120,16 @@
       "演舞・盆踊り",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "小倉祇園祭の小倉祇園太鼓",
+      "prefecture": "福岡県",
+      "designated_date": "2019-03-28",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11492412",
@@ -19310,7 +20183,16 @@
       "山車・屋台",
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "戸畑祇園大山笠行事",
+      "prefecture": "福岡県",
+      "designated_date": "1980-01-28",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q67704099",
@@ -19681,7 +20563,16 @@
     "categories": [
       "神事・祭礼",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "八戸三社大祭の山車行事",
+      "prefecture": "青森県",
+      "designated_date": "2004-02-06",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11662018",
@@ -20904,6 +21795,15 @@
       "name": "南会津町田島",
       "source": "https://www.tif.ne.jp/jp/entry/article.html?spot=7265",
       "address": "福島県南会津郡南会津町"
+    },
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "田島祇園祭のおとうや行事",
+      "prefecture": "福島県",
+      "designated_date": "1981-01-21",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
     }
   },
   {
@@ -22156,7 +23056,16 @@
     "jalan_sml_name": "飯能",
     "categories": [
       "花火"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "秩父吉田の龍勢",
+      "prefecture": "埼玉県",
+      "designated_date": "2018-03-08",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11234423",
@@ -22980,7 +23889,16 @@
     "jalan_sml_name": "富山・八尾",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "邑町のサイノカミ",
+      "prefecture": "富山県",
+      "designated_date": "2010-03-11",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11439837",
@@ -23194,7 +24112,16 @@
     "categories": [
       "山車・屋台",
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "放生津八幡宮祭の曳山・築山行事",
+      "prefecture": "富山県",
+      "designated_date": "2021-03-11",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11549648",
@@ -24849,7 +25776,16 @@
     "jalan_lrg_name": "吉野・奥吉野",
     "jalan_sml_code": "290802",
     "jalan_sml_name": "吉野・天川・洞川",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "江包・大西の御綱",
+      "prefecture": "奈良県",
+      "designated_date": "2012-03-08",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q18339240",
@@ -25519,7 +26455,16 @@
     "jalan_lrg_name": "太宰府・宗像",
     "jalan_sml_code": "400308",
     "jalan_sml_name": "若宮・遠賀・直方",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "大善寺玉垂宮の鬼夜",
+      "prefecture": "福岡県",
+      "designated_date": "1994-12-13",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11255135",
@@ -25956,7 +26901,16 @@
     "jalan_sml_name": "鹿児島・桜島",
     "categories": [
       "神事・祭礼"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "川内大綱引",
+      "prefecture": "鹿児島県",
+      "designated_date": "2024-03-21",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11477732",
@@ -26964,7 +27918,16 @@
     "jalan_sml_name": "宮古",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "山屋の田植踊",
+      "prefecture": "岩手県",
+      "designated_date": "1981-01-21",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11475055",
@@ -27047,7 +28010,16 @@
     "jalan_sml_name": "宮古",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "鬼剣舞",
+      "prefecture": "岩手県",
+      "designated_date": "1993-12-13",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11189529",
@@ -27179,7 +28151,16 @@
     "jalan_sml_name": "石巻・女川・牡鹿",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "雄勝法印神楽",
+      "prefecture": "宮城県",
+      "designated_date": "1996-12-20",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11659192",
@@ -27395,7 +28376,16 @@
         "end": "2026-07-21",
         "source": "https://tutizaki-hikiyama.com/"
       }
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "土崎神明社祭の曳山行事",
+      "prefecture": "秋田県",
+      "designated_date": "1997-12-15",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q86061980",
@@ -27954,7 +28944,16 @@
     "jalan_sml_name": "笠間",
     "categories": [
       "行事"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "常陸大津の御船祭",
+      "prefecture": "茨城県",
+      "designated_date": "2017-03-03",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q22123259",
@@ -28087,7 +29086,16 @@
     "jalan_lrg_name": "宇都宮・さくら",
     "jalan_sml_code": "080202",
     "jalan_sml_name": "宇都宮",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "発光路の強飯式",
+      "prefecture": "栃木県",
+      "designated_date": "1996-12-20",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q109595678",
@@ -28318,7 +29326,16 @@
     "jalan_sml_name": "飯能",
     "categories": [
       "灯籠・火祭り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "猪俣の百八燈",
+      "prefecture": "埼玉県",
+      "designated_date": "1987-01-08",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q135236383",
@@ -28833,7 +29850,16 @@
     "jalan_sml_name": "立川・八王子・多摩",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "下平井の鳳凰の舞",
+      "prefecture": "東京都",
+      "designated_date": "2006-03-15",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q86733658",
@@ -29184,7 +30210,16 @@
     "jalan_sml_name": "長岡･寺泊",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "佐渡の車田植",
+      "prefecture": "新潟県",
+      "designated_date": "1979-02-03",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q48754955",
@@ -29310,7 +30345,16 @@
     "jalan_sml_name": "長岡･寺泊",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "糸魚川・能生の舞楽",
+      "prefecture": "新潟県",
+      "designated_date": "1980-01-28",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11620925",
@@ -29710,7 +30754,16 @@
     "jalan_sml_name": "敦賀・若狭",
     "categories": [
       "神事・祭礼"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "敦賀西町の綱引き",
+      "prefecture": "福井県",
+      "designated_date": "1986-01-14",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q65269929",
@@ -29794,7 +30847,16 @@
     "jalan_sml_name": "敦賀・若狭",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "越前万歳",
+      "prefecture": "福井県",
+      "designated_date": "1995-12-26",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q65286277",
@@ -30062,7 +31124,16 @@
     "jalan_sml_name": "上諏訪・下諏訪・岡谷・霧ヶ峰・美ヶ原高原",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "新野の盆踊",
+      "prefecture": "長野県",
+      "designated_date": "1998-12-16",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11571113",
@@ -30104,7 +31175,16 @@
     "jalan_sml_name": "上諏訪・下諏訪・岡谷・霧ヶ峰・美ヶ原高原",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "跡部の踊り念仏",
+      "prefecture": "長野県",
+      "designated_date": "2000-12-27",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11666454",
@@ -30308,7 +31388,16 @@
     "jalan_sml_name": "郡上八幡・白鳥・高鷲・明宝",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "寒水の掛踊",
+      "prefecture": "岐阜県",
+      "designated_date": "2021-03-11",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11471439",
@@ -30801,7 +31890,16 @@
     "jalan_sml_name": "清水",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "徳山の盆踊",
+      "prefecture": "静岡県",
+      "designated_date": "1987-12-28",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q86735679",
@@ -32485,7 +33583,16 @@
     "jalan_sml_name": "吉野・天川・洞川",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "十津川の大踊",
+      "prefecture": "奈良県",
+      "designated_date": "1989-03-20",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q17228330",
@@ -32546,7 +33653,16 @@
     "jalan_lrg_name": "吉野・奥吉野",
     "jalan_sml_code": "290802",
     "jalan_sml_name": "吉野・天川・洞川",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "陀々堂の鬼はしり",
+      "prefecture": "奈良県",
+      "designated_date": "1995-12-26",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11261984",
@@ -32758,7 +33874,16 @@
     "jalan_sml_name": "龍神",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "那智の田楽",
+      "prefecture": "和歌山県",
+      "designated_date": "1976-05-04",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q17230686",
@@ -32943,7 +34068,16 @@
     "jalan_sml_name": "大田・温泉津",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "隠岐国分寺蓮華会舞",
+      "prefecture": "島根県",
+      "designated_date": "1977-05-17",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11659047",
@@ -33169,7 +34303,16 @@
     "jalan_sml_name": "岡山・玉野",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "白石踊",
+      "prefecture": "岡山県",
+      "designated_date": "1976-05-04",
+      "unesco": true,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q11591822",
@@ -34798,7 +35941,16 @@
     "jalan_sml_name": "西都",
     "categories": [
       "演舞・盆踊り"
-    ]
+    ],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "高千穂の夜神楽",
+      "prefecture": "宮崎県",
+      "designated_date": "1978-05-22",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q86733396",
@@ -34899,7 +36051,16 @@
     "jalan_lrg_name": "西海岸・東海岸",
     "jalan_sml_code": "470805",
     "jalan_sml_name": "東海岸",
-    "categories": []
+    "categories": [],
+    "cultural_relaw": {
+      "cultural_type": "重要無形民俗文化財",
+      "name": "安田のシヌグ",
+      "prefecture": "沖縄県",
+      "designated_date": "1978-05-22",
+      "unesco": false,
+      "url": "",
+      "source": "https://ja.wikipedia.org/w/index.php?oldid=110748472"
+    }
   },
   {
     "qid": "Q48744754",

@@ -324,9 +324,10 @@ function showSelectedMarker(key){
   selectedMarker.on('click',()=>selectFestival(key,'marker'));
 }
 function heritageBadge(f){
-  const type=String(f.cultural_relaw?.cultural_type||'').trim(),url=safeUrl(f.cultural_relaw?.url);
+  const type=String(f.cultural_relaw?.cultural_type||'').trim(),url=safeUrl(f.cultural_relaw?.url),source=safeUrl(f.cultural_relaw?.source);
   if(!type)return'';
-  return `<p class="badge-line"><span class="badge badge--heritage" role="note">文化財指定｜${esc(type)}</span>${url?`<a class="badge-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">文化遺産詳細登録情報<span aria-hidden="true">↗</span></a>`:''}</p>`;
+  const link=url?`<a class="badge-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">文化遺産詳細登録情報<span aria-hidden="true">↗</span></a>`:source?`<a class="badge-link" href="${esc(source)}" target="_blank" rel="noopener noreferrer">指定の出典<span aria-hidden="true">↗</span></a>`:'';
+  return `<p class="badge-line"><span class="badge badge--heritage" role="note">文化財指定｜${esc(type)}</span>${link}</p>`;
 }
 function detail(f){
   const qid=wikidataQID(f),title=wikipediaTitle(f);
