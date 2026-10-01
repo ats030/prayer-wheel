@@ -212,7 +212,7 @@ func fetchWikipediaContentOnce(ctx context.Context, apiURL string) ([]byte, int,
 	if err != nil {
 		return nil, 0, base, err
 	}
-	req.Header.Set("User-Agent", "omatsuri-map/1.0")
+	req.Header.Set("User-Agent", wikimediaUserAgent)
 	resp, err := wikipediaClient.Do(req)
 	if err != nil {
 		return nil, 0, base, err

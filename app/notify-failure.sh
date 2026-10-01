@@ -30,5 +30,19 @@ PAYLOAD=$(TEXT="$TEXT" python3 -c '
 import json, os
 print(json.dumps({"content": os.environ["TEXT"][:1900]}))
 ')
-curl -sS -m 20 -H "Content-Type: application/json" -d "$PAYLOAD" "$WEBHOOK" >/dev/null \
-    || echo "Discord への送信に失敗した" >&2
+# curl は 4xx/5xx でも終了コード 0 を返す。Webhook が削除されて 404 になっても成功に
+# 見え、2026-10 まで障害通知が届いていないことに気付けなかった (ats030-2v3is)。
+# 応答コードで判定し、届かなければ自分を failed にして `systemctl --user --failed` に出す。
+# このユニットには OnFailure= を付けていないので、失敗が通知を連鎖させることはない。
+BODY=$(mktemp)
+trap 'rm -f "$BODY"' EXIT
+CODE=$(curl -sS -m 20 -o "$BODY" -w '%{http_code}' -H "Content-Type: application/json" \
+    -d "$PAYLOAD" "$WEBHOOK") || CODE=000
+case "$CODE" in
+    2??) ;;
+    *)
+        # URL は秘密なので出さない。Discord の応答本文 (例: Unknown Webhook) だけ残す
+        echo "Discord への送信に失敗した (HTTP $CODE): $(head -c 300 "$BODY")" >&2
+        exit 1
+        ;;
+esac

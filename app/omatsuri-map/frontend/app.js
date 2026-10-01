@@ -450,6 +450,10 @@ async function hydrateImage(f,key){
   let result=contentIsRelevant?imageCache[f.qid]:null,loadError=null;
   if(typeof result==='string'||(result?.url&&!result.license)){delete imageCache[f.qid];persist(CACHE_KEY,imageCache);result=null}
   if(!result&&wikipediaContent?.image_url&&contentIsRelevant){result={url:safeUrl(wikipediaContent.image_url),license:String(wikipediaContent.license||'').trim(),licenseUrl:safeUrl(wikipediaContent.license_url),artist:plainText(wikipediaContent.artist),credit:plainText(wikipediaContent.credit),sourceUrl:safeUrl(wikipediaContent.image_source_url)};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
+  if(!result&&contentIsRelevant&&String(f.label_ja||'').trim()){
+    try{const data=await fetchJSONWithRetry(`/api/commons/image?label=${encodeURIComponent(f.label_ja)}&prefecture=${encodeURIComponent(f.prefecture||'')}`);result={url:safeUrl(data.image_url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),sourceUrl:safeUrl(data.image_source_url)};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
+    catch(error){}
+  }
   if(!result&&wikidataQID(f)&&contentIsRelevant){
     try{const data=await fetchJSONWithRetry(`/api/wiki/image?qid=${encodeURIComponent(f.qid)}`);result={url:safeUrl(data.url),license:String(data.license||'').trim(),licenseUrl:safeUrl(data.license_url),artist:plainText(data.artist),credit:plainText(data.credit),sourceUrl:safeUrl(data.source_url)};imageCache[f.qid]=result;persist(CACHE_KEY,imageCache)}
     catch(error){loadError=error}

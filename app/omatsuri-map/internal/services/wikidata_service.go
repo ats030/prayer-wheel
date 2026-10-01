@@ -136,7 +136,7 @@ func fetchWikidataEntityOnce(ctx context.Context, qid string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
-	req.Header.Set("User-Agent", "omatsuri-map/1.0")
+	req.Header.Set("User-Agent", wikimediaUserAgent)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -416,7 +416,7 @@ func fetchCommonsImageInfoOnce(ctx context.Context, fileName string) (string, st
 	if err != nil {
 		return "", "", err
 	}
-	req.Header.Set("User-Agent", "omatsuri-map/1.0")
+	req.Header.Set("User-Agent", wikimediaUserAgent)
 
 	resp, err := client.Do(req)
 	if err != nil {

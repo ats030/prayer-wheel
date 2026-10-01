@@ -60,7 +60,7 @@ func fetchCommonsAttributionOnce(ctx context.Context, imageURL string) (CommonsA
 	if err != nil {
 		return CommonsAttribution{}, 0, base, err
 	}
-	req.Header.Set("User-Agent", "omatsuri-map/1.0")
+	req.Header.Set("User-Agent", wikimediaUserAgent)
 	resp, err := client.Do(req)
 	if err != nil {
 		return CommonsAttribution{}, 0, base, err

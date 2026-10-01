@@ -45,7 +45,7 @@ func (h *WikidataHandler) GetWikidataImage(w http.ResponseWriter, r *http.Reques
 	if effectiveLicense == "" {
 		effectiveLicense = license
 	}
-	if err != nil || effectiveLicense == "" || (attribution.AttributionRequired && attribution.Artist == "" && attribution.Credit == "") {
+	if err != nil || effectiveLicense == "" {
 		http.Error(w, "image attribution metadata is incomplete", http.StatusNotFound)
 		return
 	}
