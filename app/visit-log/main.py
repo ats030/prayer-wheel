@@ -12,7 +12,9 @@
   IP と User-Agent は保存しない。訪問者の区別は
   sha256(永続ソルト + その日の日付 + IP + UA)[:16] だけを残す。
   日付が変わると同じ人でも別 ID になるので、日次のユニーク数は数えられるが
-  日をまたいだ個人の追跡はできない。DNT / Sec-GPC が立っていれば記録しない。
+  日をまたいだ個人の追跡はできない。DNT が立っていれば記録しない。
+  Sec-GPC は見ない。tailnet の IP だけで待ち受けるので訪問者は自分の端末に限られ、
+  第三者への提供も無い (ats030-ii3f9)。公開経路から計測するなら GPC の尊重を戻す。
 """
 
 import hashlib
@@ -165,7 +167,7 @@ def outbound_path(dt: datetime) -> Path:
 
 
 def record(request: Request, site: str, path: str, ref: str) -> None:
-    if request.headers.get("dnt") == "1" or request.headers.get("sec-gpc") == "1":
+    if request.headers.get("dnt") == "1":
         return
     if not SITE_RE.match(site or ""):
         return
@@ -188,7 +190,7 @@ def record(request: Request, site: str, path: str, ref: str) -> None:
 
 def record_outbound(request: Request, site: str) -> None:
     """外部サービスへの送客。PVとは別ログにして意味を混ぜない。"""
-    if request.headers.get("dnt") == "1" or request.headers.get("sec-gpc") == "1":
+    if request.headers.get("dnt") == "1":
         return
     now = datetime.now(TZ)
     ua = request.headers.get("user-agent", "")
@@ -399,7 +401,7 @@ async def tag():
     js = """(function(){
   var el = document.currentScript;
   if (!el) return;
-  if (navigator.doNotTrack === "1" || navigator.globalPrivacyControl) return;
+  if (navigator.doNotTrack === "1") return;
   var site = el.getAttribute("data-site") || location.hostname;
   var base = el.src.replace(/\\/v\\.js.*$/, "");
   function hit(){
