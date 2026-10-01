@@ -66,3 +66,5 @@ python3 app/shiseki-map/scripts/review_public_candidates.py \
 ## 後続の追加判断
 
 Issue `ats030-tjrm` で府中高札場を個別照合し、[府中市のCC BY公開データ](https://www.city.fuchu.tokyo.jp/gyosei/opendata/index.html)の座標と[市の現行観光案内](https://www.city.fuchu.tokyo.jp/kanko/kanko/spot.html)を用いて4件目として追加した。[当初の判定表](public-candidate-review.json)は無作為標本の再現性のため変更していない。位置と利用条件の判断は[東京候補の後続照合](held-tokyo-priority-review.md)に記録した。
+
+保留中の東京候補のうち、上記2文書で扱っていない57件は[東京候補の残り全件照合](held-tokyo-remaining-review.md)(Issue `ats030-sek8z`)で照合した。7件を公開候補としたが、地図への追加は代表点を確認してから別 issue で行う。
