@@ -13,14 +13,13 @@ import (
 // sections. Summary is the LLM-generated lead sentence (empty when the article
 // has no relevant text, a model is unavailable, or summarization is disabled
 // in a deployment without a warmed cache). Items is the structured list of
-// labelled rows. Blocks is the raw fallback content when the article has a
-// matching section heading. SourceURL is the canonical ja.wikipedia.org page
-// the content was drawn from.
+// labelled rows. The raw article text is not sent (decided 2026-10-01): a
+// section without a summary is empty and the client hides it. SourceURL is the
+// canonical ja.wikipedia.org page the content was drawn from.
 type wikiSectionPayload struct {
-	Summary   string                        `json:"summary,omitempty"`
-	Items     []services.SectionItem        `json:"items,omitempty"`
-	Blocks    []services.WikipediaTextBlock `json:"blocks,omitempty"`
-	SourceURL string                        `json:"source_url,omitempty"`
+	Summary   string                 `json:"summary,omitempty"`
+	Items     []services.SectionItem `json:"items,omitempty"`
+	SourceURL string                 `json:"source_url,omitempty"`
 }
 
 type WikipediaContentResponse struct {
@@ -110,7 +109,6 @@ func toPayload(section services.PanelSection) wikiSectionPayload {
 	return wikiSectionPayload{
 		Summary:   section.Summary,
 		Items:     section.Items,
-		Blocks:    section.Blocks,
 		SourceURL: section.SourceURL,
 	}
 }
