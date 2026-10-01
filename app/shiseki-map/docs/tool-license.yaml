@@ -36,8 +36,8 @@ sources:
     attribution: Tokyo Metropolitan Government and dataset link required
     restriction: only site-class records with valid coordinates and verified access are publication candidates
     decision: conditional
-    published_record_ids: ["0000000114", "0000000115", "0000000243", "0000000186", "0000000136", "0000000140", "0000000141", "0000000142"]
-    publication_note: eight individually checked records only; the 2019 access hours are not republished; the Fuchu site uses Fuchu City open-data coordinates instead of the Tokyo CSV coordinates
+    published_record_ids: ["0000000114", "0000000115", "0000000243", "0000000186", "0000000136", "0000000140", "0000000141", "0000000142", "0000000123", "0000000124", "0000000128", "0000000138", "0000000171", "0000000180", "0000000185"]
+    publication_note: fifteen individually checked records only; the 2019 access hours are not republished; the Fuchu, Mitaka (0128), Higashikurume (0138), and Ome (0185) sites use municipal CC BY open-data coordinates instead of the Tokyo CSV coordinates
     evidence: https://catalog.data.metro.tokyo.lg.jp/dataset/t000021d0000000017
   - name: Fuchu City open-data cultural property list
     cost: free download
@@ -48,6 +48,36 @@ sources:
     decision: approved
     published_record_ids: ["0000000018"]
     evidence: https://www.city.fuchu.tokyo.jp/gyosei/opendata/index.html
+    license_evidence: https://creativecommons.org/licenses/by/4.0/deed.ja
+  - name: Mitaka City open-data public facility locations
+    cost: free download
+    license: CC-BY-4.0
+    commercial_use: allowed
+    attribution: Mitaka City, dataset link, and modification notice required
+    restriction: use only the individually verified Dezan yokoana tomb No.8 facility row for coordinates; confirm visit guidance separately
+    decision: approved
+    published_record_ids: ["0000000128"]
+    evidence: https://catalog.data.metro.tokyo.lg.jp/dataset/t132047d0000000001
+    license_evidence: https://creativecommons.org/licenses/by/4.0/deed.ja
+  - name: Higashikurume City open-data cultural property list
+    cost: free download
+    license: CC-BY-4.0
+    commercial_use: allowed
+    attribution: Higashikurume City, dataset link, and modification notice required
+    restriction: use only the individually verified Shimosato Hon'mura site row for coordinates; confirm visit guidance separately
+    decision: approved
+    published_record_ids: ["0000000138"]
+    evidence: https://catalog.data.metro.tokyo.lg.jp/dataset/t132225d0000000002
+    license_evidence: https://creativecommons.org/licenses/by/4.0/deed.ja
+  - name: Ome City open-data urban park list
+    cost: free download
+    license: CC-BY-4.0
+    commercial_use: allowed
+    attribution: Ome City, dataset link, and modification notice required
+    restriction: use only the individually verified Reihoji park row for coordinates; confirm visit guidance separately
+    decision: approved
+    published_record_ids: ["0000000185"]
+    evidence: https://catalog.data.metro.tokyo.lg.jp/dataset/t132055d2025000003
     license_evidence: https://creativecommons.org/licenses/by/4.0/deed.ja
   - name: Tokyo Board of Education cultural walk map JSON
     cost: free to read
