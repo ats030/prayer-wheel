@@ -10,13 +10,36 @@ import (
 // wikiSectionPayload is the per-section JSON shape for the four panel
 // sections. Summary is the LLM-generated one-paragraph digest (empty when the
 // article has no relevant text, a model is unavailable, or summarization is
-// disabled). Blocks is always present as the raw fallback content when the
-// article has a matching section heading. SourceURL is the canonical
-// ja.wikipedia.org page the content was drawn from.
+// disabled). Blocks is the raw fallback content when the article has a
+// matching section heading, except for summaryOnlyDesignations: those sites
+// never carry the raw text, and RawOmitted marks a section whose text exists
+// but has no summary yet. SourceURL is the canonical ja.wikipedia.org page the
+// content was drawn from.
 type wikiSectionPayload struct {
-	Summary   string                        `json:"summary,omitempty"`
-	Blocks    []services.WikipediaTextBlock `json:"blocks,omitempty"`
-	SourceURL string                        `json:"source_url,omitempty"`
+	Summary    string                        `json:"summary,omitempty"`
+	Blocks     []services.WikipediaTextBlock `json:"blocks,omitempty"`
+	RawOmitted bool                          `json:"raw_omitted,omitempty"`
+	SourceURL  string                        `json:"source_url,omitempty"`
+}
+
+// summaryOnlyDesignations are the designations cmd/summary-warm covers first
+// (special + national). Their panels show the summary only; the other
+// designations keep the raw text until their summaries are warmed too.
+var summaryOnlyDesignations = map[string]bool{"special": true, "national": true}
+
+// WikipediaContentHandler serves /api/wiki/content. designation looks up a
+// site's designation by QID so the raw-text policy is decided server-side.
+type WikipediaContentHandler struct {
+	designation func(qid string) string
+}
+
+func NewWikipediaContentHandler(service *services.ShisekiService) *WikipediaContentHandler {
+	return &WikipediaContentHandler{designation: func(qid string) string {
+		if site := service.GetByQID(qid); site != nil {
+			return site.Designation
+		}
+		return ""
+	}}
 }
 
 type WikipediaContentResponse struct {
@@ -43,7 +66,7 @@ type WikipediaContentResponse struct {
 	SectionsUnavailable bool `json:"sections_unavailable,omitempty"`
 }
 
-func GetWikipediaContent(w http.ResponseWriter, r *http.Request) {
+func (h *WikipediaContentHandler) GetWikipediaContent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -83,20 +106,26 @@ func GetWikipediaContent(w http.ResponseWriter, r *http.Request) {
 		// so the client keeps the panel visible and retries on the next open.
 		response.SectionsUnavailable = true
 	} else {
-		response.History = toPayload(history)
-		response.Remains = toPayload(remains)
-		response.Access = toPayload(access)
-		response.Highlights = toPayload(highlights)
+		summaryOnly := summaryOnlyDesignations[h.designation(qid)]
+		response.History = toPayload(history, summaryOnly)
+		response.Remains = toPayload(remains, summaryOnly)
+		response.Access = toPayload(access, summaryOnly)
+		response.Highlights = toPayload(highlights, summaryOnly)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
-func toPayload(section services.PanelSection) wikiSectionPayload {
-	return wikiSectionPayload{
+func toPayload(section services.PanelSection, summaryOnly bool) wikiSectionPayload {
+	payload := wikiSectionPayload{
 		Summary:   section.Summary,
 		Blocks:    section.Blocks,
 		SourceURL: section.SourceURL,
 	}
+	if summaryOnly {
+		payload.RawOmitted = payload.Summary == "" && len(payload.Blocks) > 0
+		payload.Blocks = nil
+	}
+	return payload
 }

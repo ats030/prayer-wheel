@@ -54,7 +54,7 @@ func main() {
 	mux.HandleFunc("/api/shiseki", shisekiHandler.GetAllShiseki)
 	mux.HandleFunc("/api/wiki/image", wikidataHandler.GetWikidataImage)
 	mux.HandleFunc("/api/wiki/links", wikidataHandler.GetWikidataLinks)
-	mux.HandleFunc("/api/wiki/content", handlers.GetWikipediaContent)
+	mux.HandleFunc("/api/wiki/content", handlers.NewWikipediaContentHandler(service).GetWikipediaContent)
 	mux.HandleFunc("/api/geocoding/reverse", geocodingHandler.ReverseGeocode)
 	mux.HandleFunc("/api/jalan/nearby", jalanHandler.NearbyHotels)
 	mux.HandleFunc("/api/hotel-area/nearby", hotelAreaHandler.NearbyHotels)

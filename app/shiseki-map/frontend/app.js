@@ -315,6 +315,11 @@ async function hydrateWikiSection(o,key,config){
   const source=safeUrl(payload.source_url)||safeUrl(data.source_url);
   const license=safeUrl(data.content_license_url);
   if(!body)return;
+  if(!summary&&!blocks.length&&payload.raw_omitted){
+    body.innerHTML='<p class="detail-empty">要約はまだありません。</p>';
+    if(status)status.innerHTML=source?`原文：${wikiLink(source)}`:'';
+    return;
+  }
   if(!summary&&!blocks.length){
     body.innerHTML=`<p class="detail-empty">${esc(config.placeholder)}</p>`;
     if(status)status.textContent='';
