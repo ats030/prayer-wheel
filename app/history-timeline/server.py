@@ -15,7 +15,7 @@ HOST = os.environ.get("TIMELINE_HOST", "127.0.0.1")
 PORT = int(os.environ.get("TIMELINE_PORT", "8532"))
 SLOT = threading.BoundedSemaphore(1)
 REQUEST_TIME_LIMIT = TIME_LIMIT
-ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/styles.css": ("styles.css", "text/css; charset=utf-8"), "/tokens.css": ("tokens.css", "text/css; charset=utf-8"), "/favicon.svg": ("favicon.svg", "image/svg+xml")}
+ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/changelog": ("changelog.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/styles.css": ("styles.css", "text/css; charset=utf-8"), "/tokens.css": ("tokens.css", "text/css; charset=utf-8"), "/favicon.svg": ("favicon.svg", "image/svg+xml")}
 
 
 def pipeline_worker(query, connection):
