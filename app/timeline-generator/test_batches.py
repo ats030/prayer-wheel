@@ -105,19 +105,50 @@ class BatchTests(unittest.TestCase):
         self.assertEqual(result['events'], [])
         self.assertFalse(any(r['kind'] == 'checkpoint' for r in records))
 
-    def test_later_verification_failure_keeps_only_previous_verified_batch(self):
+    def run_with_failures(self, failing_calls, count=35):
         calls = 0
-        def fail_later(system, prompt, deadline, schema):
+        def fail_some(system, prompt, deadline, schema):
             nonlocal calls
             calls += 1
-            if calls == 4:
+            if calls in failing_calls:
                 raise t.TimelineError('verification failed')
             return grounded_model(system, prompt, deadline, schema)
         records = []
-        result = self.run_generation(history_source(35), fail_later, records)
+        with patch('sys.stderr'):
+            result = self.run_generation(history_source(count), fail_some, records)
+        return result, records
+
+    def test_one_failed_batch_is_skipped_and_later_batches_continue(self):
+        # Calls 1-2 verify the first batch; call 4 is the second batch's verification.
+        result, records = self.run_with_failures({4})
+        self.assertEqual(result['stop_reason'], 'processing_error')
+        checkpoints = [r['events'] for r in records if r['kind'] == 'checkpoint']
+        self.assertEqual([len(c) for c in checkpoints], [15, 20])
+        self.assertTrue(all(e in result['events'] for e in checkpoints[0]))
+
+    def test_first_batch_failure_does_not_abort_generation(self):
+        result, _ = self.run_with_failures({1})
+        self.assertEqual(len(result['events']), 20)
+        self.assertEqual(result['stop_reason'], 'processing_error')
+
+    def test_repeated_failures_stop_and_keep_verified_batches(self):
+        result, records = self.run_with_failures({3, 5}, count=50)
         self.assertEqual(result['stop_reason'], 'processing_error')
         self.assertEqual(len(result['events']), 15)
         self.assertEqual(result['events'], next(r['events'] for r in records if r['kind'] == 'checkpoint'))
+
+    def test_failures_without_verified_events_raise(self):
+        with self.assertRaises(t.TimelineError):
+            self.run_with_failures({1, 3})
+
+    def test_truncated_model_json_is_reported_with_cause(self):
+        # The model hits num_predict and returns HTTP 200 with cut-off JSON.
+        response = {'message': {'content': '{"events": [{"year": 1958, "title": "チキン'}, 'done_reason': 'length', 'eval_count': 3000}
+        with patch.object(t, 'json_request', return_value=response):
+            with self.assertRaises(t.TimelineError) as caught:
+                t.model_json('s', 'p', time.monotonic() + 60, t.EVENT_SCHEMA)
+        self.assertIn('done_reason=length', str(caught.exception.__cause__))
+        self.assertNotIn('チキン', str(caught.exception.__cause__))
 
     def test_deadline_between_batches_preserves_verified_work(self):
         clock = [0]

@@ -9,6 +9,7 @@ import json
 import os
 import re
 import socket
+import sys
 import threading
 import time
 import unicodedata
@@ -24,6 +25,7 @@ VERIFY_MODEL = os.environ.get("TIMELINE_VERIFY_MODEL", "qwen3.8:27b")
 TIME_LIMIT = 600
 MAX_EVENTS = 100
 BATCH_EVENTS = 15
+MAX_CONSECUTIVE_FAILURES = 2
 MATERIAL_BUDGET = 12000
 PIPELINE_VERSION = 3
 PERIOD_INPUT_ERROR = "年代による絞り込みはできません。年代条件を外してください。"
@@ -434,10 +436,16 @@ def model_json(system, prompt, deadline, schema):
         raise TimelineError("処理時間の上限に達しました。テーマを絞って再検索してください。")
     try:
         response = json_request(OLLAMA_URL + "/api/chat", {"model": VERIFY_MODEL if schema is VERIFY_SCHEMA else MODEL, "stream": False, "think": False, "format": schema, "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}], "options": {"temperature": 0, "num_predict": 3000, "num_ctx": 16384}}, timeout=min(125, left))
-        content = response.get("message", {}).get("content", "")
-        return json.loads(content)
-    except (OSError, ValueError, KeyError) as exc:
+    except (OSError, ValueError) as exc:
         raise TimelineError("年表の生成を完了できませんでした。少し待つか、テーマを絞って再検索してください。") from exc
+    message = response.get("message") if isinstance(response, dict) else None
+    content = message.get("content", "") if isinstance(message, dict) else ""
+    try:
+        return json.loads(content)
+    except (TypeError, ValueError) as exc:
+        # Keep the cause diagnosable without logging model output, which may echo the query.
+        detail = ValueError(f"unreadable model JSON: done_reason={response.get('done_reason') if isinstance(response, dict) else None} eval_count={response.get('eval_count') if isinstance(response, dict) else None} chars={len(content) if isinstance(content, str) else None}")
+        raise TimelineError("年表の生成を完了できませんでした。少し待つか、テーマを絞って再検索してください。") from detail
 
 
 def crosscheck_sources(events, sources, query, deadline):
@@ -768,6 +776,7 @@ def build_timeline(query, emit):
         sources = [source for source in pool.map(reader.fetch, results) if source]
     events, review_notes = [], []
     stop_reason = 'sources_exhausted'
+    failure, consecutive_failures = None, 0
     for index, batch in enumerate(material_batches(sources, query), 1):
         # Leave finalization time to the parent process even if an upstream stalls.
         if deadline - time.monotonic() < 10:
@@ -780,11 +789,18 @@ def build_timeline(query, emit):
                     record = record | {'message': f'第{index}組 · 検証済み {len(events)} / {MAX_EVENTS}件。' + record.get('message', '')}
                 emit(record)
             additions, notes = build_batch(query, batch, batch_progress, deadline - 2, events)
-        except TimelineError:
-            if not events:
-                raise
-            stop_reason = 'time_limit' if deadline - time.monotonic() < 10 else 'processing_error'
-            break
+        except TimelineError as exc:
+            # One failed batch must not discard the remaining material; stop only when failures repeat.
+            failure, consecutive_failures = exc, consecutive_failures + 1
+            print(f'timeline batch {index} failed: {exc} cause={exc.__cause__!r}', file=sys.stderr, flush=True)
+            if deadline - time.monotonic() < 10:
+                stop_reason = 'time_limit'
+                break
+            if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
+                stop_reason = 'processing_error'
+                break
+            continue
+        consecutive_failures = 0
         events = merge_events(events, additions)
         review_notes.extend(note for note in notes if note not in review_notes)
         if events:
@@ -793,8 +809,12 @@ def build_timeline(query, emit):
         if len(events) >= MAX_EVENTS:
             stop_reason = 'event_limit'
             break
+    if failure is not None and not events:
+        raise failure
     if stop_reason == 'time_limit' and not events:
         raise TimelineError('時間上限に達し、検証済みの出来事を保存できませんでした。再試行してください。')
+    if failure is not None and stop_reason == 'sources_exhausted':
+        stop_reason = 'processing_error'
     return timeline_result(query, events, review_notes, started, stop_reason)
 
 
