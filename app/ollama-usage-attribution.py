@@ -219,10 +219,14 @@ def main() -> int:
         (r["_src"][0], r["_src"][1]) if r["_src"] else ("未帰属", "-") for r in target)
     by_app = collections.Counter()
     tokens = collections.Counter()
+    # トークン0件は空撃ちとは限らない。上流の 502/503 で落ちた要求もトークン0で
+    # 記録されるので、呼び出し元ごとの失敗 (= 再試行の種) を状態別に残す。
+    status = collections.defaultdict(collections.Counter)
     for r in target:
         app = r["_src"][0] if r["_src"] else "未帰属"
         by_app[app] += 1
         tokens[app] += (r.get("input", 0) or 0) + (r.get("output", 0) or 0)
+        status[app][str(r.get("status"))] += 1
     unattr = by_app["未帰属"]
 
     span = f"{target[0]['ts']} 〜 {target[-1]['ts']}"
@@ -244,6 +248,7 @@ def main() -> int:
         "by_app": dict(by_app.most_common()),
         "tokens_by_app": dict(tokens.most_common()),
         "by_app_and_method": {f"{a}|{h}": n for (a, h), n in counts.most_common()},
+        "status_by_app": {a: dict(status[a].most_common()) for a, _ in by_app.most_common()},
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
