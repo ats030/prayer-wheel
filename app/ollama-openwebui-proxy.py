@@ -682,6 +682,12 @@ def log_usage(path: str, request_body: bytes | None, tail: bytes,
         "status": status,
         "client": client_label(user_agent, client_app),
     }
+    # client は User-Agent との混在で、名乗った呼び出し元かどうか見分けられない。
+    # 集計で時刻の突き合わせ (ollama-usage-attribution.py) を要らなくするため、
+    # 名乗った値は別欄にも残す。名乗らない呼び出しは従来どおり欄を持たない。
+    app = (client_app or "").strip()[:40]
+    if app:
+        record["client_app"] = app
     for key in ("finish_reason", "response_kind"):
         if usage.get(key):
             record[key] = usage[key]

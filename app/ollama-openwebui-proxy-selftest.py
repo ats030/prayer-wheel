@@ -241,10 +241,12 @@ with tempfile.TemporaryDirectory() as tmp:
                     "python-requests/2.32.3", 200, 4600)
     proxy.log_usage("/api/embed", b'{"model":"bge-m3"}', EMBED_RESPONSE, "",
                     200, 31)
+    proxy.log_usage("/api/generate", b'{"model":"gemma4:12b"}', NDJSON_STREAM,
+                    "python-httpx/0.28.1", 200, 900, client_app=" rss-reader ")
     files = sorted(proxy.USAGE_LOG_DIR.glob("usage-*.jsonl"))
     check("ファイルは1つ", len(files), 1)
     lines = files[0].read_text(encoding="utf-8").splitlines()
-    check("行数", len(lines), 2)
+    check("行数", len(lines), 3)
     first = json.loads(lines[0])
     check("path", first["path"], "/api/chat")
     check("model", first["model"], "qwen3.8:27b")
@@ -260,6 +262,10 @@ with tempfile.TemporaryDirectory() as tmp:
     check("埋め込みのモデル", second["model"], "bge-m3")
     check("埋め込みのトークン", second["output"], 0)
     check("client 不明", second["client"], "unknown")
+    check("名乗らない呼び出しに client_app は無い", "client_app" in first, False)
+    third = json.loads(lines[2])
+    check("X-Client-App は client_app に残る", third["client_app"], "rss-reader")
+    check("X-Client-App は client にも出る", third["client"], "rss-reader")
 
     print("10. 秘密を記録しない")
     body = files[0].read_text(encoding="utf-8")
