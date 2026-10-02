@@ -205,11 +205,11 @@ with sync_playwright() as playwright:
         page.goto(URL)
         page.locator("#query").fill(query)
         page.locator("#submit").click()
-        page.wait_for_function("!document.getElementById('submit').disabled")
+        page.wait_for_function("location.pathname.startsWith('/timelines/') || document.getElementById('submit')?.disabled === false")
         if not "/timelines/" in page.url:
             assert not page.locator("#form-error").is_visible()
             page.locator("#receipt-link").click()
-        page.wait_for_function("document.getElementById('job-status').textContent === '完了' || document.getElementById('job-status').textContent === '失敗'", timeout=650000)
+        page.wait_for_function("document.getElementById('job-status')?.textContent === '完了' || document.getElementById('job-status')?.textContent === '失敗'", timeout=650000)
         assert page.locator("#job-status").inner_text() == "完了", page.locator("#page-error").inner_text()
         assert page.locator(".event").count() > 0, page.locator("#result-notice").inner_text()
         print("LIVE:", query, page.locator("#result-meta").inner_text(), flush=True)
