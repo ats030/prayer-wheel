@@ -84,6 +84,21 @@ decisions:
       - No trademark or endorsement rights
       - Model licence does not clear source-text copyright or every generated output
     notes: /api/show for gemma4:12b returned Apache License 2.0; official Gemma 4 licence corroborates it
+  - tool: Qwen3.8 27B existing local verification model
+    version_or_plan: "qwen3.8:27b; digest e2f1eae8c29862f144df2aa287ba5d7175ffde6e28b98378e44305ff1ee934ce"
+    category: model
+    status: conditional
+    license: Apache-2.0
+    commercial_use: permitted subject to licence notices
+    cost: Existing local weights; no hosted API charge; infrastructure costs remain
+    license_url: https://huggingface.co/Qwen/Qwen3.8-27B/blob/main/LICENSE
+    terms_url: https://github.com/QwenLM/Qwen3.8#license-agreement
+    evidence_retrieved: 2026-10-02
+    restrictions:
+      - Preserve licence and notices when redistributing weights or derivatives
+      - No trademark or endorsement rights
+      - Model licence does not clear source-text copyright
+    notes: Existing local /api/show and publisher licence both identify Apache-2.0; verification only
   - tool: Retrieved web pages
     version_or_plan: Dynamic per-query public sources
     category: dataset

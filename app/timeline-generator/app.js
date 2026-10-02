@@ -31,6 +31,18 @@ function render(data) {
   $("result-heading").textContent = data.theme;
   $("result-meta").textContent = `${data.period} · ${data.events.length}件 · ${data.elapsed_seconds}秒`;
   $("result-notice").textContent = data.notice;
+  for (const note of data.review_notes || []) {
+    $("result-notice").append(node("br"), node("span", "", `採用を見送った候補：${note.date} ${note.title}。${note.reason}`));
+    for (const source of note.sources || []) {
+      const url = new URL(source.url);
+      if (!["http:", "https:"].includes(url.protocol)) continue;
+      const link = node("a", "source-link", `補足資料：${source.title} ↗`);
+      link.href = url.href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      $("result-notice").append(node("br"), link);
+    }
+  }
   $("result-empty").hidden = data.events.length > 0;
   $("timeline").replaceChildren();
   for (const event of data.events) {
@@ -49,6 +61,7 @@ function render(data) {
     source.append(link, node("span", "source-domain", url.hostname));
     const evidence = node("details");
     evidence.append(node("summary", "", "根拠を見る"), node("p", "quote-title", event.source.title), node("blockquote", "", event.quote));
+    if (event.source.context_heading) evidence.append(node("p", "quote-title", `本文の見出し：${event.source.context_heading}`));
     body.append(source, evidence);
     row.append(body);
     $("timeline").append(row);

@@ -5,8 +5,9 @@ import sys
 from playwright.sync_api import sync_playwright
 
 URL = os.environ.get("TIMELINE_TEST_URL", "http://100.94.207.13:8532")
-RESULT = {"kind": "result", "theme": "テスト用の年表", "period": "1900年〜", "elapsed_seconds": 1.2, "notice": "ブラウザ検証専用の応答です。", "events": [{"year": 1971, "date": "1971年", "title": "テスト用の出来事", "description": '<script>window.injected=true</script> テスト本文。', "quote": "In 1971, a test event occurred.", "source": {"url": "https://example.org/history", "title": "Test history source"}}]}
+RESULT = {"kind": "result", "theme": "テスト用の年表", "period": "1900年〜", "elapsed_seconds": 1.2, "notice": "ブラウザ検証専用の応答です。", "events": [{"year": 1971, "date": "1971年", "title": "テスト用の出来事", "description": '<script>window.injected=true</script> テスト本文。', "quote": "In 1971, a test event occurred.", "source": {"url": "https://example.org/history", "title": "Test history source", "context_heading": "1971年 <script>window.injected=true</script>"}}]}
 BASE = {"id": 1, "query": "テストテーマ 1900年以降", "state": "queued", "message": "登録順に生成します。", "stage": None, "error": None, "has_result": False, "result": None, "generated_at": None}
+RESULT['review_notes']=[{'date':'1683年','title':'テスト用の候補','reason':'伝説と史料に矛盾。<script>window.injected=true</script>','sources':[{'title':'補足資料','url':'https://example.org/other'}]}]
 
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch(headless=True)
@@ -82,7 +83,12 @@ with sync_playwright() as playwright:
     page.locator("summary").focus()
     page.keyboard.press("Enter")
     assert page.locator("blockquote").is_visible()
-    assert page.locator(".source-link").get_attribute("rel") == "noopener noreferrer"
+    assert '本文の見出し：1971年 <script>' in page.locator('details').inner_text()
+    assert not page.evaluate('Boolean(window.injected)')
+    assert page.locator(".event .source-link").get_attribute("rel") == "noopener noreferrer"
+    assert '採用を見送った候補' in page.locator('#result-notice').inner_text()
+    assert page.locator('#result-notice a').get_attribute('rel') == 'noopener noreferrer'
+    assert not page.evaluate('Boolean(window.injected)')
     for width in [320, 375, 414, 768, 1280]:
         page.set_viewport_size({"width": width, "height": 900})
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), ("result", width)
