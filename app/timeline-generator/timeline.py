@@ -220,6 +220,8 @@ def select_passages(passages, query, budget=2400):
         if not dated and not (topical and milestone):
             continue
         score = 4 * dated + 2 * topical + 3 * milestone
+        if re.search(r"製法|技法|方式|源流|転換|工業化|産業化|商品化|製品化|製造|生産", passage["text"]):
+            score += 4
         if re.search(r'伝説|伝承|諸説|異説|しかし|実際|legend|however',passage['text'],re.I):
             score += 6
         if score:
