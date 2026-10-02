@@ -2,6 +2,9 @@
 Description=SearXNG local metasearch for writing context
 After=network-online.target
 Wants=network-online.target
+# evo-x2 では llm-stack の Docker が 127.0.0.1:8081 で SearXNG を出しており、
+# この venv も無い (ats030-q2ryn)。venv のあるホストだけで起動する。
+ConditionPathExists=/home/ats030/.venv/searxng/bin/granian
 
 [Service]
 Type=simple

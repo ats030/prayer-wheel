@@ -1,6 +1,8 @@
 [Unit]
 Description=Daily Reflection auto report (previous day)
 After=network-online.target
+# daily-reflection.service と同じ理由。
+ConditionPathIsDirectory=/home/ats030/data/daily-reflection
 
 [Service]
 Type=oneshot

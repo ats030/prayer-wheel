@@ -75,13 +75,31 @@ def is_enabled(unit: str) -> bool:
     return out.stdout.strip() not in ("disabled", "masked")
 
 
+def skipped_by_condition(unit: str) -> bool:
+    """直近の起動が Condition*= で見送られたか。
+
+    ホームは2台 (ubuntu-server-app / evo-x2) で同じユニット定義を git 共有するので、
+    片方にしかないアプリはユニット側の Condition で起動を見送る (ats030-x007l)。
+    見送られたユニットは「この台では動かさない」と決めたものなので、監視しない。
+    一度も評価されていない (タイムスタンプ0) ときは未起動なだけなので監視を続ける。
+    """
+    try:
+        out = subprocess.run(["systemctl", "--user", "show", unit,
+                              "-p", "ConditionResult", "-p", "ConditionTimestampMonotonic"],
+                             capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    props = dict(l.split("=", 1) for l in out.stdout.splitlines() if "=" in l)
+    return props.get("ConditionResult") == "no" and props.get("ConditionTimestampMonotonic", "0") != "0"
+
+
 def discover_targets() -> list[dict]:
     targets = []
     for f in sorted(UNIT_DIR.glob("*.service")):
         # テンプレートユニットは起動対象ではない
         if f.name.endswith("@.service"):
             continue
-        if not is_enabled(f.name):
+        if not is_enabled(f.name) or skipped_by_condition(f.name):
             continue
         try:
             desc = next((l.split("=", 1)[1].strip() for l in f.read_text(encoding="utf-8").splitlines()
@@ -111,6 +129,10 @@ def check(browser, host: str, target: dict) -> list[str]:
         problems = []
         if resp is None or not (200 <= resp.status < 300):
             problems.append(f"HTTP {resp.status if resp else '応答なし'}")
+        # 画面ではなく JSON API (web-search の / は {"ok":true,...}) には title も
+        # 本文の長さも無い。応答が返ること (上の HTTP 判定) だけを見る。
+        if resp is not None and "json" in resp.headers.get("content-type", ""):
+            return problems
         if not page.title().strip():
             problems.append("titleが空")
         body = page.inner_text("body").strip()

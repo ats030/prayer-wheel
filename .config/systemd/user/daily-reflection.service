@@ -1,6 +1,9 @@
 [Unit]
 Description=Daily Reflection (port 8507)
 After=network-online.target
+# 日報の資料と出力は ~/data/daily-reflection (別リポジトリ) にあり、ubuntu-server-app にしか無い。
+# 無いホストでは 200/CHDIR で failed になるので、起動自体を見送る (ats030-x007l)。
+ConditionPathIsDirectory=/home/ats030/data/daily-reflection
 
 [Service]
 Type=simple

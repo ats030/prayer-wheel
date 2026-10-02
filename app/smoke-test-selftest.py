@@ -25,9 +25,15 @@ import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 BODY = sys.argv[2].encode()
 CODE = int(sys.argv[3])
+JSON = BODY.startswith(b"{")
 class H(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(CODE)
+        if JSON:
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(BODY)
+            return
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.end_headers()
         self.wfile.write(b"<html><head><title>t</title></head><body>" + BODY + b"</body></html>")
@@ -43,6 +49,9 @@ CASES = [
     ("エラー文字列を含む長い本文", 18804,
      "運用メモ: 500だと画面にInternal Server Errorしか出ない。" + "あ" * 400, 200, False),
     ("正常な画面", 18805, "ダッシュボード" + "い" * 100, 200, False),
+    # web-search の / は画面でなく JSON。title も長い本文も無いが正常。
+    ("JSON API の正常応答", 18806, '{"ok":true,"site_sources":2}', 200, False),
+    ("JSON API のエラー応答", 18807, '{"error":"x"}', 503, True),
 ]
 
 
