@@ -283,7 +283,7 @@ with sync_playwright() as playwright:
         page.goto(URL)
         page.locator("#query").fill(query)
         page.locator("#submit").click()
-        page.wait_for_function("location.pathname.startsWith('/timelines/') || document.getElementById('submit')?.disabled === false")
+        page.wait_for_function("location.pathname.startsWith('/timelines/') || document.getElementById('receipt')?.hidden === false || document.getElementById('form-error')?.hidden === false")
         if not "/timelines/" in page.url:
             assert not page.locator("#form-error").is_visible()
             page.locator("#receipt-link").click()
