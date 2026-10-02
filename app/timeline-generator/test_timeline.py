@@ -24,17 +24,21 @@ def slow_worker(query, connection):
 
 
 class QueryTests(unittest.TestCase):
-    def test_compound_filters_and_full_width(self):
-        q = t.parse_query("半導体 日本 １９８０年以降 2000年まで")
-        self.assertEqual((q.topic, q.start, q.end), ("半導体 日本", 1980, 2000))
+    def test_full_period_and_normalized_keywords(self):
+        q = t.parse_query("半導体　日本")
+        self.assertEqual((q.topic, q.start, q.end, q.period), ("半導体 日本", None, None, "全期間"))
 
-    def test_bce_and_century_boundaries(self):
-        q = t.parse_query("ローマ 紀元前500年〜100年")
-        self.assertEqual((q.start, q.end), (-500, 100))
-        q = t.parse_query("ローマ 紀元前5世紀")
-        self.assertEqual((q.start, q.end), (-500, -401))
-        q = t.parse_query("京都 20世紀")
-        self.assertEqual((q.start, q.end), (1901, 2000))
+    def test_period_conditions_are_rejected_without_removing_them(self):
+        for value in ["半導体 日本 １９８０年以降 2000年まで", "ローマ 紀元前500年〜100年", "ローマ 紀元前5世紀", "京都 20世紀", "京都 1900〜2000年", "京都 1900-2000", "京都 1980年代", "京都 昭和20年以降", "京都 (20世紀)", "1980年以降 京都", "京都 1900年", "京都 2000年まで"]:
+            with self.subTest(value=value), self.assertRaisesRegex(t.TimelineError, "年代条件を外してください"):
+                t.parse_query(value)
+        for period in ['20世紀', '1980年代', '紀元前5世紀']:
+            for suffix in ['以降', '以前', 'から', 'まで']:
+                with self.subTest(period=period, suffix=suffix), self.assertRaises(t.TimelineError):
+                    t.parse_query(f'京都 {period}{suffix}')
+        for period in ['1980年代から2000年代まで', '19世紀〜20世紀', '昭和20年から平成元年まで', '紀元前500', '西暦1900']:
+            with self.subTest(period=period), self.assertRaises(t.TimelineError):
+                t.parse_query('京都 ' + period)
 
     def test_invalid_and_uninterpreted_filters(self):
         for value in [None, "", "2000年以降", "京都 2000〜1900年", "京都 0年以降", "京都 1980年代", "京都 昭和20年以降", "京都 令和5年まで", "a" * 181]:
@@ -42,7 +46,11 @@ class QueryTests(unittest.TestCase):
                 t.parse_query(value)
 
     def test_historical_topic_name_is_not_a_date_filter(self):
-        self.assertEqual(t.parse_query("100年戦争").topic, "100年戦争")
+        for value in ["1984", "１９８４", "20世紀フォックス", "20世紀少年", "2001年宇宙の旅", "百年戦争", "100年戦争", "GPT-4.1", "半導体 日本", "1968年の学生運動"]:
+            with self.subTest(value=value):
+                q = t.parse_query(value)
+                self.assertEqual(q.topic, t.compact(value))
+                self.assertEqual((q.start, q.end), (None, None))
 
 
 class EvidenceTests(unittest.TestCase):
@@ -55,7 +63,7 @@ class EvidenceTests(unittest.TestCase):
         for changes in [{"quote": "In 1971, the first coffee shop opened in Tokyo."}, {"year": 1987}, {"source_id": 2}, {"source_id": True}, {"year": 0}, {"year": -1971}]:
             with self.subTest(changes=changes):
                 self.assertEqual(t.validate_events([self.event | changes], self.sources, t.parse_query("コーヒー")), [])
-        self.assertEqual(t.validate_events([self.event], self.sources, t.parse_query("コーヒー 1980年以降")), [])
+        self.assertEqual(t.validate_events([self.event], self.sources, t.Query("", "コーヒー", 1980)), [])
 
     def test_display_year_cannot_disagree_with_sort_year(self):
         e = self.event | {"date": "2000年"}
@@ -172,6 +180,37 @@ class HTTPTests(unittest.TestCase):
             self.assertEqual(json.load(response)["total"], 1)
         with urlopen(self.url + f"/timelines/{job['id']}") as response:
             self.assertIn(b'data-site="timeline-generator"', response.read())
+
+    def test_rejected_period_inputs_create_no_jobs(self):
+        for value in ["半導体 1980年以降", "京都 1900〜2000年", "ジャズ 20世紀", "京都 1980年代以降", "京都 紀元前500", "京都 西暦1900"]:
+            with self.subTest(value=value), self.assertRaises(HTTPError) as raised:
+                self.request({"query": value})
+            self.assertEqual(raised.exception.code, 400)
+            self.assertIn("年代条件を外してください", json.load(raised.exception)['error'])
+        self.assertEqual(self.store.listing()['total'], 0)
+        with self.request({'query': '20世紀フォックス'}) as response:
+            self.assertFalse(json.load(response)['legacy_period'])
+
+    def test_period_archive_is_readable_but_actions_return_conflict(self):
+        job, _ = self.store.submit(t.parse_query('インターネット'))
+        result = {'kind': 'result', 'events': [{'quote': 'original evidence'}]}
+        with self.store.connect() as db:
+            db.execute("UPDATE jobs SET cache_key=?, query=?, state='complete', result=? WHERE id=?", (json.dumps(['インターネット', 1980, None], ensure_ascii=False), 'インターネット 1980年以降', json.dumps(result), job['id']))
+        with urlopen(self.url + f"/api/jobs/{job['id']}") as response:
+            archived = json.load(response)
+        self.assertTrue(archived['legacy_period'])
+        self.assertEqual(archived['result'], result)
+        for action in ['retry', 'regenerate']:
+            with self.assertRaises(HTTPError) as raised:
+                urlopen(Request(self.url + f"/api/jobs/{job['id']}/{action}", data=b'{}', headers={'Content-Type': 'application/json'}))
+            self.assertEqual(raised.exception.code, 409)
+            self.assertIn('閲覧専用', json.load(raised.exception)['error'])
+        with self.request({'query': 'インターネット'}) as response:
+            new = json.load(response)
+            self.assertEqual(response.status, 201)
+        self.assertNotEqual(new['id'], archived['id'])
+        self.assertFalse(new['legacy_period'])
+        self.assertEqual(self.store.get(job['id']), archived)
 
     def test_absolute_deadline_terminates_worker(self):
         records = []

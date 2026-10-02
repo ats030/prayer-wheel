@@ -8,7 +8,16 @@ from pathlib import Path
 import sqlite3
 import threading
 
-from timeline import parse_query
+from timeline import PERIOD_INPUT_ERROR, Query, TimelineError, parse_query
+
+LEGACY_PERIOD_ERROR = "期間限定の年表は閲覧専用です。年代条件を外して新しく登録してください。"
+
+
+def query_info(cache_key):
+    """Derive archive status from the persisted request, not generated prose."""
+    topic, start, end = json.loads(cache_key)
+    return {"topic": topic, "period": Query("", topic, start, end).period,
+            "legacy_period": start is not None or end is not None}
 
 
 def now():
@@ -59,7 +68,7 @@ class JobStore:
         if row is None:
             return None
         item = dict(row)
-        item.pop("cache_key", None)
+        item.update(query_info(item.pop("cache_key")))
         result = item.pop("result")
         item["has_result"] = result is not None
         if detail:
@@ -72,6 +81,9 @@ class JobStore:
         return db.execute("SELECT value FROM counter WHERE id=1").fetchone()[0]
 
     def submit(self, query):
+        if query.start is not None or query.end is not None:
+            raise TimelineError(PERIOD_INPUT_ERROR)
+        query = parse_query(query.original)
         key = json.dumps([query.topic, query.start, query.end], ensure_ascii=False)
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")
@@ -90,13 +102,18 @@ class JobStore:
     def listing(self, limit=50, offset=0):
         with self.connect() as db:
             total = db.execute("SELECT count(*) FROM jobs").fetchone()[0]
-            rows = db.execute("""SELECT id, query, state, queue_order, created_at, updated_at,
+            rows = db.execute("""SELECT id, cache_key, query, state, queue_order, created_at, updated_at,
                 started_at, stage, message, error, generated_at,
                 result IS NOT NULL AS has_result, json_array_length(result, '$.events') AS event_count,
                 json_extract(result, '$.stop_reason') AS stop_reason
                 FROM jobs ORDER BY id DESC LIMIT ? OFFSET ?""", (limit, offset)).fetchall()
-            return {"jobs": [dict(row) | {"has_result": bool(row["has_result"])} for row in rows],
-                    "total": total, "offset": offset, "limit": limit}
+            jobs = []
+            for row in rows:
+                item = dict(row)
+                item.update(query_info(item.pop("cache_key")))
+                item["has_result"] = bool(item["has_result"])
+                jobs.append(item)
+            return {"jobs": jobs, "total": total, "offset": offset, "limit": limit}
 
     def requeue(self, identifier, action):
         with self.connect() as db:
@@ -104,6 +121,8 @@ class JobStore:
             row = db.execute("SELECT * FROM jobs WHERE id=?", (identifier,)).fetchone()
             if row is None:
                 return None
+            if query_info(row["cache_key"])["legacy_period"]:
+                raise ValueError(LEGACY_PERIOD_ERROR)
             if row["state"] in {"queued", "running"}:
                 return self.decode(row)
             if action == "retry" and row["state"] != "failed":
@@ -168,6 +187,9 @@ class QueueWorker:
             if job is None:
                 self.wake.wait(1)
                 self.wake.clear()
+                continue
+            if job["legacy_period"]:
+                self.store.record(job["id"], {"kind": "error", "message": LEGACY_PERIOD_ERROR})
                 continue
             try:
                 self.pipeline(parse_query(job["query"]), lambda record: self.store.record(job["id"], record), self.stopping)

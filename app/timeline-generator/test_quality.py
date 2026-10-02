@@ -109,10 +109,10 @@ class ContextTests(unittest.TestCase):
 
     def test_excerpt_selection_respects_requested_period(self):
         source=article('<h2>1967</h2><p>インターネットの研究開始。</p><h2>1983</h2><p>インターネットの方式を移行。</p><h2>2008</h2><p>インターネットのサービス開始。</p>')
-        selected=t.select_passages(source['passages'],t.parse_query('インターネット 1980〜1990年'))
+        selected=t.select_passages(source['passages'],t.Query('', 'インターネット', 1980, 1990))
         self.assertEqual([p['date_heading'] for p in selected],['1983'])
         ancient=article('<p>紀元前500年、ローマで制度が始まった。</p>')
-        self.assertTrue(t.select_passages(ancient['passages'],t.parse_query('ローマ 紀元前600〜紀元前400年')))
+        self.assertTrue(t.select_passages(ancient['passages'],t.Query('', 'ローマ', -600, -400)))
 
     def test_verifier_sees_context_and_theme_does_not_expand(self):
         source = article('<h3>2008</h3><p>Twitterの日本語版サービスを開始しました。</p>')

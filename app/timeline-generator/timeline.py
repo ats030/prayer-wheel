@@ -26,6 +26,7 @@ MAX_EVENTS = 100
 BATCH_EVENTS = 15
 MATERIAL_BUDGET = 12000
 PIPELINE_VERSION = 3
+PERIOD_INPUT_ERROR = "年代による絞り込みはできません。年代条件を外してください。"
 DATE_PATTERN = re.compile(r"(?<![\w.])\d{3,4}(?!\w|\.\d)|\d+年|\d+世紀|\d+(?:st|nd|rd|th)[ -]century", re.I)
 
 
@@ -50,7 +51,7 @@ class Query:
     @property
     def period(self):
         if self.start is None and self.end is None:
-            return "年代の指定なし"
+            return "全期間"
         return f"{year_label(self.start) if self.start is not None else '開始指定なし'} 〜 {year_label(self.end) if self.end is not None else '終了指定なし'}"
 
 
@@ -64,47 +65,17 @@ def parse_query(value):
     original = unicodedata.normalize("NFKC", value).strip()
     if not original or len(original) > 180 or any(ord(c) < 32 for c in original):
         raise TimelineError("キーワードを1〜180文字で入力してください。")
-    if re.search(r"(?:明治|大正|昭和|平成|令和)\s*(?:元|\d+)年", original):
-        raise TimelineError("年代条件は和暦ではなく、西暦で指定してください。")
-    topic = original
-    start = end = None
-    # Explicit numeric periods are deterministic; unsupported date syntax is rejected.
-    date = r"(紀元前\s*)?(\d{1,4})\s*年?"
-    def number(prefix, digits):
-        n = int(digits)
-        if n == 0:
-            raise TimelineError("西暦0年はありません。年代条件を修正してください。")
-        return -n if prefix else n
-    m = re.search(date + r"\s*(?:〜|~|から|–|-)\s*" + date + r"(?:まで)?", topic)
-    if m:
-        start, end = number(m[1], m[2]), number(m[3], m[4])
-        topic = topic[:m.start()] + " " + topic[m.end():]
-    for pattern, lower in [(date + r"\s*(?:以降|から)", True), (date + r"\s*(?:以前|まで)", False)]:
-        m = re.search(pattern, topic)
-        if m:
-            n = number(m[1], m[2])
-            if lower:
-                start = n if start is None else max(start, n)
-            else:
-                end = n if end is None else min(end, n)
-            topic = topic[:m.start()] + " " + topic[m.end():]
-    m = re.search(r"(紀元前\s*)?(\d{1,2})\s*世紀", topic)
-    if m:
-        century = int(m[2])
-        if not 1 <= century <= 99:
-            raise TimelineError("世紀の指定を確認してください。")
-        a, b = (-(century * 100), -((century - 1) * 100 + 1)) if m[1] else ((century - 1) * 100 + 1, century * 100)
-        start = a if start is None else max(start, a)
-        end = b if end is None else min(end, b)
-        topic = topic[:m.start()] + " " + topic[m.end():]
-    if re.search(r"\d+\s*年(?![\w一-龯ぁ-んァ-ヶ])|\d+\s*世紀|年代(?:\s|$)|以降|以前|紀元前", topic):
-        raise TimelineError("年代条件は「1980年以降」「1900〜2000年」「20世紀」の形式で指定してください。")
-    topic = " ".join(topic.split())
-    if not topic:
-        raise TimelineError("年代に加えて、調べたいテーマを入力してください。")
-    if start is not None and end is not None and start > end:
-        raise TimelineError("開始年が終了年より後です。年代条件を修正してください。")
-    return Query(original, topic, start, end)
+    # Match independent conditions, never strip digits out of a theme name.
+    # Bare numbers (1984), 20世紀フォックス and 100年戦争 remain literal themes.
+    year = r"(?:紀元前\s*|西暦\s*)?\d{1,4}\s*年?"
+    era = r"(?:明治|大正|昭和|平成|令和)\s*(?:元|\d{1,4})\s*年"
+    century = r"(?:紀元前\s*)?\d{1,2}\s*世紀"
+    decade = r"\d{1,4}\s*年代"
+    point = rf"(?:{century}|{decade}|{era}|{year})"
+    condition = rf"(?:{point}\s*(?:[〜~–-]|から)\s*{point}(?:\s*まで)?|{point}\s*(?:以降|以前|から|まで)|{century}|{decade}|(?:紀元前|西暦)\s*\d{{1,4}}\s*年?|\d{{1,4}}\s*年|{era})"
+    if re.search(rf"(?<!\w){condition}(?=$|\s|[、,;；)\]）】」』])", original):
+        raise TimelineError(PERIOD_INPUT_ERROR)
+    return Query(original, " ".join(original.split()))
 
 
 def compact(text):

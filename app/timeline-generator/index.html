@@ -18,7 +18,7 @@
       <div class="page-head"><h1 id="search-heading">年表を作る</h1></div>
       <form id="search-form" novalidate>
         <label class="sr-only" for="query">調べたいテーマ</label>
-        <div class="search-row"><input id="query" name="query" type="text" maxlength="180" placeholder="半導体 日本 1980年以降" required aria-required="true" aria-describedby="query-help form-error" autocomplete="off"><button id="submit" type="submit">キューに追加<span aria-hidden="true"> →</span></button></div>
+        <div class="search-row"><input id="query" name="query" type="text" maxlength="180" placeholder="半導体 日本" required aria-required="true" aria-describedby="query-help form-error" autocomplete="off"><button id="submit" type="submit">キューに追加<span aria-hidden="true"> →</span></button></div>
         <p class="error" id="form-error" role="alert" hidden></p>
       </form>
 
@@ -31,9 +31,9 @@
     <details id="how" class="help-panel">
       <summary>使い方</summary>
       <div class="info-body">
-        <p id="query-help">複数の言葉で絞り込めます。年代は「1980年以降」「1900〜2000年」「20世紀」のように指定します。</p>
-        <div class="examples" aria-label="検索例"><button type="button" data-query="コーヒー">コーヒー</button><button type="button" data-query="インターネット">インターネット</button><button type="button" data-query="京都 1900年以降">京都 1900年以降</button></div>
-        <p>登録順に一件ずつ、最大10分で生成します。画面を閉じても処理は続きます。同じテーマと期間の保存結果があれば再利用します。</p>
+        <p id="query-help">調べたいテーマを入力してください。複数の言葉でテーマを絞り込めます。年代による絞り込みはできません。</p>
+        <div class="examples" aria-label="検索例"><button type="button" data-query="コーヒー">コーヒー</button><button type="button" data-query="インターネット">インターネット</button><button type="button" data-query="京都 鉄道">京都 鉄道</button></div>
+        <p>テーマの歴史を全期間から調べ、登録順に一件ずつ、最大10分で生成します。画面を閉じても処理は続きます。同じテーマの保存結果があれば再利用します。</p>
         <p>根拠を確認できた出来事を最大100件まで収録します。時間上限に達した場合は検証済みの結果を保存します。原文引用は表示せず、出典リンクから資料を確認できます。</p>
       </div>
     </details>

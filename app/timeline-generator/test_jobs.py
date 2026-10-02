@@ -4,9 +4,10 @@ import tempfile
 import threading
 import time
 import unittest
+import json
 
 from jobs import JobStore, QueueWorker
-from timeline import parse_query
+from timeline import Query, TimelineError, parse_query
 from server import bounded_pipeline
 from unittest.mock import patch
 import server
@@ -26,13 +27,68 @@ class QueueTests(unittest.TestCase):
         return self.store.submit(parse_query(value))[0]
 
     def test_simultaneous_normalized_submissions_share_one_job(self):
-        values = ["半導体 日本 １９８０年以降", "半導体　日本 1980年から"] * 12
+        values = ["半導体 日本", "半導体　日本", " 半導体  日本 "] * 8
         with ThreadPoolExecutor(max_workers=8) as pool:
             jobs = list(pool.map(self.submit, values))
         self.assertEqual(len({job["id"] for job in jobs}), 1)
         self.assertEqual(self.store.listing()["total"], 1)
-        self.assertNotEqual(self.submit("日本 半導体 1980年以降")["id"], jobs[0]["id"])
-        self.assertNotEqual(self.submit("半導体 日本 2000年以降")["id"], jobs[0]["id"])
+        self.assertNotEqual(self.submit("日本 半導体")["id"], jobs[0]["id"])
+        self.assertNotEqual(self.submit("半導体 米国")["id"], jobs[0]["id"])
+
+    def test_submit_rejects_bounded_query_objects(self):
+        with self.assertRaises(TimelineError):
+            self.store.submit(Query('京都', '京都', 1980))
+        with self.assertRaises(TimelineError):
+            self.store.submit(Query('京都 20世紀', '京都'))
+        self.assertEqual(self.store.listing()['total'], 0)
+
+    def test_period_archive_is_separate_and_read_only_in_every_state(self):
+        legacy = self.submit('インターネット')
+        self.store.claim()
+        result = {'kind': 'result', 'events': [{'quote': 'stored original'}]}
+        self.store.record(legacy['id'], result)
+        with self.store.connect() as db:
+            db.execute('UPDATE jobs SET cache_key=?,query=? WHERE id=?', (json.dumps(['インターネット', 1980, None], ensure_ascii=False), 'インターネット 1980年以降', legacy['id']))
+        full = self.submit('インターネット')
+        self.assertNotEqual(full['id'], legacy['id'])
+        self.assertFalse(full['legacy_period'])
+        self.assertEqual(self.submit('インターネット')['id'], full['id'])
+        for state in ['complete', 'failed', 'queued', 'running']:
+            with self.store.connect() as db:
+                db.execute('UPDATE jobs SET state=? WHERE id=?', (state, legacy['id']))
+            before = self.store.get(legacy['id'])
+            self.assertTrue(before['legacy_period'])
+            self.assertEqual(before['topic'], 'インターネット')
+            self.assertIn('1980年', before['period'])
+            self.assertEqual(before['result'], result)
+            for action in ['retry', 'regenerate']:
+                with self.subTest(state=state, action=action), self.assertRaisesRegex(ValueError, '閲覧専用'):
+                    self.store.requeue(legacy['id'], action)
+            self.assertEqual(self.store.get(legacy['id']), before)
+        archived_row = next(row for row in self.store.listing()['jobs'] if row['id'] == legacy['id'])
+        self.assertTrue(archived_row['legacy_period'])
+        self.assertNotIn('cache_key', archived_row)
+        self.assertNotIn('stored original', str(archived_row))
+
+    def test_worker_skips_old_period_request_and_continues(self):
+        legacy = self.submit('インターネット')
+        with self.store.connect() as db:
+            db.execute('UPDATE jobs SET cache_key=?,query=? WHERE id=?', (json.dumps(['インターネット', 1980, None], ensure_ascii=False), 'インターネット 1980年以降', legacy['id']))
+        full = self.submit('インターネット')
+        done, seen = threading.Event(), []
+        def pipeline(query, emit, stopping):
+            seen.append((query.topic, query.start, query.end))
+            emit({'kind': 'result', 'events': []})
+            done.set()
+        worker = QueueWorker(self.store, pipeline)
+        worker.start()
+        try:
+            self.assertTrue(done.wait(3))
+            self.assertEqual(seen, [('インターネット', None, None)])
+            self.assertEqual(self.store.get(full['id'])['state'], 'complete')
+            self.assertIn('閲覧専用', self.store.get(legacy['id'])['error'])
+        finally:
+            worker.stop()
 
     def test_fifo_recovery_preserves_results_and_interrupted_order(self):
         first, second = self.submit("京都"), self.submit("コーヒー")

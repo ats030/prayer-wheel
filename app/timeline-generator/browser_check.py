@@ -5,10 +5,11 @@ import sys
 from pathlib import Path
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright
+from timeline import TimelineError, parse_query
 
 URL = os.environ.get("TIMELINE_TEST_URL", "http://100.94.207.13:8532")
-RESULT = {"kind": "result", "theme": "テスト用の年表", "period": "1900年〜", "elapsed_seconds": 1.2, "notice": "ブラウザ検証専用の応答です。", "events": [{"year": 1971, "date": "1971年", "title": "テスト用の出来事", "description": '<script>window.injected=true</script> テスト本文。', "quote": "In 1971, a test event occurred.", "source": {"url": "https://example.org/history", "title": "Test history source", "context_heading": "1971年 <script>window.injected=true</script>"}}]}
-BASE = {"id": 1, "query": "テストテーマ 1900年以降", "state": "queued", "message": "登録順に生成します。", "stage": None, "error": None, "has_result": False, "result": None, "generated_at": None}
+RESULT = {"kind": "result", "theme": "テスト用の年表", "period": "全期間", "elapsed_seconds": 1.2, "notice": "ブラウザ検証専用の応答です。", "events": [{"year": 1971, "date": "1971年", "title": "テスト用の出来事", "description": '<script>window.injected=true</script> テスト本文。', "quote": "In 1971, a test event occurred.", "source": {"url": "https://example.org/history", "title": "Test history source", "context_heading": "1971年 <script>window.injected=true</script>"}}]}
+BASE = {"id": 1, "query": "テストテーマ 日本", "topic": "テストテーマ 日本", "period": "全期間", "legacy_period": False, "state": "queued", "message": "登録順に生成します。", "stage": None, "error": None, "has_result": False, "result": None, "generated_at": None}
 RESULT['review_notes']=[{'date':'1683年','title':'テスト用の候補','reason':'伝説と史料に矛盾。<script>window.injected=true</script>','sources':[{'title':'補足資料','url':'https://example.org/other'},{'title':'無効なリンク','url':'javascript:window.injected=true'}]}]
 
 with sync_playwright() as playwright:
@@ -26,6 +27,12 @@ with sync_playwright() as playwright:
         path = request.url.split(URL)[-1]
         if request.method == "POST":
             posted.append(path)
+            if path == '/api/jobs':
+                try:
+                    parse_query(json.loads(request.post_data).get('query'))
+                except TimelineError as exc:
+                    route.fulfill(status=400, content_type='application/json', body=json.dumps({'error': str(exc)}))
+                    return
             if path.endswith("/retry") or path.endswith("/regenerate"):
                 job = job | {"state": "queued", "error": None, "message": "登録順に生成します。"}
             elif json.loads(request.post_data).get("query") == "エラー":
@@ -229,8 +236,42 @@ with sync_playwright() as playwright:
     page.wait_for_url("**/timelines/1")
     page.locator("#result-empty").wait_for()
     page.locator("#refine").click()
-    page.wait_for_function("document.getElementById('query').value === 'テストテーマ 1900年以降'")
+    page.wait_for_function("document.getElementById('query').value === 'テストテーマ 日本'")
     assert page.locator("#query").input_value() == BASE["query"]
+    for query in ['半導体 1980年以降', '京都 1900〜2000年', 'ジャズ 20世紀']:
+        page.locator('#query').fill(query)
+        page.locator('#submit').click()
+        page.locator('#form-error').wait_for()
+        assert '年代条件を外してください' in page.locator('#form-error').inner_text()
+        assert page.locator('#query').input_value() == query
+        assert page.locator('#query').get_attribute('aria-invalid') == 'true'
+    total = 1
+    job = BASE | {'query': 'テストテーマ 日本 1900年以降', 'period': '1900年 〜 終了指定なし', 'legacy_period': True, 'state': 'complete', 'has_result': True, 'result': RESULT | {'stop_reason': 'processing_error'}, 'generated_at': '2026-10-02T09:00:00+00:00'}
+    for width in [320, 375, 414, 768, 1280]:
+        page.set_viewport_size({'width': width, 'height': 900})
+        page.goto(URL + '/timelines/1')
+        page.locator('#legacy-period').wait_for()
+        assert '閲覧専用' in page.locator('#legacy-period').inner_text()
+        assert '1900年' in page.locator('#legacy-period').inner_text()
+        assert page.locator('#regenerate').is_hidden() and page.locator('#retry').is_hidden()
+        assert '再生成で' not in page.locator('#result-notice').inner_text()
+        assert page.locator('.event').count() == 1
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        if width in [320,1280]:
+            page.evaluate("document.documentElement.style.fontSize='200%'")
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('archive zoom',width)
+    page.locator('#refine').click()
+    page.wait_for_function("document.getElementById('query').value === 'テストテーマ 日本'")
+    assert page.locator('#query').input_value() == BASE['topic']
+    assert page.locator('#receipt').is_hidden(), 'archive link must not auto-submit'
+    page.goto(URL + '/timelines')
+    page.locator('.job-row .help').wait_for()
+    assert '期間限定・閲覧専用' in page.locator('.job-row .help').inner_text()
+    job = job | {'state': 'failed', 'error': '旧形式の生成失敗'}
+    page.goto(URL + '/timelines/1')
+    page.locator('#page-error').wait_for()
+    assert page.locator('#retry').is_hidden() and page.locator('#old-result').is_hidden()
+    assert page.locator('#legacy-period').is_visible()
     assert errors == [], errors
     print("PASS: 5 widths, dense 100 rows, no quote DOM, folded metadata, counts and timeout notice, pages, continued registration, polling, stale poll/action race, saved reuse, retry, regeneration, old result, keyboard, XSS, pagination, empty, errors", flush=True)
     if len(sys.argv) > 1 and sys.argv[1] == "--live":
@@ -238,7 +279,7 @@ with sync_playwright() as playwright:
         context.unroute('**/*', serve_page)
         for pattern in asset_patterns:
             context.unroute(pattern)
-        query = " ".join(sys.argv[2:]) or "インターネット 1980年以降"
+        query = " ".join(sys.argv[2:]) or "インターネット"
         page.goto(URL)
         page.locator("#query").fill(query)
         page.locator("#submit").click()

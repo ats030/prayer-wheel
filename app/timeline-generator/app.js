@@ -13,7 +13,11 @@ function date(value) { return new Date(value).toLocaleString("ja-JP"); }
 async function api(path, body) {
   const response = await fetch(path, {method: body === undefined ? "GET" : "POST", headers: {"Content-Type": "application/json"}, body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(15000)});
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "処理を完了できませんでした。");
+  if (!response.ok) {
+    const failure = new Error(data.error || "処理を完了できませんでした。");
+    failure.status = response.status;
+    throw failure;
+  }
   return data;
 }
 function error(id, message) { $(id).textContent = message; $(id).hidden = false; }
@@ -43,13 +47,13 @@ function sourceLink(source, text, optional = false) {
   link.setAttribute("aria-label", `出典を読む：${source.title}（別タブ）`);
   return link;
 }
-function render(data) {
+function render(data, job) {
   $("result-meta").textContent = `${data.events.length}件`;
-  $("generation-meta").textContent = `${data.period} · 生成時間 ${data.elapsed_seconds}秒`;
+  $("generation-meta").textContent = `${job.period || "全期間"} · 生成時間 ${data.elapsed_seconds}秒`;
   $("generation-notice").textContent = data.notice;
   const alerts = [];
   if (data.stop_reason === "time_limit") alerts.push(`時間上限（10分）により終了。検証済み${data.events.length}件を保存しました。`);
-  if (data.stop_reason === "processing_error") alerts.push(`途中で処理を終了。検証済み${data.events.length}件を保存しました。再生成で調べ直せます。`);
+  if (data.stop_reason === "processing_error") alerts.push(`途中で処理を終了。検証済み${data.events.length}件を保存しました。${job.legacy_period ? "年代条件を外して新しく登録できます。" : "再生成で調べ直せます。"}`);
   if (data.review_notes?.length) alerts.push(`採用を見送った候補${data.review_notes.length}件。詳細は「生成情報」で確認できます。`);
   $("result-notice").textContent = alerts.join(" ");
   $("result-notice").hidden = alerts.length === 0;
@@ -100,7 +104,13 @@ if ($("search-form")) {
       $("receipt-heading").textContent = job.state === "failed" ? "前回の生成は失敗しました" : "キューに登録されています";
       $("receipt-message").textContent = `${job.query} · ${labels[job.state]}。別のテーマも追加できます。`;
       $("receipt-link").href = `/timelines/${job.id}`;
-    } catch (exc) { error("form-error", exc.message || "接続できませんでした。もう一度お試しください。"); }
+    } catch (exc) {
+      error("form-error", exc.message || "接続できませんでした。もう一度お試しください。");
+      if (exc.status === 400) {
+        $("query").setAttribute("aria-invalid", "true");
+        $("query").focus();
+      }
+    }
     finally {
       submitting = false;
       $("submit").disabled = false;
@@ -140,7 +150,8 @@ if ($("job-list")) {
         if (previous) count.append(node("small", "", "前回"));
         row.append(link, state, count);
         const message = job.error || (active(job) || ["time_limit", "processing_error"].includes(job.stop_reason) ? job.message : "");
-        if (message) row.append(node("p", "help", message));
+        const notes = [job.legacy_period ? "期間限定・閲覧専用" : "", message].filter(Boolean);
+        if (notes.length) row.append(node("p", "help", notes.join("。")));
         list.append(row);
       }
       // Unchanged polling responses leave focused links and screen reader position intact.
@@ -175,20 +186,23 @@ if ($("job-status")) {
     $("generation-info").hidden = !job.result;
     $("job-message").textContent = job.message || "";
     $("job-message").hidden = job.state !== "queued";
-    $("retry").hidden = job.state !== "failed";
-    $("regenerate").hidden = !job.has_result || active(job);
-    $("refine").href = `/?query=${encodeURIComponent(job.query)}`;
+    $("retry").hidden = job.legacy_period || job.state !== "failed";
+    $("regenerate").hidden = job.legacy_period || !job.has_result || active(job);
+    $("refine").textContent = job.legacy_period ? "全期間で新規登録" : "条件を変える";
+    $("refine").href = `/?query=${encodeURIComponent(job.legacy_period ? job.topic : job.query)}`;
+    $("legacy-period").hidden = !job.legacy_period;
+    $("legacy-period").textContent = job.legacy_period ? `期間限定（${job.period}）の保存済み年表です。閲覧専用のため、年代条件を外して新しく登録してください。` : "";
     $("progress").hidden = job.state !== "running";
     if (job.state === "running") progress(job);
     if (job.error) error("page-error", job.error);
     else $("page-error").hidden = true;
     if (job.result && (generatedAt !== job.generated_at || renderedResult !== JSON.stringify(job.result))) {
-      render(job.result);
+      render(job.result, job);
       generatedAt = job.generated_at;
       renderedResult = JSON.stringify(job.result);
       $("saved-at").textContent = `生成日時：${date(job.generated_at)}`;
     }
-    $("old-result").hidden = !job.has_result || job.state === "complete";
+    $("old-result").hidden = job.legacy_period || !job.has_result || job.state === "complete";
   }
   async function load() {
     clearTimeout(timer);
