@@ -11,12 +11,12 @@ func TestToPayloadOmitsRawTextForSummaryOnlyDesignations(t *testing.T) {
 	raw := services.PanelSection{Blocks: blocks, SourceURL: "https://ja.wikipedia.org/wiki/X"}
 	summarized := services.PanelSection{Summary: "要約", Blocks: blocks, SourceURL: raw.SourceURL}
 
-	for _, designation := range []string{"special", "national"} {
+	for _, designation := range []string{"special", "national", "local"} {
 		if !summaryOnlyDesignations[designation] {
 			t.Fatalf("%s must be summary-only", designation)
 		}
 	}
-	for _, designation := range []string{"local", "undesig", ""} {
+	for _, designation := range []string{"undesig", ""} {
 		if summaryOnlyDesignations[designation] {
 			t.Fatalf("%q must keep the raw text until warmed", designation)
 		}

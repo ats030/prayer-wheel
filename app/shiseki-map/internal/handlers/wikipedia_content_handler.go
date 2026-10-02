@@ -23,9 +23,9 @@ type wikiSectionPayload struct {
 }
 
 // summaryOnlyDesignations are the designations cmd/summary-warm covers first
-// (special + national). Their panels show the summary only; the other
+// (special + national + local). Their panels show the summary only; the other
 // designations keep the raw text until their summaries are warmed too.
-var summaryOnlyDesignations = map[string]bool{"special": true, "national": true}
+var summaryOnlyDesignations = map[string]bool{"special": true, "national": true, "local": true}
 
 // WikipediaContentHandler serves /api/wiki/content. designation looks up a
 // site's designation by QID so the raw-text policy is decided server-side.
