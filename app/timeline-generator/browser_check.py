@@ -60,7 +60,7 @@ with sync_playwright() as playwright:
         asset = pattern.split('/')[-1]
         mime = 'text/javascript' if asset.endswith('.js') else 'image/svg+xml' if asset.endswith('.svg') else 'text/css'
         context.route(pattern, lambda route, request, asset=asset, mime=mime: route.fulfill(content_type=mime, body=Path(__file__).with_name(asset).read_bytes()))
-    fixture_pages = {'/': 'index.html', '/timelines': 'timelines.html', '/timelines/1': 'detail.html', '/changelog': 'changelog.html'}
+    fixture_pages = {'/': 'index.html', '/timelines': 'index.html', '/timelines/1': 'detail.html', '/changelog': 'changelog.html'}
     def serve_page(route):
         filename = fixture_pages.get(urlsplit(route.request.url).path)
         if filename and route.request.url.startswith(URL):
@@ -79,6 +79,11 @@ with sync_playwright() as playwright:
                 group = '.pagination' if path == '/timelines' else '.job-actions'
                 assert page.locator(group).evaluate("e => {const a=e.getBoundingClientRect(), b=document.getElementById('page-heading').getBoundingClientRect(); return Math.abs((a.top+a.bottom)/2-(b.top+b.bottom)/2)<12;}"), (path, 'heading/actions alignment')
         page.screenshot(path=f"/tmp/timeline-generator-queue-{width}.png", full_page=True)
+    for path in ['/', '/timelines']:
+        page.goto(URL + path)
+        page.locator('#job-list .job-row').wait_for()
+        assert page.locator('#search-form').is_visible()
+        assert page.locator('#search-form').evaluate("e => e.getBoundingClientRect().bottom < document.getElementById('page-heading').getBoundingClientRect().top")
     page.goto(URL)
     page.locator("#submit").click()
     assert page.locator("#form-error").is_visible()
@@ -222,6 +227,27 @@ with sync_playwright() as playwright:
     page.locator("#next").wait_for(state="visible")
     page.wait_for_function("!document.getElementById('next').disabled")
     page.locator("#next").click()
+    page.wait_for_function("document.getElementById('list-summary').textContent.includes('51〜51')")
+    saved_job = job.copy()
+    pending_list = []
+    page.route('**/api/jobs?offset=50', lambda route: pending_list.append(route))
+    deadline = time.monotonic() + 5
+    while not pending_list and time.monotonic() < deadline:
+        page.wait_for_timeout(50)
+    assert pending_list, 'second page poll did not start'
+    job = BASE | {'id': 2, 'query': '新しく追加したテーマ'}
+    page.locator('#query').fill(job['query'])
+    page.locator('#submit').click()
+    page.wait_for_function("!document.getElementById('submit').disabled")
+    assert '51〜51' in page.locator('#list-summary').inner_text()
+    pending_list.pop(0).fulfill(status=200, content_type='application/json', body=json.dumps({'jobs': [saved_job | {'event_count': 0}], 'total': 51}))
+    page.unroute('**/api/jobs?offset=50')
+    page.wait_for_function("document.getElementById('list-summary').textContent.includes('1〜50')")
+    assert page.locator('#previous').is_disabled()
+    assert page.locator('.job-link').first.inner_text() == job['query']
+    assert page.locator('#receipt-link').get_attribute('href') == '/timelines/2'
+    job = saved_job
+    page.locator('#next').click()
     page.wait_for_function("document.getElementById('list-summary').textContent.includes('51〜51')")
     total = 0
     page.locator("#previous").click()

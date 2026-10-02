@@ -104,6 +104,7 @@ if ($("search-form")) {
       $("receipt-heading").textContent = job.state === "failed" ? "前回の生成は失敗しました" : "キューに登録されています";
       $("receipt-message").textContent = `${job.query} · ${labels[job.state]}。別のテーマも追加できます。`;
       $("receipt-link").href = `/timelines/${job.id}`;
+      document.dispatchEvent(new Event("job-registered"));
     } catch (exc) {
       error("form-error", exc.message || "接続できませんでした。もう一度お試しください。");
       if (exc.status === 400) {
@@ -127,7 +128,7 @@ if ($("search-form")) {
 }
 
 if ($("job-list")) {
-  let offset = 0, timer, loading = false;
+  let offset = 0, timer, loading = false, refreshPending = false;
   async function load() {
     clearTimeout(timer);
     if (loading) return;
@@ -166,8 +167,17 @@ if ($("job-list")) {
       $("previous").disabled = offset === 0;
       $("next").disabled = offset + data.jobs.length >= data.total;
     } catch (exc) { error("page-error", `一覧を読み込めませんでした。${exc.message}`); }
-    finally { loading = false; timer = setTimeout(load, 3000); }
+    finally {
+      loading = false;
+      if (refreshPending) { refreshPending = false; offset = 0; load(); }
+      else timer = setTimeout(load, 3000);
+    }
   }
+  document.addEventListener("job-registered", () => {
+    if (loading) { refreshPending = true; return; }
+    offset = 0;
+    load();
+  });
   $("previous").addEventListener("click", () => { if (!loading) { offset = Math.max(0, offset - 50); load(); } });
   $("next").addEventListener("click", () => { if (!loading) { offset += 50; load(); } });
   load();

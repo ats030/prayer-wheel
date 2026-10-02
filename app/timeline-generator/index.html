@@ -12,7 +12,7 @@
 </head>
 <body>
   <a class="skip-link" href="#query">検索欄へ</a>
-  <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/timelines">年表一覧</a><a class="quiet-link" href="/changelog">更新履歴</a></nav></header>
+  <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="#page-heading">年表一覧</a><a class="quiet-link" href="/changelog">更新履歴</a></nav></header>
   <main>
     <section class="search-section" aria-labelledby="search-heading">
       <div class="page-head"><h1 id="search-heading">年表を作る</h1></div>
@@ -37,6 +37,16 @@
         <p>根拠を確認できた出来事を最大100件まで収録します。時間上限に達した場合は検証済みの結果を保存します。原文引用は表示せず、出典リンクから資料を確認できます。</p>
       </div>
     </details>
+    <section class="timeline-list-section" aria-labelledby="page-heading">
+      <div class="page-head">
+        <div class="heading-copy"><h2 id="page-heading" tabindex="-1">年表一覧</h2><p id="list-summary" class="help" role="status">読み込んでいます。</p></div>
+        <nav class="pagination" aria-label="一覧のページ"><button id="previous" class="text-button" type="button" disabled>前の50件</button><button id="next" class="text-button" type="button" disabled>次の50件</button></nav>
+      </div>
+      <p id="page-error" class="error" role="alert" hidden></p>
+      <p id="list-empty" hidden>まだ登録がありません。上の入力欄からテーマを追加してください。</p>
+      <div class="list-columns" aria-hidden="true"><span>テーマ</span><span>状態</span><span>収録件数</span></div>
+      <ol id="job-list" class="job-list"></ol>
+    </section>
   </main>
 </body>
 </html>
