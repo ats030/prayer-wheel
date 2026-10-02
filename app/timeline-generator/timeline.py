@@ -239,7 +239,7 @@ def select_passages(passages, query, budget=2400):
             used += size
     # Reserve cautionary evidence before ordinary milestones consume the budget.
     for item in sorted(eligible,key=lambda item:-item[2]):
-        if item[2] >= 12:
+        if re.search(r'伝説|伝承|諸説|異説|しかし|実際|legend|however', item[1]['text'], re.I):
             add(item)
     dated_items = []
     for item in eligible:

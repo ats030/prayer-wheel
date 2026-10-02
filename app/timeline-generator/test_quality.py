@@ -147,6 +147,12 @@ class ContextTests(unittest.TestCase):
         self.assertTrue(any('Legend' in p['text'] for p in selected))
         self.assertTrue(any('However' in p['text'] for p in selected))
 
+    def test_industrial_scores_do_not_exhaust_latest_era_reservation(self):
+        html = '<h1>コーヒーの歴史</h1>' + ''.join(f'<h2>{year}</h2><p>コーヒーの製造方式を発明しました。'+('説明。'*34)+'</p>' for year in range(1800,1830))
+        html += '<h2>1969</h2><p>ミルク入り缶コーヒーを発売しました。</p>'
+        selected=t.select_passages(article(html)['passages'],t.parse_query('コーヒー'),1000)
+        self.assertTrue(any('1969' in p['date_heading'] for p in selected))
+
     def test_following_counterevidence_is_kept_without_special_keywords(self):
         context = {'passage':'ウィーンに最初のコーヒーハウスが開かれました。', 'after':'この記録は後世の創作であり、当時の史料には記載がない。'}
         self.assertEqual(t.verification_context(context)['after'], context['after'])
