@@ -147,6 +147,24 @@ class ContextTests(unittest.TestCase):
         self.assertTrue(any('Legend' in p['text'] for p in selected))
         self.assertTrue(any('However' in p['text'] for p in selected))
 
+    def test_duplicated_year_heading_is_removed_without_inventing_quote(self):
+        source=article('<h2>1969年</h2><p>ミルク入り缶コーヒーを開発・生産しました。</p>')
+        event={'year':1969,'date':'1969年','title':'缶コーヒーの誕生','description':'ミルク入り缶コーヒーを開発した。','source_id':1,'quote':'1969年、ミルク入り缶コーヒーを開発・生産しました。'}
+        result=t.validate_events([event],[source],t.parse_query('コーヒー'))
+        self.assertEqual(result[0]['quote'],'ミルク入り缶コーヒーを開発・生産しました。')
+        self.assertEqual(t.validate_events([event|{'quote':'1968年、ミルク入り缶コーヒーを開発・生産しました。'}],[source],t.parse_query('コーヒー')),[])
+        self.assertEqual(t.validate_events([event|{'quote':'1969年、ミルク入り缶コーヒーを初めて開発・生産しました。'}],[source],t.parse_query('コーヒー')),[])
+
+    def test_comparison_legend_with_same_year_and_named_subject_is_visible(self):
+        event={'year':1683,'date':'1683年','title':'都市初の店','description':'都市最初の店を開店した。','_check_query':'Franz Georg Kolschitzky Vienna first coffee house'}
+        comparison={'source':'City history','url':'https://example.org/history','heading':'1683 Vienna','text':'Legend has it that Georg Franz Kolschitzky was the first to open a coffee house.'}
+        result=t.legend_conflicts([event],[comparison])
+        self.assertIn(0,result)
+        self.assertEqual(result[0]['sources'][0]['url'],comparison['url'])
+        self.assertEqual(t.legend_conflicts([event|{'year':1690}],[comparison]),{})
+        self.assertEqual(t.legend_conflicts([event|{'_check_query':'Another Person Othercity first shop'}],[comparison]),{})
+        self.assertEqual(t.legend_conflicts([event|{'description':'伝説では、最初の店を開店したとされる。'}],[comparison]),{})
+
     def test_industrial_scores_do_not_exhaust_latest_era_reservation(self):
         html = '<h1>コーヒーの歴史</h1>' + ''.join(f'<h2>{year}</h2><p>コーヒーの製造方式を発明しました。'+('説明。'*34)+'</p>' for year in range(1800,1830))
         html += '<h2>1969</h2><p>ミルク入り缶コーヒーを発売しました。</p>'
