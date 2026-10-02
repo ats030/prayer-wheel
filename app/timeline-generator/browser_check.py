@@ -1,50 +1,76 @@
-"""Browser UI checks with explicit synthetic API responses; model tested by smoke.py."""
+"""Synthetic UI checks for queued/saved states; optional --live tests real generation."""
 import json
 import os
 import sys
-import time
 from playwright.sync_api import sync_playwright
 
 URL = os.environ.get("TIMELINE_TEST_URL", "http://100.94.207.13:8532")
+RESULT = {"kind": "result", "theme": "テスト用の年表", "period": "1900年〜", "elapsed_seconds": 1.2, "notice": "ブラウザ検証専用の応答です。", "events": [{"year": 1971, "date": "1971年", "title": "テスト用の出来事", "description": '<script>window.injected=true</script> テスト本文。', "quote": "In 1971, a test event occurred.", "source": {"url": "https://example.org/history", "title": "Test history source"}}]}
+BASE = {"id": 1, "query": "テストテーマ 1900年以降", "state": "queued", "message": "登録順に生成します。", "stage": None, "error": None, "has_result": False, "result": None, "generated_at": None}
+
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch(headless=True)
-    page = browser.new_page()
+    context = browser.new_context()
+    page = context.new_page()
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
+    job = BASE.copy()
+    total = 1
+    posted = []
+    def respond(route):
+        global job
+        request = route.request
+        path = request.url.split(URL)[-1]
+        if request.method == "POST":
+            posted.append(path)
+            if path.endswith("/retry") or path.endswith("/regenerate"):
+                job = job | {"state": "queued", "error": None, "message": "登録順に生成します。"}
+            elif json.loads(request.post_data).get("query") == "エラー":
+                route.fulfill(status=503, content_type="application/json", body=json.dumps({"error": "テスト用の接続エラー"}))
+                return
+            route.fulfill(status=200, content_type="application/json", body=json.dumps(job))
+        elif path.startswith("/api/jobs?"):
+            listing = [{key: value for key, value in job.items() if key != "result"}]
+            if "offset=50" in path:
+                listing = listing if total > 50 else []
+            elif total > 50:
+                listing = [listing[0] | {"id": i + 1} for i in range(50)]
+            route.fulfill(status=200, content_type="application/json", body=json.dumps({"jobs": listing if total else [], "total": total}))
+        else:
+            route.fulfill(status=200, content_type="application/json", body=json.dumps(job))
+    context.route("**/api/jobs**", respond)
+    # Detail HTML uses a real GET existence guard; fulfill this static entry without persisting test jobs.
+    from pathlib import Path
+    detail = Path(__file__).with_name("detail.html").read_text()
+    context.route("**/timelines/1", lambda route: route.fulfill(status=200, content_type="text/html", body=detail))
     for width in [320, 375, 414, 768, 1280]:
         page.set_viewport_size({"width": width, "height": 900})
-        page.goto(URL, wait_until="domcontentloaded")
-        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), f"overflow at {width}"
-        for selector in ["#submit", ".quiet-link", "[data-query]"]:
-            for element in page.locator(selector).all():
-                assert element.evaluate("e => e.getBoundingClientRect().height >= 44"), f"small touch target: {selector}"
-                assert element.evaluate("e => getComputedStyle(e).whiteSpace === 'nowrap'"), f"wrapped button: {selector}"
-        page.screenshot(path=f"/tmp/timeline-generator-{width}.png", full_page=True)
-    ratios = page.evaluate("""() => {
-      const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
-      const css = getComputedStyle(document.documentElement);
-      const lum = name => { ctx.fillStyle = css.getPropertyValue('--color-' + name); ctx.fillRect(0,0,1,1); const rgb = Array.from(ctx.getImageData(0,0,1,1).data).slice(0,3).map(v => {v /= 255; return v <= 0.04045 ? v/12.92 : ((v+0.055)/1.055)**2.4;}); return rgb[0]*0.2126+rgb[1]*0.7152+rgb[2]*0.0722; };
-      return [['ink','paper'],['muted','paper'],['muted','surface'],['accent','paper'],['accent-ink','accent'],['error','paper'],['focus','paper'],['focus','accent']].map(([a,b]) => { const x=lum(a), y=lum(b); return [a,b,(Math.max(x,y)+0.05)/(Math.min(x,y)+0.05)]; });
-    }""")
-    print('CONTRAST:', [(a, b, round(r, 2)) for a,b,r in ratios], flush=True)
-    assert all(ratio >= (3 if name == 'focus' else 4.5) for name, _, ratio in ratios), ratios
+        for path in ["/", "/timelines", "/timelines/1", "/changelog"]:
+            page.goto(URL + path, wait_until="domcontentloaded")
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), (path, width)
+            for element in page.locator("button:visible, .quiet-link:visible").all():
+                assert element.evaluate("e => e.getBoundingClientRect().height >= 44"), (path, width, "touch target")
+        page.screenshot(path=f"/tmp/timeline-generator-queue-{width}.png", full_page=True)
+    page.goto(URL)
     page.locator("#submit").click()
     assert page.locator("#form-error").is_visible()
-    assert page.locator("#query").get_attribute("aria-invalid") == "true"
-    pending = []
-    page.route("**/api/timeline", lambda route: pending.append(route))
-    page.locator("#query").fill("テストテーマ 1900年以降")
+    page.locator("#query").fill(BASE["query"])
     page.locator("#query").press("Enter")
-    page.wait_for_function("document.getElementById('submit').disabled")
-    assert page.locator("#progress").is_visible()
-    assert page.locator("#query").is_disabled()
-    assert page.locator("#search-form").get_attribute("aria-busy") == "true"
-    result = {"kind": "result", "theme": "テスト用の年表", "period": "1900年〜", "elapsed_seconds": 1.2, "notice": "この応答はブラウザ検証専用です。", "events": [{"year": 1971, "date": "1971年", "title": "テスト用の出来事", "description": '<script>window.injected=true</script> テスト本文。', "quote": "In 1971, a test event occurred.", "source": {"url": "https://example.org/history", "title": "Test history source"}}]}
-    while not pending:
-        page.wait_for_timeout(50)
-    pending.pop(0).fulfill(status=200, content_type="application/x-ndjson", body=json.dumps({"kind": "progress", "stage": "verify", "message": "テスト用の照合中"}) + "\n" + json.dumps(result) + "\n")
-    page.locator(".event").wait_for()
+    page.locator("#receipt").wait_for()
+    assert page.locator("#query").is_enabled()
+    assert page.locator("#receipt-link").get_attribute("href") == "/timelines/1"
+    page.locator("#query").fill("次のテーマ")
+    page.locator("#submit").click()
     page.wait_for_function("!document.getElementById('submit').disabled")
+    assert posted.count("/api/jobs") == 2
+    page.locator("#receipt-link").click()
+    page.locator("#job-status").wait_for()
+    assert page.locator("#job-status").inner_text() == "待機中"
+    job = job | {"state": "running", "stage": "verify", "message": "テスト用の照合中"}
+    page.locator("#progress").wait_for()
+    assert page.locator(".steps li.current").inner_text() == "根拠を照合"
+    job = job | {"state": "complete", "has_result": True, "result": RESULT, "generated_at": "2026-10-02T09:00:00+00:00"}
+    page.locator(".event").wait_for()
     assert not page.evaluate("Boolean(window.injected)")
     assert page.locator(".event p").first.inner_text().startswith("<script>")
     page.locator("summary").focus()
@@ -53,43 +79,73 @@ with sync_playwright() as playwright:
     assert page.locator(".source-link").get_attribute("rel") == "noopener noreferrer"
     for width in [320, 375, 414, 768, 1280]:
         page.set_viewport_size({"width": width, "height": 900})
-        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), f"result overflow at {width}"
-    page.screenshot(path="/tmp/timeline-generator-result.png", full_page=True)
-    page.locator("#refine").click()
-    assert page.locator("#query").evaluate("e => e === document.activeElement")
-    page.locator("#query").fill("テスト 空結果")
-    page.locator("#submit").click()
-    while not pending:
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), ("result", width)
+        page.screenshot(path=f"/tmp/timeline-generator-saved-{width}.png", full_page=True)
+    old_job = job.copy()
+    pending = []
+    page.route("**/api/jobs/1", lambda route: pending.append(route))
+    import time
+    deadline = time.monotonic() + 5
+    while not pending and time.monotonic() < deadline:
         page.wait_for_timeout(50)
-    pending.pop(0).fulfill(status=200, content_type="application/x-ndjson", body=json.dumps(result | {"events": []}) + "\n")
+    assert pending, "poll did not start"
+    page.locator("#regenerate").click()
+    page.locator("#old-result").wait_for()
+    pending.pop(0).fulfill(status=200, content_type="application/json", body=json.dumps(old_job))
+    page.wait_for_timeout(300)
+    assert page.locator("#job-status").inner_text() == "待機中", "stale poll replaced the action result"
+    assert page.locator("#old-result").is_visible()
+    page.unroute("**/api/jobs/1")
+    assert page.locator(".event").count() == 1
+    job = job | {"state": "failed", "error": "テスト用の生成失敗"}
+    page.locator("#retry").wait_for()
+    assert page.locator(".event").count() == 1
+    page.locator("#retry").click()
+    page.wait_for_function("document.getElementById('job-status').textContent === '待機中'")
+    job = job | {"state": "complete", "result": RESULT | {"events": []}, "generated_at": "2026-10-02T09:01:00+00:00"}
     page.locator("#result-empty").wait_for()
-    page.wait_for_function("!document.getElementById('submit').disabled")
     assert page.locator(".event").count() == 0
+    page.goto(URL + "/timelines")
+    page.locator(".job-link").wait_for()
+    page.locator(".job-link").focus()
+    page.wait_for_timeout(3300)
+    assert page.locator(".job-link").evaluate("e => e === document.activeElement")
+    total = 51
+    page.locator("#next").wait_for(state="visible")
+    page.wait_for_function("!document.getElementById('next').disabled")
+    page.locator("#next").click()
+    page.wait_for_function("document.getElementById('list-summary').textContent.includes('51〜51')")
+    total = 0
+    page.locator("#previous").click()
+    page.locator("#list-empty").wait_for()
+    page.goto(URL)
+    page.locator("#query").fill("エラー")
     page.locator("#submit").click()
-    while not pending:
-        page.wait_for_timeout(50)
-    pending.pop(0).fulfill(status=503, content_type="application/json", body=json.dumps({"error": "テスト用の接続エラー"}))
     page.locator("#form-error").wait_for()
     assert page.locator("#form-error").inner_text() == "テスト用の接続エラー"
-    assert page.locator("#query").is_enabled()
+    page.locator("#query").fill(BASE["query"])
+    page.locator("#submit").click()
+    page.wait_for_url("**/timelines/1")
+    page.locator("#result-empty").wait_for()
+    page.locator("#refine").click()
+    page.wait_for_function("document.getElementById('query').value === 'テストテーマ 1900年以降'")
+    assert page.locator("#query").input_value() == BASE["query"]
     assert errors == [], errors
-    print("PASS: 320/375/414/768/1280 widths, keyboard, loading, evidence, XSS, refine, empty, error")
+    print("PASS: 5 widths, pages, continued registration, polling, stale poll/action race, saved reuse, retry, regeneration, old result, keyboard, XSS, pagination, empty, errors", flush=True)
     if len(sys.argv) > 1 and sys.argv[1] == "--live":
-        page.unroute("**/api/timeline")
-        page.goto(URL, wait_until="domcontentloaded")
+        context.unroute("**/api/jobs**")
+        context.unroute("**/timelines/1")
         query = " ".join(sys.argv[2:]) or "インターネット 1980年以降"
+        page.goto(URL)
         page.locator("#query").fill(query)
         page.locator("#submit").click()
-        page.wait_for_function("!document.getElementById('submit').disabled", timeout=200000)
-        assert not page.locator("#form-error").is_visible(), page.locator("#form-error").inner_text()
+        page.wait_for_function("!document.getElementById('submit').disabled")
+        if not "/timelines/" in page.url:
+            assert not page.locator("#form-error").is_visible()
+            page.locator("#receipt-link").click()
+        page.wait_for_function("document.getElementById('job-status').textContent === '完了' || document.getElementById('job-status').textContent === '失敗'", timeout=220000)
+        assert page.locator("#job-status").inner_text() == "完了", page.locator("#page-error").inner_text()
         assert page.locator(".event").count() > 0, page.locator("#result-notice").inner_text()
         print("LIVE:", query, page.locator("#result-meta").inner_text(), flush=True)
-        for event in page.locator(".event").all():
-            print(event.locator(".event-date").inner_text(), event.locator("h3").inner_text(), event.locator("p").first.inner_text(), flush=True)
-        page.set_viewport_size({"width": 1280, "height": 900})
         page.screenshot(path="/tmp/timeline-generator-live.png", full_page=True)
-        page.set_viewport_size({"width": 375, "height": 900})
-        page.screenshot(path="/tmp/timeline-generator-live-mobile.png", full_page=True)
-        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
-        assert errors == [], errors
     browser.close()

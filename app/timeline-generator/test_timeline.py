@@ -1,6 +1,7 @@
 """Failure-focused tests for date constraints, provenance, fetches, and HTTP boundaries."""
 import json
 import socket
+import tempfile
 import threading
 import time
 import unittest
@@ -130,7 +131,11 @@ class FetchTests(unittest.TestCase):
 class HTTPTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.temp = tempfile.TemporaryDirectory()
+        cls.store = server.JobStore(cls.temp.name + "/test.sqlite3")
         cls.http = ThreadingHTTPServer(("127.0.0.1", 0), server.Handler)
+        cls.http.jobs = cls.store
+        cls.http.worker = server.QueueWorker(cls.store, server.bounded_pipeline)
         cls.thread = threading.Thread(target=cls.http.serve_forever, daemon=True)
         cls.thread.start()
         cls.url = f"http://127.0.0.1:{cls.http.server_port}"
@@ -139,42 +144,106 @@ class HTTPTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.http.shutdown()
         cls.http.server_close()
+        cls.store.close()
+        cls.temp.cleanup()
 
     def request(self, payload, origin=None):
         headers = {"Content-Type": "application/json"}
         if origin:
             headers["Origin"] = origin
-        return urlopen(Request(self.url + "/api/timeline", data=json.dumps(payload).encode(), headers=headers), timeout=5)
+        return urlopen(Request(self.url + "/api/jobs", data=json.dumps(payload).encode(), headers=headers), timeout=5)
 
-    def test_stream_and_no_saved_state(self):
-        with patch.object(server, "pipeline_worker", mock_worker):
-            with self.request({"query": "京都"}) as response:
-                records = [json.loads(line) for line in response]
-                self.assertEqual([r["kind"] for r in records], ["progress", "result"])
-                self.assertEqual(response.headers["Cache-Control"], "no-store")
+    def setUp(self):
+        with self.store.connect() as db:
+            db.execute("DELETE FROM jobs")
+            db.execute("UPDATE counter SET value=0")
 
-    def test_absolute_deadline_terminates_worker_and_releases_slot(self):
+    def test_submit_returns_saved_state_without_waiting(self):
+        with self.request({"query": "京都"}) as response:
+            job = json.load(response)
+            self.assertEqual(response.status, 201)
+            self.assertEqual(response.headers["Cache-Control"], "no-store")
+        with self.request({"query": "京都"}) as response:
+            self.assertEqual(json.load(response)["id"], job["id"])
+            self.assertEqual(response.status, 200)
+        with urlopen(self.url + f"/api/jobs/{job['id']}") as response:
+            self.assertEqual(json.load(response)["state"], "queued")
+        with urlopen(self.url + "/api/jobs") as response:
+            self.assertEqual(json.load(response)["total"], 1)
+        with urlopen(self.url + f"/timelines/{job['id']}") as response:
+            self.assertIn(b'data-site="timeline-generator"', response.read())
+
+    def test_absolute_deadline_terminates_worker(self):
+        records = []
         started = time.monotonic()
         with patch.object(server, "pipeline_worker", slow_worker), patch.object(server, "REQUEST_TIME_LIMIT", 0.3):
-            with self.request({"query": "京都"}) as response:
-                records = [json.loads(line) for line in response]
+            server.bounded_pipeline(t.parse_query("京都"), records.append)
         self.assertEqual(records[-1]["kind"], "error")
         self.assertLess(time.monotonic() - started, 3)
-        self.assertTrue(server.SLOT.acquire(timeout=2))
-        server.SLOT.release()
 
-    def test_cross_origin_invalid_input_and_busy(self):
+    def test_cross_origin_invalid_input_and_routes(self):
         for payload, origin, expected in [({"query": "京都"}, "https://evil.example", 403), ({"query": ""}, None, 400)]:
             with self.subTest(expected=expected), self.assertRaises(HTTPError) as raised:
                 self.request(payload, origin)
             self.assertEqual(raised.exception.code, expected)
-        server.SLOT.acquire()
+        for headers in [{"Host": "evil.example"}, {"Origin": "https://evil.example"}]:
+            with self.subTest(headers=headers), self.assertRaises(HTTPError) as raised:
+                urlopen(Request(self.url + "/api/jobs", headers=headers))
+            self.assertEqual(raised.exception.code, 403)
+        for path, expected in [("/api/jobs/999999", 404), ("/timelines/999999", 404), ("/api/jobs?offset=-1", 400), ("/api/jobs?offset=99999999999999999999", 400), ("/data/timelines.sqlite3", 404)]:
+            with self.subTest(path=path), self.assertRaises(HTTPError) as raised:
+                urlopen(self.url + path)
+            self.assertEqual(raised.exception.code, expected)
+
+    def test_action_boundaries(self):
+        job, _ = self.store.submit(t.parse_query("再試行テスト"))
+        identifier = job["id"]
+        with self.store.connect() as db:
+            db.execute("UPDATE jobs SET state='failed', error='テスト失敗' WHERE id=?", (identifier,))
+        path = self.url + f"/api/jobs/{identifier}/retry"
+        for origin, expected in [("https://evil.example", 403), (None, 200)]:
+            request = Request(path, data=b"{}", headers={"Content-Type": "application/json", **({"Origin": origin} if origin else {})})
+            if expected == 403:
+                with self.assertRaises(HTTPError) as raised:
+                    urlopen(request)
+                self.assertEqual(raised.exception.code, expected)
+            else:
+                with urlopen(request) as response:
+                    self.assertEqual(json.load(response)["state"], "queued")
+
+    def test_worker_outlives_client_connection(self):
+        temp = tempfile.TemporaryDirectory()
+        store = server.JobStore(temp.name + "/jobs.sqlite3")
+        entered, release, finished = threading.Event(), threading.Event(), threading.Event()
+        def pipeline(query, emit, stopping):
+            entered.set()
+            release.wait(3)
+            emit({"kind": "result", "events": []})
+            finished.set()
+        http = ThreadingHTTPServer(("127.0.0.1", 0), server.Handler)
+        http.jobs = store
+        http.worker = server.QueueWorker(store, pipeline)
+        thread = threading.Thread(target=http.serve_forever, daemon=True)
+        thread.start()
+        http.worker.start()
         try:
-            with self.assertRaises(HTTPError) as raised:
-                self.request({"query": "京都"})
-            self.assertEqual(raised.exception.code, 429)
+            url = f"http://127.0.0.1:{http.server_port}"
+            with urlopen(Request(url + "/api/jobs", data=b'{"query":"coffee"}', headers={"Content-Type": "application/json"}), timeout=3) as response:
+                job = json.load(response)
+            # The registration connection is closed before generation completes.
+            self.assertTrue(entered.wait(3))
+            self.assertEqual(store.get(job["id"])["state"], "running")
+            release.set()
+            self.assertTrue(finished.wait(3))
+            with urlopen(url + f"/api/jobs/{job['id']}") as response:
+                self.assertEqual(json.load(response)["state"], "complete")
         finally:
-            server.SLOT.release()
+            release.set()
+            http.worker.stop()
+            http.shutdown()
+            http.server_close()
+            store.close()
+            temp.cleanup()
 
 
 if __name__ == "__main__":

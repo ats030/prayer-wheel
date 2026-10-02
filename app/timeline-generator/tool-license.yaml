@@ -1,6 +1,20 @@
 reviewed_at: 2026-10-02
 intended_use: Personal internal historical research; public release is a separate review
 decisions:
+  - tool: SQLite via existing Python sqlite3
+    version_or_plan: Existing SQLite 3.45.1 library; no installation or redistribution
+    category: package
+    status: approved
+    license: Public-Domain
+    commercial_use: Official dedication explicitly permits commercial and non-commercial use
+    cost: No licence fee, subscription, or separate service
+    license_url: https://www.sqlite.org/copyright.html
+    terms_url: https://docs.python.org/3/library/sqlite3.html
+    evidence_retrieved: 2026-10-02
+    restrictions:
+      - Python licence and bundled library notices remain separate
+      - No warranty of title purchased; optional legal warranty is not needed for this use
+    notes: Local queue/results only; no new database server
   - tool: Existing Playwright Python development installation
     version_or_plan: 1.62.0; installed Chromium, development checks only
     category: package

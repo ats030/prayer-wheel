@@ -12,34 +12,25 @@
 </head>
 <body>
   <a class="skip-link" href="#query">検索欄へ</a>
-  <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="#how">使い方</a><a class="quiet-link" href="/changelog">更新履歴</a></nav></header>
+  <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/timelines">年表一覧</a><a class="quiet-link" href="/changelog">更新履歴</a></nav></header>
   <main>
     <section class="search-section" aria-labelledby="search-heading">
       <h1 id="search-heading">気になる言葉の、<br>これまでを読む。</h1>
       <p class="intro">人物、場所、技術、文化。Webの資料を調べ、<br class="desktop-break">大きな変化を年代順にたどります。</p>
       <form id="search-form" novalidate>
         <label for="query">調べたいテーマ</label>
-        <div class="search-row"><input id="query" name="query" type="text" maxlength="180" placeholder="半導体 日本 1980年以降" required aria-required="true" aria-describedby="query-help form-error" autocomplete="off"><button id="submit" type="submit">年表を作る<span aria-hidden="true"> →</span></button></div>
+        <div class="search-row"><input id="query" name="query" type="text" maxlength="180" placeholder="半導体 日本 1980年以降" required aria-required="true" aria-describedby="query-help form-error" autocomplete="off"><button id="submit" type="submit">キューに追加<span aria-hidden="true"> →</span></button></div>
         <p class="help" id="query-help">複数の言葉で絞り込めます。年代は「1980年以降」「1900〜2000年」「20世紀」のように指定。</p>
         <p class="error" id="form-error" role="alert" hidden></p>
       </form>
       <div class="examples" aria-label="検索例"><span>例えば</span><button type="button" data-query="コーヒー">コーヒー</button><button type="button" data-query="インターネット">インターネット</button><button type="button" data-query="京都 1900年以降">京都 1900年以降</button></div>
     </section>
-    <section id="progress" class="progress-section" aria-labelledby="progress-heading" hidden>
-      <div class="progress-head"><h2 id="progress-heading">年表を作成しています</h2><span id="elapsed" aria-hidden="true">0秒</span></div>
-      <p id="progress-message" role="status" aria-live="polite"></p>
-      <ol class="steps"><li data-stage="search">資料を探す</li><li data-stage="read">本文を読む</li><li data-stage="generate">年代を整理</li><li data-stage="verify">根拠を照合</li></ol>
-      <p class="help">1〜2分程度が目安です。混雑時や資料によっては長くかかります。</p>
+    <section id="receipt" class="progress-section" hidden aria-labelledby="receipt-heading">
+      <h2 id="receipt-heading">登録しました</h2>
+      <p id="receipt-message" role="status"></p>
+      <a id="receipt-link" class="quiet-link" href="/timelines">進捗・年表を見る →</a>
     </section>
-    <section id="result" class="result-section" aria-labelledby="result-heading" tabindex="-1" hidden>
-      <div class="result-head"><h2 id="result-heading"></h2><p id="result-meta"></p></div>
-      <p id="result-notice" class="notice"></p>
-      <p id="result-empty" hidden>確認できる出来事がありませんでした。上の検索欄で言葉を減らすか、別のテーマを試してください。</p>
-      <ol id="timeline" class="timeline"></ol>
-      <p class="refine-note">地域や年代を追加すると、興味のある範囲に絞って調べられます。</p>
-      <button type="button" id="refine" class="text-button">条件を変える ↑</button>
-    </section>
-    <section id="how" class="how-section" aria-labelledby="how-heading"><h2 id="how-heading">年表の読み方</h2><p>主要な出来事を10〜15件に絞ります。資料が少ない場合は、根拠を確認できた分だけ表示します。</p><p>各項目の「根拠を見る」で引用した本文を確認できます。説明は日本語、出典は日本語以外のページも使います。AIによる整理・照合には限界があるため、詳しく調べたい出来事は出典も読んでください。</p><p>検索履歴と作成した年表は、このアプリには保存しません。</p></section>
+    <section id="how" class="how-section" aria-labelledby="how-heading"><h2 id="how-heading">年表の読み方</h2><p>主要な出来事を10〜15件に絞ります。資料が少ない場合は、根拠を確認できた分だけ表示します。</p><p>各項目の「根拠を見る」で引用した本文を確認できます。説明は日本語、出典は日本語以外のページも使います。AIによる整理・照合には限界があるため、詳しく調べたい出来事は出典も読んでください。</p><p>キーワードは登録順に一件ずつ生成します。画面を閉じても処理は続き、進捗と保存した年表は「年表一覧」で確認できます。同じテーマ・期間の年表があれば、その結果を開きます。</p></section>
   </main>
   <footer><span>歴史年表</span><span>出典をたどり、変化を読む。</span></footer>
 </body>

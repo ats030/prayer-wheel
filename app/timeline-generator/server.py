@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
-"""Private HTTP application; no saved searches, cookies, or paid APIs."""
+"""Private HTTP application with a durable, single-worker generation queue."""
 import json
 import multiprocessing
 import os
+import re
+import signal
 from pathlib import Path
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 from timeline import TIME_LIMIT, TimelineError, build_timeline, parse_query
+from jobs import JobStore, QueueWorker
 
 ROOT = Path(__file__).resolve().parent
 HOST = os.environ.get("TIMELINE_HOST", "127.0.0.1")
 PORT = int(os.environ.get("TIMELINE_PORT", "8532"))
-SLOT = threading.BoundedSemaphore(1)
 REQUEST_TIME_LIMIT = TIME_LIMIT
 ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/changelog": ("changelog.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/styles.css": ("styles.css", "text/css; charset=utf-8"), "/tokens.css": ("tokens.css", "text/css; charset=utf-8"), "/favicon.svg": ("favicon.svg", "image/svg+xml")}
+ASSETS["/timelines"] = ("timelines.html", "text/html; charset=utf-8")
 
 
 def pipeline_worker(query, connection):
@@ -30,7 +33,7 @@ def pipeline_worker(query, connection):
         connection.close()
 
 
-def bounded_pipeline(query, emit):
+def bounded_pipeline(query, emit, stopping=None):
     context = multiprocessing.get_context("spawn")
     receiver, sender = context.Pipe(duplex=False)
     worker = context.Process(target=pipeline_worker, args=(query, sender), daemon=True)
@@ -39,6 +42,8 @@ def bounded_pipeline(query, emit):
     sender.close()
     try:
         while time.monotonic() < deadline:
+            if stopping is not None and stopping.is_set():
+                return
             if receiver.poll(min(0.2, max(0, deadline - time.monotonic()))):
                 try:
                     record = receiver.recv()
@@ -87,10 +92,42 @@ class Handler(BaseHTTPRequestHandler):
         self.headers_for(status, "application/json; charset=utf-8", len(body))
         self.wfile.write(body)
 
+    def same_site(self):
+        try:
+            host = self.headers.get("Host", "")
+            hostname = urlsplit("http://" + host).hostname
+            allowed = {HOST, "127.0.0.1", "localhost", "ubuntu-server-app", "ubuntu-server-app.local"}
+            origin = self.headers.get("Origin")
+            return hostname in allowed and (not origin or origin == "http://" + host)
+        except ValueError:
+            return False
+
     def do_GET(self):
+        # Persisted queries/results also require protection against DNS rebinding.
+        if not self.same_site():
+            return self.reply(403, {"error": "アプリと同じURLから閲覧してください。"})
         path = urlsplit(self.path).path
         if path == "/api/health":
-            self.reply(200, {"ok": True, "service": "timeline-generator"})
+            ok = self.server.worker.thread.is_alive()
+            self.reply(200 if ok else 503, {"ok": ok, "service": "timeline-generator"})
+        elif path == "/api/jobs":
+            try:
+                params = parse_qs(urlsplit(self.path).query)
+                offset = int(params.get("offset", ["0"])[0])
+                if not 0 <= offset <= 2**63 - 1:
+                    raise ValueError
+            except ValueError:
+                return self.reply(400, {"error": "一覧の開始位置が不正です。"})
+            self.reply(200, self.server.jobs.listing(offset=offset))
+        elif re.fullmatch(r"/api/jobs/[1-9][0-9]{0,17}", path):
+            job = self.server.jobs.get(int(path.rsplit("/", 1)[1]))
+            self.reply(200, job) if job else self.reply(404, {"error": "年表が見つかりません。"})
+        elif re.fullmatch(r"/timelines/[1-9][0-9]{0,17}", path):
+            if not self.server.jobs.get(int(path.rsplit("/", 1)[1])):
+                return self.reply(404, {"error": "年表が見つかりません。"})
+            body = (ROOT / "detail.html").read_bytes()
+            self.headers_for(200, "text/html; charset=utf-8", len(body))
+            self.wfile.write(body)
         elif path in ASSETS:
             file, mime = ASSETS[path]
             body = (ROOT / file).read_bytes()
@@ -100,15 +137,12 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(404, {"error": "ページが見つかりません。"})
 
     def do_POST(self):
-        if self.path != "/api/timeline":
+        action = re.fullmatch(r"/api/jobs/([1-9][0-9]{0,17})/(retry|regenerate)", self.path)
+        if self.path != "/api/jobs" and action is None:
             return self.reply(404, {"error": "ページが見つかりません。"})
         # Browser cross-origin and DNS-rebinding requests cannot trigger model calls.
         try:
-            host = self.headers.get("Host", "")
-            hostname = urlsplit("http://" + host).hostname
-            allowed = {HOST, "127.0.0.1", "localhost", "ubuntu-server-app", "ubuntu-server-app.local"}
-            origin = self.headers.get("Origin")
-            if hostname not in allowed or (origin and origin != "http://" + host):
+            if not self.same_site():
                 return self.reply(403, {"error": "アプリと同じURLから検索してください。"})
             if self.headers.get("Content-Type", "").split(";")[0] != "application/json":
                 return self.reply(415, {"error": "JSON形式で検索してください。"})
@@ -117,24 +151,43 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(400, {"error": "検索条件が長すぎるか、空です。"})
             self.connection.settimeout(10)
             payload = json.loads(self.rfile.read(length))
-            query = parse_query(payload.get("query") if isinstance(payload, dict) else None)
+            if not isinstance(payload, dict):
+                raise ValueError
+            query = parse_query(payload.get("query")) if action is None else None
         except (ValueError, OSError, TimelineError) as exc:
             return self.reply(400, {"error": str(exc) if isinstance(exc, TimelineError) else "検索条件を読み取れませんでした。"})
-        if not SLOT.acquire(blocking=False):
-            return self.reply(429, {"error": "別の年表を作成中です。完了後に再検索してください。"})
-        try:
-            self.headers_for(200, "application/x-ndjson; charset=utf-8")
-            def emit(data):
-                self.wfile.write((json.dumps(data, ensure_ascii=False) + "\n").encode())
-                self.wfile.flush()
-            bounded_pipeline(query, emit)
-        except (BrokenPipeError, ConnectionResetError, TimeoutError):
-            pass
-        finally:
-            SLOT.release()
+        if action is None:
+            job, created = self.server.jobs.submit(query)
+            status = 201 if created else 200
+        else:
+            try:
+                job = self.server.jobs.requeue(int(action[1]), action[2])
+            except ValueError as exc:
+                return self.reply(409, {"error": str(exc)})
+            if job is None:
+                return self.reply(404, {"error": "年表が見つかりません。"})
+            status = 200
+        self.server.worker.wake.set()
+        self.reply(status, job)
 
 
 if __name__ == "__main__":
+    jobs = JobStore(os.environ.get("TIMELINE_DB", str(ROOT / "data" / "timelines.sqlite3")))
     server = ThreadingHTTPServer((HOST, PORT), Handler)
+    # Idle browser keep-alive sockets must not delay SIGTERM/restart.
+    server.daemon_threads = True
+    server.jobs = jobs
+    server.worker = QueueWorker(jobs, bounded_pipeline, on_failure=lambda: os._exit(1))
+    server.worker.start()
+    def shutdown(signum, frame):
+        server.worker.stopping.set()
+        threading.Thread(target=server.shutdown, daemon=True).start()
+    signal.signal(signal.SIGTERM, shutdown)
+    signal.signal(signal.SIGINT, shutdown)
     print(f"timeline-generator listening on {HOST}:{PORT}", flush=True)
-    server.serve_forever()
+    try:
+        server.serve_forever()
+    finally:
+        server.worker.stop()
+        server.server_close()
+        jobs.close()

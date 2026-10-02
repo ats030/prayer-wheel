@@ -11,13 +11,16 @@
 </head>
 <body>
   <a class="skip-link" href="#updates">更新履歴へ</a>
-  <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><a class="quiet-link" href="/">年表を作る</a></header>
+  <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/">年表を作る</a><a class="quiet-link" href="/timelines">年表一覧</a></nav></header>
   <main id="updates" class="changelog" tabindex="-1">
     <h1>更新履歴</h1>
     <p class="changelog-intro">使い方や表示が変わったところを、新しい順に掲載しています。日付は日本時間です。</p>
     <section class="release" aria-labelledby="release-20261002">
       <h2 id="release-20261002"><time datetime="2026-10-02">2026年10月2日</time></h2>
       <ul>
+        <li>キーワードをキューに追加し、登録順に生成できるようにしました。画面を閉じても処理は続き、サーバー再起動後は未完了分を再開します。</li>
+        <li>年表一覧と個別ページを追加しました。進捗・失敗・保存結果を確認できます。</li>
+        <li>同じテーマと期間の保存結果を再利用するようにしました。必要な場合は再生成でき、失敗した処理は再試行できます。</li>
         <li>個人用の歴史年表アプリを公開しました。人物・場所・企業・技術・文化などの歴史を、キーワードから調べられます。</li>
         <li>複数のキーワードや「1980年以降」「1900〜2000年」「20世紀」の年代条件で絞り込めるようにしました。</li>
         <li>年代・出来事・短い説明を、日本語の年表で表示します。各項目から出典ページと引用した本文を確認できます。</li>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>年表 · 歴史年表</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+  <script src="http://ubuntu-server-app:8526/v.js" data-site="timeline-generator" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#page-heading">本文へ</a>
+  <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/">年表を作る</a><a class="quiet-link" href="/timelines">年表一覧</a></nav></header>
+  <main class="changelog">
+    <a class="quiet-link" href="/timelines">← 年表一覧</a>
+    <h1 id="page-heading" tabindex="-1">年表を読み込んでいます</h1>
+    <p id="job-status" role="status"></p>
+    <p id="job-message" class="help"></p>
+    <p id="page-error" class="error" role="alert" hidden></p>
+    <div class="job-actions"><button id="retry" class="text-button" type="button" hidden>再試行する</button><button id="regenerate" class="text-button" type="button" hidden>再生成する</button><a id="refine" class="quiet-link" href="/">条件を変える →</a></div>
+    <section id="progress" class="progress-section" aria-labelledby="progress-heading" hidden>
+      <div class="progress-head"><h2 id="progress-heading">年表を作成しています</h2></div>
+      <p id="progress-message"></p>
+      <ol class="steps"><li>資料を探す</li><li>本文を読む</li><li>年代を整理</li><li>根拠を照合</li></ol>
+      <p class="help">一件あたり1〜2分程度が目安です。画面を閉じても処理は続きます。</p>
+    </section>
+    <section id="result" class="result-section" aria-labelledby="result-heading" hidden>
+      <div class="result-head"><h2 id="result-heading"></h2><p id="result-meta"></p></div>
+      <p id="saved-at" class="help"></p>
+      <p id="old-result" class="notice" hidden>前回の生成結果を表示しています。再生成が成功すると更新されます。</p>
+      <p id="result-notice" class="notice"></p>
+      <p id="result-empty" hidden>確認できる出来事がありませんでした。条件を変えて調べ直せます。</p>
+      <ol id="timeline" class="timeline"></ol>
+    </section>
+  </main>
+  <footer><span>歴史年表</span><a class="quiet-link" href="/changelog">更新履歴</a></footer>
+</body>
+</html>
