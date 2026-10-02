@@ -202,7 +202,26 @@ function renderList(){
 function icon(selected,shiseki){return L.divIcon({className:'',html:`<span class="shiseki-marker${selected?' selected':''}" style="background:var(${categoryColorToken(shiseki)})"></span>`,iconSize:[22,22],iconAnchor:[11,11],popupAnchor:[0,-12]})}
 // Thousands of DOM markers make panning slow, so unselected points are drawn on
 // the shared canvas and only the selected point keeps the DOM icon.
-const markerLayer=L.layerGroup().addTo(map);
+// The centre dot is painted with the circle so each point stays one cluster child.
+const DottedCircleMarker=L.CircleMarker.extend({
+  _updatePath(){
+    L.CircleMarker.prototype._updatePath.call(this);
+    const renderer=this._renderer;if(!renderer._drawing||this._empty())return;
+    const ctx=renderer._ctx,p=this._point;
+    ctx.globalAlpha=1;ctx.fillStyle=this.options.color;ctx.beginPath();ctx.arc(p.x,p.y,2.5,0,Math.PI*2);ctx.fill();
+  },
+});
+// Nearby markers cluster by zoom; identical coordinates spiderfy at the maximum zoom.
+const markerLayer=L.markerClusterGroup({
+  maxClusterRadius:40,
+  showCoverageOnHover:false,
+  spiderfyDistanceMultiplier:1.3,
+  iconCreateFunction:cluster=>{
+    const count=cluster.getChildCount();
+    const size=count<10?30:count<100?36:count<1000?42:48;
+    return L.divIcon({className:'shiseki-cluster-anchor',html:`<span class="shiseki-cluster" aria-label="${count}件の史跡">${count}</span>`,iconSize:[size,size]});
+  },
+}).addTo(map);
 function markerStyle(o){
   const css=getComputedStyle(document.documentElement);
   const fill=categoryColor(o);
@@ -212,12 +231,12 @@ function renderMarkers(){
   markerLayer.clearLayers();markers=new Map();
   visible.forEach((o,index)=>{
     const point=mapCoordinates(o);if(!point)return;
-    const key=shisekiKey(o,index),latlng=[point.latitude,point.longitude],style=markerStyle(o);
-    const marker=L.circleMarker(latlng,style).addTo(markerLayer);
-    L.circleMarker(latlng,{radius:2.5,stroke:false,fillColor:style.color,fillOpacity:1,interactive:false}).addTo(markerLayer);
+    const key=shisekiKey(o,index),latlng=[point.latitude,point.longitude];
+    const marker=new DottedCircleMarker(latlng,markerStyle(o));
     marker.bindTooltip(esc(o.label_ja||o.label_en||'名称未登録'),{direction:'top',offset:[0,-10]});
     marker.on('click',()=>selectShiseki(key,'marker'));markers.set(key,{marker,shiseki:o});
   });
+  markerLayer.addLayers([...markers.values()].map(entry=>entry.marker));
   if(selectedKey&&!markers.has(selectedKey))closeDetail(false);else showSelectedMarker(selectedKey);
 }
 function showSelectedMarker(key){
