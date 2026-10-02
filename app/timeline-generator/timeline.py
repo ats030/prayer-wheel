@@ -576,7 +576,9 @@ def legend_conflicts(events, comparison):
             matched = False
             for sentence in re.split(r"(?<=[.!?。])\s*", passage["text"]):
                 words = {word.casefold() for word in re.findall(r"[A-Za-z]+", sentence)}
-                same_year = bool(re.search(rf"(?<!\d){abs(event['year'])}(?!\d)", sentence)) or heading_years == {abs(event['year'])}
+                dated_sentence = re.sub(r"\(\s*\d{3,4}\s*[-–—]\s*\d{3,4}\s*\)", "", sentence)
+                sentence_years = {int(year) for year in re.findall(r"(?<!\d)\d{3,4}(?!\d)", dated_sentence)}
+                same_year = abs(event['year']) in sentence_years if sentence_years else heading_years == {abs(event['year'])}
                 if len(terms & words) >= 2 and same_year and re.search(positive, sentence, re.I) and not re.search(negated, sentence, re.I):
                     matched = True
                     break
