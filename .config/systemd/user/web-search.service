@@ -1,6 +1,9 @@
 [Unit]
 Description=Shared Web Search API (port 8527)
 After=network-online.target
+# 上流の YaCy / SearXNG / OpenSearch は evo-x2 にしかない。ubuntu-server-app では
+# 8527 を omatsuri-map (git 管理外のユニット) が使っており、起動すると衝突する (ats030-nxi0f)。
+ConditionHost=evo-x2
 
 [Service]
 Type=simple
