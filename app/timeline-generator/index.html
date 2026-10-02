@@ -15,23 +15,28 @@
   <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/timelines">年表一覧</a><a class="quiet-link" href="/changelog">更新履歴</a></nav></header>
   <main>
     <section class="search-section" aria-labelledby="search-heading">
-      <h1 id="search-heading">気になる言葉の、<br>これまでを読む。</h1>
-      <p class="intro">人物、場所、技術、文化。Webの資料を調べ、<br class="desktop-break">大きな変化を年代順にたどります。</p>
+      <h1 id="search-heading">年表を作る</h1>
       <form id="search-form" novalidate>
-        <label for="query">調べたいテーマ</label>
+        <label class="sr-only" for="query">調べたいテーマ</label>
         <div class="search-row"><input id="query" name="query" type="text" maxlength="180" placeholder="半導体 日本 1980年以降" required aria-required="true" aria-describedby="query-help form-error" autocomplete="off"><button id="submit" type="submit">キューに追加<span aria-hidden="true"> →</span></button></div>
-        <p class="help" id="query-help">複数の言葉で絞り込めます。年代は「1980年以降」「1900〜2000年」「20世紀」のように指定。</p>
         <p class="error" id="form-error" role="alert" hidden></p>
       </form>
-      <div class="examples" aria-label="検索例"><span>例えば</span><button type="button" data-query="コーヒー">コーヒー</button><button type="button" data-query="インターネット">インターネット</button><button type="button" data-query="京都 1900年以降">京都 1900年以降</button></div>
+
     </section>
     <section id="receipt" class="progress-section" hidden aria-labelledby="receipt-heading">
       <h2 id="receipt-heading">登録しました</h2>
       <p id="receipt-message" role="status"></p>
       <a id="receipt-link" class="quiet-link" href="/timelines">進捗・年表を見る →</a>
     </section>
-    <section id="how" class="how-section" aria-labelledby="how-heading"><h2 id="how-heading">年表の読み方</h2><p>主要な転換点と歴史の理解に役立つ出来事を、最大100件まで収録します。資料が少ない場合は、根拠を確認できた分だけ表示します。</p><p>各項目の「根拠を見る」で引用した本文を確認できます。説明は日本語、出典は日本語以外のページも使います。AIによる整理・照合には限界があるため、詳しく調べたい出来事は出典も読んでください。</p><p>キーワードは登録順に一件ずつ、最大10分で生成します。画面を閉じても処理は続き、進捗と保存した年表は「年表一覧」で確認できます。時間上限に達した場合は、検証済みの出来事を保存して終了理由を表示します。同じテーマ・期間の年表があれば、その結果を開きます。</p></section>
+    <details id="how" class="help-panel">
+      <summary>使い方</summary>
+      <div class="info-body">
+        <p id="query-help">複数の言葉で絞り込めます。年代は「1980年以降」「1900〜2000年」「20世紀」のように指定します。</p>
+        <div class="examples" aria-label="検索例"><button type="button" data-query="コーヒー">コーヒー</button><button type="button" data-query="インターネット">インターネット</button><button type="button" data-query="京都 1900年以降">京都 1900年以降</button></div>
+        <p>登録順に一件ずつ、最大10分で生成します。画面を閉じても処理は続きます。同じテーマと期間の保存結果があれば再利用します。</p>
+        <p>根拠を確認できた出来事を最大100件まで収録します。時間上限に達した場合は検証済みの結果を保存します。原文引用は表示せず、出典リンクから資料を確認できます。</p>
+      </div>
+    </details>
   </main>
-  <footer><span>歴史年表</span><span>出典をたどり、変化を読む。</span></footer>
 </body>
 </html>

@@ -85,6 +85,28 @@ class QueueTests(unittest.TestCase):
         self.assertEqual((page["total"], len(page["jobs"])), (55, 5))
         self.assertNotIn("result", page["jobs"][0])
 
+    def test_listing_counts_preserve_empty_unbuilt_and_previous_results(self):
+        job = self.submit("研究")
+        row = self.store.listing()["jobs"][0]
+        self.assertIsNone(row["event_count"])
+        self.assertIs(row["has_result"], False)
+        self.store.claim()
+        self.store.record(job["id"], {"kind": "result", "events": [], "stop_reason": "sources_exhausted"})
+        self.assertEqual(self.store.listing()["jobs"][0]["event_count"], 0)
+        self.store.requeue(job["id"], "regenerate")
+        self.store.claim()
+        result = {"kind": "result", "events": [{"quote": "private quote"}, {"quote": "second quote"}], "stop_reason": "time_limit"}
+        self.store.record(job["id"], result)
+        row = self.store.listing()["jobs"][0]
+        self.assertEqual((row["event_count"], row["stop_reason"]), (2, "time_limit"))
+        self.assertIs(row["has_result"], True)
+        self.assertNotIn("private quote", str(row))
+        self.assertNotIn("result", row)
+        self.store.requeue(job["id"], "regenerate")
+        row = self.store.listing()["jobs"][0]
+        self.assertEqual((row["state"], row["event_count"]), ("queued", 2))
+        self.assertEqual(self.store.get(job["id"])["result"], result)
+
     def test_worker_continues_after_exception_and_reuses_complete_result(self):
         first, second = self.submit("失敗するテーマ"), self.submit("成功するテーマ")
         seen = []

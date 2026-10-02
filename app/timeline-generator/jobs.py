@@ -90,8 +90,13 @@ class JobStore:
     def listing(self, limit=50, offset=0):
         with self.connect() as db:
             total = db.execute("SELECT count(*) FROM jobs").fetchone()[0]
-            rows = db.execute("SELECT * FROM jobs ORDER BY id DESC LIMIT ? OFFSET ?", (limit, offset)).fetchall()
-            return {"jobs": [self.decode(row, False) for row in rows], "total": total, "offset": offset, "limit": limit}
+            rows = db.execute("""SELECT id, query, state, queue_order, created_at, updated_at,
+                started_at, stage, message, error, generated_at,
+                result IS NOT NULL AS has_result, json_array_length(result, '$.events') AS event_count,
+                json_extract(result, '$.stop_reason') AS stop_reason
+                FROM jobs ORDER BY id DESC LIMIT ? OFFSET ?""", (limit, offset)).fetchall()
+            return {"jobs": [dict(row) | {"has_result": bool(row["has_result"])} for row in rows],
+                    "total": total, "offset": offset, "limit": limit}
 
     def requeue(self, identifier, action):
         with self.connect() as db:

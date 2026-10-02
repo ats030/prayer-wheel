@@ -27,45 +27,51 @@ function progress(data) {
     else step.removeAttribute("aria-current");
   });
 }
+function sourceLink(source, text, optional = false) {
+  let url;
+  try { url = new URL(source.url); }
+  catch { if (optional) return null; throw new Error("出典URLを読み取れませんでした。"); }
+  if (!["http:", "https:"].includes(url.protocol)) {
+    if (optional) return null;
+    throw new Error("出典URLを読み取れませんでした。");
+  }
+  const link = node("a", "source-link", text);
+  link.href = url.href;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.title = source.title;
+  link.setAttribute("aria-label", `出典を読む：${source.title}（別タブ）`);
+  return link;
+}
 function render(data) {
-  $("result-heading").textContent = data.theme;
-  $("result-meta").textContent = `${data.period} · ${data.events.length}件 · ${data.elapsed_seconds}秒`;
-  $("result-notice").textContent = data.notice;
+  $("result-meta").textContent = `${data.events.length}件`;
+  $("generation-meta").textContent = `${data.period} · 生成時間 ${data.elapsed_seconds}秒`;
+  $("generation-notice").textContent = data.notice;
+  const alerts = [];
+  if (data.stop_reason === "time_limit") alerts.push(`時間上限（10分）により終了。検証済み${data.events.length}件を保存しました。`);
+  if (data.stop_reason === "processing_error") alerts.push(`途中で処理を終了。検証済み${data.events.length}件を保存しました。再生成で調べ直せます。`);
+  if (data.review_notes?.length) alerts.push(`採用を見送った候補${data.review_notes.length}件。詳細は「生成情報」で確認できます。`);
+  $("result-notice").textContent = alerts.join(" ");
+  $("result-notice").hidden = alerts.length === 0;
+  $("review-notes").replaceChildren();
   for (const note of data.review_notes || []) {
-    $("result-notice").append(node("br"), node("span", "", `採用を見送った候補：${note.date} ${note.title}。${note.reason}`));
+    const item = node("div", "review-note");
+    item.append(node("p", "", `${note.date} ${note.title}：${note.reason}`));
     for (const source of note.sources || []) {
-      const url = new URL(source.url);
-      if (!["http:", "https:"].includes(url.protocol)) continue;
-      const link = node("a", "source-link", `補足資料：${source.title} ↗`);
-      link.href = url.href;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      $("result-notice").append(node("br"), link);
+      const link = sourceLink(source, `補足資料：${source.title} ↗`, true);
+      if (link) item.append(link);
     }
+    $("review-notes").append(item);
   }
   $("result-empty").hidden = data.events.length > 0;
   $("timeline").replaceChildren();
+  const rows = document.createDocumentFragment();
   for (const event of data.events) {
     const row = node("li", "event");
-    row.append(node("div", "event-date", event.date));
-    const body = node("div", "event-body");
-    body.append(node("h3", "", event.title), node("p", "", event.description));
-    const source = node("div", "source-row");
-    const url = new URL(event.source.url);
-    if (!["http:", "https:"].includes(url.protocol)) throw new Error("出典URLを読み取れませんでした。");
-    const link = node("a", "source-link", "出典を読む ↗");
-    link.href = url.href;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.setAttribute("aria-label", `出典を読む：${event.source.title}（別タブ）`);
-    source.append(link, node("span", "source-domain", url.hostname));
-    const evidence = node("details");
-    evidence.append(node("summary", "", "根拠を見る"), node("p", "quote-title", event.source.title), node("blockquote", "", event.quote));
-    if (event.source.context_heading) evidence.append(node("p", "quote-title", `本文の見出し：${event.source.context_heading}`));
-    body.append(source, evidence);
-    row.append(body);
-    $("timeline").append(row);
+    row.append(node("div", "event-date", event.date), node("h3", "event-title", event.title), node("p", "event-description", event.description), sourceLink(event.source, "出典 ↗"));
+    rows.append(row);
   }
+  $("timeline").append(rows);
   $("result").hidden = false;
 }
 
@@ -126,8 +132,15 @@ if ($("job-list")) {
         const row = node("li", "job-row");
         const link = node("a", "job-link", job.query);
         link.href = `/timelines/${job.id}`;
-        row.append(link, node("span", "job-state", labels[job.state]));
-        row.append(node("p", "help", job.error || (job.generated_at ? `生成日時：${date(job.generated_at)}${active(job) ? " · 前回の結果を閲覧できます" : ` · ${job.message || ""}`}` : job.message)));
+        const state = node("span", "job-state", labels[job.state]);
+        state.dataset.state = job.state;
+        const count = node("span", "job-count", Number.isInteger(job.event_count) ? `${job.event_count}件` : "—");
+        const previous = job.has_result && job.state !== "complete";
+        count.setAttribute("aria-label", Number.isInteger(job.event_count) ? `${previous ? "前回の" : ""}収録件数 ${job.event_count}件` : "未生成");
+        if (previous) count.append(node("small", "", "前回"));
+        row.append(link, state, count);
+        const message = job.error || (active(job) || ["time_limit", "processing_error"].includes(job.stop_reason) ? job.message : "");
+        if (message) row.append(node("p", "help", message));
         list.append(row);
       }
       // Unchanged polling responses leave focused links and screen reader position intact.
@@ -157,7 +170,9 @@ if ($("job-status")) {
     $("page-heading").textContent = job.query;
     document.title = `${job.query} · 歴史年表`;
     $("job-status").textContent = labels[job.state];
+    $("job-status").dataset.state = job.state;
     $("job-message").textContent = job.message || "";
+    $("job-message").hidden = job.state !== "queued";
     $("retry").hidden = job.state !== "failed";
     $("regenerate").hidden = !job.has_result || active(job);
     $("refine").href = `/?query=${encodeURIComponent(job.query)}`;

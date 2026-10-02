@@ -7,7 +7,7 @@ from playwright.sync_api import sync_playwright
 URL = os.environ.get("TIMELINE_TEST_URL", "http://100.94.207.13:8532")
 RESULT = {"kind": "result", "theme": "テスト用の年表", "period": "1900年〜", "elapsed_seconds": 1.2, "notice": "ブラウザ検証専用の応答です。", "events": [{"year": 1971, "date": "1971年", "title": "テスト用の出来事", "description": '<script>window.injected=true</script> テスト本文。', "quote": "In 1971, a test event occurred.", "source": {"url": "https://example.org/history", "title": "Test history source", "context_heading": "1971年 <script>window.injected=true</script>"}}]}
 BASE = {"id": 1, "query": "テストテーマ 1900年以降", "state": "queued", "message": "登録順に生成します。", "stage": None, "error": None, "has_result": False, "result": None, "generated_at": None}
-RESULT['review_notes']=[{'date':'1683年','title':'テスト用の候補','reason':'伝説と史料に矛盾。<script>window.injected=true</script>','sources':[{'title':'補足資料','url':'https://example.org/other'}]}]
+RESULT['review_notes']=[{'date':'1683年','title':'テスト用の候補','reason':'伝説と史料に矛盾。<script>window.injected=true</script>','sources':[{'title':'補足資料','url':'https://example.org/other'},{'title':'無効なリンク','url':'javascript:window.injected=true'}]}]
 
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch(headless=True)
@@ -31,7 +31,10 @@ with sync_playwright() as playwright:
                 return
             route.fulfill(status=200, content_type="application/json", body=json.dumps(job))
         elif path.startswith("/api/jobs?"):
-            listing = [{key: value for key, value in job.items() if key != "result"}]
+            listed = {key: value for key, value in job.items() if key != "result"}
+            listed["event_count"] = len(job["result"]["events"]) if job.get("result") else None
+            listed["stop_reason"] = job["result"].get("stop_reason") if job.get("result") else None
+            listing = [listed]
             if "offset=50" in path:
                 listing = listing if total > 50 else []
             elif total > 50:
@@ -70,6 +73,7 @@ with sync_playwright() as playwright:
     page.locator("#submit").click()
     page.wait_for_function("!document.getElementById('submit').disabled")
     assert posted.count("/api/jobs") == 2
+    assert page.locator("#how").get_attribute("open") is None
     page.locator("#receipt-link").click()
     page.locator("#job-status").wait_for()
     assert page.locator("#job-status").inner_text() == "待機中"
@@ -80,14 +84,21 @@ with sync_playwright() as playwright:
     page.locator(".event").wait_for()
     assert not page.evaluate("Boolean(window.injected)")
     assert page.locator(".event p").first.inner_text().startswith("<script>")
-    page.locator("summary").focus()
+    assert page.locator("#generation-info").get_attribute("open") is None
+    assert page.locator("#generation-notice").is_hidden()
+    assert page.locator("blockquote").count() == 0
+    assert page.locator(".event details").count() == 0
+    assert RESULT["events"][0]["quote"] not in page.locator("body").text_content()
+    assert RESULT["events"][0]["source"]["context_heading"] not in page.locator("body").text_content()
+    page.locator("#generation-info summary").focus()
     page.keyboard.press("Enter")
-    assert page.locator("blockquote").is_visible()
-    assert '本文の見出し：1971年 <script>' in page.locator('details').inner_text()
+    assert page.locator("#generation-notice").is_visible()
+    assert RESULT["events"][0]["quote"] not in page.locator("body").text_content()
     assert not page.evaluate('Boolean(window.injected)')
     assert page.locator(".event .source-link").get_attribute("rel") == "noopener noreferrer"
     assert '採用を見送った候補' in page.locator('#result-notice').inner_text()
-    assert page.locator('#result-notice a').get_attribute('rel') == 'noopener noreferrer'
+    assert page.locator('#review-notes a').count() == 1
+    assert page.locator('#review-notes a').get_attribute('rel') == 'noopener noreferrer'
     assert not page.evaluate('Boolean(window.injected)')
     for width in [320, 375, 414, 768, 1280]:
         page.set_viewport_size({"width": width, "height": 900})
@@ -105,9 +116,25 @@ with sync_playwright() as playwright:
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         page.locator('.event').last.scroll_into_view_if_needed()
         assert page.locator('.event h3').last.inner_text() == '出来事100'
+        assert page.locator('.event .source-link').count() == 100
+        assert page.locator('.event .source-link').first.evaluate('e => e.getBoundingClientRect().height >= 44')
+        assert page.locator('blockquote').count() == 0
+        assert page.locator('#generation-info').get_attribute('open') is None
+        if width == 1280:
+            heights = page.locator('.event').evaluate_all('rows => rows.map(e => e.getBoundingClientRect().height)')
+            assert max(heights) < 90, heights
+            aligned = page.locator('.event').first.evaluate("e => {const cells=[...e.children]; return Math.max(...cells.map(c=>c.getBoundingClientRect().top))-Math.min(...cells.map(c=>c.getBoundingClientRect().top)) < 24;}")
+            assert aligned
+        page.screenshot(path=f'/tmp/timeline-generator-dense-{width}.png', full_page=False)
+    for width in [320, 1280]:
+        page.set_viewport_size({'width': width, 'height': 900})
+        page.evaluate("document.documentElement.style.fontSize = '200%'")
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('text zoom', width)
+        page.evaluate("document.documentElement.style.fontSize = ''")
     page.goto(URL + '/timelines')
     page.locator('.job-link').wait_for()
     assert '時間上限' in page.locator('.job-row .help').inner_text()
+    assert page.locator('.job-count').inner_text() == '100件'
     job = job | {'result': RESULT, 'message': '生成が完了しました。'}
     page.goto(URL + '/timelines/1')
     page.wait_for_function("document.querySelectorAll('.event').length === 1")
@@ -130,6 +157,12 @@ with sync_playwright() as playwright:
     job = job | {"state": "failed", "error": "テスト用の生成失敗"}
     page.locator("#retry").wait_for()
     assert page.locator(".event").count() == 1
+    page.goto(URL + "/timelines")
+    page.locator(".job-link").wait_for()
+    assert page.locator(".job-count small").inner_text() == "前回"
+    assert "前回の" in page.locator(".job-count").get_attribute("aria-label")
+    page.goto(URL + "/timelines/1")
+    page.locator("#retry").wait_for()
     page.locator("#retry").click()
     page.wait_for_function("document.getElementById('job-status').textContent === '待機中'")
     job = job | {"state": "complete", "result": RESULT | {"events": []}, "generated_at": "2026-10-02T09:01:00+00:00"}
@@ -137,6 +170,7 @@ with sync_playwright() as playwright:
     assert page.locator(".event").count() == 0
     page.goto(URL + "/timelines")
     page.locator(".job-link").wait_for()
+    assert page.locator(".job-count").inner_text() == "0件"
     page.locator(".job-link").focus()
     page.wait_for_timeout(3300)
     assert page.locator(".job-link").evaluate("e => e === document.activeElement")
@@ -161,7 +195,7 @@ with sync_playwright() as playwright:
     page.wait_for_function("document.getElementById('query').value === 'テストテーマ 1900年以降'")
     assert page.locator("#query").input_value() == BASE["query"]
     assert errors == [], errors
-    print("PASS: 5 widths, 100 events and timeout notice, pages, continued registration, polling, stale poll/action race, saved reuse, retry, regeneration, old result, keyboard, XSS, pagination, empty, errors", flush=True)
+    print("PASS: 5 widths, dense 100 rows, no quote DOM, folded metadata, counts and timeout notice, pages, continued registration, polling, stale poll/action race, saved reuse, retry, regeneration, old result, keyboard, XSS, pagination, empty, errors", flush=True)
     if len(sys.argv) > 1 and sys.argv[1] == "--live":
         context.unroute("**/api/jobs**")
         context.unroute("**/timelines/1")
