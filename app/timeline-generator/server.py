@@ -90,7 +90,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = urlsplit(self.path).path
         if path == "/api/health":
-            self.reply(200, {"ok": True, "service": "history-timeline"})
+            self.reply(200, {"ok": True, "service": "timeline-generator"})
         elif path in ASSETS:
             file, mime = ASSETS[path]
             body = (ROOT / file).read_bytes()
@@ -136,5 +136,5 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     server = ThreadingHTTPServer((HOST, PORT), Handler)
-    print(f"history-timeline listening on {HOST}:{PORT}", flush=True)
+    print(f"timeline-generator listening on {HOST}:{PORT}", flush=True)
     server.serve_forever()

@@ -19,7 +19,7 @@ with sync_playwright() as playwright:
             for element in page.locator(selector).all():
                 assert element.evaluate("e => e.getBoundingClientRect().height >= 44"), f"small touch target: {selector}"
                 assert element.evaluate("e => getComputedStyle(e).whiteSpace === 'nowrap'"), f"wrapped button: {selector}"
-        page.screenshot(path=f"/tmp/history-timeline-{width}.png", full_page=True)
+        page.screenshot(path=f"/tmp/timeline-generator-{width}.png", full_page=True)
     ratios = page.evaluate("""() => {
       const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
       const css = getComputedStyle(document.documentElement);
@@ -54,7 +54,7 @@ with sync_playwright() as playwright:
     for width in [320, 375, 414, 768, 1280]:
         page.set_viewport_size({"width": width, "height": 900})
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), f"result overflow at {width}"
-    page.screenshot(path="/tmp/history-timeline-result.png", full_page=True)
+    page.screenshot(path="/tmp/timeline-generator-result.png", full_page=True)
     page.locator("#refine").click()
     assert page.locator("#query").evaluate("e => e === document.activeElement")
     page.locator("#query").fill("テスト 空結果")
@@ -87,9 +87,9 @@ with sync_playwright() as playwright:
         for event in page.locator(".event").all():
             print(event.locator(".event-date").inner_text(), event.locator("h3").inner_text(), event.locator("p").first.inner_text(), flush=True)
         page.set_viewport_size({"width": 1280, "height": 900})
-        page.screenshot(path="/tmp/history-timeline-live.png", full_page=True)
+        page.screenshot(path="/tmp/timeline-generator-live.png", full_page=True)
         page.set_viewport_size({"width": 375, "height": 900})
-        page.screenshot(path="/tmp/history-timeline-live-mobile.png", full_page=True)
+        page.screenshot(path="/tmp/timeline-generator-live-mobile.png", full_page=True)
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
         assert errors == [], errors
     browser.close()

@@ -9,7 +9,7 @@
 Python 3.10以降の標準ライブラリだけで動作します。新たなPython/JS依存パッケージや有料APIは不要です。
 
 ```sh
-python3 app/history-timeline/server.py
+python3 app/timeline-generator/server.py
 ```
 
 既定では `http://127.0.0.1:8532/` で起動します。
@@ -79,14 +79,14 @@ robots.txtを尊重し、本文の取得に失敗したページは使いませ�
 ## 検証と復旧
 
 ```sh
-python3 -m unittest discover -s app/history-timeline -v
-node --check app/history-timeline/app.js
-python3 app/history-timeline/smoke.py コーヒー
-python3 app/history-timeline/smoke.py インターネット 1980年以降
+python3 -m unittest discover -s app/timeline-generator -v
+node --check app/timeline-generator/app.js
+python3 app/timeline-generator/smoke.py コーヒー
+python3 app/timeline-generator/smoke.py インターネット 1980年以降
 ```
 
 `smoke.py` は実際の検索・本文・モデルを使い、結果と時間を標準出力に出します。保存したサンプルで成功を装いません。
 ブラウザ検証は `browser_check.py` で、画面幅・操作・処理中・空結果・エラー・引用表示を確認します。
 既存の開発用Playwright/Chromiumを使います。`--live インターネット 1980年以降` を追加すると、UIテスト後に実検索も検証します。
-停止は `systemctl --user stop history-timeline.service`、無効化は `systemctl --user disable history-timeline.service` です。
+停止は `systemctl --user stop timeline-generator.service`、無効化は `systemctl --user disable timeline-generator.service` です。
 新しいDBや他サービスの設定変更はなく、サービス停止で元の環境に戻せます。

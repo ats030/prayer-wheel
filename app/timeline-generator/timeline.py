@@ -16,7 +16,7 @@ from urllib.parse import quote, urlencode, urljoin, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 from urllib.robotparser import RobotFileParser
 
-USER_AGENT = "HistoryTimeline/0.1 (personal historical research; contact: ats030@gmail.com)"
+USER_AGENT = "TimelineGenerator/0.1 (personal historical research; contact: ats030@gmail.com)"
 SEARCH_URL = os.environ.get("TIMELINE_SEARCH_URL", "http://127.0.0.1:8081").rstrip("/")
 OLLAMA_URL = os.environ.get("TIMELINE_OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
 MODEL = os.environ.get("TIMELINE_MODEL", "gemma4:12b")
@@ -243,7 +243,7 @@ class WebReader:
 
 def json_request(url, payload=None, timeout=20):
     data = json.dumps(payload, ensure_ascii=False).encode() if payload is not None else None
-    request = Request(url, data=data, headers={"Content-Type": "application/json", "User-Agent": USER_AGENT, "X-Client-App": "history-timeline"})
+    request = Request(url, data=data, headers={"Content-Type": "application/json", "User-Agent": USER_AGENT, "X-Client-App": "timeline-generator"})
     with urlopen(request, timeout=timeout) as response:
         raw = response.read(3_000_001)
         if len(raw) > 3_000_000:
