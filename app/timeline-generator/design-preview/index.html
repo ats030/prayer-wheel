@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>年表 · 歴史年表</title>
+  <link rel="icon" href="http://ubuntu-server-app:8532/favicon.svg" type="image/svg+xml">
+  <style>/* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V4 */
+:root {
+  --color-paper: oklch(97% 0.012 85);
+  --color-surface: oklch(94% 0.016 85);
+  --color-ink: oklch(26% 0.018 65);
+  --color-muted: oklch(46% 0.022 65);
+  --color-rule: oklch(78% 0.025 85);
+  --color-accent: oklch(34% 0.085 160);
+  --color-accent-ink: oklch(98% 0.007 85);
+  --color-focus: oklch(65% 0.16 55);
+  --color-error: oklch(42% 0.15 25);
+  --font-display: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif CJK JP", serif;
+  --font-body: "Yu Gothic", "Hiragino Kaku Gothic ProN", "Noto Sans CJK JP", sans-serif;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-title: clamp(1.5rem, 2vw + 1rem, 2rem);
+  --text-display: clamp(2rem, 4vw + 1rem, 3.75rem);
+  --radius-sm: 4px;
+  --rule-thin: 1px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 100ms;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); font-size: var(--text-md); line-height: 1.5; }
+[hidden] { display: none !important; }
+button, input { font: inherit; }
+button { cursor: pointer; white-space: nowrap; }
+button:disabled { opacity: .55; cursor: default; }
+a { color: var(--color-accent); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+h1, h2, h3, p { overflow-wrap: anywhere; min-width: 0; }
+h1 { font-size: 1.5rem; line-height: 1.35; margin: 0 0 12px; }
+h2 { font-size: var(--text-lg); margin: 0; }
+p { margin: 0 0 8px; }
+.masthead, main, footer { width: min(100% - 24px, 1120px); margin-inline: auto; }
+.masthead { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 56px; border-bottom: 1px solid var(--color-rule); }
+.masthead-nav { display: flex; flex-wrap: wrap; gap: 0 12px; }
+.wordmark { font-size: var(--text-lg); font-weight: 700; color: var(--color-ink); text-decoration: none; white-space: nowrap; }
+.wordmark span { display: none; }
+.quiet-link, .text-button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; font-size: var(--text-sm); white-space: nowrap; }
+.text-button { background: none; border: 0; color: var(--color-accent); text-decoration: underline; padding: 0 4px; text-underline-offset: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.skip-link { position: fixed; top: 8px; left: 8px; transform: translateY(-180%); background: var(--color-paper); padding: 8px; z-index: 5; }
+.skip-link:focus { transform: translateY(0); }
+.app-main, .search-section, .changelog { padding-block: 20px; }
+.search-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+input { min-width: 0; width: 100%; height: 44px; border: 1px solid var(--color-rule); border-radius: var(--radius-sm); padding: 8px 12px; background: var(--color-paper); color: var(--color-ink); }
+input::placeholder { color: var(--color-muted); opacity: 1; }
+input[aria-invalid="true"] { border-color: var(--color-error); }
+.search-row button { border: 0; border-radius: var(--radius-sm); background: var(--color-accent); color: var(--color-accent-ink); height: 44px; padding: 8px 16px; font-weight: 700; }
+.help, .intro, .changelog-intro { font-size: var(--text-sm); color: var(--color-muted); margin-block: 4px 8px; }
+.error { color: var(--color-error); margin-block: 8px; font-weight: 700; }
+.help-panel { margin-block: 0 20px; }
+details { font-size: var(--text-sm); }
+summary { cursor: pointer; color: var(--color-accent); min-height: 44px; padding-block: 12px; width: fit-content; }
+.info-body { padding: 12px; border: 1px solid var(--color-rule); background: var(--color-surface); color: var(--color-muted); overflow-wrap: anywhere; }
+.info-body p:last-child { margin-bottom: 0; }
+.examples { display: flex; flex-wrap: wrap; gap: 0 16px; margin-bottom: 8px; }
+.examples button { min-height: 44px; background: none; border: 0; padding: 0; color: var(--color-accent); text-decoration: underline; }
+.page-head { display: flex; align-items: baseline; gap: 12px; }
+.page-head h1 { flex: 1; margin-bottom: 4px; }
+.job-state { font-size: var(--text-sm); color: var(--color-muted); white-space: nowrap; }
+.job-state[data-state="failed"] { color: var(--color-error); }
+.job-state[data-state="running"] { color: var(--color-accent); }
+.job-actions, .pagination { display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px; }
+.job-actions { margin-bottom: 4px; }
+.progress-section { border-block: 1px solid var(--color-rule); padding-block: 8px; margin-bottom: 8px; }
+.progress-section h2 { font-size: var(--text-md); }
+#progress-message, #job-message, #receipt-message { overflow-wrap: anywhere; }
+.steps { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; margin: 4px 0 0; font-size: var(--text-sm); }
+.steps li { color: var(--color-muted); border-top: 2px solid var(--color-rule); padding-top: 4px; }
+.steps li.current { color: var(--color-accent); border-color: var(--color-accent); font-weight: 700; }
+.steps li.done::before { content: '✓ '; }
+.result-tools { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0 12px; }
+#result-meta { font-size: var(--text-sm); font-variant-numeric: tabular-nums; color: var(--color-muted); margin: 0; }
+.metadata[open] { grid-column: 1 / -1; margin-bottom: 12px; }
+.notice { font-size: var(--text-sm); border-left: 3px solid var(--color-accent); padding: 8px 12px; margin: 4px 0 8px; background: var(--color-surface); overflow-wrap: anywhere; }
+.timeline { list-style: none; padding: 0; margin: 0; }
+.timeline-columns { display: none; }
+.event { display: grid; grid-template-columns: 84px minmax(0, 1fr) minmax(3.5rem, max-content); gap: 0 8px; align-items: center; border-top: 1px solid var(--color-rule); padding-block: 4px; }
+.event-date { grid-column: 1; grid-row: 1; font-size: var(--text-sm); font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.event-title { grid-column: 2; grid-row: 1; margin: 0; font-size: var(--text-md); line-height: 1.5; }
+.event-description { grid-column: 1 / -1; grid-row: 2; margin: 0; font-size: var(--text-md); }
+.event > .source-link { grid-column: 3; grid-row: 1; }
+.source-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; font-size: var(--text-sm); white-space: nowrap; }
+#review-notes .source-link { justify-content: flex-start; white-space: normal; overflow-wrap: anywhere; }
+.review-note { border-top: 1px solid var(--color-rule); padding-top: 8px; margin-top: 8px; }
+.list-columns, .job-row { display: grid; grid-template-columns: minmax(0, 1fr) 56px 80px; gap: 0 8px; }
+.list-columns { font-size: var(--text-sm); color: var(--color-muted); border-bottom: 1px solid var(--color-rule); padding-block: 8px; margin-top: 4px; }
+.list-columns span:last-child { text-align: right; }
+.job-list { list-style: none; padding: 0; margin: 0; }
+.job-row { border-bottom: 1px solid var(--color-rule); align-items: center; padding-block: 4px; }
+.job-link { font-size: var(--text-md); min-height: 44px; display: flex; align-items: center; overflow-wrap: anywhere; min-width: 0; }
+.job-count { text-align: right; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.job-count small { display: block; font-size: inherit; color: var(--color-muted); }
+.job-row .help { grid-column: 1 / -1; margin: 0 0 4px; overflow-wrap: anywhere; }
+.pagination { justify-content: space-between; padding-top: 8px; }
+.release { padding-block: 16px; border-top: 1px solid var(--color-rule); }
+.release h2 { font-size: var(--text-lg); margin-bottom: 8px; }
+.release ul { margin: 0; padding-left: 20px; }
+.release li + li { margin-top: 8px; }
+footer { border-top: 1px solid var(--color-rule); display: flex; justify-content: space-between; align-items: center; color: var(--color-muted); font-size: var(--text-sm); }
+@media (min-width: 40rem) {
+  .masthead, main, footer { width: min(100% - 40px, 1120px); }
+  .search-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .event { grid-template-columns: 104px minmax(0, 1fr) minmax(3.5rem, max-content); gap: 0 12px; }
+  .event-date { grid-column: 1; grid-row: 1 / 3; align-self: start; padding-top: 8px; }
+  .event-title { grid-column: 2; }
+  .event-description { grid-column: 2; grid-row: 2; }
+  .event > .source-link { grid-column: 3; grid-row: 1 / 3; }
+  .list-columns, .job-row { grid-template-columns: minmax(0, 1fr) 80px 100px; }
+}
+@media (min-width: 56rem) {
+  .event, .timeline-columns { grid-template-columns: 104px minmax(180px, 1fr) minmax(0, 2fr) minmax(3.5rem, max-content); gap: 0 16px; }
+  .timeline-columns { display: grid; font-size: var(--text-sm); color: var(--color-muted); padding-block: 6px; }
+  .event-date { grid-column: 1; grid-row: 1; align-self: center; padding-top: 0; }
+  .event-title { grid-column: 2; grid-row: 1; }
+  .event-description { grid-column: 3; grid-row: 1; }
+  .event > .source-link { grid-column: 4; grid-row: 1; }
+}
+@media (hover: hover) and (pointer: fine) { button:hover:not(:disabled), a:hover, summary:hover { background-color: var(--color-surface); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+</style><style>/* OpenDesign minimalist-ui, adapted to the project's dense reading layout. */
+body[data-view="proposal"] {
+  --color-rule: color-mix(in srgb, var(--color-ink) 18%, var(--color-paper));
+  --color-surface: color-mix(in srgb, var(--color-accent) 5%, var(--color-paper));
+}
+body[data-view="proposal"] .masthead { border-bottom: 2px solid var(--color-accent); flex-wrap: wrap; gap: 4px 8px; }
+body[data-view="proposal"] .wordmark { font-family: var(--font-display); letter-spacing: .04em; }
+body[data-view="proposal"] .masthead-nav { gap: 4px; }
+body[data-view="proposal"] .masthead-nav a { padding-inline: 8px; text-decoration: none; border-radius: 4px; }
+body[data-view="proposal"] .app-main { padding-top: 16px; }
+body[data-view="proposal"] .page-head { align-items: center; margin-bottom: 4px; }
+body[data-view="proposal"] .page-head h1 { font-family: var(--font-display); margin: 0; letter-spacing: .01em; }
+body[data-view="proposal"] .job-state {
+  border: 1px solid var(--color-rule); border-radius: 4px; padding: 3px 8px;
+  background: var(--color-surface); line-height: 1.5;
+}
+body[data-view="proposal"] .job-state[data-state="complete"],
+body[data-view="proposal"] .job-state[data-state="running"] { color: var(--color-accent); border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-paper)); }
+body[data-view="proposal"] .job-state[data-state="failed"] { color: var(--color-error); border-color: var(--color-error); }
+body[data-view="proposal"] .job-actions { gap: 4px 8px; margin-block: 8px 0; }
+body[data-view="proposal"] .job-actions button,
+body[data-view="proposal"] .job-actions a {
+  border: 1px solid var(--color-rule); border-radius: 4px; padding-inline: 12px;
+  text-decoration: none; background: transparent;
+}
+body[data-view="proposal"] .result-tools { border-bottom: 1px solid var(--color-rule); }
+body[data-view="proposal"] #result-meta { font-weight: 700; color: var(--color-ink); }
+body[data-view="proposal"] .metadata summary { padding-inline: 8px; }
+body[data-view="proposal"] .timeline-columns { background: var(--color-surface); padding-block: 8px; color: var(--color-muted); }
+body[data-view="proposal"] .event { border-top-color: var(--color-rule); }
+body[data-view="proposal"] .event:last-child { border-bottom: 1px solid var(--color-rule); }
+body[data-view="proposal"] .event-date { color: var(--color-accent); font-variant-numeric: tabular-nums; }
+body[data-view="proposal"] .event-title { font-weight: 700; }
+body[data-view="proposal"] .event-description { color: var(--color-muted); }
+body[data-view="proposal"] .event > .source-link {
+  border-radius: 4px; text-decoration: none; padding-inline: 8px;
+  background: var(--color-surface); gap: 4px;
+}
+body[data-view="proposal"] .info-body { border-radius: 4px; }
+body[data-view="proposal"] .notice { border-radius: 0 4px 4px 0; }
+@media (hover: hover) and (pointer: fine) {
+  body[data-view="proposal"] .event:hover { background: color-mix(in srgb, var(--color-accent) 3%, var(--color-paper)); }
+  body[data-view="proposal"] .event > .source-link:hover,
+  body[data-view="proposal"] .job-actions :is(button,a):hover { background: color-mix(in srgb, var(--color-accent) 10%, var(--color-paper)); }
+}
+</style>
+  <script src="http://ubuntu-server-app:8526/v.js" data-site="timeline-generator-design-preview" defer></script>
+</head>
+<body data-view="proposal"><aside class="preview-toolbar" aria-label="試作の比較"><strong>詳細画面の試作</strong>
+<label>表示 <select id="preview-view"><option value="proposal">提案</option><option value="current">現行</option></select></label>
+<label>件数 <select id="preview-count"><option value="saved">保存済み</option><option value="100">100件の検証用データ</option></select></label>
+<label>状態 <select id="preview-state"><option value="complete">完了</option><option value="running">再生成中</option><option value="partial">時間上限</option><option value="failed">再生成失敗</option><option value="empty">0件</option></select></label>
+<span>100件・状態・操作は検証用です</span></aside>
+<style>.preview-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;padding:8px 12px;border-bottom:1px solid var(--color-rule);font-size:14px;background:var(--color-surface)}.preview-toolbar label{display:flex;align-items:center;gap:8px}.preview-toolbar select{font:inherit;min-height:44px;max-width:100%;color:var(--color-ink);background:var(--color-paper);border:1px solid var(--color-rule);border-radius:4px;padding:4px 8px}.preview-toolbar span{color:var(--color-muted)}</style>
+  <a class="skip-link" href="#page-heading">本文へ</a>
+  <header class="masthead"><a class="wordmark" href="http://ubuntu-server-app:8532/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="http://ubuntu-server-app:8532/">年表を作る</a><a class="quiet-link" href="http://ubuntu-server-app:8532/timelines">年表一覧</a></nav></header>
+  <main class="app-main detail-page">
+    <div class="page-head"><h1 id="page-heading" tabindex="-1">年表を読み込んでいます</h1><span id="job-status" class="job-state" role="status"></span></div>
+    <p id="job-message" class="help"></p>
+    <p id="page-error" class="error" role="alert" hidden></p>
+    <div class="job-actions"><button id="retry" class="text-button" type="button" hidden>再試行</button><button id="regenerate" class="text-button" type="button" hidden>再生成</button><a id="refine" class="quiet-link" href="http://ubuntu-server-app:8532/">条件を変える</a></div>
+    <section id="progress" class="progress-section" aria-labelledby="progress-heading" hidden>
+      <h2 id="progress-heading" class="sr-only">生成の進捗</h2>
+      <p id="progress-message" role="status"></p>
+      <ol class="steps"><li>資料を探す</li><li>本文を読む</li><li>年代を整理</li><li>根拠を照合</li></ol>
+    </section>
+    <section id="result" class="result-section" aria-labelledby="page-heading" hidden>
+      <p id="old-result" class="notice" hidden>前回の生成結果を表示しています。再生成が成功すると更新されます。</p>
+      <p id="result-notice" class="notice" hidden></p>
+      <div class="result-tools">
+        <p id="result-meta"></p>
+        <details id="generation-info" class="metadata">
+          <summary>生成情報</summary>
+          <div class="info-body"><p id="saved-at"></p><p id="generation-meta"></p><p id="generation-notice"></p><div id="review-notes"></div></div>
+        </details>
+      </div>
+      <p id="result-empty" hidden>確認できる出来事がありません。条件を変えて調べ直せます。</p>
+      <div class="timeline-columns" aria-hidden="true"><span>年代</span><span>出来事</span><span>説明</span><span>出典</span></div>
+      <ol id="timeline" class="timeline"></ol>
+    </section>
+  </main>
+<script>
+const params = new URLSearchParams(location.search);
+const fixture = {"kind": "result", "theme": "ラーメン", "period": "年代の指定なし", "elapsed_seconds": 457.6, "notice": "", "events": [{"date": "1488年", "year": 1488, "title": "日本初の中華麺「経帯麺」の食文化", "description": "かん水を使用した、現代のラーメンの麺とほぼ同じレシピの経帯麺が食べられた。", "source": {"url": "https://www.raumen.co.jp/rapedia/study_history/", "title": "日本のラーメンの歴史 - ラーペディア - 新横浜ラーメン博物館"}}, {"date": "1910年", "year": 1910, "title": "浅草の来々軒によるラーメンの普及", "description": "浅草の来々軒から始まり、ラーメンが日本国内で広まり始めた。", "source": {"url": "https://toyokeizai.net/articles/-/696904", "title": "ラーメンよく食べる人が知らない「漢字の歴史」 柳麺?拉麺?昔はどの漢字が使われていたか | ビジネス | 東洋経済オンライン"}}, {"date": "1960年", "year": 1960, "title": "「インスタント」の流行と普及", "description": "1960年から61年にかけて、インスタントという言葉が最大の流行語となった。", "source": {"url": "https://www.instantramen.or.jp/know/history/origin/", "title": "インスタントラーメンの誕生 | インスタントラーメンナビ"}}, {"date": "2008年", "year": 2008, "title": "濃厚魚介つけ麺のブームと台湾まぜそばの誕生", "description": "濃厚魚介つけ麺がブームとなり、名古屋で台湾まぜそばが誕生した。", "source": {"url": "https://ramen-japan.jp/history/ramen-history/", "title": "ラーメンとその歴史"}}, {"date": "2014年", "year": 2014, "title": "多様なニーズへの対応と提供の増加", "description": "訪日客の増加に伴い、ベジタブルやムスリム向けラーメンの提供が増えた。", "source": {"url": "https://www.raumen.co.jp/rapedia/study_history/", "title": "日本のラーメンの歴史 - ラーペディア - 新横浜ラーメン博物館"}}, {"date": "2016年", "year": 2016, "title": "ラーメン店によるミシュラン一つ星の獲得", "description": "ラーメン店として世界で初めて一つ星を4年連続で獲得した。", "source": {"url": "https://ramen-japan.jp/history/ramen-history/", "title": "ラーメンとその歴史"}}], "review_notes": []};
+if (params.get('count') === '100') {
+  fixture.events = Array.from({length:100}, (_, i) => ({...fixture.events[i % fixture.events.length], title:`${fixture.events[i % fixture.events.length].title}（検証用 ${i + 1}）`}));
+}
+const selectedState = params.get('state') || 'complete';
+if (selectedState === 'empty') fixture.events = [];
+if (selectedState === 'partial') fixture.stop_reason = 'time_limit';
+let previewJob = {id:4, query:'ラーメン', state:['running','failed'].includes(selectedState)?selectedState:'complete',
+  message:selectedState==='running'?'本文を読み、年代と出来事を整理しています。':'', stage:'generate',
+  error:selectedState==='failed'?'生成に失敗しました。前回の結果を閲覧できます。':null,
+  has_result:true, result:fixture, generated_at:"2026-10-02T15:48:17+00:00"};
+window.fetch = async (path, options={}) => {
+  if (!String(path).startsWith('/api/jobs/')) throw new Error('試作では外部APIを呼び出しません。');
+  if (options.method === 'POST') {
+    previewJob = {...previewJob, state:'running', stage:'generate', error:null, message:'試作内で再生成を再現しています。'};
+    setTimeout(() => { previewJob = {...previewJob, state:'complete', message:'', generated_at:new Date().toISOString()}; }, 2500);
+  }
+  return new Response(JSON.stringify(previewJob), {headers:{'Content-Type':'application/json'}});
+};
+document.body.dataset.view = params.get('view') === 'current' ? 'current' : 'proposal';
+for (const [id, key, fallback] of [['preview-view','view','proposal'],['preview-count','count','saved'],['preview-state','state','complete']]) {
+  const control=document.getElementById(id); control.value=params.get(key)||fallback;
+  control.addEventListener('change',()=>{params.set(key,control.value);location.search=params.toString();});
+}
+</script><script>"use strict";
+const $ = (id) => document.getElementById(id);
+const stages = ["search", "read", "generate", "verify"];
+const labels = {queued: "待機中", running: "生成中", complete: "完了", failed: "失敗"};
+const active = job => ["queued", "running"].includes(job.state);
+function node(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+function date(value) { return new Date(value).toLocaleString("ja-JP"); }
+async function api(path, body) {
+  const response = await fetch(path, {method: body === undefined ? "GET" : "POST", headers: {"Content-Type": "application/json"}, body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(15000)});
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "処理を完了できませんでした。");
+  return data;
+}
+function error(id, message) { $(id).textContent = message; $(id).hidden = false; }
+function progress(data) {
+  $("progress-message").textContent = data.message || "生成を始めています。";
+  const current = stages.indexOf(data.stage);
+  document.querySelectorAll(".steps li").forEach((step, i) => {
+    step.classList.toggle("current", i === current);
+    step.classList.toggle("done", i < current);
+    if (i === current) step.setAttribute("aria-current", "step");
+    else step.removeAttribute("aria-current");
+  });
+}
+function sourceLink(source, text, optional = false) {
+  let url;
+  try { url = new URL(source.url); }
+  catch { if (optional) return null; throw new Error("出典URLを読み取れませんでした。"); }
+  if (!["http:", "https:"].includes(url.protocol)) {
+    if (optional) return null;
+    throw new Error("出典URLを読み取れませんでした。");
+  }
+  const link = node("a", "source-link", text);
+  link.href = url.href;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.title = source.title;
+  link.setAttribute("aria-label", `出典を読む：${source.title}（別タブ）`);
+  return link;
+}
+function render(data) {
+  $("result-meta").textContent = `${data.events.length}件`;
+  $("generation-meta").textContent = `${data.period} · 生成時間 ${data.elapsed_seconds}秒`;
+  $("generation-notice").textContent = data.notice;
+  const alerts = [];
+  if (data.stop_reason === "time_limit") alerts.push(`時間上限（10分）により終了。検証済み${data.events.length}件を保存しました。`);
+  if (data.stop_reason === "processing_error") alerts.push(`途中で処理を終了。検証済み${data.events.length}件を保存しました。再生成で調べ直せます。`);
+  if (data.review_notes?.length) alerts.push(`採用を見送った候補${data.review_notes.length}件。詳細は「生成情報」で確認できます。`);
+  $("result-notice").textContent = alerts.join(" ");
+  $("result-notice").hidden = alerts.length === 0;
+  $("review-notes").replaceChildren();
+  for (const note of data.review_notes || []) {
+    const item = node("div", "review-note");
+    item.append(node("p", "", `${note.date} ${note.title}：${note.reason}`));
+    for (const source of note.sources || []) {
+      const link = sourceLink(source, `補足資料：${source.title} ↗`, true);
+      if (link) item.append(link);
+    }
+    $("review-notes").append(item);
+  }
+  $("result-empty").hidden = data.events.length > 0;
+  $("timeline").replaceChildren();
+  const rows = document.createDocumentFragment();
+  for (const event of data.events) {
+    const row = node("li", "event");
+    row.append(node("div", "event-date", event.date), node("h3", "event-title", event.title), node("p", "event-description", event.description), sourceLink(event.source, "出典 ↗"));
+    rows.append(row);
+  }
+  $("timeline").append(rows);
+  $("result").hidden = false;
+}
+
+
+if ($("search-form")) {
+  let submitting = false;
+  $("search-form").addEventListener("submit", async event => {
+    event.preventDefault();
+    if (submitting) return;
+    const query = $("query").value.trim();
+    $("form-error").hidden = true;
+    $("query").removeAttribute("aria-invalid");
+    if (!query) {
+      error("form-error", "調べたいテーマを入力してください。");
+      $("query").setAttribute("aria-invalid", "true");
+      $("query").focus();
+      return;
+    }
+    submitting = true;
+    $("submit").disabled = true;
+    $("search-form").setAttribute("aria-busy", "true");
+    try {
+      const job = await api("/api/jobs", {query});
+      if (job.has_result) { location.assign(`/timelines/${job.id}`); return; }
+      $("receipt").hidden = false;
+      $("receipt-heading").textContent = job.state === "failed" ? "前回の生成は失敗しました" : "キューに登録されています";
+      $("receipt-message").textContent = `${job.query} · ${labels[job.state]}。別のテーマも追加できます。`;
+      $("receipt-link").href = `/timelines/${job.id}`;
+    } catch (exc) { error("form-error", exc.message || "接続できませんでした。もう一度お試しください。"); }
+    finally {
+      submitting = false;
+      $("submit").disabled = false;
+      $("search-form").removeAttribute("aria-busy");
+    }
+  });
+  $("query").addEventListener("input", () => { $("query").removeAttribute("aria-invalid"); $("form-error").hidden = true; });
+  document.querySelectorAll("[data-query]").forEach(button => button.addEventListener("click", () => {
+    $("query").value = button.dataset.query;
+    $("search-form").requestSubmit();
+  }));
+  const query = new URLSearchParams(location.search).get("query");
+  if (query) $("query").value = query;
+}
+
+if ($("job-list")) {
+  let offset = 0, timer, loading = false;
+  async function load() {
+    clearTimeout(timer);
+    if (loading) return;
+    loading = true;
+    try {
+      const data = await api(`/api/jobs?offset=${offset}`);
+      $("page-error").hidden = true;
+      $("list-summary").textContent = data.total ? `${data.total}件中 ${offset + 1}〜${offset + data.jobs.length}件` : "0件";
+      $("list-empty").hidden = data.total > 0;
+      const list = document.createDocumentFragment();
+      for (const job of data.jobs) {
+        const row = node("li", "job-row");
+        const link = node("a", "job-link", job.query);
+        link.href = `/timelines/${job.id}`;
+        const state = node("span", "job-state", labels[job.state]);
+        state.dataset.state = job.state;
+        const count = node("span", "job-count", Number.isInteger(job.event_count) ? `${job.event_count}件` : "—");
+        const previous = job.has_result && job.state !== "complete";
+        count.setAttribute("aria-label", Number.isInteger(job.event_count) ? `${previous ? "前回の" : ""}収録件数 ${job.event_count}件` : "未生成");
+        if (previous) count.append(node("small", "", "前回"));
+        row.append(link, state, count);
+        const message = job.error || (active(job) || ["time_limit", "processing_error"].includes(job.stop_reason) ? job.message : "");
+        if (message) row.append(node("p", "help", message));
+        list.append(row);
+      }
+      // Unchanged polling responses leave focused links and screen reader position intact.
+      const signature = JSON.stringify(data.jobs);
+      if ($("job-list").dataset.signature !== signature) {
+        const focused = document.activeElement;
+        const href = $("job-list").contains(focused) ? focused.getAttribute("href") : null;
+        $("job-list").replaceChildren(list);
+        $("job-list").dataset.signature = signature;
+        if (href) [...$("job-list").querySelectorAll("a")].find(link => link.getAttribute("href") === href)?.focus({preventScroll: true});
+      }
+      $("previous").disabled = offset === 0;
+      $("next").disabled = offset + data.jobs.length >= data.total;
+    } catch (exc) { error("page-error", `一覧を読み込めませんでした。${exc.message}`); }
+    finally { loading = false; timer = setTimeout(load, 3000); }
+  }
+  $("previous").addEventListener("click", () => { if (!loading) { offset = Math.max(0, offset - 50); load(); } });
+  $("next").addEventListener("click", () => { if (!loading) { offset += 50; load(); } });
+  load();
+}
+
+if ($("job-status")) {
+  const id = location.pathname.split("/").pop();
+  let timer, generatedAt, renderedResult, job, acting = false, generation = 0;
+  function show(current) {
+    job = current;
+    $("page-heading").textContent = job.query;
+    document.title = `${job.query} · 歴史年表`;
+    $("job-status").textContent = labels[job.state];
+    $("job-status").dataset.state = job.state;
+    $("job-message").textContent = job.message || "";
+    $("job-message").hidden = job.state !== "queued";
+    $("retry").hidden = job.state !== "failed";
+    $("regenerate").hidden = !job.has_result || active(job);
+    $("refine").href = `/?query=${encodeURIComponent(job.query)}`;
+    $("progress").hidden = job.state !== "running";
+    if (job.state === "running") progress(job);
+    if (job.error) error("page-error", job.error);
+    else $("page-error").hidden = true;
+    if (job.result && (generatedAt !== job.generated_at || renderedResult !== JSON.stringify(job.result))) {
+      render(job.result);
+      generatedAt = job.generated_at;
+      renderedResult = JSON.stringify(job.result);
+      $("saved-at").textContent = `生成日時：${date(job.generated_at)}`;
+    }
+    $("old-result").hidden = !job.has_result || job.state === "complete";
+  }
+  async function load() {
+    clearTimeout(timer);
+    const version = generation;
+    try {
+      const current = await api(`/api/jobs/${id}`);
+      if (version === generation && !acting) show(current);
+    } catch (exc) {
+      if (version === generation && !acting) error("page-error", `状態を読み込めませんでした。${exc.message}`);
+    }
+    if (version === generation && !acting) timer = setTimeout(load, 2000);
+  }
+  for (const action of ["retry", "regenerate"]) $(action).addEventListener("click", async () => {
+    if (acting) return;
+    acting = true;
+    generation += 1;
+    clearTimeout(timer);
+    $("retry").disabled = $("regenerate").disabled = true;
+    try { show(await api(`/api/jobs/${id}/${action}`, {})); }
+    catch (exc) { error("page-error", exc.message); }
+    finally { acting = false; $("retry").disabled = $("regenerate").disabled = false; timer = setTimeout(load, 2000); }
+  });
+  load();
+}
+</script><script>document.getElementById("refine").addEventListener("click", e => {e.currentTarget.href="http://ubuntu-server-app:8532/?query="+encodeURIComponent(previewJob.query);});</script></body>
+</html>

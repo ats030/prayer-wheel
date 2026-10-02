@@ -1,0 +1,10 @@
+{
+  "source_sha256": {
+    "detail.html": "d1432806a25956f8ed233fc2b4ddc464ecbae4f87a217726180c9716c63a0921",
+    "styles.css": "21745853df909caf62bc3860a7ec9e15c87da4c0908b630bcb529367faa9d214",
+    "tokens.css": "78ab40dad31625f0325647d88607bac9f937ac3f2dda4d9b79956300cdb6effd",
+    "app.js": "01ae5b028e2c136a4be0abaf076f45742bf30151644a2d71b5b16d43a042c067"
+  },
+  "saved_events": 6,
+  "fixture": "保存済みラーメンの表示項目のみ。100件モードは繰り返しの検証データ。"
+}

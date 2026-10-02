@@ -1,0 +1,22 @@
+tool: OpenDesign official reference bundle
+version: 53231d40b778d88eba23f35547bf99485d3ae9fc
+checked_at: 2026-10-02
+intended_use: Codex reads the official minimalist-ui skill and clean DESIGN.md to build an isolated detail-page prototype
+decision: approved
+adoption: selected references only; no desktop installation, cloud subscription, new dependency or separate model call
+commercial_use: permitted by MIT skill license and Apache-2.0 repository license
+cost: source references are freely available; existing Codex usage follows the existing account plan
+hosted_service: not used; no pricing or cloud terms assumed
+model_output: no new model provider or output contract introduced
+attribution:
+  - MIT Copyright (c) 2026 Leonxlnx preserved in reference/MIT.txt
+  - Open Design contributors Apache-2.0 license preserved in reference/Apache-2.0.txt
+  - Unmodified original reference documents retained; adaptations are in separate proposal.css
+restrictions:
+  - Preserve applicable license and attribution notices on redistribution
+  - No upstream trademark rights or endorsements implied
+sources:
+  - https://github.com/nexu-io/open-design/blob/53231d40b778d88eba23f35547bf99485d3ae9fc/LICENSE
+  - https://github.com/nexu-io/open-design/blob/53231d40b778d88eba23f35547bf99485d3ae9fc/skills/minimalist-skill/LICENSE
+  - https://github.com/nexu-io/open-design/blob/53231d40b778d88eba23f35547bf99485d3ae9fc/skills/minimalist-skill/SKILL.md
+  - https://github.com/nexu-io/open-design/blob/53231d40b778d88eba23f35547bf99485d3ae9fc/design-systems/clean/DESIGN.md
