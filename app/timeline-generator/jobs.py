@@ -123,7 +123,9 @@ class JobStore:
         with self.connect() as db:
             kind = record.get("kind")
             if kind == "result":
-                db.execute("UPDATE jobs SET state='complete', result=?, generated_at=?, updated_at=?, error=NULL, message='生成が完了しました。' WHERE id=? AND state='running'", (json.dumps(record, ensure_ascii=False), timestamp, timestamp, identifier))
+                message = {'time_limit': '時間上限により終了しました。検証済みの結果を保存しました。',
+                           'processing_error': '途中で処理を終了しました。検証済みの結果を保存しました。'}.get(record.get('stop_reason'), '生成が完了しました。')
+                db.execute("UPDATE jobs SET state='complete', result=?, generated_at=?, updated_at=?, error=NULL, message=? WHERE id=? AND state='running'", (json.dumps(record, ensure_ascii=False), timestamp, timestamp, message, identifier))
             elif kind == "error":
                 db.execute("UPDATE jobs SET state='failed', error=?, updated_at=?, message='生成に失敗しました。' WHERE id=? AND state='running'", (record["message"], timestamp, identifier))
             elif kind == "progress":

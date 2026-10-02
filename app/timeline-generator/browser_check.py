@@ -93,6 +93,24 @@ with sync_playwright() as playwright:
         page.set_viewport_size({"width": width, "height": 900})
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), ("result", width)
         page.screenshot(path=f"/tmp/timeline-generator-saved-{width}.png", full_page=True)
+    # A long timeline and a partial-completion notice must fit all supported widths.
+    hundred = RESULT | {'events': [RESULT['events'][0] | {'year': 1800 + i, 'date': f'{1800+i}年', 'title': f'出来事{i+1}'} for i in range(100)], 'stop_reason': 'time_limit', 'notice': '時間上限（10分）により終了しました。検証済みの出来事を保存しています。'}
+    job = job | {'result': hundred, 'message': '時間上限により終了しました。検証済みの結果を保存しました。'}
+    for width in [320, 375, 414, 768, 1280]:
+        page.set_viewport_size({'width': width, 'height': 900})
+        page.goto(URL + '/timelines/1')
+        page.wait_for_function("document.querySelectorAll('.event').length === 100")
+        assert '100件' in page.locator('#result-meta').inner_text()
+        assert '時間上限' in page.locator('#result-notice').inner_text()
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        page.locator('.event').last.scroll_into_view_if_needed()
+        assert page.locator('.event h3').last.inner_text() == '出来事100'
+    page.goto(URL + '/timelines')
+    page.locator('.job-link').wait_for()
+    assert '時間上限' in page.locator('.job-row .help').inner_text()
+    job = job | {'result': RESULT, 'message': '生成が完了しました。'}
+    page.goto(URL + '/timelines/1')
+    page.wait_for_function("document.querySelectorAll('.event').length === 1")
     old_job = job.copy()
     pending = []
     page.route("**/api/jobs/1", lambda route: pending.append(route))
@@ -143,7 +161,7 @@ with sync_playwright() as playwright:
     page.wait_for_function("document.getElementById('query').value === 'テストテーマ 1900年以降'")
     assert page.locator("#query").input_value() == BASE["query"]
     assert errors == [], errors
-    print("PASS: 5 widths, pages, continued registration, polling, stale poll/action race, saved reuse, retry, regeneration, old result, keyboard, XSS, pagination, empty, errors", flush=True)
+    print("PASS: 5 widths, 100 events and timeout notice, pages, continued registration, polling, stale poll/action race, saved reuse, retry, regeneration, old result, keyboard, XSS, pagination, empty, errors", flush=True)
     if len(sys.argv) > 1 and sys.argv[1] == "--live":
         context.unroute("**/api/jobs**")
         context.unroute("**/timelines/1")
@@ -157,7 +175,7 @@ with sync_playwright() as playwright:
         if not "/timelines/" in page.url:
             assert not page.locator("#form-error").is_visible()
             page.locator("#receipt-link").click()
-        page.wait_for_function("document.getElementById('job-status').textContent === '完了' || document.getElementById('job-status').textContent === '失敗'", timeout=220000)
+        page.wait_for_function("document.getElementById('job-status').textContent === '完了' || document.getElementById('job-status').textContent === '失敗'", timeout=650000)
         assert page.locator("#job-status").inner_text() == "完了", page.locator("#page-error").inner_text()
         assert page.locator(".event").count() > 0, page.locator("#result-notice").inner_text()
         print("LIVE:", query, page.locator("#result-meta").inner_text(), flush=True)

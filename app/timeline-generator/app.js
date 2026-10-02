@@ -127,7 +127,7 @@ if ($("job-list")) {
         const link = node("a", "job-link", job.query);
         link.href = `/timelines/${job.id}`;
         row.append(link, node("span", "job-state", labels[job.state]));
-        row.append(node("p", "help", job.error || (job.generated_at ? `生成日時：${date(job.generated_at)}${active(job) ? " · 前回の結果を閲覧できます" : ""}` : job.message)));
+        row.append(node("p", "help", job.error || (job.generated_at ? `生成日時：${date(job.generated_at)}${active(job) ? " · 前回の結果を閲覧できます" : ` · ${job.message || ""}`}` : job.message)));
         list.append(row);
       }
       // Unchanged polling responses leave focused links and screen reader position intact.

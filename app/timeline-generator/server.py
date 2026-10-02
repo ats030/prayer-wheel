@@ -10,7 +10,7 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
-from timeline import TIME_LIMIT, TimelineError, build_timeline, parse_query
+from timeline import TIME_LIMIT, TimelineError, build_timeline, parse_query, partial_result
 from jobs import JobStore, QueueWorker
 
 ROOT = Path(__file__).resolve().parent
@@ -37,24 +37,41 @@ def bounded_pipeline(query, emit, stopping=None):
     context = multiprocessing.get_context("spawn")
     receiver, sender = context.Pipe(duplex=False)
     worker = context.Process(target=pipeline_worker, args=(query, sender), daemon=True)
-    deadline = time.monotonic() + REQUEST_TIME_LIMIT
+    started = time.monotonic()
+    deadline = started + REQUEST_TIME_LIMIT
+    checkpoint = None
+    interrupted = False
     worker.start()
     sender.close()
     try:
         while time.monotonic() < deadline:
             if stopping is not None and stopping.is_set():
                 return
-            if receiver.poll(min(0.2, max(0, deadline - time.monotonic()))):
-                try:
-                    record = receiver.recv()
-                except EOFError:
-                    break
+            try:
+                ready = receiver.poll(min(0.2, max(0, deadline - time.monotonic())))
+                record = receiver.recv() if ready else None
+            except (EOFError, OSError):
+                # Only transport failures fall back; database emit failures must propagate.
+                interrupted = True
+                break
+            if ready:
+                if record.get("kind") == "checkpoint":
+                    if record.get("events"):
+                        checkpoint = record
+                    continue
+                if record.get("kind") == "error" and checkpoint:
+                    emit(partial_result(query, checkpoint, started, "processing_error"))
+                    return
                 emit(record)
                 if record.get("kind") in {"result", "error"}:
                     return
             elif not worker.is_alive():
+                interrupted = True
                 break
-        emit({"kind": "error", "message": "処理時間の上限に達しました。テーマを絞って再検索してください。"})
+        if checkpoint:
+            emit(partial_result(query, checkpoint, started, "processing_error" if interrupted or time.monotonic() < deadline else "time_limit"))
+        else:
+            emit({"kind": "error", "message": "処理を完了できず、検証済みの出来事を保存できませんでした。再試行してください。"})
     finally:
         receiver.close()
         if worker.is_alive():
