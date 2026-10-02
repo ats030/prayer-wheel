@@ -13,25 +13,30 @@
   <a class="skip-link" href="#page-heading">本文へ</a>
   <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/">年表を作る</a><a class="quiet-link" href="/timelines">年表一覧</a></nav></header>
   <main class="app-main detail-page">
-    <div class="page-head"><h1 id="page-heading" tabindex="-1">年表を読み込んでいます</h1><span id="job-status" class="job-state" role="status"></span></div>
-    <p id="job-message" class="help"></p>
-    <p id="page-error" class="error" role="alert" hidden></p>
-    <div class="job-actions"><button id="retry" class="text-button" type="button" hidden>再試行</button><button id="regenerate" class="text-button" type="button" hidden>再生成</button><a id="refine" class="quiet-link" href="/">条件を変える</a></div>
-    <section id="progress" class="progress-section" aria-labelledby="progress-heading" hidden>
-      <h2 id="progress-heading" class="sr-only">生成の進捗</h2>
-      <p id="progress-message" role="status"></p>
-      <ol class="steps"><li>資料を探す</li><li>本文を読む</li><li>年代を整理</li><li>根拠を照合</li></ol>
-    </section>
-    <section id="result" class="result-section" aria-labelledby="page-heading" hidden>
-      <p id="old-result" class="notice" hidden>前回の生成結果を表示しています。再生成が成功すると更新されます。</p>
-      <p id="result-notice" class="notice" hidden></p>
+    <div class="page-head">
+      <h1 id="page-heading" tabindex="-1">年表を読み込んでいます</h1>
+      <div class="job-actions"><button id="retry" class="text-button" type="button" hidden>再試行</button><button id="regenerate" class="text-button" type="button" hidden>再生成</button><a id="refine" class="quiet-link" href="/">条件を変える</a></div>
+    </div>
+    <section class="status-section" aria-label="年表の状態と生成情報">
       <div class="result-tools">
-        <p id="result-meta"></p>
-        <details id="generation-info" class="metadata">
+        <p id="result-meta" hidden></p>
+        <span id="job-status" class="job-state" role="status"></span>
+        <details id="generation-info" class="metadata" hidden>
           <summary>生成情報</summary>
           <div class="info-body"><p id="saved-at"></p><p id="generation-meta"></p><p id="generation-notice"></p><div id="review-notes"></div></div>
         </details>
       </div>
+      <p id="job-message" class="help" hidden></p>
+      <p id="page-error" class="error" role="alert" hidden></p>
+      <section id="progress" class="progress-section" aria-labelledby="progress-heading" hidden>
+        <h2 id="progress-heading" class="sr-only">生成の進捗</h2>
+        <p id="progress-message" role="status"></p>
+        <ol class="steps"><li>資料を探す</li><li>本文を読む</li><li>年代を整理</li><li>根拠を照合</li></ol>
+      </section>
+      <p id="old-result" class="notice" hidden>前回の生成結果を表示しています。再生成が成功すると更新されます。</p>
+      <p id="result-notice" class="notice" hidden></p>
+    </section>
+    <section id="result" class="result-section" aria-labelledby="page-heading" hidden>
       <p id="result-empty" hidden>確認できる出来事がありません。条件を変えて調べ直せます。</p>
       <div class="timeline-columns" aria-hidden="true"><span>年代</span><span>出来事</span><span>説明</span><span>出典</span></div>
       <ol id="timeline" class="timeline"></ol>

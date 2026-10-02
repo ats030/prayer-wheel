@@ -171,6 +171,8 @@ if ($("job-status")) {
     document.title = `${job.query} · 歴史年表`;
     $("job-status").textContent = labels[job.state];
     $("job-status").dataset.state = job.state;
+    $("result-meta").hidden = !job.result;
+    $("generation-info").hidden = !job.result;
     $("job-message").textContent = job.message || "";
     $("job-message").hidden = job.state !== "queued";
     $("retry").hidden = job.state !== "failed";

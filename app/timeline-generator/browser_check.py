@@ -2,6 +2,8 @@
 import json
 import os
 import sys
+from pathlib import Path
+from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright
 
 URL = os.environ.get("TIMELINE_TEST_URL", "http://100.94.207.13:8532")
@@ -44,15 +46,21 @@ with sync_playwright() as playwright:
             route.fulfill(status=200, content_type="application/json", body=json.dumps(job))
     context.route("**/api/jobs**", respond)
     # Synthetic document responses have no private-address metadata in Chromium.
-    # Fetch the real assets via Playwright for these fixtures; live mode below
-    # removes the routes and uses normal browser networking and the real HTML.
+    # Read working-tree assets to verify changes before deployment; live mode
+    # removes all fixture routes and checks the deployed HTML and assets.
     asset_patterns = ["**/styles.css", "**/tokens.css", "**/app.js", "**/favicon.svg"]
     for pattern in asset_patterns:
-        context.route(pattern, lambda route: route.fulfill(response=route.fetch()))
-    # Detail HTML uses a real GET existence guard; fulfill this static entry without persisting test jobs.
-    from pathlib import Path
-    detail = Path(__file__).with_name("detail.html").read_text()
-    context.route("**/timelines/1", lambda route: route.fulfill(status=200, content_type="text/html", body=detail))
+        asset = pattern.split('/')[-1]
+        mime = 'text/javascript' if asset.endswith('.js') else 'image/svg+xml' if asset.endswith('.svg') else 'text/css'
+        context.route(pattern, lambda route, request, asset=asset, mime=mime: route.fulfill(content_type=mime, body=Path(__file__).with_name(asset).read_bytes()))
+    fixture_pages = {'/': 'index.html', '/timelines': 'timelines.html', '/timelines/1': 'detail.html', '/changelog': 'changelog.html'}
+    def serve_page(route):
+        filename = fixture_pages.get(urlsplit(route.request.url).path)
+        if filename and route.request.url.startswith(URL):
+            route.fulfill(content_type='text/html; charset=utf-8', body=Path(__file__).with_name(filename).read_bytes())
+        else:
+            route.fallback()
+    context.route('**/*', serve_page)
     for width in [320, 375, 414, 768, 1280]:
         page.set_viewport_size({"width": width, "height": 900})
         for path in ["/", "/timelines", "/timelines/1", "/changelog"]:
@@ -60,6 +68,9 @@ with sync_playwright() as playwright:
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), (path, width)
             for element in page.locator("button:visible, .quiet-link:visible").all():
                 assert element.evaluate("e => e.getBoundingClientRect().height >= 44"), (path, width, "touch target")
+            if width == 1280 and path in ['/timelines', '/timelines/1']:
+                group = '.pagination' if path == '/timelines' else '.job-actions'
+                assert page.locator(group).evaluate("e => {const a=e.getBoundingClientRect(), b=document.getElementById('page-heading').getBoundingClientRect(); return Math.abs((a.top+a.bottom)/2-(b.top+b.bottom)/2)<12;}"), (path, 'heading/actions alignment')
         page.screenshot(path=f"/tmp/timeline-generator-queue-{width}.png", full_page=True)
     page.goto(URL)
     page.locator("#submit").click()
@@ -77,6 +88,8 @@ with sync_playwright() as playwright:
     page.locator("#receipt-link").click()
     page.locator("#job-status").wait_for()
     assert page.locator("#job-status").inner_text() == "待機中"
+    assert page.locator('#result-meta').is_hidden() and page.locator('#generation-info').is_hidden()
+    assert page.locator('.status-section #job-status').is_visible()
     job = job | {"state": "running", "stage": "verify", "message": "テスト用の照合中"}
     page.locator("#progress").wait_for()
     assert page.locator(".steps li.current").inner_text() == "根拠を照合"
@@ -85,6 +98,8 @@ with sync_playwright() as playwright:
     assert not page.evaluate("Boolean(window.injected)")
     assert page.locator(".event p").first.inner_text().startswith("<script>")
     assert page.locator("#generation-info").get_attribute("open") is None
+    assert page.locator('#result-meta').is_visible()
+    assert page.locator('#generation-info').evaluate("e => {const meta=document.getElementById('result-meta').getBoundingClientRect(), state=document.getElementById('job-status').getBoundingClientRect(), info=e.getBoundingClientRect();return Math.abs((meta.top+meta.bottom)/2-(state.top+state.bottom)/2)<2 && Math.abs((info.top+info.bottom)/2-(state.top+state.bottom)/2)<2;}")
     assert page.locator("#generation-notice").is_hidden()
     assert page.locator("blockquote").count() == 0
     assert page.locator(".event details").count() == 0
@@ -128,9 +143,31 @@ with sync_playwright() as playwright:
         page.screenshot(path=f'/tmp/timeline-generator-dense-{width}.png', full_page=False)
     for width in [320, 1280]:
         page.set_viewport_size({'width': width, 'height': 900})
+        for path in ['/', '/timelines', '/timelines/1', '/changelog']:
+            page.goto(URL + path)
+            if path == '/timelines': page.locator('.job-link').wait_for()
+            if path == '/timelines/1': page.wait_for_function("document.querySelectorAll('.event').length === 100")
+            page.evaluate("document.documentElement.style.fontSize = '200%'")
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('text zoom', path, width)
+            if path == '/timelines/1':
+                page.locator('#generation-info summary').focus()
+                page.keyboard.press('Enter')
+                assert page.locator('#generation-info').get_attribute('open') is not None
+                assert page.locator('#job-status').is_visible() and page.locator('#result-meta').is_visible()
+                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('open metadata zoom', width)
+    # A long heading and saved results must remain readable in active/error states.
+    dense_job = job.copy()
+    page.set_viewport_size({'width': 320, 'height': 900})
+    for state, label in [('queued', '待機中'), ('running', '生成中'), ('failed', '失敗')]:
+        job = dense_job | {'query': ('長いテーマと年代条件 ' * 20)[:180], 'state': state, 'stage': 'verify', 'error': 'テスト用の再生成失敗' if state == 'failed' else None}
+        page.goto(URL + '/timelines/1')
+        page.wait_for_function(f"document.getElementById('job-status').textContent === '{label}'")
         page.evaluate("document.documentElement.style.fontSize = '200%'")
-        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('text zoom', width)
-        page.evaluate("document.documentElement.style.fontSize = ''")
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('active/error text zoom', state)
+        assert page.locator('#old-result').is_visible()
+        if state == 'running': assert page.locator('#progress').is_visible()
+        if state == 'failed': assert page.locator('#page-error').is_visible()
+    job = dense_job
     page.goto(URL + '/timelines')
     page.locator('.job-link').wait_for()
     assert '時間上限' in page.locator('.job-row .help').inner_text()
@@ -198,7 +235,7 @@ with sync_playwright() as playwright:
     print("PASS: 5 widths, dense 100 rows, no quote DOM, folded metadata, counts and timeout notice, pages, continued registration, polling, stale poll/action race, saved reuse, retry, regeneration, old result, keyboard, XSS, pagination, empty, errors", flush=True)
     if len(sys.argv) > 1 and sys.argv[1] == "--live":
         context.unroute("**/api/jobs**")
-        context.unroute("**/timelines/1")
+        context.unroute('**/*', serve_page)
         for pattern in asset_patterns:
             context.unroute(pattern)
         query = " ".join(sys.argv[2:]) or "インターネット 1980年以降"

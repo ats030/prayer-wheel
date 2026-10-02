@@ -12,7 +12,7 @@ h1 { font-size: 1.5rem; line-height: 1.35; margin: 0 0 12px; }
 h2 { font-size: var(--text-lg); margin: 0; }
 p { margin: 0 0 8px; }
 .masthead, main, footer { width: min(100% - 24px, 1120px); margin-inline: auto; }
-.masthead { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 56px; border-bottom: 1px solid var(--color-rule); }
+.masthead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 8px; min-height: 56px; border-bottom: 1px solid var(--color-rule); }
 .masthead-nav { display: flex; flex-wrap: wrap; gap: 0 12px; }
 .wordmark { font-size: var(--text-lg); font-weight: 700; color: var(--color-ink); text-decoration: none; white-space: nowrap; }
 .wordmark span { display: none; }
@@ -21,7 +21,7 @@ p { margin: 0 0 8px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .skip-link { position: fixed; top: 8px; left: 8px; transform: translateY(-180%); background: var(--color-paper); padding: 8px; z-index: 5; }
 .skip-link:focus { transform: translateY(0); }
-.app-main, .search-section, .changelog { padding-block: 20px; }
+.app-main, .search-section, .changelog { padding-block: 16px; }
 .search-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 input { min-width: 0; width: 100%; height: 44px; border: 1px solid var(--color-rule); border-radius: var(--radius-sm); padding: 8px 12px; background: var(--color-paper); color: var(--color-ink); }
 input::placeholder { color: var(--color-muted); opacity: 1; }
@@ -36,13 +36,18 @@ summary { cursor: pointer; color: var(--color-accent); min-height: 44px; padding
 .info-body p:last-child { margin-bottom: 0; }
 .examples { display: flex; flex-wrap: wrap; gap: 0 16px; margin-bottom: 8px; }
 .examples button { min-height: 44px; background: none; border: 0; padding: 0; color: var(--color-accent); text-decoration: underline; }
-.page-head { display: flex; align-items: baseline; gap: 12px; }
-.page-head h1 { flex: 1; margin-bottom: 4px; }
+.page-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; margin-bottom: 12px; }
+.page-head h1 { flex: 1 1 12rem; margin: 0; }
+.heading-copy { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; flex: 1 1 16rem; min-width: 0; }
+.heading-copy h1 { flex: 0 1 auto; }
+.heading-copy .help { margin: 0; font-variant-numeric: tabular-nums; }
 .job-state { font-size: var(--text-sm); color: var(--color-muted); white-space: nowrap; }
 .job-state[data-state="failed"] { color: var(--color-error); }
 .job-state[data-state="running"] { color: var(--color-accent); }
-.job-actions, .pagination { display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px; }
-.job-actions { margin-bottom: 4px; }
+.job-actions, .pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px 8px; }
+.job-actions .text-button, .pagination .text-button { border: 1px solid var(--color-rule); border-radius: var(--radius-sm); padding-inline: 10px; text-decoration: none; }
+.job-actions .quiet-link { padding-inline: 8px; }
+.status-section { margin-bottom: 8px; }
 .progress-section { border-block: 1px solid var(--color-rule); padding-block: 8px; margin-bottom: 8px; }
 .progress-section h2 { font-size: var(--text-md); }
 #progress-message, #job-message, #receipt-message { overflow-wrap: anywhere; }
@@ -50,9 +55,14 @@ summary { cursor: pointer; color: var(--color-accent); min-height: 44px; padding
 .steps li { color: var(--color-muted); border-top: 2px solid var(--color-rule); padding-top: 4px; }
 .steps li.current { color: var(--color-accent); border-color: var(--color-accent); font-weight: 700; }
 .steps li.done::before { content: '✓ '; }
-.result-tools { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0 12px; }
+.result-tools { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: 0 12px; min-height: 44px; border-bottom: 1px solid var(--color-rule); }
 #result-meta { font-size: var(--text-sm); font-variant-numeric: tabular-nums; color: var(--color-muted); margin: 0; }
-.metadata[open] { grid-column: 1 / -1; margin-bottom: 12px; }
+#result-meta { grid-column: 1; }
+.result-tools > .job-state { grid-column: 2; }
+#result-meta[hidden] + .job-state { grid-column: 1 / 3; }
+.metadata { grid-column: 3; min-width: 0; justify-self: end; }
+.metadata[open] { grid-column: 1 / -1; width: 100%; margin-bottom: 8px; }
+.metadata summary { margin-left: auto; }
 .notice { font-size: var(--text-sm); border-left: 3px solid var(--color-accent); padding: 8px 12px; margin: 4px 0 8px; background: var(--color-surface); overflow-wrap: anywhere; }
 .timeline { list-style: none; padding: 0; margin: 0; }
 .timeline-columns { display: none; }
@@ -64,7 +74,7 @@ summary { cursor: pointer; color: var(--color-accent); min-height: 44px; padding
 .source-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; font-size: var(--text-sm); white-space: nowrap; }
 #review-notes .source-link { justify-content: flex-start; white-space: normal; overflow-wrap: anywhere; }
 .review-note { border-top: 1px solid var(--color-rule); padding-top: 8px; margin-top: 8px; }
-.list-columns, .job-row { display: grid; grid-template-columns: minmax(0, 1fr) 56px 80px; gap: 0 8px; }
+.list-columns, .job-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(3.5rem, max-content) minmax(4rem, max-content); gap: 0 8px; }
 .list-columns { font-size: var(--text-sm); color: var(--color-muted); border-bottom: 1px solid var(--color-rule); padding-block: 8px; margin-top: 4px; }
 .list-columns span:last-child { text-align: right; }
 .job-list { list-style: none; padding: 0; margin: 0; }
@@ -73,7 +83,6 @@ summary { cursor: pointer; color: var(--color-accent); min-height: 44px; padding
 .job-count { text-align: right; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 .job-count small { display: block; font-size: inherit; color: var(--color-muted); }
 .job-row .help { grid-column: 1 / -1; margin: 0 0 4px; overflow-wrap: anywhere; }
-.pagination { justify-content: space-between; padding-top: 8px; }
 .release { padding-block: 16px; border-top: 1px solid var(--color-rule); }
 .release h2 { font-size: var(--text-lg); margin-bottom: 8px; }
 .release ul { margin: 0; padding-left: 20px; }
@@ -88,7 +97,10 @@ footer { border-top: 1px solid var(--color-rule); display: flex; justify-content
   .event-title { grid-column: 2; }
   .event-description { grid-column: 2; grid-row: 2; }
   .event > .source-link { grid-column: 3; grid-row: 1 / 3; }
-  .list-columns, .job-row { grid-template-columns: minmax(0, 1fr) 80px 100px; }
+  .list-columns, .job-row { grid-template-columns: minmax(0, 1fr) minmax(5rem, max-content) minmax(6.25rem, max-content); }
+}
+@media (max-width: 39.99rem) {
+  .page-head > .job-actions, .page-head > .pagination { flex-basis: 100%; }
 }
 @media (min-width: 56rem) {
   .event, .timeline-columns { grid-template-columns: 104px minmax(180px, 1fr) minmax(0, 2fr) minmax(3.5rem, max-content); gap: 0 16px; }

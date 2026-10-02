@@ -13,13 +13,14 @@
   <a class="skip-link" href="#page-heading">本文へ</a>
   <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/">年表を作る</a><a class="quiet-link" href="/timelines">年表一覧</a></nav></header>
   <main class="app-main">
-    <h1 id="page-heading" tabindex="-1">年表一覧</h1>
-    <p id="list-summary" class="help" role="status">読み込んでいます。</p>
+    <div class="page-head">
+      <div class="heading-copy"><h1 id="page-heading" tabindex="-1">年表一覧</h1><p id="list-summary" class="help" role="status">読み込んでいます。</p></div>
+      <nav class="pagination" aria-label="一覧のページ"><button id="previous" class="text-button" type="button" disabled>前の50件</button><button id="next" class="text-button" type="button" disabled>次の50件</button></nav>
+    </div>
     <p id="page-error" class="error" role="alert" hidden></p>
     <p id="list-empty" hidden>まだ登録がありません。<a href="/">調べたいテーマを追加する →</a></p>
     <div class="list-columns" aria-hidden="true"><span>テーマ</span><span>状態</span><span>収録件数</span></div>
     <ol id="job-list" class="job-list"></ol>
-    <nav class="pagination" aria-label="一覧のページ"><button id="previous" class="text-button" type="button" disabled>前の50件</button><button id="next" class="text-button" type="button" disabled>次の50件</button></nav>
   </main>
 </body>
 </html>
