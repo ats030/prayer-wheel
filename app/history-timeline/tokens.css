@@ -1,0 +1,32 @@
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V4 */
+:root {
+  --color-paper: oklch(97% 0.012 85);
+  --color-surface: oklch(94% 0.016 85);
+  --color-ink: oklch(26% 0.018 65);
+  --color-muted: oklch(46% 0.022 65);
+  --color-rule: oklch(78% 0.025 85);
+  --color-accent: oklch(34% 0.085 160);
+  --color-accent-ink: oklch(98% 0.007 85);
+  --color-focus: oklch(65% 0.16 55);
+  --color-error: oklch(42% 0.15 25);
+  --font-display: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif CJK JP", serif;
+  --font-body: "Yu Gothic", "Hiragino Kaku Gothic ProN", "Noto Sans CJK JP", sans-serif;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-title: clamp(1.5rem, 2vw + 1rem, 2rem);
+  --text-display: clamp(2rem, 4vw + 1rem, 3.75rem);
+  --radius-sm: 4px;
+  --rule-thin: 1px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 100ms;
+}

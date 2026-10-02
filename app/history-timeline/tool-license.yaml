@@ -1,0 +1,86 @@
+reviewed_at: 2026-10-02
+intended_use: Personal internal historical research; public release is a separate review
+decisions:
+  - tool: Existing Playwright Python development installation
+    version_or_plan: 1.62.0; installed Chromium, development checks only
+    category: package
+    status: conditional
+    license: Apache-2.0
+    commercial_use: permitted subject to licence notices
+    cost: Existing installation, no new download or subscription
+    license_url: https://github.com/microsoft/playwright-python/blob/main/LICENSE
+    evidence_retrieved: 2026-10-02
+    restrictions:
+      - Retain licence and notices if redistributing Playwright
+      - Browser binary licences remain separate; no browser binary distributed with this app
+    notes: Runtime application has no Playwright dependency; browser_check.py is optional development tooling
+  - tool: Python standard library
+    version_or_plan: Existing Python 3 installation, Python 3.10 or later
+    category: package
+    status: conditional
+    license: PSF-2.0
+    commercial_use: permitted subject to notices and bundled third-party licences
+    cost: No new package or service charge; infrastructure costs remain
+    license_url: https://docs.python.org/3/license.html
+    evidence_retrieved: 2026-10-02
+    restrictions:
+      - Retain applicable copyright and licence notices when redistributing Python
+    notes: This application uses only the existing standard library at runtime
+  - tool: Existing SearXNG HTTP service
+    version_or_plan: 2026.9.30+a9d9900 as reported by /config on port 8081
+    category: service
+    status: conditional
+    license: AGPL-3.0-or-later
+    commercial_use: Software use permitted under AGPL; upstream and destination terms are separate
+    cost: Existing self-hosted service; no new paid search account
+    license_url: https://github.com/searxng/searxng/blob/a9d9900/LICENSE
+    terms_url: https://docs.searxng.org/
+    evidence_retrieved: 2026-10-02
+    restrictions:
+      - HTTP integration only; no SearXNG code copied or modified
+      - Preserve AGPL notices and corresponding-source obligations when modifying or redistributing the service
+      - Search provider availability and terms remain provider-specific
+      - No blanket permission to publish search snippets or destination-page text
+    notes: Existing service reused for personal discovery; general public operation requires review of upstream conditions
+  - tool: Existing Ollama-compatible proxy and backend
+    version_or_plan: Existing deployed service; no backend redistribution or installation
+    category: service
+    status: conditional
+    license: MIT
+    commercial_use: Ollama software permits commercial use; model terms remain separate
+    cost: Existing self-hosted inference, no paid model API
+    license_url: https://github.com/ollama/ollama/blob/main/LICENSE
+    evidence_retrieved: 2026-10-02
+    restrictions:
+      - Retain MIT copyright and licence if redistributing Ollama
+      - This record does not license other software behind the existing proxy
+    notes: Native /api/chat HTTP client only; no backend code copied
+  - tool: Gemma 4 12B existing local model
+    version_or_plan: "gemma4:12b; digest 4eb23ef187e2c5462566d6a1d3bbbc2f1346d0b4327cbb66d58fffbcc9b2b05c"
+    category: model
+    status: conditional
+    license: Apache-2.0
+    commercial_use: permitted by the model licence
+    cost: Existing local weights; no per-request hosted API charge
+    license_url: https://ai.google.dev/gemma/apache_2
+    terms_url: https://ai.google.dev/gemma/docs/core
+    evidence_retrieved: 2026-10-02
+    restrictions:
+      - Preserve licence and notices when distributing weights or derivatives
+      - No trademark or endorsement rights
+      - Model licence does not clear source-text copyright or every generated output
+    notes: /api/show for gemma4:12b returned Apache License 2.0; official Gemma 4 licence corroborates it
+  - tool: Retrieved web pages
+    version_or_plan: Dynamic per-query public sources
+    category: dataset
+    status: review_required
+    license: Page-specific
+    commercial_use: not blanket-cleared
+    cost: No new paid content subscription
+    evidence_retrieved: 2026-10-02
+    restrictions:
+      - Personal research only in this release; no automatic public publication
+      - Respect robots.txt, access failures and bounded request rates
+      - Link and name each source; show only short excerpts with the related explanation
+      - Attribution alone is not a reuse licence; review destination terms before public release
+    notes: Raw pages are processed in memory and not stored. General public release remains outside this implementation
