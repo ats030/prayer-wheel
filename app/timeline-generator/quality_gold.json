@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "verified_at": "2026-10-02",
+  "note": "人が選んだ評価用の主要項目と既知の誤り。生成結果から作らない。evidence は評価日に取得して年と語を確認した資料。網羅すべき全項目ではなく、欠落の検出用の最小集合。",
+  "themes": {
+    "インターネット": {
+      "primary_domains": ["internetsociety.org", "home.cern", "nic.ad.jp", "w3.org", "ietf.org"],
+      "milestones": [
+        {"id": "arpanet", "label": "ARPANET開始", "years": [1969, 1969], "keywords": ["ARPANET"], "evidence": ["https://www.internetsociety.org/internet/history-internet/brief-history-internet/"]},
+        {"id": "tcpip", "label": "ARPANETのTCP/IP移行", "years": [1983, 1983], "keywords": ["TCP/IP"], "evidence": ["https://www.internetsociety.org/news/press-releases/2013/new-years-day-marks-30th-anniversary-of-major-milestone-for-global-internet/"]},
+        {"id": "junet", "label": "JUNET運用開始", "years": [1984, 1984], "keywords": ["JUNET"], "evidence": ["https://www.nic.ad.jp/timeline/"]},
+        {"id": "www", "label": "WWWの考案・公開", "years": [1989, 1993], "keywords": ["WWW", "World Wide Web", "ワールドワイドウェブ"], "evidence": ["https://home.cern/science/computing/the-birth-of-the-web/where-web-was-born/"]}
+      ],
+      "known_errors": [
+        {"id": "twitter-2006", "label": "Twitter日本語版を2006年とする", "years": [2006, 2006], "keywords": ["Twitter"], "reason": "出典の2008年見出しの段落を背景の年で誤認した旧結果。公式発表は2008年4月。", "evidence": ["https://blog.x.com/en_us/a/2008/twitter-for-japan"]}
+      ]
+    },
+    "Claude Code": {
+      "primary_domains": ["anthropic.com", "claude.com", "docs.claude.com"],
+      "milestones": [
+        {"id": "preview", "label": "研究プレビュー発表", "years": [2025, 2025], "dates": ["2月24日"], "keywords": ["Claude Code"], "evidence": ["https://www.anthropic.com/news/claude-3-7-sonnet"]},
+        {"id": "ga", "label": "一般提供開始", "years": [2025, 2025], "dates": ["5月22日"], "keywords": ["一般", "提供", "GA"], "evidence": ["https://www.anthropic.com/news/claude-4"]},
+        {"id": "bun", "label": "Bun買収・年換算収益10億ドル", "years": [2025, 2025], "keywords": ["Bun"], "evidence": ["https://www.anthropic.com/news/anthropic-acquires-bun-as-claude-code-reaches-usd1b-milestone"]}
+      ],
+      "known_errors": [
+        {"id": "reasoning-mode", "label": "Claude 3.7 Sonnetの推論モードをClaude Codeの出来事とする", "keywords": ["推論モード"], "reason": "関連モデルの出来事でテーマ外。", "evidence": ["https://www.anthropic.com/news/claude-3-7-sonnet"]}
+      ]
+    },
+    "コーヒー": {
+      "primary_domains": ["ucc.co.jp", "wien.gv.at", "nestle.co.uk"],
+      "milestones": [
+        {"id": "istanbul", "label": "イスタンブールのコーヒーハウス", "years": [1554, 1555], "keywords": ["イスタンブール", "コンスタンティノープル", "コンスタンチノープル"], "evidence": ["https://www.ucc.co.jp/enjoy/encyclopedia/history/index.html"]},
+        {"id": "england", "label": "イギリス初のコーヒーハウス", "years": [1650, 1652], "keywords": ["イギリス", "オックスフォード", "ロンドン"], "evidence": ["https://www.ucc.co.jp/enjoy/encyclopedia/history/index.html"]},
+        {"id": "java", "label": "オランダによるジャワ栽培", "years": [1696, 1699], "keywords": ["ジャワ"], "evidence": ["https://www.ucc.co.jp/enjoy/encyclopedia/history/index.html"]},
+        {"id": "brazil", "label": "ブラジルへの導入", "years": [1727, 1727], "keywords": ["ブラジル"], "evidence": ["https://www.ucc.co.jp/enjoy/encyclopedia/history/index.html"]},
+        {"id": "kahisakan", "label": "日本初の本格的喫茶店 可否茶館", "years": [1888, 1888], "keywords": ["可否茶館", "喫茶店"], "evidence": ["https://www.ucc.co.jp/enjoy/encyclopedia/history/index.html"]},
+        {"id": "canned", "label": "ミルク入り缶コーヒー発売", "years": [1969, 1969], "keywords": ["缶コーヒー", "缶"], "evidence": ["https://www.ucc.co.jp/company/pressroom/pickup/20250716.html"]}
+      ],
+      "known_errors": [
+        {"id": "vienna-1683", "label": "1683年のウィーン初のコーヒーハウスを断定する", "years": [1683, 1683], "keywords": ["ウィーン"], "unless": ["伝説", "伝承", "とされ", "諸説", "説がある"], "reason": "ウィーン市資料は1683年の話に証拠がなく、史料で確認できる最初の店を1685年とする。", "evidence": ["https://presse.wien.gv.at/presse/2011/11/11/wiener-kaffeehauskultur-ist-immaterielles-kulturerbe-der-unesco"]},
+        {"id": "espressoda-2013", "label": "エスプレッソーダを2013年発売とする", "years": [2013, 2013], "keywords": ["エスプレッソーダ", "エスプレッソダ"], "reason": "当時の取材・発売記事は2012年。", "evidence": ["https://netaful.jp/report/041009.html", "https://hatenanews.com/articles/201207/9810"]}
+      ]
+    },
+    "ラーメン": {
+      "primary_domains": ["raumen.co.jp", "nissin.com", "instantramen.or.jp"],
+      "milestones": [
+        {"id": "rairaiken", "label": "浅草 来々軒の開業", "years": [1910, 1910], "keywords": ["来々軒", "來々軒", "浅草", "淺草"], "evidence": ["https://toyokeizai.net/articles/-/696904"]},
+        {"id": "nankin", "label": "南京千両の屋台", "years": [1937, 1937], "keywords": ["南京千両"], "evidence": ["https://www.raumen.co.jp/rapedia/study_history/"]},
+        {"id": "sanku", "label": "久留米 三九の白濁豚骨スープ", "years": [1947, 1947], "keywords": ["三九", "豚骨", "とんこつ"], "evidence": ["https://www.raumen.co.jp/rapedia/study_history/"]},
+        {"id": "chicken", "label": "チキンラーメン発売", "years": [1958, 1958], "keywords": ["チキンラーメン"], "evidence": ["https://www.raumen.co.jp/rapedia/study_history/", "https://www.nissin.com/jp/company/news/4446/"]},
+        {"id": "cupnoodle", "label": "カップヌードル発売", "years": [1971, 1971], "keywords": ["カップヌードル"], "evidence": ["https://www.raumen.co.jp/rapedia/study_history/"]},
+        {"id": "museum", "label": "新横浜ラーメン博物館開館", "years": [1994, 1994], "keywords": ["ラーメン博物館"], "evidence": ["https://www.raumen.co.jp/rapedia/study_history/"]}
+      ],
+      "known_errors": []
+    },
+    "平家物語": {
+      "note": "作品の成立史ではなく、物語が描く平家の興亡で評価する。",
+      "primary_domains": [],
+      "milestones": [
+        {"id": "kiyomori", "label": "平清盛の太政大臣就任", "years": [1167, 1167], "keywords": ["太政大臣"], "evidence": ["https://ja.wikipedia.org/wiki/%E5%B9%B3%E6%B8%85%E7%9B%9B"]},
+        {"id": "mochihito", "label": "以仁王の挙兵", "years": [1180, 1180], "keywords": ["以仁王"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%B2%BB%E6%89%BF%E3%83%BB%E5%AF%BF%E6%B0%B8%E3%81%AE%E4%B9%B1"]},
+        {"id": "miyakoochi", "label": "平家の都落ち", "years": [1183, 1183], "keywords": ["都落ち"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%B2%BB%E6%89%BF%E3%83%BB%E5%AF%BF%E6%B0%B8%E3%81%AE%E4%B9%B1"]},
+        {"id": "ichinotani", "label": "一ノ谷の戦い", "years": [1184, 1184], "keywords": ["一ノ谷", "一の谷"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%B2%BB%E6%89%BF%E3%83%BB%E5%AF%BF%E6%B0%B8%E3%81%AE%E4%B9%B1"]},
+        {"id": "dannoura", "label": "壇ノ浦の戦い", "years": [1185, 1185], "keywords": ["壇ノ浦", "壇の浦"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%B2%BB%E6%89%BF%E3%83%BB%E5%AF%BF%E6%B0%B8%E3%81%AE%E4%B9%B1"]}
+      ],
+      "known_errors": []
+    },
+    "昭和": {
+      "primary_domains": [],
+      "milestones": [
+        {"id": "kaigen", "label": "昭和への改元", "years": [1926, 1926], "keywords": ["改元", "大正天皇"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]},
+        {"id": "manshu", "label": "満洲事変", "years": [1931, 1931], "keywords": ["満州事変", "満洲事変", "柳条湖"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]},
+        {"id": "nicchu", "label": "日中戦争の開始", "years": [1937, 1937], "keywords": ["日中戦争", "盧溝橋", "支那事変"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]},
+        {"id": "pacific", "label": "太平洋戦争の開戦", "years": [1941, 1941], "keywords": ["太平洋戦争", "真珠湾", "開戦"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]},
+        {"id": "surrender", "label": "ポツダム宣言受諾・終戦", "years": [1945, 1945], "keywords": ["終戦", "ポツダム", "降伏", "敗戦"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]},
+        {"id": "constitution", "label": "日本国憲法の公布・施行", "years": [1946, 1947], "keywords": ["日本国憲法", "憲法"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]},
+        {"id": "sanfrancisco", "label": "サンフランシスコ平和条約", "years": [1951, 1952], "keywords": ["サンフランシスコ", "平和条約", "講和"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]},
+        {"id": "olympics", "label": "東京オリンピック", "years": [1964, 1964], "keywords": ["オリンピック", "五輪"], "evidence": ["https://ja.wikipedia.org/wiki/1964%E5%B9%B4%E6%9D%B1%E4%BA%AC%E3%82%AA%E3%83%AA%E3%83%B3%E3%83%94%E3%83%83%E3%82%AF"]},
+        {"id": "okinawa", "label": "沖縄返還", "years": [1972, 1972], "keywords": ["沖縄"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%B2%96%E7%B8%84%E8%BF%94%E9%82%84"]},
+        {"id": "houou", "label": "昭和天皇崩御", "years": [1989, 1989], "keywords": ["崩御"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]}
+      ],
+      "known_errors": []
+    }
+  }
+}

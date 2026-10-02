@@ -47,9 +47,22 @@ function sourceLink(source, text, optional = false) {
   link.setAttribute("aria-label", `出典を読む：${source.title}（別タブ）`);
   return link;
 }
+function sourceSummary(events) {
+  const counts = new Map();
+  for (const event of events) {
+    let host;
+    try { host = new URL(event.source?.url).hostname.replace(/^www\./, ""); } catch { continue; }
+    counts.set(host, (counts.get(host) || 0) + 1);
+  }
+  if (!counts.size) return "";
+  const sorted = [...counts].sort((a, b) => b[1] - a[1]);
+  const shown = sorted.slice(0, 3).map(([host, count]) => `${host} ${count}件`).join("、");
+  return `出典 ${counts.size}サイト：${shown}${sorted.length > 3 ? `、ほか${sorted.length - 3}サイト` : ""}`;
+}
 function render(data, job) {
   $("result-meta").textContent = `${data.events.length}件`;
   $("generation-meta").textContent = `${job.period || "全期間"} · 生成時間 ${data.elapsed_seconds}秒`;
+  $("source-summary").textContent = sourceSummary(data.events);
   $("generation-notice").textContent = data.notice;
   const alerts = [];
   if (data.stop_reason === "time_limit") alerts.push(`時間上限（10分）により終了。検証済み${data.events.length}件を保存しました。`);
