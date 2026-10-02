@@ -164,6 +164,8 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(t.legend_conflicts([event|{'year':1690}],[comparison]),{})
         self.assertEqual(t.legend_conflicts([event|{'_check_query':'Another Person Othercity first shop'}],[comparison]),{})
         self.assertEqual(t.legend_conflicts([event|{'description':'伝説では、最初の店を開店したとされる。'}],[comparison]),{})
+        for text in ['Archival records establish that Georg Franz Kolschitzky opened the first coffee house in 1683; this is not a legend.', 'Georg Franz Kolschitzky opened the first coffee house in 1683. A local legend says a different shop was founded in 1800.']:
+            self.assertEqual(t.legend_conflicts([event],[comparison|{'text':text}]),{})
 
     def test_industrial_scores_do_not_exhaust_latest_era_reservation(self):
         html = '<h1>コーヒーの歴史</h1>' + ''.join(f'<h2>{year}</h2><p>コーヒーの製造方式を発明しました。'+('説明。'*34)+'</p>' for year in range(1800,1830))

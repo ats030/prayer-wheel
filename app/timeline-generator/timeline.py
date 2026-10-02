@@ -441,6 +441,8 @@ def search(query):
             host = p.hostname
             if p.scheme not in {"http", "https"} or not host or p.path.lower().endswith(".pdf"):
                 continue
+            if host.removeprefix('www.') in {'togetter.com', 'reddit.com'}:
+                continue
             if url in unique or hosts.get(host, 0) >= 3:
                 continue
             unique[url] = result
@@ -499,6 +501,12 @@ def crosscheck_sources(events, sources, query, deadline):
             selected = 0
             for result in sorted(results,key=authority,reverse=True):
                 url=result.get('url','')
+                try:
+                    host = (urlsplit(url).hostname or '').removeprefix('www.')
+                except ValueError:
+                    continue
+                if host in {'togetter.com', 'reddit.com'}:
+                    continue
                 if url and url not in known:
                     candidates.append(dict(result,_check_topic=text.split()[0]))
                     known.add(url)
@@ -562,10 +570,17 @@ def legend_conflicts(events, comparison):
         if len(terms) < 2:
             continue
         for passage in comparison:
-            text = passage["heading"] + " " + passage["text"]
-            words = {word.casefold() for word in re.findall(r"[A-Za-z]+", text)}
-            if (len(terms & words) >= 2 and re.search(r"伝説|伝承|legend|myth|unproven", passage["text"], re.I)
-                    and re.search(rf"(?<!\d){abs(event['year'])}(?!\d)", text)):
+            heading_years = {int(year) for year in re.findall(r"(?<![\w.])\d{3,4}(?![\w.])", passage["heading"])}
+            positive = r"(?:legend|myth) (?:has it|says|claims|tells)|according to (?:the |a )?(?:legend|myth)|is (?:a |an |only a )?(?:legend|myth)|伝説(?:によれば|によると|では|とされ)|伝承(?:によれば|によると|では|とされ)"
+            negated = r"not (?:a |an |the )?(?:legend|myth)|no (?:legend|myth)|contrary to (?:the |a )?(?:legend|myth)|unlike (?:the |a )?(?:legend|myth)|伝説ではな|伝説でなく|伝説とは異な|伝説に反し|伝承ではな"
+            matched = False
+            for sentence in re.split(r"(?<=[.!?。])\s*", passage["text"]):
+                words = {word.casefold() for word in re.findall(r"[A-Za-z]+", sentence)}
+                same_year = bool(re.search(rf"(?<!\d){abs(event['year'])}(?!\d)", sentence)) or heading_years == {abs(event['year'])}
+                if len(terms & words) >= 2 and same_year and re.search(positive, sentence, re.I) and not re.search(negated, sentence, re.I):
+                    matched = True
+                    break
+            if matched:
                 conflicts[index] = {"date": event["date"], "title": event["title"], "reason": "同じ年代・主体を扱う比較資料に伝説・伝承としての記載があるため、史実としての断定を見送りました。", "sources": [{"title": passage["source"], "url": passage["url"]}]}
                 break
     return conflicts
