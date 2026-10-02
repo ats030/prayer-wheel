@@ -147,6 +147,14 @@ class ContextTests(unittest.TestCase):
         self.assertTrue(any('Legend' in p['text'] for p in selected))
         self.assertTrue(any('However' in p['text'] for p in selected))
 
+    def test_unknown_event_time_is_not_inferred_from_section_year(self):
+        source=article('<h2>1641年</h2><p>日本に伝わった年はいつ頃かは不明ですが、長崎の商館経由とされています。</p>')
+        event={'year':1641,'date':'1641年','title':'コーヒーの伝来','description':'商館経由で伝わったとされています。','source_id':1,'quote':source['passages'][0]['text']}
+        self.assertEqual(t.validate_events([event],[source],t.parse_query('コーヒー')),[])
+        source=article('<h2>1958年</h2><p>起源の時期は不明ですが、1958年に新方式の製品を発売しました。</p>')
+        event.update(year=1958,date='1958年',title='新方式の発売',description='1958年に新方式の製品を発売した。',quote=source['passages'][0]['text'])
+        self.assertEqual(len(t.validate_events([event],[source],t.parse_query('製品'))),1)
+
     def test_duplicated_year_heading_is_removed_without_inventing_quote(self):
         source=article('<h2>1969年</h2><p>ミルク入り缶コーヒーを開発・生産しました。</p>')
         event={'year':1969,'date':'1969年','title':'缶コーヒーの誕生','description':'ミルク入り缶コーヒーを開発した。','source_id':1,'quote':'1969年、ミルク入り缶コーヒーを開発・生産しました。'}

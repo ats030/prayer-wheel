@@ -648,6 +648,11 @@ def validate_events(raw, sources, query):
         context_year = heading_year(context["date_heading"]) if context else None
         if context_year is not None and year != context_year:
             continue
+        if context_year is not None:
+            passage = context["passage"]
+            unknown_time = re.search(r"(?:年はいつ頃|時期(?:は|が)|年代(?:は|が))[^。.!?]{0,20}(?:不明|わからない|分からない)", passage)
+            if unknown_time and not re.search(rf"(?<!\d){abs(year)}(?!\d)", passage):
+                continue
         chronological_evidence = compact(evidence + " " + " ".join(context.values())) if context else evidence
         uncertainty = r"伝説|伝承|諸説|という説|と(?:言|い)われ(?:ています|ている|る)|とされ(?:ています|ている|る)|推定|legend|alleged|supposed"
         qualification_context = evidence + " " + " ".join(value for key, value in (context or {}).items() if key != "article_lead")
