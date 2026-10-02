@@ -6,11 +6,16 @@ import time
 import unittest
 import json
 
-from jobs import JobStore, QueueWorker
+from jobs import JobStore, QueueWorker, JobCancellation
 from timeline import Query, TimelineError, parse_query
 from server import bounded_pipeline
 from unittest.mock import patch
 import server
+
+
+def cancellable_worker(query, connection):
+    connection.send({'kind':'progress', 'message':'started'})
+    time.sleep(10)
 
 
 class QueueTests(unittest.TestCase):
@@ -25,6 +30,94 @@ class QueueTests(unittest.TestCase):
 
     def submit(self, value):
         return self.store.submit(parse_query(value))[0]
+
+    def test_delete_rules_and_identifier_reuse(self):
+        for legacy in [False, True]:
+            for state in ['queued', 'running', 'complete', 'failed']:
+                for events in [None, [], [{'year': 1984}]]:
+                    with self.subTest(legacy=legacy, state=state, events=events):
+                        job = self.submit(f'テーマ {legacy} {state} {len(str(events))}')
+                        result = None if events is None else json.dumps({'events': events})
+                        key = json.dumps([job['topic'], 1980 if legacy else None, None])
+                        with self.store.connect() as db:
+                            db.execute('UPDATE jobs SET state=?,cache_key=?,result=? WHERE id=?', (state, key, result, job['id']))
+                        allowed = legacy or state in ['queued', 'running'] or not events
+                        self.assertEqual(self.store.get(job['id'])['can_delete'], allowed)
+                        listed = next(j for j in self.store.listing()['jobs'] if j['id']==job['id'])
+                        self.assertEqual(listed['can_delete'], allowed)
+                        if allowed:
+                            self.assertTrue(self.store.delete(job['id'])['deleted'])
+                            self.assertIsNone(self.store.get(job['id']))
+                        else:
+                            before = self.store.get(job['id'])
+                            with self.assertRaisesRegex(ValueError, '収録済み'):
+                                self.store.delete(job['id'])
+                            self.assertEqual(self.store.get(job['id']), before)
+        job = self.submit('削除して再登録')
+        self.store.delete(job['id'])
+        replacement = self.submit('削除して再登録')
+        self.assertGreater(replacement['id'], job['id'])
+        self.store.record(job['id'], {'kind':'result','events':[{'year':1900}]})
+        self.assertIsNone(self.store.get(job['id']))
+        self.assertEqual(self.store.get(replacement['id'])['state'], 'queued')
+        self.assertIsNone(self.store.delete(9999999))
+
+    def test_delete_terminates_running_subprocess(self):
+        job = self.submit('子プロセス取消')
+        self.store.claim()
+        entered = threading.Event()
+        records = []
+        def emit(record):
+            records.append(record)
+            entered.set()
+            self.store.record(job['id'], record)
+        token = JobCancellation(self.store, job['id'], threading.Event())
+        with patch.object(server, 'pipeline_worker', cancellable_worker):
+            thread = threading.Thread(target=bounded_pipeline, args=(parse_query('子プロセス取消'), emit, token))
+            thread.start()
+            try:
+                self.assertTrue(entered.wait(3))
+                self.store.delete(job['id'])
+                thread.join(3)
+                self.assertFalse(thread.is_alive())
+                self.assertEqual([r['kind'] for r in records], ['progress'])
+            finally:
+                self.store.delete(job['id'])
+                thread.join(3)
+
+    def test_completion_wins_delete_race_and_protects_result(self):
+        job = self.submit('完了直前')
+        self.store.claim()
+        self.assertTrue(self.store.get(job['id'])['can_delete'])
+        self.store.record(job['id'], {'kind':'result','events':[{'year':1900}]})
+        with self.assertRaisesRegex(ValueError, '収録済み'):
+            self.store.delete(job['id'])
+
+    def test_delete_running_cancels_and_continues_without_resurrection(self):
+        first = self.submit('取り消す')
+        second = self.submit('次のテーマ')
+        entered, cancelled, done = threading.Event(), threading.Event(), threading.Event()
+        def pipeline(query, emit, stopping):
+            if query.topic == '取り消す':
+                entered.set()
+                if stopping.wait(3):
+                    cancelled.set()
+                emit({'kind':'result','events':[{'year':1900}]})
+            else:
+                emit({'kind':'result','events':[]})
+                done.set()
+        worker = QueueWorker(self.store, pipeline)
+        worker.start()
+        try:
+            self.assertTrue(entered.wait(3))
+            self.store.delete(first['id'])
+            self.assertTrue(cancelled.wait(3))
+            self.assertTrue(done.wait(3))
+            self.assertIsNone(self.store.get(first['id']))
+            self.assertEqual(self.store.get(second['id'])['state'], 'complete')
+            self.assertTrue(worker.thread.is_alive())
+        finally:
+            worker.stop()
 
     def test_simultaneous_normalized_submissions_share_one_job(self):
         values = ["半導体 日本", "半導体　日本", " 半導体  日本 "] * 8

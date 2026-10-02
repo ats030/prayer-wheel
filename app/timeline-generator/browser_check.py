@@ -6,6 +6,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright
 from timeline import TimelineError, parse_query
+from jobs import can_delete
 
 URL = os.environ.get("TIMELINE_TEST_URL", "http://100.94.207.13:8532")
 RESULT = {"kind": "result", "theme": "テスト用の年表", "period": "全期間", "elapsed_seconds": 1.2, "notice": "ブラウザ検証専用の応答です。", "events": [{"year": 1971, "date": "1971年", "title": "テスト用の出来事", "description": '<script>window.injected=true</script> テスト本文。', "quote": "In 1971, a test event occurred.", "source": {"url": "https://example.org/history", "title": "Test history source", "context_heading": "1971年 <script>window.injected=true</script>"}}]}
@@ -21,12 +22,23 @@ with sync_playwright() as playwright:
     job = BASE.copy()
     total = 1
     posted = []
+    delete_failure = False
     def respond(route):
-        global job
+        global job, total
         request = route.request
         path = request.url.split(URL)[-1]
         if request.method == "POST":
             posted.append(path)
+            if path.endswith('/delete'):
+                if delete_failure:
+                    route.fulfill(status=503, content_type='application/json', body=json.dumps({'error':'削除の通信テストエラー'}))
+                    return
+                if not can_delete(job):
+                    route.fulfill(status=409, content_type='application/json', body=json.dumps({'error':'収録済みの年表は削除できません。'}))
+                else:
+                    total = 0
+                    route.fulfill(status=200, content_type='application/json', body=json.dumps({'deleted':True,'id':job['id']}))
+                return
             if path == '/api/jobs':
                 try:
                     parse_query(json.loads(request.post_data).get('query'))
@@ -42,6 +54,7 @@ with sync_playwright() as playwright:
         elif path.startswith("/api/jobs?"):
             listed = {key: value for key, value in job.items() if key != "result"}
             listed["event_count"] = len(job["result"]["events"]) if job.get("result") else None
+            listed["can_delete"] = can_delete(listed)
             listed["stop_reason"] = job["result"].get("stop_reason") if job.get("result") else None
             listing = [listed]
             if "offset=50" in path:
@@ -298,8 +311,72 @@ with sync_playwright() as playwright:
     page.locator('#page-error').wait_for()
     assert page.locator('#retry').is_hidden() and page.locator('#old-result').is_hidden()
     assert page.locator('#legacy-period').is_visible()
+    # Deletion conditions, confirmation cancellation, completion races, and feedback.
+    for width in [320, 375, 414, 768, 1280]:
+        for zoom in [100, 200]:
+            total = 1
+            job = BASE | {'state':'complete','has_result':True,'result':RESULT}
+            page.set_viewport_size({'width':width,'height':900})
+            page.goto(URL)
+            page.locator('.job-delete').wait_for()
+            page.evaluate(f"document.documentElement.style.fontSize='{zoom}%'")
+            assert page.locator('.job-delete').is_disabled()
+            assert '収録済みのため削除できません' in page.locator('.job-row .help').inner_text()
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('delete protected',width,zoom)
+            job = job | {'legacy_period':True}
+            page.wait_for_function("!document.querySelector('.job-delete').disabled")
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('delete allowed',width,zoom)
+    count_before = posted.count('/api/jobs/1/delete')
+    def reject_dialog(dialog):
+        assert job['query'] in dialog.message
+        dialog.dismiss()
+    page.once('dialog', reject_dialog)
+    page.locator('.job-delete').click()
+    assert posted.count('/api/jobs/1/delete') == count_before
+    assert page.locator('.job-row').count() == 1
+    page.once('dialog', lambda dialog: dialog.accept())
+    page.locator('.job-delete').click()
+    page.locator('#list-empty').wait_for()
+    assert page.locator('#delete-status').is_visible()
+    assert posted.count('/api/jobs/1/delete') == count_before + 1
+    total = 1
+    job = BASE.copy()
+    page.goto(URL)
+    page.locator('.job-delete:not(:disabled)').wait_for()
+    delete_failure = True
+    page.once('dialog', lambda dialog: dialog.accept())
+    page.locator('.job-delete').click()
+    page.locator('#delete-error').wait_for()
+    page.wait_for_function("!document.querySelector('.job-delete').disabled")
+    page.wait_for_timeout(3300)
+    assert page.locator('.job-delete').is_enabled(), 'same polling response must not leave deletion disabled'
+    delete_failure = False
+    page.once('dialog', lambda dialog: dialog.accept())
+    page.locator('.job-delete').click()
+    page.locator('#list-empty').wait_for()
+    # A queued row can finish between render and confirmation; API protects it.
+    total = 1
+    job = BASE.copy()
+    page.goto(URL)
+    page.locator('.job-delete:not(:disabled)').wait_for()
+    job = BASE | {'state':'complete','has_result':True,'result':RESULT}
+    page.once('dialog', lambda dialog: dialog.accept())
+    page.locator('.job-delete').click()
+    page.locator('#delete-error').wait_for()
+    page.wait_for_function("document.querySelector('.job-delete')?.disabled")
+    assert '収録済み' in page.locator('#delete-error').inner_text()
+    assert page.locator('.job-row').count() == 1
+    for state in ['queued','running','failed','complete']:
+        total = 1
+        job = BASE | {'state':state, 'has_result': state=='complete', 'result': RESULT | {'events':[]} if state=='complete' else None}
+        page.goto(URL)
+        page.locator('.job-delete:not(:disabled)').wait_for()
+        page.once('dialog', lambda dialog: dialog.accept())
+        page.locator('.job-delete').click()
+        page.locator('#list-empty').wait_for()
+        assert page.locator('#delete-status').is_visible()
     assert errors == [], errors
-    print("PASS: 5 widths, dense 100 rows, no quote DOM, folded metadata, counts and timeout notice, pages, continued registration, polling, stale poll/action race, saved reuse, retry, regeneration, old result, keyboard, XSS, pagination, empty, errors", flush=True)
+    print("PASS: 5 widths, dense 100 rows, no quote DOM, folded metadata, counts and timeout notice, pages, continued registration, polling, stale poll/action race, saved reuse, retry, regeneration, old result, keyboard, XSS, pagination, empty, errors, deletion protection/confirmation/cancel/race/retry/zoom", flush=True)
     if len(sys.argv) > 1 and sys.argv[1] == "--live":
         context.unroute("**/api/jobs**")
         context.unroute('**/*', serve_page)

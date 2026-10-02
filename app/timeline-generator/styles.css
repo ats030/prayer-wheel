@@ -114,3 +114,11 @@ footer { border-top: 1px solid var(--color-rule); display: flex; justify-content
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 
 .timeline-list-section { padding-bottom: 16px; }
+
+.job-delete { grid-column: 1 / -1; justify-self: end; min-height: 44px; padding-inline: 8px; }
+.delete-column { display: none; }
+@media (min-width: 768px) {
+  .list-columns, .job-row { grid-template-columns: minmax(0, 1fr) minmax(5rem, max-content) minmax(6.25rem, max-content) minmax(3rem, max-content); }
+  .job-delete { grid-column: 4; grid-row: 1; }
+  .delete-column { display: block; }
+}

@@ -128,13 +128,16 @@ if ($("search-form")) {
 }
 
 if ($("job-list")) {
-  let offset = 0, timer, loading = false, refreshPending = false;
+  let offset = 0, timer, loading = false, refreshPending = false, deleting = false;
   async function load() {
     clearTimeout(timer);
     if (loading) return;
+    if (deleting) { timer = setTimeout(load, 3000); return; }
     loading = true;
     try {
       const data = await api(`/api/jobs?offset=${offset}`);
+      if (deleting) return;
+      if (offset > 0 && !data.jobs.length) { refreshPending = true; return; }
       $("page-error").hidden = true;
       $("list-summary").textContent = data.total ? `${data.total}件中 ${offset + 1}〜${offset + data.jobs.length}件` : "0件";
       $("list-empty").hidden = data.total > 0;
@@ -149,9 +152,37 @@ if ($("job-list")) {
         const previous = job.has_result && job.state !== "complete";
         count.setAttribute("aria-label", Number.isInteger(job.event_count) ? `${previous ? "前回の" : ""}収録件数 ${job.event_count}件` : "未生成");
         if (previous) count.append(node("small", "", "前回"));
-        row.append(link, state, count);
+        const remove = node("button", "text-button job-delete", "削除");
+        remove.type = "button";
+        remove.dataset.id = job.id;
+        remove.disabled = !job.can_delete;
+        remove.setAttribute("aria-label", `${job.query}を削除`);
+        remove.title = job.can_delete ? "登録と保存結果を削除" : "収録済みのため削除できません";
+        remove.addEventListener("click", async () => {
+          if (deleting || !confirm(`「${job.query}」を削除しますか？登録と保存結果は元に戻せません。${active(job) ? "待機・生成中の処理も取り消します。" : ""}`)) return;
+          deleting = true;
+          let removed = false;
+          clearTimeout(timer);
+          remove.disabled = true;
+          $("delete-error").hidden = true;
+          $("delete-status").hidden = true;
+          try {
+            await api(`/api/jobs/${job.id}/delete`, {});
+            removed = true;
+            $("delete-status").textContent = `「${job.query}」を削除しました。`;
+            $("delete-status").hidden = false;
+            $("delete-status").focus({preventScroll: true});
+          } catch (exc) { error("delete-error", exc.message || "削除できませんでした。"); }
+          finally {
+            deleting = false;
+            remove.disabled = removed || !job.can_delete;
+            if (loading) refreshPending = true;
+            else { offset = 0; load(); }
+          }
+        });
+        row.append(link, state, count, remove);
         const message = job.error || (active(job) || ["time_limit", "processing_error"].includes(job.stop_reason) ? job.message : "");
-        const notes = [job.legacy_period ? "期間限定・閲覧専用" : "", message].filter(Boolean);
+        const notes = [!job.can_delete ? "収録済みのため削除できません" : "", job.legacy_period ? "期間限定・閲覧専用" : "", message].filter(Boolean);
         if (notes.length) row.append(node("p", "help", notes.join("。")));
         list.append(row);
       }

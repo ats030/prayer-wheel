@@ -212,6 +212,30 @@ class HTTPTests(unittest.TestCase):
         self.assertFalse(new['legacy_period'])
         self.assertEqual(self.store.get(job['id']), archived)
 
+    def test_delete_api_protection_origin_and_missing(self):
+        job, _ = self.store.submit(t.parse_query('削除API'))
+        path = self.url + f"/api/jobs/{job['id']}/delete"
+        headers = {'Content-Type':'application/json'}
+        with self.assertRaises(HTTPError) as raised:
+            urlopen(Request(path, data=b'{}', headers=headers | {'Origin':'https://evil.example'}))
+        self.assertEqual(raised.exception.code, 403)
+        self.assertIsNotNone(self.store.get(job['id']))
+        self.store.claim()
+        self.store.record(job['id'], {'kind':'result','events':[{'year':1900}]})
+        with self.assertRaises(HTTPError) as raised:
+            urlopen(Request(path, data=b'{}', headers=headers))
+        self.assertEqual(raised.exception.code, 409)
+        with self.store.connect() as db:
+            db.execute('UPDATE jobs SET cache_key=? WHERE id=?', (json.dumps(['削除API',1980,None]),job['id']))
+        with urlopen(Request(path, data=b'{}', headers=headers)) as response:
+            self.assertTrue(json.load(response)['deleted'])
+        with self.assertRaises(HTTPError) as raised:
+            urlopen(Request(path, data=b'{}', headers=headers))
+        self.assertEqual(raised.exception.code, 404)
+        with self.assertRaises(HTTPError) as raised:
+            urlopen(self.url + f"/api/jobs/{job['id']}")
+        self.assertEqual(raised.exception.code, 404)
+
     def test_absolute_deadline_terminates_worker(self):
         records = []
         started = time.monotonic()

@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import sqlite3
 import threading
+import time
 
 from timeline import PERIOD_INPUT_ERROR, Query, TimelineError, parse_query
 
@@ -18,6 +19,35 @@ def query_info(cache_key):
     topic, start, end = json.loads(cache_key)
     return {"topic": topic, "period": Query("", topic, start, end).period,
             "legacy_period": start is not None or end is not None}
+
+
+def can_delete(job):
+    if job["state"] in {"queued", "running"} or job["legacy_period"]:
+        return True
+    count = job.get("event_count")
+    if "result" in job:
+        count = len(job["result"].get("events", [])) if job["result"] is not None else 0
+    return not job["has_result"] or count == 0
+
+
+class JobCancellation:
+    def __init__(self, store, identifier, stopping):
+        self.store, self.identifier, self.stopping = store, identifier, stopping
+
+    def is_set(self):
+        if self.stopping.is_set():
+            return True
+        with self.store.connect() as db:
+            return db.execute("SELECT 1 FROM jobs WHERE id=?", (self.identifier,)).fetchone() is None
+
+    def wait(self, timeout=None):
+        deadline = None if timeout is None else time.monotonic() + timeout
+        while not self.is_set():
+            remaining = None if deadline is None else deadline - time.monotonic()
+            if remaining is not None and remaining <= 0:
+                return False
+            self.stopping.wait(0.1 if remaining is None else min(0.1, remaining))
+        return True
 
 
 def now():
@@ -73,6 +103,7 @@ class JobStore:
         item["has_result"] = result is not None
         if detail:
             item["result"] = json.loads(result) if result is not None else None
+        item["can_delete"] = can_delete(item)
         return item
 
     @staticmethod
@@ -91,7 +122,9 @@ class JobStore:
             created = row is None
             if created:
                 timestamp = now()
-                cursor = db.execute("INSERT INTO jobs (cache_key,query,state,queue_order,created_at,updated_at,message) VALUES (?,?,'queued',?,?,?,'登録順に生成します。')", (key, query.original, self.next_order(db), timestamp, timestamp))
+                # The durable counter never shrinks when rows are removed.
+                order = self.next_order(db)
+                cursor = db.execute("INSERT INTO jobs (id,cache_key,query,state,queue_order,created_at,updated_at,message) VALUES (?,?,?,'queued',?,?,?,'登録順に生成します。')", (order, key, query.original, order, timestamp, timestamp))
                 row = db.execute("SELECT * FROM jobs WHERE id=?", (cursor.lastrowid,)).fetchone()
             return self.decode(row), created
 
@@ -112,8 +145,20 @@ class JobStore:
                 item = dict(row)
                 item.update(query_info(item.pop("cache_key")))
                 item["has_result"] = bool(item["has_result"])
+                item["can_delete"] = can_delete(item)
                 jobs.append(item)
             return {"jobs": jobs, "total": total, "offset": offset, "limit": limit}
+
+    def delete(self, identifier):
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            job = self.decode(db.execute("SELECT * FROM jobs WHERE id=?", (identifier,)).fetchone())
+            if job is None:
+                return None
+            if not job["can_delete"]:
+                raise ValueError("収録済みの年表は削除できません。")
+            db.execute("DELETE FROM jobs WHERE id=?", (identifier,))
+            return {"id": identifier, "deleted": True}
 
     def requeue(self, identifier, action):
         with self.connect() as db:
@@ -192,8 +237,12 @@ class QueueWorker:
                 self.store.record(job["id"], {"kind": "error", "message": LEGACY_PERIOD_ERROR})
                 continue
             try:
-                self.pipeline(parse_query(job["query"]), lambda record: self.store.record(job["id"], record), self.stopping)
-                if not self.stopping.is_set() and self.store.get(job["id"])["state"] == "running":
+                cancelled = JobCancellation(self.store, job["id"], self.stopping)
+                if cancelled.is_set():
+                    continue
+                self.pipeline(parse_query(job["query"]), lambda record: self.store.record(job["id"], record), cancelled)
+                current = self.store.get(job["id"])
+                if not self.stopping.is_set() and current is not None and current["state"] == "running":
                     self.store.record(job["id"], {"kind": "error", "message": "生成結果を受け取れませんでした。再試行してください。"})
             except Exception:
                 self.store.record(job["id"], {"kind": "error", "message": "生成を完了できませんでした。再試行してください。"})
