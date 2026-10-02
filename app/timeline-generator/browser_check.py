@@ -39,6 +39,12 @@ with sync_playwright() as playwright:
         else:
             route.fulfill(status=200, content_type="application/json", body=json.dumps(job))
     context.route("**/api/jobs**", respond)
+    # Synthetic document responses have no private-address metadata in Chromium.
+    # Fetch the real assets via Playwright for these fixtures; live mode below
+    # removes the routes and uses normal browser networking and the real HTML.
+    asset_patterns = ["**/styles.css", "**/tokens.css", "**/app.js", "**/favicon.svg"]
+    for pattern in asset_patterns:
+        context.route(pattern, lambda route: route.fulfill(response=route.fetch()))
     # Detail HTML uses a real GET existence guard; fulfill this static entry without persisting test jobs.
     from pathlib import Path
     detail = Path(__file__).with_name("detail.html").read_text()
@@ -135,6 +141,8 @@ with sync_playwright() as playwright:
     if len(sys.argv) > 1 and sys.argv[1] == "--live":
         context.unroute("**/api/jobs**")
         context.unroute("**/timelines/1")
+        for pattern in asset_patterns:
+            context.unroute(pattern)
         query = " ".join(sys.argv[2:]) or "インターネット 1980年以降"
         page.goto(URL)
         page.locator("#query").fill(query)
