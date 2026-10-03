@@ -169,13 +169,11 @@ function populatePrefectures(){
   }
 }
 function populateCategories(){
-  const select=document.querySelector('#category');
-  for(const meta of CATEGORY_META){
-    const option=document.createElement('option');
-    option.value=meta.code;option.textContent=meta.label;
-    select.appendChild(option);
-  }
+  document.querySelector('#category-options').innerHTML=CATEGORY_META.map(meta=>[meta.code,meta.label]).map(([value,label])=>`<label class="multi-option"><input type="checkbox" value="${esc(value)}">${esc(label)}</label>`).join('');
 }
+function selectedCategories(){return [...document.querySelectorAll('#category-options input:checked')].map(input=>input.value)}
+function updateCategorySummary(){const labels=[...document.querySelectorAll('#category-options input:checked')].map(input=>input.parentElement.textContent);document.querySelector('#category-summary').textContent=!labels.length?'すべて':labels.length===1?labels[0]:`${labels[0]} ほか${labels.length-1}`}
+function clearCategories(){document.querySelectorAll('#category-options input').forEach(input=>{input.checked=false});updateCategorySummary()}
 function renderLegend(){
   const legend=document.querySelector('#map-legend');
   if(!legend||legend.childElementCount)return;
@@ -186,11 +184,11 @@ function applyFilters(){
   const keyword=document.querySelector('#keyword').value.trim().toLowerCase();
   const prefecture=document.querySelector('#prefecture').value;
   const region=document.querySelector('#region').value;
-  const category=document.querySelector('#category').value;
+  const categories=selectedCategories();
   visible=tokusan.filter(o=>{
     if(prefecture&&o.prefecture!==prefecture)return false;
     if(!matchesRegion(o,region))return false;
-    if(category&&categoryCode(o)!==category)return false;
+    if(categories.length&&!categories.includes(categoryCode(o)))return false;
     if(keyword){
       const haystack=[o.label_ja,o.label_en,o.place,o.prefecture,o.city,o.production_area,o.maker,categoryLabel(categoryCode(o))].filter(Boolean).join(' ').toLowerCase();
       if(!haystack.includes(keyword))return false;
@@ -498,8 +496,8 @@ function closeDetail(){
 document.querySelector('#keyword').addEventListener('input',applyFilters);
 document.querySelector('#prefecture').addEventListener('change',()=>{populateRegions();applyFilters()});
 document.querySelector('#region').addEventListener('change',applyFilters);
-document.querySelector('#category').addEventListener('change',applyFilters);
-document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';document.querySelector('#category').value='';populateRegions();applyFilters();document.querySelector('#keyword').focus()});
+document.querySelector('#category-options').addEventListener('change',()=>{updateCategorySummary();applyFilters()});
+document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';clearCategories();populateRegions();applyFilters();document.querySelector('#keyword').focus()});
 document.querySelector('.detail-close').addEventListener('click',closeDetail);
 document.querySelector('.lightbox-close').addEventListener('click',closeLightbox);
 document.querySelector('#lightbox').addEventListener('click',e=>{if(e.target.id==='lightbox')closeLightbox()});
