@@ -79,7 +79,7 @@ class BatchTests(unittest.TestCase):
         self.assertEqual(result['events'], sorted(result['events'], key=lambda e: e['year']))
         self.assertTrue(all('_context' not in e for e in result['events']))
         checkpoints = [r for r in records if r['kind'] == 'checkpoint']
-        self.assertEqual([len(r['events']) for r in checkpoints], [15, 30, 45, 60, 75, 90, 100])
+        self.assertEqual([len(r['events']) for r in checkpoints], list(range(t.BATCH_EVENTS, 100, t.BATCH_EVENTS)) + [100])
 
     def test_disjoint_material_retains_context_and_all_sources(self):
         sources = [history_source(35) | {'url': f'https://example.org/{i}'} for i in range(10)]
@@ -123,18 +123,20 @@ class BatchTests(unittest.TestCase):
         result, records = self.run_with_failures({4})
         self.assertEqual(result['stop_reason'], 'processing_error')
         checkpoints = [r['events'] for r in records if r['kind'] == 'checkpoint']
-        self.assertEqual([len(c) for c in checkpoints], [15, 20])
+        sizes = [min(t.BATCH_EVENTS, 35 - start) for start in range(0, 35, t.BATCH_EVENTS)]
+        del sizes[1]
+        self.assertEqual([len(c) for c in checkpoints], [sum(sizes[:i + 1]) for i in range(len(sizes))])
         self.assertTrue(all(e in result['events'] for e in checkpoints[0]))
 
     def test_first_batch_failure_does_not_abort_generation(self):
         result, _ = self.run_with_failures({1})
-        self.assertEqual(len(result['events']), 20)
+        self.assertEqual(len(result['events']), 35 - t.BATCH_EVENTS)
         self.assertEqual(result['stop_reason'], 'processing_error')
 
     def test_repeated_failures_stop_and_keep_verified_batches(self):
         result, records = self.run_with_failures({3, 5}, count=50)
         self.assertEqual(result['stop_reason'], 'processing_error')
-        self.assertEqual(len(result['events']), 15)
+        self.assertEqual(len(result['events']), t.BATCH_EVENTS)
         self.assertEqual(result['events'], next(r['events'] for r in records if r['kind'] == 'checkpoint'))
 
     def test_failures_without_verified_events_raise(self):
@@ -153,7 +155,7 @@ class BatchTests(unittest.TestCase):
     def test_deadline_between_batches_preserves_verified_work(self):
         clock = [0]
         def finish_near_deadline(query, sources, emit, deadline, existing):
-            clock[0] = 591
+            clock[0] = t.TIME_LIMIT - 9
             return [saved_event(1900)], []
         with patch.object(t.time, 'monotonic', side_effect=lambda: clock[0]), patch.object(t, 'build_batch', side_effect=finish_near_deadline):
             result = self.run_generation(history_source(35))
@@ -164,7 +166,7 @@ class BatchTests(unittest.TestCase):
     def test_deadline_before_any_verified_work_is_failure(self):
         clock = [0]
         def fetch(_):
-            clock[0] = 591
+            clock[0] = t.TIME_LIMIT - 9
             return history_source(35)
         with patch.object(t.time, 'monotonic', side_effect=lambda: clock[0]), patch.object(t, 'search', return_value=[{}]), patch.object(t.WebReader, 'fetch', side_effect=fetch):
             with self.assertRaises(t.TimelineError):

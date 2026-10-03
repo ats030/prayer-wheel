@@ -145,7 +145,7 @@ with sync_playwright() as playwright:
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), ("result", width)
         page.screenshot(path=f"/tmp/timeline-generator-saved-{width}.png", full_page=True)
     # A long timeline and a partial-completion notice must fit all supported widths.
-    hundred = RESULT | {'events': [RESULT['events'][0] | {'year': 1800 + i, 'date': f'{1800+i}年', 'title': f'出来事{i+1}'} for i in range(100)], 'stop_reason': 'time_limit', 'notice': '時間上限（10分）により終了しました。検証済みの出来事を保存しています。'}
+    hundred = RESULT | {'events': [RESULT['events'][0] | {'year': 1800 + i, 'date': f'{1800+i}年', 'title': f'出来事{i+1}'} for i in range(100)], 'stop_reason': 'time_limit', 'notice': '時間上限（20分）により終了しました。検証済みの出来事を保存しています。'}
     job = job | {'result': hundred, 'message': '時間上限により終了しました。検証済みの結果を保存しました。'}
     for width in [320, 375, 414, 768, 1280]:
         page.set_viewport_size({'width': width, 'height': 900})
