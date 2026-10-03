@@ -151,7 +151,7 @@ function clearCategories(){document.querySelectorAll('#category-options input').
 function renderLegend(){
   const legend=document.querySelector('#map-legend');
   if(!legend||legend.childElementCount)return;
-  legend.innerHTML=CATEGORY_META.map(meta=>`<span><span class="legend-dot" style="background:var(--color-cat-${meta.code})"></span>${esc(meta.label)}</span>`).join('')+'<span><span class="legend-dot area"></span>破線：地域代表位置</span>';
+  legend.innerHTML=CATEGORY_META.map(meta=>`<span><span class="legend-dot" style="background:var(--color-cat-${meta.code})"></span>${esc(meta.label)}</span>`).join('');
 }
 
 function applyFilters(){
@@ -191,7 +191,7 @@ function renderList(){
 }
 
 function markerIcon(o,selected){
-  const className=`tokusan-marker cat-${categoryCode(o||null)}${o?.coordinate_kind==='named_area_office'?' area':''}${selected?' selected':''}`;
+  const className=`tokusan-marker cat-${categoryCode(o||null)}${selected?' selected':''}`;
   const label=o.label_ja||o.label_en||o.qid;
   return L.divIcon({className:'tokusan-marker-anchor',html:`<button type="button" class="${className}" aria-label="${esc(label)}"></button>`,iconSize:[22,22],iconAnchor:[11,11]});
 }

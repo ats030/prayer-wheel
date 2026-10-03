@@ -43,7 +43,7 @@ input,select{width:100%;min-width:0;height:2.5rem;border:1px solid var(--color-r
 .leaflet-marker-pane .tokusan-marker-anchor{pointer-events:none}
 .tokusan-marker-anchor .tokusan-marker{pointer-events:auto;padding:0;cursor:pointer}
 .tokusan-marker-anchor:focus-visible .tokusan-marker{outline:3px solid var(--color-focus);outline-offset:2px}
-.tokusan-marker.area{border-style:dashed}
+
 .tokusan-marker.selected{background:var(--color-accent);transform:scale(1.18)}
 .tokusan-marker.cat-sa{background:var(--color-cat-sa)}
 .tokusan-marker.cat-te{background:var(--color-cat-te)}
@@ -64,7 +64,7 @@ input,select{width:100%;min-width:0;height:2.5rem;border:1px solid var(--color-r
 .tokusan-cluster-anchor{background:none;border:0}
 .map-legend{pointer-events:auto;display:grid;gap:.35rem;border:1px solid var(--color-rule);border-radius:var(--radius);background:var(--color-paper);padding:.55rem .75rem;box-shadow:0 2px 12px var(--color-shadow);font-size:.72rem;font-weight:700;color:var(--color-ink-2)}
 .legend-dot{display:inline-block;width:.6rem;height:.6rem;margin-right:.45rem;border:1.5px solid var(--color-paper);border-radius:50%;vertical-align:middle}
-.legend-dot.area{width:.7rem;height:.7rem;border:1.5px dashed currentColor;background:transparent}
+
 
 .detail-panel{min-width:0;min-height:0;overflow-y:auto;border-left:1px solid var(--color-rule);background:var(--color-accent-ink);box-shadow:-10px 0 28px var(--color-shadow)}
 .detail-panel[hidden]{display:none}
