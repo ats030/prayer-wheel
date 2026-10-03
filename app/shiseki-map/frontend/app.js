@@ -174,7 +174,8 @@ const MULTI_FILTERS=['category','era','designation'];
 function selectedValues(id){return [...document.querySelectorAll(`#${id}-options input:checked`)].map(input=>input.value)}
 function updateMultiSummary(id){const labels=[...document.querySelectorAll(`#${id}-options input:checked`)].map(input=>input.parentElement.textContent);document.querySelector(`#${id}-summary`).textContent=!labels.length?'すべて':labels.length===1?labels[0]:`${labels[0]} ほか${labels.length-1}`}
 function clearMultiFilter(id){document.querySelectorAll(`#${id}-options input`).forEach(input=>{input.checked=false});updateMultiSummary(id)}
-function populateEras(){document.querySelector('#era-options').innerHTML=[...new Set(shisekis.map(o=>o.era).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja')).map(v=>`<label class="multi-option"><input type="checkbox" value="${esc(v)}">${esc(v)}</label>`).join('')}
+function eraTags(o){return String(o.era||'').split('・').map(v=>v.trim()).filter(Boolean)}
+function populateEras(){document.querySelector('#era-options').innerHTML=[...new Set(shisekis.flatMap(eraTags))].sort((a,b)=>a.localeCompare(b,'ja')).map(v=>`<label class="multi-option"><input type="checkbox" value="${esc(v)}">${esc(v)}</label>`).join('')}
 function applyFilters(){
   const q=document.querySelector('#keyword').value.trim().toLocaleLowerCase('ja');
   const prefecture=document.querySelector('#prefecture').value;
@@ -186,7 +187,7 @@ function applyFilters(){
     const text=[o.label_ja,o.label_en,o.prefecture,o.description,o.era,o.designation_label,...tags].filter(Boolean).join(' ').toLocaleLowerCase('ja');
     const prefectureMatches=!prefecture||(o.prefecture===prefecture);
     const categoryMatches=!categories.length||tags.some(tag=>categories.includes(tag));
-    return text.includes(q)&&prefectureMatches&&categoryMatches&&(!eras.length||eras.includes(o.era))&&(!designations.length||designations.includes(designationRank(o)));
+    return text.includes(q)&&prefectureMatches&&categoryMatches&&(!eras.length||eraTags(o).some(era=>eras.includes(era)))&&(!designations.length||designations.includes(designationRank(o)));
   }).sort((a,b)=>String(a.label_ja||a.label_en||'').localeCompare(String(b.label_ja||b.label_en||''),'ja'));
   renderList();renderMarkers();
   document.querySelector('#result-count').textContent=visible.length;
