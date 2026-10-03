@@ -31,6 +31,8 @@ VERIFY_MODEL = os.environ.get("TIMELINE_VERIFY_MODEL", "qwen3.8:27b")
 TIME_LIMIT = 3600
 MAX_EVENTS = 50
 BATCH_EVENTS = 7
+# 1組に渡す段落数。出力件数（BATCH_EVENTS）とは別に数え、短い段落の多い資料で組が細切れになるのを防ぐ。
+BATCH_PASSAGES = 20
 MAX_CONSECUTIVE_FAILURES = 2
 MODEL_RETRY_DELAY = 10
 MATERIAL_BUDGET = 12000
@@ -751,11 +753,16 @@ def batch_trace(batch, urls):
 def material_batches(sources, query):
     """Disjoint, balanced excerpts; keep complete articles solely for quote checks."""
     queues = []
+    seen = set()
     for source in sources:
         if 'passages' not in source:
             queues.append([{'heading': '', 'date_heading': '', 'text': source['text'][:3000]}])
             continue
-        eligible = select_passages(source['passages'], query, budget=60000)
+        # 転載・ミラーで同じ段落が複数の出典にあれば、先の（検索順位の高い）出典だけで読む。
+        # 年は見出しにしかないことがあるため、年代見出しが違う同文は別の段落として残す。
+        mirror_key = lambda p: (p.get('date_heading', ''), compact(p['text']))
+        eligible = [p for p in select_passages(source['passages'], query, budget=60000) if mirror_key(p) not in seen]
+        seen.update(mirror_key(p) for p in eligible)
         overview = select_passages(eligible, query, budget=MATERIAL_BUDGET // max(1, len(sources)))
         chosen = {passage_key(p) for p in overview}
         queues.append(overview[-2:] + overview[:-2] + [p for p in eligible if passage_key(p) not in chosen])
@@ -763,14 +770,14 @@ def material_batches(sources, query):
     while any(positions[i] < len(queue) for i, queue in enumerate(queues)):
         selected = [[] for _ in sources]
         used = count = 0
-        while count < BATCH_EVENTS:
+        while count < BATCH_PASSAGES:
             advanced = False
             for i, queue in enumerate(queues):
                 if positions[i] >= len(queue):
                     continue
                 passage = queue[positions[i]]
                 size = len(passage['text']) + len(passage['heading'])
-                if used + size > MATERIAL_BUDGET or count >= BATCH_EVENTS:
+                if used + size > MATERIAL_BUDGET or count >= BATCH_PASSAGES:
                     continue
                 selected[i].append(passage)
                 positions[i] += 1

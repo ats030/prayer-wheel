@@ -67,7 +67,8 @@ def grounded_model(system, prompt, deadline, schema):
 
 class BatchTests(unittest.TestCase):
     def run_generation(self, source, model=grounded_model, records=None):
-        with patch.object(t, 'search', return_value=[{}]), patch.object(t.WebReader, 'fetch', return_value=source), patch.object(t, 'crosscheck_sources', return_value=[]), patch.object(t, 'model_json', side_effect=model):
+        # 擬似モデルは1段落から1件を出すので、組の段落数を出力上限に揃えて組ごとの件数を固定する。
+        with patch.object(t, 'BATCH_PASSAGES', t.BATCH_EVENTS), patch.object(t, 'search', return_value=[{}]), patch.object(t.WebReader, 'fetch', return_value=source), patch.object(t, 'crosscheck_sources', return_value=[]), patch.object(t, 'model_json', side_effect=model):
             return t.build_timeline(t.parse_query('研究'), (records if records is not None else []).append)
 
     def test_more_than_thirty_candidates_survive_and_max_events_is_hard_cap(self):
@@ -83,16 +84,41 @@ class BatchTests(unittest.TestCase):
 
     def test_disjoint_material_retains_context_and_all_sources(self):
         sources = [history_source(35) | {'url': f'https://example.org/{i}'} for i in range(10)]
+        for i, source in enumerate(sources):
+            source['passages'] = [p | {'text': p['text'] + f'（資料{i}）'} for p in source['passages']]
         batches = list(t.material_batches(sources, t.parse_query('研究')))
         seen = []
         for batch in batches:
-            self.assertLessEqual(sum(len(s['passages']) for s in batch), t.BATCH_EVENTS)
+            self.assertLessEqual(sum(len(s['passages']) for s in batch), t.BATCH_PASSAGES)
             self.assertLessEqual(sum(len(p['text']) + len(p['heading']) for s in batch for p in s['passages']), t.MATERIAL_BUDGET)
             for source in batch:
                 self.assertEqual(len(source['all_passages']), 35)
                 seen.extend((source['url'], t.passage_key(p)) for p in source['passages'])
         self.assertEqual(len(seen), 350)
         self.assertEqual(len(set(seen)), 350)
+
+    def test_short_passages_fill_a_batch_beyond_the_event_limit(self):
+        batches = list(t.material_batches([history_source(60)], t.parse_query('研究')))
+        self.assertEqual([len(b[0]['passages']) for b in batches], [t.BATCH_PASSAGES, t.BATCH_PASSAGES, 60 - 2 * t.BATCH_PASSAGES])
+        self.assertGreater(t.BATCH_PASSAGES, t.BATCH_EVENTS)
+
+    def test_passage_repeated_in_a_later_source_is_read_once(self):
+        mirror = history_source(10) | {'url': 'https://example.net/mirror'}
+        own = {'heading': '1950年', 'date_heading': '1950年', 'text': saved_event(1950)['quote']}
+        mirror['passages'] = mirror['passages'] + [own]
+        batches = list(t.material_batches([history_source(10), mirror], t.parse_query('研究')))
+        read = [(s['url'], p['text']) for b in batches for s in b for p in s['passages']]
+        self.assertEqual(len(read), 11)
+        self.assertIn(('https://example.net/mirror', own['text']), read)
+        # 照合用の全段落は出典ごとに残す。
+        self.assertTrue(all(len(s['all_passages']) == len(next(x for x in [history_source(10), mirror] if x['url'] == s['url'])['passages']) for b in batches for s in b))
+
+    def test_same_sentence_under_another_year_is_not_a_mirror(self):
+        first = {'url': 'https://example.com/a', 'title': 'A', 'text': '', 'passages': [{'heading': '1950年', 'date_heading': '1950年', 'text': 'この年、研究所の新工場が稼働した。'}]}
+        second = {'url': 'https://example.net/b', 'title': 'B', 'text': '', 'passages': [{'heading': '1972年', 'date_heading': '1972年', 'text': 'この年、研究所の新工場が稼働した。'}]}
+        batches = list(t.material_batches([first, second], t.parse_query('研究')))
+        read = [s['url'] for b in batches for s in b for p in s['passages']]
+        self.assertEqual(sorted(read), ['https://example.com/a', 'https://example.net/b'])
 
     def test_sparse_material_has_no_minimum_and_rejections_are_not_checkpoints(self):
         result = self.run_generation(history_source(2))
