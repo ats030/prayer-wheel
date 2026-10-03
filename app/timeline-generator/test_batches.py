@@ -163,9 +163,24 @@ class BatchTests(unittest.TestCase):
         busy = t.HTTPError('http://x', 503, 'busy', {}, None)
         response = {'message': {'content': '{"events": []}'}}
         with patch.object(t, 'json_request', side_effect=[busy, busy, response]) as request, patch.object(t.time, 'sleep') as sleep:
-            self.assertEqual(t.model_json('s', 'p', time.monotonic() + 600, t.VERIFY_SCHEMA), {'events': []})
+            self.assertEqual(t.model_json('s', 'p', time.monotonic() + 600, t.EVENT_SCHEMA), {'events': []})
         self.assertEqual(request.call_count, 3)
         self.assertEqual(sleep.call_count, 2)
+
+    def test_busy_verify_model_falls_back_to_the_event_model(self):
+        busy = t.HTTPError('http://x', 503, 'busy', {}, None)
+        response = {'message': {'content': '{"supported": []}'}}
+        models = []
+        def request(url, payload, timeout):
+            models.append(payload['model'])
+            if len(models) == 1:
+                raise busy
+            return response
+        with patch.object(t, 'VERIFY_MODEL', 'qwen'), patch.object(t, 'MODEL', 'gemma'), \
+                patch.object(t, 'json_request', side_effect=request), patch.object(t.time, 'sleep') as sleep:
+            self.assertEqual(t.model_json('s', 'p', time.monotonic() + 600, t.VERIFY_SCHEMA), {'supported': []})
+        self.assertEqual(models, ['qwen', 'gemma'])
+        sleep.assert_not_called()
 
     def test_busy_backend_stops_at_the_deadline(self):
         clock = [0]

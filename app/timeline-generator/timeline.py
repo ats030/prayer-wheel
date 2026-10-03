@@ -444,6 +444,11 @@ def model_json(system, prompt, deadline, schema):
             response = json_request(OLLAMA_URL + "/api/chat", payload, timeout=left)
             break
         except HTTPError as exc:
+            # The upstream proxy treats VERIFY_MODEL as the interactive model and answers 503 after
+            # its 120s interactive queue wait, so verify with MODEL instead (ats030-1nzpy).
+            if exc.code == 503 and payload["model"] == VERIFY_MODEL != MODEL:
+                payload["model"] = MODEL
+                continue
             # 503/429 mean the shared backend is busy; retry while the deadline allows.
             if exc.code in (429, 503) and deadline - time.monotonic() > MODEL_RETRY_DELAY + 5:
                 time.sleep(MODEL_RETRY_DELAY)
