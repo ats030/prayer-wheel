@@ -73,6 +73,8 @@ summary { cursor: pointer; color: var(--color-accent); min-height: 44px; padding
 .event > .source-link { grid-column: 3; grid-row: 1; }
 .source-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; font-size: var(--text-sm); white-space: nowrap; }
 #review-notes .source-link { justify-content: flex-start; white-space: normal; overflow-wrap: anywhere; }
+.quality-block { border-top: 1px solid var(--color-rule); padding-top: 8px; margin-top: 8px; }
+.quality-heading { font-size: inherit; margin: 0 0 4px; color: var(--color-ink); }
 .review-note { border-top: 1px solid var(--color-rule); padding-top: 8px; margin-top: 8px; }
 .list-columns, .job-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(3.5rem, max-content) minmax(4rem, max-content); gap: 0 8px; }
 .list-columns { font-size: var(--text-sm); color: var(--color-muted); border-bottom: 1px solid var(--color-rule); padding-block: 8px; margin-top: 4px; }

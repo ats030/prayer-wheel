@@ -12,6 +12,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 from timeline import TIME_LIMIT, TimelineError, build_timeline, parse_query, partial_result
 from jobs import JobStore, QueueWorker
+import quality_eval
 
 ROOT = Path(__file__).resolve().parent
 HOST = os.environ.get("TIMELINE_HOST", "127.0.0.1")
@@ -140,7 +141,14 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(200, self.server.jobs.listing(offset=offset))
         elif re.fullmatch(r"/api/jobs/[1-9][0-9]{0,17}", path):
             job = self.server.jobs.get(int(path.rsplit("/", 1)[1]))
-            self.reply(200, job) if job else self.reply(404, {"error": "年表が見つかりません。"})
+            if not job:
+                return self.reply(404, {"error": "年表が見つかりません。"})
+            try:
+                job["quality"] = quality_eval.job_quality(job)
+            except (OSError, ValueError, KeyError):
+                # A broken gold file must not hide the timeline itself.
+                job["quality"] = None
+            self.reply(200, job)
         elif re.fullmatch(r"/timelines/[1-9][0-9]{0,17}", path):
             if not self.server.jobs.get(int(path.rsplit("/", 1)[1])):
                 return self.reply(404, {"error": "年表が見つかりません。"})

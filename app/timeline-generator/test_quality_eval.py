@@ -105,6 +105,17 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(jobs[1]['recall'], 0.5)
         self.assertIn('再現率=50%', q.render(report))
 
+    def test_job_quality_for_detail_page(self):
+        self.assertIsNone(q.job_quality({'query': 'AI', 'result': None}, GOLD))
+        known = q.job_quality({'query': 'ラーメン', 'result': {'theme': 'ラーメン', 'period': '全期間',
+                               'events': [event(1958, 'チキンラーメン発売')]}}, GOLD)
+        self.assertEqual((known['recall'], known['gold_verified_at']), (0.5, '2026-10-02'))
+        other = q.job_quality({'query': '昭和', 'result': {'theme': '昭和', 'period': '全期間',
+                               'events': [event(1964, '東京五輪', url='https://ja.wikipedia.org/x')]}}, GOLD)
+        self.assertIsNone(other['theme'])
+        self.assertNotIn('recall', other)
+        self.assertEqual(other['sources']['kinds']['百科(二次)'], 1)
+
     def test_bundled_gold_set_is_well_formed(self):
         gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))
         for name, theme in gold['themes'].items():

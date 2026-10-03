@@ -210,6 +210,8 @@ class HTTPTests(unittest.TestCase):
             self.assertEqual(response.status, 201)
         self.assertNotEqual(new['id'], archived['id'])
         self.assertFalse(new['legacy_period'])
+        quality = archived.pop('quality')
+        self.assertEqual(quality['theme'], 'インターネット')
         self.assertEqual(self.store.get(job['id']), archived)
 
     def test_delete_api_protection_origin_and_missing(self):

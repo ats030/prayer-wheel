@@ -203,6 +203,19 @@ def evaluate_result(gold, result, query, pages=None):
     return report
 
 
+def job_quality(job, gold=None):
+    """詳細画面用。保存結果からその場で計算し、保存しない。正解集合外のテーマは出典集計だけを返す。"""
+    result = job.get('result')
+    if not result:
+        return None
+    gold = gold or json.loads(GOLD_PATH.read_text(encoding='utf-8'))
+    report = evaluate_result(gold, result, job.get('query'))
+    if report['theme'] is None:
+        report['sources'] = source_stats(result.get('events') or [], [])
+    report['gold_verified_at'] = gold['verified_at']
+    return report
+
+
 def load_jobs(path):
     connection = sqlite3.connect(f'file:{path}?mode=ro', uri=True)
     try:

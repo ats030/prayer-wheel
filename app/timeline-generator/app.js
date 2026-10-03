@@ -59,13 +59,37 @@ function sourceSummary(events) {
   const shown = sorted.slice(0, 3).map(([host, count]) => `${host} ${count}件`).join("、");
   return `出典 ${counts.size}サイト：${shown}${sorted.length > 3 ? `、ほか${sorted.length - 3}サイト` : ""}`;
 }
+function renderQuality(quality) {
+  const box = $("quality");
+  box.replaceChildren();
+  if (!quality) return;
+  const gold = node("div", "quality-block");
+  gold.append(node("h3", "quality-heading", `正解集合との照合（人手で選んだ主要項目・検証日 ${quality.gold_verified_at}）`));
+  if (quality.theme === null) {
+    gold.append(node("p", "", "このテーマは正解集合の対象外のため、網羅性は評価していません。"));
+  } else {
+    const total = quality.found.length + quality.missing.length;
+    gold.append(node("p", "", total ? `主要項目 ${quality.found.length} / ${total}件を収録（${Math.round(quality.recall * 100)}%）` : "指定期間に該当する主要項目はありません。"));
+    if (quality.missing.length) gold.append(node("p", "", `欠落：${quality.missing.map(item => item.label).join("、")}`));
+    for (const item of quality.known_errors) gold.append(node("p", "quality-error", `既知の誤りに一致：${item.label} ← ${item.year} ${item.event}`));
+  }
+  const src = quality.sources || {};
+  const kinds = Object.entries(src.kinds || {}).map(([kind, count]) => `${kind} ${count}件`).join("、");
+  const sources = node("div", "quality-block");
+  sources.append(node("h3", "quality-heading", "出典の機械的な集計（内容の正しさの判定ではありません）"));
+  if (kinds) sources.append(node("p", "", `種別：${kinds}`));
+  if (src.top_domain) sources.append(node("p", "", `最多の出典：${src.top_domain}（${Math.round(src.top_domain_share * 100)}%）`));
+  sources.append(node("p", "", `重複の疑い：${quality.duplicates.length}組`));
+  box.append(gold, sources);
+}
 function render(data, job) {
+  renderQuality(job.quality);
   $("result-meta").textContent = `${data.events.length}件`;
   $("generation-meta").textContent = `${job.period || "全期間"} · 生成時間 ${data.elapsed_seconds}秒`;
   $("source-summary").textContent = sourceSummary(data.events);
   $("generation-notice").textContent = data.notice;
   const alerts = [];
-  if (data.stop_reason === "time_limit") alerts.push(`時間上限（10分）により終了。検証済み${data.events.length}件を保存しました。`);
+  if (data.stop_reason === "time_limit") alerts.push(`時間上限（20分）により終了。検証済み${data.events.length}件を保存しました。`);
   if (data.stop_reason === "processing_error") alerts.push(`途中で処理を終了。検証済み${data.events.length}件を保存しました。${job.legacy_period ? "年代条件を外して新しく登録できます。" : "再生成で調べ直せます。"}`);
   if (data.review_notes?.length) alerts.push(`採用を見送った候補${data.review_notes.length}件。詳細は「生成情報」で確認できます。`);
   $("result-notice").textContent = alerts.join(" ");
