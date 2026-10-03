@@ -75,5 +75,17 @@ class HedgedDescriptionOtherCategoriesTest(unittest.TestCase):
                 self.assertIn(cat, cats(label))
 
 
+    def test_hanabi_matsuri_is_not_fire_festival(self):
+        result = cats("いわみ花火祭り", "海上から花火が打ち上げられる。")
+        self.assertIn("花火", result)
+        self.assertNotIn("灯籠・火祭り", result)
+        self.assertIn("灯籠・火祭り", cats("鞍馬の火祭"))
+        self.assertNotIn("灯籠・火祭り", cats("みなと花火まつり"))
+
+    def test_kana_spellings_of_fire_and_lantern(self):
+        self.assertIn("灯籠・火祭り", cats("都井岬火まつり"))
+        self.assertIn("灯籠・火祭り", cats("納涼祭", "創作灯ろうが並ぶ。"))
+
+
 if __name__ == "__main__":
     unittest.main()

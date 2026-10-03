@@ -70,7 +70,7 @@ CATS = [
      "desc_hedge": True},
     {"id": "hn", "name": "灯籠・火祭り",
      "keys": ["灯籠", "燈籠", "提灯", "たいまつ", "松明", "篝火",
-              "火祭り", "送り火"],
+              "火祭り", "火まつり", "送り火", "灯ろう"],
      "label_keys": ["灯", "燈呂", "燈会", "燈花", "あかり", "の火祭", "火振",
                     "火勢", "竹宵", "百八燈", "あんどん", "行燈", "行灯", "夜高", "どうろう",
                     "キリコ", "ランタン", "ねぶた", "ねぷた"],
@@ -141,8 +141,9 @@ def _match_desc(desc, cat):
 
 def classify(entry):
     """entry からマッチしたカテゴリ name の list を返す。空なら []。"""
-    label = (entry.get("label_ja") or "").strip()
-    desc = (entry.get("description") or "").strip()
+    # 「花火祭り」「花火まつり」の「火祭り」「火まつり」を灯火系として拾わない。
+    label = re.sub("花火(祭|まつり)", "花火", (entry.get("label_ja") or "").strip())
+    desc = re.sub("花火(祭|まつり)", "花火", (entry.get("description") or "").strip())
     out = []
     for cat in CATS:
         # 「博覧会・市」以外は label と description に検出する。
