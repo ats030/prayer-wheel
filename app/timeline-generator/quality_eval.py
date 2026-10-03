@@ -21,9 +21,8 @@ DEFAULT_DBS = [
     ('v2', ROOT / 'data' / 'quality-before-source-review-3fxm4.sqlite3'),
     ('current', ROOT / 'data' / 'timelines.sqlite3'),
 ]
-ENCYCLOPEDIA_HOSTS = ('wikipedia.org', 'kotobank.jp', 'britannica.com')
-PERSONAL_HOSTS = ('fc2.com', 'cocolog-nifty.com', 'hatenablog.com', 'hatenablog.jp', 'hateblo.jp', 'ameblo.jp',
-                  'note.com', 'livedoor.jp', 'livedoor.blog', 'seesaa.net', 'goo.ne.jp', 'blogspot.com')
+ENCYCLOPEDIA_HOSTS = timeline.ENCYCLOPEDIA_HOSTS
+PERSONAL_HOSTS = timeline.PERSONAL_HOSTS
 SOURCE_KINDS = ('一次/当事者', '百科(二次)', '個人投稿', '未分類')
 
 
@@ -36,8 +35,7 @@ def domain(url):
     return host[4:] if host.startswith('www.') else host
 
 
-def host_matches(host, suffixes):
-    return any(host == s or host.endswith('.' + s) for s in suffixes)
+host_matches = timeline.host_matches
 
 
 def source_kind(url, primary_domains):

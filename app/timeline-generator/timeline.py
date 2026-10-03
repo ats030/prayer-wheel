@@ -20,6 +20,11 @@ from urllib.robotparser import RobotFileParser
 
 USER_AGENT = "TimelineGenerator/0.1 (personal historical research; contact: ats030@gmail.com)"
 SEARCH_URL = os.environ.get("TIMELINE_SEARCH_URL", "http://127.0.0.1:8081").rstrip("/")
+# 出典の格付け。順位の加減点だけに使い、除外はしない。quality_eval も同じ一覧で分類する。
+INSTITUTION_HOSTS = ('go.jp', 'ac.jp', 'lg.jp', 'ed.jp', 'gov', 'edu', 'nhk.or.jp')
+ENCYCLOPEDIA_HOSTS = ('wikipedia.org', 'kotobank.jp', 'britannica.com')
+PERSONAL_HOSTS = ('fc2.com', 'cocolog-nifty.com', 'hatenablog.com', 'hatenablog.jp', 'hateblo.jp', 'ameblo.jp',
+                  'note.com', 'livedoor.jp', 'livedoor.blog', 'seesaa.net', 'goo.ne.jp', 'blogspot.com')
 OLLAMA_URL = os.environ.get("TIMELINE_OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
 MODEL = os.environ.get("TIMELINE_MODEL", "gemma4:12b")
 VERIFY_MODEL = os.environ.get("TIMELINE_VERIFY_MODEL", "qwen3.8:27b")
@@ -361,6 +366,22 @@ def json_request(url, payload=None, timeout=20):
         return json.loads(raw)
 
 
+def host_matches(host, suffixes):
+    return any(host == s or host.endswith('.' + s) for s in suffixes)
+
+
+def source_tier(url):
+    host = (urlsplit(url).hostname or '').lower()
+    # ブログのサブドメインは投稿者が決められるため、名前による加点より先に判定する。
+    if host_matches(host, PERSONAL_HOSTS):
+        return -6
+    if host_matches(host, INSTITUTION_HOSTS) or re.search(r'museum|hakubutsukan', host):
+        return 6
+    if host_matches(host, ENCYCLOPEDIA_HOSTS):
+        return 3
+    return 0
+
+
 def search(query):
     def run(suffix):
         params = urlencode({"q": query.topic + suffix, "format": "json", "language": "ja-JP", "categories": "general"})
@@ -400,8 +421,9 @@ def search(query):
         try:
             if urlsplit(result.get("url", "")).hostname in {"pypi.org", "marketplace.visualstudio.com"}:
                 score -= 20
-            if urlsplit(result.get("url", "")).hostname in {"note.com", "medium.com", "www.reddit.com"}:
+            if urlsplit(result.get("url", "")).hostname in {"medium.com", "www.reddit.com"}:
                 score -= 3
+            score += source_tier(result.get("url", ""))
         except ValueError:
             return -100
         return score

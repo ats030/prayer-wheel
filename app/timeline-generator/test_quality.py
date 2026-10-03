@@ -124,6 +124,16 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(result['theme'], 'インターネット')
         self.assertNotIn('_context', result['events'][0])
 
+    def test_search_prefers_institutional_and_encyclopedia_sources_without_excluding_blogs(self):
+        hosts=['example.hatenablog.com','example.com','ja.wikipedia.org','www.ndl.go.jp','www.raumen-museum.jp']
+        results=[{'title':'ラーメン 歴史','content':'ラーメンの歴史','url':f'https://{host}/ramen'} for host in hosts]
+        with patch.object(t,'json_request',return_value={'results':results}):
+            actual=[r['url'] for r in t.search(t.parse_query('ラーメン'))]
+        self.assertEqual(actual,['https://www.ndl.go.jp/ramen','https://www.raumen-museum.jp/ramen','https://ja.wikipedia.org/ramen','https://example.com/ramen','https://example.hatenablog.com/ramen'])
+        with patch.object(t,'json_request',return_value={'results':results[:1]}):
+            self.assertEqual(len(t.search(t.parse_query('ラーメン'))),1)
+        self.assertEqual(t.source_tier('https://ramen-museum.hatenablog.com/x'),-6)
+
     def test_crosscheck_uses_specific_subject_and_skips_duplicates(self):
         source=article('<h2>1685</h2><p>Vienna opened its first documented coffee house in 1685.</p>')
         source['url']='https://example.org/other'
