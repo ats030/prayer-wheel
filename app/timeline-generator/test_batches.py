@@ -152,6 +152,39 @@ class BatchTests(unittest.TestCase):
         self.assertIn('done_reason=length', str(caught.exception.__cause__))
         self.assertNotIn('チキン', str(caught.exception.__cause__))
 
+    def test_model_timeout_is_the_remaining_deadline_not_a_fixed_cap(self):
+        # Waiting in the shared proxy queue must not count against a short fixed timeout.
+        response = {'message': {'content': '{"events": []}'}}
+        with patch.object(t.time, 'monotonic', return_value=0), patch.object(t, 'json_request', return_value=response) as request:
+            self.assertEqual(t.model_json('s', 'p', 900, t.EVENT_SCHEMA), {'events': []})
+        self.assertEqual(request.call_args.kwargs['timeout'], 900)
+
+    def test_busy_backend_is_retried_until_success(self):
+        busy = t.HTTPError('http://x', 503, 'busy', {}, None)
+        response = {'message': {'content': '{"events": []}'}}
+        with patch.object(t, 'json_request', side_effect=[busy, busy, response]) as request, patch.object(t.time, 'sleep') as sleep:
+            self.assertEqual(t.model_json('s', 'p', time.monotonic() + 600, t.VERIFY_SCHEMA), {'events': []})
+        self.assertEqual(request.call_count, 3)
+        self.assertEqual(sleep.call_count, 2)
+
+    def test_busy_backend_stops_at_the_deadline(self):
+        clock = [0]
+        def busy(*args, **kwargs):
+            raise t.HTTPError('http://x', 503, 'busy', {}, None)
+        def advance(seconds):
+            clock[0] += seconds
+        with patch.object(t.time, 'monotonic', side_effect=lambda: clock[0]), patch.object(t, 'json_request', side_effect=busy) as request, patch.object(t.time, 'sleep', side_effect=advance):
+            with self.assertRaises(t.TimelineError) as caught:
+                t.model_json('s', 'p', 60, t.EVENT_SCHEMA)
+        self.assertIsInstance(caught.exception.__cause__, t.HTTPError)
+        self.assertEqual(request.call_count, 6)  # t=0..50; no retry once a backoff would leave <5s
+
+    def test_other_http_errors_are_not_retried(self):
+        with patch.object(t, 'json_request', side_effect=t.HTTPError('http://x', 400, 'bad', {}, None)) as request:
+            with self.assertRaises(t.TimelineError):
+                t.model_json('s', 'p', time.monotonic() + 600, t.EVENT_SCHEMA)
+        self.assertEqual(request.call_count, 1)
+
     def test_deadline_between_batches_preserves_verified_work(self):
         clock = [0]
         def finish_near_deadline(query, sources, emit, deadline, existing):

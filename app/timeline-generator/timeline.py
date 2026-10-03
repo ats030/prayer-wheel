@@ -14,6 +14,7 @@ import threading
 import time
 import unicodedata
 from urllib.parse import quote, urlencode, urljoin, urlsplit, urlunsplit
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from urllib.robotparser import RobotFileParser
 
@@ -26,6 +27,7 @@ TIME_LIMIT = 1200
 MAX_EVENTS = 100
 BATCH_EVENTS = 7
 MAX_CONSECUTIVE_FAILURES = 2
+MODEL_RETRY_DELAY = 10
 MATERIAL_BUDGET = 12000
 PIPELINE_VERSION = 3
 PERIOD_INPUT_ERROR = "年代による絞り込みはできません。年代条件を外してください。"
@@ -431,13 +433,24 @@ def search(query):
 
 
 def model_json(system, prompt, deadline, schema):
-    left = deadline - time.monotonic()
-    if left < 5:
-        raise TimelineError("処理時間の上限に達しました。テーマを絞って再検索してください。")
-    try:
-        response = json_request(OLLAMA_URL + "/api/chat", {"model": VERIFY_MODEL if schema is VERIFY_SCHEMA else MODEL, "stream": False, "think": False, "format": schema, "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}], "options": {"temperature": 0, "num_predict": 3000, "num_ctx": 16384}}, timeout=min(125, left))
-    except (OSError, ValueError) as exc:
-        raise TimelineError("年表の生成を完了できませんでした。少し待つか、テーマを絞って再検索してください。") from exc
+    payload = {"model": VERIFY_MODEL if schema is VERIFY_SCHEMA else MODEL, "stream": False, "think": False, "format": schema, "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}], "options": {"temperature": 0, "num_predict": 3000, "num_ctx": 16384}}
+    while True:
+        left = deadline - time.monotonic()
+        if left < 5:
+            raise TimelineError("処理時間の上限に達しました。テーマを絞って再検索してください。")
+        try:
+            # Bounded only by the job deadline: waiting in the shared proxy queue is expected,
+            # and abandoning a queued request still costs GPU time once it is dispatched.
+            response = json_request(OLLAMA_URL + "/api/chat", payload, timeout=left)
+            break
+        except HTTPError as exc:
+            # 503/429 mean the shared backend is busy; retry while the deadline allows.
+            if exc.code in (429, 503) and deadline - time.monotonic() > MODEL_RETRY_DELAY + 5:
+                time.sleep(MODEL_RETRY_DELAY)
+                continue
+            raise TimelineError("年表の生成を完了できませんでした。少し待つか、テーマを絞って再検索してください。") from exc
+        except (OSError, ValueError) as exc:
+            raise TimelineError("年表の生成を完了できませんでした。少し待つか、テーマを絞って再検索してください。") from exc
     message = response.get("message") if isinstance(response, dict) else None
     content = message.get("content", "") if isinstance(message, dict) else ""
     try:
