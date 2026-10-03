@@ -979,7 +979,6 @@
     "jalan_sml_code": "140202",
     "jalan_sml_name": "横浜・ベイエリア",
     "categories": [
-      "神事・祭礼",
       "音楽・映画・芸術"
     ]
   },
@@ -1417,7 +1416,6 @@
     "jalan_sml_name": "夕張・岩見沢",
     "categories": [
       "演舞・盆踊り",
-      "神事・祭礼",
       "市民・観光まつり"
     ]
   },
@@ -1808,7 +1806,8 @@
     "jalan_sml_name": "藤沢・茅ヶ崎",
     "categories": [
       "山車・屋台",
-      "行列・渡御"
+      "行列・渡御",
+      "神事・祭礼"
     ]
   },
   {
@@ -2121,7 +2120,8 @@
     "jalan_sml_code": "280214",
     "jalan_sml_name": "須磨・舞子・明石",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -2180,74 +2180,6 @@
     ]
   },
   {
-    "qid": "Q135193370",
-    "label_ja": "長幡部神社 旧社地",
-    "label_en": "Nagahatabe Shrine former site",
-    "prefecture": "群馬県",
-    "latitude": 36.240195,
-    "longitude": 139.102104,
-    "description": "群馬県に所在する「長幡部神社 旧社地」は、古くから地域の信仰の対象となった神社の一つであり、その名前には「長幡」という語が含まれることから、広大な神域や豊かな自然に囲まれた歴史的な背景がうかがわれます。旧社地という名称から、現在の社殿とは異なる場所にかつて本社が鎮座していたことが伺え、地域の信仰の移り変わりや歴史的変遷を物語る存在です。神社の周辺では、伝統的な農耕や自然の恵みへの感謝を祝う地域の祭りが、時代を経て継承されてきた可能性があります。",
-    "date": "日付未定",
-    "coordinate_prefecture": "埼玉県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "jalan_lrg_code": "092000",
-    "jalan_lrg_name": "藤岡・碓氷・磯部・妙義",
-    "jalan_sml_code": "092002",
-    "jalan_sml_name": "藤岡・富岡",
-    "categories": []
-  },
-  {
-    "qid": "Q135186398",
-    "label_ja": "根倉神社跡",
-    "label_en": "Nekura Shrine Site",
-    "prefecture": "愛知県",
-    "latitude": 34.574763,
-    "longitude": 136.635438,
-    "description": "愛知県内に伝わる「根倉神社跡」という名称から、かつて当地に存在していた神社であることがうかがえます。「根倉」の地名は、古くからこの地域の自然環境や住民の営みと深く結びついた名称であり、神社の祭神や由来も、その土地特有の信仰や風土に根ざしたものであったと考えられます。神社跡として現存するものは、現在では主に境内地や石碑、あるいは地元の伝承を通じてその痕跡をしのぶことができるかもしれません。地域の祭りや行事においても、こうした歴史的な神社の存在が、地域のアイデンティティや伝統の継承に何らかの形で影響を与えている可能性があります。",
-    "date": "日付未定",
-    "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "jalan_lrg_code": "231100",
-    "jalan_lrg_name": "知多",
-    "jalan_sml_code": "231102",
-    "jalan_sml_name": "知多半島",
-    "categories": []
-  },
-  {
-    "qid": "Q135185682",
-    "label_ja": "粟神社跡地",
-    "label_en": "Awa Shrine Site",
-    "prefecture": "大阪府",
-    "latitude": 34.497144,
-    "longitude": 135.401041,
-    "description": "大阪府内に「粟神社跡地」と称される場所が存在するが、その詳細な由来や歴史的経緯については明確な記録が残っていない。名称から推測されるように、古代より粟（あわ）や雑穀の豊作を願って祭祀が行われていた可能性があり、地域の農耕信仰と深く結びついていたと考えられる。神社跡地として知られる場所は、多くの場合、江戸時代以前に存在したが、近代以降の神社合祀や社会変動により廃社・合併されたケースが多く、現在は地名や碑、境内の一部が残る程度のケースも見られる。このような跡地には、地元住民による手向けや、地域の伝統行事と連動した形で、ごく控えめな供養行事が行われることもある。",
-    "date": "日付未定",
-    "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "jalan_lrg_code": "273800",
-    "jalan_lrg_name": "大阪南部（堺・岸和田・関西空港）",
-    "jalan_sml_code": "273802",
-    "jalan_sml_name": "堺・泉大津",
-    "categories": []
-  },
-  {
-    "qid": "Q135186646",
-    "label_ja": "那久志里神社古社地",
-    "label_en": "Nakushirino Shrine Site",
-    "prefecture": "三重県",
-    "latitude": 34.883499,
-    "longitude": 136.487255,
-    "description": "三重県の「那久志里神社古社地」は、地名に由来する古くからの信仰の痕跡を残すとされる神社の跡地です。「那久志里」の地名は、古語で「なくじり」や「なぐじり」とも読み、水の流れや地形にちなむ表現とされ、自然環境とのかかわりが深い地域の特色を反映していると考えられます。神社の跡地として、かつて地域の守り神として人々の信仰を集めていた可能性があります。このような古社地では、春や秋の収穫期などに地域ぐるみの祈願や感謝の行事が行われていたと推測され、地元の生活や風土に深く根ざした信仰文化が息づいていたと見られます。現在は社殿が残っていない場合もあり、その歴史は地元の口承や考古的調査を通じて少しずつ明らかにされつつある状況です。",
-    "date": "日付未定",
-    "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "jalan_lrg_code": "240200",
-    "jalan_lrg_name": "桑名・長島・四日市・鈴鹿",
-    "jalan_sml_code": "240208",
-    "jalan_sml_name": "鈴鹿・亀山",
-    "categories": []
-  },
-  {
     "qid": "Q135069866",
     "label_ja": "月山神社に",
     "label_en": "Co-Enshrinement at Gassan Shrine",
@@ -2264,97 +2196,6 @@
     "jalan_sml_name": "月山・朝日",
     "categories": [
       "行列・渡御",
-      "神事・祭礼"
-    ]
-  },
-  {
-    "qid": "Q135186661",
-    "label_ja": "天一鍬田神社古社地",
-    "label_en": "Amanohitokuhatano Shrine Site",
-    "prefecture": "三重県",
-    "latitude": 34.910859,
-    "longitude": 136.461631,
-    "description": "三重県に所在する「天一鍬田神社古社地」は、その名称から、かつて天一鍬田神社が鎮座していたとされる場所を示す史跡です。神社名に含まれる「鍬田」は、古代の農耕儀礼や土地の開発に関わる伝承を連想させる一方で、地域の歴史的背景を反映した名称であると考えられます。このような古社地は、現代では社殿が現存しない場合が多く、地元の信仰の記憶や風土を伝える象徴的な場として大切にされています。神社の祭礼や行事については、具体的な形態は不明ですが、地域の伝統行事や自然との共生を祝うような、日本の神社祭礼に共通する穏やかな雰囲気が漂う場所であると推測されます。",
-    "date": "日付未定",
-    "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "jalan_lrg_code": "240200",
-    "jalan_lrg_name": "桑名・長島・四日市・鈴鹿",
-    "jalan_sml_code": "240208",
-    "jalan_sml_name": "鈴鹿・亀山",
-    "categories": [
-      "神事・祭礼"
-    ]
-  },
-  {
-    "qid": "Q135194539",
-    "label_ja": "雨夜神社 旧社地",
-    "label_en": "Amayono Shrine former site",
-    "prefecture": "福井県",
-    "latitude": 35.978615,
-    "longitude": 136.120326,
-    "description": "福井県の「雨夜神社 旧社地」という名称から、かつてこの地に存在した神社であり、「雨夜」という語から、雨天や湿気の多い環境に由来する信仰が根付いていた可能性が考えられます。神社名に「雨夜」と含まれる場合、水の神や農業・生活に深くかかわる神格を祭る傾向があり、地域の農耕や水害防止を願う祭りが行われていたかもしれません。旧社地という表記は、現在の社殿が移転・再建されたことを示唆しており、地元の歴史や風土に根ざした信仰の変遷をうかがわせます。このような神社では、季節の変わり目や農作業の節目において、地域住民が集まり、豊作や安全を祈る伝統的な行事が行われてきたと考えられます。",
-    "date": "日付未定",
-    "coordinate_prefecture": "福井県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "jalan_lrg_code": "200400",
-    "jalan_lrg_name": "越前",
-    "jalan_sml_code": "200402",
-    "jalan_sml_name": "越前",
-    "categories": []
-  },
-  {
-    "qid": "Q135186413",
-    "label_ja": "牛庭神社 旧社地",
-    "label_en": "Ushinihano Shrine former site",
-    "prefecture": "三重県",
-    "latitude": 34.583141,
-    "longitude": 136.597376,
-    "description": "三重県にある「牛庭神社 旧社地」は、その名称から牛に関連する信仰が根付いていた可能性がうかがえる神社の旧跡です。地名や神社名に「牛」が含まれることは、農耕や家畜飼育の発展と深く結びついた地域の歴史を反映しており、かつては農業や畜産の守り神として、あるいは牛頭天王など牛にまつわる神格を祭っていたと考えられます。旧社地という表記から、現在の社殿とは異なる場所にかつて社殿が置かれていたことがうかがえ、地域の信仰の変遷や移転の歴史を示す痕跡の一つです。神社の旧跡として、地元の文化財や歴史的風土を伝える貴重な存在であり、周辺の自然環境や伝統行事とも連動して、地域の記憶を育んできたと考えられています。",
-    "date": "日付未定",
-    "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "jalan_lrg_code": "240800",
-    "jalan_lrg_name": "津・久居・美杉・松阪",
-    "jalan_sml_code": "240811",
-    "jalan_sml_name": "松阪",
-    "categories": []
-  },
-  {
-    "qid": "Q135098926",
-    "label_ja": "流田上神社 （流田上社神社）",
-    "label_en": "Nakaretanouheno Shrine",
-    "prefecture": "三重県",
-    "latitude": 34.589994,
-    "longitude": 136.599754,
-    "description": "三重県の流田上神社（流田上社神社）は、地名に由来する「流田」の地に鎮座する神社で、その名前から水の流れや田畑の豊かさとの関わりが想起される。日本の神社では、このような地名にちなんだ神格が祭られ、地域の農耕や水害防止、豊作祈願といった営みと深く結びついていることが一般的である。祭礼や行事も、地元の生活や自然のリズムに合わせて営まれることが多く、地域の信仰の中心として長く親しまれてきた可能性がある。神社の規模や祭神の詳細は明確でないものの、その存在は、地域の歴史や風土に根ざした信仰の営みをうかがわせるものである。",
-    "date": "日付未定",
-    "coordinate_prefecture": "三重県",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "jalan_lrg_code": "240800",
-    "jalan_lrg_name": "津・久居・美杉・松阪",
-    "jalan_sml_code": "240811",
-    "jalan_sml_name": "松阪",
-    "categories": [
-      "神事・祭礼"
-    ]
-  },
-  {
-    "qid": "Q135185533",
-    "label_ja": "久須須美神社 旧社地",
-    "label_en": "Kusumi Shrine former site",
-    "prefecture": "京都府",
-    "latitude": 34.83844,
-    "longitude": 135.673216,
-    "description": "久須須美神社の旧社地は、京都府内に所在する神社の一つで、その名称に「久須須美」という古語由来の語が含まれることから、古代の信仰や地域の歴史に根ざした神格を尊ぶ伝統を持つと推測されます。神社の旧社地という位置づけから、現在の社殿とは異なる歴史的な場所であり、地域の信仰の変遷や移転の痕跡を示す重要な場所と考えられます。京都の山間や里山の地に見られるような、自然と調和した静かな環境にあり、地元の住民による伝統的な祭礼や、季節の移り変わりに合わせた祈願行事が、古くから継続されてきた可能性があります。",
-    "date": "日付未定",
-    "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "jalan_lrg_code": "263300",
-    "jalan_lrg_name": "京都南部（宇治・長岡京・山崎）",
-    "jalan_sml_code": "263306",
-    "jalan_sml_name": "宇治・京田辺",
-    "categories": [
       "神事・祭礼"
     ]
   },
@@ -2495,25 +2336,6 @@
     "categories": []
   },
   {
-    "qid": "Q135206826",
-    "label_ja": "幣久良神社 旧社地",
-    "label_en": "Mitekurano Shrine former site",
-    "prefecture": "京都府",
-    "latitude": 34.841295,
-    "longitude": 135.55893,
-    "description": "京都府にある幣久良神社の旧社地は、地名に由来する「幣」や「久良」といった語から、古くから水や豊穣に関わる信仰が根付いていた地域の一つと推測されます。神社の旧跡としての性格から、かつては地域の守り神として、農作業の豊作や水害からの守りを願う祭りが行われていた可能性があります。日本の伝統的な神社のあり方として、こうした旧社地では、地元住民による継続的な参拝や、地域の節目となる行事が静かに継承されてきたと考えられます。現在は社殿が残るのみで、具体的な祭礼の様子は明らかになっていませんが、その歴史的背景から、地域の記憶を守る静かな聖域としての価値が認められています。",
-    "date": "日付未定",
-    "coordinate_prefecture": "大阪府",
-    "coordinate_validation_source": "https://raw.githubusercontent.com/amay077/JapanPrefGeoJson/13911412a4fb7ad6d52656edb8900a37b9e8e439/japan.geojson",
-    "jalan_lrg_code": "263300",
-    "jalan_lrg_name": "京都南部（宇治・長岡京・山崎）",
-    "jalan_sml_code": "263302",
-    "jalan_sml_name": "長岡京・山崎",
-    "categories": [
-      "神事・祭礼"
-    ]
-  },
-  {
     "qid": "Q11477022",
     "label_ja": "島立裸まつり",
     "label_en": "Shimadachi Hadaka Matsuri",
@@ -2637,7 +2459,9 @@
     "jalan_lrg_name": "川越・さいたま",
     "jalan_sml_code": "110202",
     "jalan_sml_name": "川越・所沢",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q21654535",
@@ -2731,7 +2555,6 @@
     "jalan_sml_name": "黒川",
     "categories": [
       "演舞・盆踊り",
-      "神事・祭礼",
       "市民・観光まつり"
     ]
   },
@@ -3121,7 +2944,6 @@
     "jalan_sml_code": "012302",
     "jalan_sml_name": "サロマ・紋別",
     "categories": [
-      "神事・祭礼",
       "花・季節・自然"
     ]
   },
@@ -3143,7 +2965,6 @@
     "jalan_sml_code": "012305",
     "jalan_sml_name": "網走・北見",
     "categories": [
-      "神事・祭礼",
       "灯籠・火祭り"
     ]
   },
@@ -3627,7 +3448,8 @@
     "jalan_sml_code": "030502",
     "jalan_sml_name": "花巻・北上・湯田",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
@@ -3947,7 +3769,8 @@
     "jalan_sml_code": "051102",
     "jalan_sml_name": "横手・湯沢",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
@@ -4919,8 +4742,7 @@
     "jalan_sml_name": "桐生・渡良瀬・梨木",
     "categories": [
       "演舞・盆踊り",
-      "行列・渡御",
-      "神事・祭礼"
+      "行列・渡御"
     ]
   },
   {
@@ -4940,7 +4762,9 @@
     "jalan_lrg_name": "前橋・高崎・伊勢崎・太田･榛名",
     "jalan_sml_code": "091408",
     "jalan_sml_name": "伊勢崎",
-    "categories": [],
+    "categories": [
+      "神事・祭礼"
+    ],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
       "name": "樋越神明宮の春鍬祭",
@@ -5206,7 +5030,9 @@
     "jalan_lrg_name": "九十九里・銚子",
     "jalan_sml_code": "121705",
     "jalan_sml_name": "銚子",
-    "categories": [],
+    "categories": [
+      "神事・祭礼"
+    ],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
       "name": "佐原の山車行事",
@@ -6031,7 +5857,9 @@
     "jalan_lrg_name": "青梅・奥多摩",
     "jalan_sml_code": "139502",
     "jalan_sml_name": "青梅",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11677480",
@@ -6211,7 +6039,9 @@
     "jalan_lrg_name": "湘南・鎌倉",
     "jalan_sml_code": "140805",
     "jalan_sml_name": "鎌倉",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11558084",
@@ -6534,7 +6364,9 @@
     "jalan_lrg_name": "瀬波・村上・岩船",
     "jalan_sml_code": "170502",
     "jalan_sml_name": "瀬波・村上",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11570011",
@@ -6582,7 +6414,8 @@
     "jalan_sml_code": "171705",
     "jalan_sml_name": "糸魚川",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -6776,7 +6609,6 @@
     "jalan_sml_code": "180205",
     "jalan_sml_name": "滑川・魚津",
     "categories": [
-      "神事・祭礼",
       "灯籠・火祭り"
     ]
   },
@@ -6834,8 +6666,7 @@
     "jalan_sml_code": "180802",
     "jalan_sml_name": "氷見・高岡",
     "categories": [
-      "演舞・盆踊り",
-      "神事・祭礼"
+      "演舞・盆踊り"
     ],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
@@ -7084,7 +6915,6 @@
     "jalan_sml_code": "192302",
     "jalan_sml_name": "白山",
     "categories": [
-      "神事・祭礼",
       "花・季節・自然"
     ]
   },
@@ -7254,9 +7084,7 @@
     "jalan_lrg_name": "若狭",
     "jalan_sml_code": "200502",
     "jalan_sml_name": "敦賀・若狭",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11499527",
@@ -7733,9 +7561,7 @@
     "jalan_lrg_name": "長野・戸隠・小布施",
     "jalan_sml_code": "160202",
     "jalan_sml_name": "長野・飯綱・戸隠",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q132427992",
@@ -7937,7 +7763,6 @@
     "jalan_sml_code": "221102",
     "jalan_sml_name": "岐阜・羽島",
     "categories": [
-      "神事・祭礼",
       "灯籠・火祭り"
     ]
   },
@@ -8279,7 +8104,8 @@
     "jalan_sml_code": "213202",
     "jalan_sml_name": "大井川・寸又峡・川根",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -8300,7 +8126,8 @@
     "jalan_sml_code": "213202",
     "jalan_sml_name": "大井川・寸又峡・川根",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -9943,8 +9770,7 @@
     "jalan_sml_code": "273802",
     "jalan_sml_name": "堺・泉大津",
     "categories": [
-      "山車・屋台",
-      "神事・祭礼"
+      "山車・屋台"
     ]
   },
   {
@@ -10053,7 +9879,9 @@
     "jalan_lrg_name": "神鍋・鉢伏・養父・和田山",
     "jalan_sml_code": "281408",
     "jalan_sml_name": "神鍋・江原",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q65258470",
@@ -10122,7 +9950,8 @@
     "jalan_sml_code": "281702",
     "jalan_sml_name": "淡路",
     "categories": [
-      "山車・屋台"
+      "山車・屋台",
+      "神事・祭礼"
     ]
   },
   {
@@ -10225,7 +10054,9 @@
     "jalan_lrg_name": "尼崎・宝塚・三田・篠山",
     "jalan_sml_code": "280502",
     "jalan_sml_name": "尼崎・西宮・宝塚・武田尾",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q55529456",
@@ -10244,9 +10075,7 @@
     "jalan_lrg_name": "神鍋・鉢伏・養父・和田山",
     "jalan_sml_code": "281408",
     "jalan_sml_name": "神鍋・江原",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11566794",
@@ -10293,7 +10122,8 @@
     "jalan_sml_code": "281702",
     "jalan_sml_name": "淡路",
     "categories": [
-      "山車・屋台"
+      "山車・屋台",
+      "神事・祭礼"
     ]
   },
   {
@@ -10455,9 +10285,7 @@
     "jalan_lrg_name": "奈良・斑鳩・天理",
     "jalan_sml_code": "290202",
     "jalan_sml_name": "奈良・大和郡山",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11445444",
@@ -10485,7 +10313,8 @@
     "jalan_sml_code": "290202",
     "jalan_sml_name": "奈良・大和郡山",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
@@ -10514,9 +10343,7 @@
     "jalan_lrg_name": "吉野・奥吉野",
     "jalan_sml_code": "290802",
     "jalan_sml_name": "吉野・天川・洞川",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11513681",
@@ -10851,7 +10678,9 @@
     "jalan_lrg_name": "本宮・新宮・中辺路",
     "jalan_sml_code": "301005",
     "jalan_sml_name": "本宮",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11568981",
@@ -11002,9 +10831,7 @@
     "jalan_lrg_name": "隠岐島",
     "jalan_sml_code": "320802",
     "jalan_sml_name": "島前",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11338451",
@@ -11141,9 +10968,7 @@
     "jalan_lrg_name": "津山・美作三湯・蒜山",
     "jalan_sml_code": "330802",
     "jalan_sml_name": "湯原・蒜山高原",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11400226",
@@ -11211,9 +11036,7 @@
     "jalan_lrg_name": "倉敷・総社・井笠",
     "jalan_sml_code": "330505",
     "jalan_sml_name": "総社・井原・笠岡",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11263106",
@@ -11314,9 +11137,7 @@
     "jalan_lrg_name": "福山・竹原・呉",
     "jalan_sml_code": "340302",
     "jalan_sml_name": "福山・尾道・しまなみ",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q24874530",
@@ -11493,8 +11314,7 @@
     "jalan_sml_code": "340302",
     "jalan_sml_name": "福山・尾道・しまなみ",
     "categories": [
-      "演舞・盆踊り",
-      "神事・祭礼"
+      "演舞・盆踊り"
     ]
   },
   {
@@ -11546,8 +11366,7 @@
     "jalan_sml_code": "340302",
     "jalan_sml_name": "福山・尾道・しまなみ",
     "categories": [
-      "行列・渡御",
-      "神事・祭礼"
+      "行列・渡御"
     ]
   },
   {
@@ -11709,8 +11528,7 @@
     "jalan_sml_code": "360802",
     "jalan_sml_name": "大歩危・祖谷・池田",
     "categories": [
-      "演舞・盆踊り",
-      "神事・祭礼"
+      "演舞・盆踊り"
     ],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
@@ -11910,7 +11728,9 @@
     "jalan_lrg_name": "琴平・丸亀・坂出",
     "jalan_sml_code": "370505",
     "jalan_sml_name": "観音寺",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11607281",
@@ -11930,8 +11750,7 @@
     "jalan_sml_code": "370502",
     "jalan_sml_name": "琴平・善通寺",
     "categories": [
-      "演舞・盆踊り",
-      "神事・祭礼"
+      "演舞・盆踊り"
     ],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
@@ -12010,9 +11829,7 @@
     "jalan_lrg_name": "今治・しまなみ海道",
     "jalan_sml_code": "380502",
     "jalan_sml_name": "今治",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q7903785",
@@ -12031,7 +11848,9 @@
     "jalan_lrg_name": "南予・宇和島",
     "jalan_sml_code": "380805",
     "jalan_sml_name": "宇和島",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11501940",
@@ -12156,7 +11975,9 @@
     "jalan_lrg_name": "久留米・原鶴・筑後川",
     "jalan_sml_code": "400502",
     "jalan_sml_name": "久留米",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11556000",
@@ -12389,9 +12210,7 @@
     "jalan_lrg_name": "別府",
     "jalan_sml_code": "440502",
     "jalan_sml_name": "別府",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11301198",
@@ -12479,9 +12298,7 @@
     "jalan_lrg_name": "中津・国東",
     "jalan_sml_code": "440805",
     "jalan_sml_name": "国東・杵築",
-    "categories": [
-      "神事・祭礼"
-    ],
+    "categories": [],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
       "name": "吉弘楽",
@@ -12510,7 +12327,6 @@
     "jalan_sml_code": "440208",
     "jalan_sml_name": "大野",
     "categories": [
-      "神事・祭礼",
       "灯籠・火祭り"
     ]
   },
@@ -12600,7 +12416,9 @@
     "jalan_lrg_name": "宮崎・青島・日南",
     "jalan_sml_code": "450202",
     "jalan_sml_name": "宮崎・青島・シーガイア",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q86734962",
@@ -12619,9 +12437,7 @@
     "jalan_lrg_name": "日向・延岡・高千穂",
     "jalan_sml_code": "450502",
     "jalan_sml_name": "日向",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q3350050",
@@ -12641,8 +12457,7 @@
     "jalan_sml_code": "450502",
     "jalan_sml_name": "日向",
     "categories": [
-      "山車・屋台",
-      "神事・祭礼"
+      "山車・屋台"
     ]
   },
   {
@@ -12906,7 +12721,6 @@
     "jalan_sml_code": "470502",
     "jalan_sml_name": "沖縄市（コザ）",
     "categories": [
-      "神事・祭礼",
       "市民・観光まつり"
     ]
   },
@@ -12986,9 +12800,7 @@
     "jalan_lrg_name": "南部",
     "jalan_sml_code": "471102",
     "jalan_sml_name": "糸満",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11634237",
@@ -13143,9 +12955,7 @@
     "jalan_lrg_name": "河原町・烏丸・大宮周辺",
     "jalan_sml_code": "260205",
     "jalan_sml_name": "河原町周辺",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q27926875",
@@ -13185,9 +12995,7 @@
     "jalan_lrg_name": "河原町・烏丸・大宮周辺",
     "jalan_sml_code": "260205",
     "jalan_sml_name": "河原町周辺",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11280345",
@@ -13216,9 +13024,7 @@
     "jalan_lrg_name": "祇園・東山・北白川周辺",
     "jalan_sml_code": "262305",
     "jalan_sml_name": "北山・宝ヶ池",
-    "categories": [
-      "神事・祭礼"
-    ],
+    "categories": [],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
       "name": "やすらい花",
@@ -13402,8 +13208,7 @@
     "jalan_sml_name": "北山・宝ヶ池",
     "categories": [
       "演舞・盆踊り",
-      "行列・渡御",
-      "神事・祭礼"
+      "行列・渡御"
     ]
   },
   {
@@ -13423,9 +13228,7 @@
     "jalan_lrg_name": "湯の花・丹波・美山",
     "jalan_sml_code": "263905",
     "jalan_sml_name": "美山",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11533908",
@@ -13444,9 +13247,7 @@
     "jalan_lrg_name": "河原町・烏丸・大宮周辺",
     "jalan_sml_code": "260205",
     "jalan_sml_name": "河原町周辺",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q17209977",
@@ -13473,9 +13274,7 @@
     "jalan_lrg_name": "祇園・東山・北白川周辺",
     "jalan_sml_code": "262302",
     "jalan_sml_name": "祇園・東山",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q979873",
@@ -13721,8 +13520,7 @@
     "jalan_sml_code": "280205",
     "jalan_sml_name": "三宮・ポートアイランド",
     "categories": [
-      "山車・屋台",
-      "神事・祭礼"
+      "山車・屋台"
     ]
   },
   {
@@ -13895,8 +13693,7 @@
     "jalan_sml_code": "013202",
     "jalan_sml_name": "帯広・十勝川",
     "categories": [
-      "花火",
-      "神事・祭礼"
+      "花火"
     ]
   },
   {
@@ -14040,7 +13837,6 @@
     "jalan_sml_code": "440602",
     "jalan_sml_name": "湯布院・湯平",
     "categories": [
-      "神事・祭礼",
       "音楽・映画・芸術"
     ]
   },
@@ -14380,8 +14176,7 @@
     "jalan_sml_code": "040202",
     "jalan_sml_name": "仙台",
     "categories": [
-      "演舞・盆踊り",
-      "神事・祭礼"
+      "演舞・盆踊り"
     ]
   },
   {
@@ -14778,9 +14573,7 @@
     "jalan_lrg_name": "広島・宮島",
     "jalan_sml_code": "340902",
     "jalan_sml_name": "広島",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11262075",
@@ -15105,9 +14898,7 @@
     "jalan_lrg_name": "三河",
     "jalan_sml_code": "230505",
     "jalan_sml_name": "西三河",
-    "categories": [
-      "神事・祭礼"
-    ],
+    "categories": [],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
       "name": "瀧山寺鬼祭り",
@@ -15143,7 +14934,9 @@
     "jalan_lrg_name": "三河",
     "jalan_sml_code": "230505",
     "jalan_sml_name": "西三河",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q22125537",
@@ -15193,7 +14986,9 @@
     "jalan_lrg_name": "三河",
     "jalan_sml_code": "230505",
     "jalan_sml_name": "西三河",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11569952",
@@ -15417,7 +15212,6 @@
     "jalan_sml_code": "138002",
     "jalan_sml_name": "新宿",
     "categories": [
-      "神事・祭礼",
       "音楽・映画・芸術",
       "市民・観光まつり"
     ]
@@ -15741,9 +15535,7 @@
     "jalan_lrg_name": "銀座・日本橋・東京駅周辺",
     "jalan_sml_code": "136202",
     "jalan_sml_name": "銀座・晴海・築地",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q109362097",
@@ -16250,7 +16042,6 @@
     "jalan_sml_code": "192002",
     "jalan_sml_name": "金沢・湯涌",
     "categories": [
-      "神事・祭礼",
       "音楽・映画・芸術",
       "市民・観光まつり"
     ]
@@ -16979,7 +16770,6 @@
     "jalan_sml_code": "071105",
     "jalan_sml_name": "南相馬・原町",
     "categories": [
-      "神事・祭礼",
       "音楽・映画・芸術"
     ]
   },
@@ -17043,7 +16833,6 @@
     "jalan_sml_code": "050805",
     "jalan_sml_name": "男鹿",
     "categories": [
-      "神事・祭礼",
       "音楽・映画・芸術",
       "市民・観光まつり"
     ]
@@ -17065,9 +16854,7 @@
     "jalan_lrg_name": "長崎",
     "jalan_sml_code": "420202",
     "jalan_sml_name": "長崎",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q3343765",
@@ -17087,7 +16874,6 @@
     "jalan_sml_code": "162202",
     "jalan_sml_name": "松本駅周辺",
     "categories": [
-      "神事・祭礼",
       "市民・観光まつり"
     ]
   },
@@ -17342,8 +17128,7 @@
     "jalan_sml_code": "213509",
     "jalan_sml_name": "浜松・浜北",
     "categories": [
-      "行列・渡御",
-      "神事・祭礼"
+      "行列・渡御"
     ]
   },
   {
@@ -17363,9 +17148,7 @@
     "jalan_lrg_name": "静岡・清水",
     "jalan_sml_code": "212602",
     "jalan_sml_name": "静岡",
-    "categories": [
-      "神事・祭礼"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11566547",
@@ -18451,7 +18234,8 @@
     "jalan_sml_name": "郡山・磐梯熱海・須賀川",
     "categories": [
       "山車・屋台",
-      "行列・渡御"
+      "行列・渡御",
+      "神事・祭礼"
     ],
     "description_source": "http://www.asakakunituko.jp/html/page06.html",
     "venue": {
@@ -18782,7 +18566,9 @@
     "jalan_lrg_name": "水戸・笠間",
     "jalan_sml_code": "100508",
     "jalan_sml_name": "笠間",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q30930004",
@@ -20142,7 +19928,9 @@
     "jalan_lrg_name": "柏崎・寺泊・長岡・魚沼（湯之谷）",
     "jalan_sml_code": "171102",
     "jalan_sml_name": "長岡･寺泊",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11632182",
@@ -21063,7 +20851,9 @@
     "jalan_lrg_name": "上諏訪・下諏訪・岡谷・霧ヶ峰・美ヶ原高原",
     "jalan_sml_code": "161902",
     "jalan_sml_name": "上諏訪・下諏訪・岡谷・霧ヶ峰・美ヶ原高原",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q109361071",
@@ -21259,7 +21049,9 @@
     "jalan_lrg_name": "静岡・清水",
     "jalan_sml_code": "212602",
     "jalan_sml_name": "静岡",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q17212378",
@@ -24166,7 +23958,9 @@
     "jalan_lrg_name": "青森",
     "jalan_sml_code": "020202",
     "jalan_sml_name": "青森・浅虫・八甲田",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11323939",
@@ -24476,7 +24270,8 @@
     "jalan_sml_code": "040805",
     "jalan_sml_name": "石巻・女川・牡鹿",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
@@ -25502,7 +25297,8 @@
     "jalan_sml_code": "091102",
     "jalan_sml_name": "渋川・伊香保",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -25600,7 +25396,9 @@
     "jalan_lrg_name": "飯能",
     "jalan_sml_code": "110802",
     "jalan_sml_name": "飯能",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11571854",
@@ -25987,7 +25785,8 @@
     "jalan_sml_code": "139205",
     "jalan_sml_name": "立川・八王子・多摩",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -26555,7 +26354,8 @@
     "jalan_sml_code": "171102",
     "jalan_sml_name": "長岡･寺泊",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -26726,7 +26526,8 @@
     "jalan_sml_code": "180502",
     "jalan_sml_name": "富山・八尾",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -27405,7 +27206,8 @@
     "jalan_sml_code": "161902",
     "jalan_sml_name": "上諏訪・下諏訪・岡谷・霧ヶ峰・美ヶ原高原",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -28005,7 +27807,8 @@
     "jalan_sml_code": "212605",
     "jalan_sml_name": "清水",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -28045,7 +27848,8 @@
     "jalan_sml_code": "212605",
     "jalan_sml_name": "清水",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -28065,7 +27869,9 @@
     "jalan_lrg_name": "静岡・清水",
     "jalan_sml_code": "212605",
     "jalan_sml_name": "清水",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11477012",
@@ -28813,7 +28619,8 @@
     "jalan_sml_code": "263902",
     "jalan_sml_name": "亀岡・湯の花・丹波",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -30008,7 +29815,8 @@
     "jalan_sml_code": "300801",
     "jalan_sml_name": "龍神",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",
@@ -30121,7 +29929,8 @@
     "jalan_sml_code": "320411",
     "jalan_sml_name": "大田・温泉津",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -30231,7 +30040,8 @@
     "jalan_sml_code": "320411",
     "jalan_sml_name": "大田・温泉津",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -30460,7 +30270,9 @@
     "jalan_lrg_name": "岡山・玉野・牛窓",
     "jalan_sml_code": "330202",
     "jalan_sml_name": "岡山・玉野",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11605658",
@@ -30936,7 +30748,9 @@
     "jalan_lrg_name": "高松・東讃",
     "jalan_sml_code": "370202",
     "jalan_sml_name": "高松・屋島",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q11288916",
@@ -31605,7 +31419,8 @@
     "jalan_sml_code": "420202",
     "jalan_sml_name": "長崎",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -31708,7 +31523,8 @@
     "jalan_sml_code": "440202",
     "jalan_sml_name": "大分",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -31832,7 +31648,8 @@
     "jalan_sml_code": "440202",
     "jalan_sml_name": "大分",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -31852,7 +31669,9 @@
     "jalan_lrg_name": "大分",
     "jalan_sml_code": "440202",
     "jalan_sml_name": "大分",
-    "categories": []
+    "categories": [
+      "神事・祭礼"
+    ]
   },
   {
     "qid": "Q28685114",
@@ -31912,7 +31731,8 @@
     "jalan_sml_code": "440202",
     "jalan_sml_name": "大分",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ]
   },
   {
@@ -32017,7 +31837,8 @@
     "jalan_sml_code": "450201",
     "jalan_sml_name": "西都",
     "categories": [
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "神事・祭礼"
     ],
     "cultural_relaw": {
       "cultural_type": "重要無形民俗文化財",

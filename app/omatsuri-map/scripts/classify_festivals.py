@@ -56,10 +56,18 @@ CATS = [
     {"id": "kw", "name": "行列・渡御",
      "keys": ["渡御", "行列", "渡会"],
      "label_keys": ["練供養", "巡行"]},
+    # 説明文には「神社の祭礼とは異なり」「日本の神社祭礼では」のような否定・一般論・
+    # 推測の文が多く、語の有無だけでは映画祭や音楽フェスにも当たる。説明文は文ごとに
+    # 見て、そうした文を除いた断定文にだけ当てる(desc_hedge)。神社名・神楽・田楽を
+    # 名に持つ祭りは説明文によらず神事として扱う。
     {"id": "jr", "name": "神事・祭礼",
      "keys": ["祭礼", "神事", "奉納", "来訪神"],
      "label_keys": ["綱引", "大綱", "会式", "護摩", "遷宮", "祇園", "くんち",
-                    "えびす", "お田", "御田", "御神田", "行事"]},
+                    "えびす", "お田", "御田", "御神田", "行事",
+                    "神社", "八幡", "神明宮", "大社", "神楽", "田楽", "神舞"],
+     # 「三大祭り」「五大祭」は複数の祭りの総称なので当てない。
+     "label_re": re.compile(r"(?<![三五])大祭"),
+     "desc_hedge": True},
     {"id": "hn", "name": "灯籠・火祭り",
      "keys": ["灯籠", "燈籠", "提灯", "たいまつ", "松明", "篝火",
               "火祭り", "送り火"],
@@ -102,23 +110,44 @@ CATS = [
 ]
 
 
+# 否定(〜とは異なり)・一般論(日本の神社祭礼では)・推測(〜とされ、可能性)の文。
+HEDGE = re.compile(
+    r"異な|限りま|ではな|ません|可能性|考えられ|推察|推測|思われ|かもしれ|ようです"
+    r"|一般的|各地|多くの祭|日本の(?:神社|伝統|祭礼|地方|各地|多く)"
+    r"|とされ|でしょう|傾向|うかが|名称に|名称から|場合が多|ことが多"
+)
+
+
 def _match_keys(s, keys):
     return any(k in s for k in keys)
+
+
+def _sentences(text):
+    return [s for s in re.split(r"(?<=[。！？])", text) if s]
+
+
+def _match_desc(desc, cat):
+    if not cat.get("desc_hedge"):
+        return _match_keys(desc, cat["keys"])
+    return any(_match_keys(s, cat["keys"]) and not HEDGE.search(s)
+               for s in _sentences(desc))
 
 
 def classify(entry):
     """entry からマッチしたカテゴリ name の list を返す。空なら []。"""
     label = (entry.get("label_ja") or "").strip()
     desc = (entry.get("description") or "").strip()
-    full = f"{label} {desc}".strip()
     out = []
     for cat in CATS:
-        # 「博覧会・市」以外は label+description に検出する。
+        # 「博覧会・市」以外は label と description に検出する。
         # 市名(長崎市・弘前市…)は説明文に混入するため、「市」系は
         # 祭り名(label_ja)に絞る(市名はほぼ説明文中にしか現れない)。
-        src = label if cat.get("label_only") else full
-        if (src and _match_keys(src, cat["keys"])) or \
-                _match_keys(label, cat.get("label_keys", [])):
+        if cat.get("label_only"):
+            hit = _match_keys(label, cat["keys"])
+        else:
+            hit = _match_keys(label, cat["keys"]) or _match_desc(desc, cat)
+        if hit or _match_keys(label, cat.get("label_keys", [])) or \
+                ("label_re" in cat and cat["label_re"].search(label)):
             out.append(cat["name"])
     return out
 
