@@ -83,11 +83,41 @@ class ReportTests(unittest.TestCase):
 
     def test_missing_stage_requires_keyword_and_year_in_one_passage(self):
         result = {'theme': 'ラーメン', 'period': '全期間', 'events': []}
-        pages = {'https://a': ['1958年 日清がチキンラーメンを発売'], 'https://b': ['来々軒は有名', '1910年の話']}
+        pages = {'https://a': [('1958年日清がチキンラーメンを発売', 'k1')], 'https://b': [('来々軒は有名', 'k2'), ('1910年の話', 'k3')]}
         report = q.evaluate_result(GOLD, result, 'ラーメン', pages)
         stages = {m['id']: m['stage'] for m in report['missing']}
         self.assertTrue(stages['chicken'].startswith('出典内にあり'))
         self.assertTrue(stages['rairaiken'].startswith('出典になし'))
+
+    def test_trace_splits_missing_items_into_processing_stages(self):
+        pages = {'https://a': [('1958年日清がチキンラーメンを発売', 'k1'), ('1910年来々軒が開店', 'k2')],
+                 'https://b': [('1910年來々軒の創業', 'k3')]}
+        trace = {'batches_total': 3, 'batches_processed': 1, 'sources': ['https://a', 'https://b'],
+                 'batches': [{'passages': [[0, 'k1']], 'processed': True}, {'passages': [[1, 'k3']], 'processed': False},
+                             {'passages': [[0, 'k2']], 'processed': False}],
+                 'rejected': []}
+        result = {'theme': 'ラーメン', 'period': '全期間', 'events': [], 'trace': trace, 'stop_reason': 'time_limit'}
+        stages = {m['id']: m for m in q.evaluate_result(GOLD, result, 'ラーメン', pages)['missing']}
+        self.assertEqual(stages['chicken']['stage'], '候補に出ず')
+        self.assertEqual(stages['rairaiken']['stage'], '未処理（時間上限）')
+        self.assertIn('第2組', stages['rairaiken']['reason'])
+        stages = {m['id']: m for m in q.evaluate_result(GOLD, {**result, 'stop_reason': 'event_limit'}, 'ラーメン', pages)['missing']}
+        self.assertEqual(stages['rairaiken']['stage'], '未処理（件数上限）')
+        trace['batches'][0]['error'] = 'モデル応答が不正'
+        stages = {m['id']: m for m in q.evaluate_result(GOLD, result, 'ラーメン', pages)['missing']}
+        self.assertEqual(stages['chicken']['stage'], '処理失敗')
+        self.assertIn('モデル応答が不正', stages['chicken']['reason'])
+        del trace['batches'][0]['error']
+        trace['batches'][2]['processed'] = True
+        trace['rejected'] = [{'batch': 1, 'year': 1958, 'date': '1958年', 'title': 'チキンラーメン発売', 'stage': '検証', 'reason': '年が違う'}]
+        stages = {m['id']: m for m in q.evaluate_result(GOLD, result, 'ラーメン', pages)['missing']}
+        self.assertEqual(stages['chicken']['stage'], '検証で除外')
+        self.assertIn('年が違う', stages['chicken']['reason'])
+        self.assertEqual(stages['rairaiken']['stage'], '候補に出ず')
+        trace['batches'] = []
+        stages = {m['id']: m for m in q.evaluate_result(GOLD, result, 'ラーメン', pages)['missing']}
+        self.assertEqual(stages['rairaiken']['stage'], 'どの組にも一致しない')
+        self.assertTrue(q.evaluate_result(GOLD, {**result, 'trace': None}, 'ラーメン', pages)['missing'][0]['stage'].startswith('出典内にあり'))
 
     def test_failed_job_without_result_and_unknown_theme(self):
         self.assertIsNone(q.evaluate_result(GOLD, None, 'AI')['theme'])

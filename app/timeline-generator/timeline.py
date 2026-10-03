@@ -731,6 +731,23 @@ def passage_key(passage):
     return (passage['heading'], passage.get('date_heading', ''), passage['text'])
 
 
+def passage_fingerprint(text):
+    """段落を後から突き合わせる短い鍵。空白と中黒の揺れを無視する（quality_eval の正規化と同じ）。"""
+    return re.sub(r'[\s・]', '', unicodedata.normalize('NFKC', str(text or '')).casefold())[:40]
+
+
+def batch_trace(batch, urls):
+    """組に入った段落を [出典番号, 鍵] で残す。URLは trace['sources'] に一度だけ置く。"""
+    entries = []
+    for source in batch:
+        if source['url'] not in urls:
+            urls.append(source['url'])
+        index = urls.index(source['url'])
+        for passage in source.get('passages') or [{'text': source['text'][:3000]}]:
+            entries.append([index, passage_fingerprint(passage['text'])])
+    return entries
+
+
 def material_batches(sources, query):
     """Disjoint, balanced excerpts; keep complete articles solely for quote checks."""
     queues = []
@@ -791,7 +808,7 @@ def merge_events(existing, additions):
     return sorted(merged, key=lambda e: (e['year'], [int(n) for n in re.findall(r'\d+', e['date'])]))[:MAX_EVENTS]
 
 
-def timeline_result(query, events, review_notes, started, stop_reason='sources_exhausted'):
+def timeline_result(query, events, review_notes, started, stop_reason='sources_exhausted', trace=None):
     notice = '出典を取得した時点の資料から作成した年表です。AIによる照合には限界があるため、気になる出来事は出典も確認してください。'
     if len(events) < 10:
         notice = f'資料と文脈を照合できた出来事は{len(events)}件です。主要な出来事を網羅できていない可能性があります。' + ('条件を変えるか、追加の資料が必要です。' if events else '別のキーワードで再検索してください。')
@@ -804,11 +821,11 @@ def timeline_result(query, events, review_notes, started, stop_reason='sources_e
     return {'kind': 'result', 'theme': query.topic, 'query': query.original, 'period': query.period,
             'events': events, 'notice': notice, 'review_notes': review_notes, 'stop_reason': stop_reason,
             'max_events': MAX_EVENTS, 'pipeline_version': PIPELINE_VERSION,
-            'elapsed_seconds': round(time.monotonic() - started, 1), 'searched_at': datetime.now(timezone.utc).isoformat()}
+            'elapsed_seconds': round(time.monotonic() - started, 1), 'searched_at': datetime.now(timezone.utc).isoformat()} | ({'trace': trace} if trace is not None else {})
 
 
 def partial_result(query, checkpoint, started, reason):
-    return timeline_result(query, checkpoint['events'], checkpoint.get('review_notes', []), started, reason)
+    return timeline_result(query, checkpoint['events'], checkpoint.get('review_notes', []), started, reason, checkpoint.get('trace'))
 
 
 def build_timeline(query, emit):
@@ -823,7 +840,12 @@ def build_timeline(query, emit):
     events, review_notes = [], []
     stop_reason = 'sources_exhausted'
     failure, consecutive_failures = None, 0
-    for index, batch in enumerate(material_batches(sources, query), 1):
+    # 品質評価で欠落の段階（未処理・候補に出ず・検証で除外）を分けるための処理経過。
+    batches = list(material_batches(sources, query))
+    trace = {'batches_total': len(batches), 'batches_processed': 0, 'sources': [], 'batches': [], 'rejected': []}
+    for batch in batches:
+        trace['batches'].append({'passages': batch_trace(batch, trace['sources']), 'processed': False})
+    for index, batch in enumerate(batches, 1):
         # Leave finalization time to the parent process even if an upstream stalls.
         if deadline - time.monotonic() < 10:
             stop_reason = 'time_limit'
@@ -834,8 +856,15 @@ def build_timeline(query, emit):
                 if record.get('kind') == 'progress':
                     record = record | {'message': f'第{index}組 · 検証済み {len(events)} / {MAX_EVENTS}件。' + record.get('message', '')}
                 emit(record)
-            additions, notes = build_batch(query, batch, batch_progress, deadline - 2, events)
+            batch_record = trace['batches'][index - 1]
+            batch_record['processed'] = True
+            trace['batches_processed'] = index
+            dropped = []
+            additions, notes = build_batch(query, batch, batch_progress, deadline - 2, events, dropped=dropped)
+            batch_record['proposed'] = len(dropped) + len(additions)
+            trace['rejected'].extend(item | {'batch': index} for item in dropped)
         except TimelineError as exc:
+            batch_record['error'] = compact(str(exc))[:120]
             # One failed batch must not discard the remaining material; stop only when failures repeat.
             failure, consecutive_failures = exc, consecutive_failures + 1
             print(f'timeline batch {index} failed: {exc} cause={exc.__cause__!r}', file=sys.stderr, flush=True)
@@ -850,7 +879,7 @@ def build_timeline(query, emit):
         events = merge_events(events, additions)
         review_notes.extend(note for note in notes if note not in review_notes)
         if events:
-            emit(timeline_result(query, events, review_notes, started) | {'kind': 'checkpoint'})
+            emit(timeline_result(query, events, review_notes, started, trace=trace) | {'kind': 'checkpoint'})
         emit({'kind': 'progress', 'stage': 'verify', 'message': f'第{index}組の照合が終了しました。検証済み {len(events)} / {MAX_EVENTS}件。'})
         if len(events) >= MAX_EVENTS:
             stop_reason = 'event_limit'
@@ -861,10 +890,12 @@ def build_timeline(query, emit):
         raise TimelineError('時間上限に達し、検証済みの出来事を保存できませんでした。再試行してください。')
     if failure is not None and stop_reason == 'sources_exhausted':
         stop_reason = 'processing_error'
-    return timeline_result(query, events, review_notes, started, stop_reason)
+    return timeline_result(query, events, review_notes, started, stop_reason, trace)
 
 
-def build_batch(query, sources, emit, deadline, existing):
+def build_batch(query, sources, emit, deadline, existing, dropped=None):
+    """dropped にリストを渡すと、落とした候補を {year, date, title, stage, reason} で追記する。"""
+    dropped = [] if dropped is None else dropped
     emit({"kind": "progress", "stage": "generate", "message": f"{len(sources)}件の資料から、年代順に整理しています。"})
     material = [{"source_id": i + 1, "title": source["title"], "url": source["url"], "publication_date": source.get("publication_date", ""), "article_lead": source.get("lead", ""), "passages": [{key: p[key] for key in ["heading", "date_heading", "text"]} for p in (source["passages"][-2:] + source["passages"][:-2])]} if "passages" in source else {"source_id": i + 1, "title": source["title"], "text": source["text"][:3000]} for i, source in enumerate(sources)]
     prompt = "既に採用済みの出来事（同じ出来事は再提案しない）:\n" + json.dumps([{"year": e["year"], "title": e["title"]} for e in existing], ensure_ascii=False) + "\n" + f"検索テーマ: {query.topic}\n年代条件: {query.period}\n資料(JSON):\n" + json.dumps(material, ensure_ascii=False)
@@ -872,7 +903,17 @@ def build_batch(query, sources, emit, deadline, existing):
     output = model_json(system, prompt, deadline, EVENT_SCHEMA)
     if not isinstance(output, dict):
         raise TimelineError("年表データを読み取れませんでした。再検索してください。")
-    events = validate_events(output.get("events"), sources, query)[:BATCH_EVENTS]
+    proposals = output.get("events") if isinstance(output.get("events"), list) else []
+    valid = validate_events(proposals, sources, query)
+    events = valid[:BATCH_EVENTS]
+    kept = {(e["year"], e["title"]) for e in events}
+    over = {(e["year"], e["title"]) for e in valid[BATCH_EVENTS:]}
+    for item in proposals[:30]:
+        key = (item.get("year"), compact(item["title"])) if isinstance(item, dict) and isinstance(item.get("title"), str) else None
+        if key and key not in kept:
+            stage, reason = ("件数上限", f"1組{BATCH_EVENTS}件の上限を超えた") if key in over else ("検査", "引用・年代・表記の機械検査に通らない")
+            dropped.append({"year": item.get("year") if type(item.get("year")) is int else None, "date": compact(str(item.get("date") or ""))[:40],
+                             "title": compact(item["title"])[:70], "stage": stage, "reason": reason})
     emit({"kind": "progress", "stage": "verify", "message": "出来事と年代を、引用した本文と照合しています。"})
     review_notes = []
     if events:
@@ -906,6 +947,11 @@ def build_batch(query, sources, emit, deadline, existing):
             if isinstance(reason,str) and re.search(r'伝説|伝承|諸説|矛盾|異説|食い違|史料.*対立',reason):
                 event=events[rejected['id']]
                 review_notes.append({'date':event['date'],'title':event['title'],'reason':compact(reason)[:200],'sources':[{'title':s['title'],'url':s['url']} for s in supplements]})
+        reasons = {r['id']: compact(r.get('reason')) if isinstance(r.get('reason'), str) else '' for r in rejections if isinstance(r, dict) and type(r.get('id')) is int}
+        for i, event in enumerate(events):
+            if i not in supported:
+                reason = conflicts[i]['reason'] if i in conflicts else reasons.get(i) or '照合で支持されない'
+                dropped.append({"year": event["year"], "date": event["date"], "title": event["title"], "stage": "検証", "reason": reason[:200]})
         events = [event for i, event in enumerate(events) if i in supported]
     for event in events:
         event.pop("_context", None)

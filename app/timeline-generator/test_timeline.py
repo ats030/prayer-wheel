@@ -193,13 +193,14 @@ class HTTPTests(unittest.TestCase):
 
     def test_period_archive_is_readable_but_actions_return_conflict(self):
         job, _ = self.store.submit(t.parse_query('インターネット'))
-        result = {'kind': 'result', 'events': [{'quote': 'original evidence'}]}
+        result = {'kind': 'result', 'events': [{'quote': 'original evidence'}], 'trace': {'batches_total': 1}}
         with self.store.connect() as db:
             db.execute("UPDATE jobs SET cache_key=?, query=?, state='complete', result=? WHERE id=?", (json.dumps(['インターネット', 1980, None], ensure_ascii=False), 'インターネット 1980年以降', json.dumps(result), job['id']))
         with urlopen(self.url + f"/api/jobs/{job['id']}") as response:
             archived = json.load(response)
+        self.assertNotIn('trace', archived['result'])
         self.assertTrue(archived['legacy_period'])
-        self.assertEqual(archived['result'], result)
+        self.assertEqual(archived['result'], {k: v for k, v in result.items() if k != 'trace'})
         for action in ['retry', 'regenerate']:
             with self.assertRaises(HTTPError) as raised:
                 urlopen(Request(self.url + f"/api/jobs/{job['id']}/{action}", data=b'{}', headers={'Content-Type': 'application/json'}))
@@ -212,7 +213,9 @@ class HTTPTests(unittest.TestCase):
         self.assertFalse(new['legacy_period'])
         quality = archived.pop('quality')
         self.assertEqual(quality['theme'], 'インターネット')
-        self.assertEqual(self.store.get(job['id']), archived)
+        stored = self.store.get(job['id'])
+        self.assertEqual(stored['result'].pop('trace'), {'batches_total': 1})
+        self.assertEqual(stored, archived)
 
     def test_delete_api_protection_origin_and_missing(self):
         job, _ = self.store.submit(t.parse_query('削除API'))

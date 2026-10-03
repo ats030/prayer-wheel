@@ -162,6 +162,9 @@ class Handler(BaseHTTPRequestHandler):
             except (OSError, ValueError, KeyError):
                 # A broken gold file must not hide the timeline itself.
                 job["quality"] = None
+            if job.get("result"):
+                # The processing trace is for offline evaluation and can be tens of KB.
+                job["result"].pop("trace", None)
             self.reply(200, job)
         elif re.fullmatch(r"/timelines/[1-9][0-9]{0,17}", path):
             if not self.server.jobs.get(int(path.rsplit("/", 1)[1])):

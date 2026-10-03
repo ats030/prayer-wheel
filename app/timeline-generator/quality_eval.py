@@ -131,19 +131,50 @@ def source_stats(events, primary_domains):
 
 
 def locate_in_sources(item, pages):
-    """欠落項目の語と年が、引用元ページの同じ段落にあるか。pages は出典URL→正規化した段落の列。"""
+    """欠落項目の語と年が同じ段落にある箇所を [(URL, 段落の鍵)] で返す。pages は出典URL→page_passages の結果。"""
     years = [str(y) for y in range(item['years'][0], item['years'][1] + 1)]
+    hits = []
     for url, passages in pages.items():
-        for text in passages or []:
+        for text, key in passages or []:
             if any(normalize(k) in text for k in item['keywords']) and any(y in text for y in years):
-                return url
-    return None
+                hits.append((url, key))
+    return hits
 
 
 def page_passages(page):
-    passages = [normalize(' '.join(str(p.get(k) or '') for k in ('date_heading', 'heading', 'text')))
+    """(照合用の正規化テキスト, 処理経過と突き合わせる鍵) の列。"""
+    passages = [(normalize(' '.join(str(p.get(k) or '') for k in ('date_heading', 'heading', 'text'))), timeline.passage_fingerprint(p.get('text')))
                 for p in page.get('passages') or []]
-    return passages or [normalize(page.get('text'))]
+    head = (page.get('text') or '')[:3000]  # 段落なしの資料はモデルに先頭3000字だけ渡している
+    return passages or [(normalize(head), timeline.passage_fingerprint(head))]
+
+
+STOP_LABELS = {'time_limit': '時間上限', 'event_limit': '件数上限', 'processing_error': '処理失敗で停止'}
+
+
+def missing_stage(item, hits, trace, stop_reason=None):
+    """出典内にある欠落項目を、処理経過から 検証で除外・候補に出ず・未処理 に分ける。旧結果は従来の大分類。"""
+    rejected = next((r for r in (trace or {}).get('rejected') or [] if matches(r, item)), None)
+    if rejected:
+        return {'stage': '検証で除外', 'reason': f"第{rejected['batch']}組・{rejected['stage']}：{rejected['reason']}", 'candidate': rejected['title']}
+    if not trace:
+        return {'stage': '出典内にあり（候補生成・検査で欠落）'}
+    found = {}
+    for number, batch in enumerate(trace.get('batches') or [], 1):
+        for source, key in batch.get('passages') or []:
+            url = trace['sources'][source]
+            if (url, key) in hits:
+                state = 'failed' if batch.get('error') else 'processed' if batch.get('processed') else 'pending'
+                found.setdefault(state, (number, batch))
+    if 'processed' in found:
+        return {'stage': '候補に出ず', 'reason': f"第{found['processed'][0]}組で処理済み"}
+    if 'failed' in found:
+        number, batch = found['failed']
+        return {'stage': '処理失敗', 'reason': f"第{number}組：{batch['error']}"}
+    if 'pending' in found:
+        label = STOP_LABELS.get(stop_reason, '停止')
+        return {'stage': f'未処理（{label}）', 'reason': f"第{found['pending'][0]}組 / 処理{trace.get('batches_processed')}組・全{trace.get('batches_total')}組"}
+    return {'stage': 'どの組にも一致しない', 'reason': '本文にはあるが、どの組の段落とも一致しない（資料選択外または出典更新）'}
 
 
 def fetch_pages(urls, timeout=60):
@@ -168,6 +199,8 @@ def evaluate_result(gold, result, query, pages=None):
         'elapsed_seconds': (result or {}).get('elapsed_seconds'),
         'pipeline_version': (result or {}).get('pipeline_version'),
         'review_notes': len((result or {}).get('review_notes') or []),
+        'batches_processed': ((result or {}).get('trace') or {}).get('batches_processed'),
+        'batches_total': ((result or {}).get('trace') or {}).get('batches_total'),
         'duplicates': duplicates(events),
     }
     if theme_name is None:
@@ -184,10 +217,11 @@ def evaluate_result(gold, result, query, pages=None):
         else:
             entry = {'id': item['id'], 'label': item['label']}
             if pages is not None:
-                url = locate_in_sources(item, pages)
-                entry['stage'] = '出典内にあり（候補生成・検査で欠落）' if url else '出典になし（検索・資料選択で欠落）'
-                if url:
-                    entry['source'] = url
+                hits = locate_in_sources(item, pages)
+                if hits:
+                    entry.update(missing_stage(item, hits, result.get('trace'), result.get('stop_reason')), source=hits[0][0])
+                else:
+                    entry['stage'] = '出典になし（検索・資料選択で欠落）'
             missing.append(entry)
     errors = [{'id': item['id'], 'label': item['label'], 'event': e.get('title'), 'year': e.get('year')}
               for item in theme['known_errors'] for e in events if matches(e, item)]
@@ -242,6 +276,8 @@ def axes(report, theme=None):
             'sources_exhausted': '資料を使い切って終了'}.get(report.get('stop_reason'), report.get('stop_reason') or '')
     if report.get('stop_reason') == 'time_limit' and elapsed is not None and elapsed < timeline.TIME_LIMIT * 0.9:
         stop += '（当時の短い上限）'  # 上限が20分だった頃の結果。棒は現在の上限に対する割合で示す。
+    if report.get('batches_total'):
+        stop += f"・資料{report['batches_processed']} / {report['batches_total']}組を処理"
     rows.append(axis('elapsed', '処理時間', None if elapsed is None else round(min(elapsed, timeline.TIME_LIMIT) / timeline.TIME_LIMIT, 2),
                      '-' if elapsed is None else f'{elapsed / 60:.0f}分 / 上限{timeline.TIME_LIMIT // 60}分', 'low', note=stop))
     return rows
@@ -277,7 +313,9 @@ def evaluate(gold, dbs, fetch_sources=False):
         for job_id, query, state, result in load_jobs(path):
             pages = None
             if fetch_sources and result:
-                urls = sorted({(e.get('source') or {}).get('url') for e in result.get('events') or []} - {None, ''})
+                # 処理経過があれば読んだ全出典、なければ引用された出典だけを照合する。
+                urls = sorted((set((result.get('trace') or {}).get('sources') or [])
+                               | {(e.get('source') or {}).get('url') for e in result.get('events') or []}) - {None, ''})
                 pages = fetch_pages(urls)
             jobs.append({'id': job_id, 'query': query, 'state': state, **evaluate_result(gold, result, query, pages)})
         snapshots.append({'label': label, 'db': str(path), 'jobs': jobs})
@@ -299,11 +337,12 @@ def render(report):
                          f"最多={src.get('top_domain')}:{'-' if share is None else f'{share:.0%}'} "
                          f"時間={job['elapsed_seconds']}s")
             for item in job.get('missing', []):
-                lines.append(f"    欠落 {item['label']}" + (f" … {item['stage']}" if 'stage' in item else ''))
+                lines.append(f"    欠落 {item['label']}" + (f" … {item['stage']}" if 'stage' in item else '')
+                             + (f"（{item['reason']}）" if 'reason' in item else ''))
             for item in job.get('known_errors', []):
                 lines.append(f"    誤り {item['label']} ← {item['year']} {item['event']}")
     if not report['fetched_sources']:
-        lines.append('欠落段階は --fetch-sources で出典本文を照合したときだけ分類する。候補生成と検査の区別は処理経過の記録がないため付けられない。')
+        lines.append('欠落段階は --fetch-sources で出典本文を照合したときだけ分類する。処理経過のない旧結果は、候補生成と検査を区別できない。')
     return '\n'.join(lines)
 
 

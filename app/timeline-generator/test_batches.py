@@ -202,7 +202,7 @@ class BatchTests(unittest.TestCase):
 
     def test_deadline_between_batches_preserves_verified_work(self):
         clock = [0]
-        def finish_near_deadline(query, sources, emit, deadline, existing):
+        def finish_near_deadline(query, sources, emit, deadline, existing, **_):
             clock[0] = t.TIME_LIMIT - 9
             return [saved_event(1900)], []
         with patch.object(t.time, 'monotonic', side_effect=lambda: clock[0]), patch.object(t, 'build_batch', side_effect=finish_near_deadline):
@@ -210,6 +210,44 @@ class BatchTests(unittest.TestCase):
         self.assertEqual(result['stop_reason'], 'time_limit')
         self.assertEqual(len(result['events']), 1)
         self.assertIn('時間上限', result['notice'])
+
+    def test_trace_records_batches_and_dropped_candidates(self):
+        def model(system, prompt, deadline, schema):
+            output = grounded_model(system, prompt, deadline, schema)
+            if schema is t.VERIFY_SCHEMA:
+                return {'supported': output['supported'][1:], 'rejected': [{'id': 0, 'reason': '年と出来事の対応が違う'}]}
+            return {'events': output['events'] + [{'year': 1801, 'date': '1801年', 'title': '架空の出来事', 'description': '本文にない。', 'quote': '本文に存在しない引用文です。', 'source_id': 1}]}
+        result = self.run_generation(history_source(10), model=model)
+        trace = result['trace']
+        self.assertEqual((trace['batches_total'], trace['batches_processed']), (2, 2))
+        self.assertEqual(trace['sources'], ['https://example.org/history'])
+        self.assertEqual(sum(len(b['passages']) for b in trace['batches']), 10)
+        self.assertTrue(all(b['processed'] for b in trace['batches']))
+        stages = {(r['stage'], r['batch']) for r in trace['rejected']}
+        self.assertEqual(stages, {('検査', 1), ('検査', 2), ('検証', 1), ('検証', 2)})
+        self.assertIn('年と出来事の対応が違う', {r['reason'] for r in trace['rejected']})
+        self.assertEqual(len(result['events']), 8)
+
+    def test_trace_records_over_cap_proposals_separately(self):
+        original = t.build_batch
+        def capped(*args, **kwargs):
+            with patch.object(t, 'BATCH_EVENTS', 2):
+                return original(*args, **kwargs)
+        with patch.object(t, 'build_batch', side_effect=capped):
+            trace = self.run_generation(history_source(10))['trace']
+        self.assertEqual({r['stage'] for r in trace['rejected']}, {'件数上限'})
+
+    def test_trace_marks_unprocessed_batches_after_deadline(self):
+        clock = [0]
+        def finish_near_deadline(query, sources, emit, deadline, existing, dropped=None):
+            clock[0] = t.TIME_LIMIT - 9
+            dropped.append({'year': 1800, 'date': '1800年', 'title': 'x', 'stage': '検証', 'reason': 'r'})
+            return [saved_event(1900)], []
+        with patch.object(t.time, 'monotonic', side_effect=lambda: clock[0]), patch.object(t, 'build_batch', side_effect=finish_near_deadline):
+            trace = self.run_generation(history_source(35))['trace']
+        self.assertEqual((trace['batches_processed'], trace['batches_total']), (1, 5))
+        self.assertEqual([b['processed'] for b in trace['batches']], [True] + [False] * 4)
+        self.assertEqual(trace['rejected'][0]['batch'], 1)
 
     def test_deadline_before_any_verified_work_is_failure(self):
         clock = [0]
