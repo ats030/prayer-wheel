@@ -1,11 +1,11 @@
 # Ollama backlog draft PR experiment
 
 This is a manually started experiment. It extends `ollama-backlog-draft.py`.
-The systemd user units exist but the timer is disabled until the three-manual
-pilot gate in the Timer gate section passes; each tick handles one eligible
-issue. The first three real PRs must be reviewed before the timer is enabled.
-`backlog-viewer` remains read-only; Beads is the source of truth for issue
-status and acceptance criteria.
+The systemd user units exist; after the first pilot passed (`ats030-hbu8`,
+app-portal PR #1), the user enabled the hourly timer on 2026-10-03, choosing
+to start the candidate scan now and let later passes be reviewed. Each tick
+handles one eligible issue. `backlog-viewer` remains read-only; Beads is the
+source of truth for issue status and acceptance criteria.
 
 ## Opt in one issue
 
@@ -88,20 +88,22 @@ change the exit code). Designed no-ops (`no_eligible_issue`,
 `already_attempted`) and transient `busy` do not send a notification, so an
 hourly tick with nothing to do stays quiet.
 
-## Timer gate
+## Timer state
 
-The manual pilots are tracked in `ats030-w1yb`. A pilot passes when its draft
-PR merges with no or only minor edits. As of 2026-10-01 one pilot has passed
-(`ats030-hbu8`, app-portal PR #1). The user units
-`ollama-backlog-pr.service`, `ollama-backlog-pr.service.d/failure-policy.conf`,
-and `ollama-backlog-pr.timer` (hourly, `OnCalendar=hourly`) are installed. The
-timer starts one runner per tick; a tick with no eligible issue exits with
-`no_eligible_issue` and `already_attempted` prevents the same issue from being
-published twice. Enable it, and review the first three PRs, only after three
-pilots have passed:
+The manual pilots are tracked in `ats030-w1yb` (deferred) and `ats030-nvzr`
+(open review follow-up). A pilot passes when its draft PR merges with no or
+only minor edits. One pilot has passed (`ats030-hbu8`, app-portal PR #1,
+squash-merge `5fd9373`). The user chose to start the candidate scan after that
+first pass rather than waiting for three, so on 2026-10-03 the timer was
+enabled with:
 
 ```bash
 systemctl --user enable --now ollama-backlog-pr.timer
 ```
 
-Stop the experiment (disable the timer) if two of the first three fail.
+The units `ollama-backlog-pr.service`,
+`ollama-backlog-pr.service.d/failure-policy.conf`, and `ollama-backlog-pr.timer`
+(hourly, `OnCalendar=hourly`) run one runner per tick; a tick with no eligible
+issue exits with `no_eligible_issue` and `already_attempted` prevents the same
+issue from being published twice. Disable the timer if a recent draft PR fails
+review or if two consecutive attempts fail.
