@@ -35,7 +35,9 @@ modern-minimal。地図と祭り情報そのものを主役にし、装飾は控
 - `--cat-jr: #9a7b2d` 神事・祭礼
 - `--cat-hn: #b85c2a` 灯籠・火祭り
 - `--cat-si: #6b7f3f` 博覧会・市
-- `--cat-js: #7a6a52` 行事
+- `--cat-ar: #7d4a8c` 音楽・映画・芸術
+- `--cat-ks: #b0487a` 花・季節・自然
+- `--cat-sm: #7a6a52` 市民・観光まつり
 - `--cat-kt: #68737d` その他 / 未分類
 
 ## Typography

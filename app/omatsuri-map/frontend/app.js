@@ -280,7 +280,9 @@ const CATEGORY_META=[
   {code:'jr',label:'神事・祭礼'},
   {code:'hn',label:'灯籠・火祭り'},
   {code:'si',label:'博覧会・市'},
-  {code:'js',label:'行事'},
+  {code:'ar',label:'音楽・映画・芸術'},
+  {code:'ks',label:'花・季節・自然'},
+  {code:'sm',label:'市民・観光まつり'},
   {code:'kt',label:'その他・未分類'},
 ];
 function categoryCode(f){
