@@ -22,7 +22,8 @@ for row in rows:
     assert row.get("source_url"), site_id
     assert row.get("categories"), site_id
     if not row.get("qid"):
-        assert row.get("id", "").startswith("tokyo:"), site_id
+        assert row.get("id", "").startswith(("tokyo:", "bunka:")), site_id
         assert row.get("source_name") and row.get("source_license"), site_id
-        assert row.get("visit_url") and row.get("access_note"), site_id
+        if row["id"].startswith("tokyo:"):
+            assert row.get("visit_url") and row.get("access_note"), site_id
 print(f"validated {len(rows)} records")

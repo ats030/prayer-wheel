@@ -11,6 +11,8 @@ data/status_cache.json
 # Wikidata SPARQL 結果キャッシュ(再生成可能)
 data/wikidata_cache/
 data/wikipedia_cache/
+# 文化庁 国指定文化財等データベースのCSV(再取得可能)
+data/bunka_cache/
 
 # Python
 __pycache__/

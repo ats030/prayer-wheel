@@ -46,7 +46,7 @@ class PublicSiteMergeTest(unittest.TestCase):
                 merged_ids.add(item["id"])
             else:
                 kept_ids.add(item["id"])
-        once_ids = {row["id"] for row in once if row.get("id")}
+        once_ids = {row["id"] for row in once if row.get("id", "").startswith("tokyo:")}
         self.assertEqual(once_ids, kept_ids)
         for row in once:
             source = review_by_id.get(row.get("id"))

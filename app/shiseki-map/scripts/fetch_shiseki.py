@@ -454,7 +454,15 @@ def main():
             "heritage_id": "", "source_url": "https://www.wikidata.org/wiki/" + qid,
         })
     fill_infobox_eras(rows, articles)
+    from bunka_shiseki import P4275_QUERY, load_csv, merge_bunka, p4275_map
     from merge_public_sites import merge_rows
+
+    def locate(lat, lon):
+        return containing_prefecture(lon, lat, features) or nearest_prefecture(lon, lat, features) or ""
+
+    rows, bunka_stats = merge_bunka(rows, load_csv(), p4275_map(query_cached("p4275_shiseki", P4275_QUERY)),
+                                    category, locate)
+    print("bunka match breakdown:", bunka_stats)
 
     rows = merge_rows(rows)
     OUTPUT.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
