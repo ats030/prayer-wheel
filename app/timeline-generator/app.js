@@ -90,7 +90,7 @@ function render(data, job) {
   $("source-summary").textContent = sourceSummary(data.events);
   $("generation-notice").textContent = data.notice;
   const alerts = [];
-  if (data.stop_reason === "time_limit") alerts.push(`時間上限（20分）により終了。検証済み${data.events.length}件を保存しました。`);
+  if (data.stop_reason === "time_limit") alerts.push(`時間上限により終了。検証済み${data.events.length}件を保存しました。`);
   if (data.stop_reason === "processing_error") alerts.push(`途中で処理を終了。検証済み${data.events.length}件を保存しました。${job.legacy_period ? "年代条件を外して新しく登録できます。" : "再生成で調べ直せます。"}`);
   if (data.review_notes?.length) alerts.push(`採用を見送った候補${data.review_notes.length}件。詳細は「生成情報」で確認できます。`);
   $("result-notice").textContent = alerts.join(" ");
