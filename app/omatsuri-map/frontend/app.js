@@ -301,22 +301,79 @@ function icon(selected,festival){
 }
 // Thousands of DOM markers make panning slow, so unselected points are drawn on
 // the shared canvas and only the selected point keeps the DOM icon.
-const markerLayer=L.layerGroup().addTo(map);
+// The centre dot is painted with the circle so each point stays one cluster child.
+const DottedCircleMarker=L.CircleMarker.extend({
+  _updatePath(){
+    L.CircleMarker.prototype._updatePath.call(this);
+    const renderer=this._renderer;if(!renderer._drawing||this._empty())return;
+    const ctx=renderer._ctx,p=this._point;
+    ctx.globalAlpha=1;ctx.fillStyle=this.options.color;ctx.beginPath();ctx.arc(p.x,p.y,2.5,0,Math.PI*2);ctx.fill();
+  },
+});
+// Nearby markers cluster by zoom; clicks are handled below so tall stacks open a list.
+const markerLayer=L.markerClusterGroup({
+  maxClusterRadius:40,
+  showCoverageOnHover:false,
+  spiderfyDistanceMultiplier:1.3,
+  spiderfyOnMaxZoom:false,
+  zoomToBoundsOnClick:false,
+  iconCreateFunction:cluster=>{
+    const count=cluster.getChildCount();
+    const size=count<10?30:count<100?36:count<1000?42:48;
+    return L.divIcon({className:'festival-cluster-anchor',html:`<span class="festival-cluster" aria-label="${count}件の祭り">${count}</span>`,iconSize:[size,size]});
+  },
+}).addTo(map);
+// Prefecture centroids stack up to dozens of festivals whose spiral is unreadable,
+// so a tall stack of identical coordinates lists its festivals by category instead.
+const STACK_LIST_MIN=9;
+markerLayer.on('clusterclick clusterkeypress',e=>{
+  if(e.type==='clusterkeypress'&&e.originalEvent?.keyCode!==13)return;
+  const cluster=e.layer,children=cluster.getAllChildMarkers(),point=children[0].getLatLng();
+  const stacked=children.every(marker=>marker.getLatLng().equals(point));
+  // Zooming cannot split a stack, nor anything at maximum zoom.
+  const listed=(stacked||map.getZoom()>=map.getMaxZoom())&&children.length>=STACK_LIST_MIN;
+  if(listed)openStackList(stacked?point:cluster.getLatLng(),children,stacked);
+  else if(!stacked&&map.getZoom()<map.getMaxZoom())cluster.zoomToBounds();
+  else cluster.spiderfy();
+  // Keyboard focus would fall to the page when the focused cluster icon is replaced.
+  if(e.type==='clusterkeypress')(listed?document.querySelector('.stack-list button'):map.getContainer()).focus();
+});
+function openStackList(point,children,stacked){
+  const entries=children.map(marker=>[marker.options.festivalKey,markers.get(marker.options.festivalKey).festival]);
+  const label=f=>f.label_ja||f.label_en||'名称未登録';
+  const groups=new Map();
+  for(const entry of entries){
+    const category=CATEGORY_META.find(meta=>meta.code===categoryCode(entry[1])).label;
+    if(!groups.has(category))groups.set(category,[]);
+    groups.get(category).push(entry);
+  }
+  const order=category=>CATEGORY_META.findIndex(meta=>meta.label===category);
+  const sorted=[...groups].sort(([a],[b])=>order(a)-order(b));
+  const prefectures=new Set(entries.map(([,f])=>f.prefecture||'地域未登録'));
+  const prefix=prefectures.size===1?`${[...prefectures][0]} `:'';
+  const heading=`${prefix}${stacked?'同じ位置':'この付近'}の ${entries.length} 件`;
+  const body=sorted.map(([category,items])=>`<section><h3>${esc(category)}（${items.length}件）</h3><ul>${items.sort(([,a],[,b])=>label(a).localeCompare(label(b),'ja')).map(([key,f])=>`<li><button type="button" data-key="${esc(key)}">${esc(label(f))}</button></li>`).join('')}</ul></section>`).join('');
+  const content=document.createElement('div');
+  content.className='stack-list';
+  content.innerHTML=`<h2>${esc(heading)}</h2>${body}`;
+  content.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>selectFestival(button.dataset.key,'marker')));
+  L.popup({maxHeight:320,className:'stack-popup'}).setLatLng(point).setContent(content).openOn(map);
+}
 function markerStyle(f){
   const css=getComputedStyle(document.documentElement);
   const fill=css.getPropertyValue(`--cat-${categoryCode(f)}`).trim()||css.getPropertyValue('--color-ink').trim();
   return {radius:9,weight:2,color:css.getPropertyValue('--color-paper').trim(),fillColor:fill,fillOpacity:1};
 }
 function renderMarkers(){
-  markerLayer.clearLayers();markers=new Map();
+  map.closePopup();markerLayer.clearLayers();markers=new Map();
   visible.forEach((f,index)=>{
     const point=mapCoordinates(f);if(!point)return;
-    const key=festivalKey(f,index),latlng=[point.latitude,point.longitude],style=markerStyle(f);
-    const marker=L.circleMarker(latlng,style).addTo(markerLayer);
-    L.circleMarker(latlng,{radius:2.5,stroke:false,fillColor:style.color,fillOpacity:1,interactive:false}).addTo(markerLayer);
+    const key=festivalKey(f,index),latlng=[point.latitude,point.longitude];
+    const marker=new DottedCircleMarker(latlng,{...markerStyle(f),festivalKey:key});
     marker.bindTooltip(esc(f.label_ja||f.label_en||'名称未登録'),{direction:'top',offset:[0,-10]});
     marker.on('click',()=>selectFestival(key,'marker'));markers.set(key,{marker,festival:f});
   });
+  markerLayer.addLayers([...markers.values()].map(entry=>entry.marker));
   if(selectedKey&&!markers.has(selectedKey))closeDetail(false);else showSelectedMarker(selectedKey);
 }
 function showSelectedMarker(key){
