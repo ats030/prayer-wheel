@@ -56,13 +56,12 @@ summary { cursor: pointer; color: var(--color-accent); min-height: 44px; padding
 .steps li { color: var(--color-muted); border-top: 2px solid var(--color-rule); padding-top: 4px; }
 .steps li.current { color: var(--color-accent); border-color: var(--color-accent); font-weight: 700; }
 .steps li.done::before { content: '✓ '; }
-.result-tools { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: 0 12px; min-height: 44px; border-bottom: 1px solid var(--color-rule); }
+.result-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 0 12px; min-height: 44px; border-bottom: 1px solid var(--color-rule); }
 #result-meta { font-size: var(--text-sm); font-variant-numeric: tabular-nums; color: var(--color-muted); margin: 0; }
-#result-meta { grid-column: 1; }
-.result-tools > .job-state { grid-column: 2; }
-#result-meta[hidden] + .job-state { grid-column: 1 / 3; }
-.metadata { grid-column: 3; min-width: 0; justify-self: end; }
-.metadata[open] { grid-column: 1 / -1; width: 100%; margin-bottom: 8px; }
+.result-section + .quality-section { margin-top: 16px; }
+.quality-link { font-size: var(--text-sm); }
+.metadata { min-width: 0; margin-left: auto; }
+.metadata[open] { flex-basis: 100%; margin-bottom: 8px; }
 .metadata summary { margin-left: auto; }
 .notice { font-size: var(--text-sm); border-left: 3px solid var(--color-accent); padding: 8px 12px; margin: 4px 0 8px; background: var(--color-surface); overflow-wrap: anywhere; }
 .timeline { list-style: none; padding: 0; margin: 0; }
@@ -141,4 +140,12 @@ footer { border-top: 1px solid var(--color-rule); display: flex; justify-content
   .list-columns, .job-row { grid-template-columns: minmax(0, 1fr) minmax(5rem, max-content) minmax(6.25rem, max-content) minmax(3rem, max-content); }
   .job-ops { grid-column: 4; grid-row: 1; }
   .delete-column { display: block; }
+}
+@media (min-width: 768px) {
+  .axis { grid-template-columns: minmax(8rem, 12rem) minmax(6rem, 1fr) minmax(0, 18rem) 4.5rem; padding-block: 4px; }
+  .axis-label { grid-column: 1; grid-row: 1; }
+  .axis-track { grid-column: 2; grid-row: 1; }
+  .axis-value { grid-column: 3; grid-row: 1; }
+  .axis-chip { grid-column: 4; grid-row: 1; justify-self: start; }
+  .axis-note { grid-column: 1 / -1; }
 }

@@ -78,7 +78,7 @@ function axisRow(axis, title = axis.label, withNote = true) {
     mark.style.left = `${Math.round(axis.target * 100)}%`;
     track.append(mark);
   }
-  row.append(track);
+  if (axis.value !== null) row.append(track);
   const percent = axis.value === null ? "" : `${Math.round(axis.value * 100)}% · `;
   const target = axis.target === null ? "" : ` · 目標${Math.round(axis.target * 100)}%`;
   row.append(node("span", "axis-value", `${percent}${axis.display}${target}`));
@@ -91,7 +91,10 @@ function renderQuality(quality) {
   const box = $("quality");
   box.replaceChildren();
   $("quality-section").hidden = !quality;
+  $("quality-link").hidden = !quality;
   if (!quality) return;
+  const off = quality.axes.filter((axis) => axis.passed === false).length;
+  $("quality-link").textContent = off ? `評価 目標外${off}` : "評価 すべて目標内";
   $("quality-basis").textContent = `再現率と既知の誤りは人手で選んだ主要項目（検証日 ${quality.gold_verified_at}）との照合です。出典の割合は機械的な集計で、内容の正しさの判定ではありません。総合点は出していません。`;
   const list = node("ul", "axes");
   for (const axis of quality.axes) list.append(axisRow(axis));

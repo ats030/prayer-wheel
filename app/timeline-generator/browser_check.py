@@ -431,6 +431,9 @@ with sync_playwright() as playwright:
     assert page.locator('#quality .axis').count() == 8
     assert page.locator('#quality .axis-target').count() == 1 and '目標100%' in page.locator('#quality .axis').first.inner_text()
     assert page.locator('#quality .axis-chip').first.inner_text() == '目標外'
+    assert page.evaluate("document.querySelector('#result').compareDocumentPosition(document.querySelector('#quality-section')) & Node.DOCUMENT_POSITION_FOLLOWING")
+    assert page.locator('#quality-link').inner_text().startswith('評価 目標外') and page.locator('#quality-link').get_attribute('href') == '#quality-section'
+    assert page.locator('#quality .axis').nth(1).locator('.axis-track').count() == 0
     job = job | {'query': 'テストテーマ 日本', 'result': RESULT}
     page.reload()
     page.wait_for_function("document.querySelector('#quality .axis-chip')?.textContent === '対象外'")

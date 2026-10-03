@@ -21,6 +21,7 @@
       <div class="result-tools">
         <p id="result-meta" hidden></p>
         <span id="job-status" class="job-state" role="status"></span>
+        <a id="quality-link" class="quiet-link quality-link" href="#quality-section" hidden></a>
         <details id="generation-info" class="metadata" hidden>
           <summary>生成情報</summary>
           <div class="info-body"><p id="saved-at"></p><p id="generation-meta"></p><p id="source-summary"></p><p id="generation-notice"></p><div id="review-notes"></div></div>
@@ -37,15 +38,15 @@
       <p id="legacy-period" class="notice" hidden></p>
       <p id="result-notice" class="notice" hidden></p>
     </section>
-    <section id="quality-section" class="quality-section" aria-labelledby="quality-title" hidden>
-      <h2 id="quality-title" class="quality-heading">評価</h2>
-      <p id="quality-basis" class="help"></p>
-      <div id="quality"></div>
-    </section>
     <section id="result" class="result-section" aria-labelledby="page-heading" hidden>
       <p id="result-empty" hidden>確認できる出来事がありません。条件を変えて調べ直せます。</p>
       <div class="timeline-columns" aria-hidden="true"><span>年代</span><span>出来事</span><span>説明</span><span>出典</span></div>
       <ol id="timeline" class="timeline"></ol>
+    </section>
+    <section id="quality-section" class="quality-section" aria-labelledby="quality-title" hidden>
+      <h2 id="quality-title" class="quality-heading">評価</h2>
+      <p id="quality-basis" class="help"></p>
+      <div id="quality"></div>
     </section>
   </main>
 </body>
