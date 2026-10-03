@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path("/home/ats030")
 RESULTS = ROOT / "data/ollama-backlog"
 CONFIG = ROOT / "scripts/ollama-backlog-pr.json"
+ENV_PATH = ROOT / ".env"
 RUNNER = ROOT / "scripts/ollama-backlog-draft.py"
 LABEL = "ollama-draft-pr"
 ISSUE_ID = re.compile(r"^ats030-[a-z0-9]+$")
@@ -47,6 +48,40 @@ def checked(args: list[str], *, cwd: Path = ROOT, timeout: int = 30) -> str:
     if result.returncode:
         raise RuntimeError(f"{args[0]} failed ({result.returncode}): {result.stderr.strip()[:300]}")
     return result.stdout.strip()
+
+
+def discord_webhook() -> str:
+    if not ENV_PATH.exists():
+        return ""
+    for line in ENV_PATH.read_text(encoding="utf-8").splitlines():
+        if line.startswith("DISCORD_WEBHOOK_URL="):
+            return line.split("=", 1)[1].strip().strip('"').strip("'")
+    return ""
+
+
+def notify(title: str, body: str) -> None:
+    """Best effort: a notification failure must never change the run's outcome."""
+    try:
+        webhook = discord_webhook()
+    except (OSError, ValueError) as exc:
+        print(f"Discord への通知を省略: .env を読めない ({type(exc).__name__})", file=sys.stderr)
+        return
+    if not webhook:
+        print("Discord への通知を省略: DISCORD_WEBHOOK_URL が未設定", file=sys.stderr)
+        return
+    payload = json.dumps({"content": (f"**{title}**\n```\n{body[:1500]}\n```")[:1900]},
+                         ensure_ascii=False).encode()
+    try:
+        request = urllib.request.Request(webhook, data=payload,
+                                         headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(request, timeout=20) as response:
+            if not 200 <= response.status < 300:
+                raise RuntimeError(f"webhook returned {response.status}")
+    except (RuntimeError, OSError) as exc:
+        print(f"Discord への通知に失敗 (http): {exc}", file=sys.stderr)
+    except ValueError as exc:
+        # The message can echo the webhook URL, which is a secret.
+        print(f"Discord への通知に失敗: DISCORD_WEBHOOK_URL の形式が不正 ({type(exc).__name__})", file=sys.stderr)
 
 
 def load_config(path: Path) -> dict:
@@ -294,8 +329,12 @@ def main() -> int:
             raise RuntimeError("draft runner returned an unexpected run directory")
         report = json.loads((run_dir / "report.json").read_text(encoding="utf-8"))
         if result.returncode or report.get("status") != "ready_for_review":
-            print(json.dumps({"status": report.get("status", "failed"),
-                              "issue_id": issue["id"], "run_dir": str(run_dir)}, ensure_ascii=False))
+            status = report.get("status", "failed")
+            print(json.dumps({"status": status, "issue_id": issue["id"],
+                              "run_dir": str(run_dir)}, ensure_ascii=False))
+            if not report.get("retryable_busy"):
+                notify("Ollama backlog failed (generation)",
+                       f"issue={issue['id']} status={status} run={run_dir}")
             return 75 if report.get("retryable_busy") else 1
         worktree = validate_draft(report, entry, repo, issue["id"])
         if report["source_head"] != source_head:
@@ -307,9 +346,11 @@ def main() -> int:
         claim_issue(issue["id"])
         try:
             url = publish(issue, entry, repo, worktree, report, github, branch)
-        except Exception:
+        except Exception as exc:
             if not remote_head(repo, branch):
                 release_issue(issue["id"])
+            notify("Ollama backlog failed (publish)", f"issue={issue['id']} error={exc}")
+            exc.notified = True
             raise
         (run_dir / "draft-pr-url.txt").write_text(url + "\n", encoding="utf-8")
         try:
@@ -319,16 +360,24 @@ def main() -> int:
             print(json.dumps({"status": "draft_pr_created_beads_comment_failed",
                               "issue_id": issue["id"], "url": url, "run_dir": str(run_dir),
                               "warning": str(exc)}, ensure_ascii=False))
+            notify("Ollama backlog warning", f"issue={issue['id']} PR created but Beads comment failed: {exc}")
             return 1
         print(json.dumps({"status": "draft_pr_created", "issue_id": issue["id"],
                           "url": url, "run_dir": str(run_dir)}, ensure_ascii=False))
+        notify("Ollama draft PR created", f"issue={issue['id']}\n{url}")
         return 0
 
 
-if __name__ == "__main__":
+def run() -> int:
     try:
-        sys.exit(main())
+        return main()
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired,
             urllib.error.URLError, KeyError, json.JSONDecodeError) as exc:
         print(json.dumps({"status": "failed", "error": str(exc)}, ensure_ascii=False), file=sys.stderr)
-        sys.exit(2)
+        if not getattr(exc, "notified", False):
+            notify("Ollama backlog failed", f"error: {exc}")
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(run())

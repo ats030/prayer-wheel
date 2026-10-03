@@ -4,6 +4,7 @@ import importlib.util
 import io
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -97,6 +98,76 @@ class SelectionTests(unittest.TestCase):
     def test_existing_pr_blocks_second_attempt(self):
         with patch.object(pr, "checked", return_value='[{"number":7,"url":"https://github.com/x/y/pull/7"}]'):
             self.assertFalse(pr.no_existing_pr(Path("/tmp/repo"), "x/y", "ollama/ats030-a"))
+
+    def test_discord_webhook_parses_env(self):
+        with tempfile.TemporaryDirectory() as directory:
+            env = Path(directory) / "env"
+            env.write_text('NOISE=1\nDISCORD_WEBHOOK_URL="https://discord.invalid/x"\n')
+            with patch.object(pr, "ENV_PATH", env):
+                self.assertEqual(pr.discord_webhook(), "https://discord.invalid/x")
+            env.write_text("# no webhook yet\n")
+            with patch.object(pr, "ENV_PATH", env):
+                self.assertEqual(pr.discord_webhook(), "")
+            with patch.object(pr, "ENV_PATH", Path(directory) / "missing"):
+                self.assertEqual(pr.discord_webhook(), "")
+
+    def test_notify_posts_and_survives_http_error(self):
+        class Response:
+            def __init__(self, status):
+                self.status = status
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        state = {"status": 204}
+
+        def opener(request, timeout=None):
+            return Response(state["status"])
+
+        with tempfile.TemporaryDirectory() as directory:
+            env = Path(directory) / "env"
+            env.write_text('DISCORD_WEBHOOK_URL=https://discord.invalid/x\n')
+            with patch.object(pr, "ENV_PATH", env), \
+                 patch.object(pr.urllib.request, "urlopen", side_effect=opener) as open_:
+                state["status"] = 204
+                pr.notify("Ollama backlog ok", "body")
+                self.assertEqual(open_.call_count, 1)
+                state["status"] = 500
+                captured = io.StringIO()
+                with patch.object(sys, "stderr", captured):
+                    pr.notify("Ollama backlog failed", "boom")
+                self.assertIn("500", captured.getvalue())
+                self.assertIn("通知に失敗", captured.getvalue())
+
+    def test_notify_survives_bad_webhook_and_env_without_leaking_url(self):
+        with tempfile.TemporaryDirectory() as directory:
+            env = Path(directory) / "env"
+            env.write_text("DISCORD_WEBHOOK_URL=secret-without-scheme\n")
+            captured = io.StringIO()
+            with patch.object(pr, "ENV_PATH", env), patch.object(sys, "stderr", captured):
+                pr.notify("Ollama draft PR created", "body")
+            self.assertIn("形式が不正", captured.getvalue())
+            self.assertNotIn("secret-without-scheme", captured.getvalue())
+            env.write_bytes(b"DISCORD_WEBHOOK_URL=\xff\xfe\n")
+            captured = io.StringIO()
+            with patch.object(pr, "ENV_PATH", env), patch.object(sys, "stderr", captured):
+                pr.notify("Ollama draft PR created", "body")
+            self.assertIn(".env を読めない", captured.getvalue())
+
+    def test_run_notifies_each_failure_once(self):
+        notified = RuntimeError("push rejected")
+        notified.notified = True
+        for error, calls in ((notified, 0), (RuntimeError("bd failed"), 1)):
+            with patch.object(pr, "main", side_effect=error), patch.object(pr, "notify") as notify, \
+                 patch.object(sys, "stderr", io.StringIO()):
+                self.assertEqual(pr.run(), 2)
+            self.assertEqual(notify.call_count, calls)
+        with patch.object(pr, "main", return_value=0), patch.object(pr, "notify") as notify:
+            self.assertEqual(pr.run(), 0)
+        notify.assert_not_called()
 
     def test_busy_does_not_run_model(self):
         with tempfile.TemporaryDirectory() as directory:

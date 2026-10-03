@@ -1,9 +1,11 @@
 # Ollama backlog draft PR experiment
 
-This is a manually started experiment. It extends `ollama-backlog-draft.py` and
-does not run on a timer. The first three real PRs must be reviewed before a
-daily timer is considered. `backlog-viewer` remains read-only; Beads is the
-source of truth for issue status and acceptance criteria.
+This is a manually started experiment. It extends `ollama-backlog-draft.py`.
+The systemd user units exist but the timer is disabled until the three-manual
+pilot gate in the Timer gate section passes; each tick handles one eligible
+issue. The first three real PRs must be reviewed before the timer is enabled.
+`backlog-viewer` remains read-only; Beads is the source of truth for issue
+status and acceptance criteria.
 
 ## Opt in one issue
 
@@ -79,10 +81,27 @@ succeeds but PR creation fails, the branch remains for manual recovery; the
 next run will not overwrite it. This experiment does not delete branches or
 old worktrees automatically.
 
+On success (`draft_pr_created`) and on a real failure (generation, publish,
+or an unhandled exception), a single-line Discord notification is posted to
+the `DISCORD_WEBHOOK_URL` in `~/.env` (best-effort; a failed webhook does not
+change the exit code). Designed no-ops (`no_eligible_issue`,
+`already_attempted`) and transient `busy` do not send a notification, so an
+hourly tick with nothing to do stays quiet.
+
 ## Timer gate
 
 The manual pilots are tracked in `ats030-w1yb`. A pilot passes when its draft
 PR merges with no or only minor edits. As of 2026-10-01 one pilot has passed
-(`ats030-hbu8`, app-portal PR #1); the busy check (exit 75) and PR creation have
-been confirmed in the running service. Create the daily timer only after three
-pilots have passed. Stop the experiment if two of the first three fail.
+(`ats030-hbu8`, app-portal PR #1). The user units
+`ollama-backlog-pr.service`, `ollama-backlog-pr.service.d/failure-policy.conf`,
+and `ollama-backlog-pr.timer` (hourly, `OnCalendar=hourly`) are installed. The
+timer starts one runner per tick; a tick with no eligible issue exits with
+`no_eligible_issue` and `already_attempted` prevents the same issue from being
+published twice. Enable it, and review the first three PRs, only after three
+pilots have passed:
+
+```bash
+systemctl --user enable --now ollama-backlog-pr.timer
+```
+
+Stop the experiment (disable the timer) if two of the first three fail.
