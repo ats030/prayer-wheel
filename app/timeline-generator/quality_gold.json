@@ -5,6 +5,7 @@
   "themes": {
     "インターネット": {
       "primary_domains": ["internetsociety.org", "home.cern", "nic.ad.jp", "w3.org", "ietf.org"],
+      "target_recall": 0.75,
       "milestones": [
         {"id": "arpanet", "label": "ARPANET開始", "years": [1969, 1969], "keywords": ["ARPANET"], "evidence": ["https://www.internetsociety.org/internet/history-internet/brief-history-internet/"]},
         {"id": "tcpip", "label": "ARPANETのTCP/IP移行", "years": [1983, 1983], "keywords": ["TCP/IP"], "evidence": ["https://www.internetsociety.org/news/press-releases/2013/new-years-day-marks-30th-anniversary-of-major-milestone-for-global-internet/"]},
@@ -43,6 +44,7 @@
     },
     "ラーメン": {
       "primary_domains": ["raumen.co.jp", "nissin.com", "instantramen.or.jp"],
+      "target_recall": 0.83,
       "milestones": [
         {"id": "rairaiken", "label": "浅草 来々軒の開業", "years": [1910, 1910], "keywords": ["来々軒", "來々軒", "浅草", "淺草"], "evidence": ["https://toyokeizai.net/articles/-/696904"]},
         {"id": "nankin", "label": "南京千両の屋台", "years": [1937, 1937], "keywords": ["南京千両"], "evidence": ["https://www.raumen.co.jp/rapedia/study_history/"]},

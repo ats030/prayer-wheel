@@ -203,6 +203,51 @@ def evaluate_result(gold, result, query, pages=None):
     return report
 
 
+def axis(key, label, value, display, better, target=None, passed=None, note=''):
+    return {'key': key, 'label': label, 'value': value, 'display': display, 'better': better,
+            'target': target, 'passed': passed, 'note': note}
+
+
+def axes(report, theme=None):
+    """画面に並べる評価軸。value は0〜1の割合で、None は対象外。合否は目標がある軸だけに付け、総合点は作らない。"""
+    count = report['events']
+    ratio = (lambda n: round(n / count, 2)) if count else (lambda n: None)
+    kinds = (report.get('sources') or {}).get('kinds') or {}
+    rows = []
+    if theme is None:
+        rows.append(axis('recall', '主要項目の再現率', None, '正解集合の対象外', 'high', note='このテーマは人手の主要項目がないため評価しません。'))
+    else:
+        total = len(report['found']) + len(report['missing'])
+        target = theme.get('target_recall')
+        recall = report['recall']
+        rows.append(axis('recall', '主要項目の再現率', recall,
+                         f"{len(report['found'])} / {total}件" if total else '期間内の主要項目なし', 'high', target,
+                         None if target is None or recall is None else recall >= target,
+                         '欠落：' + '、'.join(m['label'] for m in report['missing']) if report['missing'] else ''))
+        errors = len(report['known_errors'])
+        rows.append(axis('known_errors', '既知の誤りへの一致', None, f'{errors}件', 'low', passed=errors == 0,
+                         note='、'.join(f"{e['label']}（{e['year']} {e['event']}）" for e in report['known_errors'])))
+    pairs = len(report['duplicates'])
+    # 組数は件数の2乗で増えうるため、棒が枠を超えないよう件数で頭打ちにする。
+    rows.append(axis('duplicates', '重複の疑い', ratio(min(pairs, count)), f'{pairs}組', 'low', passed=pairs == 0))
+    rows.append(axis('primary', '一次/当事者の出典', ratio(kinds.get('一次/当事者', 0)), f"{kinds.get('一次/当事者', 0)}件", 'high',
+                     note='' if theme and theme.get('primary_domains') else 'このテーマは一次出典のサイトを定義していません。'))
+    rows.append(axis('personal', '個人投稿の出典', ratio(kinds.get('個人投稿', 0)), f"{kinds.get('個人投稿', 0)}件", 'low'))
+    src = report.get('sources') or {}
+    rows.append(axis('concentration', '最多サイトへの集中', src.get('top_domain_share'),
+                     f"{src.get('top_domain') or '-'}・全{src.get('distinct_domains', 0)}サイト", 'low'))
+    rows.append(axis('events', '収録件数', round(min(count, timeline.MAX_EVENTS) / timeline.MAX_EVENTS, 2),
+                     f'{count} / {timeline.MAX_EVENTS}件', 'high'))
+    elapsed = report.get('elapsed_seconds')
+    stop = {'time_limit': '時間上限で終了', 'processing_error': '途中終了', 'event_limit': '件数上限で終了',
+            'sources_exhausted': '資料を使い切って終了'}.get(report.get('stop_reason'), report.get('stop_reason') or '')
+    if report.get('stop_reason') == 'time_limit' and elapsed is not None and elapsed < timeline.TIME_LIMIT * 0.9:
+        stop += '（当時の短い上限）'  # 上限が20分だった頃の結果。棒は現在の上限に対する割合で示す。
+    rows.append(axis('elapsed', '処理時間', None if elapsed is None else round(min(elapsed, timeline.TIME_LIMIT) / timeline.TIME_LIMIT, 2),
+                     '-' if elapsed is None else f'{elapsed / 60:.0f}分 / 上限{timeline.TIME_LIMIT // 60}分', 'low', note=stop))
+    return rows
+
+
 def job_quality(job, gold=None):
     """詳細画面用。保存結果からその場で計算し、保存しない。正解集合外のテーマは出典集計だけを返す。"""
     result = job.get('result')
@@ -212,6 +257,7 @@ def job_quality(job, gold=None):
     report = evaluate_result(gold, result, job.get('query'))
     if report['theme'] is None:
         report['sources'] = source_stats(result.get('events') or [], [])
+    report['axes'] = axes(report, gold['themes'].get(report['theme']))
     report['gold_verified_at'] = gold['verified_at']
     return report
 

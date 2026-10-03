@@ -23,7 +23,7 @@ SEARCH_URL = os.environ.get("TIMELINE_SEARCH_URL", "http://127.0.0.1:8081").rstr
 OLLAMA_URL = os.environ.get("TIMELINE_OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
 MODEL = os.environ.get("TIMELINE_MODEL", "gemma4:12b")
 VERIFY_MODEL = os.environ.get("TIMELINE_VERIFY_MODEL", "qwen3.8:27b")
-TIME_LIMIT = 1200
+TIME_LIMIT = 3600
 MAX_EVENTS = 100
 BATCH_EVENTS = 7
 MAX_CONSECUTIVE_FAILURES = 2
@@ -768,7 +768,7 @@ def timeline_result(query, events, review_notes, started, stop_reason='sources_e
     if len(events) < 10:
         notice = f'資料と文脈を照合できた出来事は{len(events)}件です。主要な出来事を網羅できていない可能性があります。' + ('条件を変えるか、追加の資料が必要です。' if events else '別のキーワードで再検索してください。')
     if stop_reason == 'time_limit':
-        notice = '時間上限（20分）により終了しました。検証済みの出来事を保存しています。' + notice
+        notice = f'時間上限（{TIME_LIMIT // 60}分）により終了しました。検証済みの出来事を保存しています。' + notice
     elif stop_reason == 'processing_error':
         notice = '途中の処理を完了できなかったため、検証済みの出来事までを保存しています。再生成で調べ直せます。' + notice
     elif stop_reason == 'event_limit':

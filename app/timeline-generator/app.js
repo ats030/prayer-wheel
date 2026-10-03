@@ -62,28 +62,40 @@ function sourceSummary(events) {
   const shown = sorted.slice(0, 3).map(([host, count]) => `${host} ${count}件`).join("、");
   return `出典 ${counts.size}サイト：${shown}${sorted.length > 3 ? `、ほか${sorted.length - 3}サイト` : ""}`;
 }
+const passLabels = {true: "目標内", false: "目標外"};
+function axisRow(axis, title = axis.label, withNote = true) {
+  const row = node("li", "axis");
+  row.append(node("span", "axis-label", title));
+  const track = node("span", "axis-track");
+  track.setAttribute("aria-hidden", "true");
+  if (axis.value !== null) {
+    const fill = node("span", `axis-fill${axis.passed === false ? " is-off" : axis.passed === null ? " is-neutral" : ""}`);
+    fill.style.width = `${Math.round(axis.value * 100)}%`;
+    track.append(fill);
+  }
+  if (axis.target !== null) {
+    const mark = node("span", "axis-target");
+    mark.style.left = `${Math.round(axis.target * 100)}%`;
+    track.append(mark);
+  }
+  row.append(track);
+  const percent = axis.value === null ? "" : `${Math.round(axis.value * 100)}% · `;
+  const target = axis.target === null ? "" : ` · 目標${Math.round(axis.target * 100)}%`;
+  row.append(node("span", "axis-value", `${percent}${axis.display}${target}`));
+  if (axis.passed !== null) row.append(node("span", `axis-chip${axis.passed ? "" : " is-off"}`, passLabels[axis.passed]));
+  else if (axis.key === "recall" && axis.value === null) row.append(node("span", "axis-chip is-na", "対象外"));
+  if (withNote && axis.note) row.append(node("span", "axis-note", axis.note));
+  return row;
+}
 function renderQuality(quality) {
   const box = $("quality");
   box.replaceChildren();
+  $("quality-section").hidden = !quality;
   if (!quality) return;
-  const gold = node("div", "quality-block");
-  gold.append(node("h3", "quality-heading", `正解集合との照合（人手で選んだ主要項目・検証日 ${quality.gold_verified_at}）`));
-  if (quality.theme === null) {
-    gold.append(node("p", "", "このテーマは正解集合の対象外のため、網羅性は評価していません。"));
-  } else {
-    const total = quality.found.length + quality.missing.length;
-    gold.append(node("p", "", total ? `主要項目 ${quality.found.length} / ${total}件を収録（${Math.round(quality.recall * 100)}%）` : "指定期間に該当する主要項目はありません。"));
-    if (quality.missing.length) gold.append(node("p", "", `欠落：${quality.missing.map(item => item.label).join("、")}`));
-    for (const item of quality.known_errors) gold.append(node("p", "quality-error", `既知の誤りに一致：${item.label} ← ${item.year} ${item.event}`));
-  }
-  const src = quality.sources || {};
-  const kinds = Object.entries(src.kinds || {}).map(([kind, count]) => `${kind} ${count}件`).join("、");
-  const sources = node("div", "quality-block");
-  sources.append(node("h3", "quality-heading", "出典の機械的な集計（内容の正しさの判定ではありません）"));
-  if (kinds) sources.append(node("p", "", `種別：${kinds}`));
-  if (src.top_domain) sources.append(node("p", "", `最多の出典：${src.top_domain}（${Math.round(src.top_domain_share * 100)}%）`));
-  sources.append(node("p", "", `重複の疑い：${quality.duplicates.length}組`));
-  box.append(gold, sources);
+  $("quality-basis").textContent = `再現率と既知の誤りは人手で選んだ主要項目（検証日 ${quality.gold_verified_at}）との照合です。出典の割合は機械的な集計で、内容の正しさの判定ではありません。総合点は出していません。`;
+  const list = node("ul", "axes");
+  for (const axis of quality.axes) list.append(axisRow(axis));
+  box.append(list);
 }
 function render(data, job) {
   renderQuality(job.quality);
@@ -312,4 +324,34 @@ if ($("job-status")) {
     finally { acting = false; $("retry").disabled = $("regenerate").disabled = false; timer = setTimeout(load, 2000); }
   });
   load();
+}
+
+if ($("quality-axes")) {
+  (async () => {
+    try {
+      const data = await api("/api/quality");
+      $("quality-summary").textContent = data.jobs.length ? `結果のある年表 ${data.jobs.length}件を比較しています（新しい順）。` : "比較できる年表がまだありません。";
+      const sections = document.createDocumentFragment();
+      // 正解集合外のテーマは軸が少ないため、軸の多い行の順を基準に全件の軸を集める。
+      const axisKeys = new Map();
+      for (const job of [...data.jobs].sort((a, b) => b.axes.length - a.axes.length)) for (const axis of job.axes) if (!axisKeys.has(axis.key)) axisKeys.set(axis.key, axis);
+      for (const first of axisKeys.values()) {
+        const section = node("section", "quality-axis");
+        section.append(node("h2", "quality-heading", first.label));
+        const list = node("ul", "axes");
+        for (const job of data.jobs) {
+          const axis = job.axes.find(item => item.key === first.key);
+          if (!axis) continue;
+          const row = axisRow(axis, "", false);
+          const link = node("a", "axis-label", job.query);
+          link.href = `/timelines/${job.id}`;
+          row.firstChild.replaceWith(link);
+          list.append(row);
+        }
+        section.append(list);
+        sections.append(section);
+      }
+      $("quality-axes").replaceChildren(sections);
+    } catch (exc) { error("page-error", `評価を読み込めませんでした。${exc.message}`); }
+  })();
 }

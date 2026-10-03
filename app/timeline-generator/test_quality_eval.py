@@ -116,10 +116,39 @@ class ReportTests(unittest.TestCase):
         self.assertNotIn('recall', other)
         self.assertEqual(other['sources']['kinds']['百科(二次)'], 1)
 
+    def test_axes_carry_targets_only_from_the_gold_set(self):
+        gold = json.loads(json.dumps(GOLD))
+        gold['themes']['ラーメン']['target_recall'] = 0.83
+        events = [event(1958, 'チキンラーメン発売', url='https://www.raumen.co.jp/a'),
+                  event(1958, 'チキンラーメン', url='https://www.raumen.co.jp/a'),
+                  event(1971, 'カップヌードル発売', url='https://note.com/x'),
+                  event(1994, '新横浜ラーメン博物館開館', url='https://ja.wikipedia.org/x')]
+        known = q.job_quality({'query': 'ラーメン', 'result': {'theme': 'ラーメン', 'period': '全期間', 'events': events,
+                               'elapsed_seconds': 1800, 'stop_reason': 'time_limit'}}, gold)
+        axes = {a['key']: a for a in known['axes']}
+        self.assertEqual((axes['recall']['value'], axes['recall']['target'], axes['recall']['passed']), (0.5, 0.83, False))
+        self.assertIn('来々軒', axes['recall']['note'])
+        self.assertTrue(axes['known_errors']['passed'])
+        self.assertEqual((axes['duplicates']['value'], axes['duplicates']['passed']), (0.25, False))
+        self.assertEqual((axes['primary']['value'], axes['personal']['value']), (0.5, 0.25))
+        self.assertEqual((axes['concentration']['value'], axes['events']['display']), (0.5, '4 / 100件'))
+        self.assertEqual(axes['elapsed']['value'], 0.5)
+        self.assertEqual(axes['elapsed']['note'], '時間上限で終了（当時の短い上限）')
+        same = [event(1958, 'チキンラーメン', url='https://www.raumen.co.jp/a')] * 4
+        clamped = {a['key']: a for a in q.job_quality({'query': 'ラーメン', 'result': {'theme': 'ラーメン', 'events': same}}, gold)['axes']}
+        self.assertEqual((clamped['duplicates']['value'], clamped['duplicates']['display']), (1.0, '6組'))
+        self.assertTrue(all(a['passed'] is None for k, a in axes.items() if k not in ('recall', 'known_errors', 'duplicates')))
+        other = q.job_quality({'query': '昭和', 'result': {'theme': '昭和', 'events': []}}, gold)
+        recall = other['axes'][0]
+        self.assertEqual((recall['key'], recall['value'], recall['display']), ('recall', None, '正解集合の対象外'))
+        self.assertNotIn('known_errors', [a['key'] for a in other['axes']])
+        self.assertIsNone(next(a for a in other['axes'] if a['key'] == 'primary')['value'])
+
     def test_bundled_gold_set_is_well_formed(self):
         gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))
         for name, theme in gold['themes'].items():
             self.assertTrue(theme['milestones'], name)
+            self.assertTrue(0 < theme.get('target_recall', 1) <= 1, name)
             for item in theme['milestones'] + theme['known_errors']:
                 self.assertTrue(item['keywords'] and item['evidence'], item['id'])
                 if 'years' in item:

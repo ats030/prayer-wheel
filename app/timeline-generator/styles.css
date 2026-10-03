@@ -73,8 +73,22 @@ summary { cursor: pointer; color: var(--color-accent); min-height: 44px; padding
 .event > .source-link { grid-column: 3; grid-row: 1; }
 .source-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; font-size: var(--text-sm); white-space: nowrap; }
 #review-notes .source-link { justify-content: flex-start; white-space: normal; overflow-wrap: anywhere; }
-.quality-block { border-top: 1px solid var(--color-rule); padding-top: 8px; margin-top: 8px; }
-.quality-heading { font-size: inherit; margin: 0 0 4px; color: var(--color-ink); }
+.quality-section { border-top: 1px solid var(--color-rule); padding-block: 8px 16px; }
+.quality-heading { font-size: var(--text-md); margin: 8px 0 4px; color: var(--color-ink); }
+.quality-axis + .quality-axis { border-top: 1px solid var(--color-rule); margin-top: 8px; }
+.axes { list-style: none; padding: 0; margin: 0; }
+.axis { display: grid; grid-template-columns: minmax(0, 1fr) max-content; gap: 2px 8px; align-items: center; padding-block: 6px; font-size: var(--text-sm); }
+.axis-label { grid-column: 1; overflow-wrap: anywhere; }
+.axis-chip { grid-column: 2; grid-row: 1; padding: 0 6px; border-radius: var(--radius-sm); background: var(--color-accent); color: var(--color-accent-ink); }
+.axis-chip.is-off { background: var(--color-error); }
+.axis-chip.is-na { background: var(--color-surface); color: var(--color-muted); }
+.axis-track { grid-column: 1 / -1; position: relative; height: 10px; background: var(--color-surface); border: 1px solid var(--color-rule); border-radius: var(--radius-sm); }
+.axis-fill { position: absolute; inset: 0 auto 0 0; background: var(--color-accent); border-radius: var(--radius-sm); }
+.axis-fill.is-off { background: var(--color-error); }
+.axis-fill.is-neutral { background: var(--color-muted); }
+.axis-target { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--color-ink); }
+.axis-value { grid-column: 1 / -1; font-variant-numeric: tabular-nums; color: var(--color-muted); overflow-wrap: anywhere; }
+.axis-note { grid-column: 1 / -1; color: var(--color-muted); overflow-wrap: anywhere; }
 .review-note { border-top: 1px solid var(--color-rule); padding-top: 8px; margin-top: 8px; }
 .list-columns, .job-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(3.5rem, max-content) minmax(4rem, max-content); gap: 0 8px; }
 .list-columns { font-size: var(--text-sm); color: var(--color-muted); border-bottom: 1px solid var(--color-rule); padding-block: 8px; margin-top: 4px; }

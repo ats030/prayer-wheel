@@ -20,6 +20,7 @@ PORT = int(os.environ.get("TIMELINE_PORT", "8532"))
 REQUEST_TIME_LIMIT = TIME_LIMIT
 ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/changelog": ("changelog.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/styles.css": ("styles.css", "text/css; charset=utf-8"), "/tokens.css": ("tokens.css", "text/css; charset=utf-8"), "/favicon.svg": ("favicon.svg", "image/svg+xml")}
 ASSETS["/timelines"] = ("index.html", "text/html; charset=utf-8")
+ASSETS["/quality"] = ("quality.html", "text/html; charset=utf-8")
 
 
 def pipeline_worker(query, connection):
@@ -139,6 +140,19 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 return self.reply(400, {"error": "一覧の開始位置が不正です。"})
             self.reply(200, self.server.jobs.listing(offset=offset))
+        elif path == "/api/quality":
+            rows = []
+            for item in self.server.jobs.listing(limit=50)["jobs"]:
+                job = item["has_result"] and self.server.jobs.get(item["id"])
+                if not job:
+                    continue
+                try:
+                    report = quality_eval.job_quality(job)
+                except (OSError, ValueError, KeyError):
+                    return self.reply(500, {"error": "評価基準を読み込めませんでした。"})
+                rows.append({"id": job["id"], "query": job["query"], "state": job["state"],
+                             "updated_at": job["updated_at"], "theme": report["theme"], "axes": report["axes"]})
+            self.reply(200, {"jobs": rows})
         elif re.fullmatch(r"/api/jobs/[1-9][0-9]{0,17}", path):
             job = self.server.jobs.get(int(path.rsplit("/", 1)[1]))
             if not job:

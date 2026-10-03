@@ -7,6 +7,7 @@ from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright
 from timeline import TimelineError, parse_query
 from jobs import can_delete
+import quality_eval
 
 URL = os.environ.get("TIMELINE_TEST_URL", "http://100.94.207.13:8532")
 RESULT = {"kind": "result", "theme": "テスト用の年表", "period": "全期間", "elapsed_seconds": 1.2, "notice": "ブラウザ検証専用の応答です。", "events": [{"year": 1971, "date": "1971年", "title": "テスト用の出来事", "description": '<script>window.injected=true</script> テスト本文。', "quote": "In 1971, a test event occurred.", "source": {"url": "https://example.org/history", "title": "Test history source", "context_heading": "1971年 <script>window.injected=true</script>"}}]}
@@ -63,8 +64,17 @@ with sync_playwright() as playwright:
                 listing = [listing[0] | {"id": i + 1} for i in range(50)]
             route.fulfill(status=200, content_type="application/json", body=json.dumps({"jobs": listing if total else [], "total": total}))
         else:
-            route.fulfill(status=200, content_type="application/json", body=json.dumps(job))
+            route.fulfill(status=200, content_type="application/json", body=json.dumps(job | {"quality": quality_eval.job_quality(job)}))
     context.route("**/api/jobs**", respond)
+    def quality_rows(route):
+        gold = {'theme': 'ラーメン', 'period': '全期間', 'elapsed_seconds': 3600, 'stop_reason': 'time_limit',
+                'events': [RESULT['events'][0] | {'year': 1958, 'title': 'チキンラーメン発売'}]}
+        rows = [{'id': i, 'query': query, 'state': 'complete', 'updated_at': BASE['updated_at'], 'theme': None,
+                 'axes': quality_eval.job_quality({'query': query, 'result': result})['axes']}
+                # 正解集合外を先頭に置き、軸の少ない行が先でも全軸が並ぶことを確かめる。
+                for i, (query, result) in enumerate([(('長いテーマ ' * 30)[:180], RESULT), ('ラーメン', gold)], 1)]
+        route.fulfill(status=200, content_type='application/json', body=json.dumps({'jobs': rows}))
+    context.route("**/api/quality", quality_rows)
     # Synthetic document responses have no private-address metadata in Chromium.
     # Read working-tree assets to verify changes before deployment; live mode
     # removes all fixture routes and checks the deployed HTML and assets.
@@ -73,7 +83,7 @@ with sync_playwright() as playwright:
         asset = pattern.split('/')[-1]
         mime = 'text/javascript' if asset.endswith('.js') else 'image/svg+xml' if asset.endswith('.svg') else 'text/css'
         context.route(pattern, lambda route, request, asset=asset, mime=mime: route.fulfill(content_type=mime, body=Path(__file__).with_name(asset).read_bytes()))
-    fixture_pages = {'/': 'index.html', '/timelines': 'index.html', '/timelines/1': 'detail.html', '/changelog': 'changelog.html'}
+    fixture_pages = {'/': 'index.html', '/timelines': 'index.html', '/timelines/1': 'detail.html', '/changelog': 'changelog.html', '/quality': 'quality.html'}
     def serve_page(route):
         filename = fixture_pages.get(urlsplit(route.request.url).path)
         if filename and route.request.url.startswith(URL):
@@ -83,7 +93,7 @@ with sync_playwright() as playwright:
     context.route('**/*', serve_page)
     for width in [320, 375, 414, 768, 1280]:
         page.set_viewport_size({"width": width, "height": 900})
-        for path in ["/", "/timelines", "/timelines/1", "/changelog"]:
+        for path in ["/", "/timelines", "/timelines/1", "/changelog", "/quality"]:
             page.goto(URL + path, wait_until="domcontentloaded")
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), (path, width)
             for element in page.locator("button:visible, .quiet-link:visible").all():
@@ -146,7 +156,7 @@ with sync_playwright() as playwright:
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), ("result", width)
         page.screenshot(path=f"/tmp/timeline-generator-saved-{width}.png", full_page=True)
     # A long timeline and a partial-completion notice must fit all supported widths.
-    hundred = RESULT | {'events': [RESULT['events'][0] | {'year': 1800 + i, 'date': f'{1800+i}年', 'title': f'出来事{i+1}'} for i in range(100)], 'stop_reason': 'time_limit', 'notice': '時間上限（20分）により終了しました。検証済みの出来事を保存しています。'}
+    hundred = RESULT | {'events': [RESULT['events'][0] | {'year': 1800 + i, 'date': f'{1800+i}年', 'title': f'出来事{i+1}'} for i in range(100)], 'stop_reason': 'time_limit', 'notice': '時間上限（60分）により終了しました。検証済みの出来事を保存しています。'}
     job = job | {'result': hundred, 'message': '時間上限により終了しました。検証済みの結果を保存しました。'}
     for width in [320, 375, 414, 768, 1280]:
         page.set_viewport_size({'width': width, 'height': 900})
@@ -169,8 +179,9 @@ with sync_playwright() as playwright:
         page.screenshot(path=f'/tmp/timeline-generator-dense-{width}.png', full_page=False)
     for width in [320, 1280]:
         page.set_viewport_size({'width': width, 'height': 900})
-        for path in ['/', '/timelines', '/timelines/1', '/changelog']:
+        for path in ['/', '/timelines', '/timelines/1', '/changelog', '/quality']:
             page.goto(URL + path)
+            if path == '/quality': page.locator('.quality-axis').first.wait_for()
             if path == '/timelines': page.locator('.job-link').wait_for()
             if path == '/timelines/1': page.wait_for_function("document.querySelectorAll('.event').length === 100")
             page.evaluate("document.documentElement.style.fontSize = '200%'")
@@ -379,6 +390,29 @@ with sync_playwright() as playwright:
         page.locator('.job-delete').click()
         page.locator('#list-empty').wait_for()
         assert page.locator('#delete-status').is_visible()
+    # Evaluation axes: bars on the detail page and a per-axis comparison of all jobs.
+    job = BASE | {'state': 'complete', 'has_result': True, 'generated_at': BASE['updated_at'],
+                  'query': 'ラーメン', 'result': RESULT | {'theme': 'ラーメン', 'events': [RESULT['events'][0] | {'year': 1958, 'title': 'チキンラーメン発売'}]}}
+    page.goto(URL + '/timelines/1')
+    page.locator('#quality .axis').first.wait_for()
+    assert page.locator('#quality-section').is_visible() and page.locator('#generation-info #quality').count() == 0
+    assert page.locator('#quality .axis').count() == 8
+    assert page.locator('#quality .axis-target').count() == 1 and '目標83%' in page.locator('#quality .axis').first.inner_text()
+    assert page.locator('#quality .axis-chip').first.inner_text() == '目標外'
+    job = job | {'query': 'テストテーマ 日本', 'result': RESULT}
+    page.reload()
+    page.wait_for_function("document.querySelector('#quality .axis-chip')?.textContent === '対象外'")
+    page.goto(URL + '/quality')
+    page.locator('.quality-axis').first.wait_for()
+    assert page.locator('.quality-axis').count() == 8
+    assert page.locator('.quality-axis').first.locator('a.axis-label').count() == 2
+    assert page.locator('.quality-axis').first.locator('a.axis-label').first.get_attribute('href') == '/timelines/1'
+    assert page.locator('.quality-axis').first.locator('.axis-chip.is-na').count() == 1
+    assert page.locator('.quality-axis').nth(1).locator('a.axis-label').count() == 1
+    for width in [320, 1280]:
+        page.set_viewport_size({'width': width, 'height': 900})
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('quality', width)
+        page.screenshot(path=f'/tmp/timeline-generator-quality-{width}.png', full_page=True)
     assert errors == [], errors
     print("PASS: 5 widths, dense 100 rows, no quote DOM, folded metadata, counts and timeout notice, pages, continued registration, polling, stale poll/action race, saved reuse, retry, regeneration, old result, keyboard, XSS, pagination, empty, errors, deletion protection/confirmation/cancel/race/retry/zoom", flush=True)
     if len(sys.argv) > 1 and sys.argv[1] == "--live":

@@ -11,7 +11,7 @@
 </head>
 <body>
   <a class="skip-link" href="#page-heading">本文へ</a>
-  <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/">年表を作る</a></nav></header>
+  <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/">年表を作る</a><a class="quiet-link" href="/quality">評価一覧</a></nav></header>
   <main class="app-main detail-page">
     <div class="page-head">
       <h1 id="page-heading" tabindex="-1">年表を読み込んでいます</h1>
@@ -23,7 +23,7 @@
         <span id="job-status" class="job-state" role="status"></span>
         <details id="generation-info" class="metadata" hidden>
           <summary>生成情報</summary>
-          <div class="info-body"><p id="saved-at"></p><p id="generation-meta"></p><p id="source-summary"></p><div id="quality"></div><p id="generation-notice"></p><div id="review-notes"></div></div>
+          <div class="info-body"><p id="saved-at"></p><p id="generation-meta"></p><p id="source-summary"></p><p id="generation-notice"></p><div id="review-notes"></div></div>
         </details>
       </div>
       <p id="job-message" class="help" hidden></p>
@@ -36,6 +36,11 @@
       <p id="old-result" class="notice" hidden>前回の生成結果を表示しています。再生成が成功すると更新されます。</p>
       <p id="legacy-period" class="notice" hidden></p>
       <p id="result-notice" class="notice" hidden></p>
+    </section>
+    <section id="quality-section" class="quality-section" aria-labelledby="quality-title" hidden>
+      <h2 id="quality-title" class="quality-heading">評価</h2>
+      <p id="quality-basis" class="help"></p>
+      <div id="quality"></div>
     </section>
     <section id="result" class="result-section" aria-labelledby="page-heading" hidden>
       <p id="result-empty" hidden>確認できる出来事がありません。条件を変えて調べ直せます。</p>
