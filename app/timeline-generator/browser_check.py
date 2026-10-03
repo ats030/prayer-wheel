@@ -397,7 +397,7 @@ with sync_playwright() as playwright:
     page.locator('#quality .axis').first.wait_for()
     assert page.locator('#quality-section').is_visible() and page.locator('#generation-info #quality').count() == 0
     assert page.locator('#quality .axis').count() == 8
-    assert page.locator('#quality .axis-target').count() == 1 and '目標83%' in page.locator('#quality .axis').first.inner_text()
+    assert page.locator('#quality .axis-target').count() == 1 and '目標100%' in page.locator('#quality .axis').first.inner_text()
     assert page.locator('#quality .axis-chip').first.inner_text() == '目標外'
     job = job | {'query': 'テストテーマ 日本', 'result': RESULT}
     page.reload()

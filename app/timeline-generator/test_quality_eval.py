@@ -118,7 +118,7 @@ class ReportTests(unittest.TestCase):
 
     def test_axes_carry_targets_only_from_the_gold_set(self):
         gold = json.loads(json.dumps(GOLD))
-        gold['themes']['ラーメン']['target_recall'] = 0.83
+        gold['themes']['ラーメン']['target_recall'] = 1.0
         events = [event(1958, 'チキンラーメン発売', url='https://www.raumen.co.jp/a'),
                   event(1958, 'チキンラーメン', url='https://www.raumen.co.jp/a'),
                   event(1971, 'カップヌードル発売', url='https://note.com/x'),
@@ -126,7 +126,7 @@ class ReportTests(unittest.TestCase):
         known = q.job_quality({'query': 'ラーメン', 'result': {'theme': 'ラーメン', 'period': '全期間', 'events': events,
                                'elapsed_seconds': 1800, 'stop_reason': 'time_limit'}}, gold)
         axes = {a['key']: a for a in known['axes']}
-        self.assertEqual((axes['recall']['value'], axes['recall']['target'], axes['recall']['passed']), (0.5, 0.83, False))
+        self.assertEqual((axes['recall']['value'], axes['recall']['target'], axes['recall']['passed']), (0.5, 1.0, False))
         self.assertIn('来々軒', axes['recall']['note'])
         self.assertTrue(axes['known_errors']['passed'])
         self.assertEqual((axes['duplicates']['value'], axes['duplicates']['passed']), (0.25, False))
@@ -148,7 +148,7 @@ class ReportTests(unittest.TestCase):
         gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))
         for name, theme in gold['themes'].items():
             self.assertTrue(theme['milestones'], name)
-            self.assertTrue(0 < theme.get('target_recall', 1) <= 1, name)
+            self.assertEqual(theme['target_recall'], 1.0, name)
             for item in theme['milestones'] + theme['known_errors']:
                 self.assertTrue(item['keywords'] and item['evidence'], item['id'])
                 if 'years' in item:
