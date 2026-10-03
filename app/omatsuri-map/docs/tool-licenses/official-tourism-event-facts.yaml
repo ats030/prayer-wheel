@@ -1,0 +1,24 @@
+tool: Prefectural tourism association event pages (facts only)
+version_or_plan: pages reviewed 2026-10-03 for data/official-festivals-20260929.json
+category: dataset
+status: conditional
+license: proprietary-terms
+commercial_use: unknown
+license_url: https://www.kanko-miyazaki.jp/organization/site
+terms_url:
+  - https://www.kanko-miyazaki.jp/organization/site
+  - https://kochi-tabi.jp/policy.html
+  - https://www.kagoshima-kankou.com/renmei/privacy
+  - https://www.nagasaki-tabinet.com/site
+  - https://www.tochigiji.or.jp/site_policy/
+  - https://www.torican.jp/footer/about_site
+  - https://www.asobo-saga.jp/site/
+pricing_url: none; free public pages
+restrictions:
+  - All seven sites forbid reproducing their text, photos, illustrations and maps without permission.
+  - Commit only facts (event name, venue, dates, coordinates, continuation evidence) and short original descriptions; never copy page text, images or maps.
+  - Keep each page URL as the provenance of the facts; do not frame or embed the pages.
+  - asobo-saga.jp asks for a prior application before linking to pages other than its top page; torican.jp asks for top-page links in principle; kanko-miyazaki.jp discourages deep links. Owner decision on public deep links is pending before the next Cloud Run deploy.
+evidence_retrieved: 2026-10-03
+reviewer: claude-code
+notes: Event facts are not protected expression, and the batch keeps none of the pages' wording. The linking requests on three sites are the remaining condition, so the record stays conditional until the owner decides between requesting permission and linking those sites' top pages.

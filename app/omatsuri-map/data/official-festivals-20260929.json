@@ -10,9 +10,6 @@
     "description_source": "https://kochi-tabi.jp/search_event.html?id=18200",
     "date": "2026-10-17～2026-10-18",
     "coordinate_source": "official_venue",
-    "categories": [
-      "博覧会・市"
-    ],
     "venue": {
       "name": "高知県立鏡野公園",
       "latitude": 33.61902,
@@ -49,10 +46,6 @@
     "description_source": "https://www.torican.jp/festival/detail_1454.html",
     "date": "2026-07-25",
     "coordinate_source": "official_venue",
-    "categories": [
-      "花火",
-      "行事"
-    ],
     "venue": {
       "name": "浦富海水浴場",
       "latitude": 35.5900899,
@@ -89,10 +82,6 @@
     "description_source": "https://www.kanko-miyazaki.jp/event/1181",
     "date": "2026-10-17～2026-10-18",
     "coordinate_source": "official_venue",
-    "categories": [
-      "行列・渡御",
-      "演舞・盆踊り"
-    ],
     "venue": {
       "name": "飫肥城周辺",
       "latitude": 31.628854025676738,
@@ -129,10 +118,6 @@
     "description_source": "https://www.kagoshima-kankou.com/event/20300",
     "date": "2026-09-26",
     "coordinate_source": "official_venue",
-    "categories": [
-      "演舞・盆踊り",
-      "花火"
-    ],
     "venue": {
       "name": "JA鹿児島いずみ高尾野事業所駐車場周辺",
       "latitude": 32.0615736,
@@ -172,9 +157,6 @@
     "description_source": "https://kochi-tabi.jp/search_event.html?id=18504",
     "date": "2026-02-28～2026-03-15",
     "coordinate_source": "official_venue",
-    "categories": [
-      "行事"
-    ],
     "venue": {
       "name": "入田ヤナギ林",
       "latitude": 32.993633,
@@ -197,6 +179,1633 @@
         "end": "2026-03-15",
         "status": "past",
         "source": "https://kochi-tabi.jp/search_event.html?id=18504"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-aburatsu-hanabi",
+    "label_ja": "油津港まつり花火大会",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 31.581317,
+    "longitude": 131.404216,
+    "description": "日南市の油津港で夏に開かれる港まつりの花火大会。港内で花火が打ち上げられる。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1179",
+    "date": "2026-07-18",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "油津港内（日南市西町）",
+      "latitude": 31.581317,
+      "longitude": 131.404216,
+      "source": "https://www.kanko-miyazaki.jp/event/1179",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1179",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1179",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-18",
+        "end": "2026-07-18",
+        "status": "past",
+        "source": "https://www.kanko-miyazaki.jp/event/1179"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-misato-otaue",
+    "label_ja": "御田祭",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 32.436214,
+    "longitude": 131.42545,
+    "description": "美郷町西郷の田代神社の農耕神事で、毎年7月に行われる田植え祭り。牛馬入れやみこし入れで五穀豊穣と無病息災を祈る。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1187",
+    "date": "2026-07-04～2026-07-05",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "御田祭の里ふれあい広場（美郷町西郷田代）",
+      "latitude": 32.436214,
+      "longitude": 131.42545,
+      "source": "https://www.kanko-miyazaki.jp/event/1187",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1187",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1187",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-04",
+        "end": "2026-07-05",
+        "status": "past",
+        "source": "https://www.kanko-miyazaki.jp/event/1187"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-matsuri-nobeoka",
+    "label_ja": "まつりのべおか",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 32.5691567,
+    "longitude": 131.6534877,
+    "description": "延岡市の夏祭り。ばんば総踊り、太鼓の競演、出会い神輿、花火大会が行われる。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1581",
+    "date": "2026-07-18～2026-07-19",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "延岡市中央通交差点周辺・大瀬橋下流河川敷",
+      "latitude": 32.5691567,
+      "longitude": 131.6534877,
+      "source": "https://www.kanko-miyazaki.jp/event/1581",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1581",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1581",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-18",
+        "end": "2026-07-19",
+        "status": "past",
+        "source": "https://www.kanko-miyazaki.jp/event/1581"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-kadogawa-hanabi",
+    "label_ja": "かどがわ納涼花火大会",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 32.471103,
+    "longitude": 131.656824,
+    "description": "門川町の門川漁港で夏に開かれる花火大会。県内の花火製造業者が演出を担う。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1679",
+    "date": "2026-08-22",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "門川漁港中央突堤",
+      "latitude": 32.471103,
+      "longitude": 131.656824,
+      "source": "https://www.kanko-miyazaki.jp/event/1679",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1679",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）。県境データの海岸線精度に合わせ陸側へ約19m補正"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1679",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-22",
+        "end": "2026-08-22",
+        "status": "past",
+        "source": "https://www.kanko-miyazaki.jp/event/1679"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-unama-jizo",
+    "label_ja": "うなま地蔵夏まつり",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 32.50097364360195,
+    "longitude": 131.4434675219513,
+    "description": "美郷町北郷で毎年8月第1土曜に開かれる夏祭り。歌謡祭やステージ、屋台村が催される。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1680",
+    "date": "2026-08-01",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "美郷町役場北郷支所横すまいる広場",
+      "latitude": 32.50097364360195,
+      "longitude": 131.4434675219513,
+      "source": "https://www.kanko-miyazaki.jp/event/1680",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1680",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1680",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-01",
+        "end": "2026-08-01",
+        "status": "past",
+        "source": "https://www.kanko-miyazaki.jp/event/1680"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-bonchi",
+    "label_ja": "盆地まつり",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 31.72625991146461,
+    "longitude": 131.06133921729446,
+    "description": "都城市中心部の国道10号を会場に、半世紀以上続く夏祭り。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1683",
+    "date": "2026-08-01",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "都城市国道10号中央通り",
+      "latitude": 31.72625991146461,
+      "longitude": 131.06133921729446,
+      "source": "https://www.kanko-miyazaki.jp/event/1683",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1683",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1683",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-01",
+        "end": "2026-08-01",
+        "status": "past",
+        "source": "https://www.kanko-miyazaki.jp/event/1683"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-toimisaki-himatsuri",
+    "label_ja": "都井岬火まつり",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 31.3662672,
+    "longitude": 131.3331029,
+    "description": "串間市の都井岬で夏に開かれる火まつり。2026年で60回目を数える。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1688",
+    "date": "2026-08-22",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "都井岬イベント広場（串間市）",
+      "latitude": 31.3662672,
+      "longitude": 131.3331029,
+      "source": "https://www.kanko-miyazaki.jp/event/1688",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1688",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1688",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-22",
+        "end": "2026-08-22",
+        "status": "past",
+        "source": "https://www.kanko-miyazaki.jp/event/1688"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-kannonike",
+    "label_ja": "観音池まつり",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 31.825774,
+    "longitude": 131.138278,
+    "description": "都城市高城町の観音池で、堤防の安全と五穀豊穣を祈る祭り。石山花相撲の奉納や郷土芸能の披露がある。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1696",
+    "date": "2026-08-30",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "観音池公園野外ステージ（都城市高城町）",
+      "latitude": 31.825774,
+      "longitude": 131.138278,
+      "source": "https://www.kanko-miyazaki.jp/event/1696",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1696",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1696",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-30",
+        "end": "2026-08-30",
+        "status": "past",
+        "source": "https://www.kanko-miyazaki.jp/event/1696"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-yamanokuchi-dondon",
+    "label_ja": "山之口どんどんまつり",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 31.7880285,
+    "longitude": 131.1603997,
+    "description": "都城市山之口町で秋に開かれる地域の祭り。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1699",
+    "date": "2026-09-26",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "霧島酒造スポーツランド第5駐車場（都城市山之口町）",
+      "latitude": 31.7880285,
+      "longitude": 131.1603997,
+      "source": "https://www.kanko-miyazaki.jp/event/1699",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1699",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1699",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-26",
+        "end": "2026-09-26",
+        "status": "past",
+        "source": "https://www.kanko-miyazaki.jp/event/1699"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-miyakonojo-yakiniku-hanabi",
+    "label_ja": "都城焼肉カーニバル・みやこんじょ花火大会",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 31.8257738,
+    "longitude": 131.1382781,
+    "description": "都城市の観音池公園で秋に開かれる催し。焼肉の飲食イベントと花火大会が同日に行われる。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1953",
+    "date": "2026-10-10",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "観音池公園自由広場（都城市高城町）",
+      "latitude": 31.8257738,
+      "longitude": 131.1382781,
+      "source": "https://www.kanko-miyazaki.jp/event/1953",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1953",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1953",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-10",
+        "end": "2026-10-10",
+        "status": "scheduled",
+        "source": "https://www.kanko-miyazaki.jp/event/1953"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-nishimera-yamabiko-hanabi",
+    "label_ja": "やまびこ花火大会",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 32.2263324,
+    "longitude": 131.1544328,
+    "description": "西米良村の一ツ瀬川で開かれる花火大会。打ち上げ音が山々に反響することが名の由来。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1959",
+    "date": "2026-10-10",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "一ツ瀬川川原（西米良村村所）",
+      "latitude": 32.2263324,
+      "longitude": 131.1544328,
+      "source": "https://www.kanko-miyazaki.jp/event/1959",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1959",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1959",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-10",
+        "end": "2026-10-10",
+        "status": "scheduled",
+        "source": "https://www.kanko-miyazaki.jp/event/1959"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-aya-hanabi",
+    "label_ja": "綾の花火大会",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 31.993463249608812,
+    "longitude": 131.25453863558238,
+    "description": "綾町の綾南川河川敷で秋に開かれる花火大会。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/1962",
+    "date": "2026-10-24",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "綾南川三本松橋上流河川敷",
+      "latitude": 31.993463249608812,
+      "longitude": 131.25453863558238,
+      "source": "https://www.kanko-miyazaki.jp/event/1962",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/1962",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/1962",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-24",
+        "end": "2026-10-24",
+        "status": "scheduled",
+        "source": "https://www.kanko-miyazaki.jp/event/1962"
+      }
+    ]
+  },
+  {
+    "qid": "local-miyazaki-kakashimura",
+    "label_ja": "かかし村まつり",
+    "label_en": "",
+    "prefecture": "宮崎県",
+    "latitude": 31.82694069999999,
+    "longitude": 131.042322,
+    "description": "都城市山田町で毎年秋に開かれる祭り。かかしにちなむ地域の催しが行われる。",
+    "description_source": "https://www.kanko-miyazaki.jp/event/2298",
+    "date": "2026-10-17",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "一堂ヶ丘公園（都城市山田町）",
+      "latitude": 31.82694069999999,
+      "longitude": 131.042322,
+      "source": "https://www.kanko-miyazaki.jp/event/2298",
+      "coordinate_source": "https://www.kanko-miyazaki.jp/event/2298",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kanko-miyazaki.jp/event/2298",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-17",
+        "end": "2026-10-17",
+        "status": "scheduled",
+        "source": "https://www.kanko-miyazaki.jp/event/2298"
+      }
+    ]
+  },
+  {
+    "qid": "local-kochi-higashikaigan-gourmet",
+    "label_ja": "高知東海岸グルメまつり＆鉄道の日",
+    "label_en": "",
+    "prefecture": "高知県",
+    "latitude": 33.50308,
+    "longitude": 133.89114,
+    "description": "安芸市で開かれる県東部11市町村のご当地グルメの祭り。郷土芸能のステージや、鉄道の日にちなむ車両基地の見学がある。",
+    "description_source": "https://kochi-tabi.jp/search_event.html?id=18687",
+    "date": "2026-10-10～2026-10-11",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "安芸タイガース球場駐車場（安芸市桜ヶ丘町）",
+      "latitude": 33.50308,
+      "longitude": 133.89114,
+      "source": "https://kochi-tabi.jp/search_event.html?id=18687",
+      "coordinate_source": "https://kochi-tabi.jp/search_event.html?id=18687",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://kochi-tabi.jp/search_event.html?id=18687",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-10",
+        "end": "2026-10-11",
+        "status": "scheduled",
+        "source": "https://kochi-tabi.jp/search_event.html?id=18687"
+      }
+    ]
+  },
+  {
+    "qid": "local-kochi-reihoku-yamabiko",
+    "label_ja": "やまびこカーニバル",
+    "label_en": "",
+    "prefecture": "高知県",
+    "latitude": 33.75382,
+    "longitude": 133.55452,
+    "description": "土佐町の早明浦ダム下で開かれる嶺北地域の秋の祭り。地域の食材を使った料理が集まる。",
+    "description_source": "https://kochi-tabi.jp/search_event.html?id=18688",
+    "date": "2026-10-11",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "早明浦ダム直下ふれあい広場（土佐町田井）",
+      "latitude": 33.75382,
+      "longitude": 133.55452,
+      "source": "https://kochi-tabi.jp/search_event.html?id=18688",
+      "coordinate_source": "https://kochi-tabi.jp/search_event.html?id=18688",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://kochi-tabi.jp/search_event.html?id=18688",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-11",
+        "end": "2026-10-11",
+        "status": "scheduled",
+        "source": "https://kochi-tabi.jp/search_event.html?id=18688"
+      }
+    ]
+  },
+  {
+    "qid": "local-kochi-shimanto-komekome",
+    "label_ja": "米こめフェスタ",
+    "label_en": "",
+    "prefecture": "高知県",
+    "latitude": 33.213287,
+    "longitude": 133.12856,
+    "description": "四万十町の米をテーマにした秋の食の祭り。おにぎりの配布やステージの催しがある。",
+    "description_source": "https://kochi-tabi.jp/search_event.html?id=18689",
+    "date": "2026-11-01",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "四万十緑林公園（四万十町）",
+      "latitude": 33.213287,
+      "longitude": 133.12856,
+      "source": "https://kochi-tabi.jp/search_event.html?id=18689",
+      "coordinate_source": "https://kochi-tabi.jp/search_event.html?id=18689",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://kochi-tabi.jp/search_event.html?id=18689",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-11-01",
+        "end": "2026-11-01",
+        "status": "scheduled",
+        "source": "https://kochi-tabi.jp/search_event.html?id=18689"
+      }
+    ]
+  },
+  {
+    "qid": "local-kochi-mihara-doburoku",
+    "label_ja": "三原村どぶろく・農林文化祭",
+    "label_en": "",
+    "prefecture": "高知県",
+    "latitude": 32.91287,
+    "longitude": 132.84482,
+    "description": "三原村で新酒のどぶろくの販売や振る舞いが行われる秋の祭り。伝統芸能の披露や餅投げもある。",
+    "description_source": "https://kochi-tabi.jp/search_event.html?id=18690",
+    "date": "2026-11-03",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "三原村農業構造改善センター",
+      "latitude": 32.91287,
+      "longitude": 132.84482,
+      "source": "https://kochi-tabi.jp/search_event.html?id=18690",
+      "coordinate_source": "https://kochi-tabi.jp/search_event.html?id=18690",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://kochi-tabi.jp/search_event.html?id=18690",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-11-03",
+        "end": "2026-11-03",
+        "status": "scheduled",
+        "source": "https://kochi-tabi.jp/search_event.html?id=18690"
+      }
+    ]
+  },
+  {
+    "qid": "local-kochi-ino-kami",
+    "label_ja": "kami祭",
+    "label_en": "",
+    "prefecture": "高知県",
+    "latitude": 33.550808,
+    "longitude": 133.42097,
+    "description": "いの町の椙本神社（大国さま）の秋の大祭に合わせ、神社から商店街にかけて開かれる祭り。",
+    "description_source": "https://kochi-tabi.jp/search_event.html?id=18692",
+    "date": "2026-11-23",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "椙本神社〜商店街（いの町）",
+      "latitude": 33.550808,
+      "longitude": 133.42097,
+      "source": "https://kochi-tabi.jp/search_event.html?id=18692",
+      "coordinate_source": "https://kochi-tabi.jp/search_event.html?id=18692",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://kochi-tabi.jp/search_event.html?id=18692",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-11-23",
+        "end": "2026-11-23",
+        "status": "scheduled",
+        "source": "https://kochi-tabi.jp/search_event.html?id=18692"
+      }
+    ]
+  },
+  {
+    "qid": "local-kagoshima-takarabe",
+    "label_ja": "たからべ祭り",
+    "label_en": "",
+    "prefecture": "鹿児島県",
+    "latitude": 31.726211999823306,
+    "longitude": 130.99336177110672,
+    "description": "曽於市財部町の祭り。特設ステージで郷土芸能などが披露され、最後に花火が打ち上げられる。",
+    "description_source": "https://www.kagoshima-kankou.com/event/20274",
+    "date": "2026-10-03",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "曽於市役所財部支所駐車場",
+      "latitude": 31.726211999823306,
+      "longitude": 130.99336177110672,
+      "source": "https://www.kagoshima-kankou.com/event/20274",
+      "coordinate_source": "https://www.kagoshima-kankou.com/event/20274",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kagoshima-kankou.com/event/20274",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-03",
+        "end": "2026-10-03",
+        "status": "scheduled",
+        "source": "https://www.kagoshima-kankou.com/event/20274"
+      }
+    ]
+  },
+  {
+    "qid": "local-kagoshima-taniyama-furusato",
+    "label_ja": "谷山ふるさと祭",
+    "label_en": "",
+    "prefecture": "鹿児島県",
+    "latitude": 31.5236522,
+    "longitude": 130.5181307,
+    "description": "鹿児島市谷山地区で例年10月下旬に開かれる祭り。おはら祭の一環として始まった地域の祭りで、市南部で最大規模。",
+    "description_source": "https://www.kagoshima-kankou.com/event/20460",
+    "date": "2026-10-25",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "国道225号（鹿児島市谷山）",
+      "latitude": 31.5236522,
+      "longitude": 130.5181307,
+      "source": "https://www.kagoshima-kankou.com/event/20460",
+      "coordinate_source": "https://www.kagoshima-kankou.com/event/20460",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kagoshima-kankou.com/event/20460",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-25",
+        "end": "2026-10-25",
+        "status": "scheduled",
+        "source": "https://www.kagoshima-kankou.com/event/20460"
+      }
+    ]
+  },
+  {
+    "qid": "local-kagoshima-akune-midokoi",
+    "label_ja": "阿久根みどこい祭り",
+    "label_en": "",
+    "prefecture": "鹿児島県",
+    "latitude": 32.01941050000001,
+    "longitude": 130.1951189,
+    "description": "阿久根市の祭り。夏と秋に分かれていた開催が、2026年から秋の開催にまとめられた。",
+    "description_source": "https://www.kagoshima-kankou.com/event/52271",
+    "date": "2026-10-10～2026-10-11",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "本町通り・中央公園・国道3号（阿久根市）",
+      "latitude": 32.01941050000001,
+      "longitude": 130.1951189,
+      "source": "https://www.kagoshima-kankou.com/event/52271",
+      "coordinate_source": "https://www.kagoshima-kankou.com/event/52271",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kagoshima-kankou.com/event/52271",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-10",
+        "end": "2026-10-11",
+        "status": "scheduled",
+        "source": "https://www.kagoshima-kankou.com/event/52271"
+      }
+    ]
+  },
+  {
+    "qid": "local-kagoshima-minamisatsuma-soodori",
+    "label_ja": "南さつまフェスタふるさと総踊り",
+    "label_en": "",
+    "prefecture": "鹿児島県",
+    "latitude": 31.418344,
+    "longitude": 130.319753,
+    "description": "南さつま市加世田の本町通りで開かれる祭り。音楽隊やみこしのパレードと、南さつま音頭などによる総踊りが行われる。",
+    "description_source": "https://www.kagoshima-kankou.com/event/53126",
+    "date": "2026-09-23",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "加世田ゆめぴか本町通り（南さつま市）",
+      "latitude": 31.418344,
+      "longitude": 130.319753,
+      "source": "https://www.kagoshima-kankou.com/event/53126",
+      "coordinate_source": "https://www.kagoshima-kankou.com/event/53126",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.kagoshima-kankou.com/event/53126",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-23",
+        "end": "2026-09-23",
+        "status": "past",
+        "source": "https://www.kagoshima-kankou.com/event/53126"
+      }
+    ]
+  },
+  {
+    "qid": "local-nagasaki-misogoro",
+    "label_ja": "みそ五郎まつり",
+    "label_en": "",
+    "prefecture": "長崎県",
+    "latitude": 32.65479210729176,
+    "longitude": 130.2952525379246,
+    "description": "南島原市西有家町の祭り。そうめんとみそ五郎伝説の町で開かれ、2026年に2年ぶりの開催が予定されている。",
+    "description_source": "https://www.nagasaki-tabinet.com/event/50397",
+    "date": "2026-11-08",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "須川商店街（南島原市西有家町）",
+      "latitude": 32.65479210729176,
+      "longitude": 130.2952525379246,
+      "source": "https://www.nagasaki-tabinet.com/event/50397",
+      "coordinate_source": "https://www.nagasaki-tabinet.com/event/50397",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.nagasaki-tabinet.com/event/50397",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と過去の開催実績を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-11-08",
+        "end": "2026-11-08",
+        "status": "scheduled",
+        "source": "https://www.nagasaki-tabinet.com/event/50397"
+      }
+    ]
+  },
+  {
+    "qid": "local-nagasaki-hirado-tsunnode",
+    "label_ja": "平戸くんち城下つんのーで祭",
+    "label_en": "",
+    "prefecture": "長崎県",
+    "latitude": 33.368142,
+    "longitude": 129.553699,
+    "description": "平戸市の市街地で、平戸くんちと同じ時期に毎年開かれる食の祭り。",
+    "description_source": "https://www.nagasaki-tabinet.com/event/51724",
+    "date": "2025-10-25～2025-10-26",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "平戸市街地一帯",
+      "latitude": 33.368142,
+      "longitude": 129.553699,
+      "source": "https://www.nagasaki-tabinet.com/event/51724",
+      "coordinate_source": "https://www.nagasaki-tabinet.com/event/51724",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.nagasaki-tabinet.com/event/51724",
+      "checked_on": "2026-10-03",
+      "evidence": "2024年と2025年の開催実績と毎年開催の案内を確認。2026年の日程は未確認で、次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2025,
+        "start": "2025-10-25",
+        "end": "2025-10-26",
+        "status": "past",
+        "source": "https://www.nagasaki-tabinet.com/event/51724"
+      },
+      {
+        "year": 2024,
+        "start": "2024-10-19",
+        "end": "2024-10-20",
+        "status": "past",
+        "source": "https://www.nagasaki-tabinet.com/event/51724"
+      }
+    ]
+  },
+  {
+    "qid": "local-nagasaki-matsura-suigun",
+    "label_ja": "松浦水軍まつり",
+    "label_en": "",
+    "prefecture": "長崎県",
+    "latitude": 33.341176053042,
+    "longitude": 129.70914959908,
+    "description": "元寇の終焉地とされる松浦市で、郷土を守った松浦党をたたえる祭り。",
+    "description_source": "https://www.nagasaki-tabinet.com/event/60838",
+    "date": "2026-10-24～2026-10-25",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "松浦市役所周辺",
+      "latitude": 33.341176053042,
+      "longitude": 129.70914959908,
+      "source": "https://www.nagasaki-tabinet.com/event/60838",
+      "coordinate_source": "https://www.nagasaki-tabinet.com/event/60838",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.nagasaki-tabinet.com/event/60838",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-24",
+        "end": "2026-10-25",
+        "status": "scheduled",
+        "source": "https://www.nagasaki-tabinet.com/event/60838"
+      }
+    ]
+  },
+  {
+    "qid": "local-tochigi-yunishigawa-heike",
+    "label_ja": "平家大祭",
+    "label_en": "",
+    "prefecture": "栃木県",
+    "latitude": 36.96213062603755,
+    "longitude": 139.5856992677311,
+    "description": "平家落人伝説が残る日光市の湯西川温泉で開かれる祭り。",
+    "description_source": "https://www.tochigiji.or.jp/event/e15248/",
+    "date": "2026-06-06～2026-06-07",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "湯西川温泉（日光市）",
+      "latitude": 36.96213062603755,
+      "longitude": 139.5856992677311,
+      "source": "https://www.tochigiji.or.jp/event/e15248/",
+      "coordinate_source": "https://www.tochigiji.or.jp/event/e15248/",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.tochigiji.or.jp/event/e15248/",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-06-06",
+        "end": "2026-06-07",
+        "status": "past",
+        "source": "https://www.tochigiji.or.jp/event/e15248/"
+      }
+    ]
+  },
+  {
+    "qid": "local-tochigi-shiobara-yumatsuri",
+    "label_ja": "塩原温泉古式湯まつり",
+    "label_en": "",
+    "prefecture": "栃木県",
+    "latitude": 36.968339,
+    "longitude": 139.8222806,
+    "description": "那須塩原市の塩原温泉で、古式の衣装をまとって行われる湯まつり。",
+    "description_source": "https://www.tochigiji.or.jp/event/e15630/",
+    "date": "2026-09-27",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "源三窟駐車場（那須塩原市塩原）",
+      "latitude": 36.968339,
+      "longitude": 139.8222806,
+      "source": "https://www.tochigiji.or.jp/event/e15630/",
+      "coordinate_source": "https://www.tochigiji.or.jp/event/e15630/",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.tochigiji.or.jp/event/e15630/",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-27",
+        "end": "2026-09-27",
+        "status": "past",
+        "source": "https://www.tochigiji.or.jp/event/e15630/"
+      }
+    ]
+  },
+  {
+    "qid": "local-tochigi-nasu-goshinka",
+    "label_ja": "那須御神火祭",
+    "label_en": "",
+    "prefecture": "栃木県",
+    "latitude": 37.0982388,
+    "longitude": 139.9998756,
+    "description": "那須町湯本の祭り。白装束の参加者が松明を持ち、那須温泉神社から殺生石まで行列する。",
+    "description_source": "https://www.tochigiji.or.jp/event/e15774/",
+    "date": "2026-05-31",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "殺生石（那須町湯本）",
+      "latitude": 37.0982388,
+      "longitude": 139.9998756,
+      "source": "https://www.tochigiji.or.jp/event/e15774/",
+      "coordinate_source": "https://www.tochigiji.or.jp/event/e15774/",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.tochigiji.or.jp/event/e15774/",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-05-31",
+        "end": "2026-05-31",
+        "status": "past",
+        "source": "https://www.tochigiji.or.jp/event/e15774/"
+      }
+    ]
+  },
+  {
+    "qid": "local-tochigi-nasu-kyubi",
+    "label_ja": "那須九尾まつり",
+    "label_en": "",
+    "prefecture": "栃木県",
+    "latitude": 37.01464588061363,
+    "longitude": 140.10919507627563,
+    "description": "那須町で九尾の狐伝説にちなんで開かれる祭り。太鼓の演奏、九尾みこし、よさこいが行われる。",
+    "description_source": "https://www.tochigiji.or.jp/event/e15784/",
+    "date": "2026-09-27",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "那須町文化センター駐車場特設会場",
+      "latitude": 37.01464588061363,
+      "longitude": 140.10919507627563,
+      "source": "https://www.tochigiji.or.jp/event/e15784/",
+      "coordinate_source": "https://www.tochigiji.or.jp/event/e15784/",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.tochigiji.or.jp/event/e15784/",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-27",
+        "end": "2026-09-27",
+        "status": "past",
+        "source": "https://www.tochigiji.or.jp/event/e15784/"
+      }
+    ]
+  },
+  {
+    "qid": "local-tochigi-mibu-yasaka",
+    "label_ja": "八坂祭（天王祭）",
+    "label_en": "",
+    "prefecture": "栃木県",
+    "latitude": 36.426999,
+    "longitude": 139.803863,
+    "description": "壬生町の蘭学通り周辺で夏に行われる、無病息災を願う祭り。",
+    "description_source": "https://www.tochigiji.or.jp/event/e17144/",
+    "date": "2026-07-11～2026-07-12",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "蘭学通り周辺（壬生町）",
+      "latitude": 36.426999,
+      "longitude": 139.803863,
+      "source": "https://www.tochigiji.or.jp/event/e17144/",
+      "coordinate_source": "https://www.tochigiji.or.jp/event/e17144/",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.tochigiji.or.jp/event/e17144/",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-11",
+        "end": "2026-07-12",
+        "status": "past",
+        "source": "https://www.tochigiji.or.jp/event/e17144/"
+      }
+    ]
+  },
+  {
+    "qid": "local-tochigi-moka-nakamura-yabusame",
+    "label_ja": "中村八幡宮例大祭（流鏑馬）",
+    "label_en": "",
+    "prefecture": "栃木県",
+    "latitude": 36.4132805,
+    "longitude": 139.9539262,
+    "description": "真岡市の中村八幡宮で毎年9月に行われる例大祭。流鏑馬が奉納される。",
+    "description_source": "https://www.tochigiji.or.jp/event/e17298/",
+    "date": "2026-09-20",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "中村八幡宮（真岡市中）",
+      "latitude": 36.4132805,
+      "longitude": 139.9539262,
+      "source": "https://www.tochigiji.or.jp/event/e17298/",
+      "coordinate_source": "https://www.tochigiji.or.jp/event/e17298/",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.tochigiji.or.jp/event/e17298/",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-20",
+        "end": "2026-09-20",
+        "status": "past",
+        "source": "https://www.tochigiji.or.jp/event/e17298/"
+      }
+    ]
+  },
+  {
+    "qid": "local-tochigi-ujiie-noryosai",
+    "label_ja": "うじいえ納涼彩",
+    "label_en": "",
+    "prefecture": "栃木県",
+    "latitude": 36.68117845961545,
+    "longitude": 139.96253382551276,
+    "description": "さくら市氏家で開かれる祭り。創作灯ろうの展示と縁日風の催しが行われる。",
+    "description_source": "https://www.tochigiji.or.jp/event/e71390/",
+    "date": "2026-09-26",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "さくらスクエア及び氏家駅周辺（さくら市）",
+      "latitude": 36.68117845961545,
+      "longitude": 139.96253382551276,
+      "source": "https://www.tochigiji.or.jp/event/e71390/",
+      "coordinate_source": "https://www.tochigiji.or.jp/event/e71390/",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.tochigiji.or.jp/event/e71390/",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-26",
+        "end": "2026-09-26",
+        "status": "past",
+        "source": "https://www.tochigiji.or.jp/event/e71390/"
+      }
+    ]
+  },
+  {
+    "qid": "local-tottori-oshiro",
+    "label_ja": "鳥取三十二万石お城まつり",
+    "label_en": "",
+    "prefecture": "鳥取県",
+    "latitude": 35.507048,
+    "longitude": 134.2369852,
+    "description": "鳥取市の鳥取城跡周辺と中心市街地で、前夜祭と本祭の2日間開かれる祭り。",
+    "description_source": "https://www.torican.jp/festival/detail_1093.html",
+    "date": "2026-10-03～2026-10-04",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "鳥取城跡・久松公園・中心市街地",
+      "latitude": 35.507048,
+      "longitude": 134.2369852,
+      "source": "https://www.torican.jp/festival/detail_1093.html",
+      "coordinate_source": "https://www.torican.jp/festival/detail_1093.html",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.torican.jp/festival/detail_1093.html",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-03",
+        "end": "2026-10-04",
+        "status": "scheduled",
+        "source": "https://www.torican.jp/festival/detail_1093.html"
+      }
+    ]
+  },
+  {
+    "qid": "local-saga-kyuragi-nakashima-yamakasa",
+    "label_ja": "中島山笠祭",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.316008,
+    "longitude": 130.072897,
+    "description": "唐津市厳木町中島で秋に行われる山笠の祭り。",
+    "description_source": "https://www.asobo-saga.jp/events/detail/820e9f35-d2ae-4bc5-a80b-01ee89940f72",
+    "date": "2026-10-10～2026-10-11",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "厳木町中島（旧JA唐津厳木選果場跡地）",
+      "latitude": 33.316008,
+      "longitude": 130.072897,
+      "source": "https://www.asobo-saga.jp/events/detail/820e9f35-d2ae-4bc5-a80b-01ee89940f72",
+      "coordinate_source": "https://www.asobo-saga.jp/events/detail/820e9f35-d2ae-4bc5-a80b-01ee89940f72",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.asobo-saga.jp/events/detail/820e9f35-d2ae-4bc5-a80b-01ee89940f72",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-10",
+        "end": "2026-10-11",
+        "status": "scheduled",
+        "source": "https://www.asobo-saga.jp/events/detail/820e9f35-d2ae-4bc5-a80b-01ee89940f72"
+      }
+    ]
+  },
+  {
+    "qid": "local-saga-kagami-kunchi",
+    "label_ja": "鏡くんち",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.432501,
+    "longitude": 130.008567,
+    "description": "唐津市の鏡神社周辺で秋に行われるくんち。地元の保存会が山笠を担う。",
+    "description_source": "https://www.asobo-saga.jp/events/detail/7379b493-e4fe-4825-80e3-402cb6074969",
+    "date": "2026-10-11～2026-10-12",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "鏡神社周辺（唐津市鏡）",
+      "latitude": 33.432501,
+      "longitude": 130.008567,
+      "source": "https://www.asobo-saga.jp/events/detail/7379b493-e4fe-4825-80e3-402cb6074969",
+      "coordinate_source": "https://www.asobo-saga.jp/events/detail/7379b493-e4fe-4825-80e3-402cb6074969",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.asobo-saga.jp/events/detail/7379b493-e4fe-4825-80e3-402cb6074969",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-11",
+        "end": "2026-10-12",
+        "status": "scheduled",
+        "source": "https://www.asobo-saga.jp/events/detail/7379b493-e4fe-4825-80e3-402cb6074969"
+      }
+    ]
+  },
+  {
+    "qid": "local-saga-yobuko-kunchi",
+    "label_ja": "呼子くんち",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.54148,
+    "longitude": 129.896336,
+    "description": "唐津市呼子町で秋に行われるくんち。",
+    "description_source": "https://www.asobo-saga.jp/events/detail/868dfccb-839b-4b50-b7b3-e1908e8ebb7d",
+    "date": "2026-10-17～2026-10-18",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "呼子町呼子（唐津市）",
+      "latitude": 33.54148,
+      "longitude": 129.896336,
+      "source": "https://www.asobo-saga.jp/events/detail/868dfccb-839b-4b50-b7b3-e1908e8ebb7d",
+      "coordinate_source": "https://www.asobo-saga.jp/events/detail/868dfccb-839b-4b50-b7b3-e1908e8ebb7d",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.asobo-saga.jp/events/detail/868dfccb-839b-4b50-b7b3-e1908e8ebb7d",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-17",
+        "end": "2026-10-18",
+        "status": "scheduled",
+        "source": "https://www.asobo-saga.jp/events/detail/868dfccb-839b-4b50-b7b3-e1908e8ebb7d"
+      }
+    ]
+  },
+  {
+    "qid": "local-saga-yoshinogari-honoo",
+    "label_ja": "吉野ヶ里ふるさと炎まつり",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.324156,
+    "longitude": 130.38876,
+    "description": "吉野ヶ里町の吉野ヶ里歴史公園で秋に開かれる祭り。",
+    "description_source": "https://www.asobo-saga.jp/events/detail/b56fde39-d3e6-4f4a-a7e4-538b15e13c1f",
+    "date": "2026-10-24～2026-10-25",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "吉野ヶ里歴史公園「祭りの広場」",
+      "latitude": 33.324156,
+      "longitude": 130.38876,
+      "source": "https://www.asobo-saga.jp/events/detail/b56fde39-d3e6-4f4a-a7e4-538b15e13c1f",
+      "coordinate_source": "https://www.asobo-saga.jp/events/detail/b56fde39-d3e6-4f4a-a7e4-538b15e13c1f",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.asobo-saga.jp/events/detail/b56fde39-d3e6-4f4a-a7e4-538b15e13c1f",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-24",
+        "end": "2026-10-25",
+        "status": "scheduled",
+        "source": "https://www.asobo-saga.jp/events/detail/b56fde39-d3e6-4f4a-a7e4-538b15e13c1f"
+      }
+    ]
+  },
+  {
+    "qid": "local-saga-hizen-yoshida-tatsu",
+    "label_ja": "肥前吉田焼辰まつり",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.081677,
+    "longitude": 130.015832,
+    "description": "嬉野市嬉野町吉田の窯元会館周辺で秋に開かれる、肥前吉田焼の器の市。",
+    "description_source": "https://www.asobo-saga.jp/events/detail/c4a9891b-c7d6-49ef-9c1b-a3b9dc518452",
+    "date": "2026-10-31～2026-11-03",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "肥前吉田焼窯元会館周辺（嬉野市嬉野町吉田）",
+      "latitude": 33.081677,
+      "longitude": 130.015832,
+      "source": "https://www.asobo-saga.jp/events/detail/c4a9891b-c7d6-49ef-9c1b-a3b9dc518452",
+      "coordinate_source": "https://www.asobo-saga.jp/events/detail/c4a9891b-c7d6-49ef-9c1b-a3b9dc518452",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.asobo-saga.jp/events/detail/c4a9891b-c7d6-49ef-9c1b-a3b9dc518452",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-31",
+        "end": "2026-11-03",
+        "status": "scheduled",
+        "source": "https://www.asobo-saga.jp/events/detail/c4a9891b-c7d6-49ef-9c1b-a3b9dc518452"
+      }
+    ]
+  },
+  {
+    "qid": "local-saga-taku-yamakasa",
+    "label_ja": "多久山笠",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.288218,
+    "longitude": 130.096496,
+    "description": "多久市北多久町で夏に行われる山笠の祭り。",
+    "description_source": "https://www.asobo-saga.jp/events/detail/33a722c0-2338-4fde-b401-83cdc5d4acd0",
+    "date": "2026-08-15～2026-08-16",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "多久市北多久町小侍（JR多久駅付近）",
+      "latitude": 33.288218,
+      "longitude": 130.096496,
+      "source": "https://www.asobo-saga.jp/events/detail/33a722c0-2338-4fde-b401-83cdc5d4acd0",
+      "coordinate_source": "https://www.asobo-saga.jp/events/detail/33a722c0-2338-4fde-b401-83cdc5d4acd0",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.asobo-saga.jp/events/detail/33a722c0-2338-4fde-b401-83cdc5d4acd0",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-15",
+        "end": "2026-08-16",
+        "status": "past",
+        "source": "https://www.asobo-saga.jp/events/detail/33a722c0-2338-4fde-b401-83cdc5d4acd0"
+      }
+    ]
+  },
+  {
+    "qid": "local-saga-kiyama-kinokuni",
+    "label_ja": "きのくに祭り",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.420984,
+    "longitude": 130.532192,
+    "description": "基山町の駅前通りと商店街一帯で夏に開かれる祭り。",
+    "description_source": "https://www.asobo-saga.jp/events/detail/08449174-d468-4b27-9540-05c2ac0163d5",
+    "date": "2026-07-18",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "基山駅前通り・基山モール商店街一帯",
+      "latitude": 33.420984,
+      "longitude": 130.532192,
+      "source": "https://www.asobo-saga.jp/events/detail/08449174-d468-4b27-9540-05c2ac0163d5",
+      "coordinate_source": "https://www.asobo-saga.jp/events/detail/08449174-d468-4b27-9540-05c2ac0163d5",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.asobo-saga.jp/events/detail/08449174-d468-4b27-9540-05c2ac0163d5",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-18",
+        "end": "2026-07-18",
+        "status": "past",
+        "source": "https://www.asobo-saga.jp/events/detail/08449174-d468-4b27-9540-05c2ac0163d5"
+      }
+    ]
+  },
+  {
+    "qid": "local-saga-kanzaki-shukuba",
+    "label_ja": "長崎街道かんざき宿場まつり",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.308679,
+    "longitude": 130.37244,
+    "description": "長崎街道の宿場町だった神埼市神埼町で夏に開かれる祭り。",
+    "description_source": "https://www.asobo-saga.jp/events/detail/4abbaf95-1d0a-4439-a8a2-12ddbf1933b4",
+    "date": "2026-07-25",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "長崎街道門前広場（神埼市神埼町）",
+      "latitude": 33.308679,
+      "longitude": 130.37244,
+      "source": "https://www.asobo-saga.jp/events/detail/4abbaf95-1d0a-4439-a8a2-12ddbf1933b4",
+      "coordinate_source": "https://www.asobo-saga.jp/events/detail/4abbaf95-1d0a-4439-a8a2-12ddbf1933b4",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.asobo-saga.jp/events/detail/4abbaf95-1d0a-4439-a8a2-12ddbf1933b4",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-07-25",
+        "end": "2026-07-25",
+        "status": "past",
+        "source": "https://www.asobo-saga.jp/events/detail/4abbaf95-1d0a-4439-a8a2-12ddbf1933b4"
+      }
+    ]
+  },
+  {
+    "qid": "local-saga-tara-noryo-hanabi",
+    "label_ja": "太良町納涼夏まつり花火大会",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.020016,
+    "longitude": 130.180121,
+    "description": "太良町で夏に開かれる納涼祭り。夜に花火大会が行われる。",
+    "description_source": "https://www.asobo-saga.jp/events/detail/ad971385-171d-43ab-8d87-4d521d73cce1",
+    "date": "2026-08-29",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "太良町B＆G海洋センター運動広場",
+      "latitude": 33.020016,
+      "longitude": 130.180121,
+      "source": "https://www.asobo-saga.jp/events/detail/ad971385-171d-43ab-8d87-4d521d73cce1",
+      "coordinate_source": "https://www.asobo-saga.jp/events/detail/ad971385-171d-43ab-8d87-4d521d73cce1",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）。県境データの海岸線精度に合わせ陸側へ約29m補正"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.asobo-saga.jp/events/detail/ad971385-171d-43ab-8d87-4d521d73cce1",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-08-29",
+        "end": "2026-08-29",
+        "status": "past",
+        "source": "https://www.asobo-saga.jp/events/detail/ad971385-171d-43ab-8d87-4d521d73cce1"
+      }
+    ]
+  },
+  {
+    "qid": "local-saga-nosso-kunchi",
+    "label_ja": "納所くんち（ガメ踊り）",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.462467,
+    "longitude": 129.815119,
+    "description": "唐津市肥前町納所の住吉神社で行われるくんち。神事の後にガメ踊りが奉納される。",
+    "description_source": "https://www.asobo-saga.jp/events/detail/b77d52ed-e327-4b64-8728-63d1469ff821",
+    "date": "2026-09-27",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "住吉神社（唐津市肥前町納所）",
+      "latitude": 33.462467,
+      "longitude": 129.815119,
+      "source": "https://www.asobo-saga.jp/events/detail/b77d52ed-e327-4b64-8728-63d1469ff821",
+      "coordinate_source": "https://www.asobo-saga.jp/events/detail/b77d52ed-e327-4b64-8728-63d1469ff821",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.asobo-saga.jp/events/detail/b77d52ed-e327-4b64-8728-63d1469ff821",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-09-27",
+        "end": "2026-09-27",
+        "status": "past",
+        "source": "https://www.asobo-saga.jp/events/detail/b77d52ed-e327-4b64-8728-63d1469ff821"
+      }
+    ]
+  },
+  {
+    "qid": "local-saga-kyushu-hanabi",
+    "label_ja": "九州花火大会",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.431645,
+    "longitude": 129.993417,
+    "description": "唐津市の松浦川で開かれる花火大会。2026年で74回目を数える。",
+    "description_source": "https://www.asobo-saga.jp/events/detail/fee60902-0206-46b3-a6e0-9ddebbd91165",
+    "date": "2026-10-10",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "松浦川 唐津大橋北側（唐津市）",
+      "latitude": 33.431645,
+      "longitude": 129.993417,
+      "source": "https://www.asobo-saga.jp/events/detail/fee60902-0206-46b3-a6e0-9ddebbd91165",
+      "coordinate_source": "https://www.asobo-saga.jp/events/detail/fee60902-0206-46b3-a6e0-9ddebbd91165",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.asobo-saga.jp/events/detail/fee60902-0206-46b3-a6e0-9ddebbd91165",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-10-10",
+        "end": "2026-10-10",
+        "status": "scheduled",
+        "source": "https://www.asobo-saga.jp/events/detail/fee60902-0206-46b3-a6e0-9ddebbd91165"
+      }
+    ]
+  },
+  {
+    "qid": "local-saga-shiroishi-pettanko",
+    "label_ja": "しろいしぺったんこ祭",
+    "label_en": "",
+    "prefecture": "佐賀県",
+    "latitude": 33.145459,
+    "longitude": 130.12468,
+    "description": "白石町の有明スカイパークふれあい郷で秋に開かれる祭り。",
+    "description_source": "https://www.asobo-saga.jp/events/detail/5bf5a987-9ebf-4a57-900e-c5d60064c28d",
+    "date": "2026-11-15",
+    "coordinate_source": "official_venue",
+    "venue": {
+      "name": "有明スカイパークふれあい郷（白石町）",
+      "latitude": 33.145459,
+      "longitude": 130.12468,
+      "source": "https://www.asobo-saga.jp/events/detail/5bf5a987-9ebf-4a57-900e-c5d60064c28d",
+      "coordinate_source": "https://www.asobo-saga.jp/events/detail/5bf5a987-9ebf-4a57-900e-c5d60064c28d",
+      "precision": "venue_area",
+      "coordinate_note": "公式案内の会場地図が示す位置（開催エリアの代表点）"
+    },
+    "lifecycle": {
+      "status": "active",
+      "source": "https://www.asobo-saga.jp/events/detail/5bf5a987-9ebf-4a57-900e-c5d60064c28d",
+      "checked_on": "2026-10-03",
+      "evidence": "2026年の開催案内と定期開催の情報を確認。次回開催の確約ではありません。"
+    },
+    "occurrences": [
+      {
+        "year": 2026,
+        "start": "2026-11-15",
+        "end": "2026-11-15",
+        "status": "scheduled",
+        "source": "https://www.asobo-saga.jp/events/detail/5bf5a987-9ebf-4a57-900e-c5d60064c28d"
       }
     ]
   }

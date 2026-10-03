@@ -46,7 +46,7 @@ func main() {
 	// API routes
 	mux.HandleFunc("/api/festivals/prefecture/", festivalHandler.GetFestivalsByPrefecture)
 	mux.HandleFunc("/api/festivals/descriptions", festivalHandler.GetAllFestivalsWithDescriptions)
-	mux.HandleFunc("/api/festivals/", festivalHandler.GetAllFestivals)
+	mux.HandleFunc("/api/festivals/", festivalHandler.GetFestivalsOrByQID)
 	mux.HandleFunc("/api/festivals", festivalHandler.GetAllFestivals)
 	mux.HandleFunc("/api/wiki/image", wikidataHandler.GetWikidataImage)
 	mux.HandleFunc("/api/wiki/links", wikidataHandler.GetWikidataLinks)

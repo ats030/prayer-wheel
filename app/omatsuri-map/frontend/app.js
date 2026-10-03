@@ -387,6 +387,8 @@ async function hydrateAbout(f,key){
 async function hydrateWikiSection(f,key,config){
   const section=document.querySelector(config.sectionId);
   if(!section)return;
+  // Official-source (local-*) records have no article; hide instead of reporting a load failure.
+  if(!wikipediaTitle(f)){section.hidden=true;return}
   const body=document.querySelector(config.bodyId),status=document.querySelector(config.statusId);
   const data=await loadWikipediaContent(f);
   if(selectedKey!==key)return;

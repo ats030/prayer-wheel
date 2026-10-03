@@ -202,3 +202,32 @@ func TestGetFestivalByQIDNotFound(t *testing.T) {
 		t.Errorf("Expected %d, got %d", http.StatusNotFound, w.Code)
 	}
 }
+
+func TestGetFestivalsOrByQIDRoutesLocalID(t *testing.T) {
+	localRow := "local-kochi-test\tTest祭L\tTest L\t高知県\t33.56\t133.53\t2026-10-01"
+	service := newTestService(t, tokyoRow, localRow)
+	handler := NewFestivalHandler(service)
+
+	w := httptest.NewRecorder()
+	handler.GetFestivalsOrByQID(w, httptest.NewRequest(http.MethodGet, "/api/festivals/local-kochi-test", nil))
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected %d, got %d", http.StatusOK, w.Code)
+	}
+	var festival services.Festival
+	if err := json.NewDecoder(w.Body).Decode(&festival); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if festival.QID != "local-kochi-test" {
+		t.Errorf("Expected local-kochi-test, got %s", festival.QID)
+	}
+
+	w = httptest.NewRecorder()
+	handler.GetFestivalsOrByQID(w, httptest.NewRequest(http.MethodGet, "/api/festivals/", nil))
+	var festivals []services.Festival
+	if err := json.NewDecoder(w.Body).Decode(&festivals); err != nil {
+		t.Fatalf("decode list: %v", err)
+	}
+	if len(festivals) != 2 {
+		t.Errorf("Expected 2 festivals, got %d", len(festivals))
+	}
+}

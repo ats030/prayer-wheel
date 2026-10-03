@@ -16,12 +16,13 @@ import unicodedata
 from urllib.parse import urlparse
 
 try:
+    from classify_festivals import classify
     from validate_prefecture_coordinates import apply_coordinate_prefectures
 except ModuleNotFoundError:
+    from scripts.classify_festivals import classify
     from scripts.validate_prefecture_coordinates import apply_coordinate_prefectures
 
 ROOT = Path(__file__).resolve().parents[1]
-CATEGORIES = {"山車・屋台", "花火", "演舞・盆踊り", "行列・渡御", "神事・祭礼", "灯籠・火祭り", "博覧会・市", "行事", "その他"}
 STATUSES = {"active", "ended", "suspended", "unknown"}
 
 
@@ -58,9 +59,8 @@ def validate(row, today=None):
             raise ValueError(f"{key}: invalid venue {field}")
         if row.get(field) != value:
             raise ValueError(f"{key}: marker must use the reviewed venue point")
-    categories = row.get("categories", [])
-    if not categories or len(set(categories)) != len(categories) or not set(categories) <= CATEGORIES:
-        raise ValueError(f"{key}: invalid categories")
+    if "categories" in row:
+        raise ValueError(f"{key}: categories are derived by classify_festivals, not hand-written")
     lifecycle = row.get("lifecycle", {})
     if lifecycle.get("status") not in STATUSES or not web_url(lifecycle.get("source")) or not lifecycle.get("evidence"):
         raise ValueError(f"{key}: lifecycle evidence required")
@@ -86,6 +86,8 @@ def apply_batch(existing, batch, features, today=None):
     for raw in batch:
         row = deepcopy(raw)
         validate(row, today)
+        # Same vocabulary and rules as the full reclassification run.
+        row["categories"] = classify(row)
         key = row["qid"]
         if key in seen:
             raise ValueError(f"duplicate batch ID: {key}")

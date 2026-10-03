@@ -47,6 +47,15 @@ func (h *FestivalHandler) GetFestivalsByPrefecture(w http.ResponseWriter, r *htt
 	json.NewEncoder(w).Encode(festivals)
 }
 
+// GetFestivalsOrByQID serves the list at /api/festivals/ and one festival at /api/festivals/:qid.
+func (h *FestivalHandler) GetFestivalsOrByQID(w http.ResponseWriter, r *http.Request) {
+	if strings.TrimSpace(strings.TrimPrefix(r.URL.Path, "/api/festivals/")) == "" {
+		h.GetAllFestivals(w, r)
+		return
+	}
+	h.GetFestivalByQID(w, r)
+}
+
 func (h *FestivalHandler) GetFestivalByQID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
