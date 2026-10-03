@@ -170,22 +170,23 @@ function populatePrefectures(){
 function populateCategories(){
   document.querySelector('#category-options').innerHTML=[...new Set(shisekis.flatMap(o=>categoryTags(o)))].sort((a,b)=>a.localeCompare(b,'ja')).map(p=>`<label class="multi-option"><input type="checkbox" value="${esc(p)}">${esc(p)}</label>`).join('');
 }
-function selectedCategories(){return [...document.querySelectorAll('#category-options input:checked')].map(input=>input.value)}
-function updateCategorySummary(){const labels=[...document.querySelectorAll('#category-options input:checked')].map(input=>input.parentElement.textContent);document.querySelector('#category-summary').textContent=!labels.length?'すべて':labels.length===1?labels[0]:`${labels[0]} ほか${labels.length-1}`}
-function clearCategories(){document.querySelectorAll('#category-options input').forEach(input=>{input.checked=false});updateCategorySummary()}
-function populateEras(){const select=document.querySelector('#era');[...new Set(shisekis.map(o=>o.era).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja')).forEach(v=>select.add(new Option(v,v)))}
+const MULTI_FILTERS=['category','era','designation'];
+function selectedValues(id){return [...document.querySelectorAll(`#${id}-options input:checked`)].map(input=>input.value)}
+function updateMultiSummary(id){const labels=[...document.querySelectorAll(`#${id}-options input:checked`)].map(input=>input.parentElement.textContent);document.querySelector(`#${id}-summary`).textContent=!labels.length?'すべて':labels.length===1?labels[0]:`${labels[0]} ほか${labels.length-1}`}
+function clearMultiFilter(id){document.querySelectorAll(`#${id}-options input`).forEach(input=>{input.checked=false});updateMultiSummary(id)}
+function populateEras(){document.querySelector('#era-options').innerHTML=[...new Set(shisekis.map(o=>o.era).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja')).map(v=>`<label class="multi-option"><input type="checkbox" value="${esc(v)}">${esc(v)}</label>`).join('')}
 function applyFilters(){
   const q=document.querySelector('#keyword').value.trim().toLocaleLowerCase('ja');
   const prefecture=document.querySelector('#prefecture').value;
-  const categories=selectedCategories();
-  const era=document.querySelector('#era').value;
-  const designation=document.querySelector('#designation').value;
+  const categories=selectedValues('category');
+  const eras=selectedValues('era');
+  const designations=selectedValues('designation');
   visible=shisekis.filter(o=>{
     const tags=categoryTags(o);
     const text=[o.label_ja,o.label_en,o.prefecture,o.description,o.era,o.designation_label,...tags].filter(Boolean).join(' ').toLocaleLowerCase('ja');
     const prefectureMatches=!prefecture||(o.prefecture===prefecture);
     const categoryMatches=!categories.length||tags.some(tag=>categories.includes(tag));
-    return text.includes(q)&&prefectureMatches&&categoryMatches&&(!era||o.era===era)&&(!designation||designationRank(o)===designation);
+    return text.includes(q)&&prefectureMatches&&categoryMatches&&(!eras.length||eras.includes(o.era))&&(!designations.length||designations.includes(designationRank(o)));
   }).sort((a,b)=>String(a.label_ja||a.label_en||'').localeCompare(String(b.label_ja||b.label_en||''),'ja'));
   renderList();renderMarkers();
   document.querySelector('#result-count').textContent=visible.length;
@@ -429,10 +430,8 @@ function closeLightbox(){const dialog=document.querySelector('#lightbox');if(dia
 
 document.querySelector('#keyword').addEventListener('input',applyFilters);
 document.querySelector('#prefecture').addEventListener('change',applyFilters);
-document.querySelector('#category-options').addEventListener('change',()=>{updateCategorySummary();applyFilters()});
-document.querySelector('#era').addEventListener('change',applyFilters);
-document.querySelector('#designation').addEventListener('change',applyFilters);
-document.querySelector('#clear-filters').addEventListener('click',()=>{for(const id of ['keyword','prefecture','era','designation'])document.querySelector(`#${id}`).value='';clearCategories();applyFilters();document.querySelector('#keyword').focus()});
+for(const id of MULTI_FILTERS)document.querySelector(`#${id}-options`).addEventListener('change',()=>{updateMultiSummary(id);applyFilters()});
+document.querySelector('#clear-filters').addEventListener('click',()=>{for(const id of ['keyword','prefecture'])document.querySelector(`#${id}`).value='';MULTI_FILTERS.forEach(clearMultiFilter);applyFilters();document.querySelector('#keyword').focus()});
 document.querySelector('.detail-close').addEventListener('click',()=>closeDetail());
 document.querySelector('.lightbox-close').addEventListener('click',closeLightbox);
 document.querySelector('#lightbox').addEventListener('click',event=>{if(event.target.id==='lightbox')closeLightbox()});

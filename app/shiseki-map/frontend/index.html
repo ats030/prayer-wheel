@@ -26,8 +26,8 @@
       <div class="filters" role="search">
         <label class="field field-wide">史跡名・地域<input id="keyword" type="search" placeholder="例：熊本城、奈良" autocomplete="off"></label>
         <label class="field">都道府県<select id="prefecture"><option value="">すべて</option></select></label>
-                <label class="field">時代<select id="era"><option value="">すべて</option></select></label>
-        <label class="field field-wide">指定区分<select id="designation"><option value="">すべて</option><option value="special">特別史跡</option><option value="national">国指定</option><option value="local">地方指定</option><option value="undesig">未指定</option><option value="unknown">不明</option></select></label>
+        <div class="field"><span id="era-label">時代</span><details class="multi-select" id="era"><summary aria-labelledby="era-label era-summary"><span class="multi-summary" id="era-summary">すべて</span></summary><div class="multi-options" id="era-options" role="group" aria-labelledby="era-label"></div></details></div>
+        <div class="field field-wide"><span id="designation-label">指定区分</span><details class="multi-select" id="designation"><summary aria-labelledby="designation-label designation-summary"><span class="multi-summary" id="designation-summary">すべて</span></summary><div class="multi-options" id="designation-options" role="group" aria-labelledby="designation-label"><label class="multi-option"><input type="checkbox" value="special">特別史跡</label><label class="multi-option"><input type="checkbox" value="national">国指定</label><label class="multi-option"><input type="checkbox" value="local">地方指定</label><label class="multi-option"><input type="checkbox" value="undesig">未指定</label><label class="multi-option"><input type="checkbox" value="unknown">不明</label></div></details></div>
         <div class="field field-wide"><span id="category-label">カテゴリ</span><details class="multi-select" id="category"><summary aria-labelledby="category-label category-summary"><span class="multi-summary" id="category-summary">すべて</span></summary><div class="multi-options" id="category-options" role="group" aria-labelledby="category-label"></div></details></div>
       </div>
       <div class="result-bar" aria-live="polite"><span><strong id="result-count">0</strong> 件の史跡</span><button id="clear-filters" type="button">条件をクリア</button></div>
@@ -43,6 +43,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" integrity="sha256-Hk4dIpcqOSb0hZjgyvFOP+cEmDXUKKNE/tT542ZbNQg=" crossorigin=""></script>
   <script src="http://ubuntu-server-app:8526/v.js" data-site="shiseki-map" defer></script>
-  <script src="/app.js?v=20261003"></script>
+  <script src="/app.js?v=20261003b"></script>
 </body>
 </html>
