@@ -28,7 +28,7 @@ GOLD = {
             'primary_domains': [],
             'milestones': [
                 {'id': 'arpanet', 'label': 'ARPANET', 'years': [1969, 1969], 'keywords': ['ARPANET']},
-                {'id': 'www', 'label': 'WWW', 'years': [1989, 1993], 'keywords': ['WWW']},
+                {'id': 'www', 'label': 'WWW', 'years': [1989, 1993], 'keywords': ['WWW', 'ワールドワイドウェブ']},
             ],
             'known_errors': [{'id': 'vienna', 'label': '断定', 'years': [1683, 1683], 'keywords': ['ウィーン'],
                               'unless': ['伝説']}],
@@ -52,6 +52,7 @@ class MatchTests(unittest.TestCase):
     def test_width_variants_match_but_unless_suppresses(self):
         www = GOLD['themes']['インターネット']['milestones'][1]
         self.assertTrue(q.matches(event(1991, 'ＷＷＷの公開'), www))
+        self.assertTrue(q.matches(event(1991, 'ワールド・ワイド・ウェブの発明'), www))
         error = GOLD['themes']['インターネット']['known_errors'][0]
         self.assertTrue(q.matches(event(1683, 'ウィーン初のカフェ'), error))
         self.assertFalse(q.matches(event(1683, 'ウィーン初のカフェ', '伝説によれば'), error))

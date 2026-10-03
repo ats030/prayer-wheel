@@ -27,7 +27,8 @@ SOURCE_KINDS = ('一次/当事者', '百科(二次)', '個人投稿', '未分類
 
 
 def normalize(text):
-    return unicodedata.normalize('NFKC', str(text or '')).casefold()
+    # 中黒と空白の有無だけで「ワールド・ワイド・ウェブ」等の表記揺れを取りこぼさない。
+    return re.sub(r'[\s・]', '', unicodedata.normalize('NFKC', str(text or '')).casefold())
 
 
 def domain(url):
