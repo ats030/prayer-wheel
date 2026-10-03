@@ -10,7 +10,7 @@ from jobs import can_delete
 
 URL = os.environ.get("TIMELINE_TEST_URL", "http://100.94.207.13:8532")
 RESULT = {"kind": "result", "theme": "テスト用の年表", "period": "全期間", "elapsed_seconds": 1.2, "notice": "ブラウザ検証専用の応答です。", "events": [{"year": 1971, "date": "1971年", "title": "テスト用の出来事", "description": '<script>window.injected=true</script> テスト本文。', "quote": "In 1971, a test event occurred.", "source": {"url": "https://example.org/history", "title": "Test history source", "context_heading": "1971年 <script>window.injected=true</script>"}}]}
-BASE = {"id": 1, "query": "テストテーマ 日本", "topic": "テストテーマ 日本", "period": "全期間", "legacy_period": False, "state": "queued", "message": "登録順に生成します。", "stage": None, "error": None, "has_result": False, "result": None, "generated_at": None}
+BASE = {"id": 1, "query": "テストテーマ 日本", "topic": "テストテーマ 日本", "period": "全期間", "legacy_period": False, "state": "queued", "message": "登録順に生成します。", "stage": None, "error": None, "has_result": False, "result": None, "generated_at": None, "updated_at": "2026-10-03T00:15:00+00:00"}
 RESULT['review_notes']=[{'date':'1683年','title':'テスト用の候補','reason':'伝説と史料に矛盾。<script>window.injected=true</script>','sources':[{'title':'補足資料','url':'https://example.org/other'},{'title':'無効なリンク','url':'javascript:window.injected=true'}]}]
 
 with sync_playwright() as playwright:
@@ -258,6 +258,8 @@ with sync_playwright() as playwright:
     page.wait_for_function("document.getElementById('list-summary').textContent.includes('1〜50')")
     assert page.locator('#previous').is_disabled()
     assert page.locator('.job-link').first.inner_text() == job['query']
+    assert page.locator('.job-updated').first.get_attribute('datetime') == '2026-10-03T00:15:00+00:00'
+    assert page.locator('.job-updated').first.inner_text().startswith('更新 2026/')
     assert page.locator('#receipt-link').get_attribute('href') == '/timelines/2'
     job = saved_job
     page.locator('#next').click()

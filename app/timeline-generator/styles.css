@@ -81,6 +81,8 @@ summary { cursor: pointer; color: var(--color-accent); min-height: 44px; padding
 .list-columns span:last-child { text-align: right; }
 .job-list { list-style: none; padding: 0; margin: 0; }
 .job-row { border-bottom: 1px solid var(--color-rule); align-items: center; padding-block: 4px; }
+.job-theme { min-width: 0; padding-bottom: 4px; }
+.job-updated { display: block; font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
 .job-link { font-size: var(--text-md); min-height: 44px; display: flex; align-items: center; overflow-wrap: anywhere; min-width: 0; }
 .job-count { text-align: right; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 .job-count small { display: block; font-size: inherit; color: var(--color-muted); }

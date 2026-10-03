@@ -10,6 +10,7 @@ function node(tag, className, text) {
   return element;
 }
 function date(value) { return new Date(value).toLocaleString("ja-JP"); }
+function shortDate(value) { return new Date(value).toLocaleString("ja-JP", {year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"}); }
 async function api(path, body) {
   const response = await fetch(path, {method: body === undefined ? "GET" : "POST", headers: {"Content-Type": "application/json"}, body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(15000)});
   const data = await response.json();
@@ -183,6 +184,10 @@ if ($("job-list")) {
         const row = node("li", "job-row");
         const link = node("a", "job-link", job.query);
         link.href = `/timelines/${job.id}`;
+        const theme = node("div", "job-theme");
+        const updated = node("time", "job-updated", `更新 ${shortDate(job.updated_at)}`);
+        updated.dateTime = job.updated_at;
+        theme.append(link, updated);
         const state = node("span", "job-state", labels[job.state]);
         state.dataset.state = job.state;
         const count = node("span", "job-count", Number.isInteger(job.event_count) ? `${job.event_count}件` : "—");
@@ -217,7 +222,7 @@ if ($("job-list")) {
             else { offset = 0; load(); }
           }
         });
-        row.append(link, state, count, remove);
+        row.append(theme, state, count, remove);
         const message = job.error || (active(job) || ["time_limit", "processing_error"].includes(job.stop_reason) ? job.message : "");
         const notes = [!job.can_delete ? "収録済みのため削除できません" : "", job.legacy_period ? "期間限定・閲覧専用" : "", message].filter(Boolean);
         if (notes.length) row.append(node("p", "help", notes.join("。")));
