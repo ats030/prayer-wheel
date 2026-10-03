@@ -45,8 +45,34 @@ class ShintoRitualCategoryTest(unittest.TestCase):
             with self.subTest(label=label):
                 self.assertNotIn(JR, cats(label))
 
-    def test_hedge_filter_does_not_change_other_categories(self):
-        self.assertIn("山車・屋台", cats("例のまつり", "山車が出る可能性があります。"))
+    def test_hedge_filter_does_not_apply_to_fireworks(self):
+        self.assertIn("花火", cats("例のまつり", "花火が上がる可能性があります。"))
+
+
+class HedgedDescriptionOtherCategoriesTest(unittest.TestCase):
+    def test_hedged_sentences_do_not_assign(self):
+        for label, desc, cat in [
+            ("例のまつり", "山車が出る可能性があります。", "山車・屋台"),
+            ("つきがた夏まつり", "盆踊りが行われることが多いとされています。", "演舞・盆踊り"),
+            ("村上大祭", "神輿の渡御が行われると考えられます。", "行列・渡御"),
+            ("わっしょい百万夏祭り", "提灯が飾られる様子がうかがえます。", "灯籠・火祭り"),
+        ]:
+            with self.subTest(label=label):
+                self.assertNotIn(cat, cats(label, desc))
+
+    def test_assertive_sentences_still_assign(self):
+        self.assertIn("行列・渡御", cats("例のまつり", "毎年5月に神輿の渡御がある。"))
+        # 「各地区」は一般論の「各地」ではない。
+        self.assertIn("山車・屋台", cats("加悦谷祭", "各地区から山車が出る。"))
+
+    def test_label_keeps_assignment_without_description(self):
+        for label, cat in [
+            ("弘前ねぷた", "灯籠・火祭り"),
+            ("仙台クラシックフェスティバル", "音楽・映画・芸術"),
+            ("ぴあフィルムフェスティバル", "音楽・映画・芸術"),
+        ]:
+            with self.subTest(label=label):
+                self.assertIn(cat, cats(label))
 
 
 if __name__ == "__main__":

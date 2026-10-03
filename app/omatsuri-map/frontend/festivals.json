@@ -1415,7 +1415,6 @@
     "jalan_sml_code": "012908",
     "jalan_sml_name": "夕張・岩見沢",
     "categories": [
-      "演舞・盆踊り",
       "市民・観光まつり"
     ]
   },
@@ -1435,8 +1434,7 @@
     "jalan_sml_code": "121108",
     "jalan_sml_name": "松戸・柏",
     "categories": [
-      "山車・屋台",
-      "演舞・盆踊り"
+      "山車・屋台"
     ]
   },
   {
@@ -2554,7 +2552,6 @@
     "jalan_sml_code": "040505",
     "jalan_sml_name": "黒川",
     "categories": [
-      "演舞・盆踊り",
       "市民・観光まつり"
     ]
   },
@@ -2576,7 +2573,8 @@
     "jalan_sml_name": "栗原・登米",
     "categories": [
       "山車・屋台",
-      "演舞・盆踊り"
+      "演舞・盆踊り",
+      "灯籠・火祭り"
     ]
   },
   {
@@ -3134,7 +3132,6 @@
     "jalan_sml_name": "深川・滝川",
     "categories": [
       "山車・屋台",
-      "行列・渡御",
       "神事・祭礼"
     ]
   },
@@ -3256,7 +3253,8 @@
     "jalan_sml_code": "020511",
     "jalan_sml_name": "大鰐・碇ヶ関・黒石",
     "categories": [
-      "山車・屋台"
+      "山車・屋台",
+      "灯籠・火祭り"
     ]
   },
   {
@@ -3277,7 +3275,8 @@
     "jalan_sml_code": "020202",
     "jalan_sml_name": "青森・浅虫・八甲田",
     "categories": [
-      "山車・屋台"
+      "山車・屋台",
+      "灯籠・火祭り"
     ]
   },
   {
@@ -3317,7 +3316,8 @@
     "jalan_sml_code": "020511",
     "jalan_sml_name": "大鰐・碇ヶ関・黒石",
     "categories": [
-      "山車・屋台"
+      "山車・屋台",
+      "灯籠・火祭り"
     ]
   },
   {
@@ -4219,7 +4219,6 @@
     "jalan_sml_code": "070205",
     "jalan_sml_name": "二本松・岳・大玉",
     "categories": [
-      "演舞・盆踊り",
       "神事・祭礼",
       "灯籠・火祭り"
     ]
@@ -6334,7 +6333,6 @@
     "jalan_sml_code": "170502",
     "jalan_sml_name": "瀬波・村上",
     "categories": [
-      "行列・渡御",
       "神事・祭礼"
     ],
     "cultural_relaw": {
@@ -6785,9 +6783,7 @@
     "jalan_lrg_name": "加賀・小松・辰口",
     "jalan_sml_code": "192605",
     "jalan_sml_name": "加賀",
-    "categories": [
-      "行列・渡御"
-    ]
+    "categories": []
   },
   {
     "qid": "Q48744152",
@@ -9641,7 +9637,6 @@
     "jalan_sml_name": "堺・泉大津",
     "categories": [
       "山車・屋台",
-      "行列・渡御",
       "神事・祭礼"
     ]
   },
@@ -10012,9 +10007,7 @@
     "jalan_lrg_name": "神戸・有馬・明石",
     "jalan_sml_code": "280208",
     "jalan_sml_name": "元町・メリケンパーク",
-    "categories": [
-      "演舞・盆踊り"
-    ]
+    "categories": []
   },
   {
     "qid": "Q65269913",
@@ -11365,9 +11358,7 @@
     "jalan_lrg_name": "福山・竹原・呉",
     "jalan_sml_code": "340302",
     "jalan_sml_name": "福山・尾道・しまなみ",
-    "categories": [
-      "行列・渡御"
-    ]
+    "categories": []
   },
   {
     "qid": "Q446474",
@@ -12037,9 +12028,7 @@
     "jalan_lrg_name": "佐賀・古湯・熊の川",
     "jalan_sml_code": "410202",
     "jalan_sml_name": "佐賀・古湯・熊の川",
-    "categories": [
-      "行列・渡御"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11630177",
@@ -12456,9 +12445,7 @@
     "jalan_lrg_name": "日向・延岡・高千穂",
     "jalan_sml_code": "450502",
     "jalan_sml_name": "日向",
-    "categories": [
-      "山車・屋台"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11262273",
@@ -13206,10 +13193,7 @@
     "jalan_lrg_name": "祇園・東山・北白川周辺",
     "jalan_sml_code": "262305",
     "jalan_sml_name": "北山・宝ヶ池",
-    "categories": [
-      "演舞・盆踊り",
-      "行列・渡御"
-    ]
+    "categories": []
   },
   {
     "qid": "Q24876853",
@@ -13519,9 +13503,7 @@
     "jalan_lrg_name": "神戸・有馬・明石",
     "jalan_sml_code": "280205",
     "jalan_sml_name": "三宮・ポートアイランド",
-    "categories": [
-      "山車・屋台"
-    ]
+    "categories": []
   },
   {
     "qid": "Q109357776",
@@ -16323,10 +16305,7 @@
     "jalan_lrg_name": "北九州",
     "jalan_sml_code": "400802",
     "jalan_sml_name": "北九州市（小倉・八幡・門司）",
-    "categories": [
-      "演舞・盆踊り",
-      "灯籠・火祭り"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11366524",
@@ -17127,9 +17106,7 @@
     "jalan_lrg_name": "浜松・浜名湖",
     "jalan_sml_code": "213509",
     "jalan_sml_name": "浜松・浜北",
-    "categories": [
-      "行列・渡御"
-    ]
+    "categories": []
   },
   {
     "qid": "Q11662899",
@@ -18898,7 +18875,8 @@
     "jalan_sml_code": "090802",
     "jalan_sml_name": "赤城",
     "categories": [
-      "山車・屋台"
+      "山車・屋台",
+      "灯籠・火祭り"
     ],
     "description_source": "https://www.city.ota.gunma.jp/site/kankou/1037648.html",
     "venue": {
@@ -23909,7 +23887,8 @@
     "jalan_sml_code": "020202",
     "jalan_sml_name": "青森・浅虫・八甲田",
     "categories": [
-      "山車・屋台"
+      "山車・屋台",
+      "灯籠・火祭り"
     ]
   },
   {
