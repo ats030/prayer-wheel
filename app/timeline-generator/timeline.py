@@ -29,7 +29,7 @@ OLLAMA_URL = os.environ.get("TIMELINE_OLLAMA_URL", "http://127.0.0.1:11434").rst
 MODEL = os.environ.get("TIMELINE_MODEL", "gemma4:12b")
 VERIFY_MODEL = os.environ.get("TIMELINE_VERIFY_MODEL", "qwen3.8:27b")
 TIME_LIMIT = 3600
-MAX_EVENTS = 100
+MAX_EVENTS = 50
 BATCH_EVENTS = 7
 MAX_CONSECUTIVE_FAILURES = 2
 MODEL_RETRY_DELAY = 10
@@ -800,7 +800,7 @@ def timeline_result(query, events, review_notes, started, stop_reason='sources_e
     elif stop_reason == 'processing_error':
         notice = '途中の処理を完了できなかったため、検証済みの出来事までを保存しています。再生成で調べ直せます。' + notice
     elif stop_reason == 'event_limit':
-        notice = '収録上限の100件に達したため終了しました。' + notice
+        notice = f'収録上限の{MAX_EVENTS}件に達したため終了しました。' + notice
     return {'kind': 'result', 'theme': query.topic, 'query': query.original, 'period': query.period,
             'events': events, 'notice': notice, 'review_notes': review_notes, 'stop_reason': stop_reason,
             'max_events': MAX_EVENTS, 'pipeline_version': PIPELINE_VERSION,

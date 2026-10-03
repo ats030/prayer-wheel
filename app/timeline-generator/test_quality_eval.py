@@ -132,7 +132,7 @@ class ReportTests(unittest.TestCase):
         self.assertTrue(axes['known_errors']['passed'])
         self.assertEqual((axes['duplicates']['value'], axes['duplicates']['passed']), (0.25, False))
         self.assertEqual((axes['primary']['value'], axes['personal']['value']), (0.5, 0.25))
-        self.assertEqual((axes['concentration']['value'], axes['events']['display']), (0.5, '4 / 100件'))
+        self.assertEqual((axes['concentration']['value'], axes['events']['display']), (0.5, '4 / 50件'))
         self.assertEqual(axes['elapsed']['value'], 0.5)
         self.assertEqual(axes['elapsed']['note'], '時間上限で終了（当時の短い上限）')
         same = [event(1958, 'チキンラーメン', url='https://www.raumen.co.jp/a')] * 4

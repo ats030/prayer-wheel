@@ -70,16 +70,16 @@ class BatchTests(unittest.TestCase):
         with patch.object(t, 'search', return_value=[{}]), patch.object(t.WebReader, 'fetch', return_value=source), patch.object(t, 'crosscheck_sources', return_value=[]), patch.object(t, 'model_json', side_effect=model):
             return t.build_timeline(t.parse_query('研究'), (records if records is not None else []).append)
 
-    def test_more_than_thirty_candidates_survive_and_one_hundred_is_hard_cap(self):
+    def test_more_than_thirty_candidates_survive_and_max_events_is_hard_cap(self):
         records = []
         result = self.run_generation(history_source(), records=records)
-        self.assertEqual(len(result['events']), 100)
+        self.assertEqual(len(result['events']), t.MAX_EVENTS)
         self.assertEqual(result['stop_reason'], 'event_limit')
-        self.assertEqual(len({e['year'] for e in result['events']}), 100)
+        self.assertEqual(len({e['year'] for e in result['events']}), t.MAX_EVENTS)
         self.assertEqual(result['events'], sorted(result['events'], key=lambda e: e['year']))
         self.assertTrue(all('_context' not in e for e in result['events']))
         checkpoints = [r for r in records if r['kind'] == 'checkpoint']
-        self.assertEqual([len(r['events']) for r in checkpoints], list(range(t.BATCH_EVENTS, 100, t.BATCH_EVENTS)) + [100])
+        self.assertEqual([len(r['events']) for r in checkpoints], list(range(t.BATCH_EVENTS, t.MAX_EVENTS, t.BATCH_EVENTS)) + [t.MAX_EVENTS])
 
     def test_disjoint_material_retains_context_and_all_sources(self):
         sources = [history_source(35) | {'url': f'https://example.org/{i}'} for i in range(10)]
