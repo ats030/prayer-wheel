@@ -234,6 +234,15 @@ class QueueTests(unittest.TestCase):
         self.assertEqual((page["total"], len(page["jobs"])), (55, 5))
         self.assertNotIn("result", page["jobs"][0])
 
+    def test_listing_puts_recently_updated_jobs_first(self):
+        with patch("jobs.now", return_value="2026-10-03T00:00:00+00:00"):
+            first = self.submit("テーマA")
+            second = self.submit("テーマB")
+        self.assertEqual([j["id"] for j in self.store.listing()["jobs"]], [second["id"], first["id"]])
+        with patch("jobs.now", return_value="2026-10-03T00:00:01+00:00"):
+            self.store.claim()
+        self.assertEqual([j["id"] for j in self.store.listing()["jobs"]], [first["id"], second["id"]])
+
     def test_listing_counts_preserve_empty_unbuilt_and_previous_results(self):
         job = self.submit("研究")
         row = self.store.listing()["jobs"][0]

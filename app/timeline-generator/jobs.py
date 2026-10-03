@@ -139,7 +139,7 @@ class JobStore:
                 started_at, stage, message, error, generated_at,
                 result IS NOT NULL AS has_result, json_array_length(result, '$.events') AS event_count,
                 json_extract(result, '$.stop_reason') AS stop_reason
-                FROM jobs ORDER BY id DESC LIMIT ? OFFSET ?""", (limit, offset)).fetchall()
+                FROM jobs ORDER BY updated_at DESC, id DESC LIMIT ? OFFSET ?""", (limit, offset)).fetchall()
             jobs = []
             for row in rows:
                 item = dict(row)
