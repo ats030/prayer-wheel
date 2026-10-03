@@ -242,19 +242,21 @@ function populatePrefectures(){
   [...new Set(festivals.map(f=>f.prefecture).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja')).forEach(p=>select.add(new Option(p,p)));
 }
 function populateCategories(){
-  const select=document.querySelector('#category');
-  CATEGORY_META.filter(meta=>meta.code!=='kt').forEach(meta=>select.add(new Option(meta.label,meta.code)));
+  document.querySelector('#category-options').innerHTML=CATEGORY_META.filter(meta=>meta.code!=='kt').map(meta=>[meta.code,meta.label]).map(([value,label])=>`<label class="multi-option"><input type="checkbox" value="${esc(value)}">${esc(label)}</label>`).join('');
 }
+function selectedCategories(){return [...document.querySelectorAll('#category-options input:checked')].map(input=>input.value)}
+function updateCategorySummary(){const labels=[...document.querySelectorAll('#category-options input:checked')].map(input=>input.parentElement.textContent);document.querySelector('#category-summary').textContent=!labels.length?'すべて':labels.length===1?labels[0]:`${labels[0]} ほか${labels.length-1}`}
+function clearCategories(){document.querySelectorAll('#category-options input').forEach(input=>{input.checked=false});updateCategorySummary()}
 function applyFilters(){
   const q=document.querySelector('#keyword').value.trim().toLocaleLowerCase('ja');
   const prefecture=document.querySelector('#prefecture').value;
-  const category=document.querySelector('#category').value;
+  const categories=selectedCategories();
   const dateStart=document.querySelector('#festival-date-start').value;
   const dateEnd=document.querySelector('#festival-date-end').value;
   visible=festivals.filter(f=>{
     const text=[f.label_ja,f.label_en,f.prefecture,f.description].filter(Boolean).join(' ').toLocaleLowerCase('ja');
     const prefectureMatches=!prefecture||(f.prefecture===prefecture&&f.coordinate_prefecture===prefecture);
-    const categoryMatches=!category||categoryCode(f)===category;
+    const categoryMatches=!categories.length||categories.includes(categoryCode(f));
     return text.includes(q)&&prefectureMatches&&categoryMatches&&matchesLifecycle(f,'current')&&matchesDate(f,dateStart,dateEnd);
   }).sort(compareByNextOccurrence);
   renderList();renderMarkers();
@@ -502,10 +504,10 @@ function closeLightbox(){const dialog=document.querySelector('#lightbox');if(dia
 
 document.querySelector('#keyword').addEventListener('input',applyFilters);
 document.querySelector('#prefecture').addEventListener('change',applyFilters);
-document.querySelector('#category').addEventListener('change',applyFilters);
+document.querySelector('#category-options').addEventListener('change',()=>{updateCategorySummary();applyFilters()});
 document.querySelector('#festival-date-start').addEventListener('change',applyFilters);
 document.querySelector('#festival-date-end').addEventListener('change',applyFilters);
-document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';document.querySelector('#category').value='';document.querySelector('#festival-date-start').value='';document.querySelector('#festival-date-end').value='';applyFilters();document.querySelector('#keyword').focus()});
+document.querySelector('#clear-filters').addEventListener('click',()=>{document.querySelector('#keyword').value='';document.querySelector('#prefecture').value='';clearCategories();document.querySelector('#festival-date-start').value='';document.querySelector('#festival-date-end').value='';applyFilters();document.querySelector('#keyword').focus()});
 document.querySelector('.detail-close').addEventListener('click',()=>closeDetail());
 document.querySelector('.lightbox-close').addEventListener('click',closeLightbox);
 document.querySelector('#lightbox').addEventListener('click',event=>{if(event.target.id==='lightbox')closeLightbox()});
