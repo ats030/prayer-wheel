@@ -21,7 +21,7 @@ from urllib.robotparser import RobotFileParser
 USER_AGENT = "TimelineGenerator/0.1 (personal historical research; contact: ats030@gmail.com)"
 SEARCH_URL = os.environ.get("TIMELINE_SEARCH_URL", "http://127.0.0.1:8081").rstrip("/")
 # 出典の格付け。順位の加減点だけに使い、除外はしない。quality_eval も同じ一覧で分類する。
-INSTITUTION_HOSTS = ('go.jp', 'ac.jp', 'lg.jp', 'ed.jp', 'gov', 'edu', 'nhk.or.jp')
+INSTITUTION_HOSTS = ('go.jp', 'ac.jp', 'lg.jp', 'ed.jp', 'gov', 'gv.at', 'edu', 'nhk.or.jp')
 ENCYCLOPEDIA_HOSTS = ('wikipedia.org', 'kotobank.jp', 'britannica.com')
 PERSONAL_HOSTS = ('fc2.com', 'cocolog-nifty.com', 'hatenablog.com', 'hatenablog.jp', 'hateblo.jp', 'ameblo.jp',
                   'note.com', 'livedoor.jp', 'livedoor.blog', 'seesaa.net', 'goo.ne.jp', 'blogspot.com')
@@ -382,6 +382,15 @@ def source_tier(url):
     return 0
 
 
+def authority(result):
+    # 照合候補の順位。ドメイン格付けは検索と同じ source_tier を使い、名称の手掛かりは同格内の並びだけに効かせる。
+    try:
+        tier = source_tier(result.get('url', ''))
+    except ValueError:
+        return -100
+    return tier + bool(re.search(r'公式|博物館|museum|official|大学', result.get('title', '') + ' ' + result.get('url', ''), re.I))
+
+
 def search(query):
     def run(suffix):
         params = urlencode({"q": query.topic + suffix, "format": "json", "language": "ja-JP", "categories": "general"})
@@ -517,9 +526,6 @@ def crosscheck_sources(events, sources, query, deadline):
     candidates = []
     with ThreadPoolExecutor(max_workers=3) as pool:
         for text, results in zip(queries,pool.map(run, queries)):
-            def authority(result):
-                text=result.get('title','')+' '+result.get('url','')
-                return bool(re.search(r'\.gov\b|\.go\.jp|\.gv\.at|\.edu\b|\.ac\.jp',text)) * 3 + bool(re.search(r'公式|博物館|museum|official|大学',text,re.I))
             selected = 0
             for result in sorted(results,key=authority,reverse=True):
                 url=result.get('url','')

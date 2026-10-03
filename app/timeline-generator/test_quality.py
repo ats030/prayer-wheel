@@ -133,6 +133,14 @@ class ContextTests(unittest.TestCase):
         with patch.object(t,'json_request',return_value={'results':results[:1]}):
             self.assertEqual(len(t.search(t.parse_query('ラーメン'))),1)
         self.assertEqual(t.source_tier('https://ramen-museum.hatenablog.com/x'),-6)
+        self.assertEqual(t.source_tier('https://www.wien.gv.at/kaffee'),6)
+
+    def test_crosscheck_authority_shares_source_tier(self):
+        results=[{'title':'Vienna coffee history','url':f'https://{host}/kaffee'} for host in ['blog.example.hatenablog.com','example.com','www.wien.gv.at']]
+        results.append({'title':'Vienna official coffee history','url':'https://example.org/kaffee'})
+        actual=[r['url'] for r in sorted(results,key=t.authority,reverse=True)]
+        self.assertEqual(actual,['https://www.wien.gv.at/kaffee','https://example.org/kaffee','https://example.com/kaffee','https://blog.example.hatenablog.com/kaffee'])
+        self.assertEqual(t.authority({'url':'http://[::1'}),-100)
 
     def test_crosscheck_uses_specific_subject_and_skips_duplicates(self):
         source=article('<h2>1685</h2><p>Vienna opened its first documented coffee house in 1685.</p>')
