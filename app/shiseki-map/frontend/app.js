@@ -174,8 +174,11 @@ const MULTI_FILTERS=['category','era','designation'];
 function selectedValues(id){return [...document.querySelectorAll(`#${id}-options input:checked`)].map(input=>input.value)}
 function updateMultiSummary(id){const labels=[...document.querySelectorAll(`#${id}-options input:checked`)].map(input=>input.parentElement.textContent);document.querySelector(`#${id}-summary`).textContent=!labels.length?'すべて':labels.length===1?labels[0]:`${labels[0]} ほか${labels.length-1}`}
 function clearMultiFilter(id){document.querySelectorAll(`#${id}-options input`).forEach(input=>{input.checked=false});updateMultiSummary(id)}
-function eraTags(o){return String(o.era||'').split('・').map(v=>v.trim()).filter(Boolean)}
-function populateEras(){document.querySelector('#era-options').innerHTML=[...new Set(shisekis.flatMap(eraTags))].sort((a,b)=>a.localeCompare(b,'ja')).map(v=>`<label class="multi-option"><input type="checkbox" value="${esc(v)}">${esc(v)}</label>`).join('')}
+const ERA_ORDER=['旧石器時代','縄文時代','続縄文時代','弥生時代','古墳時代','飛鳥時代','奈良時代','平安時代','鎌倉時代','南北朝時代','室町時代','安土桃山時代','江戸時代','明治時代','大正時代','昭和時代','平成時代','令和時代'];
+// 元データの細分・表記揺れを時代区分へ寄せる。更新世は地質時代のため分類しない。
+const ERA_ALIASES=new Map([['日本列島の旧石器時代','旧石器時代'],['縄文時代中期','縄文時代'],['平安時代前期','平安時代'],['平安時代中期','平安時代'],['平安時代後期','平安時代'],['鎌倉前期','鎌倉時代'],['戦国時代','室町時代'],['江戸中期','江戸時代'],['幕末','江戸時代'],['彷徨五年','奈良時代']]);
+function eraTags(o){return [...new Set(String(o.era||'').split('・').map(v=>v.trim()).map(v=>ERA_ALIASES.get(v)||v).filter(v=>ERA_ORDER.includes(v)))]}
+function populateEras(){const used=new Set(shisekis.flatMap(eraTags));document.querySelector('#era-options').innerHTML=ERA_ORDER.filter(v=>used.has(v)).map(v=>`<label class="multi-option"><input type="checkbox" value="${esc(v)}">${esc(v)}</label>`).join('')}
 function applyFilters(){
   const q=document.querySelector('#keyword').value.trim().toLocaleLowerCase('ja');
   const prefecture=document.querySelector('#prefecture').value;
