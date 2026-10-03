@@ -38,7 +38,9 @@ class JobCancellation:
         if self.stopping.is_set():
             return True
         with self.store.connect() as db:
-            return db.execute("SELECT 1 FROM jobs WHERE id=?", (self.identifier,)).fetchone() is None
+            row = db.execute("SELECT state FROM jobs WHERE id=?", (self.identifier,)).fetchone()
+            # Deletion and cancellation both leave the running state.
+            return row is None or row["state"] != "running"
 
     def wait(self, timeout=None):
         deadline = None if timeout is None else time.monotonic() + timeout
@@ -160,6 +162,21 @@ class JobStore:
             db.execute("DELETE FROM jobs WHERE id=?", (identifier,))
             return {"id": identifier, "deleted": True}
 
+    def cancel(self, identifier):
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT * FROM jobs WHERE id=?", (identifier,)).fetchone()
+            if row is None:
+                return None
+            if row["state"] not in {"queued", "running"}:
+                raise ValueError("待機中・生成中の処理だけ中止できます。")
+            # A cancelled regeneration keeps the previous saved timeline.
+            if row["result"] is not None:
+                db.execute("UPDATE jobs SET state='complete', updated_at=?, stage=NULL, message='処理を中止しました。前回の結果を表示しています。' WHERE id=?", (now(), identifier))
+            else:
+                db.execute("UPDATE jobs SET state='cancelled', updated_at=?, stage=NULL, message='処理を中止しました。再試行で生成し直せます。', error=NULL WHERE id=?", (now(), identifier))
+            return self.decode(db.execute("SELECT * FROM jobs WHERE id=?", (identifier,)).fetchone())
+
     def requeue(self, identifier, action):
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")
@@ -170,8 +187,8 @@ class JobStore:
                 raise ValueError(LEGACY_PERIOD_ERROR)
             if row["state"] in {"queued", "running"}:
                 return self.decode(row)
-            if action == "retry" and row["state"] != "failed":
-                raise ValueError("失敗した処理だけ再試行できます。")
+            if action == "retry" and row["state"] not in {"failed", "cancelled"}:
+                raise ValueError("失敗・中止した処理だけ再試行できます。")
             if action == "regenerate" and row["result"] is None:
                 raise ValueError("生成済みの年表だけ再生成できます。")
             db.execute("UPDATE jobs SET state='queued', queue_order=?, updated_at=?, started_at=NULL, stage=NULL, message='登録順に生成します。', error=NULL WHERE id=?", (self.next_order(db), now(), identifier))

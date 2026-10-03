@@ -46,6 +46,11 @@ with sync_playwright() as playwright:
                 except TimelineError as exc:
                     route.fulfill(status=400, content_type='application/json', body=json.dumps({'error': str(exc)}))
                     return
+            if path.endswith('/cancel'):
+                job = job | ({'state': 'complete', 'message': '処理を中止しました。前回の結果を表示しています。'} if job.get('result')
+                             else {'state': 'cancelled', 'message': '処理を中止しました。再試行で生成し直せます。'})
+                route.fulfill(status=200, content_type='application/json', body=json.dumps(job))
+                return
             if path.endswith("/retry") or path.endswith("/regenerate"):
                 job = job | {"state": "queued", "error": None, "message": "登録順に生成します。"}
             elif json.loads(request.post_data).get("query") == "エラー":
@@ -390,6 +395,33 @@ with sync_playwright() as playwright:
         page.locator('.job-delete').click()
         page.locator('#list-empty').wait_for()
         assert page.locator('#delete-status').is_visible()
+    # Cancellation: active rows show both operations; confirmation guards the request.
+    for width in [320, 768, 1280]:
+        total = 1
+        job = BASE | {'state': 'running'}
+        page.set_viewport_size({'width': width, 'height': 900})
+        page.goto(URL)
+        page.locator('.job-cancel:not(:disabled)').wait_for()
+        assert page.locator('.job-delete').count() == 1
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('cancel', width)
+    count_before = posted.count('/api/jobs/1/cancel')
+    page.once('dialog', lambda dialog: dialog.dismiss())
+    page.locator('.job-cancel').click()
+    assert posted.count('/api/jobs/1/cancel') == count_before
+    page.once('dialog', lambda dialog: dialog.accept())
+    page.locator('.job-cancel').click()
+    page.wait_for_function("!document.querySelector('.job-cancel')")
+    assert posted.count('/api/jobs/1/cancel') == count_before + 1
+    assert '中止' in page.locator('.job-state').inner_text()
+    job = BASE | {'state': 'running'}
+    page.goto(URL + '/timelines/1')
+    page.locator('#cancel:not([hidden])').wait_for()
+    assert page.locator('#retry').is_hidden()
+    page.once('dialog', lambda dialog: dialog.accept())
+    page.locator('#cancel').click()
+    page.locator('#retry:not([hidden])').wait_for()
+    assert page.locator('#cancel').is_hidden()
+    assert '再試行で生成し直せます' in page.locator('#job-message').inner_text()
     # Evaluation axes: bars on the detail page and a per-axis comparison of all jobs.
     job = BASE | {'state': 'complete', 'has_result': True, 'generated_at': BASE['updated_at'],
                   'query': 'ラーメン', 'result': RESULT | {'theme': 'ラーメン', 'events': [RESULT['events'][0] | {'year': 1958, 'title': 'チキンラーメン発売'}]}}
@@ -414,7 +446,7 @@ with sync_playwright() as playwright:
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('quality', width)
         page.screenshot(path=f'/tmp/timeline-generator-quality-{width}.png', full_page=True)
     assert errors == [], errors
-    print("PASS: 5 widths, dense 100 rows, no quote DOM, folded metadata, counts and timeout notice, pages, continued registration, polling, stale poll/action race, saved reuse, retry, regeneration, old result, keyboard, XSS, pagination, empty, errors, deletion protection/confirmation/cancel/race/retry/zoom", flush=True)
+    print("PASS: 5 widths, dense 100 rows, no quote DOM, folded metadata, counts and timeout notice, pages, continued registration, polling, stale poll/action race, saved reuse, retry, regeneration, old result, keyboard, XSS, pagination, empty, errors, deletion protection/confirmation/cancel/race/retry/zoom, job cancellation", flush=True)
     if len(sys.argv) > 1 and sys.argv[1] == "--live":
         context.unroute("**/api/jobs**")
         context.unroute('**/*', serve_page)

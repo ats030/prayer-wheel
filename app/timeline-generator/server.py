@@ -178,7 +178,7 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(404, {"error": "ページが見つかりません。"})
 
     def do_POST(self):
-        action = re.fullmatch(r"/api/jobs/([1-9][0-9]{0,17})/(retry|regenerate|delete)", self.path)
+        action = re.fullmatch(r"/api/jobs/([1-9][0-9]{0,17})/(retry|regenerate|delete|cancel)", self.path)
         if self.path != "/api/jobs" and action is None:
             return self.reply(404, {"error": "ページが見つかりません。"})
         # Browser cross-origin and DNS-rebinding requests cannot trigger model calls.
@@ -202,7 +202,13 @@ class Handler(BaseHTTPRequestHandler):
             status = 201 if created else 200
         else:
             try:
-                job = self.server.jobs.delete(int(action[1])) if action[2] == "delete" else self.server.jobs.requeue(int(action[1]), action[2])
+                identifier = int(action[1])
+                if action[2] == "delete":
+                    job = self.server.jobs.delete(identifier)
+                elif action[2] == "cancel":
+                    job = self.server.jobs.cancel(identifier)
+                else:
+                    job = self.server.jobs.requeue(identifier, action[2])
             except ValueError as exc:
                 return self.reply(409, {"error": str(exc)})
             if job is None:

@@ -198,6 +198,59 @@ class QueueTests(unittest.TestCase):
         self.assertEqual(self.submit("京都")["result"], result)
         self.assertEqual(self.store.claim()["id"], second["id"])
 
+    def test_cancel_running_keeps_job_and_continues_with_next(self):
+        first = self.submit('中止する')
+        second = self.submit('中止後のテーマ')
+        entered, cancelled, done = threading.Event(), threading.Event(), threading.Event()
+        def pipeline(query, emit, stopping):
+            if query.topic == '中止する':
+                entered.set()
+                if stopping.wait(3):
+                    cancelled.set()
+                emit({'kind':'result','events':[{'year':1900}]})
+            else:
+                emit({'kind':'result','events':[]})
+                done.set()
+        worker = QueueWorker(self.store, pipeline)
+        worker.start()
+        try:
+            self.assertTrue(entered.wait(3))
+            self.assertEqual(self.store.cancel(first['id'])['state'], 'cancelled')
+            self.assertTrue(cancelled.wait(3))
+            self.assertTrue(done.wait(3))
+            stored = self.store.get(first['id'])
+            self.assertEqual((stored['state'], stored['result'], stored['error']), ('cancelled', None, None))
+            self.assertEqual(self.store.get(second['id'])['state'], 'complete')
+        finally:
+            worker.stop()
+        self.assertEqual(self.store.requeue(first['id'], 'retry')['state'], 'queued')
+
+    def test_cancel_regeneration_restores_previous_result(self):
+        job = self.submit('再生成中止')
+        self.store.claim()
+        result = {'kind': 'result', 'events': [{'year': 1900}]}
+        self.store.record(job['id'], result)
+        self.store.requeue(job['id'], 'regenerate')
+        self.store.claim()
+        token = JobCancellation(self.store, job['id'], threading.Event())
+        self.assertFalse(token.is_set())
+        cancelled = self.store.cancel(job['id'])
+        self.assertTrue(token.is_set())
+        self.assertEqual((cancelled['state'], cancelled['result']), ('complete', result))
+        self.store.record(job['id'], {'kind': 'result', 'events': []})
+        self.assertEqual(self.store.get(job['id'])['result'], result)
+
+    def test_cancel_rules(self):
+        job = self.submit('待機中止')
+        self.assertEqual(self.store.cancel(job['id'])['state'], 'cancelled')
+        self.assertIsNone(self.store.claim())
+        with self.assertRaisesRegex(ValueError, '中止できます'):
+            self.store.cancel(job['id'])
+        with self.assertRaisesRegex(ValueError, '再生成'):
+            self.store.requeue(job['id'], 'regenerate')
+        self.assertTrue(self.store.get(job['id'])['can_delete'])
+        self.assertIsNone(self.store.cancel(9999999))
+
     def test_retry_moves_to_tail_and_failed_refresh_keeps_old_result(self):
         first = self.submit("京都")
         self.store.claim()

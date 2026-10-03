@@ -1,7 +1,7 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
 const stages = ["search", "read", "generate", "verify"];
-const labels = {queued: "待機中", running: "生成中", complete: "完了", failed: "失敗"};
+const labels = {queued: "待機中", running: "生成中", complete: "完了", failed: "失敗", cancelled: "中止"};
 const active = job => ["queued", "running"].includes(job.state);
 const endings = {time_limit: "時間上限", processing_error: "途中終了"};
 const stateLabel = job => labels[job.state] + (job.state === "complete" && endings[job.stop_reason] ? `（${endings[job.stop_reason]}）` : "");
@@ -153,7 +153,7 @@ if ($("search-form")) {
       const job = await api("/api/jobs", {query});
       if (job.has_result) { location.assign(`/timelines/${job.id}`); return; }
       $("receipt").hidden = false;
-      $("receipt-heading").textContent = job.state === "failed" ? "前回の生成は失敗しました" : "キューに登録されています";
+      $("receipt-heading").textContent = job.state === "failed" ? "前回の生成は失敗しました" : job.state === "cancelled" ? "前回の処理は中止しました" : "キューに登録されています";
       $("receipt-message").textContent = `${job.query} · ${labels[job.state]}。別のテーマも追加できます。`;
       $("receipt-link").href = `/timelines/${job.id}`;
       document.dispatchEvent(new Event("job-registered"));
@@ -235,8 +235,35 @@ if ($("job-list")) {
             else { offset = 0; load(); }
           }
         });
+        const cancel = node("button", "text-button job-cancel", "中止");
+        cancel.type = "button";
+        cancel.setAttribute("aria-label", `${job.query}の処理を中止`);
+        cancel.title = "待機・生成中の処理を中止（登録は残します）";
+        cancel.addEventListener("click", async () => {
+          if (deleting || !confirm(`「${job.query}」の処理を中止しますか？検証途中の出来事は保存されません。${job.has_result ? "前回の結果は残ります。" : "再試行で生成し直せます。"}`)) return;
+          deleting = true;
+          clearTimeout(timer);
+          cancel.disabled = true;
+          $("delete-error").hidden = true;
+          $("delete-status").hidden = true;
+          try {
+            await api(`/api/jobs/${job.id}/cancel`, {});
+            $("delete-status").textContent = `「${job.query}」の処理を中止しました。`;
+            $("delete-status").hidden = false;
+            $("delete-status").focus({preventScroll: true});
+          } catch (exc) { error("delete-error", exc.message || "中止できませんでした。"); }
+          finally {
+            deleting = false;
+            cancel.disabled = false;
+            if (loading) refreshPending = true;
+            else load();
+          }
+        });
         // Saved timelines cannot be deleted; showing only usable buttons keeps rows short.
-        row.append(theme, state, count, ...(job.can_delete ? [remove] : []));
+        const ops = [...(active(job) ? [cancel] : []), ...(job.can_delete ? [remove] : [])];
+        const cell = node("span", "job-ops");
+        cell.append(...ops);
+        row.append(theme, state, count, ...(ops.length ? [cell] : []));
         // Failure details and the time-limit notice live on the detail page; the list keeps progress only.
         const notes = [job.legacy_period ? "期間限定・閲覧専用" : "", active(job) ? job.message : ""].filter(Boolean);
         if (notes.length) row.append(node("p", "help", notes.join("。")));
@@ -283,8 +310,9 @@ if ($("job-status")) {
     $("result-meta").hidden = !job.result;
     $("generation-info").hidden = !job.result;
     $("job-message").textContent = job.message || "";
-    $("job-message").hidden = job.state !== "queued";
-    $("retry").hidden = job.legacy_period || job.state !== "failed";
+    $("job-message").hidden = job.state !== "queued" && !(job.message || "").startsWith("処理を中止しました");
+    $("retry").hidden = job.legacy_period || !["failed", "cancelled"].includes(job.state);
+    $("cancel").hidden = !active(job);
     $("regenerate").hidden = job.legacy_period || !job.has_result || active(job);
     $("refine").textContent = job.legacy_period ? "全期間で新規登録" : "条件を変える";
     $("refine").href = `/?query=${encodeURIComponent(job.legacy_period ? job.topic : job.query)}`;
@@ -313,15 +341,16 @@ if ($("job-status")) {
     }
     if (version === generation && !acting) timer = setTimeout(load, 2000);
   }
-  for (const action of ["retry", "regenerate"]) $(action).addEventListener("click", async () => {
+  for (const action of ["retry", "regenerate", "cancel"]) $(action).addEventListener("click", async () => {
     if (acting) return;
+    if (action === "cancel" && !confirm(`処理を中止しますか？検証途中の出来事は保存されません。${job.has_result ? "前回の結果は残ります。" : "再試行で生成し直せます。"}`)) return;
     acting = true;
     generation += 1;
     clearTimeout(timer);
-    $("retry").disabled = $("regenerate").disabled = true;
+    $("retry").disabled = $("regenerate").disabled = $("cancel").disabled = true;
     try { show(await api(`/api/jobs/${id}/${action}`, {})); }
     catch (exc) { error("page-error", exc.message); }
-    finally { acting = false; $("retry").disabled = $("regenerate").disabled = false; timer = setTimeout(load, 2000); }
+    finally { acting = false; $("retry").disabled = $("regenerate").disabled = $("cancel").disabled = false; timer = setTimeout(load, 2000); }
   });
   load();
 }

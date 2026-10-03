@@ -44,6 +44,7 @@ summary { cursor: pointer; color: var(--color-accent); min-height: 44px; padding
 .job-state { font-size: var(--text-sm); color: var(--color-muted); white-space: nowrap; }
 .job-state[data-state="failed"] { color: var(--color-error); }
 .job-state[data-state="running"] { color: var(--color-accent); }
+.job-state[data-state="cancelled"] { color: var(--color-muted); }
 .job-actions, .pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px 8px; }
 .job-actions .text-button, .pagination .text-button { border: 1px solid var(--color-rule); border-radius: var(--radius-sm); padding-inline: 10px; text-decoration: none; }
 .job-actions .quiet-link { padding-inline: 8px; }
@@ -133,10 +134,11 @@ footer { border-top: 1px solid var(--color-rule); display: flex; justify-content
 
 .timeline-list-section { padding-bottom: 16px; }
 
-.job-delete { grid-column: 1 / -1; justify-self: end; min-height: 44px; padding-inline: 8px; }
+.job-ops { grid-column: 1 / -1; justify-self: end; display: flex; gap: 4px; }
+.job-ops button { min-height: 44px; padding-inline: 8px; }
 .delete-column { display: none; }
 @media (min-width: 768px) {
   .list-columns, .job-row { grid-template-columns: minmax(0, 1fr) minmax(5rem, max-content) minmax(6.25rem, max-content) minmax(3rem, max-content); }
-  .job-delete { grid-column: 4; grid-row: 1; }
+  .job-ops { grid-column: 4; grid-row: 1; }
   .delete-column { display: block; }
 }
