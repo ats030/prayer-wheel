@@ -18,7 +18,7 @@
       <div class="page-head"><h1 id="search-heading">年表を作る</h1></div>
       <form id="search-form" novalidate>
         <label class="sr-only" for="query">調べたいテーマ</label>
-        <div class="search-row"><input id="query" name="query" type="text" maxlength="180" placeholder="半導体 日本" required aria-required="true" aria-describedby="query-help form-error" autocomplete="off"><button id="submit" type="submit">キューに追加<span aria-hidden="true"> →</span></button></div>
+        <div class="search-row"><input id="query" name="query" type="text" maxlength="180" placeholder="半導体 日本" required aria-required="true" aria-describedby="query-help form-error" autocomplete="off"><button id="submit" type="submit">作成<span aria-hidden="true"> →</span></button></div>
         <p class="error" id="form-error" role="alert" hidden></p>
       </form>
 
@@ -40,7 +40,7 @@
     <section class="timeline-list-section" aria-labelledby="page-heading">
       <div class="page-head">
         <div class="heading-copy"><h2 id="page-heading" tabindex="-1">年表一覧</h2><p id="list-summary" class="help" role="status">読み込んでいます。</p></div>
-        <nav class="pagination" aria-label="一覧のページ"><button id="previous" class="text-button" type="button" disabled>前の50件</button><button id="next" class="text-button" type="button" disabled>次の50件</button></nav>
+        <nav id="pagination" class="pagination" aria-label="一覧のページ" hidden><button id="previous" class="text-button" type="button" disabled>前の50件</button><button id="next" class="text-button" type="button" disabled>次の50件</button></nav>
       </div>
       <p id="page-error" class="error" role="alert" hidden></p>
       <p id="delete-status" class="help" role="status" tabindex="-1" hidden></p>

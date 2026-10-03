@@ -3,6 +3,8 @@ const $ = (id) => document.getElementById(id);
 const stages = ["search", "read", "generate", "verify"];
 const labels = {queued: "待機中", running: "生成中", complete: "完了", failed: "失敗"};
 const active = job => ["queued", "running"].includes(job.state);
+const endings = {time_limit: "時間上限", processing_error: "途中終了"};
+const stateLabel = job => labels[job.state] + (job.state === "complete" && endings[job.stop_reason] ? `（${endings[job.stop_reason]}）` : "");
 function node(tag, className, text) {
   const element = document.createElement(tag);
   if (className) element.className = className;
@@ -188,7 +190,7 @@ if ($("job-list")) {
         const updated = node("time", "job-updated", `更新 ${shortDate(job.updated_at)}`);
         updated.dateTime = job.updated_at;
         theme.append(link, updated);
-        const state = node("span", "job-state", labels[job.state]);
+        const state = node("span", "job-state", stateLabel(job));
         state.dataset.state = job.state;
         const count = node("span", "job-count", Number.isInteger(job.event_count) ? `${job.event_count}件` : "—");
         const previous = job.has_result && job.state !== "complete";
@@ -197,9 +199,8 @@ if ($("job-list")) {
         const remove = node("button", "text-button job-delete", "削除");
         remove.type = "button";
         remove.dataset.id = job.id;
-        remove.disabled = !job.can_delete;
         remove.setAttribute("aria-label", `${job.query}を削除`);
-        remove.title = job.can_delete ? "登録と保存結果を削除" : "収録済みのため削除できません";
+        remove.title = "登録と保存結果を削除";
         remove.addEventListener("click", async () => {
           if (deleting || !confirm(`「${job.query}」を削除しますか？登録と保存結果は元に戻せません。${active(job) ? "待機・生成中の処理も取り消します。" : ""}`)) return;
           deleting = true;
@@ -217,14 +218,15 @@ if ($("job-list")) {
           } catch (exc) { error("delete-error", exc.message || "削除できませんでした。"); }
           finally {
             deleting = false;
-            remove.disabled = removed || !job.can_delete;
+            remove.disabled = removed;
             if (loading) refreshPending = true;
             else { offset = 0; load(); }
           }
         });
-        row.append(theme, state, count, remove);
-        const message = job.error || (active(job) || ["time_limit", "processing_error"].includes(job.stop_reason) ? job.message : "");
-        const notes = [!job.can_delete ? "収録済みのため削除できません" : "", job.legacy_period ? "期間限定・閲覧専用" : "", message].filter(Boolean);
+        // Saved timelines cannot be deleted; showing only usable buttons keeps rows short.
+        row.append(theme, state, count, ...(job.can_delete ? [remove] : []));
+        // Failure details and the time-limit notice live on the detail page; the list keeps progress only.
+        const notes = [job.legacy_period ? "期間限定・閲覧専用" : "", active(job) ? job.message : ""].filter(Boolean);
         if (notes.length) row.append(node("p", "help", notes.join("。")));
         list.append(row);
       }
@@ -237,6 +239,7 @@ if ($("job-list")) {
         $("job-list").dataset.signature = signature;
         if (href) [...$("job-list").querySelectorAll("a")].find(link => link.getAttribute("href") === href)?.focus({preventScroll: true});
       }
+      $("pagination").hidden = offset === 0 && data.total <= 50;
       $("previous").disabled = offset === 0;
       $("next").disabled = offset + data.jobs.length >= data.total;
     } catch (exc) { error("page-error", `一覧を読み込めませんでした。${exc.message}`); }

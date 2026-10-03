@@ -88,9 +88,10 @@ with sync_playwright() as playwright:
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), (path, width)
             for element in page.locator("button:visible, .quiet-link:visible").all():
                 assert element.evaluate("e => e.getBoundingClientRect().height >= 44"), (path, width, "touch target")
-            if width == 1280 and path in ['/timelines', '/timelines/1']:
-                group = '.pagination' if path == '/timelines' else '.job-actions'
-                assert page.locator(group).evaluate("e => {const a=e.getBoundingClientRect(), b=document.getElementById('page-heading').getBoundingClientRect(); return Math.abs((a.top+a.bottom)/2-(b.top+b.bottom)/2)<12;}"), (path, 'heading/actions alignment')
+            if path == '/timelines':
+                assert page.locator('.pagination').is_hidden(), 'single page hides pagination'
+            if width == 1280 and path == '/timelines/1':
+                assert page.locator('.job-actions').evaluate("e => {const a=e.getBoundingClientRect(), b=document.getElementById('page-heading').getBoundingClientRect(); return Math.abs((a.top+a.bottom)/2-(b.top+b.bottom)/2)<12;}"), (path, 'heading/actions alignment')
         page.screenshot(path=f"/tmp/timeline-generator-queue-{width}.png", full_page=True)
     for path in ['/', '/timelines']:
         page.goto(URL + path)
@@ -195,7 +196,8 @@ with sync_playwright() as playwright:
     job = dense_job
     page.goto(URL + '/timelines')
     page.locator('.job-link').wait_for()
-    assert '時間上限' in page.locator('.job-row .help').inner_text()
+    assert page.locator('.job-state').inner_text() == '完了（時間上限）'
+    assert page.locator('.job-row .help').count() == 0, 'list rows omit the repeated time-limit notice'
     assert page.locator('.job-count').inner_text() == '100件'
     job = job | {'result': RESULT, 'message': '生成が完了しました。'}
     page.goto(URL + '/timelines/1')
@@ -320,13 +322,13 @@ with sync_playwright() as playwright:
             job = BASE | {'state':'complete','has_result':True,'result':RESULT}
             page.set_viewport_size({'width':width,'height':900})
             page.goto(URL)
-            page.locator('.job-delete').wait_for()
+            page.locator('.job-row').wait_for()
             page.evaluate(f"document.documentElement.style.fontSize='{zoom}%'")
-            assert page.locator('.job-delete').is_disabled()
-            assert '収録済みのため削除できません' in page.locator('.job-row .help').inner_text()
+            assert page.locator('.job-delete').count() == 0, 'protected rows show no delete button'
+            assert page.locator('.job-row .help').count() == 0
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('delete protected',width,zoom)
             job = job | {'legacy_period':True}
-            page.wait_for_function("!document.querySelector('.job-delete').disabled")
+            page.locator('.job-delete:not(:disabled)').wait_for()
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('delete allowed',width,zoom)
     count_before = posted.count('/api/jobs/1/delete')
     def reject_dialog(dialog):
@@ -365,7 +367,7 @@ with sync_playwright() as playwright:
     page.once('dialog', lambda dialog: dialog.accept())
     page.locator('.job-delete').click()
     page.locator('#delete-error').wait_for()
-    page.wait_for_function("document.querySelector('.job-delete')?.disabled")
+    page.wait_for_function("!document.querySelector('.job-delete')")
     assert '収録済み' in page.locator('#delete-error').inner_text()
     assert page.locator('.job-row').count() == 1
     for state in ['queued','running','failed','complete']:
