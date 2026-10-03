@@ -201,12 +201,14 @@ if ($("job-list")) {
         const row = node("li", "job-row");
         const link = node("a", "job-link", job.query);
         link.href = `/timelines/${job.id}`;
-        const theme = node("div", "job-theme");
-        const updated = node("time", "job-updated", `更新 ${shortDate(job.updated_at)}`);
+        const updated = node("time", "job-updated");
+        updated.append(node("span", "job-updated-label", "更新 "), shortDate(job.updated_at));
         updated.dateTime = job.updated_at;
-        theme.append(link, updated);
         const state = node("span", "job-state", stateLabel(job));
         state.dataset.state = job.state;
+        // Narrow screens group state and time on one line; wide screens dissolve the group into table cells.
+        const meta = node("span", "job-meta");
+        meta.append(state, updated);
         const count = node("span", "job-count", Number.isInteger(job.event_count) ? `${job.event_count}件` : "—");
         const previous = job.has_result && job.state !== "complete";
         count.setAttribute("aria-label", Number.isInteger(job.event_count) ? `${previous ? "前回の" : ""}収録件数 ${job.event_count}件` : "未生成");
@@ -266,7 +268,7 @@ if ($("job-list")) {
         const ops = [...(active(job) ? [cancel] : []), ...(job.can_delete ? [remove] : [])];
         const cell = node("span", "job-ops");
         cell.append(...ops);
-        row.append(theme, state, count, ...(ops.length ? [cell] : []));
+        row.append(link, meta, count, ...(ops.length ? [cell] : []));
         // Failure details and the time-limit notice live on the detail page; the list keeps progress only.
         const notes = [job.legacy_period ? "期間限定・閲覧専用" : "", active(job) ? job.message : ""].filter(Boolean);
         if (notes.length) row.append(node("p", "help", notes.join("。")));

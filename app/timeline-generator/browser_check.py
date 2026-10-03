@@ -277,7 +277,7 @@ with sync_playwright() as playwright:
     assert page.locator('#previous').is_disabled()
     assert page.locator('.job-link').first.inner_text() == job['query']
     assert page.locator('.job-updated').first.get_attribute('datetime') == '2026-10-03T00:15:00+00:00'
-    assert page.locator('.job-updated').first.inner_text().startswith('更新 2026/')
+    assert '2026/' in page.locator('.job-updated').first.inner_text()
     assert page.locator('#receipt-link').get_attribute('href') == '/timelines/2'
     job = saved_job
     page.locator('#next').click()
@@ -346,6 +346,13 @@ with sync_playwright() as playwright:
             job = job | {'legacy_period':True}
             page.locator('.job-delete:not(:disabled)').wait_for()
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), ('delete allowed',width,zoom)
+            if width == 1280 and zoom == 100:
+                # Header labels and every row share one column grid, so cells line up with their heading.
+                for cell, head in [('.job-state', 2), ('.job-count', 3), ('.job-updated', 4), ('.job-ops', 5)]:
+                    assert page.evaluate(f"(() => {{const h=document.querySelector('.list-columns > :nth-child({head})').getBoundingClientRect(), c=document.querySelector('{cell}').getBoundingClientRect(); return Math.abs(h.left-c.left)<2 || Math.abs(h.right-c.right)<2;}})()"), ('column alignment', cell)
+            if width == 320:
+                assert page.locator('.list-columns').is_hidden(), 'narrow rows carry their own labels'
+                assert '更新' in page.locator('.job-updated').inner_text()
     count_before = posted.count('/api/jobs/1/delete')
     def reject_dialog(dialog):
         assert job['query'] in dialog.message

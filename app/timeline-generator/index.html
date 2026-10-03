@@ -46,8 +46,10 @@
       <p id="delete-status" class="help" role="status" tabindex="-1" hidden></p>
       <p id="delete-error" class="error" role="alert" hidden></p>
       <p id="list-empty" hidden>まだ登録がありません。上の入力欄からテーマを追加してください。</p>
-      <div class="list-columns" aria-hidden="true"><span>テーマ・更新日時</span><span>状態</span><span>収録件数</span><span class="delete-column">操作</span></div>
-      <ol id="job-list" class="job-list"></ol>
+      <div class="job-table">
+        <div class="list-columns" aria-hidden="true"><span>テーマ</span><span>状態</span><span class="count-column">収録件数</span><span>更新日時</span><span class="ops-column">操作</span></div>
+        <ol id="job-list" class="job-list"></ol>
+      </div>
     </section>
   </main>
 </body>

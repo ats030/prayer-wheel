@@ -41,10 +41,15 @@ summary { cursor: pointer; color: var(--color-accent); min-height: 44px; padding
 .heading-copy { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; flex: 1 1 16rem; min-width: 0; }
 .heading-copy h1 { flex: 0 1 auto; }
 .heading-copy .help { margin: 0; font-variant-numeric: tabular-nums; }
-.job-state { font-size: var(--text-sm); color: var(--color-muted); white-space: nowrap; }
-.job-state[data-state="failed"] { color: var(--color-error); }
-.job-state[data-state="running"] { color: var(--color-accent); }
-.job-state[data-state="cancelled"] { color: var(--color-muted); }
+.job-state { display: inline-flex; align-items: center; gap: 6px; padding: 1px 8px; border: 1px solid var(--color-rule); border-radius: 999px; background: var(--color-surface); font-size: var(--text-sm); line-height: 1.5; color: var(--color-muted); }
+.job-state::before { content: ""; flex: none; width: 0.5em; height: 0.5em; border-radius: 50%; background: currentColor; }
+.job-state[data-state="complete"] { color: var(--color-ink); }
+.job-state[data-state="complete"]::before { background: var(--color-accent); }
+.job-state[data-state="failed"] { color: var(--color-error); border-color: currentColor; }
+.job-state[data-state="running"] { color: var(--color-accent); border-color: currentColor; }
+.job-state[data-state="running"]::before { animation: job-pulse 1.4s var(--ease-in-out) infinite; }
+.job-state[data-state="queued"]::before { background: none; box-shadow: inset 0 0 0 1.5px currentColor; }
+@keyframes job-pulse { 50% { opacity: 0.25; } }
 .job-actions, .pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px 8px; }
 .job-actions .text-button, .pagination .text-button { border: 1px solid var(--color-rule); border-radius: var(--radius-sm); padding-inline: 10px; text-decoration: none; }
 .job-actions .quiet-link { padding-inline: 8px; }
@@ -90,17 +95,16 @@ summary { cursor: pointer; color: var(--color-accent); min-height: 44px; padding
 .axis-value { grid-column: 1 / -1; font-variant-numeric: tabular-nums; color: var(--color-muted); overflow-wrap: anywhere; }
 .axis-note { grid-column: 1 / -1; color: var(--color-muted); overflow-wrap: anywhere; }
 .review-note { border-top: 1px solid var(--color-rule); padding-top: 8px; margin-top: 8px; }
-.list-columns, .job-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(3.5rem, max-content) minmax(4rem, max-content); gap: 0 8px; }
-.list-columns { font-size: var(--text-sm); color: var(--color-muted); border-bottom: 1px solid var(--color-rule); padding-block: 8px; margin-top: 4px; }
-.list-columns span:last-child { text-align: right; }
-.job-list { list-style: none; padding: 0; margin: 0; }
-.job-row { border-bottom: 1px solid var(--color-rule); align-items: center; padding-block: 4px; }
-.job-theme { min-width: 0; padding-bottom: 4px; }
-.job-updated { display: block; font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
-.job-link { font-size: var(--text-md); min-height: 44px; display: flex; align-items: center; overflow-wrap: anywhere; min-width: 0; }
-.job-count { text-align: right; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
-.job-count small { display: block; font-size: inherit; color: var(--color-muted); }
-.job-row .help { grid-column: 1 / -1; margin: 0 0 4px; overflow-wrap: anywhere; }
+/* Narrow screens: each row is a two-line card (theme + count, then state/time + actions). */
+.list-columns { display: none; }
+.job-list { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--color-rule); }
+.job-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0 12px; padding-block: 4px 8px; border-bottom: 1px solid var(--color-rule); }
+.job-link { grid-column: 1; grid-row: 1; font-size: var(--text-md); font-weight: 700; min-height: 44px; display: flex; align-items: center; overflow-wrap: anywhere; min-width: 0; }
+.job-meta { grid-column: 1; grid-row: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; }
+.job-updated { font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.job-count { grid-column: 2; grid-row: 1; text-align: right; font-size: var(--text-md); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.job-count small { display: block; font-size: var(--text-sm); color: var(--color-muted); }
+.job-row .help { grid-column: 1 / -1; grid-row: 3; margin: 4px 0 0; overflow-wrap: anywhere; }
 .release { padding-block: 16px; border-top: 1px solid var(--color-rule); }
 .release h2 { font-size: var(--text-lg); margin-bottom: 8px; }
 .release ul { margin: 0; padding-left: 20px; }
@@ -115,7 +119,6 @@ footer { border-top: 1px solid var(--color-rule); display: flex; justify-content
   .event-title { grid-column: 2; }
   .event-description { grid-column: 2; grid-row: 2; }
   .event > .source-link { grid-column: 3; grid-row: 1 / 3; }
-  .list-columns, .job-row { grid-template-columns: minmax(0, 1fr) minmax(5rem, max-content) minmax(6.25rem, max-content); }
 }
 @media (max-width: 39.99rem) {
   .page-head > .job-actions, .page-head > .pagination { flex-basis: 100%; }
@@ -133,14 +136,27 @@ footer { border-top: 1px solid var(--color-rule); display: flex; justify-content
 
 .timeline-list-section { padding-bottom: 16px; }
 
-.job-ops { grid-column: 1 / -1; justify-self: end; display: flex; gap: 4px; }
+.job-ops { grid-column: 2; grid-row: 2; justify-self: end; display: flex; gap: 4px; }
 .job-ops button { min-height: 44px; padding-inline: 8px; }
-.delete-column { display: none; }
-@media (min-width: 768px) {
-  .list-columns, .job-row { grid-template-columns: minmax(0, 1fr) minmax(5rem, max-content) minmax(6.25rem, max-content) minmax(3rem, max-content); }
-  .job-ops { grid-column: 4; grid-row: 1; }
-  .delete-column { display: block; }
+/* Wide screens: one shared column grid (subgrid) keeps every row aligned with the header. */
+@media (min-width: 56rem) {
+  .job-table { --column-gap: 24px; display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto auto; column-gap: var(--column-gap); }
+  /* Subgrids keep their own gap, so restate the shared one or cells drift from the header. */
+  .list-columns, .job-list, .job-row { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; column-gap: var(--column-gap); }
+  .list-columns { font-size: var(--text-sm); color: var(--color-muted); padding-block: 8px; }
+  .count-column, .ops-column { text-align: right; }
+  .job-row { padding-block: 2px; }
+  .job-meta { display: contents; }
+  .job-link { grid-column: 1; }
+  .job-state { grid-column: 2; grid-row: 1; justify-self: start; white-space: nowrap; }
+  .job-count { grid-column: 3; font-size: var(--text-sm); }
+  .job-updated { position: relative; grid-column: 4; grid-row: 1; white-space: nowrap; }
+  /* The header names this column visually; screen readers still hear the inline label. */
+  .job-updated-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .job-ops { grid-column: 5; grid-row: 1; }
+  .job-row .help { grid-column: 1 / -1; grid-row: 2; margin: 0 0 6px; }
 }
+@media (min-width: 56rem) and (hover: hover) and (pointer: fine) { .job-row:hover { background-color: var(--color-surface); } }
 @media (min-width: 768px) {
   .axis { grid-template-columns: minmax(8rem, 12rem) minmax(6rem, 1fr) minmax(0, 18rem) 4.5rem; padding-block: 4px; }
   .axis-label { grid-column: 1; grid-row: 1; }
