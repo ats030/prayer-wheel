@@ -13,6 +13,13 @@ import timeline as t
 from jobs import JobStore, QueueWorker
 
 
+def setUpModule():
+    # 既存の検証は一段階の処理を前提にする。二段階生成は MajorFirstTests で個別に有効にする。
+    patcher = patch.object(t, 'MAJOR_FIRST', False)
+    patcher.start()
+    unittest.addModuleCleanup(patcher.stop)
+
+
 def checkpoint_worker(query, connection):
     connection.send({'kind': 'checkpoint', 'events': [saved_event(1900)], 'review_notes': []})
     connection.send({'kind': 'progress', 'stage': 'generate', 'message': 'next unverified batch'})
@@ -265,7 +272,7 @@ class BatchTests(unittest.TestCase):
 
     def test_trace_marks_unprocessed_batches_after_deadline(self):
         clock = [0]
-        def finish_near_deadline(query, sources, emit, deadline, existing, dropped=None):
+        def finish_near_deadline(query, sources, emit, deadline, existing, dropped=None, priority=None):
             clock[0] = t.TIME_LIMIT - 9
             dropped.append({'year': 1800, 'date': '1800年', 'title': 'x', 'stage': '検証', 'reason': 'r'})
             return [saved_event(1900)], []
@@ -294,6 +301,61 @@ class BatchTests(unittest.TestCase):
         first = saved_event(1900) | {'title': '鉄道開通', 'description': '鉄道が開通した。', 'quote': '1900年、鉄道が開通し、港が開港した。'}
         second = first | {'title': '港の開港', 'description': '港が開港した。'}
         self.assertEqual(t.merge_events([first], [second]), [first, second])
+
+
+class MajorFirstTests(unittest.TestCase):
+    ITEM = {'title': '研究の取り組み開始', 'year': 1810, 'search_query': '研究 1810年', 'keyword': '1810年、研究'}
+
+    def run_generation(self, enabled, prompts, major=None):
+        def model(system, prompt, deadline, schema):
+            prompts.append(prompt)
+            return grounded_model(system, prompt, deadline, schema)
+        search_results = {'results': [{'url': 'https://example.org/history', 'title': '研究の歴史'}]}
+        with patch.object(t, 'MAJOR_FIRST', enabled), patch.object(t, 'major_items', return_value=[dict(self.ITEM)]) as major_items, \
+                patch.object(t, 'json_request', return_value=search_results), patch.object(t, 'BATCH_PASSAGES', t.BATCH_EVENTS), \
+                patch.object(t, 'search', return_value=[{}]), patch.object(t.WebReader, 'fetch', return_value=history_source(20)), \
+                patch.object(t, 'crosscheck_sources', return_value=[]), patch.object(t, 'model_json', side_effect=model):
+            return t.build_timeline(t.parse_query('研究'), [].append), major_items
+
+    def test_disabled_skips_major_stage(self):
+        result, major_items = self.run_generation(False, [])
+        major_items.assert_not_called()
+        self.assertNotIn('major', result['trace'])
+        self.assertTrue(all('major' not in b for b in result['trace']['batches']))
+
+    def test_major_batch_runs_first_and_is_not_reread(self):
+        prompts = []
+        result, major_items = self.run_generation(True, prompts)
+        major_items.assert_called_once()
+        trace = result['trace']
+        self.assertTrue(trace['batches'][0].get('major'))
+        self.assertTrue(all('major' not in b for b in trace['batches'][1:]))
+        self.assertEqual(trace['batches_total'], len(trace['batches']))
+        # 主要組の資料は該当段落だけで、候補名は資料と別の欄で渡す。
+        self.assertIn('優先して確認する候補', prompts[0])
+        self.assertEqual([p['text'] for s in json.loads(prompts[0].split('資料(JSON):\n', 1)[1]) for p in s['passages']], [saved_event(1810)['quote']])
+        self.assertTrue(all('優先して確認する候補' not in p for p in prompts[1:]))
+        self.assertEqual(sorted(e['year'] for e in result['events']), list(range(1800, 1820)))
+        item = trace['major']['items'][0]
+        self.assertEqual(item['sources'], ['https://example.org/history'])
+        self.assertTrue(item['adopted'])
+
+    def test_major_stage_failure_falls_back_to_single_stage(self):
+        with patch.object(t, 'major_items', side_effect=t.TimelineError('stage failed')), patch.object(t, 'MAJOR_FIRST', True), \
+                patch.object(t, 'BATCH_PASSAGES', t.BATCH_EVENTS), patch.object(t, 'search', return_value=[{}]), \
+                patch.object(t.WebReader, 'fetch', return_value=history_source(10)), patch.object(t, 'crosscheck_sources', return_value=[]), \
+                patch.object(t, 'model_json', side_effect=grounded_model):
+            result = t.build_timeline(t.parse_query('研究'), [].append)
+        self.assertEqual(result['trace']['major']['error'], 'stage failed')
+        self.assertEqual(len(result['events']), 10)
+
+    def test_major_items_filters_period_and_duplicates(self):
+        output = {'items': [dict(self.ITEM), dict(self.ITEM, title='言い換え'), dict(self.ITEM, year=1700, keyword='古い研究'),
+                            {'title': '年なし', 'search_query': 'x', 'keyword': 'x'}, dict(self.ITEM, year=1811, keyword='')]}
+        with patch.object(t, 'model_json', return_value=output) as model:
+            items = t.major_items(t.Query('研究', '研究', 1800, 2000), [history_source(20)], time.monotonic() + 60)
+        self.assertEqual(items, [self.ITEM])
+        self.assertIn('1819年', model.call_args.args[1])
 
 
 class CheckpointTests(unittest.TestCase):

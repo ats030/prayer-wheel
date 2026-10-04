@@ -5,6 +5,13 @@ import time
 import timeline as t
 
 
+def setUpModule():
+    # 既存の検証は一段階の処理を前提にする。二段階生成は MajorFirstTests で個別に有効にする。
+    patcher = patch.object(t, 'MAJOR_FIRST', False)
+    patcher.start()
+    unittest.addModuleCleanup(patcher.stop)
+
+
 def article(html):
     parser = t.ArticleParser()
     parser.feed(html)

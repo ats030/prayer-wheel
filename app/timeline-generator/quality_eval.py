@@ -223,6 +223,13 @@ def evaluate_result(gold, result, query, pages=None):
                 else:
                     entry['stage'] = '出典になし（検索・資料選択で欠落）'
             missing.append(entry)
+    # 段階1の主要項目リスト（ats030-rwgs8）がゴールドをどれだけ含むか。リストは月日を持たないため日付条件は外す。
+    major = (result.get('trace') or {}).get('major')
+    if major is not None:
+        listed = [{'title': f"{m.get('title', '')} {m.get('keyword', '')}", 'year': m.get('year')} for m in major.get('items') or []]
+        major_found = [item['id'] for item in targets if any(matches(m, {k: v for k, v in item.items() if k != 'dates'}) for m in listed)]
+        report['major_recall'] = round(len(major_found) / len(targets), 2) if targets else None
+        report['major_found'] = major_found
     errors = [{'id': item['id'], 'label': item['label'], 'event': e.get('title'), 'year': e.get('year')}
               for item in theme['known_errors'] for e in events if matches(e, item)]
     report.update({
@@ -335,7 +342,8 @@ def render(report):
                          f"件数={job['events']} 再現率={recall} 既知誤り={len(job.get('known_errors', []))} "
                          f"重複={len(job['duplicates'])} ドメイン数={src.get('distinct_domains', '-')} "
                          f"最多={src.get('top_domain')}:{'-' if share is None else f'{share:.0%}'} "
-                         f"時間={job['elapsed_seconds']}s")
+                         f"時間={job['elapsed_seconds']}s"
+                         + ('' if job.get('major_recall') is None else f" 主要項目リスト再現率={job['major_recall']:.0%}"))
             for item in job.get('missing', []):
                 lines.append(f"    欠落 {item['label']}" + (f" … {item['stage']}" if 'stage' in item else '')
                              + (f"（{item['reason']}）" if 'reason' in item else ''))
