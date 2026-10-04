@@ -60,7 +60,14 @@ def main():
         # Explicit current location is rounded, and a new selection invalidates delayed callbacks.
         page.locator('#library').set_input_files(fixture(False))
         wait("document.querySelector('#photoDiagnostic').dataset.gpsState==='missing'")
+        held_identify=[]
+        page.route('**/identify',lambda route:held_identify.append(route))
         root.locator('[data-current]').click()
+        page.locator('#identify').click()
+        page.wait_for_timeout(200)
+        assert not held_identify, 'Do not save a record while selected current location is still being acquired'
+        page.unroute('**/identify')
+        page.route('**/identify',lambda route:route.fulfill(json={'category':'植物','summary':'manual place','candidates':[]}))
         page.evaluate("locationCallbacks.pop().success({coords:{latitude:34.123456,longitude:135.123456,accuracy:7}})")
         wait("gps?.source==='current'")
         assert page.evaluate('gps.latitude') == 34.1235

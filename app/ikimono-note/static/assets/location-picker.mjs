@@ -38,6 +38,7 @@ export function createLocationPicker(root, {onChange, value = null}) {
       const accepted = await onChange(next);
       if (accepted === false) { state.textContent = '場所は変更していません。'; return; }
       point = next;
+      if(map)map.setView([next.latitude,next.longitude],Math.max(map.getZoom(),15),{animate:false});
       state.textContent = locationLabel(next) + ' を撮影場所にしました。';
       panel.classList.add('hidden');
     } catch (error) { state.textContent = error.message; }
@@ -89,5 +90,5 @@ export function createLocationPicker(root, {onChange, value = null}) {
       state.textContent = error.code === 1 ? '現在地が許可されていません。地図で撮影場所を指定できます。' : error.code === 2 ? '現在地を取得できませんでした。地図で撮影場所を指定できます。' : '現在地の取得に時間がかかりました。もう一度押すか、地図で指定してください。';
     }, {enableHighAccuracy: true, timeout: 10000, maximumAge: 0});
   };
-  return {setValue, reset, setDisabled(next) { disabled = next; controls(); }, get map() { return map; }};
+  return {setValue, reset, setDisabled(next) { disabled = next; controls(); }, get isBusy() { return busy; }, get map() { return map; }};
 }

@@ -316,6 +316,7 @@ async function pollIdentification(pending){
 
 identify.onclick=async()=>{
   if(!selected.length)return;
+  if(captureLocationPicker?.isBusy){showStatus("撮影場所を確認しています。終わってから「名前を調べる」を押してください。");return}
   identify.disabled=true;
   captureLocationPicker?.setDisabled(true);
   /* EXIF問い合わせがまだ終わっていないことがある。ここで待たずに
