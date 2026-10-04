@@ -65,6 +65,19 @@ class EvidenceTests(unittest.TestCase):
                 self.assertEqual(t.validate_events([self.event | changes], self.sources, t.parse_query("コーヒー")), [])
         self.assertEqual(t.validate_events([self.event], self.sources, t.Query("", "コーヒー", 1980)), [])
 
+    def test_rejection_reasons_name_the_failed_check(self):
+        cases = [({"quote": "In 1971, the first coffee shop opened in Tokyo."}, "引用が原文にない、または長さが範囲外"),
+                 ({"year": 1987}, "年が引用・段落に書かれていない"),
+                 ({"source_id": 2}, "年・出典番号の形式が不正")]
+        for changes, reason in cases:
+            with self.subTest(changes=changes):
+                reasons = {}
+                t.validate_events([self.event | changes], self.sources, t.parse_query("コーヒー"), reasons)
+                self.assertEqual(reasons, {((self.event | changes)["year"], "最初の店舗"): reason})
+        reasons = {}
+        t.validate_events([self.event], self.sources, t.parse_query("コーヒー"), reasons)
+        self.assertEqual(reasons, {})
+
     def test_display_year_cannot_disagree_with_sort_year(self):
         e = self.event | {"date": "2000年"}
         result = t.validate_events([e], self.sources, t.parse_query("コーヒー"))

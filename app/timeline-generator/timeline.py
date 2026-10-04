@@ -646,7 +646,11 @@ def date_supported(year, label, evidence):
     return False
 
 
-def validate_events(raw, sources, query):
+def validate_events(raw, sources, query, reasons=None):
+    """reasons に dict を渡すと、落とした候補の (year, title) に除外理由を記録する。"""
+    def drop(item, reason):
+        if reasons is not None and isinstance(item.get("title"), str):
+            reasons[(item.get("year"), compact(item["title"]))] = reason
     if not isinstance(raw, list):
         return []
     valid = []
@@ -656,10 +660,13 @@ def validate_events(raw, sources, query):
             continue
         year, sid = item.get("year"), item.get("source_id")
         if type(year) is not int or type(sid) is not int or not 1 <= sid <= len(sources) or year == 0 or not -9999 <= year <= datetime.now().year:
+            drop(item, "年・出典番号の形式が不正")
             continue
         if query.start is not None and year < query.start or query.end is not None and year > query.end:
+            drop(item, "年代条件の範囲外")
             continue
         if any(not isinstance(item.get(k), str) for k in ["date", "title", "description", "quote"]):
+            drop(item, "必須項目が文字列でない")
             continue
         title, description, label, evidence = (compact(item[k]) for k in ["title", "description", "date", "quote"])
         source = sources[sid - 1]
@@ -671,22 +678,27 @@ def validate_events(raw, sources, query):
                 if body_context and heading_year(body_context["date_heading"]) == year and heading_year(prefixed[1] + "年") == year:
                     evidence = prefixed[2]
         if not 8 <= len(evidence) <= 1600 or evidence not in compact(source["text"]) or not 1 <= len(title) <= 70 or not 1 <= len(description) <= 200:
+            drop(item, "引用が原文にない、または長さが範囲外" if not 8 <= len(evidence) <= 1600 or evidence not in compact(source["text"]) else "見出し・説明の長さが範囲外")
             continue
         context = quote_context(source, evidence) if "passages" in source else None
         if "passages" in source and context is None:
+            drop(item, "引用を含む段落を一つに特定できない")
             continue
         context_year = heading_year(context["date_heading"]) if context else None
         if context_year is not None and year != context_year:
+            drop(item, f"年が段落見出しの年（{context_year}）と一致しない")
             continue
         if context_year is not None:
             passage = context["passage"]
             unknown_time = re.search(r"(?:年はいつ頃|時期(?:は|が)|年代(?:は|が))[^。.!?]{0,20}(?:不明|わからない|分からない)", passage)
             if unknown_time and not re.search(rf"(?<!\d){abs(year)}(?!\d)", passage):
+                drop(item, "段落が時期不明と述べている")
                 continue
         chronological_evidence = compact(evidence + " " + " ".join(context.values())) if context else evidence
         uncertainty = r"伝説|伝承|諸説|という説|と(?:言|い)われ(?:ています|ている|る)|とされ(?:ています|ている|る)|推定|legend|alleged|supposed"
         qualification_context = evidence + " " + " ".join(value for key, value in (context or {}).items() if key != "article_lead")
         if re.search(uncertainty, qualification_context, re.I) and not re.search(uncertainty, description, re.I):
+            drop(item, "原文の伝説・推定などの留保が説明にない")
             continue
         # Catch invented/altered acronyms and product names (e.g. NSFNet -> NS1Net).
         terms = re.findall(r"[A-Za-z][A-Za-z0-9]*(?:[./+-][A-Za-z0-9]+)*", title + " " + description)
@@ -697,15 +709,18 @@ def validate_events(raw, sources, query):
         evidence_terms = {term.casefold() for term in source_terms}
         evidence_terms.update(term[:-1].casefold() for term in source_terms if re.fullmatch(r'[A-Z]{2,}s', term))
         if any(len(term) > 1 and term.casefold() not in evidence_terms for term in terms):
+            drop(item, "原文にない英字表記がある")
             continue
         # Date is generated from the sort value, except supported approximate century labels.
         if re.fullmatch(r"(?:紀元前)?\d{1,2}世紀(?:ごろ)?", label):
             if not date_supported(year, label, chronological_evidence):
+                drop(item, "世紀表記の裏付けが引用・段落にない")
                 continue
         else:
             approximate = bool(re.search(rf"{abs(year)}\s*年?\s*(?:頃|ごろ)|(?:around|circa|c\.)\s*{abs(year)}\b", chronological_evidence, re.I))
             label = exact_date(label, year, chronological_evidence) or year_label(year) + ("ごろ" if approximate or "ごろ" in label or "頃" in label else "")
         if not date_supported(year, label, chronological_evidence):
+            drop(item, "年が引用・段落に書かれていない")
             continue
         key = (year, title)
         if key in seen:
@@ -911,14 +926,15 @@ def build_batch(query, sources, emit, deadline, existing, dropped=None):
     if not isinstance(output, dict):
         raise TimelineError("年表データを読み取れませんでした。再検索してください。")
     proposals = output.get("events") if isinstance(output.get("events"), list) else []
-    valid = validate_events(proposals, sources, query)
+    reasons = {}
+    valid = validate_events(proposals, sources, query, reasons)
     events = valid[:BATCH_EVENTS]
     kept = {(e["year"], e["title"]) for e in events}
     over = {(e["year"], e["title"]) for e in valid[BATCH_EVENTS:]}
     for item in proposals[:30]:
         key = (item.get("year"), compact(item["title"])) if isinstance(item, dict) and isinstance(item.get("title"), str) else None
         if key and key not in kept:
-            stage, reason = ("件数上限", f"1組{BATCH_EVENTS}件の上限を超えた") if key in over else ("検査", "引用・年代・表記の機械検査に通らない")
+            stage, reason = ("件数上限", f"1組{BATCH_EVENTS}件の上限を超えた") if key in over else ("検査", reasons.get(key, "引用・年代・表記の機械検査に通らない"))
             dropped.append({"year": item.get("year") if type(item.get("year")) is int else None, "date": compact(str(item.get("date") or ""))[:40],
                              "title": compact(item["title"])[:70], "stage": stage, "reason": reason})
     emit({"kind": "progress", "stage": "verify", "message": "出来事と年代を、引用した本文と照合しています。"})
