@@ -1,6 +1,6 @@
 """保存済み年表を人手の正解集合と照合する。モデルは呼ばず、DBは読み取り専用で開く。
 
-uv run python quality_eval.py [--db label=path ...] [--out report.json] [--fetch-sources]
+uv run python quality_eval.py [--db label=path ...] [--out report.json] [--fetch-sources] [--replay-batches 2,4,8]
 """
 import argparse
 import json
@@ -203,7 +203,8 @@ def evaluate_result(gold, result, query, pages=None):
         'batches_total': ((result or {}).get('trace') or {}).get('batches_total'),
         'duplicates': duplicates(events),
     }
-    if theme_name is None:
+    # 実行中・失敗で結果のないジョブは、再現率0ではなく評価対象外として返す。
+    if theme_name is None or not result:
         return report
     theme = gold['themes'][theme_name]
     period = result.get('period')
@@ -234,6 +235,57 @@ def evaluate_result(gold, result, query, pages=None):
         'sources': source_stats(events, theme.get('primary_domains', [])),
     })
     return report
+
+
+def event_batches(result):
+    """出来事ごとに採用された組の番号（1始まり）を返す。不明は None。
+    trace に組ごとの採用記録があればそれを使い、ない旧結果は引用と組の段落の鍵の重なりで推定する。"""
+    batches = (result.get('trace') or {}).get('batches') or []
+    if any('adopted' in b for b in batches):
+        # 年と題が同じ出来事が複数の組で採用された場合は後の組に寄せ、早い打ち切りの再現率を過大にしない。
+        adopted = {}
+        for number, batch in enumerate(batches, 1):
+            for year, title in batch.get('adopted') or []:
+                adopted[(year, title)] = number
+        return [adopted.get((e.get('year'), e.get('title'))) for e in result.get('events') or []], 'trace'
+    def estimate(event):
+        quote = normalize(event.get('quote'))
+        for number, batch in enumerate(batches, 1):
+            for _, key in batch.get('passages') or []:
+                # 短い文字列は無関係な段落にも含まれやすいので、両方が一定の長さのときだけ突き合わせる。
+                head = normalize(key)[:25]
+                if len(head) >= 12 and len(quote) >= 12 and (head in quote or quote[:25] in normalize(key)):
+                    return number
+        return None
+    return [estimate(e) for e in result.get('events') or []], 'estimated'
+
+
+def cutoff_list(text):
+    try:
+        cutoffs = tuple(int(n) for n in text.split(',') if n.strip())
+    except ValueError:
+        cutoffs = ()
+    if not cutoffs or min(cutoffs) < 1:
+        raise argparse.ArgumentTypeError('1以上の整数をカンマ区切りで指定してください')
+    return cutoffs
+
+
+def replay(gold, result, query, cutoffs):
+    """先頭N組で打ち切った場合の再現率を、保存済みの最終結果から試算する。モデルは呼ばない。
+    関連度で外された出来事は戻らず、打ち切りで上限に届かなかった場合の差は反映しない近似。"""
+    if not result or not cutoffs or not (result.get('trace') or {}).get('batches'):
+        return None
+    numbers, method = event_batches(result)
+    batches = result['trace']['batches']
+    timed = all('seconds' in b for b in batches if b.get('processed'))
+    rows = []
+    for cutoff in cutoffs:
+        events = [e for e, n in zip(result.get('events') or [], numbers) if n is not None and n <= cutoff]
+        report = evaluate_result(gold, dict(result, events=events), query)
+        seconds = round(sum(b.get('seconds', 0) for b in batches[:cutoff]), 1) if timed else None
+        rows.append({'batches': cutoff, 'events': len(events), 'recall': report.get('recall'),
+                     'found': [item['id'] for item in report.get('found', [])], 'batch_seconds': seconds})
+    return {'method': method, 'unplaced': sum(n is None for n in numbers), 'cutoffs': rows}
 
 
 def axis(key, label, value, display, better, target=None, passed=None, note=''):
@@ -306,7 +358,7 @@ def load_jobs(path):
     return [(job_id, query, state, json.loads(result) if result else None) for job_id, query, state, result in rows]
 
 
-def evaluate(gold, dbs, fetch_sources=False):
+def evaluate(gold, dbs, fetch_sources=False, replay_batches=()):
     snapshots = []
     for label, path in dbs:
         jobs = []
@@ -317,7 +369,10 @@ def evaluate(gold, dbs, fetch_sources=False):
                 urls = sorted((set((result.get('trace') or {}).get('sources') or [])
                                | {(e.get('source') or {}).get('url') for e in result.get('events') or []}) - {None, ''})
                 pages = fetch_pages(urls)
-            jobs.append({'id': job_id, 'query': query, 'state': state, **evaluate_result(gold, result, query, pages)})
+            job = {'id': job_id, 'query': query, 'state': state, **evaluate_result(gold, result, query, pages)}
+            if replay_batches and job.get('recall') is not None:
+                job['replay'] = replay(gold, result, query, replay_batches)
+            jobs.append(job)
         snapshots.append({'label': label, 'db': str(path), 'jobs': jobs})
     return {'gold_version': gold['version'], 'gold_verified_at': gold['verified_at'],
             'fetched_sources': fetch_sources, 'snapshots': snapshots}
@@ -339,6 +394,10 @@ def render(report):
             for item in job.get('missing', []):
                 lines.append(f"    欠落 {item['label']}" + (f" … {item['stage']}" if 'stage' in item else '')
                              + (f"（{item['reason']}）" if 'reason' in item else ''))
+            if job.get('replay'):
+                cells = [f"{r['batches']}組={'-' if r['recall'] is None else format(r['recall'], '.0%')}"
+                         + ('' if r['batch_seconds'] is None else f"/{r['batch_seconds']:.0f}s") for r in job['replay']['cutoffs']]
+                lines.append(f"    打ち切り試算({job['replay']['method']}, 組不明{job['replay']['unplaced']}件) " + ' '.join(cells))
             for item in job.get('known_errors', []):
                 lines.append(f"    誤り {item['label']} ← {item['year']} {item['event']}")
     if not report['fetched_sources']:
@@ -352,10 +411,11 @@ def main(argv=None):
     parser.add_argument('--gold', default=str(GOLD_PATH))
     parser.add_argument('--out', help='JSONの出力先')
     parser.add_argument('--fetch-sources', action='store_true', help='出典ページを再取得して欠落段階を分類する')
+    parser.add_argument('--replay-batches', default=(), type=cutoff_list, metavar='N,N,...', help='先頭N組で打ち切った場合の再現率を試算する')
     args = parser.parse_args(argv)
     gold = json.loads(Path(args.gold).read_text(encoding='utf-8'))
     dbs = [tuple(value.split('=', 1)) for value in args.db] if args.db else [(l, p) for l, p in DEFAULT_DBS if p.exists()]
-    report = evaluate(gold, dbs, args.fetch_sources)
+    report = evaluate(gold, dbs, args.fetch_sources, args.replay_batches)
     if args.out:
         Path(args.out).write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     print(render(report))

@@ -21,6 +21,7 @@
 | 重複の疑い | 年と出典URLが同じで、片方の題名がもう片方に含まれる組 | `duplicates()` | 詳細画面、CLI |
 | 出典の多様性 | 出典のサイト数と、最も多いサイトの割合 | `source_stats()` | 詳細画面（生成情報）、CLI |
 | 出典の種類 | 一次/当事者・百科(二次)・個人投稿・未分類の件数。一次/当事者はテーマごとの `primary_domains` で判定する | `source_kind()` | 詳細画面、CLI |
+| 打ち切り試算 | 先頭N組だけで止めた場合の再現率と、その組までの所要秒数。最終結果のうち、N組目までに採用された出来事だけで数える近似 | `replay()`（`--replay-batches 2,4,8` のときだけ） | CLI |
 | 止まり方・処理時間 | `stop_reason`（`time_limit`・`processing_error` など）と所要秒数。再現率が低い結果とよく対応する | 保存結果の値 | 一覧、詳細画面、CLI |
 
 `axes()` は上の基準を8つの軸（再現率、既知の誤り、重複、一次/当事者の割合、個人投稿の割合、最多サイトへの集中、件数／50件、処理時間／60分）に並べます。合否を付けるのは、目標がある軸だけです。再現率の目標 `target_recall` は人が決めた値だけを `quality_gold.json` に置きます。主要項目は欠落を見つけるための最小集合なので、全テーマで 1.0（1件でも欠ければ目標外）とします（ats030-it7yx）。既知の誤りと重複は0件を基準内とします。ほかの軸は量だけを灰色の棒で示します。
@@ -162,7 +163,10 @@ Twitterは新版の候補に含まれません。実際のデジタルアーツH
 uv run python quality_eval.py                    # v1 / v2 / current の保存結果を照合
 uv run python quality_eval.py --fetch-sources    # 出典を再取得し、欠落した項目の段階を分類
 uv run python quality_eval.py --db cur=data/timelines.sqlite3 --out report.json
+uv run python quality_eval.py --db cur=data/timelines.sqlite3 --replay-batches 2,4,8,12   # 先頭N組で止めた場合の再現率
 ```
+
+打ち切り試算は、組ごとの採用記録（trace の `adopted`・`seconds`、ats030-ft6q9 以降）があればそれを使います。ない旧結果では引用と組の段落の先頭を突き合わせて推定し、`estimated` と組不明の件数を表示します。推定は外れが多く（組不明が18〜24件のジョブがある）、打ち切りの判断には使いません。
 
 「再現率」は、主要項目のうち年表に入った割合です。語・年・日付のすべてが一致したときだけ、入ったと数えます。
 

@@ -136,6 +136,46 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(jobs[1]['recall'], 0.5)
         self.assertIn('再現率=50%', q.render(report))
 
+    def test_running_job_of_a_gold_theme_has_no_recall(self):
+        # 実行中のジョブは result が null でも query から正解テーマが決まる。
+        report = q.evaluate_result(GOLD, None, 'ラーメン')
+        self.assertEqual((report['theme'], report.get('recall'), report['events']), ('ラーメン', None, 0))
+
+    def test_replay_counts_only_events_adopted_within_the_cutoff(self):
+        result = {'period': '全期間', 'events': [event(1910, '来々軒開業'), event(1958, 'チキンラーメン発売')],
+                  'trace': {'batches': [{'processed': True, 'seconds': 100.0, 'passages': [], 'adopted': [[1910, '来々軒開業']]},
+                                        {'processed': True, 'seconds': 50.5, 'passages': [], 'adopted': [[1958, 'チキンラーメン発売'], [1990, '関連度で外れた']]},
+                                        {'processed': False, 'passages': []}]}}
+        replay = q.replay(GOLD, result, 'ラーメン', (1, 2))
+        self.assertEqual((replay['method'], replay['unplaced']), ('trace', 0))
+        self.assertEqual([(r['recall'], r['found'], r['batch_seconds']) for r in replay['cutoffs']],
+                         [(0.5, ['rairaiken'], 100.0), (1.0, ['rairaiken', 'chicken'], 150.5)])
+
+    def test_replay_credits_a_repeated_year_and_title_to_the_later_batch(self):
+        # 年と題だけでは同名の出来事を区別できないので、早い打ち切りの再現率を過大にしない側へ寄せる。
+        result = {'period': '全期間', 'events': [event(1958, 'チキンラーメン発売')],
+                  'trace': {'batches': [{'processed': True, 'passages': [], 'adopted': [[1958, 'チキンラーメン発売']]},
+                                        {'processed': True, 'passages': [], 'adopted': [[1958, 'チキンラーメン発売']]}]}}
+        self.assertEqual([r['found'] for r in q.replay(GOLD, result, 'ラーメン', (1, 2))['cutoffs']], [[], ['chicken']])
+
+    def test_replay_cutoffs_must_be_positive_integers(self):
+        self.assertEqual(q.cutoff_list('2, 4,8'), (2, 4, 8))
+        for text in ('0', '-1', 'a', ''):
+            with self.assertRaises(q.argparse.ArgumentTypeError):
+                q.cutoff_list(text)
+
+    def test_replay_estimates_batches_for_old_traces_by_quote(self):
+        first, second = event(1910, '来々軒開業'), event(1958, 'チキンラーメン発売')
+        first['quote'], second['quote'] = '浅草に来々軒が開業した。', '日清食品がチキンラーメンを発売した。'
+        result = {'period': '全期間', 'events': [first, second, event(1970, '出典不明')],
+                  'trace': {'batches': [{'processed': True, 'passages': [[0, '浅草に来々軒が開業した。']]},
+                                        {'processed': True, 'passages': [[0, '日清食品がチキンラーメンを発売した。']]}]}}
+        replay = q.replay(GOLD, result, 'ラーメン', (1,))
+        self.assertEqual((replay['method'], replay['unplaced']), ('estimated', 1))
+        self.assertEqual(replay['cutoffs'][0]['found'], ['rairaiken'])
+        self.assertIsNone(replay['cutoffs'][0]['batch_seconds'])
+        self.assertIsNone(q.replay(GOLD, {**result, 'trace': None}, 'ラーメン', (1,)))
+
     def test_job_quality_for_detail_page(self):
         self.assertIsNone(q.job_quality({'query': 'AI', 'result': None}, GOLD))
         known = q.job_quality({'query': 'ラーメン', 'result': {'theme': 'ラーメン', 'period': '全期間',

@@ -278,6 +278,10 @@ class BatchTests(unittest.TestCase):
         self.assertEqual(stages, {('検査', 1), ('検査', 2), ('検証', 1), ('検証', 2)})
         self.assertIn('年と出来事の対応が違う', {r['reason'] for r in trace['rejected']})
         self.assertEqual(len(result['events']), 8)
+        # 採用記録は組ごとに分かれ、合わせると最終結果の出来事に一致する。
+        self.assertTrue(all(isinstance(b['seconds'], float) and b['adopted'] for b in trace['batches']))
+        self.assertEqual(sorted(tuple(a) for b in trace['batches'] for a in b['adopted']),
+                         sorted((e['year'], e['title']) for e in result['events']))
 
     def test_trace_records_over_cap_proposals_separately(self):
         original = t.build_batch

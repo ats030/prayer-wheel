@@ -967,6 +967,7 @@ def build_timeline(query, emit):
                     record = record | {'message': f'第{index}組 · 検証済み {len(events)} / {MAX_EVENTS}件。' + record.get('message', '')}
                 emit(record)
             batch_record = trace['batches'][index - 1]
+            batch_started = time.monotonic()
             batch_record['processed'] = True
             trace['batches_processed'] = index
             dropped = []
@@ -975,6 +976,7 @@ def build_timeline(query, emit):
             trace['rejected'].extend(item | {'batch': index} for item in dropped)
         except TimelineError as exc:
             batch_record['error'] = compact(str(exc))[:120]
+            batch_record['seconds'] = round(time.monotonic() - batch_started, 1)
             # One failed batch must not discard the remaining material; stop only when failures repeat.
             failure, consecutive_failures = exc, consecutive_failures + 1
             print(f'timeline batch {index} failed: {exc} cause={exc.__cause__!r}', file=sys.stderr, flush=True)
@@ -994,6 +996,9 @@ def build_timeline(query, emit):
             pruned.extend(e for e in before if not any(e is m for m in merged))
             trace['rejected'].extend(item | {'batch': index} for item in removed)
         events = merged
+        # 打ち切り試算（quality_eval --replay-batches）用に、組の所要時間とこの組で採用した出来事を残す。
+        batch_record['seconds'] = round(time.monotonic() - batch_started, 1)
+        batch_record['adopted'] = [[e['year'], e['title']] for e in additions if any(e is m for m in merged)]
         review_notes.extend(note for note in notes if note not in review_notes)
         if events:
             emit(timeline_result(query, events, review_notes, started, trace=trace) | {'kind': 'checkpoint'})
