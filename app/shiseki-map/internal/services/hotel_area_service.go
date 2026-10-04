@@ -54,6 +54,7 @@ func NewHotelAreaServiceForTest(a8mat string) *HotelAreaService {
 // AreaSearchLink returns an A8.net-wrapped link to Jalan's hotel-listing
 // page for the given prefecture, and whether the prefecture was recognized.
 func (s *HotelAreaService) AreaSearchLink(prefecture, lrgCode, smlCode string) (string, bool) {
+	prefecture = hotelAreaPrefecture(prefecture, lrgCode)
 	code, ok := jalanPrefectureCode[prefecture]
 	if !ok {
 		return "", false
@@ -73,8 +74,27 @@ func (s *HotelAreaService) IsSmallArea(lrgCode, smlCode string) bool {
 }
 
 func (s *HotelAreaService) IsLargeArea(prefecture, lrgCode string) bool {
+	prefecture = hotelAreaPrefecture(prefecture, lrgCode)
 	code, ok := jalanPrefectureCode[prefecture]
 	return ok && len(lrgCode) == 6 && lrgCode[:2] == code && lrgCode[4:] == "00"
+}
+
+// Cultural Agency records spanning multiple prefectures keep that designation.
+// Their assigned LRG identifies the prefecture of the point shown on the map.
+func hotelAreaPrefecture(prefecture, lrgCode string) string {
+	if prefecture == "２県以上" && len(lrgCode) == 6 && lrgCode[4:] == "00" {
+		for _, digit := range lrgCode {
+			if digit < '0' || digit > '9' {
+				return prefecture
+			}
+		}
+		for name, code := range jalanPrefectureCode {
+			if lrgCode[:2] == code {
+				return name
+			}
+		}
+	}
+	return prefecture
 }
 
 // affiliateWrap mirrors JalanService.affiliateWrap: it turns a destination

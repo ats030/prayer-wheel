@@ -116,6 +116,25 @@ func TestAreaSearchLink_JalanCodesDifferingFromJIS(t *testing.T) {
 	}
 }
 
+func TestAreaSearchLink_MultiPrefectureSiteUsesAssignedRegion(t *testing.T) {
+	svc := NewHotelAreaServiceForTest("")
+	got, ok := svc.AreaSearchLink("２県以上", "141600", "141602")
+	if !ok || got != "https://www.jalan.net/140000/LRG_141600/SML_141602/" {
+		t.Fatalf("multi-prefecture region link = %q, %v", got, ok)
+	}
+	if !svc.IsLargeArea("２県以上", "141600") {
+		t.Fatal("assigned region should be recognized for its label")
+	}
+	for _, code := range []string{"", "xx1600", "14xx00", "141602", "991600"} {
+		if _, ok := svc.AreaSearchLink("２県以上", code, ""); ok {
+			t.Errorf("invalid multi-prefecture assignment %q was accepted", code)
+		}
+	}
+	if _, ok := svc.AreaSearchLink("unknown", "141600", "141602"); ok {
+		t.Fatal("unknown prefectures should still be rejected")
+	}
+}
+
 func TestAreaSearchLink_UsesJalanCodesForNorthKanto(t *testing.T) {
 	svc := NewHotelAreaServiceForTest("")
 	for prefecture, want := range map[string]string{

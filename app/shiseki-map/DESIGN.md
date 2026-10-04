@@ -38,13 +38,18 @@
 
 - 自己ホスト版は既定 port 8530。Cloud Runでは `PORT` を使用する。
 - Cloud Runでは `SHISEKI_SUMMARY_DISABLE=1` とし、Wikipedia本文ブロックを表示する。
-- `JALAN_A8MAT` がある場合のみ、地点に事前割り当てしたじゃらん大エリア（LRG）の宿泊リンクを
-  詳細下部に表示する。LRGが未判定または曖昧な地点は都道府県リンクへフォールバックする。
+- `JALAN_A8MAT` がある場合のみ、地点に事前割り当てしたじゃらん小エリア（SML）の宿泊リンクを
+  詳細下部に表示する。SMLが未設定なら大エリア（LRG）、LRGも未設定なら都道府県へフォールバックする。
 - LRGはリポジトリルートの `scripts/generate-jalan-lrg.py` で全地点へ静的に付与する。境界データの版と
   商用利用条件は `docs/tool-license-jalan-lrg.yaml` を参照する。
 - 確認済み割り当てはリポジトリルートの `data/jalan-lrg-overrides.json` に根拠・確認日付きで固定し、
   新規地点にLRGがなければ生成・検証を失敗させる。リポジトリルートで `uv run python scripts/check-jalan-lrg.py`
   を実行すると、onsen/omatsuri/shiseki 全件の欠落と不整合をオフライン検査する。
+- SMLの割り当ては `data/jalan-sml-overrides.json` に保存する。史跡を再収集する際は、同じ出典IDの
+  都道府県・緯度・経度が変わらない地点に限り、既存のLRG/SMLを引き継ぐ。新規地点や位置を変更した
+  地点は、地域を再割り当てしてからSQLiteを生成する。
+- 文化庁の所在地が「２県以上」の史跡は、その表記を保持する。宿リンクは地図上の地点を自治体境界で
+  照合して付与したLRG/SMLを使い、LRGから宿地域の都道府県を決める。
 - 自治体判定は「国土数値情報（行政区域データ）（国土交通省）を加工して作成」した
   Geolonia `japanese-admins`（生成時のみ使用）に基づく。
 - 全HTML entry pointに `data-site="shiseki-map"` のvisit-logタグを置く。Cloud Runから
