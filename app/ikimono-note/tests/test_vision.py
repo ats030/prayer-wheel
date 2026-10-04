@@ -30,6 +30,13 @@ def test_extract_exif_context_reads_capture_date():
     }
 
 
+def test_unparseable_photo_is_distinct_from_missing_gps():
+    assert vision.extract_exif_context(b"not a photograph") == {"gps_status": "exif_unreadable"}
+    out = io.BytesIO()
+    Image.new("RGB", (4, 4), "green").save(out, "JPEG")
+    assert vision.extract_exif_context(out.getvalue()) == {}
+
+
 def test_gps_coordinate_converts_and_applies_direction():
     assert vision._gps_coordinate((35, 30, 0), "N") == 35.5
     assert vision._gps_coordinate((139, 45, 0), b"W") == -139.75

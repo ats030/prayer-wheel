@@ -168,7 +168,7 @@ def extract_exif_context(raw: bytes) -> dict[str, Any]:
             f"先頭バイト={raw[:12].hex()}",
             flush=True,
         )
-        return {}
+        return {"gps_status": "exif_unreadable"}
     result: dict[str, Any] = {}
     if observed_date:
         result["observed_date"] = observed_date

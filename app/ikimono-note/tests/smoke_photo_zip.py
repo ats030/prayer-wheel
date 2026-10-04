@@ -37,11 +37,14 @@ def main():
             raise AssertionError(expression)
         page.goto(base)
         wait("typeof selectOriginalZip==='function'")
+        assert page.evaluate("async()=>{const {photoFingerprint}=await import('/assets/photo-location.mjs');return photoFingerprint({size:16*1024*1024,arrayBuffer(){throw Error('must not read oversized file')}})}") == "写真が15MBを超えています"
         with page.expect_file_chooser() as chooser:
             page.locator("#originalZipBtn").click()
         chooser.value.set_files(upload)
         wait("gps?.source==='exif' && !document.getElementById('originalZipBtn').disabled")
         assert page.locator("#gpsStatus").is_visible()
+        assert page.locator("#photoDiagnostic").get_attribute("data-gps-state") == "present"
+        assert hashlib.sha256(photo).hexdigest()[:16] in page.locator("#photoDiagnostic").inner_text()
         assert page.evaluate("selected.length") == 1
         assert page.evaluate("selected[0].name") == name
         digest = page.evaluate("async()=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await selected[0].arrayBuffer()))).map(x=>x.toString(16).padStart(2,'0')).join('')")
@@ -100,6 +103,26 @@ def main():
         wait("!document.getElementById('originalZipBtn').disabled")
         assert page.evaluate("selected[0].name") == "photo.jpg"
         assert page.evaluate("gps") is None
+        assert page.locator("#photoDiagnostic").get_attribute("data-gps-state") == "missing"
+        assert "GPSタグがありません" in page.locator("#photoDiagnostic").inner_text()
+        # Failed metadata requests must not be diagnosed as absent GPS.
+        page.route("**/api/photo-metadata", lambda route: route.fulfill(status=401, json={"detail": "ログインしてください"}))
+        page.locator("#library").set_input_files(fixture())
+        wait("document.getElementById('photoDiagnostic').dataset.gpsState==='request_failed'")
+        assert "HTTP 401" in page.locator("#photoDiagnostic").inner_text()
+        assert "写真に位置情報がないとは限りません" in page.locator("#gpsStatus").inner_text()
+        page.unroute("**/api/photo-metadata")
+        # A malformed EXIF response has its own state, without coordinates.
+        page.route("**/api/photo-metadata", lambda route: route.fulfill(json={"gps_status": "unreadable"}))
+        page.locator("#library").set_input_files(fixture())
+        wait("document.getElementById('photoDiagnostic').dataset.gpsState==='unreadable'")
+        assert page.evaluate("gps") is None
+        assert "GPSタグはありますが" in page.locator("#photoDiagnostic").inner_text()
+        page.unroute("**/api/photo-metadata")
+        page.locator("#library").set_input_files([fixture(False), fixture()])
+        wait("document.getElementById('photoDiagnostic').dataset.gpsState==='present'")
+        assert "2枚全体" in page.locator("#photoDiagnostic").inner_text()
+        assert "確認コード" not in page.locator("#photoDiagnostic").inner_text()
         for width in (360, 1280):
             page.set_viewport_size({"width": width, "height": 900})
             assert page.locator("#originalZipBtn").is_visible()
@@ -108,14 +131,14 @@ def main():
         page.goto(base + "/android-original")
         for width in (360, 1280):
             page.set_viewport_size({"width": width, "height": 900})
-            link = page.get_by_role("link", name="補助アプリをダウンロード（0.1.0）")
+            link = page.get_by_role("link", name="補助アプリをダウンロード（0.1.1）")
             assert link.is_visible()
             link.focus()
             assert page.evaluate("document.documentElement.scrollWidth<=innerWidth")
             page.screenshot(path=f"/tmp/ikimono-android-download-{width}.png", full_page=True)
         with page.expect_download() as download:
             link.click()
-        assert download.value.suggested_filename == "ikimono-original-0.1.0.apk"
+        assert download.value.suggested_filename == "ikimono-original-0.1.1.apk"
         assert download.value.failure() is None
         assert not errors, errors
         browser.close()

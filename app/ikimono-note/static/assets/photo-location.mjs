@@ -11,6 +11,22 @@ export function coordinateLabel(coordinates) {
   return `緯度 ${coordinates.latitude.toFixed(4)}, 経度 ${coordinates.longitude.toFixed(4)}`;
 }
 
+export function photoLocationState(data) {
+  if (photoCoordinates(data)) return {code: "present", label: "GPSを読み取れました"};
+  if (data?.gps_status === "unreadable") return {code: "unreadable", label: "GPSタグはありますが、値を読み取れません"};
+  if (data?.gps_status === "exif_unreadable") return {code: "exif_unreadable", label: "写真のEXIFを解析できません"};
+  return {code: "missing", label: "受け取った写真にGPSタグがありません"};
+}
+
+// This code stays in the browser; no filename, fingerprint or coordinates are logged.
+export async function photoFingerprint(file) {
+  if (file.size > 15 * 1024 * 1024) return "写真が15MBを超えています";
+  try {
+    const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+    return [...new Uint8Array(digest)].slice(0, 8).map(byte => byte.toString(16).padStart(2, "0")).join("");
+  } catch (_) { return "取得できませんでした"; }
+}
+
 export async function readOriginalZip(file) {
   if (file.size > 15 * 1024 * 1024) throw new Error("ZIPは15MB以下にしてください");
   const controller = new AbortController();
@@ -44,7 +60,11 @@ export async function readPhotoLocation(files) {
     const response = await fetch("/api/photo-metadata", {
       method: "POST", body: form, signal: controller.signal,
     });
-    if (!response.ok) throw new Error("写真の情報を読み取れませんでした。元写真を選んで、もう一度お試しください。");
+    if (!response.ok) {
+      const reason = response.status === 401 ? "ログイン状態を確認してください。" :
+        response.status === 429 ? "少し待ってから選び直してください。" : "もう一度選び直してください。";
+      throw new Error(`写真情報の問い合わせに失敗しました（HTTP ${response.status}）。${reason}`);
+    }
     return await response.json();
   } finally {
     clearTimeout(timeout);

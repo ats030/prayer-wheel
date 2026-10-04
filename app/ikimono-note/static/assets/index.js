@@ -62,22 +62,32 @@ function addFiles(files){
 }
 function applyPhotoMetadata(data){const found=[];if(data.observed_date&&!$("observedDate").value){$("observedDate").value=data.observed_date;found.push("撮った日")}if(data.location){/* 座標は場所欄の入力状況に関わらず常に写真のEXIFを使う。
    場所欄は、まだユーザーが手で書き換えていない（＝前の写真からの自動入力のままか空の）
-   ときだけ、選び直した写真のGPSで上書きする。手入力は上書きしない */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;if(!$("location").value||locationAutoFilled){$("location").value=data.location;locationAutoFilled=true;found.push("撮った場所")}}else{gps=null;$("gpsStatus").textContent="この写真からは位置情報を読み取れませんでした。元写真1枚をZIPに入れ、「元写真ZIPを選ぶ」をお試しください。ZIPに入れる前に失われた位置情報は復元できません。位置情報なしでも使えます。";if(locationAutoFilled){$("location").value="";locationAutoFilled=false}}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
+   ときだけ、選び直した写真のGPSで上書きする。手入力は上書きしない */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;if(!$("location").value||locationAutoFilled){$("location").value=data.location;locationAutoFilled=true;found.push("撮った場所")}}else{gps=null;$("gpsStatus").textContent="この写真からは位置情報を読み取れませんでした。下の読み取り結果を確認してください。Androidでは補助アプリの「元写真の位置情報を確認する」で同じ写真を確認できます。位置情報なしでも使えます。";if(locationAutoFilled){$("location").value="";locationAutoFilled=false}}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
 async function readPhotoMetadata(files){
   const selection=++photoSelection;
   gps=null;
   $("gpsStatus").textContent="写真の撮影場所を読み取っています…";
+  $("photoDiagnostic").textContent="";
+  $("photoDiagnostic").dataset.gpsState="reading";
   if(locationAutoFilled){$("location").value="";locationAutoFilled=false}
   try{
-    const {readPhotoLocation,photoCoordinates,coordinateLabel}=await import("/assets/photo-location.mjs");
+    const {readPhotoLocation,photoCoordinates,coordinateLabel,photoLocationState,photoFingerprint}=await import("/assets/photo-location.mjs");
+    const fingerprint=files.length===1?await photoFingerprint(files[0]):"";
+    if(selection!==photoSelection)return;
+    $("photoDiagnostic").textContent=files.length===1?"写真の確認コード："+fingerprint:"選択した写真"+files.length+"枚全体の読み取り結果";
     const data=await readPhotoLocation(files);
     if(selection!==photoSelection)return;
+    const state=photoLocationState(data);
+    $("photoDiagnostic").dataset.gpsState=state.code;
+    $("photoDiagnostic").textContent+=" ／ "+state.label;
     const coordinates=photoCoordinates(data);
     applyPhotoMetadata({...data,location:coordinates?coordinateLabel(coordinates):"",...coordinates});
   }catch(e){
     if(selection!==photoSelection)return;
     gps=null;
-    $("gpsStatus").textContent="写真の位置情報を読み取れませんでした。場所なしで続けられます。";
+    $("gpsStatus").textContent="写真情報の問い合わせに失敗しました。写真に位置情報がないとは限りません。場所なしで続けられます。";
+    $("photoDiagnostic").dataset.gpsState="request_failed";
+    $("photoDiagnostic").textContent+=" ／ "+e.message;
     showStatus("写真の情報を読み取れませんでした。もう一度選ぶか、場所なしで続けてください。",true);
   }
 }

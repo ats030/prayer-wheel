@@ -9,6 +9,8 @@ PLATFORM="${IKIMONO_ANDROID_PLATFORM:-$SDK/android-35/android.jar}"
 SIGNING="${IKIMONO_ANDROID_SIGNING:-$HOME/.local/share/ikimono-android/signing}"
 export JAVA_HOME="$JDK"
 export PATH="$JDK/bin:$PATH"
+VERSION=$(python3 -c 'import xml.etree.ElementTree as E; print(E.parse("AndroidManifest.xml").getroot().get("{http://schemas.android.com/apk/res/android}versionName"))')
+OUTPUT="../static/downloads/ikimono-original-${VERSION}.apk"
 for program in javac java jar keytool; do command -v "$program" >/dev/null; done
 test -f "$PLATFORM"
 mkdir -p build/generated build/classes build/dex ../static/downloads
@@ -30,6 +32,6 @@ if [ ! -f "$SIGNING/release.jks" ] || [ ! -f "$SIGNING/password" ]; then
     printf '%s\n' "Release signing key is missing: $SIGNING. See README.md." >&2
     exit 1
 fi
-"$TOOLS/apksigner" sign --v4-signing-enabled false --ks "$SIGNING/release.jks" --ks-pass "file:$SIGNING/password" --out ../static/downloads/ikimono-original-0.1.0.apk build/aligned.apk
-"$TOOLS/apksigner" verify --verbose --print-certs ../static/downloads/ikimono-original-0.1.0.apk
-sha256sum ../static/downloads/ikimono-original-0.1.0.apk
+"$TOOLS/apksigner" sign --v4-signing-enabled false --ks "$SIGNING/release.jks" --ks-pass "file:$SIGNING/password" --out "$OUTPUT" build/aligned.apk
+"$TOOLS/apksigner" verify --verbose --print-certs "$OUTPUT"
+sha256sum "$OUTPUT"
