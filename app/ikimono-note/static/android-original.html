@@ -18,8 +18,10 @@
   <header class="top"><div><div class="eyebrow">生きものノート</div><h1>Androidで元写真を渡す</h1></div>
   <div class="top-actions"><button class="control theme-toggle" id="themeToggle" type="button"><span class="theme-icon" aria-hidden="true">◐</span><span class="theme-label">自動</span></button><a class="control" href="/">撮影へ戻る</a></div></header>
   <article class="panel">
-    <p><strong>手動でZIPを作る必要はありません。</strong>補助アプリを一度入れると、ファイル選択画面から写真を選ぶだけで、自動でZIPに包んでBraveへ渡します。ログインと調べた記録は、これまでどおりBraveで使えます。</p>
-    <p>試作版です。PixelとBraveでの位置情報保持は、実機での確認が必要です。写真に元から位置情報がない場合は補えません。</p>
+    <p><strong>現在の写真登録では、この補助アプリを使う必要はありません。</strong><a href="/">写真の登録画面</a>で通常どおり写真を選び、位置が読めなければ「地図で撮影場所を指定」か「現在地を使う」から場所を追加してください。</p>
+    <h2>以前の試作版について</h2>
+    <p>以下は以前公開した補助アプリの記録です。<strong>手動でZIPを作る必要はありません。</strong>端末内の元写真を自動でZIP化して渡す試作版でした。現在の登録画面から補助アプリとZIP選択の入口は外しています。</p>
+    <details class="disclosure"><summary>以前の版の説明とダウンロード</summary>
     <p><a class="control" href="/downloads/ikimono-original-0.1.1.apk" download>補助アプリをダウンロード（0.1.1）</a></p>
     <h2>最初の設定</h2>
     <ol>
@@ -50,5 +52,6 @@
     <h2>写真と位置情報の扱い</h2>
     <p>補助アプリはネットへ接続せず、選んだ原本をメモリ上でZIP化して渡します。補助アプリが写真やZIPを端末へ保存することはありません。渡すZIPには撮影場所が含まれるため、共有先を確認してください。Webサービスでの取り扱いは<a href="/privacy">プライバシー</a>をご覧ください。</p>
     <p>補助アプリをアンインストールすると、ファイル選択画面の入口が消えます。Braveのログイン、設定、既存の記録は残ります。</p>
+    </details>
   </article>
 </main></body></html>

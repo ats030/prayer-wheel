@@ -6,6 +6,16 @@ const $=id=>document.getElementById(id);let plantnetReady=false;let affiliate=nu
    identify 側はこの Promise を待ってから座標を確定する */
 let locationReady=Promise.resolve();
 let photoSelection=0;
+let captureLocationPicker=null;
+const locationPickerReady=import('/assets/location-picker.mjs').then(({createLocationPicker,locationLabel})=>{
+  captureLocationPicker=createLocationPicker($('captureLocation'),{onChange(point){
+    if(!selected.length||identify.disabled)return false;
+    gps=point;
+    if(!$('location').value||locationAutoFilled){$('location').value=locationLabel(point);locationAutoFilled=true}
+    $('gpsStatus').textContent='指定した撮影場所を記録と地図に使います。';
+    return true;
+  }});
+});
 const drop=$("drop"),status=$("status"),previews=$("previews"),identify=$("identify");
 /* お試し枠のことは、使い切る前に言う。1日3回だと知らずに2回使い、3回目で
    初めて壁に当たるのは不親切。続ける道 (自分のキーを入れる) も一緒に出す。
@@ -41,7 +51,7 @@ window.speciesRuntimeModel=model;
 const MAX_PHOTOS=3;let previewUrls=[];
 function renderPreviews(){previewUrls.forEach(URL.revokeObjectURL);previewUrls=selected.map(file=>URL.createObjectURL(file));document.body.classList.add("has-selection");/* 枚数で列を変える。3列固定だと、1枚のときも横幅の3分の1しか使わない。 携帯では110pxほどになり、ピントや被写体の位置を確かめられない */previews.className="previews count-"+selected.length;previews.innerHTML=previewUrls.map((url,index)=>'<div class="preview-item"><img class="preview" src="'+url+'" alt="調べる写真 '+(index+1)+'"><button class="btn preview-remove" type="button" data-index="'+index+'">この写真を外す</button></div>').join("");previews.querySelectorAll(".preview-remove").forEach(button=>button.onclick=()=>removeSelectedPhoto(Number(button.dataset.index)));$("previewEmpty").classList.add("hidden");identify.classList.remove("hidden");$("captureTitle").textContent=selected.length+"枚の写真を選択中"}
 function removeSelectedPhoto(index){if(selected.length<=1){showStatus("調べる写真は1枚以上必要です。",true);return}setFiles(selected.filter((_,i)=>i!==index))}
-function setFiles(files){const chosen=[...files].filter(file=>file.type.startsWith("image/"));if(!chosen.length){showStatus("画像ファイルを選んでください。",true);return}if(chosen.length>MAX_PHOTOS){showStatus("写真は最大"+MAX_PHOTOS+"枚です。",true);return}selected=chosen;gps=null;renderPreviews();showStatus("写真の情報を確認しています。",false,true);locationReady=readPhotoMetadata(chosen)}
+function setFiles(files){const chosen=[...files].filter(file=>file.type.startsWith("image/"));if(!chosen.length){showStatus("画像ファイルを選んでください。",true);return}if(chosen.length>MAX_PHOTOS){showStatus("写真は最大"+MAX_PHOTOS+"枚です。",true);return}selected=chosen;gps=null;captureLocationPicker?.reset();$("captureLocation").classList.remove("hidden");renderPreviews();showStatus("写真の情報を確認しています。",false,true);locationReady=readPhotoMetadata(chosen)}
 /* 足すときは、いま選んでいる写真を残す。置き換えると、最初に撮った全体像が消えて
    候補が振り出しに戻る。「もっと確かめたいこと」を読んで撮り足す人が欲しいのは、
    全体像に寄りの1枚を加えた組であって、寄りの1枚だけではない。
@@ -53,16 +63,16 @@ function addFiles(files){
   const room=MAX_PHOTOS-selected.length;
   if(room<=0){showStatus("写真は"+MAX_PHOTOS+"枚までです。撮り直すときは「写真を選ぶ」から選びなおしてください。",true);return}
   const added=chosen.slice(0,room);
-  selected=[...selected,...added];
+  selected=[...selected,...added];captureLocationPicker?.reset();
   locationReady=readPhotoMetadata([...selected]);
   renderPreviews();
   const overflow=chosen.length>room?"（"+MAX_PHOTOS+"枚までなので"+added.length+"枚だけ足しました）":"";
   showStatus("写真を足して"+selected.length+"枚になりました"+overflow+"。もう一度「名前を調べる」を押すと、足した写真も合わせて調べます。");
   identify.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
 }
-function applyPhotoMetadata(data){const found=[];if(data.observed_date&&!$("observedDate").value){$("observedDate").value=data.observed_date;found.push("撮った日")}if(data.location){/* 座標は場所欄の入力状況に関わらず常に写真のEXIFを使う。
+function applyPhotoMetadata(data){const found=[];if(data.observed_date&&!$("observedDate").value){$("observedDate").value=data.observed_date;found.push("撮った日")}if(gps?.source==="map"||gps?.source==="current"){return}if(data.location){/* 座標は場所欄の入力状況に関わらず常に写真のEXIFを使う。
    場所欄は、まだユーザーが手で書き換えていない（＝前の写真からの自動入力のままか空の）
-   ときだけ、選び直した写真のGPSで上書きする。手入力は上書きしない */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;if(!$("location").value||locationAutoFilled){$("location").value=data.location;locationAutoFilled=true;found.push("撮った場所")}}else{gps=null;$("gpsStatus").textContent="この写真からは位置情報を読み取れませんでした。下の読み取り結果を確認してください。Androidでは補助アプリの「元写真の位置情報を確認する」で同じ写真を確認できます。位置情報なしでも使えます。";if(locationAutoFilled){$("location").value="";locationAutoFilled=false}}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
+   ときだけ、選び直した写真のGPSで上書きする。手入力は上書きしない */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;if(!$("location").value||locationAutoFilled){$("location").value=data.location;locationAutoFilled=true;found.push("撮った場所")}}else{gps=null;$("gpsStatus").textContent="この写真からは位置情報を読み取れませんでした。下の読み取り結果を確認してください。「地図で撮影場所を指定」か「現在地を使う」で場所を追加できます。場所なしでも使えます。";if(locationAutoFilled){$("location").value="";locationAutoFilled=false}}captureLocationPicker?.setValue(gps);if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
 async function readPhotoMetadata(files){
   const selection=++photoSelection;
   gps=null;
@@ -84,11 +94,10 @@ async function readPhotoMetadata(files){
     applyPhotoMetadata({...data,location:coordinates?coordinateLabel(coordinates):"",...coordinates});
   }catch(e){
     if(selection!==photoSelection)return;
-    gps=null;
-    $("gpsStatus").textContent="写真情報の問い合わせに失敗しました。写真に位置情報がないとは限りません。場所なしで続けられます。";
+    if(gps?.source!=="map"&&gps?.source!=="current"){gps=null;$("gpsStatus").textContent="写真の撮影場所を読み取れませんでした。地図で指定するか、そこで撮った写真なら現在地を使えます。場所なしでも続けられます。";}
     $("photoDiagnostic").dataset.gpsState="request_failed";
     $("photoDiagnostic").textContent+=" ／ "+e.message;
-    showStatus("写真の情報を読み取れませんでした。もう一度選ぶか、場所なしで続けてください。",true);
+    showStatus("写真の撮影場所は地図で追加できます。場所なしでも調べられます。");
   }
 }
 
@@ -97,30 +106,10 @@ async function waitForPhotoLocation(){
   do{pending=locationReady;await pending}while(pending!==locationReady);
 }
 function showStatus(text,error=false,busy=false){status.className='status'+(error?' error':'');status.innerHTML=(busy?'<span class="spinner"></span>':'')+text}
-async function selectOriginalZip(file){
-  if(identify.disabled){showStatus("調べ終わってから元写真ZIPを選んでください。",true);return}
-  const selection=photoSelection;
-  identify.disabled=true;
-  $("originalZipBtn").disabled=true;
-  showStatus("ZIPから元写真を読み取っています…",false,true);
-  try{
-    const {readOriginalZip}=await import("/assets/photo-location.mjs");
-    const photo=await readOriginalZip(file);
-    // 普通の写真を選び直した場合、遅れて届いたZIPの写真で置き換えない。
-    if(selection!==photoSelection)return;
-    setFiles([photo]);
-    await waitForPhotoLocation();
-  }catch(error){
-    if(selection!==photoSelection)return;
-    showStatus(error.name==="AbortError"?"ZIPの読み取りに時間がかかりました。もう一度お試しください。":error.message,true);
-  }finally{identify.disabled=false;$("originalZipBtn").disabled=false}
-}
-$("originalZipBtn").onclick=()=>$("originalZip").click();
-$("originalZip").onchange=e=>{const file=e.target.files?.[0];e.target.value="";if(file)selectOriginalZip(file)};
 /* 「選びなおす」と「足す」で入力欄を分ける。1つの入力を旗で切り替えると、
    #library はドロップ領域の <label> の中にあるため .click() が label まで
    バブルし、旗を戻す側の処理と競合する。入力を分ければその競合ごと消える */
-$("originalFileBtn").onclick=()=>$("originalFile").click();$("originalFile").onchange=e=>{setFiles(e.target.files);e.target.value=""};
+
 $('libraryBtn').onclick=()=> $('library').click();$('cameraBtn').onclick=()=> $('camera').click();$("library").onchange=e=>{setFiles(e.target.files);e.target.value=""};$("libraryAdd").onchange=e=>{addFiles(e.target.files);e.target.value=""};$("camera").onchange=e=>{addFiles(e.target.files);e.target.value=""};
 ['dragenter','dragover'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove('drag')}));drop.addEventListener("drop",e=>setFiles(e.dataTransfer.files));
 /* 場所欄をユーザーが自分で書き換えたら、以後は写真を選び直してもGPSで
@@ -182,7 +171,7 @@ async function loadAmazonProducts(){
     },budget);
   }
 }
-function safetyHtml(){const location=gps?`取得済み（誤差 約${Math.round(gps.accuracy)}m）`:"まだ取得していません";return `<aside class="safety-card" id="safetyCard"><h3>見つけた生きものの扱い</h3><p class="safety-lead">この結果は「たぶんこれ」という候補です。食べる・さわる・持ち帰るの判断には使えません。小さなお子さんが使うときは、大人といっしょに読んでください。</p><div class="safety-grid"><div class="safety-item"><span class="safety-status">食べられるか：判定しません</span><p>写真だけでは、よく似た毒のある種、毒のある部分、育ち具合を見分けられません。この結果をもとに食べないでください。</p><a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/shokuhin/yuudoku/index.html" target="_blank" rel="noopener noreferrer">厚生労働省の注意情報 ↗</a></div><div class="safety-item"><span class="safety-status">さわってよいか：判定しません</span><p>かぶれる植物、刺す・かむ生きものは、写真では見分けきれません。素手でさわらず、離れて観察してください。生きものを弱らせない距離を保ちましょう。</p></div><div class="safety-item"><span class="safety-status">持ち帰ってよいか：確認が必要</span><p>現在地：${location}。場所がわかっても、その土地の持ち主の許可、保護区域、自治体のきまり、保護されている種かどうかまでは確認できません。すべて確認できるまで採らないでください。</p><a href="https://www.env.go.jp/park/about/protect/index.html" target="_blank" rel="noopener noreferrer">環境省の採取規制を確認 ↗</a></div></div></aside>`}
+function safetyHtml(){const location=gps?(gps.source==="map"?"地図で指定済み":`取得済み（おおまかな値・誤差の目安 約${Math.round(gps.accuracy)}m）`):"まだ取得していません";return `<aside class="safety-card" id="safetyCard"><h3>見つけた生きものの扱い</h3><p class="safety-lead">この結果は「たぶんこれ」という候補です。食べる・さわる・持ち帰るの判断には使えません。小さなお子さんが使うときは、大人といっしょに読んでください。</p><div class="safety-grid"><div class="safety-item"><span class="safety-status">食べられるか：判定しません</span><p>写真だけでは、よく似た毒のある種、毒のある部分、育ち具合を見分けられません。この結果をもとに食べないでください。</p><a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/shokuhin/yuudoku/index.html" target="_blank" rel="noopener noreferrer">厚生労働省の注意情報 ↗</a></div><div class="safety-item"><span class="safety-status">さわってよいか：判定しません</span><p>かぶれる植物、刺す・かむ生きものは、写真では見分けきれません。素手でさわらず、離れて観察してください。生きものを弱らせない距離を保ちましょう。</p></div><div class="safety-item"><span class="safety-status">持ち帰ってよいか：確認が必要</span><p>撮影場所：${location}。場所がわかっても、その土地の持ち主の許可、保護区域、自治体のきまり、保護されている種かどうかまでは確認できません。すべて確認できるまで採らないでください。</p><a href="https://www.env.go.jp/park/about/protect/index.html" target="_blank" rel="noopener noreferrer">環境省の採取規制を確認 ↗</a></div></div></aside>`}
 function plantnetCreditHtml(data){
   /* Pl@ntNet の無料枠は "based on the Pl@ntNet recognition API" の明示を求めている */
   if(!data.plantnet_used)return "";
@@ -265,7 +254,7 @@ function showWorking(startedAt){
   clearInterval(elapsedTimer);
   elapsedTimer=setInterval(tick,1000);
 }
-function stopWorking(){clearInterval(elapsedTimer);elapsedTimer=null;identify.disabled=false}
+function stopWorking(){clearInterval(elapsedTimer);elapsedTimer=null;identify.disabled=false;captureLocationPicker?.setDisabled(false)}
 
 function readPending(){try{return JSON.parse(localStorage.getItem(PENDING_KEY)||"null")}catch(e){return null}}
 function writePending(value){
@@ -328,6 +317,7 @@ async function pollIdentification(pending){
 identify.onclick=async()=>{
   if(!selected.length)return;
   identify.disabled=true;
+  captureLocationPicker?.setDisabled(true);
   /* EXIF問い合わせがまだ終わっていないことがある。ここで待たずに
      coordinates を組み立てると gps が null のまま確定し、EXIFに位置がある写真でも
      地図に反映される座標が消えてしまう */

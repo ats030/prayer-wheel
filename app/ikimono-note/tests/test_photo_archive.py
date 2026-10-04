@@ -25,7 +25,8 @@ def test_android_companion_download_is_available_before_login(monkeypatch, versi
     monkeypatch.setattr(main.auth, "read_session", lambda _: None)
     page = client.get("/android-original")
     assert page.status_code == 200
-    assert "実機での確認が必要" in page.text
+    assert "この補助アプリを使う必要はありません" in page.text
+    assert "以前の試作版について" in page.text
     assert "手動でZIPを作る必要はありません" in page.text
     response = client.get(f"/downloads/ikimono-original-{version}.apk")
     assert response.status_code == 200

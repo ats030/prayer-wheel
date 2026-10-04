@@ -50,9 +50,9 @@ def main():
         page.goto(base)
         page.wait_for_function("typeof setFiles==='function'")
         photo = str(options.photo) if options.photo else fixture()
-        assert page.locator("#originalFile").get_attribute("accept") is None
+        assert page.locator("#originalZipBtn,#originalFileBtn").count() == 0
         with page.expect_file_chooser() as chooser:
-            page.locator("#originalFileBtn").click()
+            page.locator("#libraryBtn").click()
         chooser.value.set_files(photo)
         page.wait_for_function("gps?.source==='exif'")
         assert page.locator("#gpsStatus").is_visible()
@@ -106,10 +106,10 @@ def main():
         }""")
         page.goto(base + "/history")
         page.locator(".detail summary").click()
-        field = page.locator(".location-file")
-        assert field.get_attribute("accept") is None
+        field = page.locator(".location-photo")
+        assert field.get_attribute("accept") == "image/*"
         with page.expect_file_chooser() as chooser:
-            page.locator(".location-file-select").click()
+            page.locator(".location-select").click()
         chooser.value.set_files(photo)
         page.wait_for_function("document.querySelector('.location-message').textContent.includes('保存しました')")
         record = page.evaluate("async()=> (await all())[0]")
@@ -151,7 +151,7 @@ def main():
         page.goto(base)
         for width in (360, 1280):
             page.set_viewport_size({"width": width, "height": 900})
-            page.locator("#originalFile").set_input_files(fixture(False))
+            page.locator("#library").set_input_files(fixture(False))
             page.wait_for_function("document.getElementById('gpsStatus').textContent.includes('位置情報を読み取れませんでした')")
             page.evaluate("document.getElementById('location').closest('details').open=false")
             assert page.locator("#gpsStatus").is_visible()

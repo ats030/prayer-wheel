@@ -211,8 +211,10 @@ def test_settings_page_enables_all_providers():
     assert "requestCurrentLocation" not in index
     assert 'source:"current"' not in index
     assert "navigator.geolocation" not in index
-    assert '元写真ZIPを選ぶ' in index
-    assert 'ZIPに入れる前に失われた位置情報は復元できません' in index
+    assert '元写真ZIPを選ぶ' not in index
+    assert 'id="originalFileBtn"' not in index
+    assert 'id="captureLocation"' in index
+    assert '/assets/location-picker.mjs' in index
     assert "撮った場所としてAIへ送られます" in index
     assert "持ち帰ってよいか：確認が必要" in index
     assert "食べられるか：判定しません" in index

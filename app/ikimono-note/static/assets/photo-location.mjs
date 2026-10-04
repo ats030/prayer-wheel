@@ -1,4 +1,4 @@
-// 写真から読み取った座標だけを扱う。端末の現在地は取得しない。
+// 写真の読み取りと既存記録の座標更新。位置の選択はlocation-picker.mjsが扱う。
 // Cache belongs to this exact returned File, never a filename or persisted record.
 const originalMetadata = new WeakMap();
 export function photoCoordinates(data) {
@@ -94,12 +94,12 @@ export async function readPhotoLocation(files) {
 
 export function recordWithPhotoLocation(record, data, confirmReplace) {
   const coordinates = photoCoordinates(data);
-  if (!coordinates) throw new Error("この写真からは位置情報を読み取れませんでした。元写真1枚をZIPに入れ、「元写真ZIPを選ぶ」をお試しください。ZIPに入れる前に位置情報が失われている場合は補えません。記録は変更していません。");
-  const location = coordinateLabel(coordinates);
+  if (!coordinates) throw new Error("この写真からは位置情報を読み取れませんでした。「撮影場所を指定する」から地図で補えます。記録は変更していません。");
+  const location = data.manual ? String(data.location || coordinateLabel(coordinates)) : coordinateLabel(coordinates);
   const existing = record.coordinates != null || Boolean(record.context?.location?.trim());
   const unchanged = record.coordinates?.latitude === coordinates.latitude &&
     record.coordinates?.longitude === coordinates.longitude && record.context?.location === location;
   if (existing && !unchanged && !confirmReplace(
-    "この記録には場所が入っています。元写真の撮影場所に置き換えますか？\n" + location)) return null;
+    "この記録には場所が入っています。選んだ撮影場所に置き換えますか？\n" + location)) return null;
   return {...record, coordinates, context: {...record.context, location}};
 }

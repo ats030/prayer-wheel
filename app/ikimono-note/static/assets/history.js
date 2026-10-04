@@ -1,7 +1,7 @@
 const $=x=>document.getElementById(x),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));function openDb(){return new Promise((ok,no)=>{const r=indexedDB.open("species-history",1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains("entries"))r.result.createObjectStore("entries",{keyPath:"id"})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function request(r){return new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function finished(t){return new Promise((ok,no)=>{t.oncomplete=ok;t.onerror=()=>no(t.error)})}/* 候補ゼロのとき分類名に落ちると、「菌類」という名前の生きものを見つけたように読める。
    分類は行の印のほうへ回す */
 const title=e=>e.candidates?.[0]?.common_name_ja||(e.candidates?"候補が見つかりませんでした":"調べた記録");
-const coordinateLocation=v=>/^\s*緯度\s*-?\d+(?:\.\d+)?\s*[,、]\s*経度\s*-?\d+(?:\.\d+)?\s*$/.test(String(v||""));
+const coordinateLocation=v=>/^\s*(?:(?:地図で指定|現在地を使用)：)?緯度\s*-?\d+(?:\.\d+)?\s*[,、]\s*経度\s*-?\d+(?:\.\d+)?\s*$/.test(String(v||""));
 function rowLocation(e){const location=e.context?.location;return coordinateLocation(location)?"":location||"場所の記録なし"}
 async function all(){const d=await openDb(),t=d.transaction("entries"),v=await request(t.objectStore("entries").getAll());await finished(t);d.close();return v.sort((a,b)=>b.createdAt.localeCompare(a.createdAt))}let rerunRecords=new Map();
 /* 消す前に確かめる。記録は写真ごと消え、ドライブにつないでいれば次の自動保存で
@@ -146,15 +146,47 @@ async function saveShareToken(record,token){
   rerunRecords.set(String(record.id),{...record});
 }
 
+function locationMethod(e){const label=e.context?.location||'';return label.startsWith('地図で指定：')?'地図で指定した場所':label.startsWith('現在地を使用：')?'現在地を撮影場所として使用':''}
 function coordinateDetail(e){
   const c=e.coordinates;
   return '<section class="photo-location"><div data-location-value>'
     +(c?'位置：'+esc(c.latitude)+'、'+esc(c.longitude)+'（おおまかな値）':'場所の記録なし')
-    +'</div><p>この記録に使った元写真を選ぶと、撮影場所だけを補えます。</p>'
-    +'<button class="btn location-select" type="button">元写真から場所を補う</button><input class="location-photo" type="file" accept="image/*" hidden><button class="btn location-file-select" type="button">元写真をファイルから選ぶ</button><input class="location-file" type="file" hidden>'
-    +'<button class="btn location-zip-select" type="button">元写真ZIPを選ぶ</button><input class="location-zip" type="file" accept=".zip,application/zip" hidden>'
-    +'<p>元写真1枚をZIPに入れて選ぶ方法も使えます。ZIPと写真はそれぞれ15MBまで。すでに失われた位置情報は復元できません。</p>'
+    +'</div><div data-location-method>'+esc(locationMethod(e))+'</div><p>写真から場所を読むか、地図で撮影場所を指定できます。</p>'
+    +'<button class="btn location-select" type="button">写真から場所を補う</button><input class="location-photo" type="file" accept="image/*" hidden>'
+    +'<button class="btn location-manual" type="button">撮影場所を指定する</button><div class="history-location-picker"></div>'
     +'<p class="location-message" role="status"></p></section>';
+}
+function showSavedLocation(node,box,updated){
+  const c=updated.coordinates;
+  box.querySelector('[data-location-value]').textContent='位置：'+c.latitude+'、'+c.longitude+'（おおまかな値）';
+  box.querySelector('[data-location-method]').textContent=locationMethod(updated);
+  const placeFact=node.querySelector('[data-location-note]');
+  if(placeFact){placeFact.textContent=coordinateLocation(updated.context?.location)?'':'撮った場所：'+(updated.context?.location||'')}
+  const row=node.querySelector('.name').parentElement;
+  row.querySelectorAll(':scope > .muted').forEach((element,index)=>{if(index>0)element.remove()});
+  const label=rowLocation(updated);
+  if(label){const text=document.createElement('div');text.className='muted';text.textContent=label;row.append(text)}
+  box.querySelector('.location-message').textContent='撮影場所を保存しました。「観察した場所」の地図にも反映されます。';
+}
+const historyLocationPickers=new WeakMap();
+async function openHistoryLocationPicker(button){
+  const box=button.closest('.photo-location'),node=box.closest('article'),root=box.querySelector('.history-location-picker');
+  if(historyLocationPickers.has(root))return;
+  button.disabled=true;
+  try{
+    const {createLocationPicker,locationLabel}=await import('/assets/location-picker.mjs');
+    if(!root.isConnected)return;
+    const record=(await all()).find(record=>String(record.id)===node.dataset.id);
+    if(!record)throw new Error('記録が見つかりません。');
+    const picker=createLocationPicker(root,{value:record.coordinates,onChange:async point=>{
+      if(!root.isConnected)return false;
+      const updated=await savePhotoLocation(node.dataset.id,{...point,location:locationLabel(point),manual:true});
+      if(!updated)return false;
+      showSavedLocation(node,box,updated);return true;
+    }});
+    historyLocationPickers.set(root,picker);
+    button.classList.add('hidden');
+  }catch(error){box.querySelector('.location-message').textContent=error.message;button.disabled=false}
 }
 
 async function savePhotoLocation(id,data){
@@ -175,14 +207,12 @@ async function savePhotoLocation(id,data){
 document.addEventListener("click",event=>{
   const button=event.target.closest(".location-select");
   if(button)button.closest(".photo-location").querySelector(".location-photo").click();
-  const fileButton=event.target.closest(".location-file-select");
-  if(fileButton)fileButton.closest(".photo-location").querySelector(".location-file").click();
-  const zipButton=event.target.closest(".location-zip-select");
-  if(zipButton)zipButton.closest(".photo-location").querySelector(".location-zip").click();
+  const manual=event.target.closest('.location-manual');
+  if(manual)openHistoryLocationPicker(manual);
 });
 document.addEventListener("change",async event=>{
   const input=event.target;
-  if(!input.matches(".location-photo,.location-file,.location-zip"))return;
+  if(!input.matches(".location-photo"))return;
   const file=input.files?.[0];
   if(!file)return;
   const node=input.closest("article"),box=input.closest(".photo-location"),message=box.querySelector(".location-message");
@@ -190,23 +220,17 @@ document.addEventListener("change",async event=>{
   box.querySelectorAll("button,input").forEach(control=>control.disabled=true);
   message.textContent="元写真の位置情報を読み取っています…";
   try{
-    const {readPhotoLocation,readOriginalZip}=await import("/assets/photo-location.mjs");
-    const photo=input.matches(".location-zip")?await readOriginalZip(file):file;
-    const data=await readPhotoLocation([photo]);
+    const {readPhotoLocation}=await import("/assets/photo-location.mjs");
+    const data=await readPhotoLocation([file]);
     const updated=await savePhotoLocation(node.dataset.id,data);
     if(!updated){message.textContent="場所は変更していません。";return}
-    const c=updated.coordinates;
-    box.querySelector("[data-location-value]").textContent='位置：'+c.latitude+'、'+c.longitude+'（おおまかな値）';
-    const row=node.querySelector(".name").parentElement;
-    row.querySelectorAll(":scope > .muted").forEach((element,index)=>{if(index>0)element.remove()});
-    const label=rowLocation(updated);
-    if(label){const text=document.createElement("div");text.className="muted";text.textContent=label;row.append(text)}
-    message.textContent="撮影場所を保存しました。「観察した場所」の地図にも反映されます。";
+    showSavedLocation(node,box,updated);
+    historyLocationPickers.get(box.querySelector('.history-location-picker'))?.reset(updated.coordinates);
   }catch(error){
     message.textContent=error.name==="AbortError"?"読み取りに時間がかかっています。記録は変更していません。もう一度お試しください。":error.message;
   }finally{input.disabled=false;input.value="";box.querySelectorAll("button,input").forEach(control=>control.disabled=false)}
 });
-function fullDetail(e){const x=e.context||{},m=e.resultMeta||{};return detailPhotos(e)+noteEditor(e)+'<div class="facts">'+(e.category?'<div>分類：'+esc(e.category)+'</div>':"")+(e.summary?'<div>'+esc(e.summary)+'</div>':"")+((e.provider||e.model)?'<div>使ったAI：'+esc([providerLabel(e.provider),e.model].filter(Boolean).join(" · "))+'</div>':"")+(x.observedDate?'<div>撮った日：'+esc(x.observedDate)+'</div>':"")+(x.size?'<div>大きさ：'+esc(x.size)+'</div>':"")+(x.location&&!coordinateLocation(x.location)?'<div>撮った場所：'+esc(x.location)+'</div>':"")+coordinateDetail(e)+(m.strictMode?'<div>まちがい防止：学名を図鑑データで自動チェック</div>':"")+(m.taxonomyChecked?'<div>学名を図鑑データで確認済み'+(m.rejectedCandidates?' · 除いた候補 '+esc(m.rejectedCandidates)+'件':"")+'</div>':"")+(m.plantnetUsed?'<div>植物の候補は <a href="https://plantnet.org/" target="_blank" rel="noopener noreferrer">Pl@ntNet recognition API</a> によるもの</div>':"")+'</div><ol>'+(e.candidates||[]).map(c=>fullCandidate(c,e.category)).join("")+'</ol>'}async function enrich(){const records=await all(),byId=new Map(records.map(e=>[String(e.id),e]));document.querySelectorAll(".entry").forEach(node=>{const e=byId.get(node.dataset.id);if(e){node.querySelector(".detail").innerHTML='<summary>記録の内容を見る</summary>'+fullDetail(e);bindNoteEditor(node,e)}});document.querySelectorAll('.meter span[data-width]').forEach(bar=>{bar.style.width=bar.dataset.width+'%'});document.querySelectorAll(".detail-photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()})}setTimeout(()=>enrich().catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
+function fullDetail(e){const x=e.context||{},m=e.resultMeta||{};return detailPhotos(e)+noteEditor(e)+'<div class="facts">'+(e.category?'<div>分類：'+esc(e.category)+'</div>':"")+(e.summary?'<div>'+esc(e.summary)+'</div>':"")+((e.provider||e.model)?'<div>使ったAI：'+esc([providerLabel(e.provider),e.model].filter(Boolean).join(" · "))+'</div>':"")+(x.observedDate?'<div>撮った日：'+esc(x.observedDate)+'</div>':"")+(x.size?'<div>大きさ：'+esc(x.size)+'</div>':"")+(x.location&&!coordinateLocation(x.location)?'<div data-location-note>撮った場所：'+esc(x.location)+'</div>':"")+coordinateDetail(e)+(m.strictMode?'<div>まちがい防止：学名を図鑑データで自動チェック</div>':"")+(m.taxonomyChecked?'<div>学名を図鑑データで確認済み'+(m.rejectedCandidates?' · 除いた候補 '+esc(m.rejectedCandidates)+'件':"")+'</div>':"")+(m.plantnetUsed?'<div>植物の候補は <a href="https://plantnet.org/" target="_blank" rel="noopener noreferrer">Pl@ntNet recognition API</a> によるもの</div>':"")+'</div><ol>'+(e.candidates||[]).map(c=>fullCandidate(c,e.category)).join("")+'</ol>'}async function enrich(){const records=await all(),byId=new Map(records.map(e=>[String(e.id),e]));document.querySelectorAll(".entry").forEach(node=>{const e=byId.get(node.dataset.id);if(e){node.querySelector(".detail").innerHTML='<summary>記録の内容を見る</summary>'+fullDetail(e);bindNoteEditor(node,e)}});document.querySelectorAll('.meter span[data-width]').forEach(bar=>{bar.style.width=bar.dataset.width+'%'});document.querySelectorAll(".detail-photo").forEach(b=>b.onclick=()=>{$("large").src=b.dataset.src;$("lightbox").showModal()})}setTimeout(()=>enrich().catch(e=>console.error("記録の詳細を組み立てられませんでした", e)),0);
 /* 撮影画面と同じく、棚は候補ごとにその候補の中へ置く。記録から読み返すときも
    「どの候補の広告か」を位置で決められる。開いたときに初めて叩くのは変えない。
    予算は1回の開閉につき通しで6回・1棚2回 (撮影画面と同じ)。集めた品は棚をまたいで
