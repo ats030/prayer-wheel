@@ -280,6 +280,19 @@ def changelog() -> HTMLResponse:
     return _page("changelog.html")
 
 
+@app.get("/android-original", include_in_schema=False)
+def android_original() -> HTMLResponse:
+    return _page("android-original.html")
+
+
+@app.get("/downloads/ikimono-original-0.1.0.apk", include_in_schema=False)
+def android_original_apk() -> FileResponse:
+    return FileResponse(STATIC_DIR / "downloads" / "ikimono-original-0.1.0.apk",
+                        media_type="application/vnd.android.package-archive",
+                        filename="ikimono-original-0.1.0.apk",
+                        headers={"Cache-Control": "public, max-age=86400"})
+
+
 # ── ログイン ────────────────────────────────────────────
 # 公開版では必須。サーバーが持つのは識別子とメールアドレスだけで、写真も記録も
 # 設定もAPIキーも利用者の側に残る。ログインしても預かるものは増えない。
@@ -290,6 +303,7 @@ LOGIN_FLOW_COOKIE = "ikimono_login"
 # それに画面を組み立てる部品。ここを絞りすぎるとログイン画面が裸になる。
 OPEN_PATHS = {"/login", "/auth/google", "/auth/callback", "/api/me", "/privacy", "/terms",
               "/changelog",
+              "/android-original", "/downloads/ikimono-original-0.1.0.apk",
               "/favicon.png", "/apple-touch-icon.png", "/theme.js", "/health",
               # クローラと、共有したときの見え方。ログインへ飛ばすと robots.txt が
               # 読めず、共有カードの画像も出ない

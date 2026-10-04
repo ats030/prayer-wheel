@@ -16,6 +16,22 @@ import vision
 client = TestClient(main.app, base_url="http://localhost")
 
 
+def test_android_companion_download_is_available_before_login(monkeypatch):
+    monkeypatch.setattr(main, "PUBLIC_MODE", True)
+    monkeypatch.setattr(main.auth, "configured", lambda: True)
+    monkeypatch.setattr(main.auth, "read_session", lambda _: None)
+    page = client.get("/android-original")
+    assert page.status_code == 200
+    assert "実機での確認が必要" in page.text
+    assert "手動でZIPを作る必要はありません" in page.text
+    response = client.get("/downloads/ikimono-original-0.1.0.apk")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/vnd.android.package-archive"
+    assert response.headers["content-disposition"].startswith("attachment;")
+    assert response.content == (main.STATIC_DIR / "downloads" / "ikimono-original-0.1.0.apk").read_bytes()
+    assert client.get("/api/settings").status_code == 401  # No new API access.
+
+
 def original():
     exif = Image.Exif()
     exif[306] = "2026:10:03 02:54:15"

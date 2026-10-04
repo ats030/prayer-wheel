@@ -13,13 +13,14 @@ from smoke_photo_location import fixture, records
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--photo", type=Path)
+    parser.add_argument("--zip", type=Path, help="Use an archive produced by the Android Java implementation")
     args = parser.parse_args()
     photo = args.photo.read_bytes() if args.photo else fixture()["buffer"]
     name = args.photo.name if args.photo else "photo.jpg"
     archive = io.BytesIO()
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as zipped:
         zipped.writestr(name, photo)
-    upload = {"name": "original.zip", "mimeType": "application/zip", "buffer": archive.getvalue()}
+    upload = {"name": "original.zip", "mimeType": "application/zip", "buffer": args.zip.read_bytes() if args.zip else archive.getvalue()}
     with app_for_checking() as (base, _), sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
         context = browser.new_context(viewport={"width": 360, "height": 900})
@@ -104,9 +105,21 @@ def main():
             assert page.locator("#originalZipBtn").is_visible()
             assert page.evaluate("document.documentElement.scrollWidth<=innerWidth")
             page.screenshot(path=f"/tmp/ikimono-zip-{width}.png", full_page=True)
+        page.goto(base + "/android-original")
+        for width in (360, 1280):
+            page.set_viewport_size({"width": width, "height": 900})
+            link = page.get_by_role("link", name="補助アプリをダウンロード（0.1.0）")
+            assert link.is_visible()
+            link.focus()
+            assert page.evaluate("document.documentElement.scrollWidth<=innerWidth")
+            page.screenshot(path=f"/tmp/ikimono-android-download-{width}.png", full_page=True)
+        with page.expect_download() as download:
+            link.click()
+        assert download.value.suggested_filename == "ikimono-original-0.1.0.apk"
+        assert download.value.failure() is None
         assert not errors, errors
         browser.close()
-    print("OK: ZIP byte preservation, EXIF, record and map, ZIP location repair, invalid archive, selection race, viewports")
+    print("OK: ZIP byte preservation, EXIF, record and map, ZIP location repair, invalid archive, selection race, viewports, APK download")
 
 
 if __name__ == "__main__":

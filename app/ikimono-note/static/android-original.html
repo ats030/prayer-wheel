@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f4faf2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121a14" media="(prefers-color-scheme: dark)">
+  <title>Androidで元写真を渡す · 生きものノート</title>
+  <meta name="description" content="写真の撮影場所を残してBraveへ渡すAndroid補助アプリ。写真を選ぶと自動でZIPに包みます。">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <script src="/theme.js"></script>
+  <link rel="stylesheet" href="/assets/tokens.css">
+  <link rel="stylesheet" href="/assets/control.css">
+  <link rel="stylesheet" href="/assets/legal.css">
+</head>
+<body><main class="app">
+  <header class="top"><div><div class="eyebrow">生きものノート</div><h1>Androidで元写真を渡す</h1></div>
+  <div class="top-actions"><button class="control theme-toggle" id="themeToggle" type="button"><span class="theme-icon" aria-hidden="true">◐</span><span class="theme-label">自動</span></button><a class="control" href="/">撮影へ戻る</a></div></header>
+  <article class="panel">
+    <p><strong>手動でZIPを作る必要はありません。</strong>補助アプリを一度入れると、ファイル選択画面から写真を選ぶだけで、自動でZIPに包んでBraveへ渡します。ログインと調べた記録は、これまでどおりBraveで使えます。</p>
+    <p>試作版です。PixelとBraveでの位置情報保持は、実機での確認が必要です。写真に元から位置情報がない場合は補えません。</p>
+    <p><a class="control" href="/downloads/ikimono-original-0.1.0.apk" download>補助アプリをダウンロード（0.1.0）</a></p>
+    <h2>最初の設定</h2>
+    <ol>
+      <li>PixelでAPKをダウンロードして開き、インストールします。Google Play経由ではないため、Androidから求められた場合はBraveの「この提供元のアプリを許可」を一時的に有効にしてください。インストール後は元に戻せます。</li>
+      <li>「生きものノート 元写真」アプリを開き、「使う写真を許可する」を押します。「選択した写真」だけを許可する場合は、登録したい写真を選びます。</li>
+      <li>「写真の撮影場所を許可する」を押して許可します。これは写真に記録された場所を読む許可です。現在地は取得しません。</li>
+    </ol>
+    <h2>写真を登録する</h2>
+    <ol>
+      <li>Braveで生きものノートを開き、「元写真ZIPを選ぶ」を押します。</li>
+      <li>ファイル選択画面のメニューを開き、「生きものノート 元写真」を選びます。</li>
+      <li>登録したい写真を1枚選びます。ファイル名は「写真名.jpg.zip」などと表示されますが、圧縮操作は不要です。</li>
+      <li>写真のプレビューと撮影場所の読み取り結果を確認し、「名前を調べる」を押します。保存した場所は「観察した場所」の地図に表示されます。</li>
+    </ol>
+    <p>既存の記録へ場所を補う場合も、その記録の「元写真ZIPを選ぶ」から同じ操作ができます。</p>
+    <h2>写真が出てこないとき</h2>
+    <p>補助アプリで写真と撮影場所の許可を確認してください。「選択した写真」だけを許可している場合は、「使う写真を許可する」を再度押して写真を追加できます。権限を拒否してボタンでも許可画面が出ない場合は、Androidの設定 → アプリ → 生きものノート 元写真 → 権限で変更してください。</p>
+    <p>Android 10以降の端末内JPEG・PNG・WebP写真に対応します。クラウド上だけにある写真は、先に元写真を端末へ保存してください。写真とZIPは各15MBまでです。</p>
+    <h2>写真と位置情報の扱い</h2>
+    <p>補助アプリはネットへ接続せず、選んだ原本をメモリ上でZIP化して渡します。補助アプリが写真やZIPを端末へ保存することはありません。渡すZIPには撮影場所が含まれるため、共有先を確認してください。Webサービスでの取り扱いは<a href="/privacy">プライバシー</a>をご覧ください。</p>
+    <p>補助アプリをアンインストールすると、ファイル選択画面の入口が消えます。Braveのログイン、設定、既存の記録は残ります。</p>
+  </article>
+</main></body></html>
