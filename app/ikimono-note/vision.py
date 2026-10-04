@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import io
 import json
+import math
 import os
 import re
 import threading
@@ -159,9 +160,6 @@ def extract_exif_context(raw: bytes) -> dict[str, Any]:
         observed_date = ""
         if captured and re.match(r"^\d{4}:\d{2}:\d{2}", str(captured)):
             observed_date = str(captured)[:10].replace(":", "-")
-        gps_ifd = exif.get_ifd(34853)
-        latitude = _gps_coordinate(gps_ifd.get(2), gps_ifd.get(1))
-        longitude = _gps_coordinate(gps_ifd.get(4), gps_ifd.get(3))
     except Exception as exc:
         # 「読み取れませんでした」だけでは、HEICなど未対応形式で開けなかったのか
         # EXIF自体が壊れていたのか区別できない。原因切り分けのため journal にだけ残す。
@@ -174,22 +172,41 @@ def extract_exif_context(raw: bytes) -> dict[str, Any]:
     result: dict[str, Any] = {}
     if observed_date:
         result["observed_date"] = observed_date
+    try:
+        gps_ifd = exif.get_ifd(34853)
+        latitude = _gps_coordinate(gps_ifd.get(2), gps_ifd.get(1))
+        longitude = _gps_coordinate(gps_ifd.get(4), gps_ifd.get(3))
+    except Exception as exc:
+        print(f"[ikimono-note] GPS読取に失敗 ({type(exc).__name__})", flush=True)
+        result["gps_status"] = "unreadable"
+        return result
     if latitude is not None and longitude is not None:
         result.update(latitude=round(latitude, 4), longitude=round(longitude, 4))
         result["location"] = f"緯度 {result['latitude']:.4f}, 経度 {result['longitude']:.4f}"
     elif gps_ifd:
         # GPS IFD自体はあるのに緯度経度が取れない(タグ欠落・不正値)場合と、
         # そもそもGPSタグが無い場合を区別できるよう、前者だけ残しておく
-        print(f"[ikimono-note] GPS IFDはあるが緯度経度を取得できず: {dict(gps_ifd)}", flush=True)
+        result["gps_status"] = "unreadable"
+        print("[ikimono-note] GPS IFDはあるが有効な緯度経度を取得できず", flush=True)
     return result
 
 
 def _gps_coordinate(parts: Any, ref: Any) -> float | None:
-    if not parts or len(parts) != 3:
+    try:
+        if not parts or len(parts) != 3:
+            return None
+        degrees, minutes, seconds = (float(part) for part in parts)
+        direction = (ref.decode(errors="ignore") if isinstance(ref, bytes) else str(ref or "")).upper()
+        if (direction not in {"N", "S", "E", "W"}
+                or not all(math.isfinite(value) for value in (degrees, minutes, seconds))
+                or degrees < 0 or not 0 <= minutes < 60 or not 0 <= seconds < 60):
+            return None
+        value = degrees + minutes / 60 + seconds / 3600
+        if value > (90 if direction in {"N", "S"} else 180):
+            return None
+        return -value if direction in {"S", "W"} else value
+    except (TypeError, ValueError, ZeroDivisionError, OverflowError):
         return None
-    value = float(parts[0]) + float(parts[1]) / 60 + float(parts[2]) / 3600
-    direction = ref.decode(errors="ignore") if isinstance(ref, bytes) else str(ref or "")
-    return -value if direction.upper() in {"S", "W"} else value
 
 
 def prepare_image(raw: bytes) -> bytes:

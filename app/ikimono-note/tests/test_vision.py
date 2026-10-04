@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 import httpx
-from PIL import Image
+from PIL import Image, TiffImagePlugin
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 import vision
@@ -34,6 +34,27 @@ def test_gps_coordinate_converts_and_applies_direction():
     assert vision._gps_coordinate((35, 30, 0), "N") == 35.5
     assert vision._gps_coordinate((139, 45, 0), b"W") == -139.75
     assert vision._gps_coordinate(None, "N") is None
+
+
+def test_redacted_gps_keeps_capture_date():
+    exif = Image.Exif()
+    exif[306] = "2026:10:03 02:54:15"
+    exif[34853] = {1: "N", 2: (TiffImagePlugin.IFDRational(0, 0),) * 3,
+                   3: "E", 4: (139., 30., 0.)}
+    out = io.BytesIO()
+    Image.new("RGB", (64, 64), "green").save(out, "JPEG", exif=exif)
+    assert vision.extract_exif_context(out.getvalue()) == {
+        "observed_date": "2026-10-03", "gps_status": "unreadable",
+    }
+
+
+@pytest.mark.parametrize("parts,ref", [
+    ((float("nan"), 0, 0), "N"), ((float("inf"), 0, 0), "E"),
+    ((35, 60, 0), "N"), ((181, 0, 0), "E"), ((91, 0, 0), "N"),
+    ((35, 30, 0), ""), ((-35, 0, 0), "N"), (123, "N"),
+])
+def test_gps_coordinate_rejects_unusable_values(parts, ref):
+    assert vision._gps_coordinate(parts, ref) is None
 
 
 def test_normalize_limits_candidates_and_confidence():

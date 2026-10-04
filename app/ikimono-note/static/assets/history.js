@@ -152,6 +152,8 @@ function coordinateDetail(e){
     +(c?'位置：'+esc(c.latitude)+'、'+esc(c.longitude)+'（おおまかな値）':'場所の記録なし')
     +'</div><p>この記録に使った元写真を選ぶと、撮影場所だけを補えます。</p>'
     +'<button class="btn location-select" type="button">元写真から場所を補う</button><input class="location-photo" type="file" accept="image/*" hidden><button class="btn location-file-select" type="button">元写真をファイルから選ぶ</button><input class="location-file" type="file" hidden>'
+    +'<button class="btn location-zip-select" type="button">元写真ZIPを選ぶ</button><input class="location-zip" type="file" accept=".zip,application/zip" hidden>'
+    +'<p>元写真1枚をZIPに入れて選ぶ方法も使えます。ZIPと写真はそれぞれ15MBまで。すでに失われた位置情報は復元できません。</p>'
     +'<p class="location-message" role="status"></p></section>';
 }
 
@@ -175,10 +177,12 @@ document.addEventListener("click",event=>{
   if(button)button.closest(".photo-location").querySelector(".location-photo").click();
   const fileButton=event.target.closest(".location-file-select");
   if(fileButton)fileButton.closest(".photo-location").querySelector(".location-file").click();
+  const zipButton=event.target.closest(".location-zip-select");
+  if(zipButton)zipButton.closest(".photo-location").querySelector(".location-zip").click();
 });
 document.addEventListener("change",async event=>{
   const input=event.target;
-  if(!input.matches(".location-photo,.location-file"))return;
+  if(!input.matches(".location-photo,.location-file,.location-zip"))return;
   const file=input.files?.[0];
   if(!file)return;
   const node=input.closest("article"),box=input.closest(".photo-location"),message=box.querySelector(".location-message");
@@ -186,8 +190,9 @@ document.addEventListener("change",async event=>{
   box.querySelectorAll("button,input").forEach(control=>control.disabled=true);
   message.textContent="元写真の位置情報を読み取っています…";
   try{
-    const {readPhotoLocation}=await import("/assets/photo-location.mjs");
-    const data=await readPhotoLocation([file]);
+    const {readPhotoLocation,readOriginalZip}=await import("/assets/photo-location.mjs");
+    const photo=input.matches(".location-zip")?await readOriginalZip(file):file;
+    const data=await readPhotoLocation([photo]);
     const updated=await savePhotoLocation(node.dataset.id,data);
     if(!updated){message.textContent="場所は変更していません。";return}
     const c=updated.coordinates;

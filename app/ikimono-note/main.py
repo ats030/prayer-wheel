@@ -15,6 +15,7 @@ from pathlib import Path
 import os
 import threading
 import time
+from urllib.parse import quote
 
 import secrets
 
@@ -37,6 +38,7 @@ import jobs
 import pipeline
 import shares
 import vision
+import photo_archive
 
 class SettingsUpdate(BaseModel):
     provider: str
@@ -358,7 +360,7 @@ async def require_login(request: Request, call_next):
     # その設定がログインの内側だと、案内が行き止まりになる。公開版の設定は
     # ブラウザの中だけに書く (POST /api/settings は公開版では403) ので、開けても安全
     if trial_enabled() and (path in {"/", "/settings", "/identify",
-                                     "/api/settings", "/api/photo-metadata"}
+                                     "/api/settings", "/api/photo-metadata", "/api/photo-original"}
                             or path.startswith("/identify/job/")):
         return await call_next(request)
     if auth.read_session(request.cookies.get(auth.SESSION_COOKIE)):
@@ -734,6 +736,26 @@ def health() -> dict[str, object]:
     if PUBLIC_MODE:
         return {"ok": True}
     return {"ok": True, "model": vision.MODEL, "local_processing": True, "providers": ["local", "openai", "anthropic", "gemini"]}
+
+
+@app.post("/api/photo-original")
+async def photo_original(request: Request) -> Response:
+    if PUBLIC_MODE:
+        _rate_limit(request, "original-photo", 10)
+    # Read the raw ZIP body, avoiding multipart UploadFile's temporary-disk spool.
+    raw = bytearray()
+    async for chunk in request.stream():
+        if len(raw) + len(chunk) > vision.MAX_UPLOAD_BYTES:
+            raise HTTPException(status_code=413, detail="ZIPは15MB以下にしてください")
+        raw.extend(chunk)
+    try:
+        photo, name, mime = await run_in_threadpool(photo_archive.read_original, bytes(raw))
+    except vision.VisionError as exc:
+        raise HTTPException(status_code=415, detail=str(exc)) from exc
+    return Response(photo, media_type=mime, headers={
+        "Cache-Control": "no-store",
+        "X-Photo-Name": quote(name, safe=""),
+    })
 
 
 @app.post("/api/photo-metadata")

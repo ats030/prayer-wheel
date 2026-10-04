@@ -11,6 +11,30 @@ export function coordinateLabel(coordinates) {
   return `緯度 ${coordinates.latitude.toFixed(4)}, 経度 ${coordinates.longitude.toFixed(4)}`;
 }
 
+export async function readOriginalZip(file) {
+  if (file.size > 15 * 1024 * 1024) throw new Error("ZIPは15MB以下にしてください");
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  try {
+    const response = await fetch("/api/photo-original", {
+      method: "POST", body: file, headers: {"Content-Type": "application/zip"}, signal: controller.signal,
+    });
+    if (!response.ok) {
+      let message = "ZIPを読み取れませんでした。元写真1枚をZIPに入れて選び直してください。";
+      try {
+        const data = await response.json();
+        if (typeof data.detail === "string") message = data.detail;
+      } catch (_) {}
+      throw new Error(message);
+    }
+    const name = decodeURIComponent(response.headers.get("X-Photo-Name") || "photo");
+    const photo = await response.blob();
+    return new File([photo], name, {type: photo.type});
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function readPhotoLocation(files) {
   const form = new FormData();
   files.forEach(file => form.append("files", file));
@@ -29,7 +53,7 @@ export async function readPhotoLocation(files) {
 
 export function recordWithPhotoLocation(record, data, confirmReplace) {
   const coordinates = photoCoordinates(data);
-  if (!coordinates) throw new Error("この写真からは位置情報を読み取れませんでした。写真を渡す際に位置情報が除かれることもあります。「元写真をファイルから選ぶ」で選び直せます。記録は変更していません。");
+  if (!coordinates) throw new Error("この写真からは位置情報を読み取れませんでした。元写真1枚をZIPに入れ、「元写真ZIPを選ぶ」をお試しください。ZIPに入れる前に位置情報が失われている場合は補えません。記録は変更していません。");
   const location = coordinateLabel(coordinates);
   const existing = record.coordinates != null || Boolean(record.context?.location?.trim());
   const unchanged = record.coordinates?.latitude === coordinates.latitude &&

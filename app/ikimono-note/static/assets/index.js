@@ -62,7 +62,7 @@ function addFiles(files){
 }
 function applyPhotoMetadata(data){const found=[];if(data.observed_date&&!$("observedDate").value){$("observedDate").value=data.observed_date;found.push("撮った日")}if(data.location){/* 座標は場所欄の入力状況に関わらず常に写真のEXIFを使う。
    場所欄は、まだユーザーが手で書き換えていない（＝前の写真からの自動入力のままか空の）
-   ときだけ、選び直した写真のGPSで上書きする。手入力は上書きしない */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;if(!$("location").value||locationAutoFilled){$("location").value=data.location;locationAutoFilled=true;found.push("撮った場所")}}else{gps=null;$("gpsStatus").textContent="この写真からは位置情報を読み取れませんでした。写真を渡す際に位置情報が除かれることもあります。「元写真をファイルから選ぶ」で選び直せます。位置情報なしでも使えます。";if(locationAutoFilled){$("location").value="";locationAutoFilled=false}}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
+   ときだけ、選び直した写真のGPSで上書きする。手入力は上書きしない */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;if(!$("location").value||locationAutoFilled){$("location").value=data.location;locationAutoFilled=true;found.push("撮った場所")}}else{gps=null;$("gpsStatus").textContent="この写真からは位置情報を読み取れませんでした。元写真1枚をZIPに入れ、「元写真ZIPを選ぶ」をお試しください。ZIPに入れる前に失われた位置情報は復元できません。位置情報なしでも使えます。";if(locationAutoFilled){$("location").value="";locationAutoFilled=false}}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
 async function readPhotoMetadata(files){
   const selection=++photoSelection;
   gps=null;
@@ -87,6 +87,26 @@ async function waitForPhotoLocation(){
   do{pending=locationReady;await pending}while(pending!==locationReady);
 }
 function showStatus(text,error=false,busy=false){status.className='status'+(error?' error':'');status.innerHTML=(busy?'<span class="spinner"></span>':'')+text}
+async function selectOriginalZip(file){
+  if(identify.disabled){showStatus("調べ終わってから元写真ZIPを選んでください。",true);return}
+  const selection=photoSelection;
+  identify.disabled=true;
+  $("originalZipBtn").disabled=true;
+  showStatus("ZIPから元写真を読み取っています…",false,true);
+  try{
+    const {readOriginalZip}=await import("/assets/photo-location.mjs");
+    const photo=await readOriginalZip(file);
+    // 普通の写真を選び直した場合、遅れて届いたZIPの写真で置き換えない。
+    if(selection!==photoSelection)return;
+    setFiles([photo]);
+    await waitForPhotoLocation();
+  }catch(error){
+    if(selection!==photoSelection)return;
+    showStatus(error.name==="AbortError"?"ZIPの読み取りに時間がかかりました。もう一度お試しください。":error.message,true);
+  }finally{identify.disabled=false;$("originalZipBtn").disabled=false}
+}
+$("originalZipBtn").onclick=()=>$("originalZip").click();
+$("originalZip").onchange=e=>{const file=e.target.files?.[0];e.target.value="";if(file)selectOriginalZip(file)};
 /* 「選びなおす」と「足す」で入力欄を分ける。1つの入力を旗で切り替えると、
    #library はドロップ領域の <label> の中にあるため .click() が label まで
    バブルし、旗を戻す側の処理と競合する。入力を分ければその競合ごと消える */
