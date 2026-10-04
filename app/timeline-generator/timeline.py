@@ -44,7 +44,7 @@ BATCH_PASSAGES = 20
 MAX_CONSECUTIVE_FAILURES = 2
 MODEL_RETRY_DELAY = 10
 MATERIAL_BUDGET = 12000
-PIPELINE_VERSION = 3
+PIPELINE_VERSION = 4
 PERIOD_INPUT_ERROR = "年代による絞り込みはできません。年代条件を外してください。"
 DATE_PATTERN = re.compile(r"(?<![\w.])\d{3,4}(?!\w|\.\d)|\d+年|\d+世紀|\d+(?:st|nd|rd|th)[ -]century", re.I)
 
@@ -879,9 +879,43 @@ def merge_events(existing, additions):
             merged.append(event)
             titles.add(title)
             quotes.add(quote)
-        if len(merged) >= MAX_EVENTS:
+    # 上限を超えた分は prune_events が関連度で外す。
+    return sorted(merged, key=lambda e: (e['year'], [int(n) for n in re.findall(r'\d+', e['date'])]))
+
+
+PRUNE_SCHEMA = {"type": "object", "properties": {"remove": {"type": "array", "items": {"type": "integer"}}}, "required": ["remove"]}
+
+
+def prune_events(query, events, fresh, deadline, dropped):
+    """上限を超えた分だけ、テーマとの関連度が低い出来事を外す。出力済みの出来事も対象にする（ats030-z2fam）。
+    fresh は今回の組で加わった出来事。応答が不正・不足なら、その後ろから外して補う。"""
+    excess = len(events) - MAX_EVENTS
+    if excess <= 0:
+        return events
+    listing = [{"id": i, "year": e["year"], "title": e["title"], "description": e["description"]} for i, e in enumerate(events)]
+    try:
+        output = model_json("あなたは歴史年表の編集者です。年表が収録上限を超えたので、検索テーマとの関連度が最も低い出来事をちょうど" + str(excess) + "件選び、そのidをremoveに返す。"
+                            "テーマそのものの起源・発明・普及・制度や方式の転換点は残す。テーマの周辺にとどまる個別の人物・店舗・作品・企業の出来事や、同種の出来事の繰り返しを先に外す。年代の偏りを増やさない。",
+                            f"検索テーマ: {query.topic}\n出来事:\n" + json.dumps(listing, ensure_ascii=False), deadline, PRUNE_SCHEMA)
+        chosen = output.get("remove") if isinstance(output, dict) else None
+    except TimelineError:
+        chosen = None
+    remove = []
+    for i in chosen if isinstance(chosen, list) else []:
+        if type(i) is int and 0 <= i < len(events) and i not in remove and len(remove) < excess:
+            remove.append(i)
+    judged = set(remove)
+    newest = [i for i, e in enumerate(events) if any(e is f for f in fresh)] + list(range(len(events)))
+    for i in reversed(newest):
+        if len(remove) >= excess:
             break
-    return sorted(merged, key=lambda e: (e['year'], [int(n) for n in re.findall(r'\d+', e['date'])]))[:MAX_EVENTS]
+        if i not in remove:
+            remove.append(i)
+    for i in remove:
+        event = events[i]
+        reason = f"収録上限{MAX_EVENTS}件を超え、テーマとの関連度が低い" if i in judged else f"収録上限{MAX_EVENTS}件を超えた（関連度の判定を得られず新しい候補から外した）"
+        dropped.append({"year": event["year"], "date": event["date"], "title": event["title"], "stage": "関連度", "reason": reason})
+    return [e for i, e in enumerate(events) if i not in remove]
 
 
 def timeline_result(query, events, review_notes, started, stop_reason='sources_exhausted', trace=None):
@@ -892,8 +926,6 @@ def timeline_result(query, events, review_notes, started, stop_reason='sources_e
         notice = f'時間上限（{TIME_LIMIT // 60}分）により終了しました。検証済みの出来事を保存しています。' + notice
     elif stop_reason == 'processing_error':
         notice = '途中の処理を完了できなかったため、検証済みの出来事までを保存しています。再生成で調べ直せます。' + notice
-    elif stop_reason == 'event_limit':
-        notice = f'収録上限の{MAX_EVENTS}件に達したため終了しました。' + notice
     return {'kind': 'result', 'theme': query.topic, 'query': query.original, 'period': query.period,
             'events': events, 'notice': notice, 'review_notes': review_notes, 'stop_reason': stop_reason,
             'max_events': MAX_EVENTS, 'pipeline_version': PIPELINE_VERSION,
@@ -914,6 +946,8 @@ def build_timeline(query, emit):
     with ThreadPoolExecutor(max_workers=4) as pool:
         sources = [source for source in pool.map(reader.fetch, results) if source]
     events, review_notes = [], []
+    # 関連度で外した出来事。再提案と再採用を防ぐため、採用済みの一覧と重複判定に含める。
+    pruned = []
     stop_reason = 'sources_exhausted'
     failure, consecutive_failures = None, 0
     # 品質評価で欠落の段階（未処理・候補に出ず・検証で除外）を分けるための処理経過。
@@ -936,7 +970,7 @@ def build_timeline(query, emit):
             batch_record['processed'] = True
             trace['batches_processed'] = index
             dropped = []
-            additions, notes = build_batch(query, batch, batch_progress, deadline - 2, events, dropped=dropped)
+            additions, notes = build_batch(query, batch, batch_progress, deadline - 2, events + pruned, dropped=dropped)
             batch_record['proposed'] = len(dropped) + len(additions)
             trace['rejected'].extend(item | {'batch': index} for item in dropped)
         except TimelineError as exc:
@@ -952,14 +986,18 @@ def build_timeline(query, emit):
                 break
             continue
         consecutive_failures = 0
-        events = merge_events(events, additions)
+        merged = [e for e in merge_events(pruned + events, additions) if not any(e is p for p in pruned)]
+        if len(merged) > MAX_EVENTS:
+            emit({'kind': 'progress', 'stage': 'verify', 'message': f'第{index}組 · 収録上限{MAX_EVENTS}件を超えたため、関連度の低い出来事を外しています。'})
+            removed, before = [], merged
+            merged = prune_events(query, before, additions, deadline - 2, removed)
+            pruned.extend(e for e in before if not any(e is m for m in merged))
+            trace['rejected'].extend(item | {'batch': index} for item in removed)
+        events = merged
         review_notes.extend(note for note in notes if note not in review_notes)
         if events:
             emit(timeline_result(query, events, review_notes, started, trace=trace) | {'kind': 'checkpoint'})
         emit({'kind': 'progress', 'stage': 'verify', 'message': f'第{index}組の照合が終了しました。検証済み {len(events)} / {MAX_EVENTS}件。'})
-        if len(events) >= MAX_EVENTS:
-            stop_reason = 'event_limit'
-            break
     if failure is not None and not events:
         raise failure
     if stop_reason == 'time_limit' and not events:

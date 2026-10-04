@@ -1,6 +1,7 @@
 """Batch coverage, verified checkpoints and hard-deadline integration tests."""
 import json
 import os
+import re
 import struct
 import threading
 import tempfile
@@ -51,6 +52,10 @@ def history_source(count=110):
 
 
 def grounded_model(system, prompt, deadline, schema):
+    if schema is t.PRUNE_SCHEMA:
+        # 擬似の関連度判定: 古い出来事（出力済み）から外す。
+        excess = int(re.search(r'ちょうど(\d+)件', system)[1])
+        return {'remove': list(range(excess))}
     if schema is t.VERIFY_SCHEMA:
         candidates = json.loads(prompt.split('候補:', 1)[1].split('\n比較資料:', 1)[0])
         return {'supported': list(range(len(candidates)))}
@@ -71,16 +76,36 @@ class BatchTests(unittest.TestCase):
         with patch.object(t, 'BATCH_PASSAGES', t.BATCH_EVENTS), patch.object(t, 'search', return_value=[{}]), patch.object(t.WebReader, 'fetch', return_value=source), patch.object(t, 'crosscheck_sources', return_value=[]), patch.object(t, 'model_json', side_effect=model):
             return t.build_timeline(t.parse_query('研究'), (records if records is not None else []).append)
 
-    def test_more_than_thirty_candidates_survive_and_max_events_is_hard_cap(self):
-        records = []
-        result = self.run_generation(history_source(), records=records)
+    def test_over_the_cap_processing_continues_and_low_relevance_events_are_replaced(self):
+        records, prompts = [], []
+        def model(system, prompt, deadline, schema):
+            prompts.append(prompt)
+            return grounded_model(system, prompt, deadline, schema)
+        result = self.run_generation(history_source(), model=model, records=records)
         self.assertEqual(len(result['events']), t.MAX_EVENTS)
-        self.assertEqual(result['stop_reason'], 'event_limit')
-        self.assertEqual(len({e['year'] for e in result['events']}), t.MAX_EVENTS)
+        self.assertEqual(result['stop_reason'], 'sources_exhausted')
+        self.assertEqual(result['trace']['batches_processed'], result['trace']['batches_total'])
+        # 出力済みだった古い出来事が外れ、後の組の出来事が残る。
+        self.assertEqual([e['year'] for e in result['events']], list(range(1910 - t.MAX_EVENTS, 1910)))
         self.assertEqual(result['events'], sorted(result['events'], key=lambda e: e['year']))
         self.assertTrue(all('_context' not in e for e in result['events']))
         checkpoints = [r for r in records if r['kind'] == 'checkpoint']
-        self.assertEqual([len(r['events']) for r in checkpoints], list(range(t.BATCH_EVENTS, t.MAX_EVENTS, t.BATCH_EVENTS)) + [t.MAX_EVENTS])
+        self.assertEqual([len(r['events']) for r in checkpoints][:8], list(range(t.BATCH_EVENTS, t.MAX_EVENTS, t.BATCH_EVENTS)) + [t.MAX_EVENTS])
+        self.assertIn(1800, [e['year'] for e in checkpoints[0]['events']])
+        pruned = [r for r in result['trace']['rejected'] if r['stage'] == '関連度']
+        self.assertEqual(sorted(r['year'] for r in pruned), list(range(1800, 1910 - t.MAX_EVENTS)))
+        self.assertTrue(all('関連度が低い' in r['reason'] for r in pruned))
+        # 外した出来事も採用済みとして渡し、再提案させない。
+        self.assertIn('研究の出来事1800', prompts[-2])
+
+    def test_invalid_relevance_answer_drops_the_newest_candidates(self):
+        def model(system, prompt, deadline, schema):
+            return {'remove': [999, 'x']} if schema is t.PRUNE_SCHEMA else grounded_model(system, prompt, deadline, schema)
+        result = self.run_generation(history_source(56 + 3), model=model)
+        self.assertEqual([e['year'] for e in result['events']], list(range(1800, 1800 + t.MAX_EVENTS)))
+        pruned = [r for r in result['trace']['rejected'] if r['stage'] == '関連度']
+        self.assertEqual(sorted(r['year'] for r in pruned), list(range(1800 + t.MAX_EVENTS, 1859)))
+        self.assertTrue(all('判定を得られず' in r['reason'] for r in pruned))
 
     def test_disjoint_material_retains_context_and_all_sources(self):
         sources = [history_source(35) | {'url': f'https://example.org/{i}'} for i in range(10)]
