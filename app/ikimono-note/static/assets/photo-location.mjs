@@ -29,7 +29,7 @@ export async function readPhotoLocation(files) {
 
 export function recordWithPhotoLocation(record, data, confirmReplace) {
   const coordinates = photoCoordinates(data);
-  if (!coordinates) throw new Error("この写真には位置情報がありません。記録は変更していません。");
+  if (!coordinates) throw new Error("この写真からは位置情報を読み取れませんでした。写真を渡す際に位置情報が除かれることもあります。「元写真をファイルから選ぶ」で選び直せます。記録は変更していません。");
   const location = coordinateLabel(coordinates);
   const existing = record.coordinates != null || Boolean(record.context?.location?.trim());
   const unchanged = record.coordinates?.latitude === coordinates.latitude &&

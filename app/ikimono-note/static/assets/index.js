@@ -62,10 +62,11 @@ function addFiles(files){
 }
 function applyPhotoMetadata(data){const found=[];if(data.observed_date&&!$("observedDate").value){$("observedDate").value=data.observed_date;found.push("撮った日")}if(data.location){/* 座標は場所欄の入力状況に関わらず常に写真のEXIFを使う。
    場所欄は、まだユーザーが手で書き換えていない（＝前の写真からの自動入力のままか空の）
-   ときだけ、選び直した写真のGPSで上書きする。手入力は上書きしない */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;if(!$("location").value||locationAutoFilled){$("location").value=data.location;locationAutoFilled=true;found.push("撮った場所")}}else{gps=null;$("gpsStatus").textContent="この写真には位置情報が残っていませんでした。位置情報なしでも使えます。";if(locationAutoFilled){$("location").value="";locationAutoFilled=false}}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
+   ときだけ、選び直した写真のGPSで上書きする。手入力は上書きしない */gps={latitude:data.latitude,longitude:data.longitude,accuracy:11,source:"exif"};$("gpsStatus").textContent=`写真に残っていた位置を、約11m単位のおおまかな値にして入れました。撮った場所としてAIへ送られます。（緯度 ${gps.latitude.toFixed(4)}, 経度 ${gps.longitude.toFixed(4)}）`;if(!$("location").value||locationAutoFilled){$("location").value=data.location;locationAutoFilled=true;found.push("撮った場所")}}else{gps=null;$("gpsStatus").textContent="この写真からは位置情報を読み取れませんでした。写真を渡す際に位置情報が除かれることもあります。「元写真をファイルから選ぶ」で選び直せます。位置情報なしでも使えます。";if(locationAutoFilled){$("location").value="";locationAutoFilled=false}}if(found.length){$("location").closest("details").open=true;showStatus("写真から"+found.join("・")+"を入れました。内容は直せます。")}else{showStatus("撮った場所や大きさを足すと、候補をしぼりやすくなります。")}}
 async function readPhotoMetadata(files){
   const selection=++photoSelection;
   gps=null;
+  $("gpsStatus").textContent="写真の撮影場所を読み取っています…";
   if(locationAutoFilled){$("location").value="";locationAutoFilled=false}
   try{
     const {readPhotoLocation,photoCoordinates,coordinateLabel}=await import("/assets/photo-location.mjs");
@@ -89,6 +90,7 @@ function showStatus(text,error=false,busy=false){status.className='status'+(erro
 /* 「選びなおす」と「足す」で入力欄を分ける。1つの入力を旗で切り替えると、
    #library はドロップ領域の <label> の中にあるため .click() が label まで
    バブルし、旗を戻す側の処理と競合する。入力を分ければその競合ごと消える */
+$("originalFileBtn").onclick=()=>$("originalFile").click();$("originalFile").onchange=e=>{setFiles(e.target.files);e.target.value=""};
 $('libraryBtn').onclick=()=> $('library').click();$('cameraBtn').onclick=()=> $('camera').click();$("library").onchange=e=>{setFiles(e.target.files);e.target.value=""};$("libraryAdd").onchange=e=>{addFiles(e.target.files);e.target.value=""};$("camera").onchange=e=>{addFiles(e.target.files);e.target.value=""};
 ['dragenter','dragover'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove('drag')}));drop.addEventListener("drop",e=>setFiles(e.dataTransfer.files));
 /* 場所欄をユーザーが自分で書き換えたら、以後は写真を選び直してもGPSで

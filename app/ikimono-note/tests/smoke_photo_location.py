@@ -50,8 +50,12 @@ def main():
         page.goto(base)
         page.wait_for_function("typeof setFiles==='function'")
         photo = str(options.photo) if options.photo else fixture()
-        page.locator("#library").set_input_files(photo)
+        assert page.locator("#originalFile").get_attribute("accept") is None
+        with page.expect_file_chooser() as chooser:
+            page.locator("#originalFileBtn").click()
+        chooser.value.set_files(photo)
         page.wait_for_function("gps?.source==='exif'")
+        assert page.locator("#gpsStatus").is_visible()
         expected = page.evaluate("({latitude:gps.latitude,longitude:gps.longitude})")
 
         # 識別を待機させ、写真を選び直しても保存対象が混ざらないことを確認する。
@@ -73,7 +77,7 @@ def main():
             page.wait_for_timeout(100)
         assert pending, "識別のリクエストが来ない"
         page.locator("#library").set_input_files(fixture(False))
-        page.wait_for_function("gps===null && document.getElementById('gpsStatus').textContent.includes('残っていません')")
+        page.wait_for_function("gps===null && document.getElementById('gpsStatus').textContent.includes('位置情報を読み取れませんでした')")
         pending.pop().fulfill(json={"category": "植物", "summary": "test", "candidates": []})
         page.wait_for_function("lastSavedRecordId!==null && lastSavedRecordId!==undefined")
         saved = records(page)
@@ -82,6 +86,7 @@ def main():
 
         # 位置がない写真で、前の座標・自動入力を残さない。
         assert page.locator("#location").input_value() == ""
+        assert page.locator("#gpsStatus").is_visible()
         page.locator("#library").set_input_files(photo)
         page.wait_for_function("gps?.source==='exif'")
         page.route("**/api/photo-metadata", lambda route: route.fulfill(status=503, json={}))
@@ -101,8 +106,11 @@ def main():
         }""")
         page.goto(base + "/history")
         page.locator(".detail summary").click()
-        field = page.locator(".location-photo")
-        field.set_input_files(photo)
+        field = page.locator(".location-file")
+        assert field.get_attribute("accept") is None
+        with page.expect_file_chooser() as chooser:
+            page.locator(".location-file-select").click()
+        chooser.value.set_files(photo)
         page.wait_for_function("document.querySelector('.location-message').textContent.includes('保存しました')")
         record = page.evaluate("async()=> (await all())[0]")
         assert record["coordinates"] == expected
@@ -120,7 +128,7 @@ def main():
         field.set_input_files(photo)
         page.wait_for_function("document.querySelector('.location-message').textContent.includes('保存しました')")
         field.set_input_files(fixture(False))
-        page.wait_for_function("document.querySelector('.location-message').textContent.includes('位置情報がありません')")
+        page.wait_for_function("document.querySelector('.location-message').textContent.includes('位置情報を読み取れませんでした')")
         assert page.evaluate("async()=> (await all())[0].coordinates") == expected
 
         page.goto(base + "/dashboard")
@@ -138,6 +146,18 @@ def main():
         field.set_input_files(photo)
         page.wait_for_function("document.querySelector('.location-message').textContent.includes('見つかりません')")
         assert page.evaluate("async()=> (await all()).length") == 0
+        assert not errors, errors
+        # 常時表示と横幅をスマートフォン・PCで確認する。
+        page.goto(base)
+        for width in (360, 1280):
+            page.set_viewport_size({"width": width, "height": 900})
+            page.locator("#originalFile").set_input_files(fixture(False))
+            page.wait_for_function("document.getElementById('gpsStatus').textContent.includes('位置情報を読み取れませんでした')")
+            page.evaluate("document.getElementById('location').closest('details').open=false")
+            assert page.locator("#gpsStatus").is_visible()
+            assert not page.locator("#location").is_visible()
+            assert page.evaluate("document.documentElement.scrollWidth<=innerWidth")
+            page.screenshot(path=f"/tmp/ikimono-file-picker-{width}.png", full_page=True)
         assert not errors, errors
         browser.close()
     print("OK: EXIF read, selection isolation, missing/failed GPS, history repair, overwrite confirmation, deleted record")
