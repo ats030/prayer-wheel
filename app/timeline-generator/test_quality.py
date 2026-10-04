@@ -60,6 +60,16 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(t.validate_events([event], [source], t.parse_query('コーヒー')), [])
         self.assertEqual(len(t.validate_events([event | {"description": "伝説では、ウィーンにコーヒーハウスが開かれたとされています。"}], [source], t.parse_query('コーヒー'))), 1)
 
+    def test_neighbor_hedge_on_another_claim_does_not_drop_event(self):
+        quote = '1554年、シェムジとヘケムが、コンスタンティノープルにそれぞれコーヒーハウスを開業しました。'
+        source = article('<h2>コーヒーの歴史</h2><p>' + quote + '</p><p>この2店が世界最初のコーヒーハウスと言われています。</p>')
+        self.assertIn('世界最初', t.quote_context(source, quote)['after'])
+        event = {"year": 1554, "date": "1554年", "title": "コーヒーハウス開業", "description": "コンスタンティノープルにコーヒーハウスが開業した。", "quote": quote, "source_id": 1}
+        self.assertEqual(len(t.validate_events([event], [source], t.parse_query('コーヒー'))), 1)
+        self.assertEqual(t.validate_events([event | {"description": "コンスタンティノープルに世界最初のコーヒーハウスが開業した。"}], [source], t.parse_query('コーヒー')), [])
+        hedged_year = article('<h2>コーヒーの歴史</h2><p>伝説では1554年のことと言われています。</p><p>' + quote + '</p>')
+        self.assertEqual(t.validate_events([event], [hedged_year], t.parse_query('コーヒー')), [])
+
     def test_historical_name_is_not_treated_as_uncertain_claim(self):
         source=article('<h2>1958年</h2><p>初のインスタントラーメンを発売。それ以前は「中華そば」と言われていた。</p>')
         event={'year':1958,'date':'1958年','title':'インスタントラーメン発売','description':'インスタントラーメンを発売した。','source_id':1,'quote':source['passages'][0]['text']}

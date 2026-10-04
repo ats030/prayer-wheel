@@ -696,8 +696,11 @@ def validate_events(raw, sources, query, reasons=None):
                 continue
         chronological_evidence = compact(evidence + " " + " ".join(context.values())) if context else evidence
         uncertainty = r"伝説|伝承|諸説|という説|と(?:言|い)われ(?:ています|ている|る)|とされ(?:ています|ている|る)|推定|legend|alleged|supposed"
-        qualification_context = evidence + " " + " ".join(value for key, value in (context or {}).items() if key != "article_lead")
-        if re.search(uncertainty, qualification_context, re.I) and not re.search(uncertainty, description, re.I):
+        qualification_context = evidence + " " + " ".join(value for key, value in (context or {}).items() if key not in ("article_lead", "before", "after"))
+        # 隣の段落の留保は、この出来事の年か、説明と同じ「最初・起源」の主張に掛かる文だけを対象にする。
+        neighbor_hedged = any(re.search(uncertainty, sentence, re.I) and (re.search(rf"(?<!\d){abs(year)}(?!\d)", sentence) or any(claim.casefold() in description.casefold() for claim in re.findall(r"最初|初めて|世界初|起源|発祥|元祖|first|origin", sentence, re.I)))
+                              for key in ("before", "after") for sentence in re.split(r"(?<=[。.!?])\s*", (context or {}).get(key, "")))
+        if (re.search(uncertainty, qualification_context, re.I) or neighbor_hedged) and not re.search(uncertainty, description, re.I):
             drop(item, "原文の伝説・推定などの留保が説明にない")
             continue
         # Catch invented/altered acronyms and product names (e.g. NSFNet -> NS1Net).
