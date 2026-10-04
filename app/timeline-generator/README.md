@@ -23,6 +23,7 @@ python3 app/timeline-generator/server.py
 |`TIMELINE_HOST`|`127.0.0.1`|待受アドレス|
 |`TIMELINE_PORT`|`8532`|待受ポート|
 |`TIMELINE_SEARCH_URL`|`http://127.0.0.1:8081`|既存SearXNGのJSON検索|
+|`TIMELINE_SOURCE`|`searxng`|出典の検索経路。`wikipedia` にすると ja/en Wikipedia の検索APIと記事だけを使う（公開用の検証、ats030-esadh）|
 |`TIMELINE_OLLAMA_URL`|`http://127.0.0.1:11434`|既存Ollama互換プロキシ|
 |`TIMELINE_MODEL`|`gemma4:12b`|年表候補を生成する既存のローカルモデル|
 |`TIMELINE_VERIFY_MODEL`|`qwen3.8:27b`|資料と候補を照合する既存のローカルモデル|

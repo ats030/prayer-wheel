@@ -145,6 +145,26 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(t.source_tier('https://ramen-museum.hatenablog.com/x'),-6)
         self.assertEqual(t.source_tier('https://www.wien.gv.at/kaffee'),6)
 
+    def test_wikipedia_source_queries_only_wikipedia_api_serially(self):
+        def api(url, timeout=20):
+            self.assertTrue(url.startswith('https://ja.wikipedia.org/w/api.php?'))
+            self.assertIn('maxlag=5', url)
+            return {'query': {'search': [
+                {'title': 'ラーメン', 'snippet': '<span class="searchmatch">ラーメン</span>は中華麺'},
+                {'title': '平家物語 (アニメ)', 'snippet': 'ラーメン'},
+                {'title': 'うどん', 'snippet': '小麦の麺'}]}}
+        with patch.object(t, 'SOURCE', 'wikipedia'), patch.object(t, 'json_request', side_effect=api) as request, \
+                patch.object(t.time, 'sleep') as sleep:
+            actual = t.search(t.parse_query('ラーメン'))
+        self.assertEqual(actual, [{'url': 'https://ja.wikipedia.org/wiki/%E3%83%A9%E3%83%BC%E3%83%A1%E3%83%B3', 'title': 'ラーメン',
+                                   'content': 'ラーメンは中華麺', '_search_rank': 0}])
+        self.assertEqual(request.call_count, 2)
+        self.assertEqual(sleep.call_count, 2)
+        with patch.object(t, 'SOURCE', 'wikipedia'), patch.object(t, 'json_request', return_value={'query': {'search': []}}) as request, \
+                patch.object(t.time, 'sleep'):
+            t.web_search('Claude Code history')
+        self.assertEqual([c.args[0][:25] for c in request.call_args_list], ['https://en.wikipedia.org/', 'https://ja.wikipedia.org/'])
+
     def test_crosscheck_authority_shares_source_tier(self):
         results=[{'title':'Vienna coffee history','url':f'https://{host}/kaffee'} for host in ['blog.example.hatenablog.com','example.com','www.wien.gv.at']]
         results.append({'title':'Vienna official coffee history','url':'https://example.org/kaffee'})

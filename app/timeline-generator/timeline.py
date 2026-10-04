@@ -2,6 +2,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from html import unescape
 from html.parser import HTMLParser
 import http.client
 import ipaddress
@@ -20,6 +21,13 @@ from urllib.robotparser import RobotFileParser
 
 USER_AGENT = "TimelineGenerator/0.1 (personal historical research; contact: ats030@gmail.com)"
 SEARCH_URL = os.environ.get("TIMELINE_SEARCH_URL", "http://127.0.0.1:8081").rstrip("/")
+# 出典の検索経路。wikipedia は ja/en Wikipedia の検索APIと記事だけを使う。公開・収益化には SearXNG 経路を使えないため（ats030-3l22f, ats030-esadh）。
+SOURCE = os.environ.get("TIMELINE_SOURCE", "searxng")
+if SOURCE not in {"searxng", "wikipedia"}:
+    raise ValueError("TIMELINE_SOURCE must be searxng or wikipedia")
+# Wikimedia の作法: 連絡先付きの User-Agent で、API には1件ずつ問い合わせる。maxlag で混雑時は空の結果として退く。
+WIKIPEDIA_LOCK = threading.Lock()
+WIKIPEDIA_INTERVAL = 0.5
 # 出典の格付け。順位の加減点だけに使い、除外はしない。quality_eval も同じ一覧で分類する。
 INSTITUTION_HOSTS = ('go.jp', 'ac.jp', 'lg.jp', 'ed.jp', 'gov', 'gv.at', 'edu', 'nhk.or.jp')
 ENCYCLOPEDIA_HOSTS = ('wikipedia.org', 'kotobank.jp', 'britannica.com')
@@ -393,14 +401,40 @@ def authority(result):
     return tier + bool(re.search(r'公式|博物館|museum|official|大学', result.get('title', '') + ' ' + result.get('url', ''), re.I))
 
 
+def wikipedia_search(text, timeout=20, limit=10):
+    """Wikipedia の検索APIで記事を探す。日本語のテーマは ja、それ以外は en と ja を引く。"""
+    results = []
+    for lang in ('ja',) if re.search(r'[一-龯ぁ-んァ-ヶ]', text) else ('en', 'ja'):
+        params = urlencode({'action': 'query', 'list': 'search', 'srsearch': text, 'srlimit': limit, 'srprop': 'snippet',
+                            'format': 'json', 'formatversion': 2, 'maxlag': 5})
+        with WIKIPEDIA_LOCK:
+            data = json_request(f'https://{lang}.wikipedia.org/w/api.php?' + params, timeout=timeout)
+            time.sleep(WIKIPEDIA_INTERVAL)
+        for item in (data.get('query') or {}).get('search', []):
+            title = item.get('title', '')
+            results.append({'url': f'https://{lang}.wikipedia.org/wiki/' + quote(title.replace(' ', '_')), 'title': title,
+                            'content': compact(unescape(re.sub(r'<[^>]+>', '', item.get('snippet', ''))))})
+    return results
+
+
+def web_search(text, timeout=20):
+    if SOURCE == 'wikipedia':
+        return wikipedia_search(text, timeout)
+    params = urlencode({'q': text, 'format': 'json', 'language': 'ja-JP', 'categories': 'general'})
+    return json_request(SEARCH_URL + '/search?' + params, timeout=timeout).get('results', [])
+
+
 def search(query):
     def run(suffix):
-        params = urlencode({"q": query.topic + suffix, "format": "json", "language": "ja-JP", "categories": "general"})
-        data = json_request(SEARCH_URL + "/search?" + params)
-        return [dict(item, _search_rank=rank) for rank, item in enumerate(data.get("results", []))]
+        return [dict(item, _search_rank=rank) for rank, item in enumerate(web_search(query.topic + suffix))]
     results = []
     successes = 0
-    suffixes = [" 歴史 年表 起源", " 歴史 発明 発売 普及", " 歴史 公式 近現代"] if re.search(r'[一-龯ぁ-んァ-ヶ]', query.topic) else [" 歴史 年表 起源", " development milestones", " announcement launch generally available"]
+    japanese = re.search(r'[一-龯ぁ-んァ-ヶ]', query.topic)
+    if SOURCE == 'wikipedia':
+        # 百科事典の検索は語の AND なので、年表向けの語を足すと記事が減る。テーマ名そのものと「歴史」だけで引く。
+        suffixes = ['', ' 歴史' if japanese else ' history']
+    else:
+        suffixes = [" 歴史 年表 起源", " 歴史 発明 発売 普及", " 歴史 公式 近現代"] if japanese else [" 歴史 年表 起源", " development milestones", " announcement launch generally available"]
     with ThreadPoolExecutor(max_workers=3) as pool:
         futures = [pool.submit(run, suffix) for suffix in suffixes]
         for future in futures:
@@ -411,6 +445,8 @@ def search(query):
                 pass
     if not successes:
         raise TimelineError("検索サービスに接続できません。少し待って再検索してください。")
+    if SOURCE == 'wikipedia':
+        return wikipedia_results(query, results)
     unique = {}
     hosts = {}
     def relevance(result):
@@ -460,6 +496,22 @@ def search(query):
             hosts[host] = hosts.get(host, 0) + 1
         except ValueError:
             continue
+        if len(unique) == 10:
+            break
+    return list(unique.values())
+
+
+def wikipedia_results(query, results):
+    """検索APIの順位を保ったまま、テーマ語を含まない記事と作品記事（映画・アニメ等）を除く。"""
+    unique = {}
+    words = query.topic.casefold().split()
+    for result in sorted(results, key=lambda r: r['_search_rank']):
+        summary = compact(result['title'] + ' ' + result['content']).casefold()
+        if not all(word in summary for word in words):
+            continue
+        if re.search(r'[(（](?:映画|アニメ|漫画|テレビドラマ|NHK大河ドラマ|曲|アルバム|小説|ゲーム|film|TV series|album|song|novel)', result['title'], re.I):
+            continue
+        unique.setdefault(result['url'], result)
         if len(unique) == 10:
             break
     return list(unique.values())
@@ -518,10 +570,9 @@ def crosscheck_sources(events, sources, query, deadline):
     retrieval_deadline = min(deadline - 35, time.monotonic() + 20)
     def run(text):
         try:
-            params = urlencode({'q':text, 'format':'json', 'language':'ja-JP', 'categories':'general'})
-            data = json_request(SEARCH_URL + '/search?' + params, timeout=min(7, max(1, retrieval_deadline-time.monotonic())))
+            results = web_search(text, timeout=min(7, max(1, retrieval_deadline-time.monotonic())))
             first_word=text.split()[0].casefold()
-            return [r for r in data.get('results', []) if first_word in (r.get('title','')+' '+r.get('content','')).casefold()][:5]
+            return [r for r in results if first_word in (r.get('title','')+' '+r.get('content','')).casefold()][:5]
         except (OSError, ValueError):
             return []
     known = {s['url'] for s in sources}
