@@ -3,6 +3,8 @@ from pathlib import Path
 import struct
 import sys
 import zipfile
+import json
+from urllib.parse import unquote
 
 from fastapi.testclient import TestClient
 from PIL import Image
@@ -66,6 +68,15 @@ def test_original_zip_keeps_photo_bytes_and_gps():
         "observed_date": "2026-10-03", "latitude": 35.5, "longitude": 139.5,
         "location": "緯度 35.5000, 経度 139.5000",
     }
+    assert json.loads(unquote(response.headers["x-photo-metadata"])) == vision.extract_exif_context(photo)
+
+
+def test_zip_response_includes_explicit_empty_metadata_without_inventing_gps():
+    out = io.BytesIO()
+    Image.new("RGB", (4, 4), "green").save(out, "JPEG")
+    response = post(zipped(("photo.jpg", out.getvalue())))
+    assert response.status_code == 200
+    assert json.loads(unquote(response.headers["x-photo-metadata"])) == {}
 
 
 @pytest.mark.parametrize("raw", [

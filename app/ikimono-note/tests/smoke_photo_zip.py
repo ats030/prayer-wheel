@@ -38,6 +38,11 @@ def main():
         page.goto(base)
         wait("typeof selectOriginalZip==='function'")
         assert page.evaluate("async()=>{const {photoFingerprint}=await import('/assets/photo-location.mjs');return photoFingerprint({size:16*1024*1024,arrayBuffer(){throw Error('must not read oversized file')}})}") == "写真が15MBを超えています"
+        metadata_requests = []
+        def block_metadata(route):
+            metadata_requests.append(route.request.url)
+            route.abort()
+        page.route("**/api/photo-metadata", block_metadata)
         with page.expect_file_chooser() as chooser:
             page.locator("#originalZipBtn").click()
         chooser.value.set_files(upload)
@@ -77,11 +82,34 @@ def main():
         wait("document.querySelector('.location-message').textContent.includes('保存しました')")
         repaired = page.evaluate("async()=> (await all())[0]")
         assert repaired["coordinates"] == expected
+        assert not metadata_requests, metadata_requests
+        page.unroute("**/api/photo-metadata", block_metadata)
         assert repaired["summary"] == "zip test" and repaired["id"] == record_id
 
         page.goto(base)
         page.locator("#originalZip").set_input_files(upload)
         wait("gps?.source==='exif' && !document.getElementById('originalZipBtn').disabled")
+        # A distinct File with the same name must not inherit the selected original's GPS.
+        result = page.evaluate("""async bytes=>{
+          const {readPhotoLocation}=await import('/assets/photo-location.mjs');
+          return readPhotoLocation([new File([new Uint8Array(bytes)],selected[0].name,{type:'image/jpeg'})]);
+        }""", list(fixture(False)["buffer"]))
+        assert "latitude" not in result and "longitude" not in result
+
+        # Old responses without the header retain the existing metadata request.
+        legacy_requests = []
+        def watch_metadata(route):
+            legacy_requests.append(route.request.url)
+            route.continue_()
+        def legacy_original(route):
+            route.fulfill(body=photo, content_type="image/jpeg", headers={"X-Photo-Name": "photo.jpg"})
+        page.route("**/api/photo-metadata", watch_metadata)
+        page.route("**/api/photo-original", legacy_original)
+        page.locator("#originalZip").set_input_files(upload)
+        wait("gps?.source==='exif' && !document.getElementById('originalZipBtn').disabled")
+        assert len(legacy_requests) == 1
+        page.unroute("**/api/photo-metadata", watch_metadata)
+        page.unroute("**/api/photo-original", legacy_original)
         page.locator("#originalZip").set_input_files({"name": "bad.zip", "mimeType": "application/zip", "buffer": b"not zip"})
         wait("document.getElementById('status').classList.contains('error')")
         assert page.evaluate("({latitude:gps.latitude,longitude:gps.longitude})") == expected

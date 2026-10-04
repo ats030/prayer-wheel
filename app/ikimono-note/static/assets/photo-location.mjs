@@ -1,4 +1,6 @@
 // 写真から読み取った座標だけを扱う。端末の現在地は取得しない。
+// Cache belongs to this exact returned File, never a filename or persisted record.
+const originalMetadata = new WeakMap();
 export function photoCoordinates(data) {
   const {latitude, longitude} = data || {};
   if (typeof latitude !== "number" || typeof longitude !== "number" ||
@@ -45,13 +47,32 @@ export async function readOriginalZip(file) {
     }
     const name = decodeURIComponent(response.headers.get("X-Photo-Name") || "photo");
     const photo = await response.blob();
-    return new File([photo], name, {type: photo.type});
+    const original = new File([photo], name, {type: photo.type});
+    const header = response.headers.get("X-Photo-Metadata");
+    if (header) {
+      try {
+        const metadata = JSON.parse(decodeURIComponent(header));
+        if (metadata && typeof metadata === "object" && !Array.isArray(metadata)) originalMetadata.set(original, metadata);
+      } catch (_) { /* Older/incompatible responses use the existing metadata endpoint. */ }
+    }
+    return original;
   } finally {
     clearTimeout(timeout);
   }
 }
 
 export async function readPhotoLocation(files) {
+  // The original ZIP response already read EXIF from these same bytes. Avoid a second upload.
+  if (files.length && files.every(file => originalMetadata.has(file))) {
+    const combined = {};
+    files.forEach(file => {
+      const data = originalMetadata.get(file);
+      for (const key of ["observed_date", "latitude", "longitude", "location", "gps_status"]) {
+        if (Object.prototype.hasOwnProperty.call(data, key) && !Object.prototype.hasOwnProperty.call(combined, key)) combined[key] = data[key];
+      }
+    });
+    return combined;
+  }
   const form = new FormData();
   files.forEach(file => form.append("files", file));
   const controller = new AbortController();

@@ -774,9 +774,11 @@ async def photo_original(request: Request) -> Response:
         photo, name, mime = await run_in_threadpool(photo_archive.read_original, bytes(raw))
     except vision.VisionError as exc:
         raise HTTPException(status_code=415, detail=str(exc)) from exc
+    metadata = await run_in_threadpool(vision.extract_exif_context, photo)
     return Response(photo, media_type=mime, headers={
         "Cache-Control": "no-store",
         "X-Photo-Name": quote(name, safe=""),
+        "X-Photo-Metadata": quote(json.dumps(metadata, ensure_ascii=True, separators=(",", ":")), safe=""),
     })
 
 
