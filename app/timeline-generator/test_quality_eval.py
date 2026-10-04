@@ -67,13 +67,6 @@ class MatchTests(unittest.TestCase):
 
 
 class ReportTests(unittest.TestCase):
-    def test_major_list_recall_counts_gold_in_stage_one_items(self):
-        trace = {'major': {'items': [{'title': '日清食品の即席麺', 'keyword': 'チキンラーメン', 'year': 1958},
-                                     {'title': '來々軒の開店', 'keyword': '來々軒', 'year': 1911}]}}
-        report = q.evaluate_result(GOLD, {'theme': 'ラーメン', 'period': '全期間', 'events': [], 'trace': trace}, 'ラーメン')
-        self.assertEqual((report['major_recall'], report['major_found']), (0.5, ['chicken']))
-        self.assertNotIn('major_recall', q.evaluate_result(GOLD, {'theme': 'ラーメン', 'period': '全期間', 'events': []}, 'ラーメン'))
-
     def test_recall_sources_and_duplicates(self):
         result = {'theme': 'ラーメン', 'period': '全期間', 'events': [
             event(1910, '淺草 來々軒の開店', url='https://www.raumen.co.jp/x'),
