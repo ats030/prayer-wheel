@@ -283,6 +283,43 @@ class BatchTests(unittest.TestCase):
         self.assertEqual(sorted(tuple(a) for b in trace['batches'] for a in b['adopted']),
                          sorted((e['year'], e['title']) for e in result['events']))
 
+    def test_source_filter_is_off_by_default(self):
+        result = self.run_generation(history_source(7), model=grounded_model)
+        self.assertNotIn('excluded_sources', result['trace'])
+
+    def test_source_filter_drops_only_judged_unrelated_results_before_fetching(self):
+        results = [{'title': '研究', 'url': 'https://example.org/a', 'content': ''},
+                   {'title': '研究大学', 'url': 'https://example.org/b', 'content': ''},
+                   {'title': '研究の歴史', 'url': 'https://example.org/c', 'content': ''}]
+        fetched = []
+        def model(system, prompt, deadline, schema):
+            if schema is t.RELATED_SCHEMA:
+                time.sleep(0.3)
+                # 主題そのもの（id 0）と「テーマの歴史」（id 2）も無関係と答えるが、残す。
+                return {'judgments': [{'id': i, 'subject': '', 'related': False} for i in range(3)]}
+            return grounded_model(system, prompt, deadline, schema)
+        started = time.monotonic()
+        def fetch(reader, result):
+            # 判定にかかった時間は本文取得の期限に足される。
+            self.assertGreaterEqual(reader.deadline, started + 60.3)
+            fetched.append(result['url'])
+            return history_source(7)
+        with patch.object(t, 'SOURCE_FILTER', 'model'), patch.object(t, 'BATCH_PASSAGES', t.BATCH_EVENTS), patch.object(t, 'search', return_value=results), \
+                patch.object(t.WebReader, 'fetch', fetch), patch.object(t, 'crosscheck_sources', return_value=[]), patch.object(t, 'model_json', side_effect=model):
+            result = t.build_timeline(t.parse_query('研究'), lambda _: None)
+        self.assertEqual(sorted(fetched), ['https://example.org/a', 'https://example.org/c'])
+        self.assertEqual(result['trace']['excluded_sources'], [{'title': '研究大学', 'url': 'https://example.org/b'}])
+
+    def test_source_filter_keeps_everything_when_the_judgment_fails_or_removes_all(self):
+        query = t.parse_query('研究')
+        results = [{'title': '研究所', 'url': 'u1'}, {'title': '研究者', 'url': 'u2'}]
+        all_out = {'judgments': [{'id': 0, 'subject': '', 'related': False}, {'id': 1, 'subject': '', 'related': False}]}
+        for answer in (t.TimelineError('busy'), all_out, {'judgments': 'broken'}):
+            excluded = []
+            with patch.object(t, 'model_json', side_effect=[answer]):
+                self.assertEqual(t.related_sources(query, results, time.monotonic() + 60, excluded), results)
+            self.assertEqual(excluded, [])
+
     def test_trace_records_over_cap_proposals_separately(self):
         original = t.build_batch
         def capped(*args, **kwargs):
