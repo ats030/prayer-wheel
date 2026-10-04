@@ -368,6 +368,20 @@ def collect_industrial():
     return bindings
 
 
+def restore_jalan_metadata(rows, previous_rows):
+    """Keep area assignments only when the same site's location is unchanged."""
+    previous = {str(row.get("id") or row.get("qid")): row for row in previous_rows}
+    fields = ("jalan_lrg_code", "jalan_lrg_name", "jalan_sml_code", "jalan_sml_name")
+    for row in rows:
+        old = previous.get(str(row.get("id") or row.get("qid")))
+        if not old or any(row.get(field) != old.get(field)
+                          for field in ("prefecture", "latitude", "longitude")):
+            continue
+        if all(old.get(field) for field in fields):
+            row.update({field: old[field] for field in fields})
+    return rows
+
+
 def main():
     designations = collect_designations()
     broad = collect_broad()
@@ -465,6 +479,8 @@ def main():
     print("bunka match breakdown:", bunka_stats)
 
     rows = merge_rows(rows)
+    if OUTPUT.exists():
+        rows = restore_jalan_metadata(rows, json.loads(OUTPUT.read_text(encoding="utf-8")))
     OUTPUT.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     counts = {}
     for item in rows:
