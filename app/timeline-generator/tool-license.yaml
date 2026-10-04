@@ -113,3 +113,85 @@ decisions:
       - Link and name each source; show only short excerpts with the related explanation
       - Attribution alone is not a reuse licence; review destination terms before public release
     notes: Raw pages are processed in memory and not stored. General public release remains outside this implementation
+public_release_review:
+  issue: ats030-3l22f
+  reviewed_at: 2026-10-04
+  intended_use: Public static pages of human-reviewed timelines with a labelled book-affiliate block after the timeline; generation and administration stay on the Tailnet
+  verdict: Do not publish timelines generated through the current SearXNG engines; change the source path first
+  decisions:
+    - tool: SearXNG upstream engines google, bing, yandex, naver, zapmeta, wikibooks (settings.yml)
+      category: service
+      status: blocked
+      adoption: declined
+      commercial_use: Not granted; google and bing are reached by automated scraping of consumer search pages
+      cost: No fee; the issue is permission, not price
+      terms_url:
+        - https://policies.google.com/terms?hl=ja
+        - https://www.microsoft.com/en-us/servicesagreement
+      evidence_retrieved: 2026-10-04
+      restrictions:
+        - Google terms forbid automated access that violates machine-readable instructions such as robots.txt
+        - Microsoft terms forbid impermissible scraping and circumventing access restrictions
+      notes: Acceptable risk for personal Tailnet research is not a basis for monetized publication. Keep for personal use only; published pages need another source path
+    - tool: Wikipedia and Wikimedia APIs (ja/en text)
+      category: dataset
+      status: conditional
+      license: CC-BY-SA-4.0
+      commercial_use: permitted with attribution and ShareAlike
+      cost: No fee
+      license_url: https://en.wikipedia.org/wiki/Wikipedia:Reusing_Wikipedia_content
+      evidence_retrieved: 2026-10-04
+      restrictions:
+        - Link each reused article as attribution
+        - Indicate changes and license adapted text under CC BY-SA 4.0 or later; published timeline text should carry a CC BY-SA notice
+        - Follow the Wikimedia API User-Agent and rate-limit etiquette
+      notes: Recommended primary source path for published pages. Coverage narrower than general web search; quality must be re-measured with quality_eval
+    - tool: Brave Search API
+      category: service
+      status: review_required
+      adoption: declined
+      commercial_use: permitted for customer applications
+      cost: About USD 5 per 1K requests with USD 5 monthly credit (third-party summaries; confirm on brave.com/search/api)
+      terms_url: https://api-dashboard.search.brave.com/terms-of-service
+      evidence_retrieved: 2026-10-04
+      restrictions:
+        - No storing, caching or databasing of Search Results beyond transient operation; storing source URLs and titles in SQLite conflicts unless a storage-rights plan is bought
+        - No use of results to create, evaluate or benchmark AI models or services
+      notes: Paid storage-rights plan is unpriced; also breaks the no-paid-API premise. Revisit only if Wikipedia coverage is insufficient
+    - tool: Amazon Associates (Japan) and Creators API (PA-API 5.0 successor)
+      category: service
+      status: conditional
+      commercial_use: permitted under the Associates operating agreement
+      cost: No fee; commission income
+      terms_url:
+        - https://affiliate.amazon.co.jp/help/operating/agreement
+        - https://affiliate-program.amazon.com/creatorsapi/docs/en-us/paapiv5-deprecation
+      evidence_retrieved: 2026-10-04
+      restrictions:
+        - Display "Amazonのアソシエイトとして、[名称]は適格販売により収入を得ています。" conspicuously
+        - PA-API 5.0 is retired; Creators API reportedly needs 10 qualifying sales in 30 days (third-party sources, not confirmed on the official page)
+      notes: Do not depend on the Amazon API at launch; hand-picked links only, after the account is approved
+    - tool: Rakuten Affiliate and Rakuten Web Service (Books API)
+      category: service
+      status: conditional
+      commercial_use: Income from the API is permitted only through Rakuten Affiliate under the partner agreement
+      cost: No fee stated; terms reserve the right to charge
+      terms_url:
+        - https://webservice.rakuten.co.jp/guide/rule
+        - https://affiliate.rakuten.co.jp/guideline/terms/
+        - https://affiliate.rakuten.co.jp/guideline/rule/
+      evidence_retrieved: 2026-10-04
+      restrictions:
+        - Use retrieved data only for purposes the company allows; show that product data comes from Rakuten where required
+        - No self-purchases through own links and no link sharing by DM
+      notes: Recommended for automated, verified book lookup at launch
+    - tool: Display and ranking obligations
+      category: other
+      status: conditional
+      terms_url:
+        - https://www.caa.go.jp/policies/policy/representation/fair_labeling/stealth_marketing/
+        - https://developers.google.com/search/docs/essentials/spam-policies?hl=ja
+      evidence_retrieved: 2026-10-04
+      restrictions:
+        - 景品表示法のステマ告示（2023-10-01施行）に従い、アフィリエイト枠に「PR」「広告」を表示する
+        - Avoid scaled content abuse and thin affiliate pages; publish only human-reviewed timelines with added value, not every generated job
