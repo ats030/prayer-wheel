@@ -8,7 +8,7 @@ Type=simple
 Environment=TZ=Asia/Tokyo
 WorkingDirectory=/home/ats030
 EnvironmentFile=-/home/ats030/.env
-ExecStart=/usr/bin/env SEARXNG_API_URL=http://127.0.0.1:8081/search /home/ats030/app/image-generator.sh
+ExecStart=/home/ats030/app/image-generator.sh
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal
