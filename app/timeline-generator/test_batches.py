@@ -54,9 +54,9 @@ def history_source(count=110):
 def grounded_model(system, prompt, deadline, schema):
     if schema is t.PRUNE_SCHEMA:
         # 擬似の関連度判定: 古い出来事（出力済み）を周辺的とし、そこから外させる。
+        # 判定は一覧の並びによらず年で決める。分類は組をまたいで使い回すため（ats030-20t3o）。
         listing = json.loads(prompt.split('出来事:\n', 1)[1])
-        excess = len(listing) - t.MAX_EVENTS
-        return {'ratings': [{'id': e['id'], 'tier': 'peripheral' if e['id'] < excess else 'core'} for e in listing]}
+        return {'ratings': [{'id': e['id'], 'tier': 'peripheral' if e['year'] < 1910 - t.MAX_EVENTS else 'core'} for e in listing]}
     if schema is t.VERIFY_SCHEMA:
         candidates = json.loads(prompt.split('候補:', 1)[1].split('\n比較資料:', 1)[0])
         return {'supported': list(range(len(candidates)))}
@@ -131,6 +131,24 @@ class BatchTests(unittest.TestCase):
         self.assertEqual(len(kept), t.MAX_EVENTS)
         self.assertIn(events[-1], kept)
 
+    def test_relevance_tiers_are_reused_so_later_prunes_rate_only_new_events(self):
+        events = [saved_event(year) for year in range(1800, 1800 + t.MAX_EVENTS + 1)]
+        prompts = []
+        def model(system, prompt, deadline, schema):
+            listing = json.loads(prompt.split('出来事:\n', 1)[1])
+            prompts.append([e['year'] for e in listing])
+            return {'ratings': [{'id': e['id'], 'tier': 'peripheral' if e['year'] == 1801 else 'core'} for e in listing]}
+        known = {}
+        with patch.object(t, 'model_json', side_effect=model):
+            kept = t.prune_events(t.parse_query('研究'), events, events[-1:], time.monotonic() + 60, [], known)
+            newer = saved_event(1900)
+            dropped = []
+            t.prune_events(t.parse_query('研究'), kept + [newer], [newer], time.monotonic() + 60, dropped, known)
+        # 上限到達後に毎組全件を分類し直すと約45秒かかるため、2回目は新しい1件だけを分類させる（ats030-20t3o）。
+        self.assertEqual(len(prompts[0]), t.MAX_EVENTS + 1)
+        self.assertEqual(prompts[1], [1900])
+        self.assertEqual([d['year'] for d in dropped], [1900])
+
     def test_relevance_prompt_counts_domestic_firsts_as_core(self):
         events = [saved_event(year) for year in range(1800, 1800 + t.MAX_EVENTS + 1)]
         seen = []
@@ -141,6 +159,17 @@ class BatchTests(unittest.TestCase):
             t.prune_events(t.parse_query('コーヒー'), events, events[-1:], time.monotonic() + 60, [])
         # 「各地」だけでは日本初の喫茶店が周辺的と判定された（ats030-or5mw）。
         self.assertIn('各地（日本国内を含む）での最初の店', seen[0].split('context:')[0])
+
+    def test_relevance_prompt_counts_era_defining_events_as_core(self):
+        events = [saved_event(year) for year in range(1800, 1800 + t.MAX_EVENTS + 1)]
+        seen = []
+        def model(system, prompt, deadline, schema):
+            seen.append(system)
+            return {'ratings': []}
+        with patch.object(t, 'model_json', side_effect=model):
+            t.prune_events(t.parse_query('昭和'), events, events[-1:], time.monotonic() + 60, [])
+        # 物の起源向けの基準だけでは、昭和の東京オリンピックや沖縄返還が背景的とされ外れた（ats030-20t3o）。
+        self.assertIn('時代を代表する政治・外交・経済・社会の大事件', seen[0].split('context:')[0])
 
     def test_disjoint_material_retains_context_and_all_sources(self):
         sources = [history_source(35) | {'url': f'https://example.org/{i}'} for i in range(10)]
@@ -315,6 +344,8 @@ class BatchTests(unittest.TestCase):
         self.assertEqual(len(result['events']), 8)
         # 採用記録は組ごとに分かれ、合わせると最終結果の出来事に一致する。
         self.assertTrue(all(isinstance(b['seconds'], float) and b['adopted'] for b in trace['batches']))
+        # 組の遅延がどの段階で増えたかを分けるため、段階ごとの所要秒も残す（ats030-20t3o）。
+        self.assertTrue(all({'generate', 'crosscheck', 'verify'} <= b['stages'].keys() for b in trace['batches']))
         self.assertEqual(sorted(tuple(a) for b in trace['batches'] for a in b['adopted']),
                          sorted((e['year'], e['title']) for e in result['events']))
 
@@ -366,7 +397,7 @@ class BatchTests(unittest.TestCase):
 
     def test_trace_marks_unprocessed_batches_after_deadline(self):
         clock = [0]
-        def finish_near_deadline(query, sources, emit, deadline, existing, dropped=None):
+        def finish_near_deadline(query, sources, emit, deadline, existing, dropped=None, **_):
             clock[0] = t.TIME_LIMIT - 9
             dropped.append({'year': 1800, 'date': '1800年', 'title': 'x', 'stage': '検証', 'reason': 'r'})
             return [saved_event(1900)], []

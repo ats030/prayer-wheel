@@ -158,12 +158,22 @@ class ContextTests(unittest.TestCase):
             actual = t.search(t.parse_query('ラーメン'))
         self.assertEqual(actual, [{'url': 'https://ja.wikipedia.org/wiki/%E3%83%A9%E3%83%BC%E3%83%A1%E3%83%B3', 'title': 'ラーメン',
                                    'content': 'ラーメンは中華麺', '_search_rank': 0}])
-        self.assertEqual(request.call_count, 2)
-        self.assertEqual(sleep.call_count, 2)
+        self.assertEqual(request.call_count, 3)
+        self.assertEqual(sleep.call_count, 3)
         with patch.object(t, 'SOURCE', 'wikipedia'), patch.object(t, 'json_request', return_value={'query': {'search': []}}) as request, \
                 patch.object(t.time, 'sleep'):
             t.web_search('Claude Code history')
         self.assertEqual([c.args[0][:25] for c in request.call_args_list], ['https://en.wikipedia.org/', 'https://ja.wikipedia.org/'])
+
+    def test_wikipedia_extra_query_adds_two_new_topic_titled_articles(self):
+        # 補助検索は題名にテーマ語を含む未選択の記事を2件まで後ろに足し、本検索の順位は変えない（ats030-n1k8e）。
+        def hit(title, rank, extra=False):
+            return {'url': '/' + title, 'title': title, 'content': title, '_search_rank': rank, '_extra': extra}
+        main = [hit(f'コーヒー{i}', i) for i in range(3)]
+        extra = [hit('コーヒー1', 0, True), hit('ブラジル', 1, True), hit('缶コーヒー', 2, True),
+                 hit('コーヒー (アルバム)', 3, True), hit('コーヒー牛乳', 4, True), hit('コーヒーカップ', 5, True)]
+        actual = [r['title'] for r in t.wikipedia_results(t.parse_query('コーヒー'), extra + main)]
+        self.assertEqual(actual, ['コーヒー0', 'コーヒー1', 'コーヒー2', '缶コーヒー', 'コーヒー牛乳'])
 
     def test_crosscheck_authority_shares_source_tier(self):
         results=[{'title':'Vienna coffee history','url':f'https://{host}/kaffee'} for host in ['blog.example.hatenablog.com','example.com','www.wien.gv.at']]
