@@ -131,6 +131,17 @@ class BatchTests(unittest.TestCase):
         self.assertEqual(len(kept), t.MAX_EVENTS)
         self.assertIn(events[-1], kept)
 
+    def test_relevance_prompt_counts_domestic_firsts_as_core(self):
+        events = [saved_event(year) for year in range(1800, 1800 + t.MAX_EVENTS + 1)]
+        seen = []
+        def model(system, prompt, deadline, schema):
+            seen.append(system)
+            return {'ratings': []}
+        with patch.object(t, 'model_json', side_effect=model):
+            t.prune_events(t.parse_query('コーヒー'), events, events[-1:], time.monotonic() + 60, [])
+        # 「各地」だけでは日本初の喫茶店が周辺的と判定された（ats030-or5mw）。
+        self.assertIn('各地（日本国内を含む）での最初の店', seen[0].split('context:')[0])
+
     def test_disjoint_material_retains_context_and_all_sources(self):
         sources = [history_source(35) | {'url': f'https://example.org/{i}'} for i in range(10)]
         for i, source in enumerate(sources):

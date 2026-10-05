@@ -960,6 +960,7 @@ PRUNE_LABELS = {"peripheral": "周辺的", "context": "背景的"}
 def prune_events(query, events, fresh, deadline, dropped):
     """上限を超えた分だけ、テーマとの関連度が低い出来事を外す。出力済みの出来事も対象にする（ats030-z2fam）。
     件数を指定して選ばせると個別の店舗の「初の開店」まで外したため、全件を3段階に分類させ、低い段から外す（ats030-vovpg）。
+    「各地」だけでは海外の都市と読まれ、日本初の喫茶店を個別店舗として周辺的に落としたため、国内を明示する（ats030-or5mw）。
     同じ段の中と、分類を得られない出来事は、fresh（今回の組で加わった出来事）の後ろから外す。"""
     excess = len(events) - MAX_EVENTS
     if excess <= 0:
@@ -967,7 +968,7 @@ def prune_events(query, events, fresh, deadline, dropped):
     listing = [{"id": i, "year": e["year"], "title": e["title"], "description": e["description"]} for i, e in enumerate(events)]
     try:
         output = model_json("あなたは歴史年表の編集者です。検索テーマの年表に載せる出来事を、テーマにとっての重要度で3段階に分類し、全件のidとtierをratingsに返す。\n"
-                            "core: テーマそのものの起源・発見・発明・伝来、各地での最初の店・施設・製品・サービス、普及や制度・方式・技術の転換点。\n"
+                            "core: テーマそのものの起源・発見・発明・伝来、各地（日本国内を含む）での最初の店・施設・製品・サービス、普及や制度・方式・技術の転換点。\n"
                             "context: テーマの歴史の主要な展開や、理解に役立つ背景。\n"
                             "peripheral: テーマとの関係が間接的な出来事、個別の人物・作品・企業の細かな出来事、同種の出来事の繰り返し、雑学的な話題。",
                             f"検索テーマ: {query.topic}\n出来事:\n" + json.dumps(listing, ensure_ascii=False), deadline, PRUNE_SCHEMA)
