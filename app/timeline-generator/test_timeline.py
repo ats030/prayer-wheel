@@ -148,6 +148,15 @@ class FetchTests(unittest.TestCase):
         p.feed("<p>1971年、シアトルに新店舗が開店。</p>")
         self.assertIn("1971年", p.text())
 
+    def test_short_heading_replaces_previous_section_heading(self):
+        p = t.ArticleParser()
+        p.feed("<h2>コーヒー発見にまつわる伝説</h2><p>山羊飼いカルディが赤い実を見つけたと伝えられている。</p>"
+               "<h2>飲用史</h2><p>1554年、イスタンブールに最初のコーヒーハウスが開店した。</p>")
+        passages = p.passages()
+        self.assertEqual(passages[0]["heading"], "コーヒー発見にまつわる伝説")
+        self.assertEqual(passages[1]["heading"], "飲用史")
+        self.assertNotIn("before", passages[1])
+
 
 class HTTPTests(unittest.TestCase):
     @classmethod

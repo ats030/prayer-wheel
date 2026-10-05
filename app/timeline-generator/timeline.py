@@ -49,7 +49,7 @@ BATCH_PASSAGES = 20
 MAX_CONSECUTIVE_FAILURES = 2
 MODEL_RETRY_DELAY = 10
 MATERIAL_BUDGET = 12000
-PIPELINE_VERSION = 4
+PIPELINE_VERSION = 5
 PERIOD_INPUT_ERROR = "年代による絞り込みはできません。年代条件を外してください。"
 DATE_PATTERN = re.compile(r"(?<![\w.])\d{3,4}(?!\w|\.\d)|\d+年|\d+世紀|\d+(?:st|nd|rd|th)[ -]century", re.I)
 
@@ -121,9 +121,10 @@ class ArticleParser(HTMLParser):
 
     def flush(self):
         line = compact("".join(self.parts))
-        if len(line) >= 8 or heading_year(line) is not None or DATE_PATTERN.search(line):
+        level = next((int(tag[1]) for tag in reversed(self.stack) if re.fullmatch(r"h[1-6]", tag)), 0)
+        # 短い見出しも残す。捨てると前の節の見出しが後続の節へ持ち越される。
+        if (level and line) or len(line) >= 8 or heading_year(line) is not None or DATE_PATTERN.search(line):
             self.lines.append(line)
-            level = next((int(tag[1]) for tag in reversed(self.stack) if re.fullmatch(r"h[1-6]", tag)), 0)
             self.entries.append((line, level))
         self.parts = []
 
