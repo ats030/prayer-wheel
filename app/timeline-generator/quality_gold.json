@@ -1,7 +1,7 @@
 {
-  "version": 2,
-  "verified_at": "2026-10-03",
-  "note": "人が選んだ評価用の主要項目と既知の誤り。生成結果から作らない。evidence は評価日に取得して年と語を確認した資料。網羅すべき全項目ではなく、欠落の検出用の最小集合。",
+  "version": 3,
+  "verified_at": "2026-10-05",
+  "note": "人が選んだ評価用の主要項目と既知の誤り。生成結果から作らない。evidence は評価日に取得して年と語を確認した資料。網羅すべき全項目ではなく、欠落の検出用の最小集合。年表は年だけの表記も正しいため、月日を dates で要求せず、同じ年の別項目とは keywords と unless で区別する（ats030-1gqzq）。",
   "themes": {
     "インターネット": {
       "primary_domains": ["internetsociety.org", "home.cern", "nic.ad.jp", "w3.org", "ietf.org"],
@@ -20,8 +20,8 @@
       "target_recall": 1.0,
       "primary_domains": ["anthropic.com", "claude.com", "docs.claude.com"],
       "milestones": [
-        {"id": "preview", "label": "研究プレビュー発表", "years": [2025, 2025], "dates": ["2月24日"], "keywords": ["Claude Code"], "evidence": ["https://www.anthropic.com/news/claude-3-7-sonnet"]},
-        {"id": "ga", "label": "一般提供開始", "years": [2025, 2025], "dates": ["5月22日"], "keywords": ["一般", "提供", "GA"], "evidence": ["https://www.anthropic.com/news/claude-4"]},
+        {"id": "preview", "label": "研究プレビュー発表", "years": [2025, 2025], "keywords": ["Claude Codeのリリース", "Claude Codeを公開", "Claude Codeの公開", "Claude Codeの発表", "Claude Codeを発表", "研究プレビュー", "リサーチプレビュー"], "unless": ["一般提供", "Web版"], "evidence": ["https://www.anthropic.com/news/claude-3-7-sonnet"]},
+        {"id": "ga", "label": "一般提供開始", "years": [2025, 2025], "keywords": ["一般", "提供", "GA"], "evidence": ["https://www.anthropic.com/news/claude-4"]},
         {"id": "bun", "label": "Bun買収・年換算収益10億ドル", "years": [2025, 2025], "keywords": ["Bun"], "evidence": ["https://www.anthropic.com/news/anthropic-acquires-bun-as-claude-code-reaches-usd1b-milestone"]}
       ],
       "known_errors": [

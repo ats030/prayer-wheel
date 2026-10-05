@@ -159,15 +159,20 @@ def missing_stage(item, hits, trace, stop_reason=None):
         return {'stage': '検証で除外', 'reason': f"第{rejected['batch']}組・{rejected['stage']}：{rejected['reason']}", 'candidate': rejected['title']}
     if not trace:
         return {'stage': '出典内にあり（候補生成・検査で欠落）'}
-    found = {}
+    found, numbers = {}, set()
     for number, batch in enumerate(trace.get('batches') or [], 1):
         for source, key in batch.get('passages') or []:
             url = trace['sources'][source]
             if (url, key) in hits:
                 state = 'failed' if batch.get('error') else 'processed' if batch.get('processed') else 'pending'
                 found.setdefault(state, (number, batch))
+                numbers.add(number)
     if 'processed' in found:
-        return {'stage': '候補に出ず', 'reason': f"第{found['processed'][0]}組で処理済み"}
+        # 説明のない旧記録では「主権の回復」のような却下候補を語で照合できない。同じ年の別事象もあるため段階は変えず、同組・同年の却下候補を手がかりに示す（ats030-1gqzq）。
+        near = [f"{r['title']}（{r['stage']}）" for r in trace.get('rejected') or []
+                if r.get('batch') in numbers and 'description' not in r and in_years(r.get('year'), item.get('years'))]
+        hint = f"。同組・同年の却下候補: {'、'.join(near[:3])}" if near else ''
+        return {'stage': '候補に出ず', 'reason': f"第{found['processed'][0]}組で処理済み{hint}"}
     if 'failed' in found:
         number, batch = found['failed']
         return {'stage': '処理失敗', 'reason': f"第{number}組：{batch['error']}"}

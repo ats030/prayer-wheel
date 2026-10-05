@@ -990,7 +990,7 @@ def prune_events(query, events, fresh, deadline, dropped):
             reason = f"収録上限{MAX_EVENTS}件を超え、テーマとの関連度が低い（{PRUNE_LABELS[tiers[i]]}）"
         else:
             reason = f"収録上限{MAX_EVENTS}件を超えた（{'中核と判定されたが' if i in tiers else '関連度の判定を得られず'}{'新しい候補' if i in added else '出力済みの候補'}から外した）"
-        dropped.append({"year": event["year"], "date": event["date"], "title": event["title"], "stage": "関連度", "reason": reason})
+        dropped.append({"year": event["year"], "date": event["date"], "title": event["title"], "description": event["description"][:120], "stage": "関連度", "reason": reason})
     removed = set(remove)
     return [e for i, e in enumerate(events) if i not in removed]
 
@@ -1100,7 +1100,7 @@ def build_timeline(query, emit):
 
 
 def build_batch(query, sources, emit, deadline, existing, dropped=None):
-    """dropped にリストを渡すと、落とした候補を {year, date, title, stage, reason} で追記する。"""
+    """dropped にリストを渡すと、落とした候補を {year, date, title, description, stage, reason} で追記する。"""
     dropped = [] if dropped is None else dropped
     emit({"kind": "progress", "stage": "generate", "message": f"{len(sources)}件の資料から、年代順に整理しています。"})
     material = [{"source_id": i + 1, "title": source["title"], "url": source["url"], "publication_date": source.get("publication_date", ""), "article_lead": source.get("lead", ""), "passages": [{key: p[key] for key in ["heading", "date_heading", "text"]} for p in (source["passages"][-2:] + source["passages"][:-2])]} if "passages" in source else {"source_id": i + 1, "title": source["title"], "text": source["text"][:3000]} for i, source in enumerate(sources)]
@@ -1120,7 +1120,7 @@ def build_batch(query, sources, emit, deadline, existing, dropped=None):
         if key and key not in kept:
             stage, reason = ("件数上限", f"1組{BATCH_EVENTS}件の上限を超えた") if key in over else ("検査", reasons.get(key, "引用・年代・表記の機械検査に通らない"))
             dropped.append({"year": item.get("year") if type(item.get("year")) is int else None, "date": compact(str(item.get("date") or ""))[:40],
-                             "title": compact(item["title"])[:70], "stage": stage, "reason": reason})
+                             "title": compact(item["title"])[:70], "description": compact(str(item.get("description") or ""))[:120], "stage": stage, "reason": reason})
     emit({"kind": "progress", "stage": "verify", "message": "出来事と年代を、引用した本文と照合しています。"})
     review_notes = []
     if events:
@@ -1158,7 +1158,7 @@ def build_batch(query, sources, emit, deadline, existing, dropped=None):
         for i, event in enumerate(events):
             if i not in supported:
                 reason = conflicts[i]['reason'] if i in conflicts else reasons.get(i) or '照合で支持されない'
-                dropped.append({"year": event["year"], "date": event["date"], "title": event["title"], "stage": "検証", "reason": reason[:200]})
+                dropped.append({"year": event["year"], "date": event["date"], "title": event["title"], "description": event["description"][:120], "stage": "検証", "reason": reason[:200]})
         events = [event for i, event in enumerate(events) if i in supported]
     for event in events:
         event.pop("_context", None)

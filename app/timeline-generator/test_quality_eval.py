@@ -114,6 +114,17 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(stages['chicken']['stage'], '検証で除外')
         self.assertIn('年が違う', stages['chicken']['reason'])
         self.assertEqual(stages['rairaiken']['stage'], '候補に出ず')
+        # 題名に語がなくても、説明に語があれば却下候補として一致させる（ats030-1gqzq）
+        trace['rejected'] = [{'batch': 1, 'year': 1958, 'date': '1958年', 'title': '即席麺の誕生', 'description': '日清がチキンラーメンを発売した。', 'stage': '検査', 'reason': '年が引用・段落に書かれていない'}]
+        stages = {m['id']: m for m in q.evaluate_result(GOLD, result, 'ラーメン', pages)['missing']}
+        self.assertEqual((stages['chicken']['stage'], stages['chicken']['candidate']), ('検証で除外', '即席麺の誕生'))
+        # 説明のない旧記録は段階を変えず、該当段落の組で年が合う却下候補を手がかりに示すだけにする
+        trace['rejected'] = [{'batch': 1, 'year': 1958, 'date': '1958年', 'title': '即席麺の誕生', 'stage': '検査', 'reason': '年が引用・段落に書かれていない'},
+                             {'batch': 1, 'year': 1910, 'date': '1910年', 'title': '浅草の店', 'stage': '検査', 'reason': '該当段落のない組'}]
+        stages = {m['id']: m for m in q.evaluate_result(GOLD, result, 'ラーメン', pages)['missing']}
+        self.assertEqual(stages['chicken']['stage'], '候補に出ず')
+        self.assertIn('同組・同年の却下候補: 即席麺の誕生（検査）', stages['chicken']['reason'])
+        self.assertNotIn('浅草', stages['rairaiken']['reason'])
         trace['batches'] = []
         stages = {m['id']: m for m in q.evaluate_result(GOLD, result, 'ラーメン', pages)['missing']}
         self.assertEqual(stages['rairaiken']['stage'], 'どの組にも一致しない')
@@ -214,6 +225,19 @@ class ReportTests(unittest.TestCase):
         self.assertEqual((recall['key'], recall['value'], recall['display']), ('recall', None, '正解集合の対象外'))
         self.assertNotIn('known_errors', [a['key'] for a in other['axes']])
         self.assertIsNone(next(a for a in other['axes'] if a['key'] == 'primary')['value'])
+
+    def test_bundled_gold_credits_year_only_claude_code_release_and_ga(self):
+        # 年だけの採用項目も、研究プレビューと一般提供を取り違えずに一致させる（ats030-1gqzq）
+        gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))
+        result = {'theme': 'Claude Code', 'period': '全期間', 'events': [
+            event(2025, 'Claude Codeのリリース', 'ターミナルから使うエージェント型ツールが公開された。', date='2025年'),
+            event(2025, 'Claude Codeの一般提供開始', 'リサーチプレビューから一般提供へと移行した。', date='2025年'),
+            event(2025, 'Web版の導入', 'Claude CodeのWeb版をリリースした。', date='2025年10月20日')]}
+        found = {f['id']: f['event'] for f in q.evaluate_result(gold, result, 'Claude Code')['found']}
+        self.assertEqual(found['preview'], 'Claude Codeのリリース')
+        self.assertEqual(found['ga'], 'Claude Codeの一般提供開始')
+        result['events'] = result['events'][1:]
+        self.assertNotIn('preview', {f['id'] for f in q.evaluate_result(gold, result, 'Claude Code')['found']})
 
     def test_bundled_gold_set_is_well_formed(self):
         gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))

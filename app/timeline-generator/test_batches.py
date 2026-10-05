@@ -96,6 +96,8 @@ class BatchTests(unittest.TestCase):
         pruned = [r for r in result['trace']['rejected'] if r['stage'] == '関連度']
         self.assertEqual(sorted(r['year'] for r in pruned), list(range(1800, 1910 - t.MAX_EVENTS)))
         self.assertTrue(all('関連度が低い' in r['reason'] for r in pruned))
+        # 評価で語を照合できるよう、外した候補の説明も記録する（ats030-1gqzq）
+        self.assertTrue(all(r['description'] for r in pruned))
         # 外した出来事も採用済みとして渡し、再提案させない。
         self.assertIn('研究の出来事1800', prompts[-2])
 
