@@ -249,6 +249,13 @@ class ReportTests(unittest.TestCase):
         item = next(m for m in gold['themes']['コーヒー']['milestones'] if m['id'] == 'istanbul')
         self.assertTrue(q.locate_in_sources(item, {'https://ja.wikipedia.org/wiki/x': q.page_passages(page)}))
 
+    def test_bundled_gold_credits_brazil_from_the_1726_wording(self):
+        # Wikipediaは導入を「1726年ブラジルへ持ち込まれ」、パレータの伝承を1727年と書く。どちらの年でも一致させる（ats030-9hjg8）
+        gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))
+        result = {'theme': 'コーヒー', 'period': '全期間', 'events': [
+            event(1726, 'ブラジルへのコーヒー持ち込みと大規模栽培への展開', '1726年にブラジルへコーヒーが持ち込まれ、その後の大規模な栽培へとつながった。')]}
+        self.assertIn('brazil', {f['id'] for f in q.evaluate_result(gold, result, 'コーヒー')['found']})
+
     def test_bundled_gold_set_is_well_formed(self):
         gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))
         for name, theme in gold['themes'].items():
