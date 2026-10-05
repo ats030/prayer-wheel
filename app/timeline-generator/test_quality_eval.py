@@ -239,6 +239,16 @@ class ReportTests(unittest.TestCase):
         result['events'] = result['events'][1:]
         self.assertNotIn('preview', {f['id'] for f in q.evaluate_result(gold, result, 'Claude Code')['found']})
 
+    def test_bundled_gold_credits_istanbul_from_the_1550s_wording(self):
+        # Wikipediaは「1550年代」とだけ書き、生成は年代の開始年1550を出す。1554年説の資料がなくても一致させる（ats030-elou2）
+        gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))
+        result = {'theme': 'コーヒー', 'period': '全期間', 'events': [
+            event(1550, 'イスタンブールでのコーヒー店開店', '1550年代にイスタンブールにコーヒーを提供する店舗が開かれた。', date='1550年')]}
+        self.assertIn('istanbul', {f['id'] for f in q.evaluate_result(gold, result, 'コーヒー')['found']})
+        page = {'passages': [{'heading': '歴史', 'text': '1550年代にはイスタンブールにもコーヒーを提供する店舗が開かれた。'}]}
+        item = next(m for m in gold['themes']['コーヒー']['milestones'] if m['id'] == 'istanbul')
+        self.assertTrue(q.locate_in_sources(item, {'https://ja.wikipedia.org/wiki/x': q.page_passages(page)}))
+
     def test_bundled_gold_set_is_well_formed(self):
         gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))
         for name, theme in gold['themes'].items():

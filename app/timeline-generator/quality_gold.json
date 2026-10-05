@@ -32,7 +32,7 @@
       "target_recall": 1.0,
       "primary_domains": ["ucc.co.jp", "wien.gv.at", "nestle.co.uk"],
       "milestones": [
-        {"id": "istanbul", "label": "イスタンブールのコーヒーハウス", "years": [1554, 1555], "keywords": ["イスタンブール", "コンスタンティノープル", "コンスタンチノープル"], "evidence": ["https://www.ucc.co.jp/enjoy/encyclopedia/history/index.html"]},
+        {"id": "istanbul", "label": "イスタンブールのコーヒーハウス", "years": [1550, 1555], "keywords": ["イスタンブール", "コンスタンティノープル", "コンスタンチノープル"], "evidence": ["https://www.ucc.co.jp/enjoy/encyclopedia/history/index.html"]},
         {"id": "england", "label": "イギリス初のコーヒーハウス", "years": [1650, 1652], "keywords": ["イギリス初", "英国初", "オックスフォード", "ロンドン"], "evidence": ["https://www.ucc.co.jp/enjoy/encyclopedia/history/index.html"]},
         {"id": "java", "label": "オランダによるジャワ栽培", "years": [1696, 1699], "keywords": ["ジャワ"], "evidence": ["https://www.ucc.co.jp/enjoy/encyclopedia/history/index.html"]},
         {"id": "brazil", "label": "ブラジルへの導入", "years": [1727, 1727], "keywords": ["ブラジル"], "evidence": ["https://www.ucc.co.jp/enjoy/encyclopedia/history/index.html"]},
