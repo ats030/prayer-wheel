@@ -136,3 +136,17 @@ DBを削除すると入力・待機分・結果が失われます。復旧はサ
 2026-10-02の品質改善では、旧4件をSQLiteオンラインバックアップ `data/quality-before-3fxm4.sqlite3` に退避してから更新します。バックアップはローカル限定・Git対象外・権限600です。コードの切り戻しは品質改善コミットをrevertしてサービスを再起動します。結果の切り戻しはサービスを停止し、退避DBの対象IDの結果と生成日時だけを戻します。後から追加された別のジョブを消さないよう、DB全体を上書きしません。
 
 見出しの年代、段落の文脈、伝承の留保、期間・原文一致を機械検査し、別モデルでも照合します。ただし出典自体の誤りや重要項目の見落としは残ります。件数や引用一致を史実の正答率とみなさないでください。
+
+## 公開サイト (Cloud Run)
+
+運用者が確認した年表だけを、閲覧専用の静的サイトとして出す（ats030-udy41）。出典がすべて ja/en Wikipedia の記事である年表に限る。
+
+```bash
+uv run --project ~ python publish.py candidates data/<db>.sqlite3      # 承認できるか一覧
+uv run --project ~ python publish.py approve data/<db>.sqlite3 <job_id> <slug>
+uv run --project ~ python publish.py withdraw <slug>
+./deploy-cloudrun.sh            # 書き出して確認だけ
+./deploy-cloudrun.sh --deploy   # history-timeline サービスへ出す
+```
+
+承認済みの年表は `~/data/timeline-public/`、書き出しは `~/cache/timeline-public-build/` に置く。
