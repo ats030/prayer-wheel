@@ -49,7 +49,7 @@ BATCH_PASSAGES = 20
 MAX_CONSECUTIVE_FAILURES = 2
 MODEL_RETRY_DELAY = 10
 MATERIAL_BUDGET = 12000
-PIPELINE_VERSION = 6
+PIPELINE_VERSION = 7
 PERIOD_INPUT_ERROR = "年代による絞り込みはできません。年代条件を外してください。"
 DATE_PATTERN = re.compile(r"(?<![\w.])\d{3,4}(?!\w|\.\d)|\d+年|\d+世紀|\d+(?:st|nd|rd|th)[ -]century", re.I)
 
@@ -687,19 +687,46 @@ def verification_context(context):
     return packet
 
 
+BCE_MARK = r"紀元前|\bB\.?C\.?E?\.?\b|before (?:Christ|the common era)"
+
+
+BCE_BEFORE = r"(?:紀元前|(?<![以午直戦生事空名])前|\bB\.?C\.?E?\.?)\s*$"
+BCE_UNIT = r"\s*(?:年|世紀|(?:st|nd|rd|th)[ -]century)?\s*(?:頃|ごろ)?"
+BCE_RANGE = r"\s*(?:から|より|～|〜|~|-|–|—|to)\s*"
+
+
+def bce_marked(text, match):
+    """True when this numeral is written as BCE, directly or inside a descending BCE range.
+
+    紀元前500年, 前400年, 500 BC, BC 500, 紀元前500年から400年, 500–400 BC.
+    An ascending range (前27年 - 1453年) crosses into CE, so its end stays CE.
+    """
+    value = int(re.search(r"\d+", match[0])[0])
+    before, after = text[max(0, match.start() - 30):match.start()], text[match.end():match.end() + 40]
+    start = re.search(r"(?:紀元前|(?<![以午直戦生事空名])前)\s*(\d{1,5})" + BCE_UNIT + BCE_RANGE + r"(?:紀元前|前)?\s*$", before)
+    end = re.match(BCE_UNIT + BCE_RANGE + r"(\d{1,5})" + BCE_UNIT + r"\s*(?:" + BCE_MARK + ")", after, re.I)
+    return bool(re.search(BCE_BEFORE, before, re.I)
+                or start and int(start[1]) > value
+                or re.match(BCE_UNIT + r"\s*(?:" + BCE_MARK + ")", after, re.I)
+                or end and int(end[1]) < value)
+
+
 def date_supported(year, label, evidence):
-    """Require the chronological value to occur in the evidence; enforce BCE polarity."""
+    """Require the chronological value to occur in the evidence with matching BCE polarity.
+
+    Polarity is judged per occurrence, so a 紀元前 elsewhere in the context (e.g. an
+    era navigation box in the article lead) neither vetoes a CE year nor supports a BCE one.
+    """
     text = compact(evidence)
-    bc = bool(re.search(r"紀元前|\bB\.?C\.?E?\.?\b|before (?:Christ|the common era)", text, re.I))
-    if (year < 0) != bc:
-        return False
-    if re.search(r"(?<!\d)" + str(abs(year)) + r"(?!\d)", text):
+    def found(pattern):
+        return any(bce_marked(text, m) == (year < 0) for m in re.finditer(pattern, text, re.I))
+    if found(r"(?<!\d)" + str(abs(year)) + r"(?!\d)"):
         return True
     m = re.fullmatch(r"(紀元前)?(\d{1,2})世紀(?:ごろ)?", label)
     if m:
         century = int(m[2])
         expected = -century * 100 if m[1] else (century - 1) * 100 + 1
-        return year == expected and bool(re.search(rf"(?<!\d){century}(?:世紀|(?:st|nd|rd|th)[ -]century)", text, re.I))
+        return year == expected and found(rf"(?<!\d){century}(?:世紀|(?:st|nd|rd|th)[ -]century)")
     return False
 
 

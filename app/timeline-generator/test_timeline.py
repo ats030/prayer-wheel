@@ -99,6 +99,31 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(result[0]["date"], "15世紀")
         self.assertFalse(t.date_supported(1450, "15世紀", evidence))
 
+    def test_bce_elsewhere_in_context_does_not_veto_ce_year(self):
+        # ja.wikipedia 昭和 の冒頭にある時代区分ナビボックスが文脈に入る例。
+        context = "旧石器時代– 紀元前14000年頃 縄文時代前14000年頃 1946年(昭和21年)11月3日に日本国憲法が公布された。"
+        self.assertTrue(t.date_supported(1946, "1946年", context))
+
+    def test_bce_marked_numeral_does_not_support_ce_year(self):
+        self.assertFalse(t.date_supported(500, "500年", "紀元前500年に都市が築かれた。"))
+        self.assertFalse(t.date_supported(500, "500年", "The city was founded in 500 BC."))
+        self.assertFalse(t.date_supported(401, "5世紀", "紀元前5世紀に始まった。"))
+        self.assertTrue(t.date_supported(401, "5世紀", "紀元前の遺跡がある。5世紀に始まった。"))
+        self.assertTrue(t.date_supported(-500, "紀元前500年", "紀元前500年に都市が築かれた。"))
+        self.assertTrue(t.date_supported(-500, "紀元前500年", "The city was founded in 500 BC."))
+        self.assertTrue(t.date_supported(-500, "紀元前5世紀", "紀元前5世紀に始まった。"))
+        self.assertFalse(t.date_supported(-500, "紀元前500年", "500年に都市が築かれた。"))
+        self.assertFalse(t.date_supported(-400, "紀元前400年", "紀元前の遺跡がある。400年に都市が築かれた。"))
+
+    def test_bce_range_end_keeps_bce_polarity(self):
+        for text in ["紀元前500年から前400年にかけて栄えた。", "紀元前500年～400年に栄えた。", "It flourished 500–400 BC."]:
+            self.assertFalse(t.date_supported(400, "400年", text), text)
+            self.assertTrue(t.date_supported(-400, "紀元前400年", text), text)
+        self.assertFalse(t.date_supported(101, "2世紀", "紀元前3世紀から2世紀にかけて栄えた。"))
+        self.assertTrue(t.date_supported(-200, "紀元前2世紀", "紀元前3世紀から2世紀にかけて栄えた。"))
+        self.assertTrue(t.date_supported(1946, "1946年", "1945年から1946年にかけて"))
+        self.assertTrue(t.date_supported(1453, "1453年", "ローマ帝国（前27年 - 1453年）"))
+
     def test_verifier_failure_never_publishes_unverified_events(self):
         output = {"theme": "コーヒー", "events": [self.event]}
         with patch.object(t, "search", return_value=[{}]), patch.object(t.WebReader, "fetch", return_value=self.sources[0]), patch.object(t, "model_json", side_effect=[output, t.TimelineError("verification failed")]):
