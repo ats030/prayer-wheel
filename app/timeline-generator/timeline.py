@@ -49,7 +49,7 @@ BATCH_PASSAGES = 20
 MAX_CONSECUTIVE_FAILURES = 2
 MODEL_RETRY_DELAY = 10
 MATERIAL_BUDGET = 12000
-PIPELINE_VERSION = 7
+PIPELINE_VERSION = 8
 PERIOD_INPUT_ERROR = "年代による絞り込みはできません。年代条件を外してください。"
 DATE_PATTERN = re.compile(r"(?<![\w.])\d{3,4}(?!\w|\.\d)|\d+年|\d+世紀|\d+(?:st|nd|rd|th)[ -]century", re.I)
 
