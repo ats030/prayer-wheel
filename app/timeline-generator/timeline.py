@@ -49,7 +49,7 @@ BATCH_PASSAGES = 20
 MAX_CONSECUTIVE_FAILURES = 2
 MODEL_RETRY_DELAY = 10
 MATERIAL_BUDGET = 12000
-PIPELINE_VERSION = 5
+PIPELINE_VERSION = 6
 PERIOD_INPUT_ERROR = "年代による絞り込みはできません。年代条件を外してください。"
 DATE_PATTERN = re.compile(r"(?<![\w.])\d{3,4}(?!\w|\.\d)|\d+年|\d+世紀|\d+(?:st|nd|rd|th)[ -]century", re.I)
 
@@ -925,39 +925,47 @@ def related_sources(query, results, deadline, excluded):
     return [r for i, r in enumerate(results) if i not in remove]
 
 
-PRUNE_SCHEMA = {"type": "object", "properties": {"remove": {"type": "array", "items": {"type": "integer"}}}, "required": ["remove"]}
+PRUNE_TIERS = ("peripheral", "context", "core")
+PRUNE_SCHEMA = {"type": "object", "properties": {"ratings": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "integer"}, "tier": {"type": "string", "enum": list(PRUNE_TIERS)}}, "required": ["id", "tier"]}}}, "required": ["ratings"]}
+PRUNE_LABELS = {"peripheral": "周辺的", "context": "背景的"}
 
 
 def prune_events(query, events, fresh, deadline, dropped):
     """上限を超えた分だけ、テーマとの関連度が低い出来事を外す。出力済みの出来事も対象にする（ats030-z2fam）。
-    fresh は今回の組で加わった出来事。応答が不正・不足なら、その後ろから外して補う。"""
+    件数を指定して選ばせると個別の店舗の「初の開店」まで外したため、全件を3段階に分類させ、低い段から外す（ats030-vovpg）。
+    同じ段の中と、分類を得られない出来事は、fresh（今回の組で加わった出来事）の後ろから外す。"""
     excess = len(events) - MAX_EVENTS
     if excess <= 0:
         return events
     listing = [{"id": i, "year": e["year"], "title": e["title"], "description": e["description"]} for i, e in enumerate(events)]
     try:
-        output = model_json("あなたは歴史年表の編集者です。年表が収録上限を超えたので、検索テーマとの関連度が最も低い出来事をちょうど" + str(excess) + "件選び、そのidをremoveに返す。"
-                            "テーマそのものの起源・発明・普及・制度や方式の転換点は残す。テーマの周辺にとどまる個別の人物・店舗・作品・企業の出来事や、同種の出来事の繰り返しを先に外す。年代の偏りを増やさない。",
+        output = model_json("あなたは歴史年表の編集者です。検索テーマの年表に載せる出来事を、テーマにとっての重要度で3段階に分類し、全件のidとtierをratingsに返す。\n"
+                            "core: テーマそのものの起源・発見・発明・伝来、各地での最初の店・施設・製品・サービス、普及や制度・方式・技術の転換点。\n"
+                            "context: テーマの歴史の主要な展開や、理解に役立つ背景。\n"
+                            "peripheral: テーマとの関係が間接的な出来事、個別の人物・作品・企業の細かな出来事、同種の出来事の繰り返し、雑学的な話題。",
                             f"検索テーマ: {query.topic}\n出来事:\n" + json.dumps(listing, ensure_ascii=False), deadline, PRUNE_SCHEMA)
-        chosen = output.get("remove") if isinstance(output, dict) else None
+        ratings = output.get("ratings") if isinstance(output, dict) else None
     except TimelineError:
-        chosen = None
-    remove = []
-    for i in chosen if isinstance(chosen, list) else []:
-        if type(i) is int and 0 <= i < len(events) and i not in remove and len(remove) < excess:
-            remove.append(i)
-    judged = set(remove)
-    newest = [i for i, e in enumerate(events) if any(e is f for f in fresh)] + list(range(len(events)))
-    for i in reversed(newest):
-        if len(remove) >= excess:
-            break
-        if i not in remove:
-            remove.append(i)
+        ratings = None
+    tiers = {}
+    for item in ratings if isinstance(ratings, list) else []:
+        i, tier = (item.get("id"), item.get("tier")) if isinstance(item, dict) else (None, None)
+        if type(i) is int and 0 <= i < len(events) and tier in PRUNE_TIERS:
+            tiers.setdefault(i, tier)
+    added = [i for i, e in enumerate(events) if any(e is f for f in fresh)]
+    order = added[::-1] + [i for i in reversed(range(len(events))) if i not in added]
+    # 分類を得られない出来事は context と同じ段に置き、判定済みの周辺的な出来事より後に外す。
+    order.sort(key=lambda i: PRUNE_TIERS.index(tiers.get(i, "context")))
+    remove = order[:excess]
     for i in remove:
         event = events[i]
-        reason = f"収録上限{MAX_EVENTS}件を超え、テーマとの関連度が低い" if i in judged else f"収録上限{MAX_EVENTS}件を超えた（関連度の判定を得られず新しい候補から外した）"
+        if tiers.get(i) in PRUNE_LABELS:
+            reason = f"収録上限{MAX_EVENTS}件を超え、テーマとの関連度が低い（{PRUNE_LABELS[tiers[i]]}）"
+        else:
+            reason = f"収録上限{MAX_EVENTS}件を超えた（{'中核と判定されたが' if i in tiers else '関連度の判定を得られず'}{'新しい候補' if i in added else '出力済みの候補'}から外した）"
         dropped.append({"year": event["year"], "date": event["date"], "title": event["title"], "stage": "関連度", "reason": reason})
-    return [e for i, e in enumerate(events) if i not in remove]
+    removed = set(remove)
+    return [e for i, e in enumerate(events) if i not in removed]
 
 
 def timeline_result(query, events, review_notes, started, stop_reason='sources_exhausted', trace=None):

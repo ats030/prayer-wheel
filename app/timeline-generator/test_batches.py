@@ -53,9 +53,10 @@ def history_source(count=110):
 
 def grounded_model(system, prompt, deadline, schema):
     if schema is t.PRUNE_SCHEMA:
-        # 擬似の関連度判定: 古い出来事（出力済み）から外す。
-        excess = int(re.search(r'ちょうど(\d+)件', system)[1])
-        return {'remove': list(range(excess))}
+        # 擬似の関連度判定: 古い出来事（出力済み）を周辺的とし、そこから外させる。
+        listing = json.loads(prompt.split('出来事:\n', 1)[1])
+        excess = len(listing) - t.MAX_EVENTS
+        return {'ratings': [{'id': e['id'], 'tier': 'peripheral' if e['id'] < excess else 'core'} for e in listing]}
     if schema is t.VERIFY_SCHEMA:
         candidates = json.loads(prompt.split('候補:', 1)[1].split('\n比較資料:', 1)[0])
         return {'supported': list(range(len(candidates)))}
@@ -100,12 +101,33 @@ class BatchTests(unittest.TestCase):
 
     def test_invalid_relevance_answer_drops_the_newest_candidates(self):
         def model(system, prompt, deadline, schema):
-            return {'remove': [999, 'x']} if schema is t.PRUNE_SCHEMA else grounded_model(system, prompt, deadline, schema)
-        result = self.run_generation(history_source(56 + 3), model=model)
-        self.assertEqual([e['year'] for e in result['events']], list(range(1800, 1800 + t.MAX_EVENTS)))
+            return {'ratings': [{'id': 999, 'tier': 'peripheral'}, 'x']} if schema is t.PRUNE_SCHEMA else grounded_model(system, prompt, deadline, schema)
+        records = []
+        result = self.run_generation(history_source(56 + 3), model=model, records=records)
+        self.assertEqual(len(result['events']), t.MAX_EVENTS)
+        # 判定を得られない組では今回加わった候補から外し、出力済みの出来事は残す。
+        shown = [r for r in records if r['kind'] == 'checkpoint' and len(r['events']) < t.MAX_EVENTS][-1]['events']
+        self.assertTrue(all(e in result['events'] for e in shown))
         pruned = [r for r in result['trace']['rejected'] if r['stage'] == '関連度']
-        self.assertEqual(sorted(r['year'] for r in pruned), list(range(1800 + t.MAX_EVENTS, 1859)))
+        self.assertEqual(len(pruned), 56 + 3 - t.MAX_EVENTS)
+        self.assertFalse({r['year'] for r in pruned} & {e['year'] for e in shown})
         self.assertTrue(all('判定を得られず' in r['reason'] for r in pruned))
+
+    def test_relevance_tiers_remove_peripheral_before_newer_core_events(self):
+        events = [saved_event(year) for year in range(1800, 1800 + t.MAX_EVENTS + 3)]
+        fresh = events[-3:]
+        tiers = {0: 'core', 1: 'peripheral', 2: 'context', len(events) - 1: 'core'}
+        def model(system, prompt, deadline, schema):
+            return {'ratings': [{'id': i, 'tier': tier} for i, tier in tiers.items()]}
+        dropped = []
+        with patch.object(t, 'model_json', side_effect=model):
+            kept = t.prune_events(t.parse_query('研究'), events, fresh, time.monotonic() + 60, dropped)
+        # 周辺的と判定した1件の次は、未判定（背景と同じ段）を今回の組の新しい方から外す。判定済みの中核は最後まで残す。
+        self.assertEqual([d['year'] for d in dropped], [1801, 1800 + t.MAX_EVENTS + 1, 1800 + t.MAX_EVENTS])
+        self.assertIn('周辺的', dropped[0]['reason'])
+        self.assertTrue(all('判定を得られず' in d['reason'] for d in dropped[1:]))
+        self.assertEqual(len(kept), t.MAX_EVENTS)
+        self.assertIn(events[-1], kept)
 
     def test_disjoint_material_retains_context_and_all_sources(self):
         sources = [history_source(35) | {'url': f'https://example.org/{i}'} for i in range(10)]
