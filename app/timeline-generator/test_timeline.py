@@ -137,6 +137,35 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(result["events"], [])
         self.assertIn("0件", result["notice"])
 
+    def test_generation_prompt_omits_adopted_events(self):
+        # 近い年の採用済み項目が別の中核事象の提案を抑えるため、既出リストは照合にだけ渡す（ats030-s46s1）。
+        existing = [{"year": 1970, "date": "1970年", "title": "既出の焙煎所開業", "description": "焙煎所が開業した。"}]
+        calls = []
+        def fake(system, prompt, deadline, schema):
+            calls.append(prompt)
+            return {"theme": "コーヒー", "events": [self.event]} if schema is t.EVENT_SCHEMA else {"supported": [0]}
+        with patch.object(t, "model_json", side_effect=fake), patch.object(t, "crosscheck_sources", return_value=[]):
+            events, _ = t.build_batch(t.parse_query("コーヒー"), self.sources, lambda _: None, time.monotonic() + 60, existing)
+        self.assertEqual([e["title"] for e in events], ["最初の店舗"])
+        self.assertNotIn("既出の焙煎所開業", calls[0])
+        self.assertIn("既出の焙煎所開業", calls[-1])
+
+    def test_repeated_adopted_title_does_not_take_a_batch_slot(self):
+        # 生成側は既出を知らないため、説明だけ違う同年同題の再提案を上限の前に除く（ats030-s46s1）。
+        existing = [{"year": 1971, "date": "1971年", "title": "最初の、店舗", "description": "別の言い方の説明。"}]
+        acquired = {"year": 1987, "date": "1987年", "title": "会社の買収", "description": "会社が買収された。", "source_id": 1, "quote": "In 1987, the company was acquired."}
+        checked = []
+        def fake(system, prompt, deadline, schema):
+            if schema is t.EVENT_SCHEMA:
+                return {"theme": "コーヒー", "events": [self.event, acquired]}
+            checked.append(prompt)
+            return {"supported": [0]}
+        dropped = []
+        with patch.object(t, "BATCH_EVENTS", 1), patch.object(t, "model_json", side_effect=fake), patch.object(t, "crosscheck_sources", return_value=[]):
+            events, _ = t.build_batch(t.parse_query("コーヒー"), self.sources, lambda _: None, time.monotonic() + 60, existing, dropped)
+        self.assertEqual([e["title"] for e in events], ["会社の買収"])
+        self.assertEqual([(d["title"], d["stage"]) for d in dropped], [("最初の店舗", "重複")])
+
 
 class FetchTests(unittest.TestCase):
     def test_mixed_dns_and_private_addresses_are_rejected(self):
