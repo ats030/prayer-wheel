@@ -67,7 +67,7 @@ const headingPromptSystem = "あなたは日本語のお祭りアプリの編集
 // carries its content. It is invoked only as a fallback: the exact-match pass
 // in matchSectionHeading runs first, and this LLM call happens only when at
 // least one section is still unresolved.
-func resolveSectionsForHeadings(ctx context.Context, title string, specs []sectionSpec, headings []string) (map[string]string, error) {
+func resolveSectionsForHeadings(ctx context.Context, title string, specs []sectionSpec, headings []string, requireAllKeys ...bool) (map[string]string, error) {
 	reqCtx, cancel := context.WithTimeout(ctx, summaryTimeout)
 	defer cancel()
 
@@ -107,12 +107,12 @@ func resolveSectionsForHeadings(ctx context.Context, title string, specs []secti
 		"options": map[string]any{"temperature": 0.0, "num_predict": 256},
 	}
 
-	return callOllamaForJSON(reqCtx, payload, keys)
+	return callOllamaForJSON(reqCtx, payload, keys, requireAllKeys...)
 }
 
 // callOllamaForJSON sends a single /api/chat request and decodes the assistant
 // message into a JSON object mapping the supplied keys to strings.
-func callOllamaForJSON(ctx context.Context, payload map[string]any, keys []string) (map[string]string, error) {
+func callOllamaForJSON(ctx context.Context, payload map[string]any, keys []string, requireAllKeys ...bool) (map[string]string, error) {
 	buf, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
@@ -157,6 +157,9 @@ func callOllamaForJSON(ctx context.Context, payload map[string]any, keys []strin
 		if v, ok := decoded[k].(string); ok {
 			result[k] = v
 		} else {
+			if len(requireAllKeys) > 0 && requireAllKeys[0] {
+				return nil, fmt.Errorf("heading verdict missing string key %s", k)
+			}
 			result[k] = ""
 		}
 	}
@@ -225,7 +228,7 @@ func generateSectionContent(ctx context.Context, sectionLabel, instruction, sour
 			if len(decoded.Items) > 0 || decoded.Summary != "" {
 				return decoded, nil
 			}
-			return SectionContent{Summary: SummaryNone, Items: []SectionItem{}}, nil
+			return SectionContent{}, ErrSummaryUnavailable
 		}
 		if repaired, ok := repairUnclosedJSON(content[s : e+1]); ok {
 			var decoded SectionContent

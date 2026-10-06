@@ -111,12 +111,22 @@ func (s *TokusanService) collect(query string, args ...any) ([]Tokusan, error) {
 }
 
 func (s *TokusanService) GetAll() []Tokusan {
-	list, _ := s.collect("SELECT qid, label_ja, label_en, place, prefecture," +
-		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level, source_name, description, production_area, coordinate_kind, coordinate_label, coordinate_source_url, coordinate_source_name, region_ids, region_scope FROM tokusan t")
+	list, _ := s.GetAllChecked()
 	if list == nil {
 		list = []Tokusan{}
 	}
 	return list
+}
+
+// GetAllChecked keeps database errors visible to the offline completion audit.
+func (s *TokusanService) GetAllChecked() ([]Tokusan, error) {
+	return s.collect("SELECT qid, label_ja, label_en, place, prefecture," +
+		" city, lat, lng, evidence, confidence, source_url, category, maker, prefecture_level, source_name, description, production_area, coordinate_kind, coordinate_label, coordinate_source_url, coordinate_source_name, region_ids, region_scope FROM tokusan t")
+}
+
+func (s *TokusanService) OfficialSourceChecked(qid string) (history, production string, err error) {
+	err = s.db.QueryRow("SELECT history, production FROM tokusan WHERE qid = ?", qid).Scan(&history, &production)
+	return
 }
 
 func (s *TokusanService) GetByPrefecture(prefecture string) []Tokusan {

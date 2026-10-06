@@ -59,7 +59,7 @@ const headingPromptSystem = "あなたは日本語の史跡アプリの編集者
 // response envelope is decoded by callOllamaForJSON, which also tolerates the
 // common case of the model wrapping the JSON in a backtick fence or a short
 // explanatory sentence by extracting the first balanced {...} block.
-func resolveSectionsForHeadings(ctx context.Context, title string, specs []sectionSpec, headings []string) (map[string]string, error) {
+func resolveSectionsForHeadings(ctx context.Context, title string, specs []sectionSpec, headings []string, requireAllKeys ...bool) (map[string]string, error) {
 	reqCtx, cancel := context.WithTimeout(ctx, summaryTimeout)
 	defer cancel()
 
@@ -99,7 +99,7 @@ func resolveSectionsForHeadings(ctx context.Context, title string, specs []secti
 		"options": map[string]any{"temperature": 0.0, "num_predict": 256},
 	}
 
-	return callOllamaForJSON(reqCtx, payload, keys)
+	return callOllamaForJSON(reqCtx, payload, keys, requireAllKeys...)
 }
 
 // callOllamaForJSON sends a single /api/chat request and decodes the assistant
@@ -107,7 +107,7 @@ func resolveSectionsForHeadings(ctx context.Context, title string, specs []secti
 // an error on transport failure, an HTTP-level failure (>= 400), an
 // unparseable body, an empty content field, or a response missing any of the
 // expected keys; callers treat all of these as "no result" and fall back.
-func callOllamaForJSON(ctx context.Context, payload map[string]any, keys []string) (map[string]string, error) {
+func callOllamaForJSON(ctx context.Context, payload map[string]any, keys []string, requireAllKeys ...bool) (map[string]string, error) {
 	buf, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
@@ -154,6 +154,9 @@ func callOllamaForJSON(ctx context.Context, payload map[string]any, keys []strin
 		if v, ok := decoded[k].(string); ok {
 			result[k] = v
 		} else {
+			if len(requireAllKeys) > 0 && requireAllKeys[0] {
+				return nil, fmt.Errorf("heading verdict missing string key %s", k)
+			}
 			result[k] = ""
 		}
 	}
@@ -209,8 +212,13 @@ func generateSummary(ctx context.Context, sectionLabel, instruction, sourceText 
 		return "", err
 	}
 	summary := strings.TrimSpace(out.Message.Content)
-	if summary == "" {
+	if !validPlainSummary(summary) {
 		return "", ErrSummaryUnavailable
 	}
 	return summary, nil
+}
+
+func validPlainSummary(summary string) bool {
+	s := strings.TrimSpace(summary)
+	return s != "" && !strings.HasPrefix(s, "{") && !strings.HasPrefix(s, "[") && !strings.HasPrefix(s, "```") && s != "null" && s != "true" && s != "false"
 }

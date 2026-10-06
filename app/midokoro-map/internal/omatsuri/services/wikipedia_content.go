@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"midokoro-map/internal/shared"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -566,7 +567,7 @@ func matchSectionHeading(headings []wikipediaHeading, candidates []string) *wiki
 	return nil
 }
 
-func fetchWikipediaSectionHeadings(ctx context.Context, title string) ([]wikipediaHeading, error) {
+func fetchWikipediaSectionHeadings(ctx context.Context, title string, requireValid ...bool) ([]wikipediaHeading, error) {
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 	params := url.Values{
@@ -582,6 +583,11 @@ func fetchWikipediaSectionHeadings(ctx context.Context, title string) ([]wikiped
 	})
 	if err != nil {
 		return nil, err
+	}
+	if len(requireValid) > 0 && requireValid[0] {
+		if err := shared.ValidateWikiEnvelope(body, "parse", "sections"); err != nil {
+			return nil, err
+		}
 	}
 	var data struct {
 		Parse struct {
@@ -605,7 +611,7 @@ func fetchWikipediaSectionHeadings(ctx context.Context, title string) ([]wikiped
 	return headings, nil
 }
 
-func fetchWikipediaPlainText(ctx context.Context, title string) (text string, resolvedTitle string, err error) {
+func fetchWikipediaPlainText(ctx context.Context, title string, requireValid ...bool) (text string, resolvedTitle string, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 	params := url.Values{
@@ -623,6 +629,11 @@ func fetchWikipediaPlainText(ctx context.Context, title string) (text string, re
 	})
 	if err != nil {
 		return "", "", err
+	}
+	if len(requireValid) > 0 && requireValid[0] {
+		if err := shared.ValidateWikiEnvelope(body, "query", "pages"); err != nil {
+			return "", "", err
+		}
 	}
 	var data struct {
 		Query struct {
