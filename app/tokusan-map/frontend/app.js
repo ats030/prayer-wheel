@@ -368,7 +368,7 @@ function furusatoAffiliateHTML(o){
   // Only trusted, issued text anchors are accepted; return the original source.
   const entry=furusatoAffiliateCatalog[o.qid];
   if(!entry||entry.label!==o.label_ja||entry.prefecture!==o.prefecture||typeof entry.html!=='string')return'';
-  if(location.protocol!=='https:')return'';
+  if(location.origin!=='https://tokusan-map-736831430371.asia-northeast1.run.app')return'';
   const template=document.createElement('template');
   template.innerHTML=entry.html;
   if(template.content.childNodes.length!==1)return'';

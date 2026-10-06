@@ -19,7 +19,8 @@ reviewer: Codex
 notes: >-
   The official beginning guide states that participation is free. Commercial
   affiliate use is governed by the partner terms and rules. The current feature
-  uses the operator-supplied issued HTML for Yubari melon on HTTPS, with the
+  uses the operator-supplied issued HTML for Yubari melon only at the registered
+  origin https://tokusan-map-736831430371.asia-northeast1.run.app, with the
   original URL and anchor attributes preserved. All other items use ordinary
   search links. The operator reported completed partner and public-site
   registration on 2026-10-06; this is not an independent account audit.
