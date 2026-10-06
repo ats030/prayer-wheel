@@ -925,9 +925,9 @@ def test_empty_branches_link_to_generation_not_to_studying(client):
     )
     bank.answer(question_id, 0)
     html = client.get(f"/weakness?exam_id={exam_id}").text
-    assert f"/?exam_id={exam_id}&node=1" in html, "問題のある枝は解きに行ける"
+    assert f"/study?exam_id={exam_id}&node=1" in html, "問題のある枝は解きに行ける"
     assert "/admin/bank" not in html, "公開画面に管理導線を出さない"
-    assert f"/?exam_id={exam_id}&node=2" not in html
+    assert f"/study?exam_id={exam_id}&node=2" not in html
 
 
 def test_arriving_from_a_weakness_branch_opens_the_dialog_on_that_node(client):

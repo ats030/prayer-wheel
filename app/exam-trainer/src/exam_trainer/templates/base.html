@@ -10,17 +10,17 @@
   {% block head %}{% endblock %}
 </head>
 <body>
-  <nav class="nav">
+  <a class="skip-link" href="#main-content">本文へ</a>
+  <nav class="nav" aria-label="メインナビゲーション">
     <a class="brand" href="/">exam-trainer</a>
     <div class="nav-links" aria-label="メインナビゲーション">
       {% block navlinks %}
-      <a href="/{% if exam %}?exam_id={{ exam.id }}{% endif %}">解く</a>
-      <a href="/weakness{% if exam %}?exam_id={{ exam.id }}{% endif %}">弱点</a>
-      <a href="/kouko">考古教材</a>
-      <a href="/products">教材一覧</a>
+      <a href="/products" {% if nav_section == 'products' %}aria-current="location"{% endif %}>教材を探す</a>
+      <a href="/study{% if exam %}?exam_id={{ exam.id }}{% endif %}" {% if nav_section == 'study' and request.url.path != '/weakness' %}aria-current="location"{% endif %}>学習を続ける</a>
+      {% if exam %}<a href="/weakness?exam_id={{ exam.id }}" {% if request.url.path == '/weakness' %}aria-current="page"{% endif %}>弱点</a>{% endif %}
       {% if admin_view %}
-      <a href="/admin/bank{% if exam %}?exam_id={{ exam.id }}{% endif %}">問題バンク</a>
-      <a href="/admin/settings{% if exam %}?exam_id={{ exam.id }}{% endif %}">試験の設定</a>
+      <a href="/admin/bank{% if exam %}?exam_id={{ exam.id }}{% endif %}" {% if request.url.path == '/admin/bank' %}aria-current="page"{% endif %}>問題バンク</a>
+      <a href="/admin/settings{% if exam %}?exam_id={{ exam.id }}{% endif %}" {% if request.url.path == '/admin/settings' %}aria-current="page"{% endif %}>試験の設定</a>
       <a href="/">公開ページ</a>
       {% endif %}
       {% endblock %}
@@ -35,7 +35,7 @@
     {% endif %}
     <span class="meta">{% block navmeta %}{% if exam %}{{ exam.name }}{% endif %}{% endblock %}</span>
   </nav>
-  {% block body %}{% endblock %}
+  <div id="main-content" tabindex="-1">{% block body %}{% endblock %}</div>
   {% block footer %}<footer class="affiliate-site-disclosure">Amazonのアソシエイトとして、exam-trainerは適格販売により収入を得ています。</footer>{% endblock %}
   <div class="toast" id="toast"></div>
   <script>

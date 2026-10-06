@@ -1,6 +1,7 @@
 {% extends "kouko_base.html" %}
 {% block product_body %}
-<h1>PDFの見本と目次</h1><p>無料体験と同じ10問を掲載しています。PDFでは問題、解答一覧、解説を分け、印刷して解き直せる構成にします。</p>
+<p class="eyebrow">{{ exam_name }} / 見本10問</p><h1>正解の理由を、読み返す。</h1><p>無料体験と同じ10問です。PDFは問題、解答一覧、解説を分け、印刷して解き直せる構成です。</p>
+{% if sample_pdf_ready %}<p class="product-actions"><a class="btn btn-ghost" href="{{ product_url }}/files/sample-pdf?download=true">見本PDFを保存</a></p>{% endif %}
 <h2>全{{ product.questions | length }}問の目次</h2><ol class="contents-list">{% for item in contents %}<li>{{ item }}</li>{% endfor %}</ol>
 {% for q in sample %}<article class="card sample-question"><p class="eyebrow">問{{ q.id }} / {{ q.category }}</p><h2>{{ q.stem }}</h2>
 <ol type="A">{% for choice in q.choices %}<li>{{ choice }}</li>{% endfor %}</ol>

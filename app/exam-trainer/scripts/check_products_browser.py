@@ -19,7 +19,9 @@ with tempfile.TemporaryDirectory() as folder:
     settings.data_dir = Path(folder)
     db.reset_for_tests(Path(folder))
     for key, name in products.EXAMS.items():
-        bank.create_exam(name, key)
+        eid = bank.create_exam(name, key)
+        bank.set_syllabus(eid, [{'path':'1','title':'学習範囲'}])
+        bank.add_question(eid, '1', name+'の学習用問題', ['正解','誤答A','誤答B','誤答C'], 0, status='verified')
     client = TestClient(app)
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -33,18 +35,33 @@ with tempfile.TemporaryDirectory() as folder:
                 route.abort()
                 return
             target = url.path + ('?' + url.query if url.query else '')
+            if url.path.endswith('/trial/answer'):
+                assert page.locator('#trial').get_attribute('aria-busy') == 'true'
+                assert page.locator('#answer-status').is_visible()
             res = client.request(req.method, target, content=req.post_data,
                                  headers={'Content-Type':req.headers.get('content-type','')})
             route.fulfill(status=res.status_code, headers=dict(res.headers), body=res.content)
         context.route('**/*', respond)
         page = context.new_page()
-        for width in (1280,390):
+        for width in (1280,768,414,375,320):
             page.set_viewport_size({'width':width,'height':900})
             page.goto('http://exam.test/')
             assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth'), f'learning nav overflow at {width}'
+            assert page.locator('.course-card').count() == 5
+            page.keyboard.press('Tab')
+            assert page.locator('.skip-link').evaluate('(node) => node === document.activeElement')
+            page.keyboard.press('Enter')
+            assert page.evaluate('document.activeElement.id') == 'main-content'
+            page.locator('.nav-links a[href="/study"]').click()
+            assert page.locator('#study').count() == 1
+            page.locator('#examSwitch').select_option('3')
+            page.wait_for_url('**/study?exam_id=3')
+            assert page.locator('#study').get_attribute('data-exam-id') == '3'
+            assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
             page.locator('.nav-links a[href="/products"]').click()
             assert page.locator('.artifact').count() == 5
             assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
+            page.evaluate("window.scrollTo(0, 0); document.activeElement.blur()")
             page.screenshot(path=f'/tmp/product-catalog-{width}.png', full_page=True)
             for key in products.EXAMS:
                 base = f'/products/{key}'
@@ -55,7 +72,14 @@ with tempfile.TemporaryDirectory() as folder:
                 assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
                 page.locator(f'.product-nav a[href="{base}/materials"]').click()
                 assert page.locator('.artifact').count() == 7
+                assert page.locator('.pdf-card').count() == 2
+                assert page.locator('.production-materials').get_attribute('open') is None
+                assert page.locator('.production-row').first.is_hidden()
+                page.locator('.production-materials summary').press('Enter')
+                assert page.locator('.production-row').first.is_visible()
+                page.locator('.production-materials summary').press('Enter')
                 assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
+                page.evaluate("window.scrollTo(0, 0); document.activeElement.blur()")
                 page.screenshot(path=f'/tmp/product-{key}-materials-{width}.png', full_page=True)
                 with page.expect_download() as pending:
                     page.locator(f'a[href="{base}/files/review-pdf?download=true"]').click()
@@ -68,9 +92,15 @@ with tempfile.TemporaryDirectory() as folder:
                     q = by_id[qid]
                     page.locator('#choices button').nth(q['answer']).click()
                     page.locator('#next').wait_for(state='visible')
+                    assert page.locator('#trial').get_attribute('aria-busy') == 'false'
                     assert page.locator('#explanation').inner_text() == q['explanation']
                     page.locator('#next').click()
                 assert page.locator('#score').inner_text() == '10 / 10問正解'
+                with page.expect_download() as pending:
+                    page.locator('[data-result-pdf]').click()
+                assert Path(pending.value.path()).read_bytes() == (products.ARTIFACT_DIR / key / f'{key}-review.pdf').read_bytes()
+                page.evaluate("window.scrollTo(0, 0); document.activeElement.blur()")
+                page.screenshot(path=f'/tmp/product-{key}-result-{width}.png', full_page=True)
                 page.locator(f'.product-nav a[href="{base}/sample"]').click()
                 assert page.locator('.sample-question').count() == 10
                 page.locator('.sample-question summary').first.press('Enter')
@@ -78,4 +108,4 @@ with tempfile.TemporaryDirectory() as folder:
         assert not errors, errors
         browser.close()
     db.close()
-print('PASS anonymous nav; 5 products; 4 trials scored 10/10; 28 artifacts; PDF downloads; desktop/mobile; no overflow; keyboard; no JS errors')
+print('PASS home catalog; study/exam switch; 5 products; PDF2 + production5 keyboard disclosure; trial/result PDF download; 320/375/414/768/1280; no overflow; no JS errors')

@@ -48,23 +48,27 @@ with tempfile.TemporaryDirectory() as folder:
             route.fulfill(status=response.status_code, headers=dict(response.headers), body=response.content)
         context.route('**/*', respond)
         page.goto('http://exam.test/')
-        page.locator('.nav-links a[href="/kouko"]').click()
+        page.locator('.course-detail[href="/kouko"]').click()
         assert page.url == 'http://exam.test/kouko'
         for width in [1280,390]:
             page.set_viewport_size({'width':width,'height':900})
             page.goto('http://exam.test/kouko')
             assert page.locator('h1').inner_text().startswith('遺物と遺構')
             assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
+            page.evaluate("window.scrollTo(0, 0); document.activeElement.blur()")
             page.screenshot(path=f'/tmp/kouko-{width}.png', full_page=True)
             page.locator('.product-nav a[href="/kouko/materials"]').click()
             assert page.locator('.artifact').count() == 7
             assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
+            page.evaluate("window.scrollTo(0, 0); document.activeElement.blur()")
             page.screenshot(path=f'/tmp/kouko-materials-{width}.png', full_page=True)
         with page.expect_download() as pending:
             page.locator('a[href="/kouko/files/review-pdf?download=true"]').click()
         download = pending.value
         download.save_as('/tmp/kouko-downloaded-review.pdf')
         assert Path('/tmp/kouko-downloaded-review.pdf').read_bytes() == (ROOT / 'docs/kouko/kouko-review.pdf').read_bytes()
+        page.locator('.production-materials summary').press('Enter')
+        assert page.locator('.production-materials').get_attribute('open') is not None
         with page.expect_popup() as pending:
             page.locator('a[href="/kouko/files/sales-copy"]').click()
         popup = pending.value
@@ -82,6 +86,7 @@ with tempfile.TemporaryDirectory() as folder:
             assert page.locator('#trial-error').is_hidden()
             page.locator('#next').click()
         assert page.locator('#score').inner_text() == '10 / 10問正解'
+        page.evaluate("window.scrollTo(0, 0); document.activeElement.blur()")
         page.screenshot(path='/tmp/kouko-result.png', full_page=True)
         page.locator('#restart').click()
         for q in samples:
@@ -94,6 +99,7 @@ with tempfile.TemporaryDirectory() as folder:
         assert page.locator('.sample-question').count() == 10
         page.locator('.sample-question summary').first.press('Enter')
         assert page.locator('.sample-question details').first.get_attribute('open') is not None
+        page.evaluate("window.scrollTo(0, 0); document.activeElement.blur()")
         page.screenshot(path='/tmp/kouko-sample-page.png', full_page=True)
         assert not errors, errors
         context.unroute('**/*', respond)

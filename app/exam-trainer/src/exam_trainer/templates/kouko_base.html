@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% block navlinks %}<a href="/products">教材一覧</a><a href="{{ product_url }}/trial">無料10問</a><a href="{{ product_url }}/sample">見本</a>{% if admin_view %}<a href="/admin">管理</a>{% endif %}{% endblock %}
 {% block title %}{{ product.title }} | exam-trainer{% endblock %}
 {% block head %}
 <meta name="description" content="{{ product.subtitle }}。無料10問と解説付きPDFの見本を読めます。">
@@ -8,8 +7,13 @@
 {% endblock %}
 {% block body %}
 <main class="wrap kouko-wrap">
-  {% if not release.reviewed %}<p class="preview-banner" role="status">未校閲の教材です。正解や解説に誤りが含まれる可能性があります。exam-trainerの利用者向けに、校閲用の資料を共有しています。</p>{% endif %}
-  <nav class="product-nav" aria-label="{{ product_name }}"><a href="{{ product_url }}">教材の紹介</a><a href="{{ product_url }}/trial">無料10問</a><a href="{{ product_url }}/sample">解説の見本</a><a href="{{ product_url }}/materials">PDF・原稿</a></nav>
+  <p class="product-breadcrumb"><a href="/products">教材一覧</a><span aria-hidden="true"> / </span><span>{{ exam_name }}</span></p>
+  <nav class="product-nav" aria-label="{{ product_name }}">
+    {% for suffix, label in [('', '紹介'), ('/trial', '10問を試す'), ('/sample', '解説の見本'), ('/materials', 'PDF・資料')] %}
+    <a href="{{ product_url }}{{ suffix }}" {% if request.url.path == product_url ~ suffix %}aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+  </nav>
+  {% if not release.reviewed %}<p class="preview-banner" role="status"><strong>未校閲の教材です。</strong>正解や解説に誤りが含まれる可能性があります。</p>{% endif %}
   {% block product_body %}{% endblock %}
 </main>
 {% endblock %}

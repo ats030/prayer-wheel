@@ -188,11 +188,11 @@ SearXNG は上流の検索エンジン（brave / duckduckgo / google / startpage
 
 考古検定入門向けのPDF販売準備と無料10問の体験は
 [`docs/kouko/release-guide.md`](docs/kouko/release-guide.md)を参照。
-ナビの「考古教材」から、無料10問と`/kouko/materials`のPDF・原稿一覧へ進める。
+「教材を探す」で考古検定を選び、無料10問と`/kouko/materials`のPDF・資料へ進める。
 exam-trainerにアクセスできる利用者全員が、未校閲の全50問PDFも閲覧できる。
 校閲状態は画面に表示し、通常の学習バンクには追加しない。
 
-「教材一覧」(`/products`)から、他の検定にも同じ構成で進める。
+トップ(`/`)と「教材を探す」(`/products`)から、他の検定にも同じ構成で進める。
 各教材には紹介、無料10問、解説の見本、PDF・原稿一覧があり、ログイン不要で閲覧・保存できる。
 考古の既存URLはそのまま使える。
 
@@ -228,9 +228,16 @@ PDFと原稿の再構築は`~/.venv/bin/python app/exam-trainer/scripts/build_pr
 [`docs/kouko/tool-license.yaml`](docs/kouko/tool-license.yaml)を引き継ぐ。
 新4教材の出典の利用条件は未確認であり、販売前の確認対象とする。
 
-- 公開: `/`（学習）、`/weakness`（弱点）
+- 公開: `/`・`/products`（教材選択）、`/study`（学習）、`/weakness`（弱点）
 - 管理: `/admin/bank`（問題バンク）、`/admin/settings`（試験設定）
 - 管理ログイン: `/admin/login`
+
+日々の演習は「学習を続ける」から開く。旧`/?exam_id=...&node=...`や`/?node=...`は
+学習画面として継続利用できる。教材画面には現在地を示す共通ナビを置き、
+各検定の「10問を試す」を主操作にする。体験結果から全問PDFを直接保存できる。
+資料画面は学習用PDF2種類を先に表示し、原稿・販売説明・校閲記録など5種類を
+「制作資料」に折りたたむ。アクセス条件、未校閲表示と資料の版の照合は維持する。
+画面設計の基準は[`DESIGN.md`](DESIGN.md)。
 
 管理画面と変更系APIは `EXAM_TRAINER_ADMIN_TOKEN` で保護する。未設定時は管理操作を
 fail closedで拒否する。ログイン後はHTTP-only・SameSite=strictのセッションCookieを使う。

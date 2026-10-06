@@ -41,8 +41,8 @@ app = FastAPI(title="exam-trainer", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
-# Cache-busts /static on every restart, same trick as writing.
-STATIC_VERSION = str(int(BASE_DIR.stat().st_mtime))
+# A CSS/JS update gets a new URL, including edits to existing files.
+STATIC_VERSION = str(max(p.stat().st_mtime_ns for p in (BASE_DIR / "static").iterdir() if p.is_file()))
 
 ADMIN_COOKIE = "exam_trainer_admin"
 
@@ -55,7 +55,8 @@ def _is_admin(request: Request) -> bool:
 @app.middleware("http")
 async def protect_admin(request: Request, call_next):
     path = request.url.path
-    if path == "/products" or path.startswith("/products/"):
+    if (path == "/products" or path.startswith("/products/")
+            or (path == "/" and not {"exam_id", "node"}.intersection(request.query_params))):
         response = await call_next(request)
         response.headers["Cache-Control"] = "no-store"
         response.headers["X-Robots-Tag"] = "noindex"
@@ -141,6 +142,7 @@ def _page(request: Request, name: str, exam_id: int | None, **extra) -> HTMLResp
         "static_version": STATIC_VERSION,
         "counts": bank.queue_counts(exam["id"]) if exam else {"due": 0, "new": 0},
         "status_counts": bank.counts_by_status(exam["id"]) if exam else {},
+        "nav_section": "admin" if request.url.path.startswith("/admin") else "study",
         **extra,
     }
     return templates.TemplateResponse(request, name, context)
@@ -148,10 +150,14 @@ def _page(request: Request, name: str, exam_id: int | None, **extra) -> HTMLResp
 
 def _kouko_page(request: Request, name: str, **extra) -> HTMLResponse:
     product = kouko.load_product()
+    assets = extra["artifacts"] if "artifacts" in extra else kouko.artifacts()
     return templates.TemplateResponse(request, name, {
         "request": request, "exam": None, "exams": [],
         "static_version": STATIC_VERSION, "product": product,
         "release": kouko.release_state(), "admin_view": _is_admin(request),
+        "nav_section": "products",
+        "pdf_ready": any(a["id"] == "review-pdf" and a["current"] for a in assets),
+        "sample_pdf_ready": any(a["id"] == "sample-pdf" and a["current"] for a in assets),
         "product_url": "/kouko", "product_name": "考古教材", "exam_name": "考古検定",
         "contents": ["考古資料の見方と旧石器", "縄文の集落と交流", "弥生の農具と集落",
                      "古墳と土器生産", "古代の宮殿、木簡、壁画"],
@@ -215,26 +221,33 @@ def _editorial_product(product_id: str) -> dict:
 
 def _product_page(request: Request, product_id: str, template: str, **extra) -> HTMLResponse:
     product = _editorial_product(product_id)
+    assets = extra["artifacts"] if "artifacts" in extra else products.artifacts(product_id)
     return templates.TemplateResponse(request, template, {
         "request": request, "exam": None, "exams": [], "product": product,
         "static_version": STATIC_VERSION, "admin_view": _is_admin(request),
         "product_url": f"/products/{product_id}", "product_name": product["exam_name"] + "の教材",
         "exam_name": product["exam_name"], "contents": product["contents"],
         "release": products.release_state(product_id), **extra,
+        "nav_section": "products",
+        "pdf_ready": any(a["id"] == "review-pdf" and a["current"] for a in assets),
+        "sample_pdf_ready": any(a["id"] == "sample-pdf" and a["current"] for a in assets),
     })
 
 
 @app.get("/products", response_class=HTMLResponse)
 def product_catalog(request: Request) -> HTMLResponse:
     entries = [{"name": "考古検定 入門クラス", "url": "/kouko", "count": 50,
+                "description": "考古資料・縄文・弥生・古墳の基礎",
                 "reviewed": kouko.release_state()["reviewed"]}]
     for product_id, name in products.EXAMS.items():
         product = products.load_product(product_id)
         entries.append({"name": name, "url": f"/products/{product_id}",
-                        "count": len(product["questions"]), "reviewed": products.release_state(product_id)["reviewed"]})
+                        "count": len(product["questions"]), "description": "・".join(product["contents"][:3]),
+                        "reviewed": products.release_state(product_id)["reviewed"]})
     return templates.TemplateResponse(request, "product_catalog.html", {
         "request": request, "exam": None, "exams": [], "static_version": STATIC_VERSION,
-        "entries": entries,
+        "entries": entries, "nav_section": "products",
+        "has_unreviewed": any(not entry["reviewed"] for entry in entries),
     })
 
 
@@ -285,6 +298,13 @@ def product_answer(product_id: str, payload: KoukoAnswerIn) -> dict:
 
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request, exam_id: int | None = None, node: str = "") -> HTMLResponse:
+    if {"exam_id", "node"}.intersection(request.query_params):
+        return study(request, exam_id, node)
+    return product_catalog(request)
+
+
+@app.get("/study", response_class=HTMLResponse)
+def study(request: Request, exam_id: int | None = None, node: str = "") -> HTMLResponse:
     exam = _current_exam(exam_id)
     question = bank.next_question(exam["id"], node) if exam else None
     return _page(

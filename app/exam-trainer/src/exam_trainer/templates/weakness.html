@@ -44,7 +44,7 @@
         {% endif %}
         {# 問題が無い枝で「解く」を出しても空振りするので、そこは生成へ送る。 #}
         {% if item.questions %}
-        <a class="btn btn-secondary btn-xs" href="/?exam_id={{ exam.id }}&node={{ item.path }}">解く</a>
+        <a class="btn btn-secondary btn-xs" href="/study?exam_id={{ exam.id }}&node={{ item.path }}">解く</a>
         {% else %}
         {% endif %}
       </div>

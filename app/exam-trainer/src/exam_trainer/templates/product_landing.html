@@ -4,9 +4,9 @@
   <p class="eyebrow">{{ exam_name }}を学ぶ人へ</p>
   <h1>{{ product.title }}</h1>
   <p class="lead">まず10問を解き、正解の理由を解説で確かめましょう。PDFには全{{ product.questions | length }}問と解説、参考資料をまとめています。</p>
-  <div class="product-actions"><a class="btn btn-primary" href="{{ product_url }}/trial">無料10問を解く</a><a href="{{ product_url }}/sample">解説の見本を読む</a></div>
+  <div class="product-actions"><a class="btn btn-primary" href="{{ product_url }}/trial">10問を試す</a><a href="{{ product_url }}/sample">解説の見本を読む</a></div>
   <p class="muted">登録不要。1問ずつ正誤と解説を確認できます。</p>
-  <p><a href="{{ product_url }}/materials">{{ product.questions | length }}問の校閲用PDF・見本PDF・原稿を開く</a></p>
+  <p><a href="{{ product_url }}/materials">{{ product.questions | length }}問の問題集PDFと見本を開く</a></p>
 </header>
 <section class="product-section"><h2>収録分野</h2><ol class="contents-list">{% for item in contents %}<li>{{ item }}</li>{% endfor %}</ol>
   <p class="muted">{{ product.scope_note }}</p>

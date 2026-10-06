@@ -1,22 +1,24 @@
 {% extends "kouko_base.html" %}
 {% block product_body %}
-<h1>無料10問で基礎を確認</h1>
-<p class="muted">1問ずつ解説を読めます。結果はこの画面を開いている間だけ保持されます。再読み込みすると最初からになります。</p>
+<header class="trial-intro"><p class="eyebrow">{{ exam_name }} / 無料体験</p><h1>10問を試す。</h1><p class="muted">選ぶと正誤と解説が表示されます。再読み込みすると最初からになります。</p></header>
 <noscript><p>この体験にはJavaScriptが必要です。<a href="{{ product_url }}/sample">問題と解説の見本</a>はそのまま読めます。</p></noscript>
 <section class="card trial" id="trial" data-answer-url="{{ product_url }}/trial/answer" hidden>
   <p id="progress" class="eyebrow"></p><progress id="trial-progress" value="0" max="10" aria-label="回答済みの問題数"></progress>
   <h2 id="question" tabindex="-1"></h2><div id="choices" class="trial-choices"></div>
   <p id="trial-error" role="alert" hidden></p>
+  <p id="answer-status" class="muted" role="status" hidden>採点しています…</p>
   <div id="feedback" aria-live="polite" hidden><h3 id="verdict"></h3><p id="explanation"></p><a id="source" target="_blank" rel="noopener"></a>
-    <p><a href="{{ product_url }}#purchase">解説付きPDFを見る</a></p>
   </div>
   <button class="btn btn-primary" id="next" hidden>次の問題へ</button>
 </section>
 <section class="card trial-result" id="result" hidden aria-labelledby="result-title">
-  <h2 id="result-title" tabindex="-1">10問を解き終えました</h2><p class="score" id="score"></p>
+  <p class="eyebrow">{{ exam_name }} / 体験の結果</p><h2 id="result-title" tabindex="-1">10問を解き終えました</h2><p class="score" id="score"></p>
   <p>この10問の結果は、本試験の合否を予測するものではありません。</p><div id="review-topics"></div>
-  <div class="product-actions"><a class="btn btn-ghost" href="{{ product_url }}/sample">問題と解説を読み返す</a><button class="btn btn-ghost" id="restart">もう一度解く</button></div>
+  <div class="result-next"><h3>解説を読み返して、紙でも復習</h3><p>問題集PDFには全{{ product.questions | length }}問と解説を収録しています。</p>
+    <div class="product-actions">{% if pdf_ready %}<a class="btn btn-primary" data-result-pdf href="{{ product_url }}/files/review-pdf?download=true">問題集PDFを保存</a>{% else %}<a class="btn btn-primary" href="{{ product_url }}/materials">PDFの準備状況を見る</a>{% endif %}<a class="btn btn-ghost" href="{{ product_url }}/sample">解説を読み返す</a></div>
+    {% if release.booth_url %}<p><a href="{{ release.booth_url }}" data-purchase-link>BOOTHで購入する</a></p>{% else %}<p class="muted">販売準備中です。PDFはアプリの利用者向けに共有しています。</p>{% endif %}
+  </div>
+  <button class="btn btn-ghost" id="restart">もう一度解く</button>
 </section>
-<div class="product-section" id="pdf">{% include "kouko_purchase.html" %}</div>
 {% endblock %}
 {% block scripts %}<script id="trial-data" type="application/json">{{ trial_questions | tojson }}</script><script src="/static/kouko.js?v={{ static_version }}" defer></script>{% endblock %}

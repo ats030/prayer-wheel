@@ -72,6 +72,10 @@ a:hover { text-decoration: underline; }
   border-radius: var(--r-md);
 }
 .nav-links a:hover { background: var(--surface-2); color: var(--ink); text-decoration: none; }
+.nav-links a[aria-current] { color: var(--ink); background: var(--surface-2); }
+.nav-links a:focus-visible, .nav .brand:focus-visible { outline: 2px solid var(--primary-hover); outline-offset: 2px; }
+.skip-link { position: fixed; top: 8px; left: 12px; z-index: 20; padding: 12px 16px; background: var(--surface-2); color: var(--ink); transform: translateY(-150%); }
+.skip-link:focus { transform: translateY(0); outline: 2px solid var(--primary-hover); }
 .nav .spacer { flex: 1; }
 .nav .meta { color: var(--ink-subtle); font-size: 13px; }
 

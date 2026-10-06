@@ -29,6 +29,8 @@
   async function answer(q, chosen) {
     if (busy || answered) return;
     busy = true;
+    get('trial').setAttribute('aria-busy', 'true');
+    get('answer-status').hidden = false;
     get('trial-error').hidden = true;
     const buttons = [...get('choices').children];
     buttons.forEach(b => { b.disabled = true; });
@@ -54,7 +56,11 @@
       get('trial-error').textContent = `${error.message}。もう一度選んでください。`;
       get('trial-error').hidden = false;
       buttons.forEach(b => { b.disabled = false; });
-    } finally { busy = false; }
+    } finally {
+      busy = false;
+      get('trial').setAttribute('aria-busy', 'false');
+      get('answer-status').hidden = true;
+    }
   }
 
   get('next').addEventListener('click', () => {

@@ -3,7 +3,7 @@
   <h2>{{ product.title }}</h2>
   <p>四択{{ product.questions | length }}問と全問解説。無料体験の10問に追加{{ product.questions | length - 10 }}問を収録しています。問題と解説を分けて印刷できます。</p>
   {% if product.price_yen %}<p class="price">{{ product.price_yen }}円 <span class="muted">PDFダウンロード版{% if not release.booth_url %}・予定価格{% endif %}</span></p>{% else %}<p class="muted">販売価格は未定です。</p>{% endif %}
-  <div class="product-actions"><a class="btn btn-ghost" href="{{ product_url }}/sample">見本と目次を読む</a><a href="{{ product_url }}/materials">PDF・原稿を開く</a>
+  <div class="product-actions"><a class="btn btn-primary" href="{{ product_url }}/materials">問題集PDFを見る</a><a class="btn btn-ghost" href="{{ product_url }}/sample">解説の見本を読む</a>
   {% if release.booth_url %}<a class="btn btn-primary" href="{{ release.booth_url }}" rel="noopener" data-purchase-link>BOOTHで購入する</a>
   {% else %}<span class="muted">販売準備中です</span>{% endif %}</div>
 </aside>

@@ -1,0 +1,40 @@
+[
+  {
+    "date": "2026-10-06",
+    "scope": "app",
+    "genre": "modern-minimal",
+    "tone": "restrained dark study interface",
+    "design_system": "DESIGN.md",
+    "theme": "existing Linear-derived dark tokens",
+    "macrostructures": {
+      "catalog": "compact course rows",
+      "trial": "single-question workbench",
+      "materials": "two PDF shelves and production disclosure",
+      "sample": "question and explanation document"
+    },
+    "pages": [
+      "/",
+      "/products",
+      "/kouko",
+      "/products/{product_id}",
+      "trial",
+      "sample",
+      "materials"
+    ],
+    "verified_widths": [
+      320,
+      375,
+      414,
+      768,
+      1280
+    ],
+    "critique": {
+      "philosophy": 4,
+      "hierarchy": 5,
+      "execution": 4,
+      "specificity": 4,
+      "restraint": 5,
+      "variety": 4
+    }
+  }
+]
