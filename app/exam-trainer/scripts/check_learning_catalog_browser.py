@@ -49,10 +49,10 @@ with tempfile.TemporaryDirectory() as folder:
             for path in ('/study', '/weakness'):
                 page.goto('http://exam.test' + path)
                 assert page.locator('#examSwitch option').count() == 5
-                assert page.locator('#examSwitch option').all_text_contents() == list(learning_catalog.EXAMS.values())
+                assert page.locator('#examSwitch option').all_text_contents() == list(learning_catalog.DISPLAY_NAMES)
                 # Native picker keyboard navigation selects archaeology from the existing exam.
                 page.locator('#examSwitch').focus()
-                page.keyboard.press('Home')
+                page.keyboard.press('End')
                 page.keyboard.press('Enter')
                 page.wait_for_url(f'**{path}?exam_id={eid}')
                 page.wait_for_function(f'document.querySelector("#examSwitch").value === "{eid}"')

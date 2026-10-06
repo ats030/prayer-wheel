@@ -247,6 +247,7 @@ def product_catalog(request: Request) -> HTMLResponse:
         entries.append({"name": name, "url": f"/products/{product_id}",
                         "count": len(product["questions"]), "description": "・".join(product["contents"][:3]),
                         "reviewed": products.release_state(product_id)["reviewed"]})
+    entries = learning_catalog.ordered_exams(entries)
     return templates.TemplateResponse(request, "product_catalog.html", {
         "request": request, "exam": None, "exams": [], "static_version": STATIC_VERSION,
         "entries": entries, "nav_section": "products",

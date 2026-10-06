@@ -54,10 +54,14 @@ def test_picker_matches_material_catalog_without_changing_selection_or_bank_orde
     bank.create_exam('追加検定B', 'extra-b')
     original = bank.list_exams()
     client = TestClient(app)
+    catalog = client.get('/products').text
+    positions = [catalog.index(f'<h2>{name}</h2>') for name in learning_catalog.DISPLAY_NAMES]
+    assert positions == sorted(positions)
+    assert learning_catalog.DISPLAY_NAMES[-1] == '考古検定 入門クラス'
     for path in ('/study', '/weakness'):
         html = client.get(f'{path}?exam_id=3').text
         picker = html.split('<select id="examSwitch"', 1)[1].split('</select>', 1)[0]
-        names = [*learning_catalog.EXAMS.values(), '追加検定A', '追加検定B']
+        names = [*learning_catalog.DISPLAY_NAMES, '追加検定A', '追加検定B']
         positions = [picker.index(name) for name in names]
         assert positions == sorted(positions)
         assert picker.count('<option') == 7

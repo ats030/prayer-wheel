@@ -11,12 +11,13 @@ import json
 from . import db, kouko, products
 
 EXAMS = {"kouko": "考古検定 入門クラス", **products.EXAMS}
+DISPLAY_NAMES = (*products.EXAMS.values(), EXAMS["kouko"])
 PROVIDER = "material-snapshot"
 
 
 def ordered_exams(exams: list[dict]) -> list[dict]:
     """Match the material catalog; keep additional exams in their existing order."""
-    rank = {name: index for index, name in enumerate(EXAMS.values())}
+    rank = {name: index for index, name in enumerate(DISPLAY_NAMES)}
     return sorted(exams, key=lambda exam: rank.get(exam["name"], len(rank)))
 
 
