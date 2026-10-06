@@ -242,8 +242,12 @@ func (s *FestivalService) collect(query string, args ...any) ([]Festival, error)
 }
 
 func (s *FestivalService) GetAll() []Festival {
-	list, _ := s.collect("SELECT " + festivalColumns + " FROM festival f")
+	list, _ := s.GetAllChecked()
 	return emptyIfNil(list)
+}
+
+func (s *FestivalService) GetAllChecked() ([]Festival, error) {
+	return s.collect("SELECT " + festivalColumns + " FROM festival f")
 }
 
 func (s *FestivalService) GetByPrefecture(prefecture string) []Festival {

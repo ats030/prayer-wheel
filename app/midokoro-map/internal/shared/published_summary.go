@@ -13,11 +13,12 @@ var SummarySections = map[string][]string{
 }
 
 type PublishedSummaries struct {
-	Version   int                                              `json:"version"`
-	CheckedAt time.Time                                        `json:"checked_at"`
-	Rosters   map[string]string                                `json:"rosters"`
-	Counts    map[string]int                                   `json:"counts"`
-	Items     map[string]map[string]map[string]PreparedSection `json:"items"`
+	Version        int                                              `json:"version"`
+	CheckedAt      time.Time                                        `json:"checked_at"`
+	Rosters        map[string]string                                `json:"rosters"`
+	Counts         map[string]int                                   `json:"counts"`
+	SourceDBHashes map[string]string                                `json:"source_db_hashes"`
+	Items          map[string]map[string]map[string]PreparedSection `json:"items"`
 }
 
 func (p PublishedSummaries) Validate() error {

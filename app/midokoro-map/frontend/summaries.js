@@ -22,6 +22,10 @@ export function summaryRenderer(context) {
       if (isCurrent()) {
         const body = document.querySelector('.detail-description');
         if (body) body.textContent = '要約を読み込めませんでした。もう一度開いてください。';
+        for (const key of ['history','remains','access','highlights','food','efficacy','tourism','flow']) {
+          const status = document.querySelector(`#detail-${key}-status`);
+          if (status) status.textContent = '要約を読み込めませんでした。もう一度開いてください。';
+        }
       }
       return;
     }

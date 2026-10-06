@@ -126,8 +126,39 @@ func load(kind string, service *tk.TokusanService) ([]item, error) {
 			items = append(items, item{OfficialSourceHash: hash([]string{history, production}), ID: t.QID, Label: t.LabelJA, Title: t.WikipediaTitle(), Source: t.SourceURL, Description: t.Description, Official: &v})
 		}
 	} else {
-		names := map[string]string{"shiseki": "shiseki.json", "onsen": "onsen.json", "omatsuri": "festivals.json"}
-		b, err := os.ReadFile(filepath.Join("frontend/assets", kind, names[kind]))
+		// Read the same authoritative database as the public category API,
+		// rather than a separately exported frontend JSON snapshot.
+		var roster any
+		var err error
+		switch kind {
+		case "shiseki":
+			s, e := sh.NewShisekiService("data/shiseki/shiseki.db")
+			if e != nil {
+				return nil, e
+			}
+			defer s.Close()
+			roster, err = s.GetAllChecked()
+		case "onsen":
+			s, e := on.NewOnsenService("data/onsen/onsen.db")
+			if e != nil {
+				return nil, e
+			}
+			defer s.Close()
+			roster, err = s.GetAllChecked()
+		case "omatsuri":
+			s, e := om.NewFestivalService("data/omatsuri/festivals.db")
+			if e != nil {
+				return nil, e
+			}
+			defer s.Close()
+			roster, err = s.GetAllChecked()
+		default:
+			return nil, fmt.Errorf("unknown kind %q", kind)
+		}
+		if err != nil {
+			return nil, err
+		}
+		b, err := json.Marshal(roster)
 		if err != nil {
 			return nil, err
 		}
@@ -141,6 +172,9 @@ func load(kind string, service *tk.TokusanService) ([]item, error) {
 	seen := map[string]bool{}
 	for i := range items {
 		it := &items[i]
+		if kind == "shiseki" && it.LocalID != "" {
+			it.ID = it.LocalID
+		}
 		if it.ID == "" {
 			it.ID = it.LocalID
 		}

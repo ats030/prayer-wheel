@@ -74,6 +74,7 @@ with sync_playwright() as p:
     host.locator(".shiseki-card").nth(1).click()
     page.wait_for_function("document.querySelector('#view-shiseki').shadowRoot.querySelector('.detail-description').textContent.includes('要約を読み込めませんでした')")
     assert "原文を読む" not in host.locator("#detail-content").inner_text()
+    assert "読み込んでいます" not in host.locator("#detail-history-status").inner_text()
     assert not errors, errors
     print(json.dumps({"summary_only_categories": list(keys), "browser_errors": errors}, ensure_ascii=False))
     browser.close()

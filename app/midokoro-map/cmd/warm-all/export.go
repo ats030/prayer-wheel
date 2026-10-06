@@ -53,5 +53,12 @@ func exportSummaries(root, output string, service *tk.TokusanService) error {
 	if err := p.Validate(); err != nil {
 		return err
 	}
+	p.SourceDBHashes, err = shared.SummaryDatabaseHashes("data")
+	if err != nil {
+		return err
+	}
+	if err = p.ValidateDatabases("data"); err != nil {
+		return err
+	}
 	return writeJSON(output, p)
 }

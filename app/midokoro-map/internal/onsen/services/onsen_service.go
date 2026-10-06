@@ -229,8 +229,12 @@ func itoa(n int) string {
 }
 
 func (s *OnsenService) GetAll() []Onsen {
-	list, _ := s.collect("SELECT " + onsenColumns + " FROM onsen o")
+	list, _ := s.GetAllChecked()
 	return emptyIfNil(list)
+}
+
+func (s *OnsenService) GetAllChecked() ([]Onsen, error) {
+	return s.collect("SELECT " + onsenColumns + " FROM onsen o")
 }
 
 func (s *OnsenService) GetByPrefecture(prefecture string) []Onsen {

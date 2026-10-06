@@ -21,6 +21,9 @@ func registerPublishedSummaries(mux *http.ServeMux, dataDir string) error {
 	if err := p.Validate(); err != nil {
 		return err
 	}
+	if err := p.ValidateDatabases(dataDir); err != nil {
+		return err
+	}
 	for kind := range shared.SummarySections {
 		mux.HandleFunc("GET /api/"+kind+"/summary/{id}", func(w http.ResponseWriter, r *http.Request) {
 			sections, ok := p.Items[kind][r.PathValue("id")]

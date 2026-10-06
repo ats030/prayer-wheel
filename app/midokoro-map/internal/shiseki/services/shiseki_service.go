@@ -251,8 +251,12 @@ func itoa(n int) string {
 }
 
 func (s *ShisekiService) GetAll() []Shiseki {
-	list, _ := s.collect("SELECT " + shisekiColumns + " FROM shiseki o")
+	list, _ := s.GetAllChecked()
 	return emptyIfNil(list)
+}
+
+func (s *ShisekiService) GetAllChecked() ([]Shiseki, error) {
+	return s.collect("SELECT " + shisekiColumns + " FROM shiseki o")
 }
 
 func (s *ShisekiService) GetByPrefecture(prefecture string) []Shiseki {
