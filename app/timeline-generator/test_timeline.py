@@ -78,6 +78,30 @@ class EvidenceTests(unittest.TestCase):
         t.validate_events([self.event], self.sources, t.parse_query("コーヒー"), reasons)
         self.assertEqual(reasons, {})
 
+    def test_nearly_verbatim_quote_is_replaced_by_the_source_text(self):
+        # 平家物語 v9 で、表の行の書き直し・1字の写し誤り・中略の連結が引用の検査で落ちた。
+        cases = [("仁安2 1167年2月11日 従一位太政大臣。5月17日、太政大臣辞任。", "仁安2年2月11日、従一位太政大臣。", 1167, "仁安2 1167年2月11日 従一位太政大臣。"),
+                 ("治承4年(1180年)、以仁王が源頼政の協力を受け、平家追討の令旨を発した。", "治承4年(1180年)、以仁王が源良政の協力を受け、平家追討の令旨を発した。", 1180, "治承4年(1180年)、以仁王が源頼政の協力を受け、平家追討の令旨を発した。"),
+                 ("清盛は軍事制圧に乗り出す。まずは近江を制圧し、ついで1180年12月、重衡は興福寺を焼き討ちにする。", "清盛は軍事制圧に乗り出す。……1180年12月、重衡は興福寺を焼き討ちにする。", 1180, "清盛は軍事制圧に乗り出す。まずは近江を制圧し、ついで1180年12月、重衡は興福寺を焼き討ちにする。")]
+        for text, quote, year, expected in cases:
+            with self.subTest(quote=quote):
+                source = {"url": "https://example.org/heike", "title": "平家", "text": text, "passages": [{"heading": "", "date_heading": "", "text": text}]}
+                e = self.event | {"year": year, "date": f"{year}年", "title": "出来事", "quote": quote}
+                result = t.validate_events([e], [source], t.parse_query("平家物語"))
+                self.assertEqual([r["quote"] for r in result], [expected])
+
+    def test_quote_with_changed_content_is_not_repaired(self):
+        text = "1180年、以仁王が源頼政の協力を受けて挙兵し、宇治で敗れた。"
+        source = {"url": "https://example.org/heike", "title": "平家", "text": text, "passages": [{"heading": "", "date_heading": "", "text": text}]}
+        for quote in ["1180年、以仁王が源義仲の協力を受けて挙兵し、京で勝った。", "以仁王が挙兵した。"]:
+            with self.subTest(quote=quote):
+                self.assertIsNone(t.repair_quote(quote, source))
+
+    def test_repaired_quote_keeps_the_rest_of_the_source_sentence(self):
+        text = "1600年、徳川家康は大坂城に入城しなかったと伝わる。翌年に江戸へ戻った。"
+        source = {"url": "https://example.org/ieyasu", "title": "家康", "text": text, "passages": [{"heading": "", "date_heading": "", "text": text}]}
+        self.assertEqual(t.repair_quote("1600年、徳川家康は大坂城に入城した。", source), "1600年、徳川家康は大坂城に入城しなかったと伝わる。")
+
     def test_display_year_cannot_disagree_with_sort_year(self):
         e = self.event | {"date": "2000年"}
         result = t.validate_events([e], self.sources, t.parse_query("コーヒー"))
@@ -210,6 +234,23 @@ class FetchTests(unittest.TestCase):
         self.assertEqual(passages[0]["heading"], "コーヒー発見にまつわる伝説")
         self.assertEqual(passages[1]["heading"], "飲用史")
         self.assertNotIn("before", passages[1])
+
+    def test_back_matter_sections_are_not_passages(self):
+        p = t.ArticleParser()
+        p.feed("<h2>歴史</h2><p>1185年、壇ノ浦の戦いで平氏が滅亡した。</p>"
+               "<h2>参考文献</h2><ul><li>山田孝雄『平家物語』岩波書店、1929年。</li></ul>"
+               "<h2>外部リンク</h2><div class=\"navbox\"><li>藤原良房857-872年</li></div>")
+        self.assertEqual([x["text"] for x in p.passages()], ["1185年、壇ノ浦の戦いで平氏が滅亡した。"])
+
+    def test_back_matter_ends_at_the_next_body_section(self):
+        p = t.ArticleParser()
+        p.feed("<h2>脚注</h2><h3>注釈</h3><p>1929年の刊行本による。</p><h2>年表</h2><p>1180年、以仁王が挙兵した。</p>")
+        self.assertEqual([x["text"] for x in p.passages()], ["1180年、以仁王が挙兵した。"])
+
+    def test_page_title_named_like_back_matter_keeps_its_body(self):
+        p = t.ArticleParser()
+        p.feed("<h1>Notes</h1><h2>History</h2><p>The app launched in 2016.</p>")
+        self.assertEqual([x["text"] for x in p.passages()], ["The app launched in 2016."])
 
 
 class HTTPTests(unittest.TestCase):

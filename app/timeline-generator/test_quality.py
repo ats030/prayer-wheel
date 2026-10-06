@@ -175,6 +175,36 @@ class ContextTests(unittest.TestCase):
         actual = [r['title'] for r in t.wikipedia_results(t.parse_query('コーヒー'), extra + main)]
         self.assertEqual(actual, ['コーヒー0', 'コーヒー1', 'コーヒー2', '缶コーヒー', 'コーヒー牛乳'])
 
+    def test_wikipedia_kind_query_adds_two_untitled_articles_that_mention_the_topic(self):
+        # 出来事の種類の語による補助検索は、題名にテーマ語がなくても要約に含む未選択の記事を2件まで足す（ats030-jjqhq）。
+        def hit(title, content, rank, **mark):
+            return {'url': '/' + title, 'title': title, 'content': content, '_search_rank': rank, **mark}
+        main = [hit('平家物語', '平家物語', 0)]
+        kind = [hit('平家物語', '平家物語', 0, _kind=True), hit('源平合戦の絵巻', '絵巻', 1, _kind=True),
+                hit('治承・寿永の乱', '平家物語にも描かれる', 2, _kind=True), hit('一ノ谷の戦い', '平家物語の', 3, _kind=True),
+                hit('壇ノ浦の戦い', '平家物語の', 4, _kind=True)]
+        actual = [r['title'] for r in t.wikipedia_results(t.parse_query('平家物語'), kind + main)]
+        self.assertEqual(actual, ['平家物語', '治承・寿永の乱', '一ノ谷の戦い'])
+
+    def test_kind_word_is_one_plain_noun_or_nothing(self):
+        query = t.parse_query('平家物語')
+        for word, expected in [('合戦', '合戦'), ('戦い 年表', None), ('平家物語', None), ('歴史', None), ('世界初', None), ('', None), ('a' * 13, None)]:
+            with patch.object(t, 'model_json', return_value={'subject': '作品', 'word': word}):
+                self.assertEqual(t.event_kind_word(query, time.monotonic() + 60), expected)
+        with patch.object(t, 'model_json', side_effect=t.TimelineError('busy')):
+            self.assertIsNone(t.event_kind_word(query, time.monotonic() + 60))
+
+    def test_wikipedia_search_adds_kind_query_only_with_deadline(self):
+        query = t.parse_query('平家物語')
+        with patch.object(t, 'SOURCE', 'wikipedia'), patch.object(t, 'web_search', return_value=[]) as search, \
+                patch.object(t, 'event_kind_word', return_value='合戦') as kind:
+            t.search(query)
+            kind.assert_not_called()
+            self.assertEqual(sorted(c.args[0] for c in search.call_args_list), ['平家物語', '平家物語 世界初', '平家物語 歴史'])
+            search.reset_mock()
+            t.search(query, time.monotonic() + 60)
+            self.assertIn('平家物語 合戦', [c.args[0] for c in search.call_args_list])
+
     def test_crosscheck_authority_shares_source_tier(self):
         results=[{'title':'Vienna coffee history','url':f'https://{host}/kaffee'} for host in ['blog.example.hatenablog.com','example.com','www.wien.gv.at']]
         results.append({'title':'Vienna official coffee history','url':'https://example.org/kaffee'})
