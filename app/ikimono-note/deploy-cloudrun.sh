@@ -99,13 +99,30 @@ say "■ API を有効化"
 
 say "■ 秘密を Secret Manager へ"
 put_secret() {
-  local name="$1" value="$2"
+  local name="$1" value="$2" latest current
   [ -n "$value" ] || return 0
   if ! "$GCLOUD" secrets describe "$name" --project "$PROJECT" >/dev/null 2>&1; then
-    "$GCLOUD" secrets create "$name" --replication-policy=automatic --project "$PROJECT" >/dev/null
+    "$GCLOUD" secrets create "$name" --replication-policy=automatic --project "$PROJECT" >/dev/null \
+      || fail "Secret を作成できません ($name)"
   fi
-  printf '%s' "$value" | "$GCLOUD" secrets versions add "$name" --data-file=- --project "$PROJECT" >/dev/null
-  say "  $name"
+  # 値が同じ再デプロイでは版を増やさない。読み取り失敗時も追加せず止める。
+  latest=$("$GCLOUD" secrets versions list "$name" --project "$PROJECT" \
+    --limit=1 --sort-by='~createTime' --format='value(name)') \
+    || fail "Secret の版を確認できません ($name)"
+  if [ -n "$latest" ]; then
+    # 末尾の改行も比較するため、コマンド置換の改行除去を番兵で防ぐ。
+    current=$("$GCLOUD" secrets versions access "${latest##*/}" \
+      --secret="$name" --project "$PROJECT" && printf '.') \
+      || fail "Secret を比較できません ($name)。読み取り権限と最新版の状態を確認してください"
+    current=${current%.}
+    if [ "$current" = "$value" ]; then
+      say "  $name (変更なし)"
+      return 0
+    fi
+  fi
+  printf '%s' "$value" | "$GCLOUD" secrets versions add "$name" --data-file=- --project "$PROJECT" >/dev/null \
+    || fail "Secret の版を追加できません ($name)"
+  say "  $name (更新)"
 }
 put_secret ikimono-google-client-secret "$CLIENT_SECRET"
 put_secret ikimono-session-secret "$SESSION_SECRET"

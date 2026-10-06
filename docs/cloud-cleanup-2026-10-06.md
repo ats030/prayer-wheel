@@ -45,7 +45,14 @@ been reconciled against a later billing export.
 
 Google pricing reference: https://cloud.google.com/secret-manager/pricing
 
-The deployment scripts still add a Secret version each time they deploy.
-Recurrence prevention is tracked separately in `ats030-0ghlc`.
+Recurrence prevention was implemented in `ats030-0ghlc`: all four deployment
+scripts compare the latest Secret value and add a version only when it changes
+or no version exists. Failed metadata or value reads stop before version creation.
+Six regression tests cover all four local scripts (32 cases), including repeated
+unchanged values, changed values, initial creation, trailing newlines, read
+failures, and empty input. With writes blocked, the seven production Secrets'
+update functions were run twice each; all 14 runs skipped creation and their
+version metadata stayed unchanged. No full application redeployment was needed
+or performed. The medium code review found no actionable defects.
 Destroyed Secret versions are not recoverable; removed services can be rebuilt
 from local source if required.

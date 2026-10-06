@@ -41,6 +41,33 @@ fail() { printf 'できません: %s\n' "$*" >&2; exit 1; }
 # ~/.env から1つ読む。行頭が KEY= のものだけ見る (export や引用符には対応しない)
 env_of() { sed -n "s/^$1=//p" "$ENV_FILE" | tail -1; }
 
+put_secret() {
+  local name="$1" value="$2" latest current
+  [ -n "$value" ] || return 0
+  if ! "$GCLOUD" secrets describe "$name" --project "$PROJECT" >/dev/null 2>&1; then
+    "$GCLOUD" secrets create "$name" --replication-policy=automatic --project "$PROJECT" >/dev/null \
+      || fail "Secret を作成できません ($name)"
+  fi
+  # 値が同じ再デプロイでは版を増やさない。読み取り失敗時も追加せず止める。
+  latest=$("$GCLOUD" secrets versions list "$name" --project "$PROJECT" \
+    --limit=1 --sort-by='~createTime' --format='value(name)') \
+    || fail "Secret の版を確認できません ($name)"
+  if [ -n "$latest" ]; then
+    # 末尾の改行も比較するため、コマンド置換の改行除去を番兵で防ぐ。
+    current=$("$GCLOUD" secrets versions access "${latest##*/}" \
+      --secret="$name" --project "$PROJECT" && printf '.') \
+      || fail "Secret を比較できません ($name)。読み取り権限と最新版の状態を確認してください"
+    current=${current%.}
+    if [ "$current" = "$value" ]; then
+      say "  $name (変更なし)"
+      return 0
+    fi
+  fi
+  printf '%s' "$value" | "$GCLOUD" secrets versions add "$name" --data-file=- --project "$PROJECT" >/dev/null \
+    || fail "Secret の版を追加できません ($name)"
+  say "  $name (更新)"
+}
+
 command -v "$GCLOUD" >/dev/null 2>&1 || fail "gcloud が見つかりません ($GCLOUD)"
 [ -f "$ENV_FILE" ] || fail "$ENV_FILE がありません"
 
@@ -77,11 +104,7 @@ RUNTIME_SA="${OMATSURI_RUNTIME_SA:-$PROJECT_NUMBER-compute@developer.gserviceacc
 SECRETS=""
 if [ -n "$A8MAT" ]; then
   say "■ 秘密を Secret Manager へ"
-  if ! "$GCLOUD" secrets describe omatsuri-jalan-a8mat --project "$PROJECT" >/dev/null 2>&1; then
-    "$GCLOUD" secrets create omatsuri-jalan-a8mat --replication-policy=automatic --project "$PROJECT" >/dev/null
-  fi
-  printf '%s' "$A8MAT" | "$GCLOUD" secrets versions add omatsuri-jalan-a8mat --data-file=- --project "$PROJECT" >/dev/null
-  say "  omatsuri-jalan-a8mat"
+  put_secret omatsuri-jalan-a8mat "$A8MAT"
 
   say "■ 秘密の読み取りを許可 ($RUNTIME_SA)"
   "$GCLOUD" secrets add-iam-policy-binding omatsuri-jalan-a8mat \
