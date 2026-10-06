@@ -1,0 +1,7 @@
+.git
+.gitignore
+app-server
+artifacts
+.hallmark
+**/*_test.go
+**/*.bak

@@ -1,0 +1,20 @@
+
+  <main class="app-shell">
+    <section class="workbench" aria-label="祭りを探す">
+      <header class="masthead"><h2>祭り</h2><p class="lede">地域と開催日から、各地の祭りを探せます。</p></header>
+      <div class="filters" role="search">
+        <label class="field field-wide">祭り名・地域<input id="keyword" type="search" placeholder="例：ねぶた、青森" autocomplete="off"></label>
+        <label class="field field-wide">都道府県<select id="prefecture"><option value="">すべて</option></select></label>
+        <div class="field field-wide"><span id="category-label">種類</span><details class="multi-select" id="category"><summary aria-labelledby="category-label category-summary"><span class="multi-summary" id="category-summary">すべて</span></summary><div class="multi-options" id="category-options" role="group" aria-labelledby="category-label"></div></details></div>
+        <label class="field field-wide date-range-field">開催期間<span class="date-range"><input id="festival-date-start" type="date" aria-label="開催期間の開始日"><span class="date-range-sep" aria-hidden="true">〜</span><input id="festival-date-end" type="date" aria-label="開催期間の終了日"></span></label>
+      </div>
+      <div class="result-bar" aria-live="polite"><span><strong id="result-count">0</strong> 件の祭り</span><button id="clear-filters" type="button">条件をクリア</button></div>
+      <div class="festival-list" id="festival-list"></div>
+    </section>
+    <section class="map-region" aria-label="祭りの地図"><div id="map"></div><div class="map-count" id="map-count">読み込み中</div><div class="map-legend" id="map-legend" role="list" aria-label="祭りの種類凡例"></div></section>
+    <aside class="detail-panel" id="detail-panel" aria-labelledby="detail-panel-label" tabindex="-1" hidden>
+      <header class="detail-header"><div><p class="eyebrow" id="detail-panel-label">祭りの詳細</p><p class="detail-origin" id="detail-origin">選択中の祭り</p></div><button class="detail-close" type="button" aria-label="詳細を閉じる">×</button></header>
+      <div class="detail-content" id="detail-content" aria-live="polite"></div>
+    </aside>
+  </main>
+  <dialog id="lightbox" aria-label="祭りの画像"><button class="lightbox-close" type="button" aria-label="画像を閉じる">×</button><img id="lightbox-image" alt=""></dialog>

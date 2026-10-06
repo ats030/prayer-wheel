@@ -1,0 +1,1337 @@
+[
+  {
+    "prefecture": "北海道",
+    "code": "01",
+    "source_name": "北海道の公的観光案内",
+    "source_url": "https://www.visit-hokkaido.jp/spot/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "01-01",
+        "label": "道央"
+      },
+      {
+        "id": "01-02",
+        "label": "道南"
+      },
+      {
+        "id": "01-03",
+        "label": "道北"
+      },
+      {
+        "id": "01-04",
+        "label": "道東"
+      }
+    ]
+  },
+  {
+    "prefecture": "青森県",
+    "code": "02",
+    "source_name": "青森県の公的観光案内",
+    "source_url": "https://aomori-tourism.com/spot/index.html",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "02-01",
+        "label": "津軽"
+      },
+      {
+        "id": "02-02",
+        "label": "南部"
+      },
+      {
+        "id": "02-03",
+        "label": "下北"
+      }
+    ]
+  },
+  {
+    "prefecture": "岩手県",
+    "code": "03",
+    "source_name": "岩手県の公的観光案内",
+    "source_url": "https://iwatetabi.jp/spots/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "03-01",
+        "label": "県北"
+      },
+      {
+        "id": "03-02",
+        "label": "県央"
+      },
+      {
+        "id": "03-03",
+        "label": "県南"
+      },
+      {
+        "id": "03-04",
+        "label": "沿岸"
+      }
+    ]
+  },
+  {
+    "prefecture": "宮城県",
+    "code": "04",
+    "source_name": "宮城県の公的観光案内",
+    "source_url": "https://www.miyagi-kankou.or.jp/miyagi_trip/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "04-01",
+        "label": "仙台・松島"
+      },
+      {
+        "id": "04-02",
+        "label": "三陸"
+      },
+      {
+        "id": "04-03",
+        "label": "県北"
+      },
+      {
+        "id": "04-04",
+        "label": "県南"
+      }
+    ]
+  },
+  {
+    "prefecture": "秋田県",
+    "code": "05",
+    "source_name": "秋田県の公的観光案内",
+    "source_url": "https://akita-fun.jp/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "05-01",
+        "label": "十和田・八幡平"
+      },
+      {
+        "id": "05-02",
+        "label": "大館・阿仁・森吉"
+      },
+      {
+        "id": "05-03",
+        "label": "白神・能代・男鹿"
+      },
+      {
+        "id": "05-04",
+        "label": "秋田"
+      },
+      {
+        "id": "05-05",
+        "label": "由利本荘・鳥海"
+      },
+      {
+        "id": "05-06",
+        "label": "大曲・角館・田沢湖"
+      },
+      {
+        "id": "05-07",
+        "label": "横手・増田"
+      },
+      {
+        "id": "05-08",
+        "label": "湯沢・栗駒"
+      }
+    ]
+  },
+  {
+    "prefecture": "山形県",
+    "code": "06",
+    "source_name": "山形県の公的観光案内",
+    "source_url": "https://yamagatakanko.com/areaguide",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "06-01",
+        "label": "村山"
+      },
+      {
+        "id": "06-02",
+        "label": "最上"
+      },
+      {
+        "id": "06-03",
+        "label": "置賜"
+      },
+      {
+        "id": "06-04",
+        "label": "庄内"
+      }
+    ]
+  },
+  {
+    "prefecture": "福島県",
+    "code": "07",
+    "source_name": "福島県の公的観光案内",
+    "source_url": "https://www.tif.ne.jp/yamafuku/spot/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "07-01",
+        "label": "会津"
+      },
+      {
+        "id": "07-02",
+        "label": "中通り"
+      },
+      {
+        "id": "07-03",
+        "label": "浜通り"
+      }
+    ]
+  },
+  {
+    "prefecture": "茨城県",
+    "code": "08",
+    "source_name": "茨城県の公的観光案内",
+    "source_url": "https://www.ibarakiguide.jp/page/inquiry.html",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "08-01",
+        "label": "県央"
+      },
+      {
+        "id": "08-02",
+        "label": "県北"
+      },
+      {
+        "id": "08-03",
+        "label": "鹿行"
+      },
+      {
+        "id": "08-04",
+        "label": "県南"
+      },
+      {
+        "id": "08-05",
+        "label": "県西"
+      }
+    ]
+  },
+  {
+    "prefecture": "栃木県",
+    "code": "09",
+    "source_name": "栃木県の公的観光案内",
+    "source_url": "https://www.tochigiji.or.jp/about/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "09-01",
+        "label": "日光"
+      },
+      {
+        "id": "09-02",
+        "label": "那須"
+      },
+      {
+        "id": "09-03",
+        "label": "県央"
+      },
+      {
+        "id": "09-04",
+        "label": "県南"
+      },
+      {
+        "id": "09-05",
+        "label": "県東"
+      }
+    ]
+  },
+  {
+    "prefecture": "群馬県",
+    "code": "10",
+    "source_name": "群馬県の公的観光案内",
+    "source_url": "https://gunma-kanko.jp/features/97",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "10-01",
+        "label": "吾妻"
+      },
+      {
+        "id": "10-02",
+        "label": "利根沼田"
+      },
+      {
+        "id": "10-03",
+        "label": "西部"
+      },
+      {
+        "id": "10-04",
+        "label": "県央"
+      },
+      {
+        "id": "10-05",
+        "label": "東部"
+      }
+    ]
+  },
+  {
+    "prefecture": "埼玉県",
+    "code": "11",
+    "source_name": "埼玉県の公的観光案内",
+    "source_url": "https://saitama-supportdesk.com/ja/area/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "11-01",
+        "label": "秩父"
+      },
+      {
+        "id": "11-02",
+        "label": "西部"
+      },
+      {
+        "id": "11-03",
+        "label": "北部"
+      },
+      {
+        "id": "11-04",
+        "label": "中央"
+      },
+      {
+        "id": "11-05",
+        "label": "東部"
+      }
+    ]
+  },
+  {
+    "prefecture": "千葉県",
+    "code": "12",
+    "source_name": "千葉県の公的観光案内",
+    "source_url": "https://maruchiba.jp/spot/index.html",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "12-01",
+        "label": "ベイエリア"
+      },
+      {
+        "id": "12-02",
+        "label": "東葛飾"
+      },
+      {
+        "id": "12-03",
+        "label": "北総"
+      },
+      {
+        "id": "12-04",
+        "label": "九十九里"
+      },
+      {
+        "id": "12-05",
+        "label": "南房総"
+      },
+      {
+        "id": "12-06",
+        "label": "かずさ・臨海"
+      }
+    ]
+  },
+  {
+    "prefecture": "東京都",
+    "code": "13",
+    "source_name": "東京都の公的観光案内",
+    "source_url": "https://www.gotokyo.org/book/area/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "13-01",
+        "label": "23区"
+      },
+      {
+        "id": "13-02",
+        "label": "多摩"
+      },
+      {
+        "id": "13-03",
+        "label": "島しょ"
+      }
+    ]
+  },
+  {
+    "prefecture": "神奈川県",
+    "code": "14",
+    "source_name": "神奈川県の公的観光案内",
+    "source_url": "https://www.kanagawa-kankou.or.jp/areaguide",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "14-01",
+        "label": "横浜・川崎"
+      },
+      {
+        "id": "14-02",
+        "label": "箱根"
+      },
+      {
+        "id": "14-03",
+        "label": "湘南"
+      },
+      {
+        "id": "14-04",
+        "label": "丹沢大山"
+      },
+      {
+        "id": "14-05",
+        "label": "相模湖・相模川流域"
+      },
+      {
+        "id": "14-06",
+        "label": "三浦半島"
+      },
+      {
+        "id": "14-07",
+        "label": "足柄"
+      }
+    ]
+  },
+  {
+    "prefecture": "新潟県",
+    "code": "15",
+    "source_name": "新潟県の公的観光案内",
+    "source_url": "https://niigata-kankou.or.jp/spot",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "15-01",
+        "label": "村上・新発田"
+      },
+      {
+        "id": "15-02",
+        "label": "新潟・阿賀"
+      },
+      {
+        "id": "15-03",
+        "label": "弥彦・燕三条"
+      },
+      {
+        "id": "15-04",
+        "label": "長岡・柏崎"
+      },
+      {
+        "id": "15-05",
+        "label": "湯沢・魚沼"
+      },
+      {
+        "id": "15-06",
+        "label": "妙高・上越・糸魚川"
+      },
+      {
+        "id": "15-07",
+        "label": "佐渡"
+      }
+    ]
+  },
+  {
+    "prefecture": "富山県",
+    "code": "16",
+    "source_name": "富山県の公的観光案内",
+    "source_url": "https://www.info-toyama.com/spot",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "16-01",
+        "label": "高岡・氷見・射水"
+      },
+      {
+        "id": "16-02",
+        "label": "砺波・五箇山"
+      },
+      {
+        "id": "16-03",
+        "label": "富山市周辺"
+      },
+      {
+        "id": "16-04",
+        "label": "立山"
+      },
+      {
+        "id": "16-05",
+        "label": "黒部・宇奈月"
+      }
+    ]
+  },
+  {
+    "prefecture": "石川県",
+    "code": "17",
+    "source_name": "石川県の公的観光案内",
+    "source_url": "https://www.hot-ishikawa.jp/spot/index.html",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "17-01",
+        "label": "能登"
+      },
+      {
+        "id": "17-02",
+        "label": "金沢"
+      },
+      {
+        "id": "17-03",
+        "label": "加賀"
+      },
+      {
+        "id": "17-04",
+        "label": "白山"
+      }
+    ]
+  },
+  {
+    "prefecture": "福井県",
+    "code": "18",
+    "source_name": "福井県の公的観光案内",
+    "source_url": "https://www.fuku-e.com/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "18-01",
+        "label": "あわら・坂井・福井市"
+      },
+      {
+        "id": "18-02",
+        "label": "永平寺・奥越"
+      },
+      {
+        "id": "18-03",
+        "label": "丹南"
+      },
+      {
+        "id": "18-04",
+        "label": "若狭路"
+      }
+    ]
+  },
+  {
+    "prefecture": "山梨県",
+    "code": "19",
+    "source_name": "山梨県の公的観光案内",
+    "source_url": "https://www.yamanashi-kankou.jp/search/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "19-01",
+        "label": "清里・小淵沢・韮崎"
+      },
+      {
+        "id": "19-02",
+        "label": "甲府・昇仙峡"
+      },
+      {
+        "id": "19-03",
+        "label": "石和・勝沼・西沢渓谷"
+      },
+      {
+        "id": "19-04",
+        "label": "大月・都留"
+      },
+      {
+        "id": "19-05",
+        "label": "富士川流域・南アルプス"
+      },
+      {
+        "id": "19-06",
+        "label": "富士山・富士五湖"
+      }
+    ]
+  },
+  {
+    "prefecture": "長野県",
+    "code": "20",
+    "source_name": "長野県の公的観光案内",
+    "source_url": "https://www.go-nagano.net/tradition-and-culture/id22654",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "20-01",
+        "label": "北信"
+      },
+      {
+        "id": "20-02",
+        "label": "東信"
+      },
+      {
+        "id": "20-03",
+        "label": "中信"
+      },
+      {
+        "id": "20-04",
+        "label": "南信"
+      }
+    ]
+  },
+  {
+    "prefecture": "岐阜県",
+    "code": "21",
+    "source_name": "岐阜県の公的観光案内",
+    "source_url": "https://www.kankou-gifu.jp/article/detail_267.html",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "21-01",
+        "label": "岐阜"
+      },
+      {
+        "id": "21-02",
+        "label": "西濃"
+      },
+      {
+        "id": "21-03",
+        "label": "中濃"
+      },
+      {
+        "id": "21-04",
+        "label": "東濃"
+      },
+      {
+        "id": "21-05",
+        "label": "飛騨"
+      }
+    ]
+  },
+  {
+    "prefecture": "静岡県",
+    "code": "22",
+    "source_name": "静岡県の公的観光案内",
+    "source_url": "https://hellonavi.jp/feature/area",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "22-01",
+        "label": "伊豆"
+      },
+      {
+        "id": "22-02",
+        "label": "富士"
+      },
+      {
+        "id": "22-03",
+        "label": "中部"
+      },
+      {
+        "id": "22-04",
+        "label": "西部"
+      }
+    ]
+  },
+  {
+    "prefecture": "愛知県",
+    "code": "23",
+    "source_name": "愛知県の公的観光案内",
+    "source_url": "https://aichinow.pref.aichi.jp/about",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "23-01",
+        "label": "名古屋"
+      },
+      {
+        "id": "23-02",
+        "label": "尾張北部"
+      },
+      {
+        "id": "23-03",
+        "label": "尾張西部"
+      },
+      {
+        "id": "23-04",
+        "label": "知多"
+      },
+      {
+        "id": "23-05",
+        "label": "西三河"
+      },
+      {
+        "id": "23-06",
+        "label": "東三河"
+      },
+      {
+        "id": "23-07",
+        "label": "奥三河"
+      }
+    ]
+  },
+  {
+    "prefecture": "三重県",
+    "code": "24",
+    "source_name": "三重県の公的観光案内",
+    "source_url": "https://www.kankomie.or.jp/special/education/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "24-01",
+        "label": "北勢"
+      },
+      {
+        "id": "24-02",
+        "label": "中南勢"
+      },
+      {
+        "id": "24-03",
+        "label": "伊勢志摩"
+      },
+      {
+        "id": "24-04",
+        "label": "伊賀"
+      },
+      {
+        "id": "24-05",
+        "label": "東紀州"
+      }
+    ]
+  },
+  {
+    "prefecture": "滋賀県",
+    "code": "25",
+    "source_name": "滋賀県の公的観光案内",
+    "source_url": "https://www.biwako-visitors.jp/welcome/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "25-01",
+        "label": "大津"
+      },
+      {
+        "id": "25-02",
+        "label": "湖南"
+      },
+      {
+        "id": "25-03",
+        "label": "甲賀"
+      },
+      {
+        "id": "25-04",
+        "label": "東近江"
+      },
+      {
+        "id": "25-05",
+        "label": "湖東"
+      },
+      {
+        "id": "25-06",
+        "label": "湖北"
+      },
+      {
+        "id": "25-07",
+        "label": "湖西"
+      }
+    ]
+  },
+  {
+    "prefecture": "京都府",
+    "code": "26",
+    "source_name": "京都府の公的観光案内",
+    "source_url": "https://www.kyoto-kankou.or.jp/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "26-01",
+        "label": "海の京都"
+      },
+      {
+        "id": "26-02",
+        "label": "森の京都"
+      },
+      {
+        "id": "26-03",
+        "label": "お茶の京都"
+      },
+      {
+        "id": "26-04",
+        "label": "竹の里・乙訓"
+      },
+      {
+        "id": "26-05",
+        "label": "京都市"
+      }
+    ]
+  },
+  {
+    "prefecture": "大阪府",
+    "code": "27",
+    "source_name": "大阪府の公的観光案内",
+    "source_url": "https://www.pref.osaka.lg.jp/o070080/miryokuzukuri/shityouson_kankou/index.html",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "27-01",
+        "label": "大阪市"
+      },
+      {
+        "id": "27-02",
+        "label": "北摂"
+      },
+      {
+        "id": "27-03",
+        "label": "河内"
+      },
+      {
+        "id": "27-04",
+        "label": "泉州"
+      }
+    ]
+  },
+  {
+    "prefecture": "兵庫県",
+    "code": "28",
+    "source_name": "兵庫県の公的観光案内",
+    "source_url": "https://www.hyogo-tourism.jp/index.html",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "28-01",
+        "label": "摂津（阪神）"
+      },
+      {
+        "id": "28-02",
+        "label": "播磨"
+      },
+      {
+        "id": "28-03",
+        "label": "但馬"
+      },
+      {
+        "id": "28-04",
+        "label": "丹波"
+      },
+      {
+        "id": "28-05",
+        "label": "淡路"
+      }
+    ]
+  },
+  {
+    "prefecture": "奈良県",
+    "code": "29",
+    "source_name": "奈良県の公的観光案内",
+    "source_url": "https://yamatoji.nara-kankou.or.jp/welcome/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "29-01",
+        "label": "奈良"
+      },
+      {
+        "id": "29-02",
+        "label": "生駒・信貴・斑鳩・葛城"
+      },
+      {
+        "id": "29-03",
+        "label": "山の辺・飛鳥・橿原・宇陀"
+      },
+      {
+        "id": "29-04",
+        "label": "吉野路"
+      }
+    ]
+  },
+  {
+    "prefecture": "和歌山県",
+    "code": "30",
+    "source_name": "和歌山県の公的観光案内",
+    "source_url": "https://www.wakayama-kanko.or.jp/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "30-01",
+        "label": "和歌山市近郊"
+      },
+      {
+        "id": "30-02",
+        "label": "高野山"
+      },
+      {
+        "id": "30-03",
+        "label": "有田・日高"
+      },
+      {
+        "id": "30-04",
+        "label": "白浜・串本"
+      },
+      {
+        "id": "30-05",
+        "label": "熊野"
+      }
+    ]
+  },
+  {
+    "prefecture": "鳥取県",
+    "code": "31",
+    "source_name": "鳥取県の公的観光案内",
+    "source_url": "https://www.tottori-guide.jp/tourism/agent/tour/area/25",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "31-01",
+        "label": "東部"
+      },
+      {
+        "id": "31-02",
+        "label": "中部"
+      },
+      {
+        "id": "31-03",
+        "label": "西部"
+      }
+    ]
+  },
+  {
+    "prefecture": "島根県",
+    "code": "32",
+    "source_name": "島根県の公的観光案内",
+    "source_url": "https://www.kankou-shimane.com/pickup/12656.html",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "32-01",
+        "label": "出雲"
+      },
+      {
+        "id": "32-02",
+        "label": "石見"
+      },
+      {
+        "id": "32-03",
+        "label": "隠岐"
+      }
+    ]
+  },
+  {
+    "prefecture": "岡山県",
+    "code": "33",
+    "source_name": "岡山県の公的観光案内",
+    "source_url": "https://www.okayama-kanko.jp/spot/index.html",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "33-01",
+        "label": "備前"
+      },
+      {
+        "id": "33-02",
+        "label": "備中"
+      },
+      {
+        "id": "33-03",
+        "label": "美作"
+      }
+    ]
+  },
+  {
+    "prefecture": "広島県",
+    "code": "34",
+    "source_name": "広島県の公的観光案内",
+    "source_url": "https://www.hiroshima-kankou.com/spot",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "34-01",
+        "label": "広島市周辺"
+      },
+      {
+        "id": "34-02",
+        "label": "安芸"
+      },
+      {
+        "id": "34-03",
+        "label": "備後"
+      },
+      {
+        "id": "34-04",
+        "label": "備北"
+      },
+      {
+        "id": "34-05",
+        "label": "芸北"
+      },
+      {
+        "id": "34-06",
+        "label": "宮島周辺"
+      }
+    ]
+  },
+  {
+    "prefecture": "山口県",
+    "code": "35",
+    "source_name": "山口県の公的観光案内",
+    "source_url": "https://yamaguchi-tourism.jp/spot/index.html",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "35-01",
+        "label": "岩国・柳井・周南"
+      },
+      {
+        "id": "35-02",
+        "label": "山口・防府"
+      },
+      {
+        "id": "35-03",
+        "label": "下関・秋吉台・宇部"
+      },
+      {
+        "id": "35-04",
+        "label": "萩・長門"
+      }
+    ]
+  },
+  {
+    "prefecture": "徳島県",
+    "code": "36",
+    "source_name": "徳島県の公的観光案内",
+    "source_url": "https://www.awanavi.jp/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "36-01",
+        "label": "東部"
+      },
+      {
+        "id": "36-02",
+        "label": "西部"
+      },
+      {
+        "id": "36-03",
+        "label": "南部"
+      }
+    ]
+  },
+  {
+    "prefecture": "香川県",
+    "code": "37",
+    "source_name": "香川県の公的観光案内",
+    "source_url": "https://www.my-kagawa.jp/tekuteku",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "37-01",
+        "label": "東讃"
+      },
+      {
+        "id": "37-02",
+        "label": "高松"
+      },
+      {
+        "id": "37-03",
+        "label": "中讃"
+      },
+      {
+        "id": "37-04",
+        "label": "西讃"
+      },
+      {
+        "id": "37-05",
+        "label": "島"
+      }
+    ]
+  },
+  {
+    "prefecture": "愛媛県",
+    "code": "38",
+    "source_name": "愛媛県の公的観光案内",
+    "source_url": "https://www.iyokannet.jp/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "38-01",
+        "label": "東予"
+      },
+      {
+        "id": "38-02",
+        "label": "中予"
+      },
+      {
+        "id": "38-03",
+        "label": "南予"
+      }
+    ]
+  },
+  {
+    "prefecture": "高知県",
+    "code": "39",
+    "source_name": "高知県の公的観光案内",
+    "source_url": "https://kochi-tabi.jp/search_spot.html",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "39-01",
+        "label": "東部"
+      },
+      {
+        "id": "39-02",
+        "label": "中部"
+      },
+      {
+        "id": "39-03",
+        "label": "西部"
+      }
+    ]
+  },
+  {
+    "prefecture": "福岡県",
+    "code": "40",
+    "source_name": "福岡県の公的観光案内",
+    "source_url": "https://www.crossroadfukuoka.jp/areaguide",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "40-01",
+        "label": "福岡"
+      },
+      {
+        "id": "40-02",
+        "label": "北九州"
+      },
+      {
+        "id": "40-03",
+        "label": "筑後"
+      },
+      {
+        "id": "40-04",
+        "label": "筑豊"
+      }
+    ]
+  },
+  {
+    "prefecture": "佐賀県",
+    "code": "41",
+    "source_name": "佐賀県の公的観光案内",
+    "source_url": "https://www.asobo-saga.jp/areaguide/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "41-01",
+        "label": "東部"
+      },
+      {
+        "id": "41-02",
+        "label": "中部"
+      },
+      {
+        "id": "41-03",
+        "label": "北西部"
+      },
+      {
+        "id": "41-04",
+        "label": "南部"
+      },
+      {
+        "id": "41-05",
+        "label": "西部"
+      }
+    ]
+  },
+  {
+    "prefecture": "長崎県",
+    "code": "42",
+    "source_name": "長崎県の公的観光案内",
+    "source_url": "https://www.nagasaki-tabinet.com/access_prefecture",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "42-01",
+        "label": "長崎"
+      },
+      {
+        "id": "42-02",
+        "label": "佐世保・東彼杵・ハウステンボス"
+      },
+      {
+        "id": "42-03",
+        "label": "島原・雲仙・南島原"
+      },
+      {
+        "id": "42-04",
+        "label": "大村・諫早"
+      },
+      {
+        "id": "42-05",
+        "label": "平戸・松浦"
+      },
+      {
+        "id": "42-06",
+        "label": "西海"
+      },
+      {
+        "id": "42-07",
+        "label": "五島"
+      },
+      {
+        "id": "42-08",
+        "label": "壱岐"
+      },
+      {
+        "id": "42-09",
+        "label": "対馬"
+      }
+    ]
+  },
+  {
+    "prefecture": "熊本県",
+    "code": "43",
+    "source_name": "熊本県の公的観光案内",
+    "source_url": "https://kumamoto.guide/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "43-01",
+        "label": "県北"
+      },
+      {
+        "id": "43-02",
+        "label": "熊本"
+      },
+      {
+        "id": "43-03",
+        "label": "天草"
+      },
+      {
+        "id": "43-04",
+        "label": "阿蘇"
+      },
+      {
+        "id": "43-05",
+        "label": "県央"
+      },
+      {
+        "id": "43-06",
+        "label": "県南"
+      }
+    ]
+  },
+  {
+    "prefecture": "大分県",
+    "code": "44",
+    "source_name": "大分県の公的観光案内",
+    "source_url": "https://www.visit-oita.jp/topics/detail/423",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "44-01",
+        "label": "別府湾"
+      },
+      {
+        "id": "44-02",
+        "label": "やまなみ"
+      },
+      {
+        "id": "44-03",
+        "label": "奥豊後"
+      },
+      {
+        "id": "44-04",
+        "label": "日田・耶馬"
+      },
+      {
+        "id": "44-05",
+        "label": "宇佐・国東"
+      },
+      {
+        "id": "44-06",
+        "label": "日豊海岸"
+      }
+    ]
+  },
+  {
+    "prefecture": "宮崎県",
+    "code": "45",
+    "source_name": "宮崎県の公的観光案内",
+    "source_url": "https://www.kanko-miyazaki.jp/spot/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "45-01",
+        "label": "北部"
+      },
+      {
+        "id": "45-02",
+        "label": "中部"
+      },
+      {
+        "id": "45-03",
+        "label": "南部"
+      },
+      {
+        "id": "45-04",
+        "label": "西部"
+      }
+    ]
+  },
+  {
+    "prefecture": "鹿児島県",
+    "code": "46",
+    "source_name": "鹿児島県の公的観光案内",
+    "source_url": "https://www.kagoshima-kankou.com/guide",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "46-01",
+        "label": "北薩摩"
+      },
+      {
+        "id": "46-02",
+        "label": "霧島・姶良"
+      },
+      {
+        "id": "46-03",
+        "label": "中薩摩"
+      },
+      {
+        "id": "46-04",
+        "label": "南薩摩"
+      },
+      {
+        "id": "46-05",
+        "label": "大隅"
+      },
+      {
+        "id": "46-06",
+        "label": "種子屋久・十島三島"
+      },
+      {
+        "id": "46-07",
+        "label": "奄美"
+      }
+    ]
+  },
+  {
+    "prefecture": "沖縄県",
+    "code": "47",
+    "source_name": "沖縄県の公的観光案内",
+    "source_url": "https://www.okinawastory.jp/about/area-guide/",
+    "source_checked_at": "2026-09-29",
+    "regions": [
+      {
+        "id": "47-01",
+        "label": "本島北部"
+      },
+      {
+        "id": "47-02",
+        "label": "本島中部"
+      },
+      {
+        "id": "47-03",
+        "label": "本島南部"
+      },
+      {
+        "id": "47-04",
+        "label": "宮古諸島"
+      },
+      {
+        "id": "47-05",
+        "label": "八重山諸島"
+      },
+      {
+        "id": "47-06",
+        "label": "久米島"
+      },
+      {
+        "id": "47-07",
+        "label": "本島周辺離島"
+      }
+    ]
+  }
+]

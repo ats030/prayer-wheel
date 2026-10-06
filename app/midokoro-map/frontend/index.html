@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>みどころマップ｜史跡・祭り・温泉・特産物</title>
+  <meta name="description" content="日本各地の史跡、祭り、温泉、特産物を、同じ地図で種類を切り替えて探せます。">
+  <link rel="canonical" href="https://midokoro-map-736831430371.asia-northeast1.run.app/">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/app.css">
+  <script src="/vendor/leaflet.js" defer></script>
+  <script src="/vendor/leaflet.markercluster.js" defer></script>
+  <script src="/app.js" type="module"></script>
+  <script src="http://ubuntu-server-app:8526/v.js" data-site="midokoro-map" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="みどころマップのホーム"><img src="/favicon.svg" alt="" width="28" height="28"><h1>みどころマップ</h1></a>
+    <nav class="kind-tabs" role="tablist" aria-label="探すもの">
+      <button id="tab-shiseki" role="tab" data-kind="shiseki" aria-controls="view-shiseki" aria-selected="false" tabindex="-1">史跡</button>
+      <button id="tab-omatsuri" role="tab" data-kind="omatsuri" aria-controls="view-omatsuri" aria-selected="false" tabindex="-1">祭り</button>
+      <button id="tab-onsen" role="tab" data-kind="onsen" aria-controls="view-onsen" aria-selected="false" tabindex="-1">温泉</button>
+      <button id="tab-tokusan" role="tab" data-kind="tokusan" aria-controls="view-tokusan" aria-selected="false" tabindex="-1">特産物</button>
+    </nav>
+    <a class="history-link" href="/changelog">更新履歴</a>
+  </header>
+  <div id="workspace" aria-label="地図と検索"><p id="status" role="status">地図を読み込んでいます…</p></div>
+  <noscript>地図の表示にはJavaScriptが必要です。</noscript>
+</body>
+</html>

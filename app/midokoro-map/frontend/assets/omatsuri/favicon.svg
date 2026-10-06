@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <text id="kago-moji" x="50" y="68" font-family="'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif" font-size="55" font-weight="900" text-anchor="middle">祭</text>
+  </defs>
+  <rect x="20" y="8" width="60" height="14" rx="3" fill="#171717"/>
+  <path d="M20 20h60c10 14 12 46 0 60H20C8 66 10 34 20 20Z" fill="#d71920"/>
+  <use href="#kago-moji" fill="#fff" stroke="#fff" stroke-width="1.5" paint-order="stroke"/>
+  <rect x="20" y="78" width="60" height="14" rx="3" fill="#171717"/>
+</svg>

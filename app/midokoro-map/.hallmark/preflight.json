@@ -1,0 +1,16 @@
+{
+  "genre": "modern-minimal",
+  "macrostructure": "Workbench",
+  "palette": "existing warm paper / navy / vermilion",
+  "brand": "みどころマップ",
+  "font_exception": "existing Japanese system font retained",
+  "scope": "Shared category header; preserve domain controls and provenance",
+  "responsive_widths": [
+    320,
+    375,
+    414,
+    768,
+    1440
+  ],
+  "review": "5 widths and four categories checked in Chromium, no horizontal overflow; existing font/structure retained by brand requirement; mobile legend collapsed"
+}

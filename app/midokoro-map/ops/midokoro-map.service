@@ -1,0 +1,13 @@
+[Unit]
+Description=Midokoro Map (みどころマップ, port 8533)
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=simple
+WorkingDirectory=%h/app/midokoro-map
+ExecStart=%h/app/midokoro-map/run-local.sh
+Restart=on-failure
+RestartSec=10
+SuccessExitStatus=143
+[Install]
+WantedBy=default.target
