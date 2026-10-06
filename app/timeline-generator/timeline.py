@@ -788,29 +788,39 @@ def date_supported(year, label, evidence):
 
 QUOTE_SKIP = re.compile(r"[\s\W_…]")
 SENTENCE_END = re.compile(r"[。．！？!?]|\.(?:\s|$)")
+ELLIPSIS = re.compile(r"…+|\.{3,}|・{3,}|（中略）|\(中略\)")
+MAX_OMISSION = 300
 
 
 def repair_quote(evidence, source):
     """引用が原文とほぼ同じなら、モデルが見た段落の該当箇所そのものに置き換える。
-    表の行の書き直し、1字の写し誤り、「……」での中略を拾う。合わない字が3字以上なら None。"""
-    target = QUOTE_SKIP.sub("", evidence)
-    if len(target) < 8:
+    表の行の書き直し、1字の写し誤り、「……」での中略を拾う。合わない字が3字以上なら None。
+    「...」で区切った引用は区切りごとに照合し、同じ段落に順に並んでいれば省いた部分も含めて原文に置き換える（ats030-jjqhq）。"""
+    parts = [part for part in (QUOTE_SKIP.sub("", piece) for piece in ELLIPSIS.split(evidence)) if part]
+    if sum(map(len, parts)) < 8:
         return None
     best = None
     for passage in source.get("passages") or [{"text": source.get("text", "")[:3000]}]:
         text = compact(passage["text"])
         kept = [(i, ch) for i, ch in enumerate(text) if not QUOTE_SKIP.fullmatch(ch)]
         stripped = "".join(ch for _, ch in kept)
-        # 1字ずつの偶然の一致で範囲が広がらないよう、2字以上の連続一致だけを数える。
-        blocks = [b for b in SequenceMatcher(None, target, stripped, autojunk=False).get_matching_blocks() if b.size >= 2]
-        if not blocks:
-            continue
-        matched = sum(b.size for b in blocks)
-        span = blocks[-1].b + blocks[-1].size - blocks[0].b
+        spans, matched, offset = [], 0, 0
+        for target in parts:
+            # 1字ずつの偶然の一致で範囲が広がらないよう、2字以上の連続一致だけを数える。
+            blocks = [b for b in SequenceMatcher(None, target, stripped[offset:], autojunk=False).get_matching_blocks() if b.size >= 2]
+            if not blocks:
+                break
+            span = blocks[-1].b + blocks[-1].size - blocks[0].b
+            # 中略で省けるのは区切りの間だけで、一つの区切りの中に作文や長い省略は挟めない。
+            if span > len(target) * 3 // 2 + 4 or (spans and blocks[0].b > MAX_OMISSION):
+                break
+            matched += sum(b.size for b in blocks)
+            spans.append((offset + blocks[0].b, offset + blocks[-1].b + blocks[-1].size))
+            offset = spans[-1][1]
         # 長い引用でも作文を足せないよう、合わない字は割合ではなく2字までに限る。
-        if len(target) - matched > 2 or span > len(target) * 3 // 2 + 4:
+        if len(spans) < len(parts) or sum(map(len, parts)) - matched > 2:
             continue
-        start, end = kept[blocks[0].b][0], kept[blocks[-1].b + blocks[-1].size - 1][0] + 1
+        start, end = kept[spans[0][0]][0], kept[spans[-1][1] - 1][0] + 1
         # 文の途中で切ると「入城し|なかった」のように否定や留保が落ちるので、原文の文末まで含める。
         stop = SENTENCE_END.search(text, end - 1)
         end = stop.end() if stop else len(text)
@@ -818,6 +828,16 @@ def repair_quote(evidence, source):
         if best is None or matched > best[0]:
             best = (matched, repaired)
     return best[1] if best else None
+
+
+def miscopies(evidence, repaired):
+    """修復前後の引用から、2字以内の写し誤り（南京千良→南京千両）を左隣2字付きで返す。題名・説明の同じ誤記を直すのに使う。"""
+    wrong, right = QUOTE_SKIP.sub("", evidence), QUOTE_SKIP.sub("", repaired)
+    pairs = []
+    for op, i1, i2, j1, j2 in SequenceMatcher(None, wrong, right, autojunk=False).get_opcodes():
+        if op == "replace" and i2 - i1 == j2 - j1 <= 2 and i1 >= 2 and wrong[i1 - 2:i1] == right[j1 - 2:j1]:
+            pairs.append((wrong[i1 - 2:i2], right[j1 - 2:j2]))
+    return pairs
 
 
 def validate_events(raw, sources, query, reasons=None):
@@ -852,7 +872,12 @@ def validate_events(raw, sources, query, reasons=None):
                 if body_context and heading_year(body_context["date_heading"]) == year and heading_year(prefixed[1] + "年") == year:
                     evidence = prefixed[2]
         if evidence not in compact(source["text"]):
-            evidence = repair_quote(evidence, source) or evidence
+            repaired = repair_quote(evidence, source)
+            if repaired:
+                # 引用で写し誤った固有名は題名・説明でも同じように誤るので、原文の表記に揃える。
+                for wrong, right in miscopies(evidence, repaired):
+                    title, description = title.replace(wrong, right), description.replace(wrong, right)
+                evidence = repaired
         if not 8 <= len(evidence) <= 1600 or evidence not in compact(source["text"]) or not 1 <= len(title) <= 70 or not 1 <= len(description) <= 200:
             drop(item, "引用が原文にない、または長さが範囲外" if not 8 <= len(evidence) <= 1600 or evidence not in compact(source["text"]) else "見出し・説明の長さが範囲外")
             continue
@@ -1015,10 +1040,12 @@ RELATED_SCHEMA = {"type": "object", "properties": {"judgments": {"type": "array"
 
 
 def protected_source(query, result):
-    """テーマそのものの記事と「テーマの歴史」記事は判定に関係なく残す。"""
+    """テーマそのものの記事と「テーマの歴史」記事は判定に関係なく残す。
+    テーマ名を冠した博物館・資料館も残す。判定が回ごとに揺れ、新横浜ラーメン博物館を名前だけ同じ施設として外す回があった（ats030-jjqhq）。"""
     title = compact(result.get('title', '')).casefold()
     topic = compact(query.topic).casefold()
-    return title in {topic, topic + 'の歴史', 'history of ' + topic, 'history of the ' + topic}
+    return title in {topic, topic + 'の歴史', 'history of ' + topic, 'history of the ' + topic} \
+        or (topic in title and bool(re.search(r'博物館|資料館|ミュージアム|museum', title)))
 
 
 def related_sources(query, results, deadline, excluded):

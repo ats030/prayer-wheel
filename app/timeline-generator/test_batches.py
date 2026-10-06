@@ -376,6 +376,15 @@ class BatchTests(unittest.TestCase):
         self.assertEqual(sorted(fetched), ['https://example.org/a', 'https://example.org/c'])
         self.assertEqual(result['trace']['excluded_sources'], [{'title': '研究大学', 'url': 'https://example.org/b'}])
 
+    def test_source_filter_keeps_a_museum_named_after_the_theme(self):
+        query = t.parse_query('ラーメン')
+        results = [{'title': 'ラーメン', 'url': 'u0'}, {'title': '新横浜ラーメン博物館', 'url': 'u1'}, {'title': 'ラーメン橋', 'url': 'u2'}]
+        excluded = []
+        with patch.object(t, 'model_json', return_value={'judgments': [{'id': i, 'subject': '', 'related': False} for i in (1, 2)]}):
+            kept = t.related_sources(query, results, time.monotonic() + 60, excluded)
+        self.assertEqual([r['url'] for r in kept], ['u0', 'u1'])
+        self.assertEqual(excluded, [{'title': 'ラーメン橋', 'url': 'u2'}])
+
     def test_source_filter_keeps_everything_when_the_judgment_fails_or_removes_all(self):
         query = t.parse_query('研究')
         results = [{'title': '研究所', 'url': 'u1'}, {'title': '研究者', 'url': 'u2'}]

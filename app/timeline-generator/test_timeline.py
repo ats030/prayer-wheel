@@ -102,6 +102,28 @@ class EvidenceTests(unittest.TestCase):
         source = {"url": "https://example.org/ieyasu", "title": "家康", "text": text, "passages": [{"heading": "", "date_heading": "", "text": text}]}
         self.assertEqual(t.repair_quote("1600年、徳川家康は大坂城に入城した。", source), "1600年、徳川家康は大坂城に入城しなかったと伝わる。")
 
+    def test_quote_with_long_omission_and_miscopied_name_is_repaired(self):
+        # ラーメン v10 で、南京千両を「南京千良」と写し、70字ほどを「...」で省いた引用が落ちた。
+        text = "1937年(昭和12年)、久留米のうどん屋だった宮本時男は、横浜南京街の支那そばや、自分が長崎県島原市出身だったことから長崎ちゃんぽんからもヒントを得て清湯(透き通ったスープ)の豚骨スープを開発し、「南京千両」という屋号で屋台をひいた。豚骨ラーメンは1937年(昭和12年)に久留米ラーメンからはじまった。"
+        source = {"url": "https://example.org/ramen", "title": "ラーメン", "text": text, "passages": [{"heading": "", "date_heading": "", "text": text}]}
+        e = self.event | {"year": 1937, "date": "1937年", "title": "南京千良の屋台開業", "description": "宮本時男が豚骨スープの屋台「南京千良」を始めた。",
+                          "quote": "1937年(昭和12年)、久留米のうどん屋だった宮本時男は、...豚骨スープを開発し、「南京千良」という屋号で屋台をひいた。"}
+        result = t.validate_events([e], [source], t.parse_query("ラーメン"))
+        self.assertEqual([(r["title"], r["description"], r["quote"]) for r in result],
+                         [("南京千両の屋台開業", "宮本時男が豚骨スープの屋台「南京千両」を始めた。", text.split("。")[0] + "。")])
+
+    def test_omission_cannot_join_distant_or_reordered_text(self):
+        filler = "その後も多くの店が開かれた。" * 30
+        text = "1937年、宮本時男は久留米で屋台を始めた。" + filler + "1955年、別の店主が博多で屋台を開いた。"
+        source = {"url": "https://example.org/ramen", "title": "ラーメン", "text": text, "passages": [{"heading": "", "date_heading": "", "text": text}]}
+        for quote in ["1937年、宮本時男は久留米で…1955年、別の店主が博多で屋台を開いた。", "1955年、別の店主が博多で…1937年、宮本時男は久留米で屋台を始めた。"]:
+            with self.subTest(quote=quote):
+                self.assertIsNone(t.repair_quote(quote, source))
+
+    def test_miscopy_needs_matching_left_context(self):
+        self.assertEqual(t.miscopies("屋号は南京千良だった", "屋号は南京千両だった"), [("京千良", "京千両")])
+        self.assertEqual(t.miscopies("良い店だった", "両の店だった"), [])
+
     def test_display_year_cannot_disagree_with_sort_year(self):
         e = self.event | {"date": "2000年"}
         result = t.validate_events([e], self.sources, t.parse_query("コーヒー"))

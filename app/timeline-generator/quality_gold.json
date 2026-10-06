@@ -8,7 +8,7 @@
       "target_recall": 1.0,
       "milestones": [
         {"id": "arpanet", "label": "ARPANET開始", "years": [1969, 1969], "keywords": ["ARPANET"], "evidence": ["https://www.internetsociety.org/internet/history-internet/brief-history-internet/"]},
-        {"id": "tcpip", "label": "ARPANETのTCP/IP移行", "years": [1983, 1983], "keywords": ["TCP/IPへの移行", "TCP/IPに移行", "TCP/IPへ移行", "TCP/IP移行", "TCP/IPへの切り替え", "TCP/IPに切り替", "TCP/IPを採用", "TCP/IPの採用", "フラグデー", "Flag Day"], "evidence": ["https://www.internetsociety.org/news/press-releases/2013/new-years-day-marks-30th-anniversary-of-major-milestone-for-global-internet/"]},
+        {"id": "tcpip", "label": "ARPANETのTCP/IP移行", "years": [1983, 1983], "keywords": ["TCP/IPへの移行", "TCP/IPに移行", "TCP/IPへ移行", "TCP/IP移行", "TCP/IPへの切り替え", "TCP/IPに切り替", "TCP/IPへ切り替", "TCP/IPへの完全な切り替", "TCP/IPへ完全に切り替", "TCP/IPへの完全移行", "TCP/IPに完全移行", "TCP/IPを採用", "TCP/IPの採用", "フラグデー", "Flag Day"], "evidence": ["https://www.internetsociety.org/news/press-releases/2013/new-years-day-marks-30th-anniversary-of-major-milestone-for-global-internet/"]},
         {"id": "junet", "label": "JUNET運用開始", "years": [1984, 1984], "keywords": ["JUNET"], "evidence": ["https://www.nic.ad.jp/timeline/"]},
         {"id": "www", "label": "WWWの考案・公開", "years": [1989, 1993], "keywords": ["World Wide Web", "ワールドワイドウェブ", "WWWの考案", "WWWの公開", "WWWを考案", "WWWを公開", "WWWの誕生", "WWWの提案", "WWWを提案"], "evidence": ["https://home.cern/science/computing/the-birth-of-the-web/where-web-was-born/"]}
       ],

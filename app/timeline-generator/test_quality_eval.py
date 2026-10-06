@@ -263,6 +263,13 @@ class ReportTests(unittest.TestCase):
             event(1680, 'ジャワ島へのコーヒーの木移植', '1680年にオランダがイエメンから取り寄せたコーヒーの木をジャワ島に移植した。')]}
         self.assertIn('java', {f['id'] for f in q.evaluate_result(gold, result, 'コーヒー')['found']})
 
+    def test_bundled_gold_credits_tcpip_from_the_complete_switch_wording(self):
+        # 「TCP/IPへの完全な切り替え」のように修飾語が挟まっても、1983年のARPANET移行として数える
+        gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))
+        result = {'theme': 'インターネット', 'period': '全期間', 'events': [
+            event(1983, 'ARPANETのTCP/IPへの完全な切り替え', '1983年1月1日、ARPANETはTCP/IPへ完全に切り替えられた。')]}
+        self.assertIn('tcpip', {f['id'] for f in q.evaluate_result(gold, result, 'インターネット')['found']})
+
     def test_bundled_gold_set_is_well_formed(self):
         gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))
         for name, theme in gold['themes'].items():
