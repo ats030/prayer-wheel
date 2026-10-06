@@ -87,6 +87,16 @@ class ContextTests(unittest.TestCase):
         adjacent = article('<h2>アジア</h2><p>' + quote + 'これは伝承である。</p>')
         self.assertEqual(t.validate_events([event | {"description": "東京下谷に喫茶店「可否茶館」が開店した。"}], [adjacent], t.parse_query('コーヒー')), [])
 
+    def test_neighbor_hedge_about_another_century_does_not_drop_first_claim(self):
+        quote = '16世紀半ば、オスマン帝国の首都イスタンブールに世界で初めてコーヒーを提供する店が開業した。'
+        event = {"year": 1550, "date": "1550年", "title": "イスタンブールでのコーヒー店の開業", "description": "16世紀半ば、イスタンブールに世界で初めてコーヒーを提供する店が開業した。", "quote": quote, "source_id": 1}
+        other = '<p>ヨーロッパにコーヒーを提供する店が登場したのは(諸説あるものの)17世紀半ばのことで、ヴェネツィアに初めて誕生したとも言われる。</p>'
+        source = article('<h2>歴史</h2><p>' + quote + '</p>' + other)
+        self.assertEqual(len(t.validate_events([event], [source], t.parse_query('コーヒー'))), 1)
+        same = '<p>16世紀半ばのこの店が初めてとされる。</p>'
+        hedged = article('<h2>歴史</h2><p>' + quote + '</p>' + same)
+        self.assertEqual(t.validate_events([event], [hedged], t.parse_query('コーヒー')), [])
+
     def test_historical_name_is_not_treated_as_uncertain_claim(self):
         source=article('<h2>1958年</h2><p>初のインスタントラーメンを発売。それ以前は「中華そば」と言われていた。</p>')
         event={'year':1958,'date':'1958年','title':'インスタントラーメン発売','description':'インスタントラーメンを発売した。','source_id':1,'quote':source['passages'][0]['text']}
