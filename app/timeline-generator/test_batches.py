@@ -461,6 +461,47 @@ class BatchTests(unittest.TestCase):
         result = self.run_generation(history_source(t.BATCH_EVENTS), model=model, saturated=14)
         self.assertEqual(len(result['events']), t.BATCH_EVENTS)
 
+    def test_source_without_candidates_is_asked_again_alone(self):
+        first = history_source(3)
+        second = {'url': 'https://example.org/other', 'title': '別記事', 'passages': [{'heading': '背景', 'date_heading': '1850年', 'text': saved_event(1850)['quote']}]}
+        second['text'] = second['passages'][0]['text']
+        materials = []
+        def model(system, prompt, deadline, schema):
+            materials.append([m['source_id'] for m in json.loads(prompt.split('資料(JSON):\n', 1)[1])])
+            events = grounded_model(system, prompt, deadline, schema)['events']
+            # 初回は先頭の記事だけから選び、2本目の記事を読み飛ばす。
+            return {'events': [e for e in events if e['source_id'] == 1] if len(materials) == 1 else events}
+        with patch.object(t, 'model_json', side_effect=model):
+            generated = t.generate_batch(t.parse_query('研究'), [first, second], time.monotonic() + 900)
+        self.assertEqual(materials, [[1, 2], [2]])
+        self.assertEqual(sorted(e['year'] for e in generated['valid']), [1800, 1801, 1802, 1850])
+        self.assertEqual(generated['limit'], t.SATURATED_EVENTS)
+
+    def test_unused_source_events_survive_a_full_widened_batch(self):
+        first = history_source(14)
+        second = {'url': 'https://example.org/other', 'title': '別記事', 'passages': [{'heading': '背景', 'date_heading': '1850年', 'text': saved_event(1850)['quote']}]}
+        second['text'] = second['passages'][0]['text']
+        def model(system, prompt, deadline, schema):
+            events = grounded_model(system, prompt, deadline, schema)['events']
+            if '最大14件' in system:
+                return {'events': [e for e in events if e['source_id'] == 1][:14]}
+            # 初回は先頭の記事から7件で枠を埋め、2本目の記事は後の問い合わせでだけ読む。
+            return {'events': [e for e in events if e['source_id'] == 1][:7] if '"source_id": 1' in prompt else events}
+        with patch.object(t, 'model_json', side_effect=model):
+            generated = t.generate_batch(t.parse_query('研究'), [first, second], time.monotonic() + 900)
+        self.assertIn(1850, [e['year'] for e in generated['valid']])
+        self.assertEqual(generated['limit'], 15)
+
+    def test_batch_using_every_source_is_not_asked_again(self):
+        calls = []
+        def model(system, prompt, deadline, schema):
+            calls.append(prompt)
+            return grounded_model(system, prompt, deadline, schema)
+        with patch.object(t, 'model_json', side_effect=model):
+            generated = t.generate_batch(t.parse_query('研究'), [history_source(3)], time.monotonic() + 900)
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(generated['limit'], t.BATCH_EVENTS)
+
     def test_trace_marks_unprocessed_batches_after_deadline(self):
         clock = [0]
         def finish_near_deadline(query, sources, emit, deadline, existing, generated, dropped=None, **_):
