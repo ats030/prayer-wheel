@@ -112,6 +112,11 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual([(r["title"], r["description"], r["quote"]) for r in result],
                          [("南京千両の屋台開業", "宮本時男が豚骨スープの屋台「南京千両」を始めた。", text.split("。")[0] + "。")])
 
+    def test_one_character_piece_between_omissions_counts_as_mismatch(self):
+        text = "1937年、宮本時男は横浜で屋台を始めた。"
+        source = {"url": "https://example.org/ramen", "title": "ラーメン", "text": text, "passages": [{"heading": "", "date_heading": "", "text": text}]}
+        self.assertEqual(t.repair_quote("1937年、宮本時男…は…横浜で屋台を始めた。", source), text)
+
     def test_omission_cannot_join_distant_or_reordered_text(self):
         filler = "その後も多くの店が開かれた。" * 30
         text = "1937年、宮本時男は久留米で屋台を始めた。" + filler + "1955年、別の店主が博多で屋台を開いた。"

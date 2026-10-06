@@ -805,7 +805,9 @@ def repair_quote(evidence, source):
         kept = [(i, ch) for i, ch in enumerate(text) if not QUOTE_SKIP.fullmatch(ch)]
         stripped = "".join(ch for _, ch in kept)
         spans, matched, offset = [], 0, 0
-        for target in parts:
+        # 「…は…」のような1字の区切りは照合できないので、合わない字として数える。
+        anchors = [part for part in parts if len(part) >= 2]
+        for target in anchors:
             # 1字ずつの偶然の一致で範囲が広がらないよう、2字以上の連続一致だけを数える。
             blocks = [b for b in SequenceMatcher(None, target, stripped[offset:], autojunk=False).get_matching_blocks() if b.size >= 2]
             if not blocks:
@@ -818,7 +820,7 @@ def repair_quote(evidence, source):
             spans.append((offset + blocks[0].b, offset + blocks[-1].b + blocks[-1].size))
             offset = spans[-1][1]
         # 長い引用でも作文を足せないよう、合わない字は割合ではなく2字までに限る。
-        if len(spans) < len(parts) or sum(map(len, parts)) - matched > 2:
+        if not anchors or len(spans) < len(anchors) or sum(map(len, parts)) - matched > 2:
             continue
         start, end = kept[spans[0][0]][0], kept[spans[-1][1] - 1][0] + 1
         # 文の途中で切ると「入城し|なかった」のように否定や留保が落ちるので、原文の文末まで含める。
