@@ -33,7 +33,7 @@
     const buttons = [...get('choices').children];
     buttons.forEach(b => { b.disabled = true; });
     try {
-      const response = await fetch('/kouko/trial/answer', {
+      const response = await fetch(get('trial').dataset.answerUrl, {
         method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({question_id: q.id, chosen}),
       });

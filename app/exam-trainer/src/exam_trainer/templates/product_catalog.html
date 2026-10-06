@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}検定の教材一覧 | exam-trainer{% endblock %}
+{% block navlinks %}<a href="/">解く</a><a href="/products">教材一覧</a>{% endblock %}
+{% block head %}<meta name="robots" content="noindex,nofollow"><link rel="stylesheet" href="/static/kouko.css?v={{ static_version }}">{% endblock %}
+{% block body %}
+<main class="wrap kouko-wrap">
+  <h1>検定の教材一覧</h1>
+  <p>10問を解いて解説を読む。PDFを保存して紙で解き直す。検定ごとに、体験と教材の制作物をまとめています。</p>
+  <p class="preview-banner">未校閲の教材は、正誤・出題範囲・出典の利用条件を販売前に確認します。</p>
+  <div class="artifact-list">
+  {% for entry in entries %}<article class="card artifact"><p class="eyebrow">四択{{ entry.count }}問 / 無料体験10問 / {{ "校閲済み" if entry.reviewed else "未校閲" }}</p><h2>{{ entry.name }}</h2>
+    <div class="product-actions"><a class="btn btn-primary" href="{{ entry.url }}">教材の紹介</a><a href="{{ entry.url }}/trial">無料10問</a><a href="{{ entry.url }}/materials">PDF・原稿</a></div>
+  </article>{% endfor %}
+  </div>
+</main>
+{% endblock %}
+{% block footer %}<footer class="affiliate-site-disclosure">各検定主催者の公式教材、認定教材ではありません。</footer>{% endblock %}

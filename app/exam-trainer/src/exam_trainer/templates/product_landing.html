@@ -1,0 +1,21 @@
+{% extends "kouko_base.html" %}
+{% block product_body %}
+<header class="product-hero">
+  <p class="eyebrow">{{ exam_name }}を学ぶ人へ</p>
+  <h1>{{ product.title }}</h1>
+  <p class="lead">まず10問を解き、正解の理由を解説で確かめましょう。PDFには全{{ product.questions | length }}問と解説、参考資料をまとめています。</p>
+  <div class="product-actions"><a class="btn btn-primary" href="{{ product_url }}/trial">無料10問を解く</a><a href="{{ product_url }}/sample">解説の見本を読む</a></div>
+  <p class="muted">登録不要。1問ずつ正誤と解説を確認できます。</p>
+  <p><a href="{{ product_url }}/materials">{{ product.questions | length }}問の校閲用PDF・見本PDF・原稿を開く</a></p>
+</header>
+<section class="product-section"><h2>収録分野</h2><ol class="contents-list">{% for item in contents %}<li>{{ item }}</li>{% endfor %}</ol>
+  <p class="muted">{{ product.scope_note }}</p>
+</section>
+<section class="product-section"><h2>解説を読んで解き直す</h2><p>全問に解説と出典のリンクを付けています。無料体験で迷った問題を読み返し、PDFの解答欄を使ってもう一度解けます。</p></section>
+{% include "kouko_purchase.html" %}
+<section class="product-section"><h2>利用前に</h2>
+  <details><summary>PDFには何が入っていますか？</summary><p>四択{{ product.questions | length }}問、解答欄、解答一覧、全問解説、参考資料を収録しています。無料体験の10問も含みます。</p></details>
+  <details><summary>検証済みの問題なのに未校閲なのはなぜですか？</summary><p>既存バンクの検証済み問題から教材用のコピーを作っています。機械検証は人の校閲を代替しません。正誤や出題範囲、出典の利用条件は販売前に確認します。</p></details>
+  <details><summary>本試験の範囲を網羅していますか？</summary><p>収録済み問題の練習教材です。全範囲への対応、難易度の一致、合格は保証しません。主催者の公式教材、認定教材ではありません。</p></details>
+</section>
+{% endblock %}

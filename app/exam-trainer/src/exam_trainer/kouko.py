@@ -15,22 +15,58 @@ ARTIFACT_DIR = Path(__file__).resolve().parents[2] / "docs" / "kouko"
 
 
 def artifacts() -> list[dict]:
+    return artifact_list(ARTIFACT_DIR, content_digest(), 50, "kouko", release_state()["reviewed"])
+
+
+def artifact_list(directory: Path, digest: str, count: int, prefix: str, reviewed: bool = False) -> list[dict]:
     """A fixed list of resources; never turn a caller's path into a filename."""
     specs = [
-        ("review-pdf", "50問の校閲用PDF", "問題、解答、全問解説と参考資料を収録。", "kouko-review.pdf"),
-        ("sample-pdf", "10問の見本PDF", "無料体験と同じ10問を収録。", "kouko-sample.pdf"),
-        ("manuscript", "問題と解説の原稿", "全50問の問題、解説と出典をテキストで確認。", "manuscript.md"),
+        ("review-pdf", f"{count}問の校閲用PDF", "問題、解答、全問解説と参考資料を収録。", f"{prefix}-review.pdf"),
+        ("sample-pdf", "10問の見本PDF", "無料体験と同じ10問を収録。", f"{prefix}-sample.pdf"),
+        ("manuscript", "問題と解説の原稿", f"全{count}問の問題、解説と出典をテキストで確認。", "manuscript.md"),
         ("sales-copy", "販売説明とSNSの原稿", "BOOTHの商品説明と一問解説の投稿案。", "sales-copy.md"),
-        ("review-sheet", "校閲記録のCSV", "各問の確認結果や修正点を記入するシート。", f"review-{content_digest()[:12]}.csv"),
+        ("review-sheet", "校閲記録のCSV", "各問の確認結果や修正点を記入するシート。", f"review-{digest[:12]}.csv"),
         ("claim-audit", "根拠確認の記録", "問題の根拠と、校閲で確認する点。", "claim-audit.md"),
         ("release-guide", "校閲から販売までの手順", "校閲記録、PDFの更新、出品までの進め方。", "release-guide.md"),
     ]
-    return [{"id": key, "title": title, "description": description,
-             "path": ARTIFACT_DIR / filename,
-             "media_type": "application/pdf" if filename.endswith(".pdf") else "text/plain; charset=utf-8",
-             "format": "PDF" if filename.endswith(".pdf") else "CSV" if filename.endswith(".csv") else "テキスト",
-             "available": (ARTIFACT_DIR / filename).is_file()}
-            for key, title, description, filename in specs]
+    manifest = directory / "artifact-state.json"
+    try:
+        records = json.loads(manifest.read_text())
+    except (OSError, ValueError):
+        records = {}
+    if not isinstance(records, dict):
+        records = {}
+    assets = []
+    for key, title, description, filename in specs:
+        path = directory / filename
+        available = path.is_file()
+        record = records.get(key, {})
+        if not isinstance(record, dict):
+            record = {}
+        current = (available and record.get("content_sha256") == digest
+                   and record.get("file_sha256") == hashlib.sha256(path.read_bytes()).hexdigest()
+                   and (not record.get("reviewed_pdf") or reviewed))
+        assets.append({"id": key, "title": title, "description": description, "path": path,
+                       "media_type": "application/pdf" if filename.endswith(".pdf") else "text/plain; charset=utf-8",
+                       "format": "PDF" if filename.endswith(".pdf") else "CSV" if filename.endswith(".csv") else "テキスト",
+                       "available": available, "current": current})
+    return assets
+
+
+def record_artifacts(directory: Path, digest: str, count: int, prefix: str,
+                     reviewed: bool, preserve: set[str] | None = None) -> None:
+    """Record a completed build; preserved human copy stays on its own revision."""
+    path = directory / "artifact-state.json"
+    records = json.loads(path.read_text()) if path.exists() else {}
+    for asset in artifact_list(directory, digest, count, prefix, reviewed):
+        if not asset["available"] or asset["id"] in (preserve or set()):
+            continue
+        records[asset["id"]] = {"content_sha256": digest,
+                                "file_sha256": hashlib.sha256(asset["path"].read_bytes()).hexdigest(),
+                                "reviewed_pdf": reviewed if asset["format"] == "PDF" else False}
+    temp = path.with_suffix(".tmp")
+    temp.write_text(json.dumps(records, indent=2) + "\n")
+    temp.replace(path)
 
 
 def load_product() -> dict:
@@ -56,9 +92,13 @@ def content_digest() -> str:
 
 
 def release_state() -> dict:
-    release = json.loads((PRODUCT_DIR / "kouko-release.json").read_text())
+    return release_state_for(PRODUCT_DIR / "kouko-release.json", content_digest())
+
+
+def release_state_for(path: Path, digest: str) -> dict:
+    release = json.loads(path.read_text())
     reviewed = (
-        release.get("reviewed_sha256") == content_digest()
+        release.get("reviewed_sha256") == digest
         and bool(release.get("reviewer")) and bool(release.get("reviewed_at"))
         and release.get("source_terms_checked") is True
     )

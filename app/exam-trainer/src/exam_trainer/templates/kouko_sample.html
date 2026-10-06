@@ -1,7 +1,7 @@
 {% extends "kouko_base.html" %}
 {% block product_body %}
 <h1>PDFの見本と目次</h1><p>無料体験と同じ10問を掲載しています。PDFでは問題、解答一覧、解説を分け、印刷して解き直せる構成にします。</p>
-<h2>全50問の目次</h2><ol class="contents-list"><li>考古資料の見方と旧石器</li><li>縄文の集落と交流</li><li>弥生の農具と集落</li><li>古墳と土器生産</li><li>古代の宮殿、木簡、壁画</li></ol>
+<h2>全{{ product.questions | length }}問の目次</h2><ol class="contents-list">{% for item in contents %}<li>{{ item }}</li>{% endfor %}</ol>
 {% for q in sample %}<article class="card sample-question"><p class="eyebrow">問{{ q.id }} / {{ q.category }}</p><h2>{{ q.stem }}</h2>
 <ol type="A">{% for choice in q.choices %}<li>{{ choice }}</li>{% endfor %}</ol>
 <details><summary>正解と解説を読む</summary><p><strong>正解：{{ "ABCD"[q.answer] }} {{ q.choices[q.answer] }}</strong></p><p>{{ q.explanation }}</p>

@@ -2,20 +2,20 @@
 {% block product_body %}
 <h1>無料10問で基礎を確認</h1>
 <p class="muted">1問ずつ解説を読めます。結果はこの画面を開いている間だけ保持されます。再読み込みすると最初からになります。</p>
-<noscript><p>この体験にはJavaScriptが必要です。<a href="/kouko/sample">問題と解説の見本</a>はそのまま読めます。</p></noscript>
-<section class="card trial" id="trial" hidden>
+<noscript><p>この体験にはJavaScriptが必要です。<a href="{{ product_url }}/sample">問題と解説の見本</a>はそのまま読めます。</p></noscript>
+<section class="card trial" id="trial" data-answer-url="{{ product_url }}/trial/answer" hidden>
   <p id="progress" class="eyebrow"></p><progress id="trial-progress" value="0" max="10" aria-label="回答済みの問題数"></progress>
   <h2 id="question" tabindex="-1"></h2><div id="choices" class="trial-choices"></div>
   <p id="trial-error" role="alert" hidden></p>
   <div id="feedback" aria-live="polite" hidden><h3 id="verdict"></h3><p id="explanation"></p><a id="source" target="_blank" rel="noopener"></a>
-    <p><a href="/kouko#purchase">解説付きPDFを見る</a></p>
+    <p><a href="{{ product_url }}#purchase">解説付きPDFを見る</a></p>
   </div>
   <button class="btn btn-primary" id="next" hidden>次の問題へ</button>
 </section>
 <section class="card trial-result" id="result" hidden aria-labelledby="result-title">
   <h2 id="result-title" tabindex="-1">10問を解き終えました</h2><p class="score" id="score"></p>
   <p>この10問の結果は、本試験の合否を予測するものではありません。</p><div id="review-topics"></div>
-  <div class="product-actions"><a class="btn btn-ghost" href="/kouko/sample">問題と解説を読み返す</a><button class="btn btn-ghost" id="restart">もう一度解く</button></div>
+  <div class="product-actions"><a class="btn btn-ghost" href="{{ product_url }}/sample">問題と解説を読み返す</a><button class="btn btn-ghost" id="restart">もう一度解く</button></div>
 </section>
 <div class="product-section" id="pdf">{% include "kouko_purchase.html" %}</div>
 {% endblock %}

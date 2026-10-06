@@ -1,0 +1,37 @@
+{
+  "review-pdf": {
+    "content_sha256": "d4cc15453631e4135825d0aa5407f0136186b11c70d10952bdc23331d612450c",
+    "file_sha256": "3aa50176012f8f15603151494efec8d6197ffcd4266f366bfddbe8dec49d52d2",
+    "reviewed_pdf": false
+  },
+  "sample-pdf": {
+    "content_sha256": "d4cc15453631e4135825d0aa5407f0136186b11c70d10952bdc23331d612450c",
+    "file_sha256": "9e4fdb204332f84d8eb9a4a3482a655d952e2a49d36884b5546a88e300e796b6",
+    "reviewed_pdf": false
+  },
+  "manuscript": {
+    "content_sha256": "d4cc15453631e4135825d0aa5407f0136186b11c70d10952bdc23331d612450c",
+    "file_sha256": "ae8012d6ef9eaed12bee0dc014337f50508263f09c5f76b09864483240f0f757",
+    "reviewed_pdf": false
+  },
+  "sales-copy": {
+    "content_sha256": "d4cc15453631e4135825d0aa5407f0136186b11c70d10952bdc23331d612450c",
+    "file_sha256": "fda9db565461e7328c92ddd1f44692404154eafa350873af36846c5d7c06929a",
+    "reviewed_pdf": false
+  },
+  "review-sheet": {
+    "content_sha256": "d4cc15453631e4135825d0aa5407f0136186b11c70d10952bdc23331d612450c",
+    "file_sha256": "75a21a6bd7beda905ef4342e13faa5e02a3cd1f06b3b8941581b611476898f12",
+    "reviewed_pdf": false
+  },
+  "claim-audit": {
+    "content_sha256": "d4cc15453631e4135825d0aa5407f0136186b11c70d10952bdc23331d612450c",
+    "file_sha256": "051abb4a0582c6767cc76daea5bf45af44e13af07160e34f4c421a856175b106",
+    "reviewed_pdf": false
+  },
+  "release-guide": {
+    "content_sha256": "d4cc15453631e4135825d0aa5407f0136186b11c70d10952bdc23331d612450c",
+    "file_sha256": "004f783e3a96e57e9666af74aaf614c16aa6a2c607b8b7f3367ec7551413ac7d",
+    "reviewed_pdf": false
+  }
+}

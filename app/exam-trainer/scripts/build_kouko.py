@@ -5,6 +5,7 @@ Run with ~/.venv/bin/python app/exam-trainer/scripts/build_kouko.py.
 No network, bank mutations, approval changes, or uploads are performed.
 """
 
+import argparse
 import csv
 import html
 import sys
@@ -31,9 +32,11 @@ def chunks(items, size=5):
     return [items[i:i + size] for i in range(0, len(items), size)]
 
 
-def render_book(product, questions, sample=False):
-    reviewed = kouko.release_state()["reviewed"]
-    label = "見本10問" if sample else "50問"
+def render_book(product, questions, sample=False, *, reviewed=None, groups=None, exam_name="考古検定"):
+    if reviewed is None:
+        reviewed = kouko.release_state()["reviewed"]
+    groups = GROUPS if groups is None else groups
+    label = f"見本{len(questions)}問" if sample else f"{len(questions)}問"
     stamp = "" if reviewed else "校閲用原稿 / 未校閲 / 販売不可"
     pages = []
     def page(title, body, kind=''):
@@ -42,9 +45,9 @@ def render_book(product, questions, sample=False):
          f'<p>四択{label} / 解答と解説 / 参考資料付き</p><p>exam-trainer<br>第{escape(product["version"])}版</p>'
          '<h3>使い方</h3><ol><li>問題を解き、解答欄にA〜Dを記入する。</li><li>解答一覧で採点する。</li>'
          '<li>解説と参考資料を読み、迷った問題を解き直す。</li></ol>'
-         f'<p>{escape(product["scope_note"])}</p><p>考古検定主催者の公式教材、認定教材ではありません。'
+         f'<p>{escape(product["scope_note"])}</p><p>{escape(exam_name)}主催者の公式教材、認定教材ではありません。'
          '本試験の問題を転載した教材ではありません。</p><h3>目次</h3><ol>'
-         + ''.join(f'<li>{escape(t)}</li>' for t in GROUPS) + '</ol>'
+         + ''.join(f'<li>{escape(t)}</li>' for t in groups) + '</ol>'
          '<p>個人の学習用に保存、印刷できます。ファイルの再配布、再販売はできません。</p>')
     # Two columns keep the 50-row answer sheet on one page.
     tables = []
@@ -63,20 +66,22 @@ def render_book(product, questions, sample=False):
     for group in chunks(questions):
         body = ''
         for q in group:
-            source = product['sources'][q['source']]
             body += f'<article><h3>問{q["id"]}　正解：{LETTERS[q["answer"]]} {escape(q["choices"][q["answer"]])}</h3>'
-            body += f'<p>{escape(q["explanation"])}</p><p class="reference">参考 [{escape(q["source"])}]：'
-            body += f'<a href="{escape(source["url"])}">{escape(source["title"])}</a></p></article>'
+            body += f'<p>{escape(q["explanation"])}</p>'
+            for key in q.get('source_keys', [q['source']]):
+                source = product['sources'][key]
+                body += f'<p class="reference">参考 [{escape(key)}]：<a href="{escape(source["url"])}">{escape(source["title"])}</a></p>'
+            body += '</article>'
         page('解説', body)
-    used = sorted({q['source'] for q in questions})
+    used = sorted({key for q in questions for key in q.get('source_keys', [q['source']])})
     for group in chunks(used):
         body = ''
         for key in group:
             source = product['sources'][key]
             body += f'<article><h3>[{key}] {escape(source["title"])}</h3><p class="reference"><a href="{escape(source["url"])}">{escape(source["url"])}</a></p>'
-            body += f'<p class="reference">確認日：{escape(source["checked_at"])}</p></article>'
+            body += f'<p class="reference">{escape(source.get("date_label", "確認日"))}：{escape(source["checked_at"])}</p></article>'
         page('参考資料', body)
-    return '''<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><title>考古検定 基礎練習</title><style>
+    return '''<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><title>練習問題と解説</title><style>
 @page { size: A4; margin: 17mm 18mm; }
 * { box-sizing: border-box; } body { font-family: "Noto Sans CJK JP", sans-serif; color: #202020; font-size: 11pt; line-height: 1.65; }
 .page { break-after: page; } .page:last-child { break-after: auto; } h2 { font-size: 22pt; margin: 6mm 0; } h3 { font-size: 11pt; margin: 0 0 2mm; }
@@ -88,7 +93,7 @@ th,td { border: 1px solid #aaa; padding: 1mm 2mm; height: 7mm; } .key-grid { dis
 </style></head><body>''' + ''.join(pages) + '</body></html>'
 
 
-def main():
+def main(confirm_copy=False):
     from playwright.sync_api import sync_playwright
     from pypdf import PdfWriter
 
@@ -144,9 +149,14 @@ def main():
                                  '/Subject': 'Content SHA-256: ' + kouko.content_digest()})
             writer.write(OUTPUT / f'{name}.pdf')
         browser.close()
+    kouko.record_artifacts(OUTPUT, kouko.content_digest(), 50, "kouko", kouko.release_state()["reviewed"],
+                           preserve=set() if confirm_copy else {"sales-copy", "release-guide"})
     print(f'Built {len(questions)} questions, answers={dict(Counter(q["answer"] for q in questions))}, digest={kouko.content_digest()}')
     print(f'Artifacts: {OUTPUT}')
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--confirm-copy', action='store_true',
+                        help='手作成の販売原稿と販売手順が現在の教材の版に合うことを確認済みとして記録')
+    main(parser.parse_args().confirm_copy)

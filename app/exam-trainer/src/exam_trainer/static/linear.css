@@ -284,3 +284,11 @@ input[type="text"]:focus, textarea:focus, select:focus {
 @media (max-width: 760px) {
   .job-panel { align-items: stretch; flex-direction: column; }
 }
+/* Keep the exam picker and教材 links reachable on narrow screens. */
+@media (max-width: 768px) {
+  .nav { height: auto; min-height: 56px; flex-wrap: wrap; padding: 12px; gap: 8px; }
+  .nav .nav-links { order: 2; width: 100%; min-width: 0; overflow-x: auto; }
+  .nav .nav-links a { white-space: nowrap; flex-shrink: 0; }
+  .nav .compact-select { max-width: 160px; }
+  .nav .meta { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}

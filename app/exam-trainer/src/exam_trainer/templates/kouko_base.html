@@ -1,16 +1,16 @@
 {% extends "base.html" %}
-{% block navlinks %}<a href="/kouko/trial">無料10問</a><a href="/kouko/sample">見本</a>{% if admin_view %}<a href="/admin">管理</a>{% endif %}{% endblock %}
-{% block title %}考古検定 入門クラスの練習問題と解説 | exam-trainer{% endblock %}
+{% block navlinks %}<a href="/products">教材一覧</a><a href="{{ product_url }}/trial">無料10問</a><a href="{{ product_url }}/sample">見本</a>{% if admin_view %}<a href="/admin">管理</a>{% endif %}{% endblock %}
+{% block title %}{{ product.title }} | exam-trainer{% endblock %}
 {% block head %}
-<meta name="description" content="考古検定の入門クラスに向けて、考古資料、縄文、弥生、古墳の基礎を四択問題で確認。無料10問と解説付きPDFの見本を読めます。">
+<meta name="description" content="{{ product.subtitle }}。無料10問と解説付きPDFの見本を読めます。">
 {% if not release.reviewed %}<meta name="robots" content="noindex,nofollow">{% endif %}
 <link rel="stylesheet" href="/static/kouko.css?v={{ static_version }}">
 {% endblock %}
 {% block body %}
 <main class="wrap kouko-wrap">
   {% if not release.reviewed %}<p class="preview-banner" role="status">未校閲の教材です。正解や解説に誤りが含まれる可能性があります。exam-trainerの利用者向けに、校閲用の資料を共有しています。</p>{% endif %}
-  <nav class="product-nav" aria-label="考古教材"><a href="/kouko">教材の紹介</a><a href="/kouko/trial">無料10問</a><a href="/kouko/sample">解説の見本</a><a href="/kouko/materials">PDF・原稿</a></nav>
+  <nav class="product-nav" aria-label="{{ product_name }}"><a href="{{ product_url }}">教材の紹介</a><a href="{{ product_url }}/trial">無料10問</a><a href="{{ product_url }}/sample">解説の見本</a><a href="{{ product_url }}/materials">PDF・原稿</a></nav>
   {% block product_body %}{% endblock %}
 </main>
 {% endblock %}
-{% block footer %}<footer class="affiliate-site-disclosure">exam-trainerのオリジナル教材です。考古検定主催者の公式教材、認定教材ではありません。</footer>{% endblock %}
+{% block footer %}<footer class="affiliate-site-disclosure">exam-trainerのオリジナル教材です。{{ exam_name }}主催者の公式教材、認定教材ではありません。</footer>{% endblock %}

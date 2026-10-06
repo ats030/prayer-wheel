@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Literal
 from pydantic import BaseModel
 
-from . import bank, db, jobs, kouko, ollama_client, web
+from . import bank, db, jobs, kouko, products, ollama_client, web
 from .config import settings
 
 logger = logging.getLogger(__name__)
@@ -55,6 +55,11 @@ def _is_admin(request: Request) -> bool:
 @app.middleware("http")
 async def protect_admin(request: Request, call_next):
     path = request.url.path
+    if path == "/products" or path.startswith("/products/"):
+        response = await call_next(request)
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Robots-Tag"] = "noindex"
+        return response
     if path == "/kouko" or path.startswith("/kouko/"):
         reviewed = kouko.release_state()["reviewed"]
         response = await call_next(request)
@@ -147,6 +152,9 @@ def _kouko_page(request: Request, name: str, **extra) -> HTMLResponse:
         "request": request, "exam": None, "exams": [],
         "static_version": STATIC_VERSION, "product": product,
         "release": kouko.release_state(), "admin_view": _is_admin(request),
+        "product_url": "/kouko", "product_name": "考古教材", "exam_name": "考古検定",
+        "contents": ["考古資料の見方と旧石器", "縄文の集落と交流", "弥生の農具と集落",
+                     "古墳と土器生産", "古代の宮殿、木簡、壁画"],
         **extra,
     })
 
@@ -178,6 +186,8 @@ def kouko_file(asset_id: str, download: bool = False) -> FileResponse:
     asset = next((item for item in kouko.artifacts() if item["id"] == asset_id), None)
     if asset is None or not asset["available"]:
         raise HTTPException(status_code=404, detail="資料が見つかりません")
+    if not asset["current"]:
+        raise HTTPException(status_code=409, detail="資料は版の確認・更新待ちです")
     return FileResponse(asset["path"], media_type=asset["media_type"],
                         filename=asset["path"].name,
                         content_disposition_type="attachment" if download else "inline")
@@ -191,6 +201,83 @@ class KoukoAnswerIn(BaseModel):
 @app.post("/kouko/trial/answer")
 def kouko_answer(payload: KoukoAnswerIn) -> dict:
     result = kouko.check_answer(payload.question_id, payload.chosen)
+    if result is None:
+        raise HTTPException(status_code=404, detail="無料体験の問題ではありません")
+    return result
+
+
+def _editorial_product(product_id: str) -> dict:
+    try:
+        return products.load_product(product_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="教材が見つかりません")
+
+
+def _product_page(request: Request, product_id: str, template: str, **extra) -> HTMLResponse:
+    product = _editorial_product(product_id)
+    return templates.TemplateResponse(request, template, {
+        "request": request, "exam": None, "exams": [], "product": product,
+        "static_version": STATIC_VERSION, "admin_view": _is_admin(request),
+        "product_url": f"/products/{product_id}", "product_name": product["exam_name"] + "の教材",
+        "exam_name": product["exam_name"], "contents": product["contents"],
+        "release": products.release_state(product_id), **extra,
+    })
+
+
+@app.get("/products", response_class=HTMLResponse)
+def product_catalog(request: Request) -> HTMLResponse:
+    entries = [{"name": "考古検定 入門クラス", "url": "/kouko", "count": 50,
+                "reviewed": kouko.release_state()["reviewed"]}]
+    for product_id, name in products.EXAMS.items():
+        product = products.load_product(product_id)
+        entries.append({"name": name, "url": f"/products/{product_id}",
+                        "count": len(product["questions"]), "reviewed": products.release_state(product_id)["reviewed"]})
+    return templates.TemplateResponse(request, "product_catalog.html", {
+        "request": request, "exam": None, "exams": [], "static_version": STATIC_VERSION,
+        "entries": entries,
+    })
+
+
+@app.get("/products/{product_id}", response_class=HTMLResponse)
+def product_landing(request: Request, product_id: str) -> HTMLResponse:
+    return _product_page(request, product_id, "product_landing.html")
+
+
+@app.get("/products/{product_id}/trial", response_class=HTMLResponse)
+def product_trial(request: Request, product_id: str) -> HTMLResponse:
+    product = _editorial_product(product_id)
+    return _product_page(request, product_id, "kouko_trial.html",
+                         trial_questions=kouko.trial_payload(product))
+
+
+@app.get("/products/{product_id}/sample", response_class=HTMLResponse)
+def product_sample(request: Request, product_id: str) -> HTMLResponse:
+    product = _editorial_product(product_id)
+    return _product_page(request, product_id, "kouko_sample.html", sample=kouko.sample_questions(product))
+
+
+@app.get("/products/{product_id}/materials", response_class=HTMLResponse)
+def product_materials(request: Request, product_id: str) -> HTMLResponse:
+    _editorial_product(product_id)
+    return _product_page(request, product_id, "kouko_materials.html", artifacts=products.artifacts(product_id))
+
+
+@app.get("/products/{product_id}/files/{asset_id}")
+def product_file(product_id: str, asset_id: str, download: bool = False) -> FileResponse:
+    _editorial_product(product_id)
+    asset = next((item for item in products.artifacts(product_id) if item["id"] == asset_id), None)
+    if asset is None or not asset["available"]:
+        raise HTTPException(status_code=404, detail="資料が見つかりません")
+    if not asset["current"]:
+        raise HTTPException(status_code=409, detail="資料は版の確認・更新待ちです")
+    return FileResponse(asset["path"], media_type=asset["media_type"], filename=asset["path"].name,
+                        content_disposition_type="attachment" if download else "inline")
+
+
+@app.post("/products/{product_id}/trial/answer")
+def product_answer(product_id: str, payload: KoukoAnswerIn) -> dict:
+    _editorial_product(product_id)
+    result = products.check_answer(product_id, payload.question_id, payload.chosen)
     if result is None:
         raise HTTPException(status_code=404, detail="無料体験の問題ではありません")
     return result

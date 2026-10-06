@@ -19,6 +19,7 @@ def editorial(tmp_path, monkeypatch):
     monkeypatch.setattr(settings, 'admin_token', 'editorial-test-token')
     artifacts = tmp_path / 'artifacts'
     artifacts.mkdir()
+    shutil.copyfile(kouko.ARTIFACT_DIR / 'artifact-state.json', artifacts / 'artifact-state.json')
     for item in kouko.artifacts():
         if item['available']:
             shutil.copyfile(item['path'], artifacts / item['path'].name)
