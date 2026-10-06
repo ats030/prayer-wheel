@@ -13,13 +13,16 @@
   <nav class="nav">
     <a class="brand" href="/">exam-trainer</a>
     <div class="nav-links" aria-label="メインナビゲーション">
+      {% block navlinks %}
       <a href="/{% if exam %}?exam_id={{ exam.id }}{% endif %}">解く</a>
       <a href="/weakness{% if exam %}?exam_id={{ exam.id }}{% endif %}">弱点</a>
+      {% if kouko_available or admin_view %}<a href="/kouko">考古教材</a>{% endif %}
       {% if admin_view %}
       <a href="/admin/bank{% if exam %}?exam_id={{ exam.id }}{% endif %}">問題バンク</a>
       <a href="/admin/settings{% if exam %}?exam_id={{ exam.id }}{% endif %}">試験の設定</a>
       <a href="/">公開ページ</a>
       {% endif %}
+      {% endblock %}
     </div>
     <span class="spacer"></span>
     {% if exams | length > 1 %}
@@ -32,7 +35,7 @@
     <span class="meta">{% block navmeta %}{% if exam %}{{ exam.name }}{% endif %}{% endblock %}</span>
   </nav>
   {% block body %}{% endblock %}
-  <footer class="affiliate-site-disclosure">Amazonのアソシエイトとして、exam-trainerは適格販売により収入を得ています。</footer>
+  {% block footer %}<footer class="affiliate-site-disclosure">Amazonのアソシエイトとして、exam-trainerは適格販売により収入を得ています。</footer>{% endblock %}
   <div class="toast" id="toast"></div>
   <script>
     function toast(msg, ms) {

@@ -1,0 +1,26 @@
+{% extends "kouko_base.html" %}
+{% block product_body %}
+<header class="product-hero">
+  <p class="eyebrow">考古検定の入門クラスを目指す人へ</p>
+  <h1>遺物と遺構。<br>違いを説明できますか。</h1>
+  <p class="lead">名前を覚えたつもりでも、四択で迷う。まず10問を解いて、用語と時代の違いを解説で確かめましょう。</p>
+  <div class="product-actions"><a class="btn btn-primary" href="/kouko/trial">無料10問を解く</a><a href="/kouko/sample">解説の見本を読む</a></div>
+  <p class="muted">登録不要。1問ずつ正誤と解説を確認できます。</p>
+</header>
+<section class="product-section" aria-labelledby="contents-title">
+  <h2 id="contents-title">この問題集で確かめること</h2>
+  <div class="grid two">
+    <div class="card"><h3>資料と時代を区別する</h3><p>遺物と遺構、竪穴建物と掘立柱建物、石包丁と農具、土師器と須恵器。混同しやすい用語を、使い方や構造と結び付けます。</p></div>
+    <div class="card"><h3>正解の理由を読む</h3><p>全問に解説と参考資料のリンクを付けています。間違えた用語を出典でも確認し、解き直すための教材です。</p></div>
+  </div>
+</section>
+<section class="product-section"><h2>収録分野</h2>
+<ol class="contents-list"><li>考古資料の見方と旧石器（10問）</li><li>縄文の集落と交流（10問）</li><li>弥生の農具と集落（10問）</li><li>古墳と土器生産（10問）</li><li>古代の宮殿、木簡、壁画（10問）</li></ol>
+<p class="muted">{{ product.scope_note }}</p></section>
+{% include "kouko_purchase.html" %}
+<section class="product-section"><h2>購入前に</h2>
+<details><summary>公式過去問題集との違いは？</summary><p>本教材は基礎知識を確認するオリジナル問題集です。公式問題の転載や本試験の再現問題は収録していません。公式過去問題集と併せて使う補助教材です。</p></details>
+<details><summary>PDFには何が入っていますか？</summary><p>問題50問、解答一覧、全問解説、参考資料一覧、解き直し用の解答欄を収録します。無料10問も含まれます。</p></details>
+<details><summary>受験の申し込みはできますか？</summary><p>このサイトでは教材を扱っています。受験案内と最新日程は<a href="https://www.n-bunkazaihogo.jp/koukokentei/">考古検定の公式サイト</a>をご確認ください。</p></details>
+</section>
+{% endblock %}

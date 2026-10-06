@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block navlinks %}<a href="/kouko/trial">無料10問</a><a href="/kouko/sample">見本</a>{% if admin_view %}<a href="/admin">管理</a>{% endif %}{% endblock %}
+{% block title %}考古検定 入門クラスの練習問題と解説 | exam-trainer{% endblock %}
+{% block head %}
+<meta name="description" content="考古検定の入門クラスに向けて、考古資料、縄文、弥生、古墳の基礎を四択問題で確認。無料10問と解説付きPDFの見本を読めます。">
+{% if not release.reviewed %}<meta name="robots" content="noindex,nofollow">{% endif %}
+<link rel="stylesheet" href="/static/kouko.css?v={{ static_version }}">
+{% endblock %}
+{% block body %}
+<main class="wrap kouko-wrap">
+  {% if not release.reviewed %}<p class="preview-banner" role="status">校閲用プレビューです。問題と解説の確認が完了するまで一般公開されません。</p>{% endif %}
+  <nav class="product-nav" aria-label="考古教材"><a href="/kouko">教材の紹介</a><a href="/kouko/trial">無料10問</a><a href="/kouko/sample">PDFの見本</a></nav>
+  {% block product_body %}{% endblock %}
+</main>
+{% endblock %}
+{% block footer %}<footer class="affiliate-site-disclosure">exam-trainerのオリジナル教材です。考古検定主催者の公式教材、認定教材ではありません。</footer>{% endblock %}

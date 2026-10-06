@@ -1,0 +1,33 @@
+reviewed_at: 2026-10-06
+intended_use: "考古検定入門向けオリジナルPDFの販売準備。外部への出品、転載、投稿は未実施。"
+candidates:
+  - name: BOOTH downloadable products
+    version_or_plan: "ダウンロード販売（2026-10-06確認）"
+    cost: "売上発生時に5.6%+45円。無料の販売サービスとしては扱わない。"
+    commercial_use: conditional
+    decision: conditional
+    conditions:
+      - "ショップ所有者が現行の共通規約、BOOTH個別規約、ガイドラインに同意する"
+      - "出品者が販売する教材の権利と説明の正確さを確認する"
+      - "登録、決済、振込、出品者情報の条件を出品前に確認する"
+    sources:
+      - https://booth.pm/guide
+      - https://policies.pixiv.net/
+      - https://booth.pm/announcements/832
+    note: "ユーザーが選んだ販路。商品の売買とダウンロード提供を公式が案内。出品やアカウント登録は実行していない。"
+  - name: "自治体、遺跡管理機関、奈良文化財研究所の解説ページ"
+    version_or_plan: "kouko.jsonのsourcesに記録した17ページ"
+    cost: "公開ページの参照。画像の転載等に伴う料金や許諾は未確認。"
+    commercial_use: review_required
+    decision: review_required
+    conditions:
+      - "各ページは事実確認と参考リンクに利用。本文、写真、図版は転載しない"
+      - "全問校閲と、商用教材での利用方法に関する参照先ごとの確認を済ませるまで公開しない"
+      - "公式の名称、キャラクター、ロゴの利用許諾があるとは扱わない"
+    sources:
+      - https://sannaimaruyama.pref.aomori.jp/materials/photo/use/
+      - https://www.n-bunkazaihogo.jp/activities/kouko-kentei/index.html
+    note: "資料本文の閲覧は事実の正しさの根拠であり、転載権の根拠ではない。全出典URLはkouko.jsonに保存。利用条件の確認は公開条件に含めた。"
+dependencies:
+  added: []
+  note: "既存のFastAPI、Jinja2、Playwrightで構築。新規依存の追加やサービス契約はなし。"

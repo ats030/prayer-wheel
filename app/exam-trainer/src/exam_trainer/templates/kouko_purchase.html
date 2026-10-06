@@ -1,0 +1,9 @@
+<aside class="card purchase" id="purchase" aria-label="PDF問題集の案内">
+  <p class="eyebrow">解説を読んで、紙でもう一度解く</p>
+  <h2>{{ product.title }}</h2>
+  <p>四択50問と全問解説。無料体験の10問に追加40問を収録しています。問題と解説を分けて印刷できます。</p>
+  <p class="price">{{ product.price_yen }}円 <span class="muted">PDFダウンロード版</span></p>
+  <div class="product-actions"><a class="btn btn-ghost" href="/kouko/sample">見本と目次を読む</a>
+  {% if release.booth_url %}<a class="btn btn-primary" href="{{ release.booth_url }}" rel="noopener" data-purchase-link>BOOTHで購入する</a>
+  {% else %}<span class="muted">販売準備中です</span>{% endif %}</div>
+</aside>

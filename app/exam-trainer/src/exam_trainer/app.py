@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Literal
 from pydantic import BaseModel
 
-from . import bank, db, jobs, ollama_client, web
+from . import bank, db, jobs, kouko, ollama_client, web
 from .config import settings
 
 logger = logging.getLogger(__name__)
@@ -55,6 +55,17 @@ def _is_admin(request: Request) -> bool:
 @app.middleware("http")
 async def protect_admin(request: Request, call_next):
     path = request.url.path
+    if path == "/kouko" or path.startswith("/kouko/"):
+        reviewed = kouko.release_state()["reviewed"]
+        if not reviewed and not _is_admin(request):
+            return JSONResponse({"detail": "教材は準備中です"}, status_code=404,
+                                headers={"X-Robots-Tag": "noindex", "Cache-Control": "no-store"})
+        response = await call_next(request)
+        # Never cache authenticated previews or answer responses in shared caches.
+        response.headers["Cache-Control"] = "no-store"
+        if not reviewed:
+            response.headers["X-Robots-Tag"] = "noindex"
+        return response
     if path in {"/admin/login", "/api/admin/session"}:
         return await call_next(request)
     admin_page = path == "/admin" or path.startswith("/admin/")
@@ -128,9 +139,50 @@ def _page(request: Request, name: str, exam_id: int | None, **extra) -> HTMLResp
         "static_version": STATIC_VERSION,
         "counts": bank.queue_counts(exam["id"]) if exam else {"due": 0, "new": 0},
         "status_counts": bank.counts_by_status(exam["id"]) if exam else {},
+        "kouko_available": kouko.release_state()["reviewed"],
         **extra,
     }
     return templates.TemplateResponse(request, name, context)
+
+
+def _kouko_page(request: Request, name: str, **extra) -> HTMLResponse:
+    product = kouko.load_product()
+    return templates.TemplateResponse(request, name, {
+        "request": request, "exam": None, "exams": [],
+        "static_version": STATIC_VERSION, "product": product,
+        "release": kouko.release_state(), "admin_view": _is_admin(request),
+        **extra,
+    })
+
+
+@app.get("/kouko", response_class=HTMLResponse)
+def kouko_landing(request: Request) -> HTMLResponse:
+    return _kouko_page(request, "kouko_landing.html")
+
+
+@app.get("/kouko/trial", response_class=HTMLResponse)
+def kouko_trial(request: Request) -> HTMLResponse:
+    return _kouko_page(request, "kouko_trial.html",
+                       trial_questions=kouko.trial_payload(kouko.load_product()))
+
+
+@app.get("/kouko/sample", response_class=HTMLResponse)
+def kouko_sample(request: Request) -> HTMLResponse:
+    return _kouko_page(request, "kouko_sample.html",
+                       sample=kouko.sample_questions(kouko.load_product()))
+
+
+class KoukoAnswerIn(BaseModel):
+    question_id: int
+    chosen: Literal[0, 1, 2, 3]
+
+
+@app.post("/kouko/trial/answer")
+def kouko_answer(payload: KoukoAnswerIn) -> dict:
+    result = kouko.check_answer(payload.question_id, payload.chosen)
+    if result is None:
+        raise HTTPException(status_code=404, detail="無料体験の問題ではありません")
+    return result
 
 
 @app.get("/", response_class=HTMLResponse)
