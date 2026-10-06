@@ -355,10 +355,17 @@ function showDetail(o,origin){
     <section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section>
     <div id="detail-sections" aria-live="polite"></div>
     ${amazonLink(o)}
+    ${furusatoLink(o)}
     ${links.length?`<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${links.map(([label,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label}<span aria-hidden="true">↗</span></a>`).join('')}</nav></section>`:''}
   </article>`;
   hydrateImage(o);
   hydrateSections(o);
+}
+
+function furusatoLink(o){
+  const url=safeUrl(o.furusato_search_url);
+  if(!url||new URL(url).origin!=='https://search.rakuten.co.jp'||!new URL(url).pathname.startsWith('/search/mall/'))return'';
+  return `<section class="detail-section detail-affiliate" aria-labelledby="detail-furusato"><h3 id="detail-furusato">ふるさと納税</h3><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">楽天市場で「${esc(o.label_ja)} ${esc(o.prefecture)}」の返礼品を探す <span aria-hidden="true">↗</span></a><p class="detail-note">「ふるさと納税・特産物名・都道府県」によるキーワード検索です。返礼品が見つからない場合や、別の産地の商品・通常の商品が含まれる場合があります。寄付先の自治体と返礼品の詳細はリンク先で確認してください。</p></section>`;
 }
 
 function amazonLink(o){

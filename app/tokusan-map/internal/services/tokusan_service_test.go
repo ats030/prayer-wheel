@@ -34,10 +34,16 @@ func TestProductionCoordinatesAcrossQueries(t *testing.T) {
 	if one == nil || one.CoordinateLabel != flower.CoordinateLabel {
 		t.Fatal("QID query lost point")
 	}
+	if flower.FurusatoSearchURL == "" || one.FurusatoSearchURL != flower.FurusatoSearchURL {
+		t.Fatal("list/detail queries must carry the same furusato search")
+	}
 	found := false
 	for _, item := range s.GetByPrefecture("愛知県") {
 		if item.QID == flower.QID {
 			found = item.CoordinateKind == flower.CoordinateKind
+			if item.FurusatoSearchURL != flower.FurusatoSearchURL {
+				t.Fatal("prefecture query lost furusato search")
+			}
 		}
 	}
 	if !found {

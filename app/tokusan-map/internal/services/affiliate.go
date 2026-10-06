@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 // The configured search template is public link metadata, never an API credential.
@@ -35,6 +36,15 @@ func affiliateTemplate() string {
 }
 
 var affiliateTag = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
+
+// Ordinary search only: do not rewrite URLs issued by Rakuten Affiliate.
+func furusatoSearchURL(label, prefecture string) string {
+	label, prefecture = strings.TrimSpace(label), strings.TrimSpace(prefecture)
+	if label == "" || prefecture == "" {
+		return ""
+	}
+	return "https://search.rakuten.co.jp/search/mall/" + url.PathEscape("ふるさと納税 "+label+" "+prefecture) + "/"
+}
 
 func amazonProductSearchURL(label string) string {
 	if label == "" {

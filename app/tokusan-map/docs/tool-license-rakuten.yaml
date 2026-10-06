@@ -1,0 +1,25 @@
+tool: Rakuten Affiliate Japan
+version_or_plan: Free partner program; URL-generated text links
+category: service
+status: conditional
+license: proprietary-terms
+commercial_use: Affiliate monetization permitted subject to partner terms and guidelines
+license_url: https://affiliate.rakuten.co.jp/guideline/terms/
+terms_url: https://affiliate.rakuten.co.jp/guideline/rule/
+pricing_url: https://affiliate.rakuten.co.jp/know-how/help/begin.html
+restrictions:
+  - Operator registration and registration of the public HTTPS site are required.
+  - Preserve officially generated URLs and HTML attributes; do not substitute search keywords.
+  - Only explicitly permitted text changes may be made to generated text links.
+  - Identify advertising clearly and disclose affiliate revenue when enabled.
+  - Do not conceal the Rakuten destination or claim availability or origin matching.
+  - No product images, prices, API, paid dependencies, or external scripts are used.
+evidence_retrieved: 2026-10-06
+reviewer: Codex
+notes: >-
+  The official beginning guide states that participation is free. Commercial
+  affiliate use is governed by the partner terms and rules. The current feature
+  uses ordinary keyword search links only and earns no Rakuten affiliate revenue.
+  Actual affiliate activation remains conditional on operator registration,
+  generated-link inspection, and a compliant integration. No account, agreement,
+  or permission to rewrite generated links is inferred.

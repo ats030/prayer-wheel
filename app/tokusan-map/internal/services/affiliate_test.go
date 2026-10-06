@@ -35,3 +35,19 @@ func TestAmazonProductSearchWithoutAffiliate(t *testing.T) {
 		t.Fatal("an unset affiliate template must not create an affiliate link")
 	}
 }
+
+func TestFurusatoSearchPreservesKeywords(t *testing.T) {
+	label := "茶 & 菓子/詰合せ?#"
+	u, err := url.Parse(furusatoSearchURL(label, "京都府"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if u.Scheme != "https" || u.Host != "search.rakuten.co.jp" || u.Path != "/search/mall/ふるさと納税 "+label+" 京都府/" || u.RawQuery != "" || u.Fragment != "" {
+		t.Fatalf("keywords escaped into URL structure: %s", u)
+	}
+	for _, pair := range [][2]string{{"", "北海道"}, {"メロン", ""}, {" ", "北海道"}} {
+		if furusatoSearchURL(pair[0], pair[1]) != "" {
+			t.Fatal("incomplete origin/name must not produce a search link")
+		}
+	}
+}
