@@ -27,7 +27,7 @@
     <span class="spacer"></span>
     {% if exams | length > 1 %}
     <select id="examSwitch" class="compact-select" style="width:auto;" aria-label="試験を切り替え">
-      {% for item in exams %}
+      {% for item in exam_options | default(exams) %}
       <option value="{{ item.id }}" {% if exam and item.id == exam.id %}selected{% endif %}>{{ item.name }}</option>
       {% endfor %}
     </select>

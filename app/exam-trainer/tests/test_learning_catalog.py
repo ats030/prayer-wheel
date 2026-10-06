@@ -46,6 +46,26 @@ def test_missing_course_preserves_all_existing_questions_and_history():
     assert {table: table_rows(table) for table in before} == totals
 
 
+def test_picker_matches_material_catalog_without_changing_selection_or_bank_order():
+    for key, name in products.EXAMS.items():
+        bank.create_exam(name, key)
+    learning_catalog.import_missing()
+    bank.create_exam('追加検定A', 'extra-a')
+    bank.create_exam('追加検定B', 'extra-b')
+    original = bank.list_exams()
+    client = TestClient(app)
+    for path in ('/study', '/weakness'):
+        html = client.get(f'{path}?exam_id=3').text
+        picker = html.split('<select id="examSwitch"', 1)[1].split('</select>', 1)[0]
+        names = [*learning_catalog.EXAMS.values(), '追加検定A', '追加検定B']
+        positions = [picker.index(name) for name in names]
+        assert positions == sorted(positions)
+        assert picker.count('<option') == 7
+        assert '<option value="3" selected>歴史能力検定3級 日本史</option>' in picker
+    assert 'data-exam-id="1"' in client.get('/study').text
+    assert bank.list_exams() == original
+
+
 def test_imported_course_can_be_selected_answered_and_aggregated():
     created = learning_catalog.import_missing()
     assert {item['name'] for item in created} == set(learning_catalog.EXAMS.values())

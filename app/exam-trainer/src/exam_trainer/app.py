@@ -135,9 +135,11 @@ def _current_exam(exam_id: int | None) -> dict | None:
 
 def _page(request: Request, name: str, exam_id: int | None, **extra) -> HTMLResponse:
     exam = _current_exam(exam_id)
+    exams = bank.list_exams()
     context = {
         "request": request,
-        "exams": bank.list_exams(),
+        "exams": exams,
+        "exam_options": learning_catalog.ordered_exams(exams),
         "exam": exam,
         "static_version": STATIC_VERSION,
         "counts": bank.queue_counts(exam["id"]) if exam else {"due": 0, "new": 0},

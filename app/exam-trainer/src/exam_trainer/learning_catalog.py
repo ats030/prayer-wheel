@@ -14,6 +14,12 @@ EXAMS = {"kouko": "考古検定 入門クラス", **products.EXAMS}
 PROVIDER = "material-snapshot"
 
 
+def ordered_exams(exams: list[dict]) -> list[dict]:
+    """Match the material catalog; keep additional exams in their existing order."""
+    rank = {name: index for index, name in enumerate(EXAMS.values())}
+    return sorted(exams, key=lambda exam: rank.get(exam["name"], len(rank)))
+
+
 def prepare_missing(exams: list[dict]) -> list[dict]:
     names = {e["name"] for e in exams}
     slugs = {e["slug"] for e in exams}
