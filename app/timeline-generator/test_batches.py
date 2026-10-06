@@ -440,9 +440,10 @@ class BatchTests(unittest.TestCase):
             if schema is t.EVENT_SCHEMA:
                 systems.append(system)
                 if '最大14件' in system:
-                    # 再生成では1件目が言い換えで重複し、枠外だった出来事が1件増える。
+                    # 再生成では1件目が同じ引用の言い換えで重複し、枠外だった別の引用の出来事が1件増える。
                     events = grounded_model(system, prompt, deadline, schema)['events']
-                    return {'events': events + [events[0] | {'year': 1799, 'title': '枠外の出来事'}]}
+                    paraphrase = events[0] | {'title': events[0]['title'] + 'が起こる'}
+                    return {'events': [paraphrase] + events + [events[0] | {'year': 1799, 'title': '枠外の出来事', 'quote': '1799年、枠外の出来事。'}]}
             return grounded_model(system, prompt, deadline, schema)
         result = self.run_generation(history_source(t.BATCH_EVENTS + 3), model=model, saturated=14)
         self.assertEqual(['最大7件' in s for s in systems], [True, False, True])
@@ -450,6 +451,15 @@ class BatchTests(unittest.TestCase):
         # 枠外の出来事は検証まで届き、そこで資料と照合される。
         self.assertIn(1799, [r['year'] for r in result['trace']['rejected'] if r['batch'] == 1])
         self.assertEqual(result['trace']['batches'][0]['proposed'], t.BATCH_EVENTS + 1)
+        self.assertNotIn('研究の出来事1800が起こる', [r['title'] for r in result['trace']['rejected']] + [e['title'] for e in result['events']])
+
+    def test_saturated_retry_failure_keeps_first_proposals(self):
+        def model(system, prompt, deadline, schema):
+            if schema is t.EVENT_SCHEMA and '最大14件' in system:
+                raise t.TimelineError('busy')
+            return grounded_model(system, prompt, deadline, schema)
+        result = self.run_generation(history_source(t.BATCH_EVENTS), model=model, saturated=14)
+        self.assertEqual(len(result['events']), t.BATCH_EVENTS)
 
     def test_trace_marks_unprocessed_batches_after_deadline(self):
         clock = [0]
