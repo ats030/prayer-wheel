@@ -362,10 +362,46 @@ function showDetail(o,origin){
   hydrateSections(o);
 }
 
+let furusatoAffiliateCatalog={};
+
+function furusatoAffiliateHTML(o){
+  // Only trusted, issued text anchors are accepted; return the original source.
+  const entry=furusatoAffiliateCatalog[o.qid];
+  if(!entry||entry.label!==o.label_ja||entry.prefecture!==o.prefecture||typeof entry.html!=='string')return'';
+  if(location.protocol!=='https:')return'';
+  const template=document.createElement('template');
+  template.innerHTML=entry.html;
+  if(template.content.childNodes.length!==1)return'';
+  const anchor=template.content.firstChild;
+  if(anchor.nodeName!=='A'||!anchor.textContent.trim()||[...anchor.childNodes].some(n=>n.nodeType!==Node.TEXT_NODE))return'';
+  if(!anchor.textContent.includes(o.label_ja)||!anchor.textContent.includes(o.prefecture))return'';
+  if([...anchor.attributes].some(a=>!['href','target','rel','style'].includes(a.name)))return'';
+  if(anchor.getAttribute('target')!=='_blank'||anchor.getAttribute('rel')!=='nofollow sponsored noopener'||anchor.getAttribute('style')!=='word-wrap:break-word;')return'';
+  try{
+    const url=new URL(anchor.getAttribute('href'));
+    if(url.origin!=='https://hb.afl.rakuten.co.jp'||url.username||url.password||!/^\/hgc\/[a-f0-9.]+\/$/.test(url.pathname)||url.searchParams.get('link_type')!=='text')return'';
+    const destination=new URL(url.searchParams.get('pc'));
+    const expected=`/search/mall/ふるさと納税 ${o.label_ja} ${o.prefecture}/`;
+    if(destination.origin!=='https://search.rakuten.co.jp'||destination.username||destination.password||destination.search||destination.hash||decodeURIComponent(destination.pathname).replace(/\+/g,' ')!==expected)return'';
+    if(url.searchParams.has('m'))return'';
+  }catch{return''}
+  return entry.html;
+}
+
+async function loadFurusatoAffiliateCatalog(){
+  const data=await fetchJSONWithRetry('/furusato-affiliate.json?v=20261006b');
+  if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('Invalid furusato affiliate catalog');
+  furusatoAffiliateCatalog=data;
+  const section=document.querySelector('[aria-labelledby="detail-furusato"]');
+  if(selectedItem&&section)section.outerHTML=furusatoLink(selectedItem);
+}
+
 function furusatoLink(o){
   const url=safeUrl(o.furusato_search_url);
   if(!url||new URL(url).origin!=='https://search.rakuten.co.jp'||!new URL(url).pathname.startsWith('/search/mall/'))return'';
-  return `<section class="detail-section detail-affiliate" aria-labelledby="detail-furusato"><h3 id="detail-furusato">ふるさと納税</h3><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">楽天市場で「${esc(o.label_ja)} ${esc(o.prefecture)}」の返礼品を探す <span aria-hidden="true">↗</span></a><p class="detail-note">「ふるさと納税・特産物名・都道府県」によるキーワード検索です。返礼品が見つからない場合や、別の産地の商品・通常の商品が含まれる場合があります。寄付先の自治体と返礼品の詳細はリンク先で確認してください。</p></section>`;
+  const affiliate=furusatoAffiliateHTML(o);
+  const link=affiliate||`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">楽天市場で「${esc(o.label_ja)} ${esc(o.prefecture)}」の返礼品を探す <span aria-hidden="true">↗</span></a>`;
+  return `<section class="detail-section detail-affiliate" aria-labelledby="detail-furusato"><h3 id="detail-furusato">ふるさと納税${affiliate?' <span class="detail-note-inline">広告</span>':''}</h3>${link}<p class="detail-note">「ふるさと納税・特産物名・都道府県」によるキーワード検索です。返礼品が見つからない場合や、別の産地の商品・通常の商品が含まれる場合があります。寄付先の自治体と返礼品の詳細はリンク先で確認してください。</p>${affiliate?'<p class="image-license">このリンクは楽天アフィリエイトの広告です。リンク経由の申し込みなどにより、特産物マップが報酬を受け取る場合があります。</p>':''}</section>`;
 }
 
 function amazonLink(o){
@@ -483,6 +519,7 @@ document.querySelector('#lightbox').addEventListener('cancel',closeLightbox);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
 
 loadImageCatalog().catch(()=>{});
+loadFurusatoAffiliateCatalog().catch(()=>{});
 Promise.all([fetchJSONWithRetry('/api/tokusan/'),fetchJSONWithRetry('/regions.json?v=202609296')]).then(([data,regions])=>{
   if(!Array.isArray(regions))throw new Error('Invalid region definitions');
   regionsByPrefecture=new Map(regions.map(p=>[p.prefecture,p]));

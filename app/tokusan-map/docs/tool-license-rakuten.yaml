@@ -19,7 +19,9 @@ reviewer: Codex
 notes: >-
   The official beginning guide states that participation is free. Commercial
   affiliate use is governed by the partner terms and rules. The current feature
-  uses ordinary keyword search links only and earns no Rakuten affiliate revenue.
-  Actual affiliate activation remains conditional on operator registration,
-  generated-link inspection, and a compliant integration. No account, agreement,
-  or permission to rewrite generated links is inferred.
+  uses the operator-supplied issued HTML for Yubari melon on HTTPS, with the
+  original URL and anchor attributes preserved. All other items use ordinary
+  search links. The operator reported completed partner and public-site
+  registration on 2026-10-06; this is not an independent account audit.
+  No permission to rewrite generated links is inferred. Actual conversion
+  attribution and payment are not verified by rendering tests.
