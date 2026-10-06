@@ -71,7 +71,7 @@ class SelectionTests(unittest.TestCase):
             Path("/tmp/worktree"), Path("/tmp/agent-home"), [],
             Path("/home/ats030/app/example")))
 
-    def test_proxy_status_must_be_json_and_idle(self):
+    def test_proxy_status_reports_background_free(self):
         class Opener:
             def __init__(self, state, content_type="application/json"):
                 self.state = state
@@ -84,16 +84,22 @@ class SelectionTests(unittest.TestCase):
                 response.headers["Content-Type"] = self.content_type
                 return response
 
-        idle = {"state": "idle", "queue_depth": 0, "active_count": 0}
+        idle = {"state": "idle", "queue_depth": 0, "active_count": 0,
+                "background_free": 2}
         with patch.object(pr.urllib.request, "build_opener", return_value=Opener(idle)):
-            self.assertTrue(pr.proxy_idle())
+            self.assertEqual(pr.proxy_background_free(), 2)
+        # opencode が対話を保持中でも background 枠が残っていれば通す。
         with patch.object(pr.urllib.request, "build_opener", return_value=Opener(
-                {**idle, "active_count": 1})):
-            self.assertFalse(pr.proxy_idle())
-        with patch.object(pr.urllib.request, "build_opener", return_value=Opener(
-                idle, "text/html")):
+                {"state": "generating", "active_count": 1,
+                 "background_free": 1})):
+            self.assertEqual(pr.proxy_background_free(), 1)
+        with patch.object(pr.urllib.request, "build_opener", return_value=Opener(idle, "text/html")):
             with self.assertRaises(RuntimeError):
-                pr.proxy_idle()
+                pr.proxy_background_free()
+        with patch.object(pr.urllib.request, "build_opener",
+                          return_value=Opener({"state": "idle"})):
+            with self.assertRaises(RuntimeError):
+                pr.proxy_background_free()
 
     def test_existing_pr_blocks_second_attempt(self):
         with patch.object(pr, "checked", return_value='[{"number":7,"url":"https://github.com/x/y/pull/7"}]'):
@@ -183,7 +189,8 @@ class SelectionTests(unittest.TestCase):
                   patch.object(pr, "github_repository", return_value="owner/repo"),
                   patch.object(pr, "remote_head", return_value=""),
                   patch.object(pr, "no_existing_pr", return_value=True),
-                  patch.object(pr, "proxy_idle", return_value=False),
+                  patch.object(pr, "PROXY_BUSY_WAIT_SECONDS", 0),
+                  patch.object(pr, "proxy_background_free", return_value=0),
                   patch.object(pr, "command", side_effect=AssertionError("model must not run")),
                   patch("sys.argv", ["pr", "--config", str(config_path), "--run"])):
                 output = io.StringIO()

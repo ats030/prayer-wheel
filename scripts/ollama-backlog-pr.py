@@ -15,6 +15,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -34,6 +35,9 @@ MAX_CHANGED_LINES = 80
 STATUS_URL = "http://localhost:11434/api/opencode-status"
 # 27Bに1000行超のファイルを1回で読ませると300秒では返らない (ats030-hbu8 run2)。
 MODEL_TIMEOUT = 1200
+# background 枠が埋まっている場合、次の空き枠を待つ最大待機(秒)。
+# 1時間 timer の1 tick が無駄にならない程度に抑える。
+PROXY_BUSY_WAIT_SECONDS = 300
 
 
 def command(args: list[str], *, cwd: Path = ROOT, timeout: int = 30) -> subprocess.CompletedProcess[str]:
@@ -142,7 +146,15 @@ def select_issue(rows: list[dict], config: dict, requested: str | None) -> dict 
     return candidates[0] if candidates else None
 
 
-def proxy_idle() -> bool:
+def proxy_background_free() -> int:
+    """Return how many background generation slots are currently free.
+
+    The draft runner is classified as ``background`` via
+    ``X-Client-App: backlog-draft`` (see ollama-backlog-draft.py), so a
+    foreground/opencode interaction can no longer preempt it. The old
+    ``state == idle AND queue_depth == 0`` check caused hourly busy because
+    OpenCode always holds the interactive slot on a busy host.
+    """
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
     with opener.open(STATUS_URL, timeout=3) as response:
         if response.headers.get_content_type() != "application/json":
@@ -150,8 +162,10 @@ def proxy_idle() -> bool:
         status = json.loads(response.read(4096))
     if not isinstance(status, dict) or status.get("state") not in ("idle", "queued", "generating"):
         raise RuntimeError("Ollama proxy returned invalid status")
-    return (status["state"] == "idle" and status.get("queue_depth") == 0
-            and status.get("active_count") == 0)
+    free = status.get("background_free")
+    if not isinstance(free, int) or free < 0:
+        raise RuntimeError("Ollama proxy did not report background_free")
+    return free
 
 
 def github_repository(repo: Path) -> str:
@@ -297,12 +311,27 @@ def main() -> int:
                               "repo": entry["repo"], "github": github}, ensure_ascii=False))
             return 0
         try:
-            idle = proxy_idle()
+            free = proxy_background_free()
+            waited = 0
         except (urllib.error.URLError, ValueError, RuntimeError) as exc:
             print(json.dumps({"status": "busy_unknown", "reason": str(exc)}, ensure_ascii=False))
             return 75
-        if not idle:
-            print(json.dumps({"status": "busy", "issue_id": issue["id"]}, ensure_ascii=False))
+        if not free:
+            deadline = time.monotonic() + PROXY_BUSY_WAIT_SECONDS
+            waited = PROXY_BUSY_WAIT_SECONDS
+            while time.monotonic() < deadline:
+                time.sleep(min(30, max(1, deadline - time.monotonic())))
+                try:
+                    free = proxy_background_free()
+                except (urllib.error.URLError, ValueError, RuntimeError) as exc:
+                    print(json.dumps({"status": "busy_unknown", "reason": str(exc)},
+                                     ensure_ascii=False))
+                    return 75
+                if free:
+                    break
+        if not free:
+            print(json.dumps({"status": "busy", "issue_id": issue["id"],
+                              "waited_seconds": waited}, ensure_ascii=False))
             return 75
         source_head = checked(["git", "rev-parse", "HEAD"], cwd=repo)
         if checked(["git", "status", "--porcelain"], cwd=repo):

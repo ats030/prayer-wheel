@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
   "issues": {
-    "ats030-hbu8": {
-      "repo": "app/app-portal",
-      "base": "main",
+    "ats030-bm3l4": {
+      "repo": "app/receipt-scanner",
+      "base": "master",
       "files": [
-        "main.py"
+        "shelf_life.py"
       ],
       "tests": [
-        "python -m pytest -q test_main.py"
+        "python3 -c \"from shelf_life import classify; assert classify('水切り巾着') == ('豆腐・練物', 5, True); assert classify('水') == ('飲料', 180, True); assert classify('水切り') == ('豆腐・練物', 5, True)\""
       ],
       "read_only": []
     }

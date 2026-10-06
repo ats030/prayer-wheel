@@ -163,23 +163,41 @@ def one_pass(issue: dict, worktree: Path, repo: Path, files: list[str],
     payload = json.dumps({"model": model_name.split("/", 1)[1], "stream": False,
                           "messages": [{"role": "user", "content": request_prompt}],
                           "temperature": 0, "max_tokens": 4096}).encode()
-    request = urllib.request.Request(base_url + "/chat/completions", data=payload,
-                                     headers={"Content-Type": "application/json"})
+    import time as _time
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-    try:
-        with opener.open(request, timeout=timeout) as response:
-            response_text = json.loads(response.read())["choices"][0]["message"]["content"]
-        if not isinstance(response_text, str):
-            raise RuntimeError("model returned non-text content")
-    except urllib.error.HTTPError as exc:
-        detail = exc.read()[:300]
-        retry_after = exc.headers.get("Retry-After", "")
-        (run_dir / "model.stderr.log").write_text(
-            f"HTTP {exc.code}; Retry-After: {retry_after or 'unspecified'}; {detail!r}\n")
-        return 75 if exc.code in (429, 503) else 69
-    except urllib.error.URLError as exc:
-        (run_dir / "model.stderr.log").write_text(f"Ollama unavailable: {exc.reason}\n")
-        return 69
+    # One full generation + 5 min of 429 retries.  systemd's TimeoutStartSec
+    # (3000 s) and pr.py's subprocess timeout (timeout+660) are both longer.
+    deadline = _time.monotonic() + timeout + 300
+    response_text = None
+    while True:
+        request = urllib.request.Request(base_url + "/chat/completions", data=payload,
+                                         headers={"Content-Type": "application/json",
+                                                  "X-Client-App": "backlog-draft"})
+        try:
+            with opener.open(request, timeout=timeout) as response:
+                response_text = json.loads(response.read())["choices"][0]["message"]["content"]
+            break
+        except urllib.error.HTTPError as exc:
+            code = exc.code
+            retry_after = exc.headers.get("Retry-After", "")
+            if code in (429, 503) and _time.monotonic() < deadline:
+                wait = int(retry_after) if retry_after.isdigit() else 30
+                _time.sleep(max(5, min(wait, 90)))
+                continue
+            detail = exc.read()[:300]
+            (run_dir / "model.stderr.log").write_text(
+                f"HTTP {code}; Retry-After: {retry_after or 'unspecified'}; {detail!r}\n")
+            return 75 if code in (429, 503) else 69
+        except urllib.error.URLError as exc:
+            (run_dir / "model.stderr.log").write_text(f"Ollama unavailable: {exc.reason}\n")
+            return 69
+        except Exception as exc:  # noqa: BLE001
+            (run_dir / "model.stderr.log").write_text(f"model request: {exc}\n")
+            if _time.monotonic() >= deadline:
+                raise
+            _time.sleep(10)
+    if not isinstance(response_text, str):
+        raise RuntimeError("model returned non-text content")
     (run_dir / "model.stdout.log").write_text(response_text)
     try:
         drafts = validated_replacements(response_text, files, worktree)

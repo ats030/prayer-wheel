@@ -272,34 +272,38 @@ class GenerationScheduler:
     def snapshot(self) -> dict:
         with self.condition:
             now = self.clock()
+            active_background = sum(
+                item["kind"] == "background" for item in self.active.values()
+            )
             opencode_waiting = next(
                 (item for item in self.waiting.values() if item["kind"] == "opencode"),
                 None,
             )
             active = next(iter(self.active.values()), None)
             shown = opencode_waiting or active
+            base = {
+                "state": "idle",
+                "model": "",
+                "elapsed_seconds": 0,
+                "queue_depth": len(self.waiting),
+                "active_count": len(self.active),
+                "background_free": max(0, self.max_background - active_background),
+                "last_received_seconds": None,
+            }
             if shown is None:
-                return {
-                    "state": "idle",
-                    "model": "",
-                    "elapsed_seconds": 0,
-                    "queue_depth": len(self.waiting),
-                    "active_count": len(self.active),
-                    "last_received_seconds": None,
-                }
+                return base
             queued = "started_at" not in shown
             started = shown.get("queued_at") if queued else shown["started_at"]
-            return {
+            base.update({
                 "state": "queued" if queued else "generating",
                 "model": shown["model"],
                 "elapsed_seconds": max(0, int(now - started)),
-                "queue_depth": len(self.waiting),
-                "active_count": len(self.active),
                 "last_received_seconds": (
                     None if queued or self.last_received_at is None
                     else max(0, int(now - self.last_received_at))
                 ),
-            }
+            })
+            return base
 
 
 class InteractiveRouter:
