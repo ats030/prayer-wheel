@@ -28,7 +28,7 @@ func TestOfficialPreparationRejectsReadErrorsAndInvalidatesChangedSource(t *test
 	summaryCache = newSummaryCache(filepath.Join(t.TempDir(), "summaries.json"), 100)
 	defer func() { officialSummaryCache, summaryCache = oldOfficial, oldSummary }()
 	officialSummaryCache.Put("local-1", "history", SectionContent{Summary: "既存要約。", Items: []SectionItem{}})
-	saveSummary("midokoro-official-source-v1:local-1:history", shared.SourceHash("古い歴史。"))
+	saveSummary("midokoro-official-source-v2:local-1:history", shared.SourceHash("古い歴史。"))
 	calls := 0
 	model := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calls++

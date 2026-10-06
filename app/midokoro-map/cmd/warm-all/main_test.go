@@ -4,11 +4,12 @@ import (
 	"midokoro-map/internal/shared"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestResumeRequiresEverySectionAndSameInput(t *testing.T) {
 	it := item{ID: "Q1", Title: "史跡"}
-	c := checkpoint{Version: 5, Kind: "shiseki", ID: it.ID, InputHash: hash(it), Sections: map[string]shared.PreparedSection{}}
+	c := checkpoint{Version: 6, Kind: "shiseki", ID: it.ID, InputHash: hash(it), Sections: map[string]shared.PreparedSection{}}
 	for _, key := range required["shiseki"] {
 		c.Sections[key] = shared.Prepared("", nil, false, "", "", true)
 	}
@@ -53,5 +54,27 @@ func TestResumeRequiresEverySectionAndSameInput(t *testing.T) {
 	}
 	if complete(read(path+"missing"), "shiseki", it) {
 		t.Fatal("missing checkpoint passed")
+	}
+}
+
+func TestFailedBatchDoesNotStarveLaterItems(t *testing.T) {
+	now := time.Now()
+	it := item{ID: "Q1", Title: "史跡"}
+	failed := checkpoint{Version: 6, Kind: "shiseki", ID: it.ID, InputHash: hash(it), CheckedAt: now, Error: "timeout"}
+	if eligible(failed, "shiseki", it, now, time.Hour, false) {
+		t.Fatal("recent failure immediately retried")
+	}
+	if !eligible(checkpoint{}, "shiseki", item{ID: "Q2"}, now, time.Hour, false) {
+		t.Fatal("untouched next item starved")
+	}
+	if !eligible(failed, "shiseki", it, now.Add(time.Hour), time.Hour, false) {
+		t.Fatal("expired failure not retried")
+	}
+	if !eligible(failed, "shiseki", it, now, time.Hour, true) {
+		t.Fatal("final recheck skipped failed source")
+	}
+	it.Description = "updated"
+	if !eligible(failed, "shiseki", it, now, time.Hour, false) {
+		t.Fatal("updated input delayed")
 	}
 }

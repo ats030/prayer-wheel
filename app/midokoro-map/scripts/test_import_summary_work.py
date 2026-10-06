@@ -1,7 +1,6 @@
 import importlib.util
 import json
 from pathlib import Path
-import sqlite3
 import tempfile
 import unittest
 
@@ -24,17 +23,14 @@ class ImportSummaryWorkTest(unittest.TestCase):
                     if kind == "tokusan":
                         section = "history" if "old" in value else "production" if "unified" in value else "about"
                         (base / "official_summaries.json").write_text(json.dumps({"Q1": {"sections": {section: {"summary": section}}}}))
-            old_db = root.parent / "tokusan-map/frontend/tokusan.db"
-            old_db.parent.mkdir(parents=True)
-            with sqlite3.connect(old_db) as db:
-                db.execute("CREATE TABLE tokusan(qid TEXT,history TEXT,production TEXT)")
-            (root / "data/tokusan/tokusan.db").write_bytes(old_db.read_bytes())
             module.main()
             target = module.WORK / "cache/shiseki/summaries.json"
             expected = {"old": "old", "unified": "new", "work": "generated"}
             self.assertEqual(json.loads(target.read_text()), expected)
             official = json.loads((module.WORK / "cache/tokusan/official_summaries.json").read_text())
             self.assertEqual(set(official["Q1"]["sections"]), {"history", "production", "about"})
+            wiki = json.loads((module.WORK / "cache/tokusan/summaries.json").read_text())
+            self.assertNotIn("midokoro-official-source-v2:Q1:history", wiki)
             module.main()
             self.assertEqual(json.loads(target.read_text()), expected)
             (root.parent / "onsen-map/data/summaries.json").write_text("broken")

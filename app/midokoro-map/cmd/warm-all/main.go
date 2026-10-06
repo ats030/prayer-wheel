@@ -54,7 +54,19 @@ type checkpoint struct {
 
 func hash(v any) string { b, _ := json.Marshal(v); return shared.SourceHash(string(b)) }
 func complete(c checkpoint, kind string, it item) bool {
-	return c.Version == 5 && c.Kind == kind && c.ID == it.ID && c.InputHash == hash(it) && c.Error == "" && shared.SummaryComplete(c.Sections, required[kind])
+	return c.Version == 6 && c.Kind == kind && c.ID == it.ID && c.InputHash == hash(it) && c.Error == "" && shared.SummaryComplete(c.Sections, required[kind])
+}
+
+func eligible(c checkpoint, kind string, it item, now time.Time, retryAfter time.Duration, recheck bool) bool {
+	if recheck {
+		return true
+	}
+	if complete(c, kind, it) {
+		return false
+	}
+	// Give failures time to recover and let later new items advance instead of
+	// retrying the same first 100 failed records on every batch.
+	return c.Version != 6 || c.InputHash != hash(it) || c.CheckedAt.IsZero() || now.Sub(c.CheckedAt) >= retryAfter
 }
 func writeJSON(path string, v any) error {
 	b, err := json.Marshal(v)
@@ -188,7 +200,29 @@ func main() {
 	root := flag.String("work", "data/summary-work", "private work directory")
 	limit := flag.Int("limit", 0, "limit attempted items per pass (audit always checks full roster)")
 	audit := flag.Bool("audit", false, "read-only full completion check; nonzero until all ready")
+	recheck := flag.Bool("recheck", false, "refresh every source before cutover; requires all kinds and limit 0")
+	retryAfter := flag.Duration("retry-after", time.Hour, "minimum interval before retrying unchanged failed input")
 	flag.Parse()
+	if *recheck {
+		seen := map[string]bool{}
+		for _, kind := range strings.Split(*kinds, ",") {
+			seen[kind] = true
+		}
+		if *audit || *limit != 0 || len(seen) != len(required) {
+			log.Fatal("source recheck requires all four kinds, limit 0, without --audit")
+		}
+		for kind := range required {
+			if !seen[kind] {
+				log.Fatal("source recheck requires all four kinds")
+			}
+		}
+	}
+	recheckStart := time.Now().UTC()
+	if *recheck {
+		if err := writeJSON(filepath.Join(*root, "source-recheck.json"), map[string]any{"version": 6, "complete": false, "started_at": recheckStart}); err != nil {
+			log.Fatal(err)
+		}
+	}
 	service, err := tk.NewTokusanService("data/tokusan/tokusan.db")
 	if err != nil {
 		log.Fatal(err)
@@ -197,6 +231,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 	allReady := true
+	recheckedRosters := map[string]string{}
 	for _, kind := range strings.Split(*kinds, ",") {
 		if required[kind] == nil {
 			log.Fatalf("unknown kind %q", kind)
@@ -206,6 +241,7 @@ func main() {
 			log.Fatal(err)
 		}
 		rosterHash := hash(items)
+		recheckedRosters[kind] = rosterHash
 		attempted, ready := 0, 0
 		for _, it := range items {
 			p := filepath.Join(*root, "items", kind, shared.SourceHash(it.ID)+".json")
@@ -214,7 +250,7 @@ func main() {
 			}
 		}
 		status := func() map[string]any {
-			return map[string]any{"version": 5, "kind": kind, "roster_hash": rosterHash, "total": len(items), "complete": ready, "pending": len(items) - ready, "attempted": attempted, "checked_at": time.Now().UTC()}
+			return map[string]any{"version": 6, "kind": kind, "roster_hash": rosterHash, "total": len(items), "complete": ready, "pending": len(items) - ready, "attempted": attempted, "checked_at": time.Now().UTC()}
 		}
 		flushStatus := func() {
 			if !*audit {
@@ -229,12 +265,12 @@ func main() {
 			c := read(path)
 			wasComplete := complete(c, kind, it)
 			didAttempt := false
-			if !complete(c, kind, it) && !*audit && (*limit == 0 || attempted < *limit) && ctx.Err() == nil {
+			if eligible(c, kind, it, time.Now(), *retryAfter, *recheck) && !*audit && (*limit == 0 || attempted < *limit) && ctx.Err() == nil {
 				attempted++
 				didAttempt = true
 				previous := c
 				sections, e := prepare(ctx, kind, it, service)
-				c = checkpoint{Version: 5, Kind: kind, ID: it.ID, InputHash: hash(it), CheckedAt: time.Now().UTC(), Sections: sections}
+				c = checkpoint{Version: 6, Kind: kind, ID: it.ID, InputHash: hash(it), CheckedAt: time.Now().UTC(), Sections: sections}
 				if e != nil {
 					c.Error = e.Error()
 				}
@@ -243,8 +279,13 @@ func main() {
 				}
 				log.Printf("%s [%d/%d] %s complete=%v error=%s", kind, i+1, len(items), it.Label, complete(c, kind, it), c.Error)
 			}
-			if !wasComplete && complete(c, kind, it) {
-				ready++
+			if didAttempt {
+				if wasComplete {
+					ready--
+				}
+				if complete(c, kind, it) {
+					ready++
+				}
 			}
 			if didAttempt {
 				flushStatus()
@@ -255,6 +296,12 @@ func main() {
 		fmt.Println(string(b))
 		if ready != len(items) {
 			allReady = false
+		}
+	}
+	if *recheck {
+		proof := map[string]any{"version": 6, "complete": allReady && ctx.Err() == nil, "started_at": recheckStart, "finished_at": time.Now().UTC(), "rosters": recheckedRosters}
+		if err = writeJSON(filepath.Join(*root, "source-recheck.json"), proof); err != nil {
+			log.Fatal(err)
 		}
 	}
 	if ctx.Err() != nil {

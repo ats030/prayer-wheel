@@ -103,7 +103,7 @@ func PrepareOfficialSummary(ctx context.Context, service *TokusanService, item T
 		if key == "history" || key == "production" {
 			var ok bool
 			content, ok = GetOfficialSummary(item.QID, key)
-			markerKey := "midokoro-official-source-v1:" + item.QID + ":" + key
+			markerKey := "midokoro-official-source-v2:" + item.QID + ":" + key
 			marker, matched := lookupSummary(markerKey)
 			proof, verified := lookupSummary("midokoro-verified-none:" + markerKey)
 			ok = ok && (content.Summary != SummaryNone || verified && proof == "1") && matched && marker == shared.SourceHash(text) && (content.Summary != "" || len(content.Items) > 0)

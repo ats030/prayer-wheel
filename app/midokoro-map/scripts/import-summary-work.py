@@ -10,7 +10,6 @@ import os
 import fcntl
 from pathlib import Path
 import tempfile
-import sqlite3
 
 ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / "data/summary-work"
@@ -68,23 +67,6 @@ def import_caches():
                 else:
                     merged.update(value)
             imports.append((kind, filename, sources, target, merged))
-    # Establish a legacy baseline only when both official databases are exact
-    # copies. This permits reuse at migration and invalidation on later edits;
-    # it does not reconstruct the unknown historical generation revision.
-    old_db = ROOT.parent / "tokusan-map/frontend/tokusan.db"
-    new_db = ROOT / "data/tokusan/tokusan.db"
-    if old_db.read_bytes() == new_db.read_bytes():
-        with sqlite3.connect(f"file:{new_db}?mode=ro", uri=True) as db:
-            rows = list(db.execute("SELECT qid, history, production FROM tokusan"))
-        official = next(value for kind, name, _, _, value in imports
-                        if kind == "tokusan" and name == "official_summaries.json")
-        wiki = next(value for kind, name, _, _, value in imports
-                    if kind == "tokusan" and name == "summaries.json")
-        for qid, history, production in rows:
-            for key, text in (("history", history), ("production", production)):
-                if key in official.get(qid, {}).get("sections", {}) and text is not None:
-                    marker = f"midokoro-official-source-v1:{qid}:{key}"
-                    wiki.setdefault(marker, hashlib.sha256(text.encode()).hexdigest())
     manifest = []
     for kind, filename, sources, target, merged in imports:
         for path in sources:
