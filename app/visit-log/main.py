@@ -53,6 +53,7 @@ SITE_RE = re.compile(r"^[A-Za-z0-9._-]{1,%d}$" % MAX_SITE)
 # 「登録したのに届いていない」として画面に出したいので、イベントとは別に持つ。
 SITES_PATH = DATA_DIR / "sites.json"
 EXTERNAL_STATS_PATH = DATA_DIR / "external-stats.json"
+CLOUD_STATS_PATH = DATA_DIR / "cloud-run-stats.json"
 MAX_URL = 300
 MAX_NOTE = 120
 URL_RE = re.compile(r"^https?://[^\s/?#]+")
@@ -156,6 +157,56 @@ def save_external_stats(rows: list[dict]) -> None:
     tmp = EXTERNAL_STATS_PATH.with_name("external-stats.json.tmp")
     tmp.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
     tmp.replace(EXTERNAL_STATS_PATH)
+
+
+def cloud_summary(days: int, include_bots: bool) -> dict:
+    """Cloud request aggregates remain separate from beacon PV and visitors."""
+    try:
+        data = json.loads(CLOUD_STATS_PATH.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {"services": [], "projects": {}, "status": "未取得"}
+    except (OSError, json.JSONDecodeError):
+        return {"services": [], "projects": {}, "status": "取得失敗"}
+    today = datetime.now(TZ).date()
+    dates = [(today - timedelta(days=i)).isoformat() for i in reversed(range(days))]
+    services = []
+    for service in data.get("services", []):
+        rows = [r for r in service.get("rows", []) if dates[0] <= r["date"] <= dates[-1]
+                and (include_bots or r["bot"] != "bot")]
+        daily = defaultdict(int)
+        paths = defaultdict(int)
+        kinds = defaultdict(int)
+        statuses = defaultdict(int)
+        bots = defaultdict(int)
+        for r in rows:
+            count = r["requests"]
+            daily[r["date"]] += count
+            paths[(r["path"], r["kind"])] += count
+            kinds[r["kind"]] += count
+            statuses[r["status"]] += count
+            bots[r["bot"]] += count
+        coverage = [(datetime.fromisoformat(a.replace("Z", "+00:00")),
+                     datetime.fromisoformat(b.replace("Z", "+00:00")))
+                    for a, b in service.get("coverage", [])]
+        daily_rows = []
+        for date in dates:
+            start = datetime.fromisoformat(date).replace(tzinfo=TZ)
+            end = start + timedelta(days=1)
+            complete = any(a <= start and b >= end for a, b in coverage)
+            partial = any(a < end and b > start for a, b in coverage)
+            daily_rows.append({"date": date, "requests": daily[date] if partial else None,
+                               "coverage": "complete" if complete else "partial" if partial else "missing"})
+        services.append({k: service.get(k) for k in
+                         ("id", "project", "region", "service", "url", "status", "observed_at", "attempted_at", "retention_days", "error", "discovery_state")} | {
+            "requests": sum(daily.values()), "errors_4xx": sum(n for s, n in statuses.items() if 400 <= s < 500),
+            "errors_5xx": sum(n for s, n in statuses.items() if 500 <= s < 600),
+            "daily": daily_rows, "kinds": dict(kinds), "bots": dict(bots),
+            "statuses": [{"status": s, "requests": n} for s, n in sorted(statuses.items())],
+            "paths": [{"path": p, "kind": k, "requests": n} for (p, k), n in
+                      sorted(paths.items(), key=lambda item: (-item[1], item[0]))[:50]],
+        })
+    return {"services": services, "projects": data.get("projects", {}),
+            "status": data.get("status", "ok"), "attempted_at": data.get("attempted_at")}
 
 
 def log_path(dt: datetime) -> Path:
@@ -353,6 +404,7 @@ def summarize(days: int, include_bots: bool) -> dict:
             key=lambda row: (-row["clicks"], row["key"]),
         ),
         "external_stats": sorted(load_external_stats(), key=lambda row: row.get("site", "")),
+        "cloud_run": cloud_summary(days, include_bots),
     }
 
 
@@ -606,6 +658,10 @@ button.link{border:none;background:none;color:var(--acc);padding:2px 6px;text-de
 <div class="card"><h2>外部サービスへの送客クリック</h2>
 <p style="margin:0 0 10px;color:var(--mut)">外部サービス全体のPVではなく、この画面の計測リンクから送ったクリックだけです。</p>
 <div id="outbound"></div></div>
+<div class="card"><h2>Cloud Run アクセス</h2>
+<p style="margin:0 0 10px;color:var(--mut)">HTTPリクエストの集計です。上の期間・bot切替が適用されます。ページ・API・静的ファイルの分類はパスとメソッドによる推定です。bot以外は人間と断定せず「不明」とします。</p>
+<p style="margin:0 0 10px;color:var(--mut)">1時間ごとに更新、日本時間の日別表示。欠測は「—」、取得範囲が1日未満の日は「一部」と表示します。ログ保存設定による除外は集計できません。内部PV・訪問者数には加算しません。</p>
+<div id="cloud-run" aria-live="polite"></div></div>
 <div class="card"><h2>外部サービス公式統計</h2>
 <p style="margin:0 0 10px;color:var(--mut)">内部PVには加算しません。Cloud RunはHTTPリクエスト数、その他は公式画面から転記した値です。</p>
 <form class="reg" id="stats-reg">
@@ -688,6 +744,30 @@ function statsTable(rows) {
   return '<table><tr><th>サービス</th><th>指標</th><th class="n">累計</th><th>取得</th><th>確認時刻</th></tr>' + body + '</table>';
 }
 
+function cloudTable(data) {
+  const kinds = {page: "ページ", api: "API", static: "静的ファイル"};
+  const time = value => value ? new Date(value).toLocaleString("ja-JP", {timeZone: "Asia/Tokyo"}) + " JST" : "未取得";
+  const warnings = Object.entries(data.projects || {}).filter(([_, p]) => p.status !== "ok")
+    .map(([p]) => `<p class="msg err">${esc(p)}：一覧または保存期間の取得に失敗。前回の集計を表示しています。</p>`).join("");
+  const globalError = data.status === "取得失敗" ? '<p class="msg err">収集に失敗しました。前回の集計を表示しています。</p>' : "";
+  if (!data.services.length) return warnings + globalError + '<div class="empty">' + (data.status === "未取得" ? '収集データは未取得です。初回集計の完了を待っています。' : 'アクセス集計データがありません。') + '</div>';
+  return warnings + globalError + data.services.map(s => {
+    const received = s.observed_at;
+    const counts = received ? `<p>取得分 ${num(s.requests)} 件 · 4xx ${num(s.errors_4xx)} 件 · 5xx ${num(s.errors_5xx)} 件</p>` : "";
+    const status = s.discovery_state === "retired" ? "停止・削除済み（履歴）" : s.status === "ok" ? "取得成功" : "取得失敗（前回値を保持）";
+    const kindRows = Object.entries(kinds).map(([k, label]) => `${label} ${num(s.kinds[k] || 0)} 件`).join(" · ");
+    const daily = s.daily.map(r => `<tr><td>${esc(r.date)}</td><td class="n">${r.requests === null ? "—" : num(r.requests)}</td><td>${({complete:"取得済み",partial:"一部",missing:"欠測"})[r.coverage]}</td></tr>`).join("");
+    const paths = s.paths.map(r => `<tr><td class="k" style="overflow-wrap:anywhere">${esc(r.path)}</td><td>${kinds[r.kind] || esc(r.kind)}</td><td class="n">${num(r.requests)}</td></tr>`).join("");
+    const statuses = s.statuses.map(r => `${r.status || "不明"}: ${num(r.requests)} 件`).join(" · ");
+    return `<details style="border-top:1px solid var(--line);padding:10px 0"><summary style="cursor:pointer">${esc(s.service)} · ${received ? num(s.requests) + " 件（取得分）" : "未取得"} · ${esc(status)}</summary>
+      <p class="k" style="overflow-wrap:anywhere">${esc(s.project)} / ${esc(s.region)}</p>
+      <p style="color:var(--mut)">集計時点：${esc(time(s.observed_at))} · 最終試行：${esc(time(s.attempted_at))} · Google側保存 ${s.retention_days || "不明"} 日</p>
+      ${counts}<p>${kindRows}</p><p>bot判定 ${num(s.bots.bot || 0)} 件 · 不明 ${num(s.bots.unknown || 0)} 件</p><p>HTTPステータス：${statuses || "—"}</p>
+      <details><summary>日別リクエスト数</summary><div style="overflow-x:auto"><table><tr><th>日付（JST）</th><th class="n">件数</th><th>取得範囲</th></tr>${daily}</table></div></details>
+      <details><summary>パス別リクエスト数（上位50件）</summary><div style="overflow-x:auto"><table><tr><th>パス</th><th>種別（推定）</th><th class="n">件数</th></tr>${paths}</table></div></details></details>`;
+  }).join("");
+}
+
 document.getElementById("reg").onsubmit = async e => {
   e.preventDefault();
   const r = await fetch("/api/sites", {
@@ -747,6 +827,7 @@ async function load() {
         `<tr><td class="k">${esc(r.key)}</td><td class="n">${num(r.clicks)}</td><td class="n">${num(r.visitors)}</td></tr>`).join("")}</table>`
     : '<div class="empty">まだ送客クリックがありません</div>';
   document.getElementById("external-stats").innerHTML = statsTable(d.external_stats);
+  document.getElementById("cloud-run").innerHTML = cloudTable(d.cloud_run);
 }
 
 document.querySelectorAll("[data-d]").forEach(b => b.onclick = () => {

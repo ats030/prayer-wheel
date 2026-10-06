@@ -1,0 +1,17 @@
+tool: Google Cloud Logging API
+version_or_plan: v2, existing Google Cloud projects
+category: service
+status: conditional
+license: proprietary-terms
+commercial_use: permitted under customer's Google Cloud agreement
+license_url: https://cloud.google.com/terms/
+terms_url: https://cloud.google.com/terms/
+pricing_url: https://cloud.google.com/products/observability/pricing
+restrictions:
+  - Existing authorized Google Cloud account and project access required.
+  - Cloud Logging storage remains billable beyond existing allowances; this change does not alter ingestion or retention.
+  - No new sinks, log buckets, metrics, datasets, or hosted services are created.
+  - Read-only Logging API usage has no additional charge per official pricing; API quotas still apply.
+evidence_retrieved: 2026-10-06
+reviewer: Codex
+notes: Adopt existing request-log reads only. Commercial hosted use is covered by Google Cloud service terms, not an open-source redistribution license. Conditional on the existing account agreement and authorized access. No new Python dependencies.
