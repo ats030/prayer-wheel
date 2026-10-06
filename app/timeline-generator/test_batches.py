@@ -72,9 +72,10 @@ def grounded_model(system, prompt, deadline, schema):
 
 
 class BatchTests(unittest.TestCase):
-    def run_generation(self, source, model=grounded_model, records=None):
+    def run_generation(self, source, model=grounded_model, records=None, saturated=None):
         # 擬似モデルは1段落から1件を出すので、組の段落数を出力上限に揃えて組ごとの件数を固定する。
-        with patch.object(t, 'BATCH_PASSAGES', t.BATCH_EVENTS), patch.object(t, 'search', return_value=[{}]), patch.object(t.WebReader, 'fetch', return_value=source), patch.object(t, 'crosscheck_sources', return_value=[]), patch.object(t, 'model_json', side_effect=model):
+        # 毎組が上限で埋まるため、再生成は既定で止め、それを確かめるテストだけ有効にする。
+        with patch.object(t, 'SATURATED_EVENTS', saturated or t.BATCH_EVENTS), patch.object(t, 'BATCH_PASSAGES', t.BATCH_EVENTS), patch.object(t, 'search', return_value=[{}]), patch.object(t.WebReader, 'fetch', return_value=source), patch.object(t, 'crosscheck_sources', return_value=[]), patch.object(t, 'model_json', side_effect=model):
             return t.build_timeline(t.parse_query('研究'), (records if records is not None else []).append)
 
     def test_over_the_cap_processing_continues_and_low_relevance_events_are_replaced(self):
@@ -427,11 +428,28 @@ class BatchTests(unittest.TestCase):
     def test_trace_records_over_cap_proposals_separately(self):
         original = t.verify_batch
         def capped(*args, **kwargs):
-            with patch.object(t, 'BATCH_EVENTS', 2):
-                return original(*args, **kwargs)
+            args[5]['limit'] = 2
+            return original(*args, **kwargs)
         with patch.object(t, 'verify_batch', side_effect=capped):
             trace = self.run_generation(history_source(10))['trace']
         self.assertEqual({r['stage'] for r in trace['rejected']}, {'件数上限'})
+
+    def test_saturated_batch_is_regenerated_with_wider_limit(self):
+        systems = []
+        def model(system, prompt, deadline, schema):
+            if schema is t.EVENT_SCHEMA:
+                systems.append(system)
+                if '最大14件' in system:
+                    # 再生成では1件目が言い換えで重複し、枠外だった出来事が1件増える。
+                    events = grounded_model(system, prompt, deadline, schema)['events']
+                    return {'events': events + [events[0] | {'year': 1799, 'title': '枠外の出来事'}]}
+            return grounded_model(system, prompt, deadline, schema)
+        result = self.run_generation(history_source(t.BATCH_EVENTS + 3), model=model, saturated=14)
+        self.assertEqual(['最大7件' in s for s in systems], [True, False, True])
+        self.assertEqual(['最大14件' in s for s in systems], [False, True, False])
+        # 枠外の出来事は検証まで届き、そこで資料と照合される。
+        self.assertIn(1799, [r['year'] for r in result['trace']['rejected'] if r['batch'] == 1])
+        self.assertEqual(result['trace']['batches'][0]['proposed'], t.BATCH_EVENTS + 1)
 
     def test_trace_marks_unprocessed_batches_after_deadline(self):
         clock = [0]
