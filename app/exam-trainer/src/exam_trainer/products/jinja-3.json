@@ -1,0 +1,622 @@
+{
+  "title": "神社検定 参級 練習問題と解説",
+  "exam_name": "神社検定 参級",
+  "subtitle": "四択20問・解説と参考資料付き",
+  "version": "0.1",
+  "price_yen": null,
+  "checked_at": "2026-10-06",
+  "scope_note": "神社の基礎と神話を学ぶ独自作成の四択20問です。参級の公式テキスト全体を網羅する教材ではありません。神話は伝承として扱います。 未校閲です。本試験との難易度の一致、合格は保証しません。販売前に全問校閲と出典の利用条件の確認が必要です。",
+  "contents": [
+    "境内と参拝",
+    "祭祀と神宮",
+    "神話の基礎"
+  ],
+  "free_ids": [
+    1,
+    2,
+    3,
+    7,
+    8,
+    9,
+    11,
+    13,
+    15,
+    18
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "category": "境内と参拝",
+      "node_path": "1",
+      "stem": "神社の入口に立つ鳥居は、何の境界を示すものですか？",
+      "choices": [
+        "神域とその外側",
+        "本殿と拝殿",
+        "内宮と外宮",
+        "摂社と末社"
+      ],
+      "answer": 0,
+      "explanation": "鳥居は神域の入口を示します。本殿と拝殿を分けるための施設ではありません。",
+      "source": "S001",
+      "source_keys": [
+        "S001"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "鳥居は神域の入口を示します。本殿と拝殿を分けるための施設ではありません。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 2,
+      "category": "境内と参拝",
+      "node_path": "1",
+      "stem": "参拝前に手と口を清めるための場所はどれですか？",
+      "choices": [
+        "神楽殿",
+        "手水舎（ちょうずや）",
+        "社務所",
+        "宝物殿"
+      ],
+      "answer": 1,
+      "explanation": "手水舎は参拝前のお清めに用います。神楽を奉納する神楽殿とは用途が異なります。",
+      "source": "S001",
+      "source_keys": [
+        "S001"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "手水舎は参拝前のお清めに用います。神楽を奉納する神楽殿とは用途が異なります。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 3,
+      "category": "境内と参拝",
+      "node_path": "1",
+      "stem": "神社で祭神がお鎮まりになる社殿を何と呼びますか？",
+      "choices": [
+        "拝殿",
+        "神楽殿",
+        "本殿",
+        "社務所"
+      ],
+      "answer": 2,
+      "explanation": "本殿は祭神をお祀りする社殿です。参拝者が祈りを捧げる拝殿と役割を区別します。",
+      "source": "S001",
+      "source_keys": [
+        "S001"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "本殿は祭神をお祀りする社殿です。参拝者が祈りを捧げる拝殿と役割を区別します。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 4,
+      "category": "境内と参拝",
+      "node_path": "1",
+      "stem": "通常、本殿の前にあり、祈願などを行う社殿はどれですか？",
+      "choices": [
+        "本殿",
+        "手水舎",
+        "宝物殿",
+        "拝殿"
+      ],
+      "answer": 3,
+      "explanation": "拝殿は祈りを捧げるための社殿です。配置は神社ごとに異なるため、すべて同じとは限りません。",
+      "source": "S001",
+      "source_keys": [
+        "S001"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "拝殿は祈りを捧げるための社殿です。配置は神社ごとに異なるため、すべて同じとは限りません。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 5,
+      "category": "境内と参拝",
+      "node_path": "1",
+      "stem": "神楽などを神さまに奉納するための建物はどれですか？",
+      "choices": [
+        "神楽殿",
+        "手水舎",
+        "社務所",
+        "宝物殿"
+      ],
+      "answer": 0,
+      "explanation": "神楽殿は神楽などの芸能を奉納する場です。すべての神社に同じ形で備わるとは限りません。",
+      "source": "S001",
+      "source_keys": [
+        "S001"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "神楽殿は神楽などの芸能を奉納する場です。すべての神社に同じ形で備わるとは限りません。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 6,
+      "category": "境内と参拝",
+      "node_path": "1",
+      "stem": "境内に置かれる狛犬に込められた意味として適切なのはどれですか？",
+      "choices": [
+        "祭神の名前を記す",
+        "邪気を祓い、神前を守護する",
+        "参拝の回数を数える",
+        "神饌の品目を表示する"
+      ],
+      "answer": 1,
+      "explanation": "狛犬には神前守護の意味があります。境内の施設は形だけでなく役割と合わせて覚えましょう。",
+      "source": "S001",
+      "source_keys": [
+        "S001"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "狛犬には神前守護の意味があります。境内の施設は形だけでなく役割と合わせて覚えましょう。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 7,
+      "category": "境内と参拝",
+      "node_path": "1",
+      "stem": "神社本庁が基本として案内する拝礼の順序はどれですか？",
+      "choices": [
+        "一拝・二拍手・二拝",
+        "二拝・一拍手・二拝",
+        "二拝・二拍手・一拝",
+        "二拝・四拍手・一拝"
+      ],
+      "answer": 2,
+      "explanation": "一般的な基本形は二拝二拍手一拝です。独自の作法を持つ神社では、その案内に従います。",
+      "source": "S002",
+      "source_keys": [
+        "S002"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "一般的な基本形は二拝二拍手一拝です。独自の作法を持つ神社では、その案内に従います。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 8,
+      "category": "境内と参拝",
+      "node_path": "1",
+      "stem": "出雲大社が正式な参拝作法として案内する拍手の回数は何回ですか？",
+      "choices": [
+        "1回",
+        "2回",
+        "3回",
+        "4回"
+      ],
+      "answer": 3,
+      "explanation": "出雲大社は二礼四拍手一礼を案内しています。一般的な二拍手の作法と区別します。",
+      "source": "S003",
+      "source_keys": [
+        "S003"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "出雲大社は二礼四拍手一礼を案内しています。一般的な二拍手の作法と区別します。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 9,
+      "category": "祭祀と神宮",
+      "node_path": "2",
+      "stem": "祭りなどで神さまに供える食事を何と呼びますか？",
+      "choices": [
+        "神饌（しんせん）",
+        "祝詞（のりと）",
+        "神楽（かぐら）",
+        "玉串（たまぐし）"
+      ],
+      "answer": 0,
+      "explanation": "神饌は神さまへの食事のお供えです。言葉を奏上する祝詞とは異なります。",
+      "source": "S004",
+      "source_keys": [
+        "S004"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "神饌は神さまへの食事のお供えです。言葉を奏上する祝詞とは異なります。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 10,
+      "category": "祭祀と神宮",
+      "node_path": "2",
+      "stem": "祭典で神職が神さまに奏上する言葉を何と呼びますか？",
+      "choices": [
+        "神饌（しんせん）",
+        "祝詞（のりと）",
+        "神輿（みこし）",
+        "神楽（かぐら）"
+      ],
+      "answer": 1,
+      "explanation": "祝詞は祭典で奏上する言葉です。感謝や祈願を言葉で伝える役割があります。",
+      "source": "S005",
+      "source_keys": [
+        "S005"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "祝詞は祭典で奏上する言葉です。感謝や祈願を言葉で伝える役割があります。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 11,
+      "category": "祭祀と神宮",
+      "node_path": "2",
+      "stem": "伊勢神宮の内宮（皇大神宮）にお祀りされる神はどなたですか？",
+      "choices": [
+        "豊受大御神（とようけのおおみかみ）",
+        "大国主大神（おおくにぬしのおおかみ）",
+        "天照大御神（あまてらすおおみかみ）",
+        "猿田彦神（さるだひこのかみ）"
+      ],
+      "answer": 2,
+      "explanation": "内宮の祭神は天照大御神です。外宮にお祀りされる豊受大御神との対応を覚えましょう。",
+      "source": "S006",
+      "source_keys": [
+        "S006"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "内宮の祭神は天照大御神です。外宮にお祀りされる豊受大御神との対応を覚えましょう。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 12,
+      "category": "祭祀と神宮",
+      "node_path": "2",
+      "stem": "伊勢神宮の外宮（豊受大神宮）にお祀りされる神はどなたですか？",
+      "choices": [
+        "天照大御神（あまてらすおおみかみ）",
+        "素戔嗚尊（すさのおのみこと）",
+        "瓊瓊杵尊（ににぎのみこと）",
+        "豊受大御神（とようけのおおみかみ）"
+      ],
+      "answer": 3,
+      "explanation": "外宮には豊受大御神がお祀りされます。天照大御神のお食事に関わる神として説明されています。",
+      "source": "S006",
+      "source_keys": [
+        "S006"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "外宮には豊受大御神がお祀りされます。天照大御神のお食事に関わる神として説明されています。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 13,
+      "category": "祭祀と神宮",
+      "node_path": "2",
+      "stem": "伊勢神宮の式年遷宮は、原則として何年に一度行う制度ですか？",
+      "choices": [
+        "20年",
+        "10年",
+        "30年",
+        "60年"
+      ],
+      "answer": 0,
+      "explanation": "伊勢神宮の式年遷宮は20年を周期とします。これは伊勢神宮の制度で、すべての神社に共通する周期ではありません。",
+      "source": "S007",
+      "source_keys": [
+        "S007"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "伊勢神宮の式年遷宮は20年を周期とします。これは伊勢神宮の制度で、すべての神社に共通する周期ではありません。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 14,
+      "category": "祭祀と神宮",
+      "node_path": "2",
+      "stem": "伊勢神宮の社殿に受け継がれている建築様式はどれですか？",
+      "choices": [
+        "大社造（たいしゃづくり）",
+        "神明造（しんめいづくり）",
+        "春日造（かすがづくり）",
+        "八幡造（はちまんづくり）"
+      ],
+      "answer": 1,
+      "explanation": "伊勢神宮は神明造の社殿を伝えています。式年遷宮は建築技術の継承にもつながります。",
+      "source": "S007",
+      "source_keys": [
+        "S007"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "伊勢神宮は神明造の社殿を伝えています。式年遷宮は建築技術の継承にもつながります。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 15,
+      "category": "神話の基礎",
+      "node_path": "3",
+      "stem": "国生み神話で、国を形づくる役目を担う二神はどなたですか？",
+      "choices": [
+        "天照大御神と豊受大御神",
+        "大国主大神と猿田彦神",
+        "伊邪那岐命と伊邪那美命",
+        "天鈿女命と瓊瓊杵尊"
+      ],
+      "answer": 2,
+      "explanation": "国生みは伊邪那岐命・伊邪那美命を中心とする神話です。神話上の物語として学び、歴史的事実とは分けて扱います。",
+      "source": "S008",
+      "source_keys": [
+        "S008"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "国生みは伊邪那岐命・伊邪那美命を中心とする神話です。神話上の物語として学び、歴史的事実とは分けて扱います。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 16,
+      "category": "神話の基礎",
+      "node_path": "3",
+      "stem": "天岩戸神話で、岩戸の中に隠れる神はどなたですか？",
+      "choices": [
+        "瓊瓊杵尊",
+        "猿田彦神",
+        "豊受大御神",
+        "天照大御神"
+      ],
+      "answer": 3,
+      "explanation": "天照大御神の岩戸隠れによって世界が暗くなる、という神話です。",
+      "source": "S009",
+      "source_keys": [
+        "S009"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "天照大御神の岩戸隠れによって世界が暗くなる、という神話です。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 17,
+      "category": "神話の基礎",
+      "node_path": "3",
+      "stem": "天岩戸神話で、神々の前で舞を舞う神はどなたですか？",
+      "choices": [
+        "天鈿女命（あめのうずめのみこと）",
+        "豊受大御神",
+        "伊邪那美命",
+        "瓊瓊杵尊"
+      ],
+      "answer": 0,
+      "explanation": "天鈿女命の舞は、天照大御神が岩戸の外に関心を向ける場面に登場します。",
+      "source": "S009",
+      "source_keys": [
+        "S009"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "天鈿女命の舞は、天照大御神が岩戸の外に関心を向ける場面に登場します。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 18,
+      "category": "神話の基礎",
+      "node_path": "3",
+      "stem": "天孫降臨の神話で、地上に降りる天照大御神の孫はどなたですか？",
+      "choices": [
+        "素戔嗚尊",
+        "瓊瓊杵尊（ににぎのみこと）",
+        "大国主大神",
+        "伊邪那岐命"
+      ],
+      "answer": 1,
+      "explanation": "天孫降臨では瓊瓊杵尊が地上へ降ります。神話の場面と登場する神を対応させましょう。",
+      "source": "S009",
+      "source_keys": [
+        "S009"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "天孫降臨では瓊瓊杵尊が地上へ降ります。神話の場面と登場する神を対応させましょう。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 19,
+      "category": "神話の基礎",
+      "node_path": "3",
+      "stem": "三種の神器の組み合わせとして適切なのはどれですか？",
+      "choices": [
+        "鏡・矛・勾玉",
+        "剣・弓・勾玉",
+        "鏡・剣・勾玉",
+        "鏡・剣・鈴"
+      ],
+      "answer": 2,
+      "explanation": "三種の神器は八咫鏡・草薙剣・八坂瓊勾玉です。瓊瓊杵尊に授けられる神話に登場します。",
+      "source": "S009",
+      "source_keys": [
+        "S009"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "三種の神器は八咫鏡・草薙剣・八坂瓊勾玉です。瓊瓊杵尊に授けられる神話に登場します。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    },
+    {
+      "id": 20,
+      "category": "神話の基礎",
+      "node_path": "3",
+      "stem": "伊勢神宮が紹介する天孫降臨の神話で、瓊瓊杵尊の先導をする神はどなたですか？",
+      "choices": [
+        "豊受大御神",
+        "伊邪那美命",
+        "大国主大神",
+        "猿田彦神"
+      ],
+      "answer": 3,
+      "explanation": "猿田彦神は天孫降臨で先導する神として登場します。",
+      "source": "S009",
+      "source_keys": [
+        "S009"
+      ],
+      "provenance": {
+        "origin": "editorial-original",
+        "created_at": "2026-10-06",
+        "evidence": "",
+        "support_summary": "猿田彦神は天孫降臨で先導する神として登場します。",
+        "human_review": "未校閲",
+        "source_details": []
+      }
+    }
+  ],
+  "sources": {
+    "S001": {
+      "title": "神社本庁：境内について（トップページから「おまいりする」へ）",
+      "url": "https://www.jinjahoncho.or.jp/",
+      "checked_at": "2026-10-06",
+      "date_label": "出典参照日（人による校閲は未実施）",
+      "consulted_url": "https://www.jinjahoncho.or.jp/omairi/keidai/",
+      "link_note": "参照先の方針に合わせ、閲覧リンクはトップページです。ページ名からお探しください。"
+    },
+    "S002": {
+      "title": "神社本庁：参拝方法（トップページから「おまいりする」へ）",
+      "url": "https://www.jinjahoncho.or.jp/",
+      "checked_at": "2026-10-06",
+      "date_label": "出典参照日（人による校閲は未実施）",
+      "consulted_url": "https://www.jinjahoncho.or.jp/omairi/sanpai/",
+      "link_note": "参照先の方針に合わせ、閲覧リンクはトップページです。ページ名からお探しください。"
+    },
+    "S003": {
+      "title": "出雲大社：参拝作法",
+      "url": "https://izumooyashiro.or.jp/archives/faq/7898",
+      "checked_at": "2026-10-06",
+      "date_label": "出典参照日（人による校閲は未実施）"
+    },
+    "S004": {
+      "title": "神社本庁：神饌（トップページから「おまつりする」へ）",
+      "url": "https://www.jinjahoncho.or.jp/",
+      "checked_at": "2026-10-06",
+      "date_label": "出典参照日（人による校閲は未実施）",
+      "consulted_url": "https://www.jinjahoncho.or.jp/omatsuri/shinsen/",
+      "link_note": "参照先の方針に合わせ、閲覧リンクはトップページです。ページ名からお探しください。"
+    },
+    "S005": {
+      "title": "神社本庁：祝詞（トップページから「おまつりする」へ）",
+      "url": "https://www.jinjahoncho.or.jp/",
+      "checked_at": "2026-10-06",
+      "date_label": "出典参照日（人による校閲は未実施）",
+      "consulted_url": "https://www.jinjahoncho.or.jp/omatsuri/norito/",
+      "link_note": "参照先の方針に合わせ、閲覧リンクはトップページです。ページ名からお探しください。"
+    },
+    "S006": {
+      "title": "伊勢神宮：神宮について",
+      "url": "https://www.isejingu.or.jp/about/index.html",
+      "checked_at": "2026-10-06",
+      "date_label": "出典参照日（人による校閲は未実施）"
+    },
+    "S007": {
+      "title": "伊勢神宮：式年遷宮の思想",
+      "url": "https://www.isejingu.or.jp/sengu/aboutsengu.html",
+      "checked_at": "2026-10-06",
+      "date_label": "出典参照日（人による校閲は未実施）"
+    },
+    "S008": {
+      "title": "神社本庁：国生み（トップページから「神社と神道」へ）",
+      "url": "https://www.jinjahoncho.or.jp/",
+      "checked_at": "2026-10-06",
+      "date_label": "出典参照日（人による校閲は未実施）",
+      "consulted_url": "https://www.jinjahoncho.or.jp/shinto/shinwa/story1/",
+      "link_note": "参照先の方針に合わせ、閲覧リンクはトップページです。ページ名からお探しください。"
+    },
+    "S009": {
+      "title": "伊勢神宮：神宮の神話",
+      "url": "https://www.isejingu.or.jp/about/mythology/",
+      "checked_at": "2026-10-06",
+      "date_label": "出典参照日（人による校閲は未実施）"
+    }
+  },
+  "provenance": {
+    "origin": "editorial-original",
+    "created_at": "2026-10-06",
+    "selection": "公開一次資料を参照し、問題・選択肢・解説を独自作成。公式問題・本文・画像は転載しない。",
+    "human_review": "未校閲",
+    "source_terms": "販売利用の確認待ち",
+    "exam_scope_url": "https://www.jinjakentei.jp/shiken/last.html"
+  }
+}

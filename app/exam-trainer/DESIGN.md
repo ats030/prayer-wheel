@@ -7,7 +7,7 @@ fonts in `static/linear.css` are the source of tokens. No new font or dependency
 ## Genre and structure
 
 - Modern minimal, functional and restrained. No ornamental images or motion.
-- Catalog: short introduction followed by five compact course rows. Trial is
+- Catalog: short introduction followed by seven compact course rows. Trial is
   the primary action; PDFs and an introduction are secondary. Use real counts.
 - Product introduction: title, trial action, scope, PDF invitation and details.
 - Trial: one question, choices, feedback, then a result with PDF and explanation

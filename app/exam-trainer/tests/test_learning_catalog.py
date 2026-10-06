@@ -64,7 +64,7 @@ def test_picker_matches_material_catalog_without_changing_selection_or_bank_orde
         names = [*learning_catalog.DISPLAY_NAMES, '追加検定A', '追加検定B']
         positions = [picker.index(name) for name in names]
         assert positions == sorted(positions)
-        assert picker.count('<option') == 7
+        assert picker.count('<option') == len(learning_catalog.DISPLAY_NAMES) + 2
         assert '<option value="3" selected>歴史能力検定3級 日本史</option>' in picker
     assert 'data-exam-id="1"' in client.get('/study').text
     assert bank.list_exams() == original
@@ -73,7 +73,7 @@ def test_picker_matches_material_catalog_without_changing_selection_or_bank_orde
 def test_imported_course_can_be_selected_answered_and_aggregated():
     created = learning_catalog.import_missing()
     assert {item['name'] for item in created} == set(learning_catalog.EXAMS.values())
-    assert [item['questions'] for item in created] == [50, 50, 31, 50, 29]
+    assert [item['questions'] for item in created] == [50, 50, 31, 50, 29, 20, 20]
     eid = created[0]['exam_id']
     q = bank.next_question(eid)
     original = kouko.load_product()['questions'][0]
@@ -91,7 +91,7 @@ def test_imported_course_can_be_selected_answered_and_aggregated():
         picker = html.split('<select id="examSwitch"', 1)[1].split('</select>', 1)[0]
         for name in learning_catalog.EXAMS.values():
             assert name in picker
-        assert picker.count('<option') == 5
+        assert picker.count('<option') == len(learning_catalog.DISPLAY_NAMES)
         assert '未校閲の教材から取り込んだ練習問題' in html
         assert 'href="/kouko"' in html
     assert client.post(f'/api/questions/{q["id"]}/answer', json={'chosen': q['answer']}).json()['correct']
@@ -122,6 +122,41 @@ def test_import_failure_rolls_back_all_new_courses():
     assert not bank.list_exams()
     assert not table_rows('question')
     assert not table_rows('syllabus_node')
+
+
+@pytest.mark.parametrize('key', ['jinja-3', 'shiro-3'])
+def test_original_materials_preserve_existing_five_and_support_learning(key):
+    for other, name in learning_catalog.EXAMS.items():
+        if other not in ('jinja-3', 'shiro-3'):
+            eid = bank.create_exam(name, other)
+            bank.set_syllabus(eid, [{'path': '1', 'title': '既存範囲'}])
+            qid = bank.add_question(eid, '1', '既存問題', ['正解', '誤答'], 0, status='verified')
+            bank.answer(qid, 0)
+    before = {table: table_rows(table) for table in ('exam', 'syllabus_node', 'question', 'review', 'card')}
+    created = learning_catalog.import_missing()
+    assert [item['key'] for item in created] == ['jinja-3', 'shiro-3']
+    assert [item['questions'] for item in created] == [20, 20]
+    for table, rows in before.items():
+        assert table_rows(table)[:len(rows)] == rows
+    eid = next(item['exam_id'] for item in created if item['key'] == key)
+    product = products.load_product(key)
+    q = bank.next_question(eid)
+    assert q['stem'] == product['questions'][0]['stem']
+    assert not q['evidence']
+    provenance = q['source_details'][-1]
+    assert provenance['original_provenance']['origin'] == 'editorial-original'
+    assert 'bank_question_id' not in provenance['original_provenance']
+    assert provenance['editorial_content_sha256'] == products.content_digest(key)
+    client = TestClient(app)
+    for route in ('study', 'weakness'):
+        html = client.get(f'/{route}?exam_id={eid}').text
+        assert f'href="/products/{key}"' in html
+        assert '未校閲の教材から取り込んだ練習問題' in html
+    assert client.post(f'/api/questions/{q["id"]}/answer', json={'chosen': q['answer']}).json()['correct']
+    stats = bank.node_stats(eid)
+    assert stats[0]['answered'] == stats[0]['correct'] == 1
+    assert bank.queue_counts(eid)['new'] == 19
+    assert learning_catalog.import_missing() == []
 
 
 @pytest.mark.parametrize('key,module', [('kouko', kouko), ('g', products)])
@@ -161,7 +196,7 @@ def test_cli_preview_backup_and_repeat(tmp_path):
     assert len(bank.list_exams()) == 1
     assert not list(tmp_path.glob('bank-before-catalog-*.sqlite'))
     subprocess.run(command + ['--apply'], env=env, capture_output=True, text=True, check=True)
-    assert len(bank.list_exams()) == 5
+    assert len(bank.list_exams()) == len(learning_catalog.EXAMS)
     assert table_rows('review') == before
     backups = list(tmp_path.glob('bank-before-catalog-*.sqlite'))
     assert len(backups) == 1

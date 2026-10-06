@@ -47,7 +47,7 @@ with tempfile.TemporaryDirectory() as folder:
             page.set_viewport_size({'width':width,'height':900})
             page.goto('http://exam.test/')
             assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth'), f'learning nav overflow at {width}'
-            assert page.locator('.course-card').count() == 5
+            assert page.locator('.course-card').count() == 7
             page.keyboard.press('Tab')
             assert page.locator('.skip-link').evaluate('(node) => node === document.activeElement')
             page.keyboard.press('Enter')
@@ -59,7 +59,7 @@ with tempfile.TemporaryDirectory() as folder:
             assert page.locator('#study').get_attribute('data-exam-id') == '3'
             assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
             page.locator('.nav-links a[href="/products"]').click()
-            assert page.locator('.artifact').count() == 5
+            assert page.locator('.artifact').count() == 7
             assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
             page.evaluate("window.scrollTo(0, 0); document.activeElement.blur()")
             page.screenshot(path=f'/tmp/product-catalog-{width}.png', full_page=True)
@@ -108,4 +108,4 @@ with tempfile.TemporaryDirectory() as folder:
         assert not errors, errors
         browser.close()
     db.close()
-print('PASS home catalog; study/exam switch; 5 products; PDF2 + production5 keyboard disclosure; trial/result PDF download; 320/375/414/768/1280; no overflow; no JS errors')
+print('PASS home catalog; study/exam switch; 7 products; PDF2 + production5 keyboard disclosure; trial/result PDF download; 320/375/414/768/1280; no overflow; no JS errors')

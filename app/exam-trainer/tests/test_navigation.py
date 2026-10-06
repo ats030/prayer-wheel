@@ -24,7 +24,7 @@ def test_home_is_catalog_and_navigation_has_one_learning_entry(client):
     for path in ('/', '/products'):
         response = client.get(path)
         assert response.status_code == 200
-        assert response.text.count('class="artifact course-card"') == 5
+        assert response.text.count('class="artifact course-card"') == 7
         assert 'href="/study"' in response.text
         assert 'id="study"' not in response.text
         assert 'href="/kouko/trial"' in response.text

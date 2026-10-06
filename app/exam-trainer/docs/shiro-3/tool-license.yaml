@@ -1,0 +1,21 @@
+reviewed_at: 2026-10-06
+intended_use: "日本城郭検定3級の独自練習問題をアプリ内で提供し、PDF販売の原稿を準備する。出品はしない。"
+candidates:
+  - name: "自治体・城郭管理機関・兵庫県立歴史博物館の公開解説"
+    version_or_plan: "shiro-3.jsonのsourcesに記録した8ページ（2026-10-06参照）"
+    cost: "公開ページの閲覧。転載の料金・許諾条件は未確定。"
+    commercial_use: review_required
+    decision: conditional
+    conditions:
+      - "公開資料は事実確認に参照し、問題・選択肢・解説は独自作成する"
+      - "公式問題・テキストの文章・写真・図版・ロゴの転載は採用しない"
+      - "公開されていることや自治体の運営だけを商用利用許諾の根拠にしない"
+      - "販売前に全問校閲と参照先ごとの利用方法を確認し、releaseの条件確認を記録する"
+    sources:
+      - https://www.city.himeji.lg.jp/site_policy/0000000009.html
+      - https://www.city.koka.lg.jp/26182.htm
+      - https://cms.kentei-uketsuke.com/shiro/about/
+    note: "転載・データセットとしての取り込みや商用再利用を承認する記録ではない。公式範囲は主催者案内で確認。各本文・写真等の商用再利用の許諾根拠は未取得のため、原文・画像の採用と販売は保留する。姫路市の通常ページはオープンデータ用規約の対象として扱わない。参照先と独自要約はsource-review.mdおよび教材JSONに記録。"
+dependencies:
+  added: []
+  note: "既存のFastAPI・Jinja2・Playwright・pypdfを使用。新規サービス契約なし。BOOTHの条件はdocs/kouko/tool-license.yamlを参照し、出品前に再確認する。"

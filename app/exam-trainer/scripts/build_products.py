@@ -24,6 +24,8 @@ from exam_trainer import kouko, products
 from build_kouko import render_book
 
 LETTERS = "ABCD"
+# Original authored snapshots must never be replaced by learning-bank copies.
+BANK_EXPORT_IDS = ("g", "nihonshu", "rekishi-3", "sekai-isan-3")
 
 
 def round_robin(questions: list[dict], limit: int) -> list[dict]:
@@ -39,6 +41,8 @@ def round_robin(questions: list[dict], limit: int) -> list[dict]:
 
 
 def snapshot(conn: sqlite3.Connection, product_id: str, exported_at: str) -> dict:
+    if product_id not in BANK_EXPORT_IDS:
+        raise ValueError(f"独自作成教材はバンクから書き出せません: {product_id}")
     exam = conn.execute("SELECT * FROM exam WHERE name=?", (products.EXAMS[product_id],)).fetchone()
     if exam is None:
         raise ValueError(f"試験がありません: {products.EXAMS[product_id]}")
@@ -93,12 +97,15 @@ def snapshot(conn: sqlite3.Connection, product_id: str, exported_at: str) -> dic
                            "human_review": "未校閲", "source_terms": "未確認"}}
 
 
-def export_bank(path: Path, replace: bool = False) -> None:
+def export_bank(path: Path, replace: bool = False, keys=None) -> None:
+    selected = tuple(keys) if keys is not None else BANK_EXPORT_IDS
+    if any(key not in BANK_EXPORT_IDS for key in selected):
+        raise ValueError("独自作成教材はバンクから書き出せません")
     # Prepare every snapshot before writing files; never create an empty bank.
     conn = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     try:
-        prepared = {key: snapshot(conn, key, date.today().isoformat()) for key in products.EXAMS}
+        prepared = {key: snapshot(conn, key, date.today().isoformat()) for key in selected}
     finally:
         conn.close()
     for key in prepared:
@@ -116,11 +123,14 @@ def export_bank(path: Path, replace: bool = False) -> None:
 def write_text_artifacts(key: str, product: dict, output: Path) -> bool:
     digest = products.content_digest(key)
     qs = product["questions"]
+    authored = product.get('provenance', {}).get('origin') == 'editorial-original'
     manuscript = [f'# {product["title"]}', '', '校閲用原稿 / 未校閲 / 販売不可', '',
                   f'教材SHA-256: `{digest}`', '', product["scope_note"], '']
     audit = [f'# {product["exam_name"]} 根拠確認の記録', '',
-             f'書き出し日：{product["checked_at"]}。出典本文の再確認は行っていません。', '',
-             'バンクのverifiedは機械検証・既存の登録状態です。人による校閲や商用利用の許諾を意味しません。', '',
+             (f'出典参照日：{product["checked_at"]}。公開一次資料を参照して独自に作成した練習問題です。'
+              if authored else f'書き出し日：{product["checked_at"]}。出典本文の再確認は行っていません。'), '',
+             ('参照による事実確認は、人による校閲や商用利用の許諾を意味しません。保存した説明は独自の要約で、原文の引用ではありません。'
+              if authored else 'バンクのverifiedは機械検証・既存の登録状態です。人による校閲や商用利用の許諾を意味しません。'), '',
              '| 問 | バンクID | 分野 | 出典 | 保存済み根拠 | 校閲 |', '|---|---|---|---|---|---|']
     for q in qs:
         manuscript += [f'## 問{q["id"]} {q["category"]}', '', q["stem"], '']
@@ -129,10 +139,12 @@ def write_text_artifacts(key: str, product: dict, output: Path) -> bool:
         for source_key in q["source_keys"]:
             source = product["sources"][source_key]
             manuscript += [f'参考：[{source_key}] {source["url"]}', '']
-        bank_id = q["provenance"]["bank_question_id"]
-        manuscript += [f'バンク問題ID：{bank_id} / 登録状態：verified / 人による校閲：未確認', '']
+        bank_id = q["provenance"].get("bank_question_id", '—')
+        manuscript += [('由来：独自作成 / 人による校閲：未確認' if authored else
+                        f'バンク問題ID：{bank_id} / 登録状態：verified / 人による校閲：未確認'), '']
         refs = ', '.join(product["sources"][s]["url"] for s in q["source_keys"])
-        evidence = '抜粋あり・再確認待ち' if q["provenance"]["evidence"].strip() else '抜粋なし・本文の確認が必要'
+        evidence = ('参照要約あり・校閲待ち' if authored else
+                    ('抜粋あり・再確認待ち' if q["provenance"]["evidence"].strip() else '抜粋なし・本文の確認が必要'))
         audit.append(f'| {q["id"]} | {bank_id} | {q["category"].replace("|", "/")} | {refs} | {evidence} | 未確認 |')
     audit += ['', '## 販売前の確認', '', '全問の正誤、誤答の一意性、出題範囲と難易度、出典本文と利用条件を確認します。',
               '未確認の記述を一次情報で確認済みと表示しません。exam-trainer利用者への原稿共有と、販売の承認は別です。', '']
@@ -171,7 +183,7 @@ def write_text_artifacts(key: str, product: dict, output: Path) -> bool:
 
 ## 出品前に埋める項目
 校閲結果、参照先の利用条件、販売価格、PDFページ数、版、BOOTH商品URLを確認します。
-検証済みバンクからの書き出しだけでは販売可能になりません。
+{'公開資料の参照と独自作成だけでは販売可能になりません。' if authored else '検証済みバンクからの書き出しだけでは販売可能になりません。'}
 ''')
     (output / 'release-guide.md').write_text(f'''# {product["exam_name"]} 校閲から販売まで
 
@@ -185,7 +197,7 @@ noindexは認証機能ではありません。全問PDFはアプリに到達で�
 ## 校閲
 review-{digest[:12]}.csvに全問の確認結果・校閲者・修正内容を記録します。
 出典本文、正誤、選択肢、検定の出題範囲・難易度、出典の利用条件を人が確認します。
-本教材は既存バンクのコピーです。学習履歴を変更せず、更新は教材JSONに反映します。
+{'本教材は公開資料を参照した独自作成の練習問題です。' if authored else '本教材は既存バンクのコピーです。'}学習履歴を変更せず、更新は教材JSONに反映します。
 
 ## 更新と再構築
 src/exam_trainer/products/{key}.jsonがこの版の教材データです。
@@ -206,14 +218,14 @@ PDFを再構築し、保存版の表示・版・全問数を確認してから�
     return copy_created
 
 
-def build(confirm_sales_copy: bool = False) -> None:
+def build(confirm_sales_copy: bool = False, keys=None) -> None:
     from playwright.sync_api import sync_playwright
     from pypdf import PdfWriter
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-        for key in products.EXAMS:
+        for key in (keys or products.EXAMS):
             product = products.load_product(key)
             output = products.ARTIFACT_DIR / key
             output.mkdir(parents=True, exist_ok=True)
@@ -243,9 +255,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--export-bank', type=Path)
     parser.add_argument('--replace-drafts', action='store_true')
+    parser.add_argument('--product', action='append', choices=list(products.EXAMS),
+                        help='対象教材だけを処理する（複数指定可）')
     parser.add_argument('--confirm-sales-copy', action='store_true',
                         help='手修正の販売原稿が現在の教材の版に合うことを確認済みとして記録')
     args = parser.parse_args()
     if args.export_bank:
-        export_bank(args.export_bank, args.replace_drafts)
-    build(args.confirm_sales_copy)
+        export_bank(args.export_bank, args.replace_drafts, args.product)
+    build(args.confirm_sales_copy, args.product)

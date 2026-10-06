@@ -28,7 +28,7 @@ def editorial(tmp_path, monkeypatch):
     db.close()
 
 
-def test_catalog_reachable_from_learning_and_all_five_products(editorial):
+def test_catalog_reachable_from_learning_and_all_products(editorial):
     assert 'href="/products"' in editorial.get('/').text
     page = editorial.get('/products')
     assert page.status_code == 200
@@ -38,7 +38,8 @@ def test_catalog_reachable_from_learning_and_all_five_products(editorial):
         assert f'href="/products/{key}/materials"' in page.text
 
 
-@pytest.mark.parametrize('key,count', [('g',50), ('nihonshu',31), ('rekishi-3',50), ('sekai-isan-3',29)])
+@pytest.mark.parametrize('key,count', [('g',50), ('nihonshu',31), ('rekishi-3',50), ('sekai-isan-3',29),
+                                       ('jinja-3',20), ('shiro-3',20)])
 def test_funnel_trial_files_and_history_isolation(editorial, key, count):
     product = products.load_product(key)
     assert len(product['questions']) == count
@@ -206,3 +207,56 @@ def test_snapshot_filters_status_format_and_sources_without_mutating_bank(tmp_pa
         assert all(q['provenance']['status_at_export'] == 'verified' for q in product['questions'])
     finally:
         db.close()
+
+
+@pytest.mark.parametrize('key', ['jinja-3', 'shiro-3'])
+def test_original_material_artifacts_do_not_claim_verified_bank_export(key, tmp_path, monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / 'scripts'))
+    import build_products
+    product = products.load_product(key)
+    build_products.write_text_artifacts(key, product, tmp_path)
+    for name in ('manuscript.md', 'claim-audit.md', 'release-guide.md'):
+        text = (tmp_path / name).read_text()
+        assert '独自' in text
+        assert 'verified' not in text
+        assert '未確認' in text or '未校閲' in text
+    assert '既存バンクのコピー' not in (tmp_path / 'release-guide.md').read_text()
+    assert all(q['provenance']['origin'] == 'editorial-original' and not q['provenance']['evidence']
+               for q in product['questions'])
+
+
+def test_default_bank_export_only_requires_existing_bank_backed_courses(tmp_path, monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / 'scripts'))
+    import build_products
+    output = tmp_path / 'products'
+    output.mkdir()
+    monkeypatch.setattr(products, 'PRODUCT_DIR', output)
+    db.reset_for_tests(tmp_path / 'bank')
+    try:
+        for key in build_products.BANK_EXPORT_IDS:
+            eid = bank.create_exam(products.EXAMS[key], key)
+            for number in range(10):
+                bank.add_question(eid, '1', f'問題{number}', ['A', 'B', 'C', 'D'], 0,
+                                  explanation='解説', source_refs=['https://example.test/source'], status='verified')
+        build_products.export_bank(settings.db_path)
+        assert {p.name for p in output.glob('*.json')} == {
+            name for key in build_products.BANK_EXPORT_IDS for name in (f'{key}.json', f'{key}-release.json')}
+    finally:
+        db.close()
+
+
+@pytest.mark.parametrize('key', ['jinja-3', 'shiro-3'])
+def test_bank_export_cannot_replace_an_original_even_with_explicit_flags(key, tmp_path, monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / 'scripts'))
+    import build_products
+    raw = (products.PRODUCT_DIR / f'{key}.json').read_bytes()
+    monkeypatch.setattr(products, 'PRODUCT_DIR', tmp_path)
+    original = tmp_path / f'{key}.json'
+    original.write_bytes(raw)
+    # Reject before opening a DB or writing any file, including a mixed selection.
+    with pytest.raises(ValueError, match='独自作成教材'):
+        build_products.export_bank(tmp_path / 'missing.sqlite', replace=True, keys=['g', key])
+    with pytest.raises(ValueError, match='独自作成教材'):
+        build_products.snapshot(None, key, '2026-10-06')
+    assert original.read_bytes() == raw
+    assert not (tmp_path / 'g.json').exists()

@@ -1,4 +1,4 @@
-"""Verify all five courses and archaeology learning/weakness with a temp bank."""
+"""Verify all courses and archaeology learning/weakness with a temp bank."""
 
 import sys
 import tempfile
@@ -18,11 +18,13 @@ with tempfile.TemporaryDirectory() as folder:
     settings.admin_token = 'catalog-browser-token'
     db.reset_for_tests(Path(folder))
     for key, name in products.EXAMS.items():
+        if key in ('jinja-3', 'shiro-3'):
+            continue
         eid = bank.create_exam(name, key)
         bank.set_syllabus(eid, [{'path': '1', 'title': '既存範囲'}])
         bank.add_question(eid, '1', name + 'の既存問題', ['正解', '誤答'], 0, status='verified')
     created = learning_catalog.import_missing()
-    assert len(created) == 1 and created[0]['key'] == 'kouko'
+    assert [item['key'] for item in created] == ['kouko', 'jinja-3', 'shiro-3']
     eid = created[0]['exam_id']
     client = TestClient(app)
     with sync_playwright() as p:
@@ -48,7 +50,7 @@ with tempfile.TemporaryDirectory() as folder:
             page.set_viewport_size({'width': width, 'height': 900})
             for path in ('/study', '/weakness'):
                 page.goto('http://exam.test' + path)
-                assert page.locator('#examSwitch option').count() == 5
+                assert page.locator('#examSwitch option').count() == len(learning_catalog.DISPLAY_NAMES)
                 assert page.locator('#examSwitch option').all_text_contents() == list(learning_catalog.DISPLAY_NAMES)
                 # Native picker keyboard navigation selects archaeology from the existing exam.
                 page.locator('#examSwitch').focus()
@@ -72,6 +74,22 @@ with tempfile.TemporaryDirectory() as folder:
             page.locator('.progress-row a[href*="node=2"]').click()
             page.locator('#study').wait_for(state='visible')
             assert page.locator('#study').get_attribute('data-node') == '2'
+            for key in ('jinja-3', 'shiro-3'):
+                new_eid = next(item['exam_id'] for item in created if item['key'] == key)
+                page.locator('#examSwitch').select_option(str(new_eid))
+                page.wait_for_url(f'**/study?exam_id={new_eid}')
+                assert page.locator('#study').get_attribute('data-exam-id') == str(new_eid)
+                assert '未校閲の教材' in page.locator('#main-content').inner_text()
+                question = bank.get_question(int(page.locator('#card').get_attribute('data-question-id')))
+                assert question['stem'] in {q['stem'] for q in products.load_product(key)['questions']}
+                page.locator('.choice').nth(question['answer']).click()
+                page.locator('#nextBtn').wait_for(state='visible')
+                assert page.locator('#verdict').inner_text() == '正解'
+                page.locator(f'.nav-links a[href="/weakness?exam_id={new_eid}"]').click()
+                assert page.locator('.recent-row').count() > 0
+                assert page.locator('#examSwitch').input_value() == str(new_eid)
+                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                page.goto(f'http://exam.test/study?exam_id={new_eid}')
         client.cookies.set(ADMIN_COOKIE, settings.admin_token)
         for width in (320, 375, 414, 768, 1280):
             page.set_viewport_size({'width': width, 'height': 900})
@@ -83,4 +101,4 @@ with tempfile.TemporaryDirectory() as folder:
         assert not errors, errors
         browser.close()
     db.close()
-print('PASS both pickers show 5 courses; native keyboard switch; archaeology answer/weakness/scope links; bank provenance; 5 widths; no overflow or JS errors')
+print('PASS both pickers show 7 courses; native keyboard switch; archaeology/shrine/castle answers and weakness; bank provenance; 5 widths; no overflow or JS errors')
