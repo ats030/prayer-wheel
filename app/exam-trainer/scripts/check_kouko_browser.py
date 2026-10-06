@@ -11,8 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
 from fastapi.testclient import TestClient
 from playwright.sync_api import sync_playwright
-from exam_trainer import kouko
-from exam_trainer.app import app, ADMIN_COOKIE
+from exam_trainer import db, kouko
+from exam_trainer.app import app
 from exam_trainer.config import settings
 
 with tempfile.TemporaryDirectory() as folder:
@@ -20,15 +20,16 @@ with tempfile.TemporaryDirectory() as folder:
     for name in ['kouko.json', 'kouko-release.json']:
         shutil.copyfile(original/name, Path(folder)/name)
     kouko.PRODUCT_DIR = Path(folder)
+    db.reset_for_tests(Path(folder) / 'bank')
     settings.admin_token = 'browser-check-temporary-token'
     client = TestClient(app)
-    client.cookies.set(ADMIN_COOKIE, settings.admin_token)
     product = kouko.load_product()
     samples = kouko.sample_questions(product)
     failures = [0]
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        page = browser.new_page(viewport={'width': 1280, 'height': 900})
+        context = browser.new_context(viewport={'width': 1280, 'height': 900})
+        page = context.new_page()
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
         def respond(route):
@@ -41,16 +42,35 @@ with tempfile.TemporaryDirectory() as folder:
                 failures[0] -= 1
                 route.fulfill(status=503, content_type='application/json', body=json.dumps({'detail': '接続を確認できませんでした'}))
                 return
-            response = client.request(request.method, url.path, content=request.post_data,
+            target = url.path + (f'?{url.query}' if url.query else '')
+            response = client.request(request.method, target, content=request.post_data,
                                       headers={'Content-Type': request.headers.get('content-type', '')})
             route.fulfill(status=response.status_code, headers=dict(response.headers), body=response.content)
-        page.route('**/*', respond)
+        context.route('**/*', respond)
+        page.goto('http://exam.test/')
+        page.locator('.nav-links a[href="/kouko"]').click()
+        assert page.url == 'http://exam.test/kouko'
         for width in [1280,390]:
             page.set_viewport_size({'width':width,'height':900})
             page.goto('http://exam.test/kouko')
             assert page.locator('h1').inner_text().startswith('遺物と遺構')
             assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
             page.screenshot(path=f'/tmp/kouko-{width}.png', full_page=True)
+            page.locator('.product-nav a[href="/kouko/materials"]').click()
+            assert page.locator('.artifact').count() == 7
+            assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
+            page.screenshot(path=f'/tmp/kouko-materials-{width}.png', full_page=True)
+        with page.expect_download() as pending:
+            page.locator('a[href="/kouko/files/review-pdf?download=true"]').click()
+        download = pending.value
+        download.save_as('/tmp/kouko-downloaded-review.pdf')
+        assert Path('/tmp/kouko-downloaded-review.pdf').read_bytes() == (ROOT / 'docs/kouko/kouko-review.pdf').read_bytes()
+        with page.expect_popup() as pending:
+            page.locator('a[href="/kouko/files/sales-copy"]').click()
+        popup = pending.value
+        popup.wait_for_load_state()
+        assert 'BOOTH商品説明の原稿' in popup.locator('body').inner_text()
+        popup.close()
         page.goto('http://exam.test/kouko/trial')
         failures[0] = 1
         page.locator('#choices button').nth(0).click()
@@ -76,10 +96,11 @@ with tempfile.TemporaryDirectory() as folder:
         assert page.locator('.sample-question details').first.get_attribute('open') is not None
         page.screenshot(path='/tmp/kouko-sample-page.png', full_page=True)
         assert not errors, errors
-        page.unroute('**/*', respond)
+        context.unroute('**/*', respond)
         page.goto((ROOT / 'docs/kouko/kouko-review.html').as_uri())
         page.emulate_media(media='print')
         page.set_viewport_size({'width':794,'height':1123})
         page.locator('.page').nth(2).screenshot(path='/tmp/kouko-pdf-page.png')
         browser.close()
-    print('PASS desktop/mobile; no overflow; 10 correct/10 incorrect; retry; restart; keyboard details; no JS errors')
+    db.close()
+    print('PASS no login; nav to materials; PDF download; text popup; desktop/mobile; no overflow; 10 correct/10 incorrect; retry; restart; keyboard details; no JS errors')

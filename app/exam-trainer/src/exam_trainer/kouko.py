@@ -1,7 +1,7 @@
 """One editorial product, kept separate from the live learning bank.
 
-Only the ten sample questions are exposed over HTTP. Public access requires a
-human review of the exact content digest; editing the manuscript revokes it.
+The trial serves ten questions. App visitors may read the complete editorial
+artifacts; human review of the exact content digest controls sale readiness.
 """
 
 import hashlib
@@ -11,6 +11,26 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 PRODUCT_DIR = Path(__file__).parent / "products"
+ARTIFACT_DIR = Path(__file__).resolve().parents[2] / "docs" / "kouko"
+
+
+def artifacts() -> list[dict]:
+    """A fixed list of resources; never turn a caller's path into a filename."""
+    specs = [
+        ("review-pdf", "50問の校閲用PDF", "問題、解答、全問解説と参考資料を収録。", "kouko-review.pdf"),
+        ("sample-pdf", "10問の見本PDF", "無料体験と同じ10問を収録。", "kouko-sample.pdf"),
+        ("manuscript", "問題と解説の原稿", "全50問の問題、解説と出典をテキストで確認。", "manuscript.md"),
+        ("sales-copy", "販売説明とSNSの原稿", "BOOTHの商品説明と一問解説の投稿案。", "sales-copy.md"),
+        ("review-sheet", "校閲記録のCSV", "各問の確認結果や修正点を記入するシート。", f"review-{content_digest()[:12]}.csv"),
+        ("claim-audit", "根拠確認の記録", "問題の根拠と、校閲で確認する点。", "claim-audit.md"),
+        ("release-guide", "校閲から販売までの手順", "校閲記録、PDFの更新、出品までの進め方。", "release-guide.md"),
+    ]
+    return [{"id": key, "title": title, "description": description,
+             "path": ARTIFACT_DIR / filename,
+             "media_type": "application/pdf" if filename.endswith(".pdf") else "text/plain; charset=utf-8",
+             "format": "PDF" if filename.endswith(".pdf") else "CSV" if filename.endswith(".csv") else "テキスト",
+             "available": (ARTIFACT_DIR / filename).is_file()}
+            for key, title, description, filename in specs]
 
 
 def load_product() -> dict:

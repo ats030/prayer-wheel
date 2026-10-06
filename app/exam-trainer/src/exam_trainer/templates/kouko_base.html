@@ -8,8 +8,8 @@
 {% endblock %}
 {% block body %}
 <main class="wrap kouko-wrap">
-  {% if not release.reviewed %}<p class="preview-banner" role="status">校閲用プレビューです。問題と解説の確認が完了するまで一般公開されません。</p>{% endif %}
-  <nav class="product-nav" aria-label="考古教材"><a href="/kouko">教材の紹介</a><a href="/kouko/trial">無料10問</a><a href="/kouko/sample">PDFの見本</a></nav>
+  {% if not release.reviewed %}<p class="preview-banner" role="status">未校閲の教材です。正解や解説に誤りが含まれる可能性があります。exam-trainerの利用者向けに、校閲用の資料を共有しています。</p>{% endif %}
+  <nav class="product-nav" aria-label="考古教材"><a href="/kouko">教材の紹介</a><a href="/kouko/trial">無料10問</a><a href="/kouko/sample">解説の見本</a><a href="/kouko/materials">PDF・原稿</a></nav>
   {% block product_body %}{% endblock %}
 </main>
 {% endblock %}

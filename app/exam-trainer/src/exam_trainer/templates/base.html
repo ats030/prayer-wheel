@@ -16,7 +16,7 @@
       {% block navlinks %}
       <a href="/{% if exam %}?exam_id={{ exam.id }}{% endif %}">解く</a>
       <a href="/weakness{% if exam %}?exam_id={{ exam.id }}{% endif %}">弱点</a>
-      {% if kouko_available or admin_view %}<a href="/kouko">考古教材</a>{% endif %}
+      <a href="/kouko">考古教材</a>
       {% if admin_view %}
       <a href="/admin/bank{% if exam %}?exam_id={{ exam.id }}{% endif %}">問題バンク</a>
       <a href="/admin/settings{% if exam %}?exam_id={{ exam.id }}{% endif %}">試験の設定</a>

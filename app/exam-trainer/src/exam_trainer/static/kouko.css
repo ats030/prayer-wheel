@@ -14,6 +14,8 @@
 .price, .score { font-size: 28px; font-weight: 600; }
 .price .muted { font-size: 14px; font-weight: 400; }
 .sample-question { margin: 20px 0; }
+.artifact-list { display: grid; gap: 16px; margin-top: 24px; }
+.artifact h2 { font-size: 20px; margin: 0 0 12px; }
 .sample-question h2, .trial h2 { font-size: 20px; line-height: 1.6; }
 .sample-question ol { line-height: 1.9; }
 details { border-top: 1px solid var(--hairline); padding: 16px 0; }

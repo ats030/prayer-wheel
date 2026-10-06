@@ -13,7 +13,7 @@ import secrets
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
@@ -57,13 +57,10 @@ async def protect_admin(request: Request, call_next):
     path = request.url.path
     if path == "/kouko" or path.startswith("/kouko/"):
         reviewed = kouko.release_state()["reviewed"]
-        if not reviewed and not _is_admin(request):
-            return JSONResponse({"detail": "教材は準備中です"}, status_code=404,
-                                headers={"X-Robots-Tag": "noindex", "Cache-Control": "no-store"})
         response = await call_next(request)
-        # Never cache authenticated previews or answer responses in shared caches.
+        # These resources share the learning app's network access boundary.
         response.headers["Cache-Control"] = "no-store"
-        if not reviewed:
+        if not reviewed or path == "/kouko/materials" or path.startswith("/kouko/files/"):
             response.headers["X-Robots-Tag"] = "noindex"
         return response
     if path in {"/admin/login", "/api/admin/session"}:
@@ -139,7 +136,6 @@ def _page(request: Request, name: str, exam_id: int | None, **extra) -> HTMLResp
         "static_version": STATIC_VERSION,
         "counts": bank.queue_counts(exam["id"]) if exam else {"due": 0, "new": 0},
         "status_counts": bank.counts_by_status(exam["id"]) if exam else {},
-        "kouko_available": kouko.release_state()["reviewed"],
         **extra,
     }
     return templates.TemplateResponse(request, name, context)
@@ -170,6 +166,21 @@ def kouko_trial(request: Request) -> HTMLResponse:
 def kouko_sample(request: Request) -> HTMLResponse:
     return _kouko_page(request, "kouko_sample.html",
                        sample=kouko.sample_questions(kouko.load_product()))
+
+
+@app.get("/kouko/materials", response_class=HTMLResponse)
+def kouko_materials(request: Request) -> HTMLResponse:
+    return _kouko_page(request, "kouko_materials.html", artifacts=kouko.artifacts())
+
+
+@app.get("/kouko/files/{asset_id}")
+def kouko_file(asset_id: str, download: bool = False) -> FileResponse:
+    asset = next((item for item in kouko.artifacts() if item["id"] == asset_id), None)
+    if asset is None or not asset["available"]:
+        raise HTTPException(status_code=404, detail="資料が見つかりません")
+    return FileResponse(asset["path"], media_type=asset["media_type"],
+                        filename=asset["path"].name,
+                        content_disposition_type="attachment" if download else "inline")
 
 
 class KoukoAnswerIn(BaseModel):

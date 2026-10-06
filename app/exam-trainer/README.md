@@ -188,7 +188,9 @@ SearXNG は上流の検索エンジン（brave / duckduckgo / google / startpage
 
 考古検定入門向けのPDF販売準備と無料10問の体験は
 [`docs/kouko/release-guide.md`](docs/kouko/release-guide.md)を参照。
-未校閲の教材は管理者プレビューに限り、通常の学習バンクには追加しない。
+ナビの「考古教材」から、無料10問と`/kouko/materials`のPDF・原稿一覧へ進める。
+exam-trainerにアクセスできる利用者全員が、未校閲の全50問PDFも閲覧できる。
+校閲状態は画面に表示し、通常の学習バンクには追加しない。
 
 - 公開: `/`（学習）、`/weakness`（弱点）
 - 管理: `/admin/bank`（問題バンク）、`/admin/settings`（試験設定）

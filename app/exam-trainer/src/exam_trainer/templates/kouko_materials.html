@@ -1,0 +1,15 @@
+{% extends "kouko_base.html" %}
+{% block title %}考古教材のPDFと原稿 | exam-trainer{% endblock %}
+{% block product_body %}
+<h1>考古教材のPDFと原稿</h1>
+<p>exam-trainerにアクセスできる人が、教材の制作物を確認できます。全50問のPDFと、販売前の原稿をまとめています。</p>
+<div class="artifact-list">
+{% for asset in artifacts %}
+<article class="card artifact">
+  <p class="eyebrow">{{ asset.format }}</p><h2>{{ asset.title }}</h2><p>{{ asset.description }}</p>
+  {% if asset.available %}<div class="product-actions"><a class="btn btn-primary" href="/kouko/files/{{ asset.id }}" target="_blank" rel="noopener">開く</a><a href="/kouko/files/{{ asset.id }}?download=true">ダウンロード</a></div>
+  {% else %}<p class="muted">準備中です</p>{% endif %}
+</article>
+{% endfor %}
+</div>
+{% endblock %}
