@@ -70,6 +70,18 @@ class ContextTests(unittest.TestCase):
         hedged_year = article('<h2>コーヒーの歴史</h2><p>伝説では1554年のことと言われています。</p><p>' + quote + '</p>')
         self.assertEqual(t.validate_events([event], [hedged_year], t.parse_query('コーヒー')), [])
 
+    def test_hedge_on_distant_sentence_in_same_passage_does_not_drop_event(self):
+        quote = '1888年4月13日、東京下谷に最初の喫茶店「可否茶館」が開店した。'
+        text = '1807年には幕府からコーヒー豆が支給されたという。1867年の渋沢栄一の記述が最も古い記述とされる。また昭武の日記にもコーヒーの記述がある。' + quote
+        source = article('<h2>アジア</h2><p>' + text + '</p>')
+        event = {"year": 1888, "date": "1888年4月13日", "title": "可否茶館の開店", "description": "東京下谷に最初の喫茶店「可否茶館」が開店した。", "quote": quote, "source_id": 1}
+        self.assertEqual(len(t.validate_events([event], [source], t.parse_query('コーヒー'))), 1)
+        for hedge in ['この店が最初だと言われている。', '1888年のことと推定される。']:
+            hedged = article('<h2>アジア</h2><p>' + text + hedge + '別の話題の文である。</p>')
+            self.assertEqual(t.validate_events([event], [hedged], t.parse_query('コーヒー')), [], hedge)
+        adjacent = article('<h2>アジア</h2><p>' + quote + 'これは伝承である。</p>')
+        self.assertEqual(t.validate_events([event | {"description": "東京下谷に喫茶店「可否茶館」が開店した。"}], [adjacent], t.parse_query('コーヒー')), [])
+
     def test_historical_name_is_not_treated_as_uncertain_claim(self):
         source=article('<h2>1958年</h2><p>初のインスタントラーメンを発売。それ以前は「中華そば」と言われていた。</p>')
         event={'year':1958,'date':'1958年','title':'インスタントラーメン発売','description':'インスタントラーメンを発売した。','source_id':1,'quote':source['passages'][0]['text']}

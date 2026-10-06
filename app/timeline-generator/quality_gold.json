@@ -74,7 +74,7 @@
       "target_recall": 1.0,
       "primary_domains": [],
       "milestones": [
-        {"id": "kaigen", "label": "昭和への改元", "years": [1926, 1926], "keywords": ["改元", "大正天皇"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]},
+        {"id": "kaigen", "label": "昭和への改元", "years": [1926, 1926], "keywords": ["改元", "大正天皇", "元号", "即位"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]},
         {"id": "manshu", "label": "満洲事変", "years": [1931, 1931], "keywords": ["満州事変", "満洲事変", "柳条湖"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]},
         {"id": "nicchu", "label": "日中戦争の開始", "years": [1937, 1937], "keywords": ["日中戦争", "盧溝橋", "支那事変"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]},
         {"id": "pacific", "label": "太平洋戦争の開戦", "years": [1941, 1941], "keywords": ["太平洋戦争", "真珠湾", "開戦"], "evidence": ["https://ja.wikipedia.org/wiki/%E6%98%AD%E5%92%8C"]},

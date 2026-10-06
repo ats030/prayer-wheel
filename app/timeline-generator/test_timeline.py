@@ -143,6 +143,18 @@ class EvidenceTests(unittest.TestCase):
         e = self.event | {"year": 1986, "date": "1986年", "title": "NSFNetの設立", "description": "学術研究用のNS1Netが作られた。", "quote": "1986年、学術研究用のNSFNetが作られた。"}
         self.assertEqual(t.validate_events([e], [self.sources[0] | {"text": e["quote"]}], t.parse_query("インターネット")), [])
 
+    def test_unsupported_bracketed_acronym_gloss_is_removed(self):
+        quote = "In May 2025, Claude Code became generally available."
+        e = self.event | {"year": 2025, "date": "2025年", "title": "Claude Codeの一般提供（GA）開始", "description": "Claude Codeが一般提供(GA)へと移行した。", "quote": quote}
+        result = t.validate_events([e], [self.sources[0] | {"text": quote}], t.parse_query("Claude Code"))
+        self.assertEqual((result[0]["title"], result[0]["description"]), ("Claude Codeの一般提供開始", "Claude Codeが一般提供へと移行した。"))
+
+    def test_supported_bracketed_acronym_is_kept(self):
+        quote = "1986年、全米科学財団(NSF)がNSFNetを作った。"
+        e = self.event | {"year": 1986, "date": "1986年", "title": "NSFNetの設立", "description": "全米科学財団(NSF)がNSFNetを作った。", "quote": quote}
+        result = t.validate_events([e], [self.sources[0] | {"text": quote}], t.parse_query("インターネット"))
+        self.assertEqual(result[0]["description"], "全米科学財団(NSF)がNSFNetを作った。")
+
     def test_century_is_not_falsely_precise(self):
         evidence = "Coffee was consumed in Yemen in the 15th century."
         e = self.event | {"year": 1401, "date": "15世紀", "quote": evidence}

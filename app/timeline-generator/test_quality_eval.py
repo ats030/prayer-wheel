@@ -270,6 +270,13 @@ class ReportTests(unittest.TestCase):
             event(1983, 'ARPANETのTCP/IPへの完全な切り替え', '1983年1月1日、ARPANETはTCP/IPへ完全に切り替えられた。')]}
         self.assertIn('tcpip', {f['id'] for f in q.evaluate_result(gold, result, 'インターネット')['found']})
 
+    def test_bundled_gold_credits_kaigen_from_the_era_start_wording(self):
+        # 「昭和元号の開始」「昭和天皇の即位」も1926年の改元として数える（ats030-jjqhq）
+        gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))
+        for title, description in [('昭和元号の開始', '大正の次の元号として1926年12月25日から開始された。'), ('昭和天皇の即位', '大正15年12月25日に昭和天皇が即位し、昭和の元年となりました。')]:
+            result = {'theme': '昭和', 'period': '全期間', 'events': [event(1926, title, description)]}
+            self.assertIn('kaigen', {f['id'] for f in q.evaluate_result(gold, result, '昭和')['found']}, title)
+
     def test_bundled_gold_set_is_well_formed(self):
         gold = json.loads(q.GOLD_PATH.read_text(encoding='utf-8'))
         for name, theme in gold['themes'].items():
