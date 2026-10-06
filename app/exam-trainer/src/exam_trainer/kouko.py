@@ -70,7 +70,11 @@ def record_artifacts(directory: Path, digest: str, count: int, prefix: str,
 
 
 def load_product() -> dict:
-    product = json.loads((PRODUCT_DIR / "kouko.json").read_text())
+    return parse_product((PRODUCT_DIR / "kouko.json").read_bytes())
+
+
+def parse_product(raw: bytes) -> dict:
+    product = json.loads(raw)
     questions = product["questions"]
     ids = [q["id"] for q in questions]
     if len(questions) != 50 or len(set(ids)) != 50:

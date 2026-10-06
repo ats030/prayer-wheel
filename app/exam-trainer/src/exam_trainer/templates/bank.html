@@ -81,6 +81,7 @@
         <span class="badge">{{ item.node_path }}</span>
         <span class="badge status-{{ item.status }}">{{ {'verified': '出題可', 'held': '要確認', 'draft': '未検証', 'rejected': '破棄'}.get(item.status, item.status) }}</span>
         {% if item.origin == 'generated' %}<span class="badge">生成</span>{% endif %}
+        {% if item.origin == 'editorial' %}<span class="badge">教材から取り込み</span>{% endif %}
         <span class="spacer"></span>
         {% if item.status != 'verified' %}
         <button class="btn btn-secondary btn-xs" data-action="verified">出題可にする</button>
@@ -105,7 +106,8 @@
       {% for source in item.source_details %}
       <details class="evidence" style="margin-top:8px;">
         <summary>情報源の記録（{{ source.provider or source.scope or '手動' }}）</summary>
-        <p>取得日時: {{ source.fetched_at }}</p>
+        {% if source.snapshot_checked_at %}<p>教材の確認日: {{ source.snapshot_checked_at }}</p>{% else %}<p>取得日時: {{ source.fetched_at }}</p>{% endif %}
+        {% if source.editorial_question_id %}<p class="request-status">教材問題ID: {{ source.editorial_question_id }} / {{ source.human_review }} / 版: {{ source.editorial_content_sha256 }}</p>{% endif %}
         {% if source.terms %}
         <p>{{ source.terms.license }} / {{ source.terms.status }} / 確認日: {{ source.terms.checked_at }}</p>
         <p>{{ source.terms.conditions }}</p>

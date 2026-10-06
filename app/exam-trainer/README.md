@@ -273,3 +273,26 @@ OLLAMA_API_URL              # 既定 http://localhost:11434
 EXAM_TRAINER_ADMIN_TOKEN     # 管理画面・変更APIの認証トークン（必須）
 EXAM_TRAINER_SECURE_COOKIES  # HTTPS公開時は true
 ```
+
+
+### 教材を演習・弱点の選択欄へ登録する
+
+教材一覧は固定のJSON、演習と弱点の右上の選択欄は学習DBの検定一覧です。
+教材を追加した際は、不足する検定を次のコマンドで確認・登録します。
+
+```bash
+.venv/bin/python app/exam-trainer/scripts/import_learning_catalog.py
+.venv/bin/python app/exam-trainer/scripts/import_learning_catalog.py --apply
+```
+
+確認だけの実行はDBを読み取り専用で開きます。`--apply`は設定済みDBの
+`bank-before-catalog-*.sqlite`バックアップを所有者のみ読み取り可能な権限で作成し、
+不足した検定・分野・問題を1トランザクションで追加します。既存の検定名があれば
+その問題や履歴には触れず、再実行で重複しません。識別子が別の検定に使われている
+場合は変更を中止します。サービス起動や公開ページからの自動取り込みはありません。
+
+取り込んだ問題は演習に使えますが、取り込みは人による校閲を意味しません。
+問題には元教材のSHA・問題ID・出典と来歴を記録し、演習と弱点に未校閲と表示します。
+教材JSONの改訂を既存問題へ自動同期しません。取り込みを戻す場合は追加された検定IDを
+対象にし、既存4検定とその履歴を維持してください。バックアップ全体の復元は、その後の
+新しい解答履歴を失うため、通常の取り消し方法として使わないでください。

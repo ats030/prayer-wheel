@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Literal
 from pydantic import BaseModel
 
-from . import bank, db, jobs, kouko, products, ollama_client, web
+from . import bank, db, jobs, kouko, products, ollama_client, web, learning_catalog
 from .config import settings
 
 logger = logging.getLogger(__name__)
@@ -143,6 +143,7 @@ def _page(request: Request, name: str, exam_id: int | None, **extra) -> HTMLResp
         "counts": bank.queue_counts(exam["id"]) if exam else {"due": 0, "new": 0},
         "status_counts": bank.counts_by_status(exam["id"]) if exam else {},
         "nav_section": "admin" if request.url.path.startswith("/admin") else "study",
+        "import_info": learning_catalog.import_info(exam["id"]) if exam else None,
         **extra,
     }
     return templates.TemplateResponse(request, name, context)

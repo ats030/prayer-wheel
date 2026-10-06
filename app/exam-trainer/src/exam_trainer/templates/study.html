@@ -9,6 +9,9 @@
     <h1>問題を解く</h1>
     <p class="page-description">選択肢を選んで解説を確認し、1問ずつ進めます。</p>
   </header>
+  {% if import_info %}
+  <p class="request-status">{{ import_info.human_review }}の教材から取り込んだ練習問題です。<a href="{{ import_info.url }}">教材と出典を確認する</a></p>
+  {% endif %}
   <div class="study-toolbar">
     <div class="queue-counts" aria-label="出題待ちの問題数">
       <span>復習 <strong id="dueCount">{{ counts.due }}</strong>問</span>

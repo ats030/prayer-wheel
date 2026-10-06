@@ -25,7 +25,11 @@ def require_product(product_id: str) -> None:
 
 def load_product(product_id: str) -> dict:
     require_product(product_id)
-    product = json.loads((PRODUCT_DIR / f"{product_id}.json").read_text())
+    return parse_product((PRODUCT_DIR / f"{product_id}.json").read_bytes())
+
+
+def parse_product(raw: bytes) -> dict:
+    product = json.loads(raw)
     questions = product["questions"]
     ids = [q["id"] for q in questions]
     free_ids = product["free_ids"]

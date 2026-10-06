@@ -8,6 +8,9 @@
     <p class="page-description">各問題の最後の解答から正答率を計算しています。確認したい範囲を選んで、学習を続けられます。</p>
     {% if exam %}<a class="btn btn-secondary" href="/study?exam_id={{ exam.id }}">全範囲から解く</a>{% endif %}
   </header>
+  {% if import_info %}
+  <p class="request-status">{{ import_info.human_review }}の教材から取り込んだ練習問題の記録です。<a href="{{ import_info.url }}">教材と出典を確認する</a></p>
+  {% endif %}
 
   {% if not exam %}
   <div class="card empty-state">
