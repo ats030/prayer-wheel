@@ -317,10 +317,10 @@ class BatchTests(unittest.TestCase):
 
     def test_deadline_between_batches_preserves_verified_work(self):
         clock = [0]
-        def finish_near_deadline(query, sources, emit, deadline, existing, **_):
+        def finish_near_deadline(query, sources, emit, deadline, existing, generated, **_):
             clock[0] = t.TIME_LIMIT - 9
             return [saved_event(1900)], []
-        with patch.object(t.time, 'monotonic', side_effect=lambda: clock[0]), patch.object(t, 'build_batch', side_effect=finish_near_deadline):
+        with patch.object(t.time, 'monotonic', side_effect=lambda: clock[0]), patch.object(t, 'verify_batch', side_effect=finish_near_deadline):
             result = self.run_generation(history_source(35))
         self.assertEqual(result['stop_reason'], 'time_limit')
         self.assertEqual(len(result['events']), 1)
@@ -395,22 +395,38 @@ class BatchTests(unittest.TestCase):
                 self.assertEqual(t.related_sources(query, results, time.monotonic() + 60, excluded), results)
             self.assertEqual(excluded, [])
 
+    def test_next_batch_generates_while_current_batch_verifies(self):
+        # 第2組の生成が第1組の照合中に始まり、照合は組の順で前の組の採用分を既出として受け取る（ats030-gk683）。
+        second_generation, existing_seen = threading.Event(), []
+        def model(system, prompt, deadline, schema):
+            if schema is t.EVENT_SCHEMA and '"1801年"' in prompt:
+                second_generation.set()
+            if schema is t.VERIFY_SCHEMA:
+                existing_seen.append(len(json.loads(prompt.split('既に採用済み:', 1)[1].split('\n候補:', 1)[0])))
+                if len(existing_seen) == 1:
+                    self.assertTrue(second_generation.wait(5))
+            return grounded_model(system, prompt, deadline, schema)
+        with patch.object(t, 'BATCH_EVENTS', 1):
+            result = self.run_generation(history_source(3), model=model)
+        self.assertEqual(existing_seen, [0, 1, 2])
+        self.assertEqual([e['year'] for e in result['events']], [1800, 1801, 1802])
+
     def test_trace_records_over_cap_proposals_separately(self):
-        original = t.build_batch
+        original = t.verify_batch
         def capped(*args, **kwargs):
             with patch.object(t, 'BATCH_EVENTS', 2):
                 return original(*args, **kwargs)
-        with patch.object(t, 'build_batch', side_effect=capped):
+        with patch.object(t, 'verify_batch', side_effect=capped):
             trace = self.run_generation(history_source(10))['trace']
         self.assertEqual({r['stage'] for r in trace['rejected']}, {'件数上限'})
 
     def test_trace_marks_unprocessed_batches_after_deadline(self):
         clock = [0]
-        def finish_near_deadline(query, sources, emit, deadline, existing, dropped=None, **_):
+        def finish_near_deadline(query, sources, emit, deadline, existing, generated, dropped=None, **_):
             clock[0] = t.TIME_LIMIT - 9
             dropped.append({'year': 1800, 'date': '1800年', 'title': 'x', 'stage': '検証', 'reason': 'r'})
             return [saved_event(1900)], []
-        with patch.object(t.time, 'monotonic', side_effect=lambda: clock[0]), patch.object(t, 'build_batch', side_effect=finish_near_deadline):
+        with patch.object(t.time, 'monotonic', side_effect=lambda: clock[0]), patch.object(t, 'verify_batch', side_effect=finish_near_deadline):
             trace = self.run_generation(history_source(35))['trace']
         self.assertEqual((trace['batches_processed'], trace['batches_total']), (1, 5))
         self.assertEqual([b['processed'] for b in trace['batches']], [True] + [False] * 4)
