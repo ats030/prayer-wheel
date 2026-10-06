@@ -15,7 +15,11 @@ fonts in `static/linear.css` are the source of tokens. No new font or dependency
 - Materials: two learning PDFs first; five production resources in a native
   disclosure. Collapsing information never changes access permissions.
 - Sample: readable question/answer articles with reference links.
-- Learning and administration: preserve the existing working views and data.
+- Learning: mobile-first question workbench, separate scope/queue controls,
+  persistent request feedback, readable answer/explanation and next action.
+- Weakness: sectioned progress rows with labelled accuracy and a per-scope study link.
+- Administration: desktop-first list/filter workbench and sectioned settings,
+  accessible native dialogs, explicit pending/error states; usable on mobile.
 
 ## Locked theme and typography
 
@@ -53,5 +57,6 @@ overflow at its source; do not hide inaccessible content to make a check pass.
 ## Per-page allowances
 
 Page structure varies by purpose; theme, type, control voice and section rhythm
-are shared. Administrative screens are outside the visual redesign except for
-shared navigation. No change to content, learner history, auth or file gates.
+are shared. Administrative screens share the system and retain existing operations.
+No change to content, learner history, scheduling, auth or file gates. Native
+dialogs trap focus, close with Escape and restore focus to the opener.

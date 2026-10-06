@@ -6,38 +6,47 @@
   <link rel="stylesheet" href="/static/linear.css?v={{ static_version }}">
   <script src="http://ubuntu-server-app:8526/v.js" data-site="exam-trainer" defer></script>
 </head>
-<body>
+<body class="login-view">
   <main class="login-shell">
     <section class="card login-card">
       <div class="badge">管理用</div>
-      <h1>exam-trainer</h1>
+      <h1>管理画面にログイン</h1>
       <p class="muted">問題・教材・試験設定を変更するには管理トークンを入力してください。</p>
+      <form id="loginForm">
       <div class="field"><label for="adminToken">管理トークン</label>
-        <input id="adminToken" type="password" autocomplete="current-password" autofocus>
+        <input id="adminToken" type="password" autocomplete="current-password" required aria-describedby="loginStatus" autofocus>
       </div>
       <p id="loginStatus" class="muted" role="status"></p>
-      <button class="btn btn-primary" id="loginButton">管理画面を開く</button>
-      <a class="btn btn-ghost" href="/">公開ページへ戻る</a>
+      <button class="btn btn-primary" id="loginButton" type="submit">管理画面を開く</button>
+      </form>
+      <a class="btn btn-ghost" href="/">教材を探す</a>
     </section>
   </main>
   <script>
     const button = document.getElementById('loginButton');
-    async function login() {
+    document.getElementById('loginForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (button.disabled) return;
+      const status = document.getElementById('loginStatus');
       button.disabled = true;
-      const response = await fetch('/api/admin/session', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({token: document.getElementById('adminToken').value, next: {{ next | tojson }}})
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        document.getElementById('loginStatus').textContent = data.detail || 'ログインできませんでした';
-        button.disabled = false; return;
+      button.textContent = '確認しています…';
+      status.textContent = '';
+      status.classList.remove('is-error');
+      try {
+        const response = await fetch('/api/admin/session', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({token: document.getElementById('adminToken').value, next: {{ next | tojson }}})
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'ログインできませんでした');
+        window.location.href = data.next;
+      } catch (error) {
+        status.textContent = error instanceof TypeError ? '接続できませんでした。もう一度お試しください。' : error.message;
+        status.classList.add('is-error');
+        document.getElementById('adminToken').focus();
+        button.disabled = false;
+        button.textContent = '管理画面を開く';
       }
-      window.location.href = data.next;
-    }
-    button.addEventListener('click', login);
-    document.getElementById('adminToken').addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') login();
     });
   </script>
 </body>

@@ -59,12 +59,13 @@
 
     matBtn.addEventListener('click', () => {
       document.getElementById('matStatus').textContent = '';
-      matModal.classList.add('show');
+      matModal.showModal();
       loadCounts();
     });
-    document.getElementById('matCancel').addEventListener('click', () => matModal.classList.remove('show'));
+    document.getElementById('matCancel').addEventListener('click', () => matModal.close());
     matModal.addEventListener('click', (event) => {
-      if (event.target === matModal) matModal.classList.remove('show');
+      const bounds = matModal.getBoundingClientRect();
+      if (event.target === matModal && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) matModal.close();
     });
 
     document.getElementById('matConfirm').addEventListener('click', async () => {
@@ -206,16 +207,17 @@
 
     function openGenerate() {
       document.getElementById('genStatus').textContent = '';
-      genModal.classList.add('show');
+      genModal.showModal();
       refreshPreview();
     }
     genBtn.addEventListener('click', openGenerate);
     // Arrived from a weakness branch with no questions: the node is already
     // selected server-side, so open straight onto it.
     if (page.dataset.openGenerate && !genBtn.disabled) openGenerate();
-    document.getElementById('genCancel').addEventListener('click', () => genModal.classList.remove('show'));
+    document.getElementById('genCancel').addEventListener('click', () => genModal.close());
     genModal.addEventListener('click', (event) => {
-      if (event.target === genModal) genModal.classList.remove('show');
+      const bounds = genModal.getBoundingClientRect();
+      if (event.target === genModal && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) genModal.close();
     });
     document.getElementById('genConfirm').addEventListener('click', async () => {
       const status = document.getElementById('genStatus');
@@ -246,7 +248,7 @@
           await postJSON(`/api/exams/${EXAM_ID}/generate`, { node_path: node.value, target, search_scope });
           toast('生成を開始しました。画面を閉じても続きます');
         }
-        genModal.classList.remove('show');
+        genModal.close();
         pollJobs();
       } catch (err) {
         status.textContent = err.message;
@@ -262,12 +264,13 @@
 
   addBtn.addEventListener('click', () => {
     document.getElementById('addStatus').textContent = '';
-    modal.classList.add('show');
+    modal.showModal();
     document.getElementById('qStem').focus();
   });
-  document.getElementById('addCancel').addEventListener('click', () => modal.classList.remove('show'));
+  document.getElementById('addCancel').addEventListener('click', () => modal.close());
   modal.addEventListener('click', (event) => {
-    if (event.target === modal) modal.classList.remove('show');
+    const bounds = modal.getBoundingClientRect();
+    if (event.target === modal && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) modal.close();
   });
 
   const lines = (id) => document.getElementById(id).value

@@ -9,7 +9,7 @@
   <script src="http://ubuntu-server-app:8526/v.js" data-site="exam-trainer" defer></script>
   {% block head %}{% endblock %}
 </head>
-<body>
+<body class="{% if admin_view %}admin-view{% else %}learner-view{% endif %}">
   <a class="skip-link" href="#main-content">本文へ</a>
   <nav class="nav" aria-label="メインナビゲーション">
     <a class="brand" href="/">exam-trainer</a>
@@ -21,7 +21,6 @@
       {% if admin_view %}
       <a href="/admin/bank{% if exam %}?exam_id={{ exam.id }}{% endif %}" {% if request.url.path == '/admin/bank' %}aria-current="page"{% endif %}>問題バンク</a>
       <a href="/admin/settings{% if exam %}?exam_id={{ exam.id }}{% endif %}" {% if request.url.path == '/admin/settings' %}aria-current="page"{% endif %}>試験の設定</a>
-      <a href="/">公開ページ</a>
       {% endif %}
       {% endblock %}
     </div>
@@ -37,7 +36,7 @@
   </nav>
   <div id="main-content" tabindex="-1">{% block body %}{% endblock %}</div>
   {% block footer %}<footer class="affiliate-site-disclosure">Amazonのアソシエイトとして、exam-trainerは適格販売により収入を得ています。</footer>{% endblock %}
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script>
     function toast(msg, ms) {
       const t = document.getElementById('toast');

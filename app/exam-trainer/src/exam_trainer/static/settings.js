@@ -6,15 +6,23 @@
 
   const addExam = document.getElementById('addExam');
   const examName = document.getElementById('examName');
+  const examStatus = document.getElementById('examStatus');
+  function examMessage(message, error = false) {
+    examStatus.hidden = false;
+    examStatus.textContent = message;
+    examStatus.classList.toggle('is-error', error);
+  }
   async function createExam() {
+    if (addExam.disabled) return;
     const name = examName.value.trim();
-    if (!name) { toast('試験名を入力してください'); examName.focus(); return; }
+    if (!name) { examMessage('試験名を入力してください', true); examName.focus(); return; }
     addExam.disabled = true;
+    examMessage('試験を追加しています…');
     try {
       const data = await postJSON('/api/exams', { name });
       window.location.href = `/admin/settings?exam_id=${data.id}`;
     } catch (err) {
-      toast(err.message);
+      examMessage(err.message, true);
       addExam.disabled = false;
     }
   }
@@ -32,7 +40,7 @@
       await postJSON(`/api/exams/${btn.dataset.deleteExam}/delete`);
       window.location.href = '/admin/settings';
     } catch (err) {
-      toast(err.message);
+      examMessage(err.message, true);
       btn.disabled = false;
     }
   });
@@ -42,15 +50,17 @@
   save.addEventListener('click', async () => {
     const status = document.getElementById('syllabusStatus');
     save.disabled = true;
+    status.classList.remove('is-error');
     status.textContent = '保存中…';
     try {
       const data = await postJSON(`/api/exams/${EXAM_ID}/syllabus`, {
         outline: document.getElementById('outline').value,
       });
       status.textContent = `${data.count}項目を登録しました`;
-      toast('シラバスを保存しました');
+
     } catch (err) {
       status.textContent = err.message;
+      status.classList.add('is-error');
     } finally {
       save.disabled = false;
     }
@@ -60,6 +70,8 @@
     const btn = event.currentTarget;
     const status = document.getElementById('affiliateStatus');
     btn.disabled = true;
+    status.classList.remove('is-error');
+    status.textContent = '保存中…';
     try {
       await postJSON('/api/exams/' + EXAM_ID + '/affiliate-resources', {
         node_path: document.getElementById('affiliateNode').value,
@@ -70,6 +82,7 @@
       window.location.reload();
     } catch (err) {
       status.textContent = err.message;
+      status.classList.add('is-error');
       btn.disabled = false;
     }
   });
@@ -83,7 +96,10 @@
         { active: btn.dataset.nextActive === '1' });
       window.location.reload();
     } catch (err) {
-      toast(err.message); btn.disabled = false;
+      const status = document.getElementById('affiliateStatus');
+      status.textContent = err.message;
+      status.classList.add('is-error');
+      btn.disabled = false;
     }
   });
 })();

@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% block title %}弱点 — exam-trainer{% endblock %}
 {% block body %}
-<div class="wrap">
-  <div class="page-head">
-    <h1 style="margin:0;">弱点</h1>
-    <span class="spacer"></span>
-    <span class="muted" style="font-size:13px;">直近の解答だけで採点しています</span>
-  </div>
+<div class="wrap weakness-wrap">
+  <header class="page-heading">
+    <p class="eyebrow">{% if exam %}{{ exam.name }}{% else %}学習{% endif %}</p>
+    <h1>弱点を確認する</h1>
+    <p class="page-description">各問題の最後の解答から正答率を計算しています。確認したい範囲を選んで、学習を続けられます。</p>
+    {% if exam %}<a class="btn btn-secondary" href="/study?exam_id={{ exam.id }}">全範囲から解く</a>{% endif %}
+  </header>
 
   {% if not exam %}
   <div class="card empty-state">
@@ -18,45 +19,50 @@
     ここに項目ごとの正答率が出ます。
   </div>
   {% else %}
-  <div class="card">
+  <section aria-labelledby="scopeProgress">
+  <h2 class="section-title" id="scopeProgress">範囲ごとの正答率</h2>
+  <div class="card progress-card">
     <div class="tree">
       {% for item in stats %}
-      <div class="tree-row" style="padding-left: {{ item.depth * 20 }}px;">
+      <div class="tree-row progress-row" style="--node-depth: {{ item.depth }};">
         <div class="tree-title">
           <span class="path">{{ item.path }}</span>{{ item.title }}
           {% if item.keywords %}<span class="keywords">{{ item.keywords }}</span>{% endif %}
         </div>
         {% if item.accuracy is not none %}
         {% set pct = (item.accuracy * 100) | round | int %}
-        <div class="meter {% if pct < 60 %}bad{% elif pct < 80 %}mid{% endif %}">
+        <div class="meter {% if pct < 60 %}bad{% elif pct < 80 %}mid{% endif %}" role="meter" aria-label="{{ item.title }}の正答率" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ pct }}">
           <span style="width: {{ pct }}%;"></span>
         </div>
         <div class="tree-figure">
           {{ pct }}%
-          <div class="muted">{{ item.correct }}/{{ item.answered }}</div>
+          <div class="muted">正解 {{ item.correct }} / {{ item.answered }}問</div>
         </div>
         {% else %}
-        <div class="meter"><span style="width:0;"></span></div>
+        <div class="meter" aria-hidden="true"><span style="width:0;"></span></div>
         <div class="tree-figure">
           <span class="muted">未挑戦</span>
           <div class="muted">{{ item.questions }}問</div>
         </div>
         {% endif %}
-        {# 問題が無い枝で「解く」を出しても空振りするので、そこは生成へ送る。 #}
+        {# 学習可能な問題がある範囲だけリンクを表示。 #}
         {% if item.questions %}
-        <a class="btn btn-secondary btn-xs" href="/study?exam_id={{ exam.id }}&node={{ item.path }}">解く</a>
+        <a class="btn btn-secondary btn-xs" href="/study?exam_id={{ exam.id }}&node={{ item.path }}" aria-label="{{ item.path }} {{ item.title }}を解く">解く</a>
         {% else %}
+        <span class="scope-unavailable">問題準備中</span>
         {% endif %}
       </div>
       {% endfor %}
     </div>
   </div>
 
+  </section>
+
   {% if recent %}
-  <h2 class="section-title" style="margin-top:32px;">直近の解答</h2>
+  <h2 class="section-title recent-heading">直近の解答</h2>
   <div class="card">
     {% for item in recent %}
-    <div class="tree-row">
+    <div class="tree-row recent-row">
       <div class="tree-title">
         <span class="path">{{ item.node_path }}</span>{{ item.stem[:60] }}{% if item.stem | length > 60 %}…{% endif %}
       </div>

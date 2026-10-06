@@ -1,11 +1,14 @@
 {% extends "base.html" %}
 {% block title %}問題バンク — exam-trainer{% endblock %}
 {% block body %}
-<div class="wrap" id="bankPage" data-exam-id="{{ exam.id if exam else '' }}"
+<div class="wrap admin-wrap" id="bankPage" data-exam-id="{{ exam.id if exam else '' }}"
      {% if open_generate %}data-open-generate="1"{% endif %}>
-  <div class="page-head">
-    <h1 style="margin:0;">問題バンク</h1>
-    <span class="spacer"></span>
+  <header class="page-heading">
+    <p class="eyebrow">管理{% if exam %} · {{ exam.name }}{% endif %}</p>
+    <h1>問題バンク</h1>
+    <p class="page-description">問題を追加し、根拠と正解を確認して出題可にします。</p>
+  </header>
+  <div class="bank-actions">
     <button class="btn btn-secondary" id="materialBtn" {% if not exam %}disabled{% endif %}>素材を追加</button>
     <button class="btn btn-secondary" id="addBtn" {% if not exam %}disabled{% endif %}>問題を追加</button>
     <button class="btn btn-primary" id="generateBtn"
@@ -15,11 +18,13 @@
     </button>
   </div>
 
+  {% if exam and not has_web %}<p class="request-status">検索先が未設定のため生成できません。問題の手入力と素材の追加は利用できます。</p>{% endif %}
+
   {% if exam %}
   <section class="job-panel" id="jobPanel" {% if not jobs %}hidden{% endif %}>
     <div class="job-panel-copy">
       <strong id="jobTitle">生成ジョブ</strong>
-      <span id="jobStatus" class="muted"></span>
+      <span id="jobStatus" role="status" aria-live="polite" class="muted"></span>
     </div>
     <div class="job-panel-actions">
       <button class="btn btn-ghost btn-xs" id="jobRefresh" type="button">更新</button>
@@ -32,46 +37,49 @@
     まだ試験がありません。<a href="/admin/settings">試験の設定</a>で追加してください。
   </div>
   {% else %}
-  <div class="tabs" style="margin-bottom:16px;">
-    <a class="tab {% if not status %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}">すべて</a>
-    <a class="tab {% if status == 'verified' %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}&status=verified">
+  <nav class="tabs bank-tabs" aria-label="問題の状態">
+    <a class="tab {% if not status %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}" {% if not status %}aria-current="page"{% endif %}>すべて</a>
+    <a class="tab {% if status == 'verified' %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}&status=verified" {% if status == 'verified' %}aria-current="page"{% endif %}>
       出題可 <span class="badge">{{ status_counts.get('verified', 0) }}</span>
     </a>
-    <a class="tab {% if status == 'held' %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}&status=held">
+    <a class="tab {% if status == 'held' %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}&status=held" {% if status == 'held' %}aria-current="page"{% endif %}>
       要確認 <span class="badge">{{ status_counts.get('held', 0) }}</span>
     </a>
-    <a class="tab {% if status == 'draft' %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}&status=draft">
+    <a class="tab {% if status == 'draft' %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}&status=draft" {% if status == 'draft' %}aria-current="page"{% endif %}>
       未検証 <span class="badge">{{ status_counts.get('draft', 0) }}</span>
     </a>
-    <a class="tab {% if status == 'rejected' %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}&status=rejected">
+    <a class="tab {% if status == 'rejected' %}active{% endif %}" href="/admin/bank?exam_id={{ exam.id }}&status=rejected" {% if status == 'rejected' %}aria-current="page"{% endif %}>
       破棄 <span class="badge">{{ status_counts.get('rejected', 0) }}</span>
     </a>
-  </div>
+  </nav>
 
-  <div class="card">
+  <div class="card bank-list">
     <form class="filter-row" method="get" action="/admin/bank">
       <input type="hidden" name="exam_id" value="{{ exam.id }}">
       <input type="hidden" name="status" value="{{ status }}">
-      <select name="node">
+      <div class="field filter-scope"><label for="bankNode">出題範囲</label>
+      <select name="node" id="bankNode">
         <option value="">全範囲</option>
         {% for item in syllabus %}
         <option value="{{ item.path }}" {% if item.path == node %}selected{% endif %}>{{ item.path }} {{ item.title }}</option>
         {% endfor %}
       </select>
-      <input type="text" name="q" value="{{ query }}" placeholder="問題文を検索" style="width:240px;">
+      </div>
+      <div class="field filter-query"><label for="bankQuery">問題文を検索</label><input type="text" name="q" id="bankQuery" value="{{ query }}" placeholder="検索語を入力"></div>
       <button class="btn btn-secondary" type="submit">絞り込む</button>
+      {% if node or query %}<a class="btn btn-ghost" href="/admin/bank?exam_id={{ exam.id }}&status={{ status }}">条件をクリア</a>{% endif %}
     </form>
 
     {% if not questions %}
     <div class="empty-state">
-      該当する問題がありません。「問題を追加」で手入力するか、シラバスから生成してください。
+      {% if node or query %}検索条件に一致する問題がありません。範囲や検索語を変えてください。{% else %}この状態の問題はありません。「問題を追加」で手入力するか、シラバスから生成できます。{% endif %}
     </div>
     {% else %}
     {% for item in questions %}
     <div class="q-row" data-question-id="{{ item.id }}">
       <div class="q-head">
         <span class="badge">{{ item.node_path }}</span>
-        <span class="badge status-{{ item.status }}">{{ item.status }}</span>
+        <span class="badge status-{{ item.status }}">{{ {'verified': '出題可', 'held': '要確認', 'draft': '未検証', 'rejected': '破棄'}.get(item.status, item.status) }}</span>
         {% if item.origin == 'generated' %}<span class="badge">生成</span>{% endif %}
         <span class="spacer"></span>
         {% if item.status != 'verified' %}
@@ -85,7 +93,7 @@
       <div class="q-stem">{{ item.stem }}</div>
       <ol class="q-choices" type="A">
         {% for choice in item.choices %}
-        <li class="{% if loop.index0 == item.answer %}is-answer{% endif %}">{{ choice }}</li>
+        <li class="{% if loop.index0 == item.answer %}is-answer{% endif %}">{{ choice }}{% if loop.index0 == item.answer %}<span class="answer-label">正解</span>{% endif %}</li>
         {% endfor %}
       </ol>
       {% if item.hold_reason %}<div class="q-hold">⚠ {{ item.hold_reason }}</div>{% endif %}
@@ -112,9 +120,8 @@
   {% endif %}
 </div>
 
-<div class="modal-bg" id="materialModal">
-  <div class="modal">
-    <h3>素材を追加</h3>
+<dialog class="modal" id="materialModal" aria-labelledby="materialTitle">
+    <h3 id="materialTitle">素材を追加</h3>
     <p class="muted" style="margin-top:-8px;font-size:13px;">
       問題の根拠にするページを直接指定します。検索が使えないときや、公式の解説ページを
       確実に根拠にしたいときに使います。指定サイト検索では、登録済みサイトの素材だけを使います。
@@ -135,16 +142,14 @@
                 placeholder="https://ja.wikipedia.org/wiki/誤差逆伝播法&#10;https://例.jp/解説ページ"></textarea>
     </div>
     <div class="row" style="justify-content:flex-end;gap:8px;">
-      <span id="matStatus" class="muted" style="font-size:13px;margin-right:auto;"></span>
+      <span id="matStatus" role="status" aria-live="polite" class="muted" style="font-size:13px;margin-right:auto;"></span>
       <button class="btn btn-ghost" id="matCancel">閉じる</button>
       <button class="btn btn-primary" id="matConfirm">取り込む</button>
     </div>
-  </div>
-</div>
+</dialog>
 
-<div class="modal-bg" id="generateModal">
-  <div class="modal">
-    <h3>問題を生成する</h3>
+<dialog class="modal" id="generateModal" aria-labelledby="generateTitle">
+    <h3 id="generateTitle">問題を生成する</h3>
     <div class="field">
       <label for="genSearchScope">検索範囲</label>
       <select id="genSearchScope">
@@ -198,16 +203,14 @@
       1項目ずつ順に処理します。画面を閉じても続きます。
     </p>
     <div class="row" style="justify-content:flex-end;gap:8px;">
-      <span id="genStatus" class="muted" style="font-size:13px;margin-right:auto;"></span>
+      <span id="genStatus" role="status" aria-live="polite" class="muted" style="font-size:13px;margin-right:auto;"></span>
       <button class="btn btn-ghost" id="genCancel">キャンセル</button>
       <button class="btn btn-primary" id="genConfirm">生成を開始</button>
     </div>
-  </div>
-</div>
+</dialog>
 
-<div class="modal-bg" id="addModal">
-  <div class="modal">
-    <h3>問題を追加</h3>
+<dialog class="modal" id="addModal" aria-labelledby="addTitle">
+    <h3 id="addTitle">問題を追加</h3>
     <p class="muted" style="margin-top:-8px;font-size:13px;">
       形の検査（正解が1つ・選択肢の重複・正解だけが長い）を通ったものだけ保存できます。
     </p>
@@ -224,7 +227,7 @@
       <textarea id="qStem" rows="3"></textarea>
     </div>
     <div class="field">
-      <label>選択肢（1行に1つ。先頭の行が A）</label>
+      <label for="qChoices">選択肢（1行に1つ。先頭の行が A）</label>
       <textarea id="qChoices" rows="4" placeholder="教師あり学習&#10;教師なし学習&#10;強化学習"></textarea>
     </div>
     <div class="field">
@@ -240,12 +243,11 @@
       <textarea id="qSources" rows="2"></textarea>
     </div>
     <div class="row" style="justify-content:flex-end;gap:8px;">
-      <span id="addStatus" class="muted" style="font-size:13px;margin-right:auto;"></span>
+      <span id="addStatus" role="status" aria-live="polite" class="muted" style="font-size:13px;margin-right:auto;"></span>
       <button class="btn btn-ghost" id="addCancel">キャンセル</button>
       <button class="btn btn-primary" id="addConfirm">保存</button>
     </div>
-  </div>
-</div>
+</dialog>
 {% endblock %}
 
 {% block scripts %}

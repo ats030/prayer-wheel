@@ -1,21 +1,29 @@
 {% extends "base.html" %}
 {% block title %}解く — exam-trainer{% endblock %}
 {% block body %}
-<div class="wrap" id="study"
+<div class="wrap learning-wrap" id="study"
      data-exam-id="{{ exam.id if exam else '' }}"
      data-node="{{ node }}">
-  <div class="page-head">
-    <h1 style="margin:0;">解く</h1>
-    <span class="badge">復習 {{ counts.due }}</span>
-    <span class="badge">新規 {{ counts.new }}</span>
-    <span class="spacer"></span>
+  <header class="page-heading">
+    <p class="eyebrow">{% if exam %}{{ exam.name }}{% else %}学習{% endif %}</p>
+    <h1>問題を解く</h1>
+    <p class="page-description">選択肢を選んで解説を確認し、1問ずつ進めます。</p>
+  </header>
+  <div class="study-toolbar">
+    <div class="queue-counts" aria-label="出題待ちの問題数">
+      <span>復習 <strong id="dueCount">{{ counts.due }}</strong>問</span>
+      <span>新規 <strong id="newCount">{{ counts.new }}</strong>問</span>
+    </div>
     {% if syllabus %}
-    <select id="nodeFilter" style="width:auto;max-width:320px;" aria-label="出題範囲">
-      <option value="">全範囲</option>
-      {% for item in syllabus %}
-      <option value="{{ item.path }}" {% if item.path == node %}selected{% endif %}>{{ item.path }} {{ item.title }}</option>
-      {% endfor %}
-    </select>
+    <div class="scope-field">
+      <label for="nodeFilter">出題範囲</label>
+      <select id="nodeFilter">
+        <option value="">全範囲</option>
+        {% for item in syllabus %}
+        <option value="{{ item.path }}" {% if item.path == node %}selected{% endif %}>{{ item.path }} {{ item.title }}</option>
+        {% endfor %}
+      </select>
+    </div>
     {% endif %}
   </div>
 
@@ -26,18 +34,19 @@
   {% elif not question %}
   <div class="card empty-state" id="emptyState">
     {% if status_counts.get('verified', 0) == 0 %}
-      出題できる問題がありません。問題は検証を通ったものだけが出題されます
+      出題できる問題がありません。検証を通った問題が追加されるまでお待ちください。
     {% else %}
       いまは復習の期限が来ている問題がありません。時間をおくか、出題範囲を変えてください。
     {% endif %}
+    <div class="empty-actions"><a class="btn btn-secondary" href="/products">教材を探す</a><a class="btn btn-ghost" href="/weakness?exam_id={{ exam.id }}">弱点を見る</a></div>
   </div>
   {% else %}
-  <div class="card study-card" id="card" data-question-id="{{ question.id }}">
+  <div class="card study-card" id="card" aria-busy="false" data-question-id="{{ question.id }}">
     <div class="study-meta">
       <span class="badge">{{ question.node_path }}</span>
       <span id="cardHint">1問ずつ採点します</span>
     </div>
-    <p class="study-stem" id="stem">{{ question.stem }}</p>
+    <p class="study-stem" id="stem" tabindex="-1">{{ question.stem }}</p>
     <div class="choices" id="choices">
       {% for choice in question.choices %}
       <button type="button" class="choice" data-index="{{ loop.index0 }}">
@@ -46,8 +55,10 @@
       {% endfor %}
     </div>
 
+    <p id="studyStatus" class="request-status" role="status" aria-live="polite" hidden></p>
     <div id="result" hidden>
-      <div class="verdict" id="verdict"></div>
+      <div class="verdict" id="verdict" role="status"></div>
+      <h2 class="section-title answer-heading">解説</h2>
       <div class="explanation" id="explanation"></div>
       <div class="evidence" id="evidence" hidden></div>
       <aside class="affiliate-card" id="affiliateCard" hidden>
@@ -64,10 +75,11 @@
     </div>
 
     <div class="study-actions" id="unsureRow">
-      <button class="btn btn-ghost btn-xs" id="unsureBtn" title="正解しても自信がなければ、次の復習が早く来ます">自信がない</button>
-      <span class="muted" style="font-size:12px;">選ぶ前に押すと、この問題は「自信なし」として記録されます</span>
+      <button class="btn btn-ghost btn-xs" id="unsureBtn" aria-pressed="false" aria-describedby="unsureHelp" title="正解しても自信がなければ、次の復習が早く来ます">自信がない</button>
+      <span class="muted" id="unsureHelp">選ぶ前に押すと、この問題は「自信なし」として記録されます</span>
     </div>
   </div>
+  <p class="keyboard-hint">キーボード：A〜Fで解答 · 解答後にEnterで次の問題</p>
   {% endif %}
 </div>
 {% endblock %}
