@@ -24,5 +24,6 @@ for kind in ("SHISEKI", "ONSEN", "OMATSURI", "TOKUSAN"):
     os.environ.pop(f"{kind}_SUMMARY_DISABLE", None)
     os.environ[f"{kind}_CACHE_MAX"] = "200000"
 os.environ["SUMMARY_CACHE_MAX"] = "200000"
+os.environ.setdefault("SUMMARY_REQUEST_TIMEOUT", "15m")
 os.execv(str(root / "summary-worker"), ["summary-worker", "--kinds",
          "tokusan,onsen,omatsuri,shiseki", "--limit", "100", *sys.argv[1:]])

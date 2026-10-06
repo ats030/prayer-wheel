@@ -1,4 +1,5 @@
 // Shared Leaflet instance, data transport, and scoped category UI.
+import {summaryRenderer} from './summaries.js';
 const views = new Map();
 const preparing = new Map();
 let activeKind = null;
@@ -128,6 +129,8 @@ async function buildView(kind, config) {
     else if (typeof input === 'string' && input.startsWith('/') && !input.startsWith('//')) input = '/assets/'+kind+input;
     return fetch(input, options);
   };
+  context.summariesOnly = config.summariesOnly === true;
+  context.hydrateSummary = summaryRenderer(context);
   // Wait for styles before computing category colours or sizing the map.
   try {
   await Promise.all([...root.querySelectorAll('link')].map(link=>new Promise((resolve,reject)=>{

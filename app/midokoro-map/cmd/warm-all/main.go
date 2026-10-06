@@ -22,12 +22,7 @@ import (
 	"time"
 )
 
-var required = map[string][]string{
-	"shiseki":  {"about", "history", "remains", "access", "highlights"},
-	"omatsuri": {"about", "history", "highlights", "flow", "access", "tourism"},
-	"onsen":    {"about", "history", "food", "efficacy", "access", "tourism"},
-	"tokusan":  {"about", "history", "production", "visit"},
-}
+var required = shared.SummarySections
 
 type item struct {
 	OfficialSourceHash string      `json:"official_source_hash,omitempty"`
@@ -202,7 +197,11 @@ func main() {
 	audit := flag.Bool("audit", false, "read-only full completion check; nonzero until all ready")
 	recheck := flag.Bool("recheck", false, "refresh every source before cutover; requires all kinds and limit 0")
 	retryAfter := flag.Duration("retry-after", time.Hour, "minimum interval before retrying unchanged failed input")
+	export := flag.String("export", "", "export complete source-verified summaries to this JSON path")
 	flag.Parse()
+	if *export != "" && (*recheck || *audit) {
+		log.Fatal("export is separate from audit/recheck")
+	}
 	if *recheck {
 		seen := map[string]bool{}
 		for _, kind := range strings.Split(*kinds, ",") {
@@ -228,6 +227,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer service.Close()
+	if *export != "" {
+		if err := exportSummaries(*root, *export, service); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 	allReady := true

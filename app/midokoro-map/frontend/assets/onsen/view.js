@@ -241,7 +241,7 @@ function detail(o){
   const pedia=wikipediaTitle?`https://ja.wikipedia.org/wiki/${encodeURIComponent(wikipediaTitle)}`:'';
   const springType=springDetailText(o);
   const springNote=springSourceNote(o);
-  const aboutBody=o.description?esc(o.description):'記事の概要を読み込んでいます…';
+  const aboutBody=context.summariesOnly?'要約を読み込んでいます…':o.description?esc(o.description):'記事の概要を読み込んでいます…';
   return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(o.label_ja||o.label_en||'名称未登録')}</h2>${statusBadge(o)}</header><dl class="detail-facts"><div><dt>所在地</dt><dd id="detail-location">${locationMarkup(o.prefecture||'地域未登録',o)}<span class="location-loading">詳細を確認中…</span></dd></div><div><dt>泉質</dt><dd id="detail-spring">${springType?esc(springType):'未登録'}${springNote?` <span class="source-note">${esc(springNote)}</span>`:''}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">温泉について</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status"></p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section" id="detail-efficacy-section" aria-labelledby="detail-efficacy"><h3 id="detail-efficacy">効能</h3><div class="detail-efficacy" id="detail-efficacy-body"></div><p class="detail-efficacy-status" id="detail-efficacy-status">読み込んでいます…</p></section><section class="detail-section" id="detail-history-section" aria-labelledby="detail-history"><h3 id="detail-history">歴史</h3><div class="detail-history" id="detail-history-body"></div><p class="detail-history-status" id="detail-history-status">読み込んでいます…</p></section><section class="detail-section" id="detail-food-section" aria-labelledby="detail-food"><h3 id="detail-food">名物</h3><div class="detail-food" id="detail-food-body"></div><p class="detail-food-status" id="detail-food-status">読み込んでいます…</p></section><section class="detail-section" id="detail-access-section" aria-labelledby="detail-access"><h3 id="detail-access">アクセス</h3><div class="detail-access" id="detail-access-body"></div><p class="detail-access-status" id="detail-access-status">読み込んでいます…</p></section><section class="detail-section" id="detail-tourism-section" aria-labelledby="detail-tourism"><h3 id="detail-tourism">観光</h3><div class="detail-tourism" id="detail-tourism-body"></div><p class="detail-tourism-status" id="detail-tourism-status">読み込んでいます…</p></section><section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" id="detail-links" aria-label="出典">${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}</nav></section><section class="detail-section detail-affiliate" id="detail-affiliate-section" aria-labelledby="detail-affiliate-heading"><h3 id="detail-affiliate-heading">近くの宿</h3><div class="affiliate" id="detail-affiliate" aria-label="宿泊検索"><p class="detail-affiliate-status">近くの宿を検索しています…</p></div></section></article>`;
 }
 function selectOnsen(key,origin){
@@ -260,12 +260,15 @@ function openDetail(o,key,origin){
   requestAnimationFrame(()=>{map.invalidateSize();focusTarget?.focus({preventScroll:origin!=='marker'})});
   hydrateImage(o,key);
   hydrateLocation(o,key);
+  if(context.summariesOnly)context.hydrateSummary(o.qid,()=>selectedKey===key);
+  else {
   hydrateAbout(o,key);
   hydrateHistory(o,key);
   hydrateFood(o,key);
   hydrateEfficacy(o,key);
   hydrateAccess(o,key);
   hydrateTourism(o,key);
+  }
   hydrateLinks(o,key);
   hydrateNearbyHotels(o,key);
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"midokoro-map/internal/shared"
 	"net/http"
 	"os"
 	"strings"
@@ -22,13 +23,14 @@ var summaryModel = func() string {
 
 const (
 	summaryPromptSystem  = "日本語の史跡アプリの情報編集者です。記事本文から指示された情報を抜き出して、自然な日本語で簡潔な要約を1つの段落にまとめてください。記事の事実のみを用い、推測や追加の情報は含めません。該当する記述が全くないと判断できる場合は、1語で「" + SummaryNone + "」とだけ答えてください。"
-	summaryTimeout       = 60 * time.Second
 	maxSummaryInputRunes = 12000
 	// SummaryNone is the exact token the model is instructed to reply with when
 	// the article has no usable content for the requested section. Callers treat
 	// it as "no relevant text" and fall back to the raw blocks / placeholder.
 	SummaryNone = "なし"
 )
+
+var summaryTimeout = shared.SummaryRequestTimeout()
 
 var summaryClient = &http.Client{Timeout: summaryTimeout + 10*time.Second}
 

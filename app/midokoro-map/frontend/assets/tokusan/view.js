@@ -278,7 +278,7 @@ async function hydrateSections(o){
   if(!qid||!container)return;
   let data=sectionsCache.get(qid);
   if(!data){
-    try{data=await fetchJSONWithRetry(`/api/sections/${encodeURIComponent(qid)}`)}
+    try{data=await fetchJSONWithRetry(`/api/${context.summariesOnly?'summary':'sections'}/${encodeURIComponent(qid)}`)}
     catch(error){console.warn(`Sections could not be loaded for ${qid}`,error);data=null}
     if(data&&!data.sections_unavailable&&!data.sections_retry)sectionsCache.set(qid,data);
   }
@@ -292,7 +292,7 @@ function renderSections(o,sections){
     const payload=sections[key]||{};
     const summary=String(payload.summary||'').trim();
     const items=Array.isArray(payload.items)?payload.items:[];
-    const blocks=Array.isArray(payload.blocks)?payload.blocks:[];
+    const blocks=!context.summariesOnly&&Array.isArray(payload.blocks)?payload.blocks:[];
     if(!summary&&!items.length&&!blocks.length)return'';
     const itemsMarkup=items.map(item=>{
       const from=String(item.from||'').trim(),to=String(item.to||'').trim();

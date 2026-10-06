@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"midokoro-map/internal/shared"
 	"net/http"
 	"os"
 	"strings"
@@ -22,7 +23,6 @@ var summaryModel = func() string {
 
 const (
 	summaryPromptSystem  = "日本語の温泉アプリの情報編集者です。記事本文から指示された情報を抜き出してください。記事の事実のみを用い、推測や追加の情報は含めません。表現は以下のように正規化してください。範囲・経路の区切りは「〜」に統一します。数字と日本語の間の半角スペースは除去します(例:「1925 年」は「1925年」)。括弧は全角（）に統一します。文調は常体で統一します。固有名詞・数値・年号・駅名・路線名は原文のまま変更しないでください。"
-	summaryTimeout       = 60 * time.Second
 	maxSummaryInputRunes = 12000
 	// SummaryNone is the exact token the model is instructed to reply with when
 	// the article has no usable content for the requested section. Callers treat
@@ -47,6 +47,8 @@ type SectionContent struct {
 	Summary string        `json:"summary,omitempty"`
 	Items   []SectionItem `json:"items"`
 }
+
+var summaryTimeout = shared.SummaryRequestTimeout()
 
 var summaryClient = &http.Client{Timeout: summaryTimeout + 10*time.Second}
 

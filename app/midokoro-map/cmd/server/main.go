@@ -25,6 +25,7 @@ var kinds = map[string]bool{"shiseki": true, "omatsuri": true, "onsen": true, "t
 type publicConfig struct {
 	DefaultKind      string   `json:"defaultKind"`
 	AffiliateOrigins []string `json:"affiliateOrigins"`
+	SummariesOnly    bool     `json:"summariesOnly"`
 }
 
 func readConfig() (publicConfig, error) {
@@ -35,11 +36,16 @@ func readConfig() (publicConfig, error) {
 	if !kinds[def] {
 		return publicConfig{}, fmt.Errorf("invalid MIDOKORO_DEFAULT_KIND: %s", def)
 	}
-	return publicConfig{def, shared.AffiliateOrigins()}, nil
+	return publicConfig{DefaultKind: def, AffiliateOrigins: shared.AffiliateOrigins(), SummariesOnly: os.Getenv("MIDOKORO_SUMMARIES_ONLY") == "1"}, nil
 }
 
 func newHandler(dataDir, frontendDir string, config publicConfig) (http.Handler, error) {
 	mux := http.NewServeMux()
+	if config.SummariesOnly {
+		if err := registerPublishedSummaries(mux, dataDir); err != nil {
+			return nil, err
+		}
+	}
 	builders := map[string]func(string) (http.Handler, error){
 		"shiseki": shiseki.NewHandler, "omatsuri": omatsuri.NewHandler,
 		"onsen": onsen.NewHandler, "tokusan": tokusan.NewHandler,
