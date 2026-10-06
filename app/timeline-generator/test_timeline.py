@@ -155,6 +155,12 @@ class EvidenceTests(unittest.TestCase):
         result = t.validate_events([e], [self.sources[0] | {"text": quote}], t.parse_query("インターネット"))
         self.assertEqual(result[0]["description"], "全米科学財団(NSF)がNSFNetを作った。")
 
+    def test_supported_gloss_with_trailing_period_is_kept(self):
+        quote = "1969年、米国(U.S.)の国防総省がARPANETを作った。"
+        e = self.event | {"year": 1969, "date": "1969年", "title": "ARPANETの稼働", "description": "米国(U.S.)の国防総省がARPANETを作った。", "quote": quote}
+        result = t.validate_events([e], [self.sources[0] | {"text": quote}], t.parse_query("インターネット"))
+        self.assertEqual(result[0]["description"], "米国(U.S.)の国防総省がARPANETを作った。")
+
     def test_century_is_not_falsely_precise(self):
         evidence = "Coffee was consumed in Yemen in the 15th century."
         e = self.event | {"year": 1401, "date": "15世紀", "quote": evidence}

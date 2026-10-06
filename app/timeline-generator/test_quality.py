@@ -76,6 +76,11 @@ class ContextTests(unittest.TestCase):
         source = article('<h2>アジア</h2><p>' + text + '</p>')
         event = {"year": 1888, "date": "1888年4月13日", "title": "可否茶館の開店", "description": "東京下谷に最初の喫茶店「可否茶館」が開店した。", "quote": quote, "source_id": 1}
         self.assertEqual(len(t.validate_events([event], [source], t.parse_query('コーヒー'))), 1)
+        # 正規化前の全角括弧や改行を含む段落でも、正規化した引用文の位置から範囲を決める。
+        wide = '1888年（明治21年）4月13日、東京下谷に最初の喫茶店「可否茶館」が開店した。'
+        wide_source = article('<h2>アジア</h2><p>' + text + '</p>')
+        wide_source["text"] = wide_source["passages"][0]["text"] = text.replace(quote, wide).replace('また', '\n\nまた')
+        self.assertEqual(len(t.validate_events([event | {"quote": wide}], [wide_source], t.parse_query('コーヒー'))), 1)
         for hedge in ['この店が最初だと言われている。', '1888年のことと推定される。']:
             hedged = article('<h2>アジア</h2><p>' + text + hedge + '別の話題の文である。</p>')
             self.assertEqual(t.validate_events([event], [hedged], t.parse_query('コーヒー')), [], hedge)

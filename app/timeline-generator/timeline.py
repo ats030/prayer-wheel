@@ -904,8 +904,10 @@ def validate_events(raw, sources, query, reasons=None):
         # 同じ段落でも、別の年の文の「とされる」は対象外。引用文と前後1文、年か主張が同じ文だけを見る（ats030-jjqhq）。
         passage_scope = ""
         if context:
-            sentences = [m for m in re.finditer(r"[^。.!?]+[。.!?]*", context["passage"])]
-            start = context["passage"].find(evidence)
+            # evidence は compact 済みなので、全角括弧や改行を含む段落も同じ正規化で探す。
+            passage = compact(context["passage"])
+            sentences = [m for m in re.finditer(r"[^。.!?]+[。.!?]*", passage)]
+            start = passage.find(evidence)
             end = start + len(evidence)
             near = [i for i, m in enumerate(sentences) if start >= 0 and m.start() < end and m.end() > start]
             near = set(range(min(near) - 1, max(near) + 2)) if near else set(range(len(sentences)))
@@ -929,7 +931,7 @@ def validate_events(raw, sources, query, reasons=None):
         # drop the gloss when the source never spells it, instead of the whole event.
         def drop_gloss(text):
             return re.sub(r"\s*[(（]([A-Za-z][A-Za-z0-9./+-]*)[)）]",
-                          lambda m: m.group(0) if m.group(1).casefold() in evidence_terms else "", text)
+                          lambda m: m.group(0) if m.group(1).rstrip(".").casefold() in evidence_terms else "", text)
         title, description = drop_gloss(title), drop_gloss(description)
         terms = re.findall(r"[A-Za-z][A-Za-z0-9]*(?:[./+-][A-Za-z0-9]+)*", title + " " + description)
         if any(len(term) > 1 and term.casefold() not in evidence_terms for term in terms):
