@@ -96,6 +96,9 @@ class ContextTests(unittest.TestCase):
         same = '<p>16世紀半ばのこの店が初めてとされる。</p>'
         hedged = article('<h2>歴史</h2><p>' + quote + '</p>' + same)
         self.assertEqual(t.validate_events([event], [hedged], t.parse_query('コーヒー')), [])
+        # 「創業300年」は西暦ではないので、同じ主張への留保として扱う。
+        duration = article('<h2>歴史</h2><p>' + quote + '</p><p>創業300年を超え、世界で初めてとされる店である。</p>')
+        self.assertEqual(t.validate_events([event], [duration], t.parse_query('コーヒー')), [])
 
     def test_historical_name_is_not_treated_as_uncertain_claim(self):
         source=article('<h2>1958年</h2><p>初のインスタントラーメンを発売。それ以前は「中華そば」と言われていた。</p>')

@@ -411,6 +411,19 @@ class BatchTests(unittest.TestCase):
         self.assertEqual(existing_seen, [0, 1, 2])
         self.assertEqual([e['year'] for e in result['events']], [1800, 1801, 1802])
 
+    def test_deadline_reached_before_unprefetched_batch_stops_cleanly(self):
+        # 冒頭の時間検査と先行生成の検査の間に10秒を切っても、例外ではなく時間上限で止める。
+        clock = [0]
+        class Records(list):
+            def append(self, record):
+                if '第1組を整理' in record.get('message', ''):
+                    clock[0] = t.TIME_LIMIT - 9.5
+                super().append(record)
+        with patch.object(t.time, 'monotonic', side_effect=lambda: clock[0]):
+            with self.assertRaises(t.TimelineError) as caught:
+                self.run_generation(history_source(3), records=Records())
+        self.assertIn('時間上限', str(caught.exception))
+
     def test_trace_records_over_cap_proposals_separately(self):
         original = t.verify_batch
         def capped(*args, **kwargs):

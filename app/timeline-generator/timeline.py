@@ -924,7 +924,8 @@ def validate_events(raw, sources, query, reasons=None):
                 return True
             # 「17世紀半ばのヴェネツィアが初めて」の留保は、16世紀半ばの「初めて」には掛からない（ats030-jjqhq）。
             centuries = [int(n) for n in re.findall(r"(\d{1,2})世紀", sentence)]
-            years = [int(n) for n in re.findall(r"(?<!\d)(\d{3,4})年", sentence)]
+            # 「創業300年」「100年の歴史」のような年数は西暦ではないので、別の時代の文とは見なさない。
+            years = [int(n) for n in re.findall(r"(?<!\d)(?<!創業)(?<!約)(\d{3,4})年(?!間|の歴史|以上|余|近く|ぶり|目)", sentence)]
             if (centuries or years) and year > 0 and (year - 1) // 100 + 1 not in centuries and not any(abs(y - year) < 10 for y in years):
                 return False
             return any(claim.casefold() in description.casefold() for claim in re.findall(r"最初|初めて|世界初|起源|発祥|元祖|first|origin", sentence, re.I))
@@ -1254,6 +1255,9 @@ def build_timeline(query, emit):
                 dropped, batch_record['stages'] = [], {}
                 batch_progress({"kind": "progress", "stage": "generate", "message": f"{len(batch)}件の資料から、年代順に整理しています。"})
                 prefetch(index)
+                if index not in pending:
+                    stop_reason = 'time_limit'
+                    break
                 generated = pending.pop(index).result()
                 prefetch(index + 1)
                 additions, notes = verify_batch(query, batch, batch_progress, deadline - 2, events + pruned, generated, dropped=dropped, stages=batch_record['stages'])
