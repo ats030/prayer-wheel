@@ -13,6 +13,7 @@
   document.querySelector('#static-map-note').hidden = true;
 
   function record(event) {
+    if (document.body.dataset.storyPreview === 'true') return;
     if (navigator.doNotTrack === '1' || sent.has(event)) return;
     sent.add(event);
     fetch('/api/story-events/' + storySlug + '/' + event, {

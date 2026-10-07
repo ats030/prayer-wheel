@@ -118,3 +118,5 @@ Cloud Runの既存リクエストログは通常のプラットフォーム項�
 自前サーバーとCloud Runの両方での確認である。件数だけで自動公開しない。
 
 文化の地図は `/stories` から有田・草津・川越を選べます。追加テーマの根拠と検証は [docs/additional-stories.md](docs/additional-stories.md) に記録しています。
+
+Ollamaで同じ形式の記事下書きを作れます。確認済みの資料パケットから `python3 scripts/generate-story.py --packet docs/story-packets/kusatsu-yumomi.json --output data/story-work/kusatsu-draft` で本文・出典確認資料・探索プレビューを出力します。手順と検証範囲は [docs/ollama-stories.md](docs/ollama-stories.md) を参照してください。

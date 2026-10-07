@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <title>$title｜みどころマップ・下書き</title>
+  <meta name="description" content="$intro">
+  <meta property="og:title" content="$title">
+  <meta property="og:description" content="$lead">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/vendor/leaflet.css">
+  <link rel="stylesheet" href="/stories/story.css">
+  <script src="/vendor/leaflet.js" defer></script>
+  <script src="/stories/story.js" defer></script>
+  <script src="http://ubuntu-server-app:8526/v.js" data-site="midokoro-map" defer></script>
+</head>
+<body class="story-page" data-story="$slug" data-story-preview="true">
+  <a class="skip-link" href="#story-main">本文へ</a>
+  <header class="site-header">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="28" height="28"><span>みどころマップ・下書き</span></a>
+  </header>
+  <main id="story-main">
+    <section class="story-lead" aria-labelledby="story-title">
+      <p class="eyebrow">土地のつながりをたどる / $region</p>
+      <h1 id="story-title">$title</h1>
+      <p class="lead-copy">$lead</p>
+      <p>$intro</p>
+      <nav class="question-links" aria-label="気になる問いから探す">$questions</nav>
+    </section>
+    <section class="explorer" id="explorer" aria-labelledby="explorer-title">
+      <div class="section-heading"><h2 id="explorer-title">場所から、つながりへ</h2><span id="exploration-progress" aria-live="polite"></span></div>
+      <p class="map-note">点線は文化的なつながりです。施設の代表位置を示しており、道順や配管の位置を表しません。</p>
+      <nav class="place-links" aria-label="地図の場所を選ぶ">$place_links</nav>
+      <div class="explorer-grid" hidden>
+        <div class="map-wrap">
+          <div id="story-map" role="region" aria-label="${region}の5地点と文化的なつながりの地図"></div>
+          <p id="map-status" role="status">地図を読み込んでいます。下の解説からも場所のつながりを読めます。</p>
+          <button id="map-reset" class="map-reset" type="button" hidden>5地点を見渡す</button>
+        </div>
+        <aside id="selection" aria-label="選んだ場所とつながり" hidden>
+          <div id="selected-place"></div><div id="selected-relation" hidden></div>
+          <h3>ここから、どこへ？</h3><div id="related-places"></div>
+        </aside>
+      </div>
+      <p id="static-map-note">地図を表示するにはJavaScriptが必要です。場所のリンクから、下の解説とつながりを読めます。</p>
+      <div class="share-tools" id="share-tools" hidden>
+        <button type="button" id="share-story">このつながりを共有</button>
+        <button type="button" id="copy-story">リンクをコピー</button>
+        <p id="share-status" role="status"></p>
+        <div id="manual-share" hidden><label for="share-url">このURLを選択してコピーできます</label><input id="share-url" type="url" readonly></div>
+      </div>
+      <p class="reading-link"><a href="#places">5地点の解説をまとめて読む ↓</a></p>
+    </section>
+    <section id="places" class="story-reading" aria-labelledby="places-title">
+      <p class="eyebrow">場所に残るもの</p><h2 id="places-title">$reading_title</h2>
+      <div class="place-articles">$places</div>
+    </section>
+    <section id="relations" class="story-reading" aria-labelledby="relations-title">
+      <p class="eyebrow">場所を結ぶ理由</p><h2 id="relations-title">つながりを選んで、もう一歩</h2>
+      <ul class="relation-articles">$relations</ul>
+    </section>
+    <footer class="story-footer">
+      <p>資料確認：$checked_at。Ollamaで執筆した下書きです。出典・年代・因果関係を確認してから公開してください。</p>
+      <p>下書きの探索操作は集客評価用の操作件数に含めません。</p>
+    </footer>
+  </main>
+</body>
+</html>

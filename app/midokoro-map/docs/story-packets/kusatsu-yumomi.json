@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "slug": "kusatsu-yumomi",
+  "title": "草津では、なぜ湯をもむ？",
+  "region": "群馬県・草津町",
+  "checked_at": "2026-10-07",
+  "angle": "水を足さず熱い湯を扱う工夫と施設ごとの源泉の違いを見比べる。温泉の効能や具体的な入浴手順は書かない。 湯畑源泉と万代源泉は別の源泉である。2種類を使用するという事実から、湯を混合すると書かない。",
+  "sources": [
+    {
+      "id": "source-1",
+      "url": "https://www.kusatsu-onsen.ne.jp/kankou/1004.php",
+      "label": "草津温泉観光協会・湯畑",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-2",
+      "url": "https://www.kusatsu-onsen.ne.jp/netsunoyu/history.html",
+      "label": "熱乃湯・湯もみの歴史",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-3",
+      "url": "https://www.kusatsu-onsen.ne.jp/netsunoyu/",
+      "label": "熱乃湯・施設案内",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-4",
+      "url": "https://onsen-kusatsu.com/gozanoyu/",
+      "label": "草津三湯・御座之湯",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-5",
+      "url": "https://onsen-kusatsu.com/ohtakinoyu/hot-spring/",
+      "label": "草津三湯・大滝乃湯の温泉",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-6",
+      "url": "https://onsen-kusatsu.com/sainokawara/hot-spring/",
+      "label": "草津三湯・西の河原露天風呂の源泉",
+      "checked_at": "2026-10-07"
+    }
+  ],
+  "facts": [
+    {
+      "id": "yubatake-facts",
+      "text": "湯畑の湯樋は湯の花を採るとともに、湯の温度を下げる役割を持つ。",
+      "source_ids": [
+        "source-1"
+      ]
+    },
+    {
+      "id": "netsunoyu-facts",
+      "text": "草津の湯もみは、水を加えて湯を薄めずに温度を下げるための方法として伝えられている。熱乃湯で湯もみと草津の歌を紹介している。",
+      "source_ids": [
+        "source-2",
+        "source-3"
+      ]
+    },
+    {
+      "id": "gozanoyu-facts",
+      "text": "御座之湯は湯畑源泉と万代源泉を使用する。建物は江戸・明治時代の共同湯を思わせる姿で再建されたものである。",
+      "source_ids": [
+        "source-4"
+      ]
+    },
+    {
+      "id": "ohtakinoyu-facts",
+      "text": "大滝乃湯は煮川源泉を使用する。合わせ湯では湯が浴槽を順に巡り、水を足さずに自然冷却する。",
+      "source_ids": [
+        "source-5"
+      ]
+    },
+    {
+      "id": "sainokawara-facts",
+      "text": "西の河原露天風呂は森林に囲まれた露天風呂で、万代源泉を使用する。施設名から湯の出所を推定しない。",
+      "source_ids": [
+        "source-6"
+      ]
+    }
+  ],
+  "places": [
+    {
+      "id": "yubatake",
+      "name": "湯畑",
+      "lat": 36.62294,
+      "lng": 138.59666,
+      "role": "湯の出発点",
+      "visit_note": "地図の点は湯畑の代表位置です。",
+      "fact_ids": [
+        "yubatake-facts"
+      ]
+    },
+    {
+      "id": "netsunoyu",
+      "name": "熱乃湯",
+      "lat": 36.622701,
+      "lng": 138.596347,
+      "role": "湯もみ",
+      "visit_note": "公演や体験の実施状況は公式案内で確認できます。",
+      "fact_ids": [
+        "netsunoyu-facts"
+      ]
+    },
+    {
+      "id": "gozanoyu",
+      "name": "御座之湯",
+      "lat": 36.62232,
+      "lng": 138.596,
+      "role": "二つの源泉",
+      "visit_note": "草津町草津421。開館状況は公式案内で確認できます。",
+      "fact_ids": [
+        "gozanoyu-facts"
+      ]
+    },
+    {
+      "id": "ohtakinoyu",
+      "name": "大滝乃湯",
+      "lat": 36.62291,
+      "lng": 138.60153,
+      "role": "合わせ湯",
+      "visit_note": "草津町草津596-13。入浴方法は施設の案内に従ってください。",
+      "fact_ids": [
+        "ohtakinoyu-facts"
+      ]
+    },
+    {
+      "id": "sainokawara",
+      "name": "西の河原露天風呂",
+      "lat": 36.62431,
+      "lng": 138.58839,
+      "role": "景色と源泉",
+      "visit_note": "草津町草津521-3。利用案内は公式サイトで確認できます。",
+      "fact_ids": [
+        "sainokawara-facts"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "id": "cooling",
+      "from": "yubatake",
+      "to": "netsunoyu",
+      "kind": "thematic",
+      "note": "テーマで結ぶ関係：この線は施設間の配湯管を表しません。",
+      "fact_ids": [
+        "yubatake-facts",
+        "netsunoyu-facts"
+      ]
+    },
+    {
+      "id": "source-goza",
+      "from": "yubatake",
+      "to": "gozanoyu",
+      "kind": "documented",
+      "note": "源泉の利用関係：線は配管の正確な位置ではありません。 湯畑源泉と万代源泉は別の源泉です。この資料は湯の混合を説明するものではありません。",
+      "fact_ids": [
+        "yubatake-facts",
+        "gozanoyu-facts"
+      ]
+    },
+    {
+      "id": "cooling-baths",
+      "from": "netsunoyu",
+      "to": "ohtakinoyu",
+      "kind": "thematic",
+      "note": "テーマで結ぶ関係：二つの施設の歴史的な継承関係を示すものではありません。",
+      "fact_ids": [
+        "netsunoyu-facts",
+        "ohtakinoyu-facts"
+      ]
+    },
+    {
+      "id": "different-springs",
+      "from": "gozanoyu",
+      "to": "ohtakinoyu",
+      "kind": "thematic",
+      "note": "テーマで結ぶ関係：施設が使う源泉の比較です。",
+      "fact_ids": [
+        "gozanoyu-facts",
+        "ohtakinoyu-facts"
+      ]
+    },
+    {
+      "id": "bandai",
+      "from": "gozanoyu",
+      "to": "sainokawara",
+      "kind": "documented",
+      "note": "共通する源泉：線は配管の正確な位置ではありません。",
+      "fact_ids": [
+        "gozanoyu-facts",
+        "sainokawara-facts"
+      ]
+    }
+  ]
+}

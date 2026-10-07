@@ -1,0 +1,33 @@
+reviewed: 2026-10-07
+scope: Local editorial draft command; existing Ollama endpoint and installed model, no SDK or paid API.
+decisions:
+  - name: Ollama
+    version: 0.32.14
+    evidence: Existing endpoint /api/version.
+    status: approved
+    license: MIT
+    commercial_use: permitted_with_notice
+    cost: No paid API used; existing hardware and electricity are not cost-free.
+    source: https://github.com/ollama/ollama/blob/v0.32.14/LICENSE
+    conditions: Preserve notices when redistributing Ollama. This command only calls the installed API.
+  - name: Installed gemma4:12b
+    digest: 4eb23ef187e2c5462566d6a1d3bbbc2f1346d0b4327cbb66d58fffbcc9b2b05c
+    quantization: Q4_K_M
+    evidence: Existing endpoint /api/tags and Apache License 2.0 text from /api/show.
+    status: approved
+    license: Apache-2.0
+    commercial_use: permitted_with_notice
+    cost: Installed weights, no download or paid inference service added.
+    sources:
+      - https://ollama.com/library/gemma4
+      - https://ai.google.dev/gemma/terms
+      - https://ai.google.dev/gemma/apache_2
+    conditions: Gemma 4 has its own Apache license link; do not apply older Gemma terms to it. Model weights are not redistributed here. Preserve license/NOTICE if redistributing weights; no trademark endorsement. Outputs still need factual and editorial review.
+  - name: Alternative model selected by CLI or MIDOKORO_STORY_MODEL
+    status: review_required
+    conditions: Check the exact model/digest license and commercial use before adoption. The command records the requested and actual model and refuses silent remapping.
+  - name: Existing story source material and frontend assets
+    status: conditional
+    intended_use: Original factual notes and existing Leaflet exploration UI, reused in a local draft bundle.
+    source: story-license.yaml
+    conditions: Keep source links, checked dates, uncertainties and Leaflet notices; no copied third-party prose or photos. OSM attribution and normal tile-policy constraints remain in force.

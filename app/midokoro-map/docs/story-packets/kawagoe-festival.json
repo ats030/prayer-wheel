@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "slug": "kawagoe-festival",
+  "title": "川越では、なぜ蔵の町に山車が出る？",
+  "region": "埼玉県・川越市",
+  "checked_at": "2026-10-07",
+  "angle": "城主の祭礼奨励、町々の参加、江戸との交流、大火後の再建を分けてたどる。祭礼の起源と現存御殿・蔵造りの建築年代を混同しない。",
+  "sources": [
+    {
+      "id": "source-1",
+      "url": "https://koedo.or.jp/spot_007/",
+      "label": "小江戸川越観光協会・本丸御殿",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-2",
+      "url": "https://koedo.or.jp/spot_008/",
+      "label": "小江戸川越観光協会・川越氷川神社",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-3",
+      "url": "https://www.kawagoematsuri.jp/about/about_history.html",
+      "label": "川越まつり・歴史",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-4",
+      "url": "https://kawagoematsuri.jp/matsurimuseum/",
+      "label": "川越まつり会館・展示案内",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-5",
+      "url": "https://koedo.or.jp/spot_002/",
+      "label": "小江戸川越観光協会・蔵造りの町並み",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-6",
+      "url": "https://koedo.or.jp/spot_001/",
+      "label": "小江戸川越観光協会・時の鐘",
+      "checked_at": "2026-10-07"
+    }
+  ],
+  "facts": [
+    {
+      "id": "honmaru-facts",
+      "text": "現在残る川越城本丸御殿は1848年に造営された建物の一部である。",
+      "source_ids": [
+        "source-1"
+      ]
+    },
+    {
+      "id": "hikawa-facts",
+      "text": "川越氷川神社は川越の総鎮守とされる。1648年、川越藩主の松平信綱が神輿・獅子頭・太鼓等を寄進し、祭礼を奨励した。これが川越まつりの起源とされる。",
+      "source_ids": [
+        "source-2",
+        "source-3"
+      ]
+    },
+    {
+      "id": "matsuri-museum-facts",
+      "text": "川越まつり会館は、実際の川越まつりで曳かれる山車を定期的に入れ替えながら展示する。祭りの開催日以外にも山車を見られる。",
+      "source_ids": [
+        "source-4"
+      ]
+    },
+    {
+      "id": "kurazukuri-facts",
+      "text": "松平信綱の町割りで通りに店が向かい合う家並みができた。江戸との商業上の結び付きが強かった川越に蔵造りの商家が建った。現在の蔵造りの多くは川越大火後に建てられた。蔵造りは火災に強い建築として紹介されている。",
+      "source_ids": [
+        "source-5"
+      ]
+    },
+    {
+      "id": "toki-no-kane-facts",
+      "text": "現在の時の鐘は1893年の川越大火後に再建された四代目である。観光協会は商人たちが自分の店より鐘の再建を急いだと紹介している。",
+      "source_ids": [
+        "source-6"
+      ]
+    },
+    {
+      "id": "festival-history",
+      "text": "1651年から神輿の行列が氏子域の町々を巡り、町衆も随行するようになった。1698年、高沢町が江戸の祭礼に習って踊り屋台を披露した。",
+      "source_ids": [
+        "source-3"
+      ]
+    }
+  ],
+  "places": [
+    {
+      "id": "honmaru",
+      "name": "川越城本丸御殿",
+      "lat": 35.92443,
+      "lng": 139.49144,
+      "role": "城下町",
+      "visit_note": "川越市郭町2-13-1。公開状況は公式案内で確認できます。",
+      "fact_ids": [
+        "honmaru-facts"
+      ]
+    },
+    {
+      "id": "hikawa",
+      "name": "川越氷川神社",
+      "lat": 35.92887,
+      "lng": 139.48809,
+      "role": "祭りの起点",
+      "visit_note": "川越市宮下町2-11-3。参拝案内は公式サイトで確認できます。",
+      "fact_ids": [
+        "hikawa-facts"
+      ]
+    },
+    {
+      "id": "matsuri-museum",
+      "name": "川越まつり会館",
+      "lat": 35.92421,
+      "lng": 139.48212,
+      "role": "町の山車",
+      "visit_note": "川越市元町2-1-10。展示内容と開館日は公式案内で確認できます。",
+      "fact_ids": [
+        "matsuri-museum-facts"
+      ]
+    },
+    {
+      "id": "kurazukuri",
+      "name": "蔵造りの町並み",
+      "lat": 35.92275,
+      "lng": 139.48269,
+      "role": "商家と火災",
+      "visit_note": "一番街周辺に分布。地図の点は通りの代表位置です。",
+      "fact_ids": [
+        "kurazukuri-facts"
+      ]
+    },
+    {
+      "id": "toki-no-kane",
+      "name": "時の鐘",
+      "lat": 35.92373,
+      "lng": 139.48308,
+      "role": "町の時間",
+      "visit_note": "川越市幸町15-7。地図の点は鐘楼の代表位置です。",
+      "fact_ids": [
+        "toki-no-kane-facts"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "id": "lord-festival",
+      "from": "honmaru",
+      "to": "hikawa",
+      "kind": "documented",
+      "note": "歴史を結ぶ関係：現在の本丸御殿は1848年の建物で、祭礼奨励当時の建物ではありません。",
+      "fact_ids": [
+        "honmaru-facts",
+        "hikawa-facts"
+      ]
+    },
+    {
+      "id": "shrine-floats",
+      "from": "hikawa",
+      "to": "matsuri-museum",
+      "kind": "documented",
+      "note": "祭礼史と展示を結ぶ関係です。",
+      "fact_ids": [
+        "hikawa-facts",
+        "matsuri-museum-facts",
+        "festival-history"
+      ]
+    },
+    {
+      "id": "town-edo",
+      "from": "matsuri-museum",
+      "to": "kurazukuri",
+      "kind": "thematic",
+      "note": "テーマで結ぶ関係：商家の建築が山車行事を生んだ、という因果関係ではありません。",
+      "fact_ids": [
+        "matsuri-museum-facts",
+        "kurazukuri-facts",
+        "festival-history"
+      ]
+    },
+    {
+      "id": "fire-rebuilding",
+      "from": "kurazukuri",
+      "to": "toki-no-kane",
+      "kind": "documented",
+      "note": "同じ大火後の再建を結ぶ関係です。",
+      "fact_ids": [
+        "kurazukuri-facts",
+        "toki-no-kane-facts"
+      ]
+    },
+    {
+      "id": "town-plan",
+      "from": "honmaru",
+      "to": "kurazukuri",
+      "kind": "documented",
+      "note": "歴史を結ぶ関係：現在の町並み全体が江戸時代の建物というわけではありません。",
+      "fact_ids": [
+        "honmaru-facts",
+        "kurazukuri-facts"
+      ]
+    }
+  ]
+}
