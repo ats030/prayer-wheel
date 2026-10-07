@@ -32,6 +32,21 @@ cmd/warm-<kind>は統合版の種類別キャッシュへ書く。元版と統�
 
 ブラウザ検証はpython3 scripts/browser-check.py <URL>。PlaywrightとChromiumは開発環境の既存インストールを使用する。画像出力はartifacts/へ保存しgit対象外とする。
 
+## 文化のつながりをたどる実験
+
+`/stories/arita-porcelain` は有田の5地点を原料・焼成・町並み・信仰・仕事の記録からたどるテーマページ。
+HTML本文を正本にして、地点と関係をJavaScriptで地図へ反映する。
+関係の選択と選択地点をURLで復元し、共有URLには `from=shared` を付ける。
+資料・座標の根拠と判断は `docs/arita-story.md`。自動生成した関係や既存DBの変更は含まない。
+
+`python3 scripts/browser-story-check.py <URL>` はPC/スマホ、URL復元、共有の代替、地図失敗、JSなし、Do Not Trackと操作計測を検証する。
+操作計測は同一オリジンの空POST `/api/story-events/arita-porcelain/<event>` で既存のリクエストログと標準ログに記録する。
+イベントは固定の8種類、各ページ読込につき各種類1回。アプリは識別子・本文・参照元を記録せず、DNT時は送信しない。
+Cloud Runの既存リクエストログは通常のプラットフォーム項目を保持する。ログの保存期間と権限は変更しない。
+自己ホストではjournalの `story_event` 行を、公開版は既存visit-logのCloud Runパス集計を使える。
+イベント送信はブラウザやネットワークで欠測し、ログにはbot/人工リクエストも入り得るため、PV・ユニーク人数・共有完了・現地訪問として扱わない。
+実験の判断基準とロールバックは同文書に記録。SNS投稿や外部リンク依頼はこの実装に含まない。
+
 
 ## 統合先での事前要約生成
 

@@ -41,6 +41,7 @@ func readConfig() (publicConfig, error) {
 
 func newHandler(dataDir, frontendDir string, config publicConfig) (http.Handler, error) {
 	mux := http.NewServeMux()
+	registerStoryRoutes(mux, frontendDir)
 	if config.SummariesOnly {
 		if err := registerPublishedSummaries(mux, dataDir); err != nil {
 			return nil, err
