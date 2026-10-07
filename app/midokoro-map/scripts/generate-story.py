@@ -358,15 +358,23 @@ def generate(packet_path, output, base, model, timeout=600, num_predict=4096, re
         output.parent.mkdir(parents=True, exist_ok=True)
         with failure_path.open("x") as failed:
             json.dump({"status": "rejected", "error": str(exc), "packet": packet, "response": response,
-                       "prompt_version": PROMPT_VERSION, "requested_model": model,
+                       "prompt_version": previous.get("prompt_version") if previous else PROMPT_VERSION,
+                       "processor_prompt_version": PROMPT_VERSION, "requested_model": model,
                        "model_digest": candidates[0]["digest"],
+                       "generated_at": previous.get("generated_at", response.get("created_at")) if previous else response.get("created_at"),
+                       "elapsed_seconds": previous.get("elapsed_seconds") if previous else round(time.monotonic() - started, 2),
                        "options": previous.get("options") if previous else payload["options"],
                        "think": previous.get("think") if previous else False,
                        "system_prompt_sha256": previous.get("system_prompt_sha256") if previous else hashlib.sha256(SYSTEM.encode()).hexdigest()},
                       failed, ensure_ascii=False, indent=2)
         raise StoryError(f"{exc}（未検証の応答: {failure_path}）") from exc
-    manifest = {"schema_version": 1, "prompt_version": PROMPT_VERSION,
-                "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(), "requested_model": model,
+    processed_at = dt.datetime.now(dt.timezone.utc).isoformat()
+    manifest = {"schema_version": 1,
+                "prompt_version": previous.get("prompt_version") if previous else PROMPT_VERSION,
+                "processor_prompt_version": PROMPT_VERSION,
+                "generated_at": previous.get("generated_at", response.get("created_at")) if previous else response.get("created_at", processed_at),
+                "processed_at": processed_at, "rechecked_at": processed_at if recheck else None,
+                "requested_model": model,
                 "actual_model": response["model"], "model_digest": candidates[0]["digest"],
                 "packet_sha256": hashlib.sha256(packet_raw).hexdigest(),
                 "options": previous.get("options") if previous else payload["options"],
@@ -377,7 +385,8 @@ def generate(packet_path, output, base, model, timeout=600, num_predict=4096, re
                 "rechecked_response_sha256": hashlib.sha256(Path(recheck).read_bytes()).hexdigest() if recheck else None,
                 "normalizations": normalizations,
                 "think": previous.get("think") if previous else False,
-                "elapsed_seconds": round(time.monotonic() - started, 2),
+                "elapsed_seconds": previous.get("elapsed_seconds") if previous else round(time.monotonic() - started, 2),
+                "recheck_elapsed_seconds": round(time.monotonic() - started, 2) if recheck else None,
                 "ollama_total_duration_ns": response.get("total_duration"),
                 "prompt_eval_count": response.get("prompt_eval_count"), "eval_count": response.get("eval_count"),
                 "done_reason": response["done_reason"], "validation": "structure-and-reference-ids-only",

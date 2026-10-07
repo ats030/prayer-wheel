@@ -143,12 +143,34 @@ class WriterChecks(unittest.TestCase):
                 self.assertEqual([call.args[1] for call in api.call_args_list], ["/api/tags"])
                 self.assertEqual(manifest["generation_mode"], "recheck")
                 self.assertEqual(manifest["original_prompt_version"], "old-prompt")
+                self.assertEqual(manifest["prompt_version"], "old-prompt")
                 self.assertIsNone(manifest["request_sha256"])
                 self.assertIsNone(manifest["options"])
+                self.assertIsNone(manifest["generated_at"])
+                self.assertIsNone(manifest["elapsed_seconds"])
+                self.assertIsNotNone(manifest["rechecked_at"])
+                self.assertIsNotNone(manifest["recheck_elapsed_seconds"])
                 saved["model_digest"] = "wrong"
                 response.write_text(json.dumps(saved))
                 with self.assertRaisesRegex(writer.StoryError, "digest"):
                     writer.generate(source, Path(temp) / "bad", "http://localhost:11434", "gemma4:12b", recheck=response)
+
+    def test_failed_rechecks_preserve_original_prompt_version(self):
+        saved = {"status": "rejected", "packet": self.packet, "requested_model": "gemma4:12b",
+                 "model_digest": "abc", "prompt_version": "old-prompt",
+                 "response": {"done": True, "done_reason": "stop", "model": "gemma4:12b",
+                              "message": {"content": "invalid JSON"}}}
+        with tempfile.TemporaryDirectory() as temp:
+            response = Path(temp) / "failed.json"
+            response.write_text(json.dumps(saved))
+            with patch.object(writer, "request_json", return_value={"models": [{"name": "gemma4:12b", "digest": "abc"}]}):
+                for name in ["first-recheck", "second-recheck"]:
+                    out = Path(temp) / name
+                    with self.assertRaises(writer.StoryError):
+                        writer.generate(HERE.parent / "docs/story-packets/kusatsu-yumomi.json", out,
+                                        "http://localhost:11434", "gemma4:12b", recheck=response)
+                    response = out.with_name(name + ".failed.json")
+                    self.assertEqual(json.loads(response.read_text())["prompt_version"], "old-prompt")
 
     def test_public_output_and_existing_runs_are_refused_before_http(self):
         source = HERE.parent / "docs/story-packets/kusatsu-yumomi.json"
