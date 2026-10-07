@@ -8,6 +8,7 @@ from pathlib import Path
 import sqlite3
 import threading
 import time
+from milestones import normalize
 
 from timeline import PERIOD_INPUT_ERROR, Query, TimelineError, parse_query
 
@@ -72,6 +73,11 @@ class JobStore:
                     stage TEXT, message TEXT, error TEXT, result TEXT,
                     generated_at TEXT)""")
                 db.execute("CREATE TABLE IF NOT EXISTS counter (id INTEGER PRIMARY KEY, value INTEGER NOT NULL)")
+                columns = {row['name'] for row in db.execute('PRAGMA table_info(jobs)')}
+                if 'requested_milestones' not in columns:
+                    db.execute("ALTER TABLE jobs ADD COLUMN requested_milestones TEXT NOT NULL DEFAULT '[]'")
+                if 'milestones_revision' not in columns:
+                    db.execute('ALTER TABLE jobs ADD COLUMN milestones_revision INTEGER NOT NULL DEFAULT 0')
                 db.execute("INSERT OR IGNORE INTO counter VALUES (1, 0)")
                 db.execute("CREATE INDEX IF NOT EXISTS fifo ON jobs(state, queue_order)")
                 # A terminated worker restarts its interrupted item before later items.
@@ -105,6 +111,7 @@ class JobStore:
         item["has_result"] = result is not None
         if detail:
             item["result"] = json.loads(result) if result is not None else None
+        item['requested_milestones'] = json.loads(item.pop('requested_milestones', '[]'))
         item["can_delete"] = can_delete(item)
         return item
 
@@ -176,6 +183,25 @@ class JobStore:
             else:
                 db.execute("UPDATE jobs SET state='cancelled', updated_at=?, stage=NULL, message='処理を中止しました。再試行で生成し直せます。', error=NULL WHERE id=?", (now(), identifier))
             return self.decode(db.execute("SELECT * FROM jobs WHERE id=?", (identifier,)).fetchone())
+
+    def save_milestones(self, identifier, items, revision):
+        items = normalize(items)
+        if type(revision) is not int or revision < 0:
+            raise ValueError('主要項目の版が不正です。')
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            row = db.execute('SELECT * FROM jobs WHERE id=?', (identifier,)).fetchone()
+            if row is None:
+                return None
+            if query_info(row['cache_key'])['legacy_period']:
+                raise ValueError(LEGACY_PERIOD_ERROR)
+            if row['state'] in {'queued', 'running'}:
+                raise ValueError('待機・生成中は主要項目を変更できません。中止後に編集してください。')
+            if row['milestones_revision'] != revision:
+                raise ValueError('別の画面で主要項目が変更されました。読み直して編集してください。')
+            db.execute('UPDATE jobs SET requested_milestones=?, milestones_revision=milestones_revision+1, updated_at=? WHERE id=?',
+                       (json.dumps(items, ensure_ascii=False), now(), identifier))
+            return self.decode(db.execute('SELECT * FROM jobs WHERE id=?', (identifier,)).fetchone())
 
     def requeue(self, identifier, action):
         with self.connect() as db:
@@ -257,7 +283,9 @@ class QueueWorker:
                 cancelled = JobCancellation(self.store, job["id"], self.stopping)
                 if cancelled.is_set():
                     continue
-                self.pipeline(parse_query(job["query"]), lambda record: self.store.record(job["id"], record), cancelled)
+                query = parse_query(job["query"])
+                query.requested_milestones = job['requested_milestones']
+                self.pipeline(query, lambda record: self.store.record(job["id"], record), cancelled)
                 current = self.store.get(job["id"])
                 if not self.stopping.is_set() and current is not None and current["state"] == "running":
                     self.store.record(job["id"], {"kind": "error", "message": "生成結果を受け取れませんでした。再試行してください。"})

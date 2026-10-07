@@ -43,6 +43,25 @@
       <div class="timeline-columns" aria-hidden="true"><span>年代</span><span>出来事</span><span>説明</span><span>出典</span></div>
       <ol id="timeline" class="timeline"></ol>
     </section>
+    <section id="milestones-section" class="quality-section" aria-labelledby="milestones-title" hidden>
+      <h2 id="milestones-title" class="quality-heading">指定した主要項目</h2>
+      <p class="help">この年表で重点的に調べたい出来事を指定できます。共通の評価基準は変更しません。項目を外すと重点調査の対象から外れますが、年表への収録は禁止しません。</p>
+      <ul id="milestone-report" class="milestone-report"></ul>
+      <details id="milestones-editor">
+        <summary>主要項目を編集</summary>
+        <form id="milestones-form">
+          <p class="help">最大12件。名前は必須、年代・補足・参考URLは任意です。年代は西暦、紀元前は負数で指定します。名前と年代の一致は機械的な目安です。別表記では未確認になることがあります。</p>
+          <fieldset id="milestones-fields">
+            <legend class="sr-only">主要項目の編集</legend>
+            <div id="milestones-rows"></div>
+            <div class="milestone-actions"><button id="milestone-add" type="button" class="text-button">項目を追加</button><button id="milestone-import" type="button" class="text-button" hidden>共通評価の項目を取り込む</button><button id="milestone-reload" type="button" class="text-button">保存内容に戻す</button><button type="submit" class="text-button">主要項目を保存</button></div>
+          </fieldset>
+          <p id="milestones-message" class="help" role="status"></p>
+          <p id="milestones-error" class="error" role="alert" hidden></p>
+          <p class="help">保存だけでは再生成しません。保存後、ページ上部の「再生成」で調べ直します。参考URLも出典として取得・照合し、根拠が確認できた出来事だけを収録します。</p>
+        </form>
+      </details>
+    </section>
     <section id="quality-section" class="quality-section" aria-labelledby="quality-title" hidden>
       <h2 id="quality-title" class="quality-heading">評価</h2>
       <p id="quality-basis" class="help"></p>

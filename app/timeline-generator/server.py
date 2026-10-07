@@ -13,6 +13,7 @@ from urllib.parse import parse_qs, urlsplit
 from timeline import TIME_LIMIT, TimelineError, build_timeline, parse_query, partial_result
 from jobs import JobStore, QueueWorker
 import quality_eval
+from milestones import report as milestone_report
 
 ROOT = Path(__file__).resolve().parent
 HOST = os.environ.get("TIMELINE_HOST", "127.0.0.1")
@@ -157,8 +158,18 @@ class Handler(BaseHTTPRequestHandler):
             job = self.server.jobs.get(int(path.rsplit("/", 1)[1]))
             if not job:
                 return self.reply(404, {"error": "年表が見つかりません。"})
+            if not job['legacy_period']:
+                job['milestone_report'] = milestone_report(job['requested_milestones'], job.get('result') or {})
             try:
                 job["quality"] = quality_eval.job_quality(job)
+                gold = json.loads(quality_eval.GOLD_PATH.read_text(encoding='utf-8'))
+                theme = quality_eval.find_theme(gold, job.get('result'), job['query'])
+                suggestions = [
+                    {'name': m['label'], 'year': m['years'][0] if m.get('years') and m['years'][0] == m['years'][1] else None,
+                     'note': m.get('note', ''), 'url': (m.get('evidence') or [''])[0]}
+                    for m in gold['themes'].get(theme, {}).get('milestones', [])]
+                if not job['legacy_period']:
+                    job['suggested_milestones'] = suggestions
             except (OSError, ValueError, KeyError):
                 # A broken gold file must not hide the timeline itself.
                 job["quality"] = None
@@ -181,7 +192,7 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(404, {"error": "ページが見つかりません。"})
 
     def do_POST(self):
-        action = re.fullmatch(r"/api/jobs/([1-9][0-9]{0,17})/(retry|regenerate|delete|cancel)", self.path)
+        action = re.fullmatch(r"/api/jobs/([1-9][0-9]{0,17})/(retry|regenerate|delete|cancel|milestones)", self.path)
         if self.path != "/api/jobs" and action is None:
             return self.reply(404, {"error": "ページが見つかりません。"})
         # Browser cross-origin and DNS-rebinding requests cannot trigger model calls.
@@ -191,7 +202,7 @@ class Handler(BaseHTTPRequestHandler):
             if self.headers.get("Content-Type", "").split(";")[0] != "application/json":
                 return self.reply(415, {"error": "JSON形式で検索してください。"})
             length = int(self.headers.get("Content-Length", "0"))
-            if not 1 <= length <= 2048:
+            if not 1 <= length <= (65536 if action and action[2] == 'milestones' else 2048):
                 return self.reply(400, {"error": "検索条件が長すぎるか、空です。"})
             self.connection.settimeout(10)
             payload = json.loads(self.rfile.read(length))
@@ -210,6 +221,8 @@ class Handler(BaseHTTPRequestHandler):
                     job = self.server.jobs.delete(identifier)
                 elif action[2] == "cancel":
                     job = self.server.jobs.cancel(identifier)
+                elif action[2] == 'milestones':
+                    job = self.server.jobs.save_milestones(identifier, payload.get('items'), payload.get('revision'))
                 else:
                     job = self.server.jobs.requeue(identifier, action[2])
             except ValueError as exc:
@@ -217,7 +230,9 @@ class Handler(BaseHTTPRequestHandler):
             if job is None:
                 return self.reply(404, {"error": "年表が見つかりません。"})
             status = 200
-        self.server.worker.wake.set()
+        job['milestone_report'] = milestone_report(job.get('requested_milestones', []), job.get('result') or {})
+        if not action or action[2] != 'milestones':
+            self.server.worker.wake.set()
         self.reply(status, job)
 
 

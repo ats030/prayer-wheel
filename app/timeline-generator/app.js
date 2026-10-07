@@ -306,8 +306,76 @@ if ($("job-list")) {
 if ($("job-status")) {
   const id = location.pathname.split("/").pop();
   let timer, generatedAt, renderedResult, job, acting = false, generation = 0;
+  let editorRevision, editorDirty = false;
+  const milestoneRows = $("milestones-rows");
+  function addMilestone(item = {}) {
+    if (milestoneRows.children.length >= 12) return;
+    const row = node("div", "milestone-row");
+    for (const [key, label, type, max] of [["name", "出来事の名前（必須）", "text", 120], ["year", "年代（任意）", "number"], ["note", "補足（任意）", "text", 300], ["url", "参考URL（任意）", "url", 1000]]) {
+      const field = node("label", null, label);
+      const input = node("input");
+      input.type = type; input.dataset.key = key; input.value = item[key] ?? "";
+      if (max) input.maxLength = max;
+      if (key === "name") input.required = true;
+      if (key === "year") { input.min = -9999; input.max = 9999; input.step = 1; }
+      input.addEventListener("input", () => { editorDirty = true; $("milestones-message").textContent = "未保存の変更があります。"; });
+      field.append(input); row.append(field);
+    }
+    const remove = node("button", "text-button", "この項目を外す");
+    remove.type = "button";
+    remove.addEventListener("click", () => { row.remove(); editorDirty = true; $("milestone-add").disabled = false; $("milestones-message").textContent = "未保存の変更があります。"; $("milestone-add").focus(); });
+    row.append(remove); milestoneRows.append(row);
+    $("milestone-add").disabled = milestoneRows.children.length >= 12;
+    return row;
+  }
+  function fillMilestones(items) {
+    milestoneRows.replaceChildren();
+    $("milestone-add").disabled = false;
+    for (const item of items) addMilestone(item);
+  }
+  function showMilestones(current) {
+    $("milestones-section").hidden = current.legacy_period;
+    $("milestones-fields").disabled = active(current) || acting;
+    $("milestone-import").hidden = !(current.suggested_milestones || []).length;
+    const revision = current.milestones_revision ?? 0;
+    if (editorRevision !== revision) {
+      if (!editorDirty) { fillMilestones(current.requested_milestones || []); editorRevision = revision; }
+      else $("milestones-message").textContent = "別の画面で保存内容が変わりました。入力は保持しています。「保存内容に戻す」で読み直してください。";
+    }
+    const rows = (current.milestone_report || []).map(item => {
+      const status = {found: "一致する項目あり", pending: "次回調査", missing: "未確認", mismatch: "指定年と相違"}[item.status];
+      const li = node("li", null, `${item.name}${item.year == null ? "" : `（${item.year}年）`} — ${status}。${item.reason}`);
+      return li;
+    });
+    if (!rows.length) rows.push(node("li", null, "主要項目はまだ指定されていません。"));
+    $("milestone-report").replaceChildren(...rows);
+  }
+  $("milestone-add").addEventListener("click", () => { const row = addMilestone(); if (row) { editorDirty = true; $("milestones-message").textContent = "未保存の変更があります。"; row.querySelector("input").focus(); } });
+  $("milestone-import").addEventListener("click", () => {
+    const existing = [...milestoneRows.querySelectorAll('[data-key="name"]')].map(input => input.value);
+    for (const item of job.suggested_milestones || []) if (!existing.includes(item.name)) addMilestone(item);
+    editorDirty = true; $("milestones-message").textContent = "取り込んだ項目は未保存です。";
+  });
+  $("milestone-reload").addEventListener("click", () => { fillMilestones(job.requested_milestones || []); editorDirty = false; editorRevision = job.milestones_revision ?? 0; $("milestones-message").textContent = "保存内容に戻しました。"; $("milestones-error").hidden = true; });
+  $("milestones-form").addEventListener("submit", async event => {
+    event.preventDefault();
+    if (acting || active(job)) return;
+    const items = [...milestoneRows.children].map(row => Object.fromEntries([...row.querySelectorAll("input")].map(input => [input.dataset.key, input.dataset.key === "year" ? (input.value === "" ? null : Number(input.value)) : input.value])));
+    acting = true; generation += 1; clearTimeout(timer);
+    $("milestones-fields").disabled = true;
+    $("milestones-error").hidden = true;
+    try {
+      const saved = await api(`/api/jobs/${id}/milestones`, {items, revision: editorRevision});
+      editorDirty = false; editorRevision = undefined;
+      saved.suggested_milestones = job.suggested_milestones;
+      show(saved);
+      $("milestones-message").textContent = "主要項目を保存しました。再生成で反映します。";
+    } catch (exc) { error("milestones-error", exc.message); }
+    finally { acting = false; $("milestones-fields").disabled = active(job); timer = setTimeout(load, 2000); }
+  });
   function show(current) {
     job = current;
+    showMilestones(current);
     $("page-heading").textContent = job.query;
     document.title = `${job.query} · 歴史年表`;
     $("job-status").textContent = labels[job.state];
@@ -348,6 +416,7 @@ if ($("job-status")) {
   }
   for (const action of ["retry", "regenerate", "cancel"]) $(action).addEventListener("click", async () => {
     if (acting) return;
+    if (["regenerate", "retry"].includes(action) && editorDirty) { error("milestones-error", `主要項目の変更を保存してから${action === "retry" ? "再試行" : "再生成"}してください。`); $("milestones-editor").open = true; return; }
     if (action === "cancel" && !confirm(`処理を中止しますか？検証途中の出来事は保存されません。${job.has_result ? "前回の結果は残ります。" : "再試行で生成し直せます。"}`)) return;
     acting = true;
     generation += 1;
@@ -355,7 +424,7 @@ if ($("job-status")) {
     $("retry").disabled = $("regenerate").disabled = $("cancel").disabled = true;
     try { show(await api(`/api/jobs/${id}/${action}`, {})); }
     catch (exc) { error("page-error", exc.message); }
-    finally { acting = false; $("retry").disabled = $("regenerate").disabled = $("cancel").disabled = false; timer = setTimeout(load, 2000); }
+    finally { acting = false; $("retry").disabled = $("regenerate").disabled = $("cancel").disabled = false; $("milestones-fields").disabled = active(job); timer = setTimeout(load, 2000); }
   });
   load();
 }

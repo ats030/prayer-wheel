@@ -165,3 +165,12 @@ footer { border-top: 1px solid var(--color-rule); display: flex; justify-content
   .axis-chip { grid-column: 4; grid-row: 1; justify-self: start; }
   .axis-note { grid-column: 1 / -1; }
 }
+/* Keep the existing dense timeline visible while requests are edited. */
+.milestone-row { display:grid; grid-template-columns:2fr 1fr; gap:8px 16px; padding:12px 0; border-bottom:1px solid var(--color-rule); min-width:0; }
+.milestone-row label { display:grid; gap:4px; min-width:0; }
+.milestone-row input { width:100%; min-width:0; min-height:44px; box-sizing:border-box; }
+.milestone-actions { display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:12px; }
+.milestone-actions .text-button, .milestone-row .text-button { white-space:normal; overflow-wrap:anywhere; text-align:left; }
+#milestones-fields { border:0; padding:0; margin:0; min-width:0; }
+.milestone-report { padding-left:20px; overflow-wrap:anywhere; }
+@media (max-width:600px) { .milestone-row { grid-template-columns:1fr; } }
