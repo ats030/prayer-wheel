@@ -16,7 +16,8 @@ export class GameState {
     this.mazeCurrentTheme = null;
     this._testMode = false;
     
-    this.highScore = parseInt(localStorage.getItem('gakushuGameHighScore') || '0');
+    const saved = Number(localStorage.getItem('gakushuGameHighScore'));
+    this.highScore = Number.isSafeInteger(saved) && saved >= 0 ? saved : 0;
   }
 
   incrementQuestionsAnswered() {
@@ -44,7 +45,10 @@ export class GameState {
   }
 
   saveScore() {
-    localStorage.setItem('gakushuGameHighScore', this.score);
+    const saved = Number(localStorage.getItem('gakushuGameHighScore'));
+    const stored = Number.isSafeInteger(saved) && saved >= 0 ? saved : 0;
+    this.highScore = Math.max(this.highScore, this.score, stored);
+    localStorage.setItem('gakushuGameHighScore', this.highScore);
   }
 
   cleanup() {
