@@ -20,6 +20,16 @@ EVENT = {'year': 1972, 'date': '1972年', 'title': '沖縄返還', 'description'
 
 
 class MilestoneTests(unittest.TestCase):
+    def test_slow_ordinary_search_leaves_a_targeted_search_window(self):
+        query = t.parse_query('昭和'); query.requested_milestones = [ITEM]
+        clock = [100.0]
+        def slow_search(*args):
+            clock[0] = 170.0
+            return [{'url': 'https://example.org/history'}]
+        with patch.object(t.time, 'monotonic', side_effect=lambda: clock[0]), patch.object(t, 'search', side_effect=slow_search), patch.object(t, 'requested_sources', return_value=[]) as requested, patch.object(t, 'SOURCE_FILTER', ''), patch.object(t.WebReader, 'fetch', return_value=None):
+            t.build_timeline(query, lambda _: None)
+        self.assertEqual(requested.call_args.args[1], 200.0)
+
     def test_overlapping_targeted_results_preserve_ordinary_fetch_order(self):
         ordinary = [{'url': f'normal{i}', 'title': f'original{i}'} for i in range(4)]
         targeted = [dict(ordinary[3], title='request'), dict(ordinary[2], title='request'), {'url': 'target', '_requested': True}]

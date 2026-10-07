@@ -1277,7 +1277,7 @@ def build_timeline(query, emit):
     results = search(query, min(deadline - 120, started + 60))
     ordinary_urls = {r['url'] for r in results} if query.requested_milestones else None
     if query.requested_milestones:
-        targeted = requested_sources(query, min(deadline - 120, started + 60))
+        targeted = requested_sources(query, min(deadline - 120, time.monotonic() + 30))
         results = merge_source_results(results, targeted)
     excluded_sources = []
     # 種類の語を選ぶモデル呼び出しの待ち時間で本文取得の時間を削らない。
