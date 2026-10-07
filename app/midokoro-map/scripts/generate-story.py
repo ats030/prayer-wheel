@@ -19,7 +19,7 @@ import urllib.parse
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
-PROMPT_VERSION = "midokoro-story-v2"
+PROMPT_VERSION = "midokoro-story-v3"
 ID = re.compile(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*\Z")
 RESERVED_IDS = {"story-main", "story-title", "places", "places-title", "relations",
                 "relations-title", "explorer", "explorer-title", "story-map", "selection",
@@ -32,6 +32,7 @@ SYSTEM = """あなたは『みどころマップ』の日本語編集者です�
 資料にない歴史、年号、固有名詞、効能、料金、営業時間、体験談は追加しません。
 関係のkindとnoteを守り、テーマによる比較を因果関係や配管・移動経路に変えません。
 現在の建物と昔の出来事の時代差、伝承や未確認事項を消しません。
+forbidden_phrasesの語句は出力に含めません。重要語の表記は入力事実からそのまま使います。
 各段落のevidence_idsには、その対象のfact_idsから使った事実IDを列挙します。
 読み手に具体的な発見を渡す、自然な日本語のです・ます調で書いてください。
 一つの事実を一文で要約するだけではなく、事実と、その場所をどう見比べるかを2〜3文で書きます。
@@ -97,6 +98,11 @@ def validate_packet(packet):
     for field, limit in [("title", 100), ("region", 100), ("angle", 800)]:
         text(packet.get(field), field, limit)
     date(packet.get("checked_at"), "checked_at")
+    forbidden = packet.get("forbidden_phrases", [])
+    require(isinstance(forbidden, list) and len(forbidden) <= 30,
+            "forbidden_phrasesは30件以下の配列です")
+    for phrase in forbidden:
+        text(phrase, "forbidden_phrases", 100)
     sources = keyed(packet.get("sources"), "sources")
     facts = keyed(packet.get("facts"), "facts")
     places = keyed(packet.get("places"), "places", 5)
@@ -158,6 +164,9 @@ def validate_draft(draft, packet):
     require(isinstance(draft, dict), "生成結果はJSON objectが必要です")
     require(draft.get("error") == "", "生成を辞退しました: " + str(draft.get("error", "error項目なし")))
     require(set(draft) == set(schema(packet)["properties"]), "生成結果の項目がschemaと異なります")
+    for phrase in packet.get("forbidden_phrases", []):
+        require(phrase not in json.dumps(draft, ensure_ascii=False),
+                "編集上の禁止表現が含まれます: " + phrase)
     for field, limit in [("title", 100), ("lead", 240), ("intro", 400), ("reading_title", 100)]:
         text(draft.get(field), field, limit)
     require(draft["title"] == packet["title"], "記事の題名が入力と異なります")
@@ -318,7 +327,8 @@ def generate(packet_path, output, base, model, timeout=600, num_predict=4096):
     output.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix=".story-", dir=output.parent))
     try:
-        for name, value in [("packet.json", packet), ("draft.json", draft), ("manifest.json", manifest), ("response.json", response)]:
+        (staging / "packet.json").write_bytes(packet_raw)
+        for name, value in [("draft.json", draft), ("manifest.json", manifest), ("response.json", response)]:
             (staging / name).write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
         (staging / "review.md").write_text(review_text(draft, packet, manifest))
         preview = staging / "preview"
@@ -358,7 +368,7 @@ def main():
         require(args.output is not None, "--outputを指定してください")
         manifest = generate(args.packet, args.output, args.ollama_url, args.model, args.timeout, args.num_predict)
         print(json.dumps({"output": str(args.output), **manifest}, ensure_ascii=False, indent=2))
-    except (StoryError, OSError, json.JSONDecodeError) as exc:
+    except (StoryError, OSError, json.JSONDecodeError, UnicodeError) as exc:
         print(f"生成失敗: {exc}", file=sys.stderr)
         sys.exit(2)
 

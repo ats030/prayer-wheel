@@ -194,5 +194,9 @@
         "sainokawara-facts"
       ]
     }
+  ],
+  "forbidden_phrases": [
+    "湯畑の源泉の一つ",
+    "組み合わせて使用"
   ]
 }

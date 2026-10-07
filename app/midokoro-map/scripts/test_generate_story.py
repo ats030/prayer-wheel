@@ -3,6 +3,7 @@
 import copy
 import importlib.util
 import json
+import hashlib
 from pathlib import Path
 import tempfile
 import threading
@@ -98,6 +99,15 @@ class WriterChecks(unittest.TestCase):
         with self.assertRaisesRegex(writer.StoryError, "schema"):
             writer.validate_draft(self.draft, self.packet)
 
+    def test_observed_typo_and_misleading_phrase_are_rejected(self):
+        self.packet["forbidden_phrases"] = ["祭領", "組み合わせて使用"]
+        for phrase in self.packet["forbidden_phrases"]:
+            with self.subTest(phrase=phrase):
+                bad = copy.deepcopy(self.draft)
+                bad["intro"] = phrase
+                with self.assertRaisesRegex(writer.StoryError, "禁止表現"):
+                    writer.validate_draft(bad, self.packet)
+
     def test_html_is_escaped_and_editorial_notes_are_fixed(self):
         self.draft["lead"] = '<script>alert("x")</script>'
         rendered = writer.render(self.draft, self.packet)
@@ -164,7 +174,9 @@ class WriterChecks(unittest.TestCase):
         try:
             with tempfile.TemporaryDirectory() as temp:
                 out = Path(temp) / "out"
-                manifest = writer.generate(HERE.parent / "docs/story-packets/kusatsu-yumomi.json", out,
+                source = Path(temp) / "unformatted-input.json"
+                source.write_text(json.dumps(self.packet, ensure_ascii=False, separators=(",", ":")))
+                manifest = writer.generate(source, out,
                                            f"http://127.0.0.1:{server.server_port}", "gemma4:12b")
                 self.assertEqual([x[0] for x in calls], ["/api/tags", "/api/chat"])
                 payload = calls[1][1]
@@ -176,6 +188,8 @@ class WriterChecks(unittest.TestCase):
                 self.assertEqual(manifest["model_digest"], "tested-digest")
                 self.assertEqual(manifest["editorial_review"], "pending")
                 self.assertEqual(manifest["eval_count"], 123)
+                self.assertEqual((out / "packet.json").read_bytes(), source.read_bytes())
+                self.assertEqual(manifest["packet_sha256"], hashlib.sha256((out / "packet.json").read_bytes()).hexdigest())
                 self.assertTrue((out / "review.md").is_file())
                 self.assertTrue((out / "preview/stories/kusatsu-yumomi/index.html").is_file())
                 self.assertTrue((out / "preview/vendor/leaflet.js").is_file())

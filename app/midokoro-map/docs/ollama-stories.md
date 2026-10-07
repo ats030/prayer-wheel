@@ -42,6 +42,7 @@ workloadヘッダーでモデルを差し替えず、応答モデルが指定と
 | `facts` | 事実ID、確認済みの短い事実、対応する出典ID群 |
 | `places` | 5地点の固定ID・名前・代表座標・役割・訪問時の注意・使える事実ID群 |
 | `relations` | 5関係の固定ID・両端・種類・固定の注意書き・使える事実ID群 |
+| `forbidden_phrases` | 任意。実生成で見つかった誤字や誤解を招く表現の禁止リスト |
 
 `kind` は出典上の関係 `documented`、編集上の比較 `thematic`、伝承を含む関係 `tradition` のいずれか。
 本文中の注意書き `note` はモデルに書き換えさせず、そのまま表示する。
@@ -88,7 +89,7 @@ python3 scripts/browser-story-preview-check.py data/story-work/kusatsu-draft
 
 前者はfake Ollamaで通信と失敗時の動作を検証する。後者は既存のPlaywright環境を使い、生成物の探索・共有・4画面幅・JavaScript無効表示・計測停止を確認する。
 単体テストを通っても執筆品質は分からないため、実モデルで草津と川越を生成し、本文と根拠を別途読んで評価する。
-初回の12bモデルは要約が短く、源泉の使用を混合と読める表現にした。この観察から、本文長と見比べ方の指示、源泉に関する編集上の制約を補強した。
+初回の12bモデルは要約が短く、源泉の使用を混合と読める表現にした。川越では「奨領」「祭領」という誤字も見つかった。この観察から、本文長と見比べ方の指示、源泉に関する編集上の制約、禁止表現のチェックを補強した。一般的な誤字校正や事実の意味の検証ができるわけではない。
 検証データは `data/story-work` に保存し、GitとCloud Runのビルド対象から除外する。
 
 Ollamaとモデルの利用条件は [story-generation-license.yaml](story-generation-license.yaml)、APIと構造化出力は [Ollama公式API](https://docs.ollama.com/api/chat) と [構造化出力の説明](https://docs.ollama.com/capabilities/structured-outputs) を参照する。
