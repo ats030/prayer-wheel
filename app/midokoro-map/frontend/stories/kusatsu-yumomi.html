@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>草津では、なぜ湯をもむ？｜みどころマップ</title>
+  <meta name="description" content="湯を冷ます工夫と、施設ごとの源泉の違い。5つの場所から草津の湯をたどってみてください。">
+  <link rel="canonical" href="https://midokoro-map-736831430371.asia-northeast1.run.app/stories/kusatsu-yumomi">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="草津では、なぜ湯をもむ？">
+  <meta property="og:description" content="熱い湯を、どう扱うか。板、湯樋、浴槽に、温泉の町の工夫が残る。">
+  <meta property="og:url" content="https://midokoro-map-736831430371.asia-northeast1.run.app/stories/kusatsu-yumomi">
+  <meta property="og:site_name" content="みどころマップ">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/vendor/leaflet.css">
+  <link rel="stylesheet" href="/stories/story.css">
+  <script src="/vendor/leaflet.js" defer></script>
+  <script src="/stories/story.js" defer></script>
+  <script src="http://ubuntu-server-app:8526/v.js" data-site="midokoro-map" defer></script>
+</head>
+<body class="story-page" data-story="kusatsu-yumomi">
+  <a class="skip-link" href="#story-main">本文へ</a>
+  <header class="site-header">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="28" height="28"><span>みどころマップ</span></a>
+    <nav class="story-nav" aria-label="サイト"><a href="/?kind=shiseki">全国の地図</a><a href="/stories">ほかのテーマ</a></nav>
+  </header>
+  <main id="story-main">
+    <section class="story-lead" aria-labelledby="story-title">
+      <p class="eyebrow">土地のつながりをたどる　02 / 群馬県・草津町</p>
+      <h1 id="story-title">草津では、なぜ湯をもむ？</h1>
+      <p class="lead-copy">熱い湯を、どう扱うか。<br>板、湯樋、浴槽に、温泉の町の工夫が残る。</p>
+      <p>湯を冷ます工夫と、施設ごとの源泉の違い。5つの場所から草津の湯をたどってみてください。</p>
+      <nav class="question-links" aria-label="気になる問いから探す"><a href="#cooling" data-relation="cooling">なぜ水を足さずに冷ます？ <span aria-hidden="true">→</span></a><a href="#different-springs" data-relation="different-springs">同じ草津でも湯は違う？ <span aria-hidden="true">→</span></a><a href="#bandai" data-relation="bandai">露天風呂の湯はどこから？ <span aria-hidden="true">→</span></a></nav>
+    </section>
+
+    <section class="explorer" id="explorer" aria-labelledby="explorer-title">
+      <div class="section-heading"><h2 id="explorer-title">場所から、つながりへ</h2><span id="exploration-progress" aria-live="polite"></span></div>
+      <p class="map-note">点を選ぶと、関連する場所が見つかります。点線は文化的なつながりを表します。移動経路は各地点の公式案内で確認できます。</p>
+      <nav class="place-links" aria-label="地図の場所を選ぶ"><a href="#yubatake" data-place="yubatake">1 湯畑</a><a href="#netsunoyu" data-place="netsunoyu">2 熱乃湯</a><a href="#gozanoyu" data-place="gozanoyu">3 御座之湯</a><a href="#ohtakinoyu" data-place="ohtakinoyu">4 大滝乃湯</a><a href="#sainokawara" data-place="sainokawara">5 西の河原露天風呂</a></nav>
+      <div class="explorer-grid" hidden>
+        <div class="map-wrap">
+          <div id="story-map" role="region" aria-label="群馬県・草津町の5地点と文化的なつながりの地図"></div>
+          <p id="map-status" role="status">地図を読み込んでいます。下の解説からも場所のつながりを読めます。</p>
+          <button id="map-reset" class="map-reset" type="button" hidden>5地点を見渡す</button>
+        </div>
+        <aside id="selection" aria-label="選んだ場所とつながり" hidden>
+          <div id="selected-place"></div>
+          <div id="selected-relation" hidden></div>
+          <h3>ここから、どこへ？</h3>
+          <div id="related-places"></div>
+        </aside>
+      </div>
+      <p id="static-map-note">地図を表示するにはJavaScriptが必要です。場所のリンクから、下の解説とつながりを読めます。</p>
+      <div class="share-tools" id="share-tools" hidden>
+        <button type="button" id="share-story">このつながりを共有</button>
+        <button type="button" id="copy-story">リンクをコピー</button>
+        <p id="share-status" role="status"></p>
+        <div id="manual-share" hidden><label for="share-url">このURLを選択してコピーできます</label><input id="share-url" type="url" readonly></div>
+      </div>
+      <p class="reading-link"><a href="#places">5地点の解説をまとめて読む ↓</a></p>
+    </section>
+
+    <section id="places" class="story-reading" aria-labelledby="places-title">
+      <p class="eyebrow">場所に残るもの</p><h2 id="places-title">見える湯と、湯の来る場所</h2>
+      <div class="place-articles">
+<article id="yubatake" data-lat="36.62294" data-lng="138.59666" data-number="1"><p class="place-kicker">01 / 湯の出発点</p><h3>湯畑</h3><p>町の中心で見える湯樋は、飾りだけではありません。流れる湯から湯の花を採り、湯を冷ます役割があります。温泉が浴槽に届く前の仕事を、町の真ん中で見られます。</p><p class="visit-note">地図の点は湯畑の代表位置です。</p><p class="source">出典：<a href="https://www.kusatsu-onsen.ne.jp/kankou/1004.php" target="_blank" rel="noopener noreferrer">草津温泉観光協会・湯畑</a></p><a class="select-place" href="#yubatake" data-place="yubatake">この場所のつながりを見る →</a></article>
+<article id="netsunoyu" data-lat="36.622701" data-lng="138.596347" data-number="2"><p class="place-kicker">02 / 湯もみ</p><h3>熱乃湯</h3><p>長い板で湯を動かす「湯もみ」。熱い湯に水を足さず温度を下げるための工夫として伝えられてきました。熱乃湯では、湯もみと草津の歌に触れられます。</p><p class="visit-note">公演や体験の実施状況は公式案内で確認できます。</p><p class="source">出典：<a href="https://www.kusatsu-onsen.ne.jp/netsunoyu/history.html" target="_blank" rel="noopener noreferrer">熱乃湯・湯もみの歴史</a> / <a href="https://www.kusatsu-onsen.ne.jp/netsunoyu/" target="_blank" rel="noopener noreferrer">熱乃湯・施設案内</a></p><a class="select-place" href="#netsunoyu" data-place="netsunoyu">この場所のつながりを見る →</a></article>
+<article id="gozanoyu" data-lat="36.62232" data-lng="138.59600" data-number="3"><p class="place-kicker">03 / 二つの源泉</p><h3>御座之湯</h3><p>同じ建物で、異なる源泉を使った湯に出会えます。御座之湯が引くのは湯畑源泉と万代源泉。建物は江戸・明治の共同湯を思わせる姿で再建されたものです。</p><p class="visit-note">草津町草津421。開館状況は公式案内で確認できます。</p><p class="source">出典：<a href="https://onsen-kusatsu.com/gozanoyu/" target="_blank" rel="noopener noreferrer">草津三湯・御座之湯</a></p><a class="select-place" href="#gozanoyu" data-place="gozanoyu">この場所のつながりを見る →</a></article>
+<article id="ohtakinoyu" data-lat="36.62291" data-lng="138.60153" data-number="4"><p class="place-kicker">04 / 合わせ湯</p><h3>大滝乃湯</h3><p>ここで使われるのは煮川源泉です。「合わせ湯」では、湯が浴槽を順に巡り、自然に冷めていく仕組みが紹介されています。温度の違いも、湯を扱う工夫の一つです。</p><p class="visit-note">草津町草津596-13。入浴方法は施設の案内に従ってください。</p><p class="source">出典：<a href="https://onsen-kusatsu.com/ohtakinoyu/hot-spring/" target="_blank" rel="noopener noreferrer">草津三湯・大滝乃湯の温泉</a></p><a class="select-place" href="#ohtakinoyu" data-place="ohtakinoyu">この場所のつながりを見る →</a></article>
+<article id="sainokawara" data-lat="36.62431" data-lng="138.58839" data-number="5"><p class="place-kicker">05 / 景色と源泉</p><h3>西の河原露天風呂</h3><p>森林に囲まれた大きな露天風呂。名前からは西の河原の湯を想像しますが、施設の源泉は万代源泉です。見える景色と、湯が来る場所を分けて眺めると、温泉の地図が変わります。</p><p class="visit-note">草津町草津521-3。利用案内は公式サイトで確認できます。</p><p class="source">出典：<a href="https://onsen-kusatsu.com/sainokawara/hot-spring/" target="_blank" rel="noopener noreferrer">草津三湯・西の河原露天風呂の源泉</a></p><a class="select-place" href="#sainokawara" data-place="sainokawara">この場所のつながりを見る →</a></article>
+</div>
+    </section>
+
+    <section id="relations" class="story-reading" aria-labelledby="relations-title">
+      <p class="eyebrow">場所を結ぶ理由</p><h2 id="relations-title">つながりを選んで、もう一歩</h2>
+      <ul class="relation-articles">
+<li id="cooling" data-from="yubatake" data-to="netsunoyu"><h3>湯樋と板、湯を冷ます二つの工夫</h3><p>湯畑では湯樋を流れる間に湯が冷め、湯もみでは板で湯を動かします。熱い源泉をどう扱うか、という同じ問いを異なる方法で見比べられます。</p><p class="relation-kind">テーマで結ぶ関係：この線は施設間の配湯管を表しません。</p><p class="source">出典：<a href="https://www.kusatsu-onsen.ne.jp/kankou/1004.php" target="_blank" rel="noopener noreferrer">草津温泉観光協会・湯畑</a> / <a href="https://www.kusatsu-onsen.ne.jp/netsunoyu/history.html" target="_blank" rel="noopener noreferrer">熱乃湯・湯もみの歴史</a></p><a href="#netsunoyu" data-relation="cooling">このつながりを見る →</a></li>
+<li id="source-goza" data-from="yubatake" data-to="gozanoyu"><h3>町の中心の源泉は、御座之湯へ</h3><p>御座之湯は湯畑源泉と万代源泉を使用しています。町の中心で眺めた湯の出発点が、実際の浴場の案内につながります。</p><p class="relation-kind">源泉の利用関係：線は配管の正確な位置ではありません。</p><p class="source">出典：<a href="https://onsen-kusatsu.com/gozanoyu/" target="_blank" rel="noopener noreferrer">草津三湯・御座之湯</a></p><a href="#gozanoyu" data-relation="source-goza">このつながりを見る →</a></li>
+<li id="cooling-baths" data-from="netsunoyu" data-to="ohtakinoyu"><h3>湯を動かす方法と、巡らせる方法</h3><p>湯もみは板を使い、合わせ湯は浴槽を順に巡る湯を自然冷却します。水を加えず冷ます工夫を、実演と浴場の仕組みから見比べる関係です。</p><p class="relation-kind">テーマで結ぶ関係：二つの施設の歴史的な継承関係を示すものではありません。</p><p class="source">出典：<a href="https://www.kusatsu-onsen.ne.jp/netsunoyu/history.html" target="_blank" rel="noopener noreferrer">熱乃湯・湯もみの歴史</a> / <a href="https://onsen-kusatsu.com/ohtakinoyu/hot-spring/" target="_blank" rel="noopener noreferrer">草津三湯・大滝乃湯の温泉</a></p><a href="#ohtakinoyu" data-relation="cooling-baths">このつながりを見る →</a></li>
+<li id="different-springs" data-from="gozanoyu" data-to="ohtakinoyu"><h3>同じ草津でも、源泉は一つではない</h3><p>御座之湯は湯畑・万代、大滝乃湯は煮川の湯を使います。「草津温泉」という一つの名前の中に、いくつもの源泉があることが分かります。</p><p class="relation-kind">テーマで結ぶ関係：施設が使う源泉の比較です。</p><p class="source">出典：<a href="https://onsen-kusatsu.com/gozanoyu/" target="_blank" rel="noopener noreferrer">草津三湯・御座之湯</a> / <a href="https://onsen-kusatsu.com/ohtakinoyu/hot-spring/" target="_blank" rel="noopener noreferrer">草津三湯・大滝乃湯の温泉</a></p><a href="#ohtakinoyu" data-relation="different-springs">このつながりを見る →</a></li>
+<li id="bandai" data-from="gozanoyu" data-to="sainokawara"><h3>建物が違っても、万代源泉でつながる</h3><p>御座之湯が使う二つの源泉のうち、万代源泉は西の河原露天風呂でも使われています。木造の共同湯を思わせる建物と、森林の露天風呂を、湯の由来から結べます。</p><p class="relation-kind">共通する源泉：線は配管の正確な位置ではありません。</p><p class="source">出典：<a href="https://onsen-kusatsu.com/gozanoyu/" target="_blank" rel="noopener noreferrer">草津三湯・御座之湯</a> / <a href="https://onsen-kusatsu.com/sainokawara/hot-spring/" target="_blank" rel="noopener noreferrer">草津三湯・西の河原露天風呂の源泉</a></p><a href="#sainokawara" data-relation="bandai">このつながりを見る →</a></li>
+</ul>
+    </section>
+    <footer class="story-footer">
+      <p>資料確認：2026年10月7日。解説とつながりの構成は、みどころマップが各出典に基づいて編集しています。場所の点は施設や通りの代表位置です。</p>
+      <p>匿名の操作件数を、機能の改善に使います。個人を識別するCookieは使いません。ブラウザのDo Not Trackが有効な場合、操作計測を停止します。</p>
+      <a href="/?kind=shiseki">全国の史跡・祭り・温泉・特産物も探す →</a>
+    </footer>
+  </main>
+</body>
+</html>

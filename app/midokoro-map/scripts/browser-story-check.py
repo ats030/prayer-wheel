@@ -137,6 +137,41 @@ with sync_playwright() as p:
     assert not static_page.locator("#map-status").is_visible()
     assert static_page.get_by_text("地図を表示するにはJavaScriptが必要です。場所のリンクから、下の解説とつながりを読めます。").is_visible()
     page.goto(origin + "/")
-    assert page.locator(".story-entry").get_attribute("href") == path + "?from=home"
+    assert page.locator(".story-entry").get_attribute("href") == "/stories?from=home"
+    page.locator(".story-entry").click()
+    assert page.locator(".place-articles article").count() == 3
+    for slug, default, relation in [("kusatsu-yumomi", "湯畑", "cooling"), ("kawagoe-festival", "川越城本丸御殿", "lord-festival")]:
+        theme_path = "/stories/" + slug
+        theme_events = []
+        theme = context.new_page()
+        theme.on("pageerror", lambda error: errors.append(str(error)))
+        theme.on("request", lambda request: theme_events.append(request.url) if "/api/story-events/" in request.url else None)
+        theme.route("https://tile.openstreetmap.org/**", lambda route: route.abort())
+        theme.goto(origin + theme_path + "?from=home")
+        theme.locator("#selected-place h3").wait_for()
+        assert theme.locator("#selected-place h3").inner_text() == default
+        assert theme.locator(".leaflet-marker-icon").count() == 5
+        assert theme.locator(".relation-articles li").count() == 5
+        theme.locator(f'.question-links [data-relation="{relation}"]').click()
+        assert theme.locator("#selected-relation").is_visible()
+        destination = theme.locator(".place-links [aria-current]").get_attribute("data-place")
+        theme.reload()
+        theme.locator("#selected-place h3").wait_for()
+        assert theme.locator(".place-links [aria-current]").get_attribute("data-place") == destination
+        theme.evaluate("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:()=>Promise.reject(new Error('denied'))}})")
+        theme.locator("#copy-story").click()
+        theme.locator("#manual-share").wait_for(state="visible")
+        assert urlsplit(theme.locator("#share-url").input_value()).path == theme_path
+        assert theme_events and all("/api/story-events/" + slug + "/" in url for url in theme_events)
+        for width in [320, 375, 768, 1440]:
+            theme.set_viewport_size({"width":width,"height":1000})
+            assert not theme.evaluate("document.documentElement.scrollWidth > innerWidth"), (slug, width)
+        theme.screenshot(path=str(artifacts / (slug + ".png")), full_page=True)
+        static_page.goto(origin + theme_path)
+        assert static_page.locator(".place-articles article").count() == 5
+        assert static_page.locator(".relation-articles li").count() == 5
+        assert static_page.locator("#static-map-note").is_visible()
+        theme.close()
+    assert not errors, errors
     print(json.dumps({"checks": "5 places, keyboard, reverse traversal, URL reload/share, per-page event deduplication, clipboard fallback/success, Web Share failure, 4 widths, marker selection, Leaflet/tile failure, DNT, static HTML, home entry", "browser_errors": errors}, ensure_ascii=False))
     browser.close()

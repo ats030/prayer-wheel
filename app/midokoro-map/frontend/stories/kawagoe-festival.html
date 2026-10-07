@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>川越では、なぜ蔵の町に山車が出る？｜みどころマップ</title>
+  <meta name="description" content="城主の祭礼奨励、町の山車、大火後の再建。5つの場所から川越の町を読み直してみてください。">
+  <link rel="canonical" href="https://midokoro-map-736831430371.asia-northeast1.run.app/stories/kawagoe-festival">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="川越では、なぜ蔵の町に山車が出る？">
+  <meta property="og:description" content="神社の祭りに、町が加わる。城、山車、商家、鐘から、川越の時間をたどる。">
+  <meta property="og:url" content="https://midokoro-map-736831430371.asia-northeast1.run.app/stories/kawagoe-festival">
+  <meta property="og:site_name" content="みどころマップ">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/vendor/leaflet.css">
+  <link rel="stylesheet" href="/stories/story.css">
+  <script src="/vendor/leaflet.js" defer></script>
+  <script src="/stories/story.js" defer></script>
+  <script src="http://ubuntu-server-app:8526/v.js" data-site="midokoro-map" defer></script>
+</head>
+<body class="story-page" data-story="kawagoe-festival">
+  <a class="skip-link" href="#story-main">本文へ</a>
+  <header class="site-header">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="28" height="28"><span>みどころマップ</span></a>
+    <nav class="story-nav" aria-label="サイト"><a href="/?kind=shiseki">全国の地図</a><a href="/stories">ほかのテーマ</a></nav>
+  </header>
+  <main id="story-main">
+    <section class="story-lead" aria-labelledby="story-title">
+      <p class="eyebrow">土地のつながりをたどる　03 / 埼玉県・川越市</p>
+      <h1 id="story-title">川越では、なぜ蔵の町に山車が出る？</h1>
+      <p class="lead-copy">神社の祭りに、町が加わる。<br>城、山車、商家、鐘から、川越の時間をたどる。</p>
+      <p>城主の祭礼奨励、町の山車、大火後の再建。5つの場所から川越の町を読み直してみてください。</p>
+      <nav class="question-links" aria-label="気になる問いから探す"><a href="#lord-festival" data-relation="lord-festival">城と祭りはどうつながる？ <span aria-hidden="true">→</span></a><a href="#town-edo" data-relation="town-edo">なぜ山車も商家も江戸の面影？ <span aria-hidden="true">→</span></a><a href="#fire-rebuilding" data-relation="fire-rebuilding">火事のあと、町は何を再建した？ <span aria-hidden="true">→</span></a></nav>
+    </section>
+
+    <section class="explorer" id="explorer" aria-labelledby="explorer-title">
+      <div class="section-heading"><h2 id="explorer-title">場所から、つながりへ</h2><span id="exploration-progress" aria-live="polite"></span></div>
+      <p class="map-note">点を選ぶと、関連する場所が見つかります。点線は文化的なつながりを表します。移動経路は各地点の公式案内で確認できます。</p>
+      <nav class="place-links" aria-label="地図の場所を選ぶ"><a href="#honmaru" data-place="honmaru">1 川越城本丸御殿</a><a href="#hikawa" data-place="hikawa">2 川越氷川神社</a><a href="#matsuri-museum" data-place="matsuri-museum">3 川越まつり会館</a><a href="#kurazukuri" data-place="kurazukuri">4 蔵造りの町並み</a><a href="#toki-no-kane" data-place="toki-no-kane">5 時の鐘</a></nav>
+      <div class="explorer-grid" hidden>
+        <div class="map-wrap">
+          <div id="story-map" role="region" aria-label="埼玉県・川越市の5地点と文化的なつながりの地図"></div>
+          <p id="map-status" role="status">地図を読み込んでいます。下の解説からも場所のつながりを読めます。</p>
+          <button id="map-reset" class="map-reset" type="button" hidden>5地点を見渡す</button>
+        </div>
+        <aside id="selection" aria-label="選んだ場所とつながり" hidden>
+          <div id="selected-place"></div>
+          <div id="selected-relation" hidden></div>
+          <h3>ここから、どこへ？</h3>
+          <div id="related-places"></div>
+        </aside>
+      </div>
+      <p id="static-map-note">地図を表示するにはJavaScriptが必要です。場所のリンクから、下の解説とつながりを読めます。</p>
+      <div class="share-tools" id="share-tools" hidden>
+        <button type="button" id="share-story">このつながりを共有</button>
+        <button type="button" id="copy-story">リンクをコピー</button>
+        <p id="share-status" role="status"></p>
+        <div id="manual-share" hidden><label for="share-url">このURLを選択してコピーできます</label><input id="share-url" type="url" readonly></div>
+      </div>
+      <p class="reading-link"><a href="#places">5地点の解説をまとめて読む ↓</a></p>
+    </section>
+
+    <section id="places" class="story-reading" aria-labelledby="places-title">
+      <p class="eyebrow">場所に残るもの</p><h2 id="places-title">城下町、祭り、大火のあと</h2>
+      <div class="place-articles">
+<article id="honmaru" data-lat="35.92443" data-lng="139.49144" data-number="1"><p class="place-kicker">01 / 城下町</p><h3>川越城本丸御殿</h3><p>川越は城下町でした。現在の本丸御殿に残る部分は、1848年に造営された建物の一部です。城主が関わった町割りや祭礼を知る入口になります。</p><p class="visit-note">川越市郭町2-13-1。公開状況は公式案内で確認できます。</p><p class="source">出典：<a href="https://koedo.or.jp/spot_007/" target="_blank" rel="noopener noreferrer">小江戸川越観光協会・本丸御殿</a></p><a class="select-place" href="#honmaru" data-place="honmaru">この場所のつながりを見る →</a></article>
+<article id="hikawa" data-lat="35.92887" data-lng="139.48809" data-number="2"><p class="place-kicker">02 / 祭りの起点</p><h3>川越氷川神社</h3><p>川越の総鎮守として知られる神社です。1648年、川越藩主の松平信綱が神輿などを寄進して祭礼を奨励しました。祭りの起点を知ると、山車が町を巡る意味も見えてきます。</p><p class="visit-note">川越市宮下町2-11-3。参拝案内は公式サイトで確認できます。</p><p class="source">出典：<a href="https://koedo.or.jp/spot_008/" target="_blank" rel="noopener noreferrer">小江戸川越観光協会・川越氷川神社</a> / <a href="https://www.kawagoematsuri.jp/about/about_history.html" target="_blank" rel="noopener noreferrer">川越まつり・歴史</a></p><a class="select-place" href="#hikawa" data-place="hikawa">この場所のつながりを見る →</a></article>
+<article id="matsuri-museum" data-lat="35.92421" data-lng="139.48212" data-number="3"><p class="place-kicker">03 / 町の山車</p><h3>川越まつり会館</h3><p>祭りの日以外にも、町が持つ山車を見られる場所があります。会館は実際に川越まつりで曳かれる山車を入れ替えて展示しています。神社の祭礼が、町の人々の参加へ広がった歴史をたどれます。</p><p class="visit-note">川越市元町2-1-10。展示内容と開館日は公式案内で確認できます。</p><p class="source">出典：<a href="https://kawagoematsuri.jp/matsurimuseum/" target="_blank" rel="noopener noreferrer">川越まつり会館・展示案内</a></p><a class="select-place" href="#matsuri-museum" data-place="matsuri-museum">この場所のつながりを見る →</a></article>
+<article id="kurazukuri" data-lat="35.92275" data-lng="139.48269" data-number="4"><p class="place-kicker">04 / 商家と火災</p><h3>蔵造りの町並み</h3><p>黒い壁の蔵造りは、商品をしまう倉庫だけではありません。ここには商家として使われた建物が並びます。現在の蔵造りの多くは川越大火後に建てられ、店の営みと火災への備えを伝えています。</p><p class="visit-note">一番街周辺に分布。地図の点は通りの代表位置です。</p><p class="source">出典：<a href="https://koedo.or.jp/spot_002/" target="_blank" rel="noopener noreferrer">小江戸川越観光協会・蔵造りの町並み</a></p><a class="select-place" href="#kurazukuri" data-place="kurazukuri">この場所のつながりを見る →</a></article>
+<article id="toki-no-kane" data-lat="35.92373" data-lng="139.48308" data-number="5"><p class="place-kicker">05 / 町の時間</p><h3>時の鐘</h3><p>現在の鐘楼は、1893年の川越大火後に建てられた四代目です。観光協会は、商人たちが自分の店より鐘の再建を急いだと紹介しています。店と鐘に、町を立て直す二つの仕事が残ります。</p><p class="visit-note">川越市幸町15-7。地図の点は鐘楼の代表位置です。</p><p class="source">出典：<a href="https://koedo.or.jp/spot_001/" target="_blank" rel="noopener noreferrer">小江戸川越観光協会・時の鐘</a></p><a class="select-place" href="#toki-no-kane" data-place="toki-no-kane">この場所のつながりを見る →</a></article>
+</div>
+    </section>
+
+    <section id="relations" class="story-reading" aria-labelledby="relations-title">
+      <p class="eyebrow">場所を結ぶ理由</p><h2 id="relations-title">つながりを選んで、もう一歩</h2>
+      <ul class="relation-articles">
+<li id="lord-festival" data-from="honmaru" data-to="hikawa"><h3>城主は、なぜ神社の祭りを支えた？</h3><p>1648年、藩主の松平信綱による寄進と祭礼の奨励が、川越まつりの起源とされています。城下町を治める側と神社の祭礼との関わりをたどる線です。</p><p class="relation-kind">歴史を結ぶ関係：現在の本丸御殿は1848年の建物で、祭礼奨励当時の建物ではありません。</p><p class="source">出典：<a href="https://www.kawagoematsuri.jp/about/about_history.html" target="_blank" rel="noopener noreferrer">川越まつり・祭礼の起源</a> / <a href="https://koedo.or.jp/spot_007/" target="_blank" rel="noopener noreferrer">小江戸川越観光協会・本丸御殿</a></p><a href="#hikawa" data-relation="lord-festival">このつながりを見る →</a></li>
+<li id="shrine-floats" data-from="hikawa" data-to="matsuri-museum"><h3>神輿の行列から、町の山車へ</h3><p>祭礼では神輿の行列に町々が参加するようになり、江戸の祭礼を手本にした踊り屋台も登場しました。会館の山車を、神社だけでなく町の人々が育てた祭りとして眺められます。</p><p class="relation-kind">祭礼史と展示を結ぶ関係です。</p><p class="source">出典：<a href="https://www.kawagoematsuri.jp/about/about_history.html" target="_blank" rel="noopener noreferrer">川越まつり・町衆の参加</a> / <a href="https://kawagoematsuri.jp/matsurimuseum/" target="_blank" rel="noopener noreferrer">川越まつり会館・展示案内</a></p><a href="#matsuri-museum" data-relation="shrine-floats">このつながりを見る →</a></li>
+<li id="town-edo" data-from="matsuri-museum" data-to="kurazukuri"><h3>山車も商家も、江戸とのつながりを持つ</h3><p>川越の祭りは江戸の祭礼に学び、商業で江戸と結び付いた川越には蔵造りの商家が建つようになりました。祭りの形と店の形を、江戸との交流という視点で見比べられます。</p><p class="relation-kind">テーマで結ぶ関係：商家の建築が山車行事を生んだ、という因果関係ではありません。</p><p class="source">出典：<a href="https://www.kawagoematsuri.jp/about/about_history.html" target="_blank" rel="noopener noreferrer">川越まつり・江戸祭礼の影響</a> / <a href="https://koedo.or.jp/spot_002/" target="_blank" rel="noopener noreferrer">小江戸川越観光協会・蔵造りの町並み</a></p><a href="#kurazukuri" data-relation="town-edo">このつながりを見る →</a></li>
+<li id="fire-rebuilding" data-from="kurazukuri" data-to="toki-no-kane"><h3>大火のあと、店と鐘を建て直す</h3><p>1893年の大火のあと、町には蔵造りの商家が増え、時の鐘も再建されました。耐火建築と町の時を知らせる鐘から、商人たちの再建を読み取れます。</p><p class="relation-kind">同じ大火後の再建を結ぶ関係です。</p><p class="source">出典：<a href="https://koedo.or.jp/spot_002/" target="_blank" rel="noopener noreferrer">小江戸川越観光協会・蔵造りの町並み</a> / <a href="https://koedo.or.jp/spot_001/" target="_blank" rel="noopener noreferrer">小江戸川越観光協会・時の鐘</a></p><a href="#toki-no-kane" data-relation="fire-rebuilding">このつながりを見る →</a></li>
+<li id="town-plan" data-from="honmaru" data-to="kurazukuri"><h3>城下町の通りに、明治の建物が並ぶ</h3><p>観光協会は松平信綱による町割りを、通りに店が向かい合う家並みの始まりとして紹介しています。その通りに、後の大火を経た蔵造りの商家が並びます。町の形と建物の年代を分けて見る関係です。</p><p class="relation-kind">歴史を結ぶ関係：現在の町並み全体が江戸時代の建物というわけではありません。</p><p class="source">出典：<a href="https://koedo.or.jp/spot_002/" target="_blank" rel="noopener noreferrer">小江戸川越観光協会・蔵造りの町並み</a></p><a href="#kurazukuri" data-relation="town-plan">このつながりを見る →</a></li>
+</ul>
+    </section>
+    <footer class="story-footer">
+      <p>資料確認：2026年10月7日。解説とつながりの構成は、みどころマップが各出典に基づいて編集しています。場所の点は施設や通りの代表位置です。</p>
+      <p>匿名の操作件数を、機能の改善に使います。個人を識別するCookieは使いません。ブラウザのDo Not Trackが有効な場合、操作計測を停止します。</p>
+      <a href="/?kind=shiseki">全国の史跡・祭り・温泉・特産物も探す →</a>
+    </footer>
+  </main>
+</body>
+</html>

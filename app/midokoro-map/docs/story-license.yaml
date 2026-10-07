@@ -1,5 +1,5 @@
 reviewed: 2026-10-07
-scope: One editorial theme page; no new dependency or imported third-party dataset.
+scope: Three editorial theme pages; no new dependency or imported third-party dataset.
 decisions:
   - name: Existing Leaflet
     version: 1.9.4
@@ -30,3 +30,21 @@ decisions:
     status: conditional
     cost: Existing billed project; not guaranteed free. No new service or retention setting.
     conditions: Use existing deployment configuration and existing logging access; anonymous counts do not establish unique people or conversion.
+  - name: Kusatsu and Kawagoe editorial sources
+    status: approved
+    intended_use: Original factual summaries, ten representative points and source links; no imported prose, photos or dataset.
+    cost: Public sources read without paid API or account.
+    commercial_use: Factual reference only; no reproduction license claimed.
+    conditions: Preserve source links, checked date, approximate point precision and distinction between evidence and thematic comparison.
+    sources:
+      - https://www.kusatsu-onsen.ne.jp/netsunoyu/history.html
+      - https://www.kusatsu-onsen.ne.jp/kankou/1004.php
+      - https://onsen-kusatsu.com/gozanoyu/
+      - https://onsen-kusatsu.com/ohtakinoyu/hot-spring/
+      - https://onsen-kusatsu.com/sainokawara/hot-spring/
+      - https://koedo.or.jp/spot_001/
+      - https://koedo.or.jp/spot_002/
+      - https://koedo.or.jp/spot_007/
+      - https://koedo.or.jp/spot_008/
+      - https://www.kawagoematsuri.jp/about/about_history.html
+      - https://kawagoematsuri.jp/matsurimuseum/

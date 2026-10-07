@@ -15,8 +15,17 @@ var storyEvents = map[string]bool{
 	"share-returned": true, "copy-success": true,
 }
 
+var storySlugs = []string{"arita-porcelain", "kusatsu-yumomi", "kawagoe-festival"}
+
 func registerStoryRoutes(mux *http.ServeMux, frontendDir string) {
-	const path = "/stories/arita-porcelain"
+	registerStoryPage(mux, frontendDir, "/stories", "index.html")
+	for _, slug := range storySlugs {
+		registerStoryPage(mux, frontendDir, "/stories/"+slug, slug+".html")
+		registerStoryEvents(mux, slug)
+	}
+}
+
+func registerStoryPage(mux *http.ServeMux, frontendDir, path, file string) {
 	mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
 			w.Header().Set("Allow", "GET, HEAD")
@@ -24,13 +33,18 @@ func registerStoryRoutes(mux *http.ServeMux, frontendDir string) {
 			return
 		}
 		w.Header().Set("Cache-Control", "no-store")
-		http.ServeFile(w, r, filepath.Join(frontendDir, "stories", "arita-porcelain.html"))
+		http.ServeFile(w, r, filepath.Join(frontendDir, "stories", file))
 	})
-	// Accept only the single canonical page path (no subtree aliases).
-	mux.HandleFunc(path+"/", func(w http.ResponseWriter, r *http.Request) {
-		http.NotFound(w, r)
-	})
-	const prefix = "/api/story-events/arita-porcelain/"
+	// Accept only canonical page paths (no subtree aliases).
+	if path != "/stories" {
+		mux.HandleFunc(path+"/", func(w http.ResponseWriter, r *http.Request) {
+			http.NotFound(w, r)
+		})
+	}
+}
+
+func registerStoryEvents(mux *http.ServeMux, slug string) {
+	prefix := "/api/story-events/" + slug + "/"
 	mux.HandleFunc(prefix, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store")
 		if r.Method != http.MethodPost {
@@ -51,7 +65,7 @@ func registerStoryRoutes(mux *http.ServeMux, frontendDir string) {
 			http.Error(w, "empty body required", http.StatusBadRequest)
 			return
 		}
-		log.Printf("story_event story=arita-porcelain event=%s", event)
+		log.Printf("story_event story=%s event=%s", slug, event)
 		w.WriteHeader(http.StatusNoContent)
 	})
 }

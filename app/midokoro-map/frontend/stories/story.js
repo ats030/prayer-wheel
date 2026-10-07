@@ -1,6 +1,7 @@
 (() => {
   'use strict';
-  const storyPath = '/stories/arita-porcelain';
+  const storySlug = document.body.dataset.story;
+  const storyPath = '/stories/' + storySlug;
   const places = new Map([...document.querySelectorAll('.place-articles article')].map(el => [el.id, el]));
   const relations = new Map([...document.querySelectorAll('.relation-articles li')].map(el => [el.id, el]));
   const markers = new Map(), lines = new Map(), visited = new Set(), sent = new Set();
@@ -14,7 +15,7 @@
   function record(event) {
     if (navigator.doNotTrack === '1' || sent.has(event)) return;
     sent.add(event);
-    fetch('/api/story-events/arita-porcelain/' + event, {
+    fetch('/api/story-events/' + storySlug + '/' + event, {
       method:'POST', credentials:'omit', referrerPolicy:'no-referrer', keepalive:true,
     }).catch(() => {}); // Measurement failure must not interrupt exploration.
   }
@@ -109,7 +110,7 @@
       select([rel.dataset.from, rel.dataset.to].includes(place) ? place : rel.dataset.to, key);
     }
     else if (places.has(key)) select(key, null, false, false);
-    else if (!selectedPlace) select('izumiyama', null, false, false, false);
+    else if (!selectedPlace) select(places.keys().next().value, null, false, false, false);
   }
   document.addEventListener('click', event => {
     const link = event.target.closest('[data-place], [data-relation]');
@@ -180,7 +181,7 @@
     record('share-open');
     share.disabled = true;
     try {
-      await navigator.share({title:document.querySelector('h1').textContent, text:'窯の道具が、町の塀になる。有田焼のルーツを地図でたどる。', url:sharedURL()});
+      await navigator.share({title:document.querySelector('h1').textContent, text:document.querySelector('meta[property="og:description"]').content, url:sharedURL()});
       record('share-returned');
       document.querySelector('#share-status').textContent = '共有画面を閉じました。';
     } catch (error) {

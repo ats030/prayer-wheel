@@ -77,3 +77,40 @@ func TestStoryEventsRejectArbitraryInput(t *testing.T) {
 		t.Fatalf("unexpected application logs: %s", output.String())
 	}
 }
+
+func TestAdditionalStoryThemes(t *testing.T) {
+	mux := http.NewServeMux()
+	registerStoryRoutes(mux, "../../frontend")
+	for _, slug := range storySlugs {
+		t.Run(slug, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			mux.ServeHTTP(w, httptest.NewRequest("GET", "/stories/"+slug, nil))
+			body := w.Body.String()
+			if w.Code != 200 || strings.Count(body, "data-number=") != 5 || strings.Count(body, "data-from=") != 5 || !strings.Contains(body, `data-story="`+slug+`"`) {
+				t.Fatalf("invalid theme %s: status=%d", slug, w.Code)
+			}
+			w = httptest.NewRecorder()
+			mux.ServeHTTP(w, httptest.NewRequest("POST", "/api/story-events/"+slug+"/view", nil))
+			if w.Code != 204 {
+				t.Fatalf("event status=%d", w.Code)
+			}
+			w = httptest.NewRecorder()
+			mux.ServeHTTP(w, httptest.NewRequest("POST", "/stories/"+slug, nil))
+			if w.Code != 405 {
+				t.Fatalf("page POST status=%d", w.Code)
+			}
+		})
+	}
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, httptest.NewRequest("GET", "/stories", nil))
+	for _, slug := range storySlugs {
+		if !strings.Contains(w.Body.String(), "/stories/"+slug+"?from=home") {
+			t.Fatal("missing theme entry: " + slug)
+		}
+	}
+	w = httptest.NewRecorder()
+	mux.ServeHTTP(w, httptest.NewRequest("POST", "/api/story-events/unknown/view", nil))
+	if w.Code != 404 {
+		t.Fatalf("unknown story status=%d", w.Code)
+	}
+}
