@@ -8,6 +8,8 @@
   const status = document.querySelector('#map-status');
   const selection = document.querySelector('#selection');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelector('.explorer-grid').hidden = false;
+  document.querySelector('#static-map-note').hidden = true;
 
   function record(event) {
     if (navigator.doNotTrack === '1' || sent.has(event)) return;
@@ -51,7 +53,7 @@
       if (active) line.bringToFront();
     }
   }
-  function select(id, relationID = null, interacted = false, move = true) {
+  function select(id, relationID = null, interacted = false, move = true, updateAddress = true) {
     if (!places.has(id)) return;
     selectedPlace = id;
     selectedRelation = relations.has(relationID) ? relationID : null;
@@ -81,7 +83,7 @@
       else link.removeAttribute('aria-current');
     });
     selection.hidden = false;
-    setAddress();
+    if (updateAddress) setAddress();
     if (interacted) { record('explore'); if (selectedRelation) record('follow'); }
     if (map) {
       map.invalidateSize({pan:false});
@@ -106,7 +108,8 @@
       const place = new URL(location.href).searchParams.get('place');
       select([rel.dataset.from, rel.dataset.to].includes(place) ? place : rel.dataset.to, key);
     }
-    else select(places.has(key) ? key : 'izumiyama', null, false, false);
+    else if (places.has(key)) select(key, null, false, false);
+    else if (!selectedPlace) select('izumiyama', null, false, false, false);
   }
   document.addEventListener('click', event => {
     const link = event.target.closest('[data-place], [data-relation]');

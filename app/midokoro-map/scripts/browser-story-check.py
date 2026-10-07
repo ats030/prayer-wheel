@@ -78,6 +78,14 @@ with sync_playwright() as p:
     page.locator('.leaflet-marker-icon[title="陶山神社"]').click()
     assert page.locator("#selected-place h3").inner_text() == "陶山神社"
     assert not errors, errors
+    page.locator('.reading-link a').click()
+    assert urlsplit(page.url).fragment == "places"
+    page.reload()
+    page.locator("#selected-place h3").wait_for()
+    assert urlsplit(page.url).fragment == "places"
+    page.goto(origin + path + "#relations")
+    page.locator("#selected-place h3").wait_for()
+    assert urlsplit(page.url).fragment == "relations"
 
     privacy = browser.new_context()
     privacy.add_init_script("Object.defineProperty(navigator,'doNotTrack',{get:()=> '1'}); Object.defineProperty(navigator,'share',{value:async()=>{throw new Error('unavailable')}})")
@@ -126,6 +134,8 @@ with sync_playwright() as p:
     assert static_page.locator(".relation-articles li").count() == 5
     assert "伝承" in static_page.locator("#stone-shrine").inner_text()
     assert static_page.locator("#places .source a").count() >= 5
+    assert not static_page.locator("#map-status").is_visible()
+    assert static_page.get_by_text("地図を表示するにはJavaScriptが必要です。場所のリンクから、下の解説とつながりを読めます。").is_visible()
     page.goto(origin + "/")
     assert page.locator(".story-entry").get_attribute("href") == path + "?from=home"
     print(json.dumps({"checks": "5 places, keyboard, reverse traversal, URL reload/share, per-page event deduplication, clipboard fallback/success, Web Share failure, 4 widths, marker selection, Leaflet/tile failure, DNT, static HTML, home entry", "browser_errors": errors}, ensure_ascii=False))
