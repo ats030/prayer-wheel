@@ -82,7 +82,8 @@ class NotifyTests(unittest.TestCase):
         request = send.call_args.args[0]
         self.assertEqual(request.get_header("User-agent"), "backlog-enrich/1.0")
         self.assertEqual(request.get_method(), "POST")
-        self.assertEqual(json.loads(request.data)["content"], "**weekly**\n```\nreport\n```")
+        self.assertEqual(json.loads(request.data)["content"], "**weekly**\nreport")
+        self.assertEqual(json.loads(request.data)["allowed_mentions"], {"parse": []})
         self.assertEqual(send.call_args.kwargs["timeout"], 5)
         self.assertIn("HTTP 204", output.getvalue())
 
@@ -135,6 +136,37 @@ class DraftTestCaseTests(unittest.TestCase):
 
 
 class ReportTests(unittest.TestCase):
+    def test_notification_explains_counts_and_handles_long_titles(self):
+        rows = [{"id": f"ats030-{i}", "title": "長いタスク名*" * 100,
+                 "idle_days": 30} for i in range(8)]
+        report = {"summary": {"stale": 8, "missing_acceptance": 8,
+                              "ready": 8, "parked": 8, "skipped": 0},
+                  "stale_candidates": rows, "missing_acceptance": rows,
+                  "candidates": {"ready": rows, "parked": rows, "skipped": []}}
+        body = enrich.notification_body(report)
+        self.assertIn("14日以上動きなし：8件", body)
+        self.assertIn("全残タスクの集計ではありません", body)
+        self.assertIn("重複", body)
+        self.assertIn("完了条件なし", body)
+        self.assertEqual(body.count("ほか5件"), 3)
+        self.assertIn("タスクの更新・延期・完了処理は行っていません", body)
+        self.assertLess(len(body) + len("**今週のタスク棚卸し｜2026-10-07**\n"), 1900)
+        self.assertIn("\\*", body)
+        report["missing_acceptance"] = [rows[0], rows[0]]
+        body = enrich.notification_body(report)
+        self.assertIn("完了条件の記載なし：1件", body)
+        self.assertEqual(body.split("**完了条件なし")[1].split("**自動PR候補")[0].count("ats030-0"), 1)
+
+    def test_empty_notification_has_no_task_sections(self):
+        report = {"summary": dict.fromkeys(
+            ["stale", "missing_acceptance", "ready", "parked", "skipped"], 0),
+                  "stale_candidates": [], "missing_acceptance": [],
+                  "candidates": {"ready": []}}
+        body = enrich.notification_body(report)
+        self.assertIn("14日以上動きなし：0件", body)
+        self.assertNotIn("**長期未更新", body)
+        self.assertIn("http://ubuntu-server-app.tailf74832.ts.net:8509/", body)
+
     def test_report_reuses_candidate_ranking_and_states(self):
         issues = [
             issue("ats030-ready1", acceptance="done"),

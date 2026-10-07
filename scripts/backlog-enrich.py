@@ -152,7 +152,8 @@ def notify(title: str, body: str) -> None:
     if not webhook:
         print("Discord への通知を省略: DISCORD_WEBHOOK_URL が未設定", file=sys.stderr)
         return
-    payload = json.dumps({"content": (f"**{title}**\n```\n{body[:1500]}\n```")[:1900]},
+    payload = json.dumps({"content": (f"**{title}**\n{body}")[:1900],
+                          "allowed_mentions": {"parse": []}},
                          ensure_ascii=False).encode()
     try:
         request = urllib.request.Request(webhook, data=payload,
@@ -195,6 +196,47 @@ def build_report(ready: list[dict], now: datetime | None = None) -> dict:
     }
 
 
+def notification_body(report: dict) -> str:
+    """Explain the weekly report without treating overlapping counts as totals."""
+    def unique(rows: list[dict]) -> list[dict]:
+        return list({row["id"]: row for row in rows}.values())
+
+    stale = unique(report["stale_candidates"])
+    missing = unique(report["missing_acceptance"])
+    ranked = {key: unique(rows) for key, rows in report["candidates"].items()}
+    s = {"stale": len(stale), "missing_acceptance": len(missing),
+         **{key: len(ranked.get(key, [])) for key in ("ready", "parked", "skipped")}}
+    lines = [
+        "着手可能なタスクを確認しました（全残タスクの集計ではありません）。",
+        f"・{STALE_DAYS}日以上動きなし：{s['stale']}件",
+        f"・完了条件の記載なし：{s['missing_acceptance']}件",
+        f"・自動PRの候補：{s['ready']}件（実行には承認・設定が必要）",
+        f"・自動PRの条件未達：{s['parked']}件／設定済みなどの除外：{s['skipped']}件",
+        "※長期未更新と他の区分には重複があります。",
+    ]
+    groups = [
+        ("長期未更新 — 続ける・延期する・閉じるを確認", stale),
+        ("完了条件なし — 何ができれば完了かを追記", missing),
+        ("自動PR候補 — 対象と検証方法を確認", ranked["ready"]),
+    ]
+    for heading, rows in groups:
+        if not rows:
+            continue
+        lines.extend(["", f"**{heading}**"])
+        for row in rows[:3]:
+            title = " ".join(row["title"].split())
+            if len(title) > 60:
+                title = title[:59] + "…"
+            title = re.sub(r"([\\`*_~<>\[\]|])", r"\\\1", title)
+            idle = f"／{row['idle_days']}日未更新" if "idle_days" in row else ""
+            lines.append(f"・{title}（{row['id']}{idle}）")
+        if len(rows) > 3:
+            lines.append(f"ほか{len(rows) - 3}件")
+    lines.extend(["", "確認先：<http://ubuntu-server-app.tailf74832.ts.net:8509/>（Tailnet内）",
+                  "今回は集計のみです。タスクの更新・延期・完了処理は行っていません。"])
+    return "\n".join(lines)
+
+
 def main() -> int:
     ready = json.loads(candidates.run(
         ["bd", "ready", "--json", "--limit", "0"]).stdout)
@@ -215,14 +257,7 @@ def main() -> int:
         print(f"  ready: {row['id']} score={row['score']}")
     print(f"report: {out_path}")
 
-    body = "\n".join([
-        f"stale={s['stale']} missing_acceptance={s['missing_acceptance']} "
-        f"ready={s['ready']} parked={s['parked']}",
-        *[f"stale: {r['id']} idle={r['idle_days']}d" for r in report["stale_candidates"][:5]],
-        *[f"ready: {r['id']} score={r['score']}" for r in report["candidates"]["ready"][:5]],
-        f"report: {out_path}",
-    ])
-    notify("Ollama backlog enrich (weekly)", body)
+    notify(f"今週のタスク棚卸し｜{date}", notification_body(report))
     return 0
 
 
