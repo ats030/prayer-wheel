@@ -18,6 +18,7 @@
 - `manifest.json`: モデル、digest、入力とプロンプトのhash、生成条件、生成統計。
 - `reviewed.json`: 一次資料と照合して編集した、公開に使った本文。
 - `editorial-changes.json`: 下書きからの変更前後と理由。
+- `claim-audit.md`: 主張と一次資料の対応、対象範囲、断定できない事項。
 - `publication.json`: 公開時の本文・応答・HTMLのhashと編集確認記録。
 
 `manifest.json` の `editorial_review: pending` は生成時の状態を保持する。
