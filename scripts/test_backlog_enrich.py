@@ -156,6 +156,14 @@ class ReportTests(unittest.TestCase):
         body = enrich.notification_body(report)
         self.assertIn("完了条件の記載なし：1件", body)
         self.assertEqual(body.split("**完了条件なし")[1].split("**自動PR候補")[0].count("ats030-0"), 1)
+        self.assertIn("条件未達の内数", body)
+        for row in rows:
+            row["title"] = "*" * 500
+            row["id"] += "x" * 100
+        body = enrich.notification_body(report)
+        self.assertLess(len(body), 1800)
+        self.assertIn("http://ubuntu-server-app.tailf74832.ts.net:8509/", body)
+        self.assertTrue(body.endswith("タスクの更新・延期・完了処理は行っていません。"))
 
     def test_empty_notification_has_no_task_sections(self):
         report = {"summary": dict.fromkeys(

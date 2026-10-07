@@ -209,10 +209,10 @@ def notification_body(report: dict) -> str:
     lines = [
         "着手可能なタスクを確認しました（全残タスクの集計ではありません）。",
         f"・{STALE_DAYS}日以上動きなし：{s['stale']}件",
-        f"・完了条件の記載なし：{s['missing_acceptance']}件",
+        f"・自動PRの検討対象で完了条件の記載なし：{s['missing_acceptance']}件",
         f"・自動PRの候補：{s['ready']}件（実行には承認・設定が必要）",
         f"・自動PRの条件未達：{s['parked']}件／設定済みなどの除外：{s['skipped']}件",
-        "※長期未更新と他の区分には重複があります。",
+        "※完了条件なしは条件未達の内数です。長期未更新と他の区分にも重複があります。",
     ]
     groups = [
         ("長期未更新 — 続ける・延期する・閉じるを確認", stale),
@@ -223,15 +223,21 @@ def notification_body(report: dict) -> str:
         if not rows:
             continue
         lines.extend(["", f"**{heading}**"])
+        displayed = 0
         for row in rows[:3]:
             title = " ".join(row["title"].split())
             if len(title) > 60:
                 title = title[:59] + "…"
             title = re.sub(r"([\\`*_~<>\[\]|])", r"\\\1", title)
             idle = f"／{row['idle_days']}日未更新" if "idle_days" in row else ""
-            lines.append(f"・{title}（{row['id']}{idle}）")
-        if len(rows) > 3:
-            lines.append(f"ほか{len(rows) - 3}件")
+            entry = f"・{title}（{row['id']}{idle}）"
+            # Leave room for later headings, omitted counts, footer and title.
+            if len("\n".join(lines + [entry])) > 1400:
+                break
+            lines.append(entry)
+            displayed += 1
+        if len(rows) > displayed:
+            lines.append(f"ほか{len(rows) - displayed}件")
     lines.extend(["", "確認先：<http://ubuntu-server-app.tailf74832.ts.net:8509/>（Tailnet内）",
                   "今回は集計のみです。タスクの更新・延期・完了処理は行っていません。"])
     return "\n".join(lines)
