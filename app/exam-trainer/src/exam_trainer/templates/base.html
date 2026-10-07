@@ -21,6 +21,7 @@
       {% if admin_view %}
       <a href="/admin/bank{% if exam %}?exam_id={{ exam.id }}{% endif %}" {% if request.url.path == '/admin/bank' %}aria-current="page"{% endif %}>問題バンク</a>
       <a href="/admin/settings{% if exam %}?exam_id={{ exam.id }}{% endif %}" {% if request.url.path == '/admin/settings' %}aria-current="page"{% endif %}>試験の設定</a>
+      <a href="/admin/quality" {% if request.url.path == '/admin/quality' %}aria-current="page"{% endif %}>品質診断</a>
       {% endif %}
       {% endblock %}
     </div>

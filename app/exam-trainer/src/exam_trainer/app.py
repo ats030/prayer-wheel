@@ -18,9 +18,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from typing import Literal
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from . import bank, db, jobs, kouko, products, ollama_client, web, learning_catalog
+from . import bank, db, jobs, kouko, products, ollama_client, web, learning_catalog, quality
 from .config import settings
 
 logger = logging.getLogger(__name__)
@@ -34,6 +34,8 @@ async def lifespan(_app: FastAPI):
     # "running" with nothing running it.
     jobs.recover_running()
     jobs.start_worker()
+    quality.recover()
+    quality.start_worker()
     yield
 
 
@@ -86,7 +88,11 @@ async def protect_admin(request: Request, call_next):
             return JSONResponse({"detail": "管理者認証が必要です"}, status_code=401)
         destination = path + (("?" + request.url.query) if request.url.query else "")
         return RedirectResponse("/admin/login?next=" + destination, status_code=303)
-    return await call_next(request)
+    response = await call_next(request)
+    if path.startswith('/admin/quality') or path.startswith('/api/quality/'):
+        response.headers['Cache-Control'] = 'no-store'
+        response.headers['X-Robots-Tag'] = 'noindex'
+    return response
 
 
 class AdminLoginIn(BaseModel):
@@ -149,6 +155,68 @@ def _page(request: Request, name: str, exam_id: int | None, **extra) -> HTMLResp
         **extra,
     }
     return templates.TemplateResponse(request, name, context)
+
+
+@app.get('/admin/quality', response_class=HTMLResponse)
+def quality_page(request: Request, run_id: int | None = None, verdict: str = '', sampled: bool = False):
+    history = quality.runs()
+    run = quality.get_run(run_id) if run_id is not None else (history[0] if history else None)
+    if run_id is not None and not run:
+        raise HTTPException(status_code=404,detail='診断がありません')
+    items = quality.decorated_items(run['id']) if run else []
+    metrics = quality.human_metrics(items)
+    if verdict:
+        if verdict not in quality.LABELS:
+            raise HTTPException(status_code=422,detail='判定を選び直してください')
+        items = [i for i in items if i['result'] and i['result']['verdict']==verdict]
+    if sampled:
+        items = [i for i in items if i['sampled']]
+    return _page(request,'quality.html',None,admin_view=True,exam=None,exams=[],history=history,
+                 run=run,items=items,metrics=metrics,axes=quality.AXES,labels=quality.LABELS,
+                 verdict=verdict,sampled=sampled)
+
+
+class QualityRunIn(BaseModel):
+    use_llm: bool = True
+
+
+@app.post('/api/quality/runs')
+def create_quality_run(payload: QualityRunIn):
+    return quality.enqueue(use_llm=payload.use_llm)
+
+
+@app.get('/api/quality/runs/{run_id}')
+def quality_status(run_id: int):
+    run = quality.get_run(run_id)
+    if not run:
+        raise HTTPException(status_code=404,detail='診断がありません')
+    return run
+
+
+@app.get('/admin/quality/{run_id}/review.csv')
+def quality_csv(run_id: int):
+    if not quality.get_run(run_id):
+        raise HTTPException(status_code=404,detail='診断がありません')
+    try:
+        text = quality.export_csv(run_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=409,detail=str(exc)) from exc
+    return Response(text,media_type='text/csv; charset=utf-8',headers={
+        'Content-Disposition':f'attachment; filename="quality-{run_id}-review.csv"',
+        'Cache-Control':'no-store','X-Robots-Tag':'noindex'})
+
+
+class QualityReviewIn(BaseModel):
+    csv_text: str = Field(max_length=2_000_000)
+
+
+@app.post('/api/quality/runs/{run_id}/reviews')
+def quality_reviews(run_id: int,payload: QualityReviewIn):
+    try:
+        count = quality.import_csv(run_id,payload.csv_text)
+    except ValueError as exc:
+        raise HTTPException(status_code=422,detail=str(exc)) from exc
+    return {'imported':count}
 
 
 def _kouko_page(request: Request, name: str, **extra) -> HTMLResponse:

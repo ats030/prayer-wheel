@@ -38,12 +38,12 @@ def _headers(base_url: str) -> dict[str, str]:
     return {}
 
 
-def _post(path: str, payload: dict) -> dict:
+def _post(path: str, payload: dict, *, headers: dict | None = None, timeout: float | None = None) -> dict:
     last: Exception | None = None
     for base in _base_urls():
         try:
-            with httpx.Client(timeout=_TIMEOUT) as client:
-                resp = client.post(base + path, json=payload, headers=_headers(base))
+            with httpx.Client(timeout=httpx.Timeout(timeout, connect=10.0) if timeout else _TIMEOUT) as client:
+                resp = client.post(base + path, json=payload, headers={**_headers(base), **(headers or {})})
                 resp.raise_for_status()
                 return resp.json()
         except (httpx.HTTPError, ValueError) as exc:
@@ -122,7 +122,24 @@ def available() -> bool:
     return False
 
 
-def generate_json(prompt: str, system: str = "", model: str = "") -> dict | list:
+def model_fingerprint(name: str) -> dict:
+    """Record the installed model's digest, without credentials or endpoints."""
+    resolved = resolve_model(name)
+    for base in _base_urls():
+        try:
+            with httpx.Client(timeout=10) as client:
+                response = client.get(base + '/api/tags', headers=_headers(base))
+                response.raise_for_status()
+                models = response.json().get('models', [])
+            for model in models:
+                if model.get('name') == resolved and model.get('digest'):
+                    return {'name': resolved, 'digest': model['digest'], 'status': 'recorded'}
+        except (httpx.HTTPError, ValueError, AttributeError):
+            continue
+    return {'name': resolved, 'digest': '', 'status': 'unavailable'}
+
+
+def generate_json(prompt: str, system: str = "", model: str = "", options: dict | None = None, headers: dict | None = None, think: bool | None = None, timeout: float | None = None) -> dict | list:
     """Ask for JSON and parse it.
 
     `format=json` constrains the decoder but does not guarantee the shape, so a
@@ -140,8 +157,9 @@ def generate_json(prompt: str, system: str = "", model: str = "") -> dict | list
         "messages": messages,
         "stream": False,
         "format": "json",
-        "options": {"temperature": 0.3},
-    })
+        "options": {"temperature": 0.3, **(options or {})},
+        **({'think': think} if think is not None else {}),
+    }, **({'headers': headers} if headers else {}), **({'timeout': timeout} if timeout else {}))
     content = (data.get("message") or {}).get("content", "")
     return _parse_json(content)
 
