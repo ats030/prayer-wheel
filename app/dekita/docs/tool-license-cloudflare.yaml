@@ -1,0 +1,24 @@
+tool: Cloudflare Workers Static Assets and Wrangler
+plan_or_version: Workers Free; Wrangler 4.148.0
+reviewed_at: 2026-10-07
+status: conditional
+cost:
+  condition: Static asset requests and asset storage are free. Use the Workers Free account plan only.
+license:
+  wrangler: MIT OR Apache-2.0
+  service_terms: Cloudflare Self-Serve Subscription Agreement and Service-Specific Terms
+  commercial_use: Service terms do not impose a noncommercial-only condition; intended game hosting is conditional on account acceptance and applicable policies.
+conditions:
+  - Account owner accepts Cloudflare service terms and verifies the Workers Free plan before deployment.
+  - Do not upgrade the plan or enable paid products; domain purchase is outside scope.
+  - No payment-card data is collected or processed.
+  - Preserve applicable open-source notices if distributing Wrangler; Wrangler is used as a development tool here.
+  - Recheck service pricing and terms before release.
+adoption: Static asset preparation approved; deployment requires account and Free-plan verification. No claim that ikimono-note fits Free yet.
+sources:
+  - https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/
+  - https://developers.cloudflare.com/workers/platform/pricing/
+  - https://www.cloudflare.com/terms/
+  - https://www.cloudflare.com/service-specific-terms-application-services/
+  - https://registry.npmjs.org/wrangler/4.148.0
+  - https://github.com/cloudflare/workers-sdk/blob/main/LICENSE-MIT

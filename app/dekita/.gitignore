@@ -1,5 +1,7 @@
 # Dependencies
 node_modules/
+dist/
+.wrangler/
 
 # Local SDK / tooling
 google-cloud-sdk/

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ハイスコアの引き継ぎ — できた！</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <script src="migration.js" type="module"></script>
+  <script src="http://ubuntu-server-app:8526/v.js" data-site="dekita" defer></script>
+</head>
+<body>
+  <main>
+    <h1>ハイスコアの引き継ぎ</h1>
+    <p>保護者の方向けの操作です。旧サイトでファイルを保存し、新サイトで読み込んでください。同じ端末・ブラウザで旧サイトを開くと、保存済みのスコアを取り出せます。</p>
+    <p>現在のハイスコア：<output id="score">確認中</output></p>
+    <h2>旧サイトで保存する</h2>
+    <button id="export" type="button">ハイスコアをファイルに保存</button>
+    <h2>新サイトで読み込む</h2>
+    <p>読み込むスコアが現在のスコアより小さい場合は、現在のスコアを残します。</p>
+    <label>引き継ぎファイル <input id="import" type="file" accept="application/json,.json"></label>
+    <p id="status" role="status"></p>
+    <p><a href="/">ゲームへ戻る</a></p>
+  </main>
+</body>
+</html>

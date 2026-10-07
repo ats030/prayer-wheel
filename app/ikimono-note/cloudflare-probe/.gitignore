@@ -1,0 +1,6 @@
+.venv/
+.venv-workers/
+.wrangler/
+node_modules/
+uv.lock
+package-lock.json
