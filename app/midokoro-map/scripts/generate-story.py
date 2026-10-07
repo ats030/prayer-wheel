@@ -185,8 +185,8 @@ def validate_draft(draft, packet):
             available = " ".join(facts[f]["text"] for f in row["evidence_ids"])
             supplied_numbers = set(re.findall(r"\d+", available))
             written = row["body"] + row.get("title", "")
-            require(set(re.findall(r"\d+", written)) <= supplied_numbers,
-                    key + ": 引用事実にない数字が含まれます")
+            extra = set(re.findall(r"\d+", written)) - supplied_numbers
+            require(not extra, key + ": 引用事実にない数字が含まれます: " + ",".join(sorted(extra)))
     questions = draft.get("questions")
     require(isinstance(questions, list) and len(questions) == 3, "問いは3つ必要です")
     used = set()
@@ -289,6 +289,8 @@ def generate(packet_path, output, base, model, timeout=600, num_predict=4096):
     require(not any(output == p or output.is_relative_to(p) or p.is_relative_to(output) for p in forbidden),
             "出力先はソース/公開ディレクトリの外にしてください")
     require(not output.exists(), "出力先は既にあります。新しいディレクトリを指定してください")
+    failure_path = output.with_name(output.name + ".failed.json")
+    require(not failure_path.exists(), "失敗時の応答ファイルが既にあります。新しい出力先を指定してください")
     parsed = urllib.parse.urlsplit(base)
     require(parsed.scheme in ("http", "https") and parsed.hostname and not parsed.username
             and not parsed.password and not parsed.query and not parsed.fragment, "Ollama URLが不正です")
@@ -303,16 +305,25 @@ def generate(packet_path, output, base, model, timeout=600, num_predict=4096):
                "options": {"temperature": 0.2, "seed": 42, "num_ctx": 16384, "num_predict": num_predict}}
     started = time.monotonic()
     response = request_json(base, "/api/chat", payload, timeout)
-    require(response.get("done") is True and response.get("done_reason") == "stop", "Ollama生成が完了していません（出力上限等）")
-    require(response.get("model") == model, "応答モデルが指定と異なります。proxyのルーティングを確認してください")
-    message = response.get("message")
-    require(isinstance(message, dict) and isinstance(message.get("content"), str), "Ollamaの本文がありません")
     try:
-        draft = json.loads(message["content"])
-    except json.JSONDecodeError as exc:
-        raise StoryError("生成本文がJSONではありません。出力上限やモデルを確認してください") from exc
-    validate_draft(draft, packet)
-    rendered = render(draft, packet)
+        require(response.get("done") is True and response.get("done_reason") == "stop", "Ollama生成が完了していません（出力上限等）")
+        require(response.get("model") == model, "応答モデルが指定と異なります。proxyのルーティングを確認してください")
+        message = response.get("message")
+        require(isinstance(message, dict) and isinstance(message.get("content"), str), "Ollamaの本文がありません")
+        try:
+            draft = json.loads(message["content"])
+        except json.JSONDecodeError as exc:
+            raise StoryError("生成本文がJSONではありません。出力上限やモデルを確認してください") from exc
+        validate_draft(draft, packet)
+        rendered = render(draft, packet)
+    except StoryError as exc:
+        # Keep rejected evidence for diagnosis, clearly separate from usable drafts.
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with failure_path.open("x") as failed:
+            json.dump({"status": "rejected", "error": str(exc), "packet": packet, "response": response,
+                       "prompt_version": PROMPT_VERSION, "requested_model": model,
+                       "model_digest": candidates[0]["digest"]}, failed, ensure_ascii=False, indent=2)
+        raise StoryError(f"{exc}（未検証の応答: {failure_path}）") from exc
     manifest = {"schema_version": 1, "prompt_version": PROMPT_VERSION,
                 "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(), "requested_model": model,
                 "actual_model": response["model"], "model_digest": candidates[0]["digest"],

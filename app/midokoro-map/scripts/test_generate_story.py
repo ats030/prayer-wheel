@@ -143,6 +143,9 @@ class WriterChecks(unittest.TestCase):
                         writer.generate(HERE.parent / "docs/story-packets/kusatsu-yumomi.json", out,
                                         "http://localhost:11434", "gemma4:12b")
                 self.assertFalse(out.exists())
+                rejected = json.loads(out.with_name("out.failed.json").read_text())
+                self.assertEqual(rejected["status"], "rejected")
+                self.assertEqual(rejected["response"], response)
 
     def test_http_contract_and_complete_preview_bundle(self):
         calls = []
