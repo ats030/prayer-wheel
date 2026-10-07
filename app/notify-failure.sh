@@ -15,21 +15,19 @@ UNIT="$1"
 WEBHOOK=$(sed -n 's/^DISCORD_WEBHOOK_URL=//p' "$HOME/.env" | head -1 | tr -d '"')
 RESULT=$(systemctl --user show "$UNIT" -p Result --value 2>/dev/null || echo unknown)
 STATUS=$(systemctl --user show "$UNIT" -p ExecMainStatus --value 2>/dev/null || echo '?')
+DESCRIPTION=$(systemctl --user show "$UNIT" -p Description --value 2>/dev/null || echo '')
 LOG=$(journalctl --user -u "$UNIT" -n 15 --no-pager -o cat 2>/dev/null | tail -15)
 
-TEXT=$(printf '🚨 **%s** が失敗しました (result=%s, exit=%s)\n```\n%s\n```' \
-    "$UNIT" "$RESULT" "$STATUS" "$LOG")
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+printf '障害検出: %s (result=%s, status=%s)\n' "$UNIT" "$RESULT" "$STATUS"
+PAYLOAD=$(printf '%s\n' "$LOG" | UNIT="$UNIT" DESCRIPTION="$DESCRIPTION" RESULT="$RESULT" STATUS="$STATUS" \
+    python3 "$SCRIPT_DIR/notify_failure_message.py")
 
 # journal には必ず残す。Webhook 未設定でも障害の記録が消えないようにするため
-printf '%s\n' "$TEXT"
+printf '%s\n' "$PAYLOAD" | python3 -c 'import json,sys; print(json.load(sys.stdin)["content"])'
 
 [ -n "$WEBHOOK" ] || { echo "DISCORD_WEBHOOK_URL が未設定のため通知は送らない" >&2; exit 0; }
 
-# Discord のメッセージ上限は2000文字。超えると 400 で落ちるので切り詰める
-PAYLOAD=$(TEXT="$TEXT" python3 -c '
-import json, os
-print(json.dumps({"content": os.environ["TEXT"][:1900]}))
-')
 # curl は 4xx/5xx でも終了コード 0 を返す。Webhook が削除されて 404 になっても成功に
 # 見え、2026-10 まで障害通知が届いていないことに気付けなかった (ats030-2v3is)。
 # 応答コードで判定し、届かなければ自分を failed にして `systemctl --user --failed` に出す。
