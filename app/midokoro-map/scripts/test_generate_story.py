@@ -117,6 +117,39 @@ class WriterChecks(unittest.TestCase):
         self.assertIn('data-story-preview="true"', rendered)
         self.assertIn('name="robots" content="noindex,nofollow"', rendered)
 
+    def test_typo_restoration_is_source_bounded_and_does_not_mutate_raw_draft(self):
+        bad = copy.deepcopy(self.draft)
+        bad["intro"] = "祭領を奨領した町です。"
+        unchanged, changes = writer.normalize_known_typos(bad, self.packet)
+        self.assertEqual(unchanged["intro"], bad["intro"])
+        self.assertFalse(changes)
+        self.packet["facts"][0]["text"] += "祭礼を奨励した。"
+        fixed, changes = writer.normalize_known_typos(bad, self.packet)
+        self.assertEqual(fixed["intro"], "祭礼を奨励した町です。")
+        self.assertEqual(len(changes), 2)
+        self.assertEqual(bad["intro"], "祭領を奨領した町です。")
+
+    def test_recheck_reuses_response_without_generation_and_checks_packet_digest(self):
+        source = HERE.parent / "docs/story-packets/kusatsu-yumomi.json"
+        saved = {"status": "rejected", "packet": self.packet, "requested_model": "gemma4:12b",
+                 "model_digest": "abc", "prompt_version": "old-prompt",
+                 "response": {"done": True, "done_reason": "stop", "model": "gemma4:12b",
+                              "message": {"content": json.dumps(self.draft, ensure_ascii=False)}}}
+        with tempfile.TemporaryDirectory() as temp:
+            response = Path(temp) / "failed.json"
+            response.write_text(json.dumps(saved))
+            with patch.object(writer, "request_json", return_value={"models": [{"name": "gemma4:12b", "digest": "abc"}]}) as api:
+                manifest = writer.generate(source, Path(temp) / "out", "http://localhost:11434", "gemma4:12b", recheck=response)
+                self.assertEqual([call.args[1] for call in api.call_args_list], ["/api/tags"])
+                self.assertEqual(manifest["generation_mode"], "recheck")
+                self.assertEqual(manifest["original_prompt_version"], "old-prompt")
+                self.assertIsNone(manifest["request_sha256"])
+                self.assertIsNone(manifest["options"])
+                saved["model_digest"] = "wrong"
+                response.write_text(json.dumps(saved))
+                with self.assertRaisesRegex(writer.StoryError, "digest"):
+                    writer.generate(source, Path(temp) / "bad", "http://localhost:11434", "gemma4:12b", recheck=response)
+
     def test_public_output_and_existing_runs_are_refused_before_http(self):
         source = HERE.parent / "docs/story-packets/kusatsu-yumomi.json"
         with patch.object(writer, "request_json") as api:

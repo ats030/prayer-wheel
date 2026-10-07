@@ -79,6 +79,8 @@ python3 -m http.server 18534 --bind 127.0.0.1 \
 `manifest.json` の `editorial_review` は常に `pending` で、自動的な事実認定は行わない。
 入力不備、接続失敗、不完全JSON、出力上限、構造不正では終了コード2となり、採用済みの下書きは出力しない。
 モデル応答を受け取った後の検証失敗では、診断用の未検証応答を `<出力先>.failed.json` に保存する。これには資料とモデル応答が含まれるが、プレビューは生成しない。新しい出力先を指定して再実行する前に、このファイルで失敗原因を確認する。
+入力事実に正しい語があり、誤字が入力にはない場合に限り、観察済みの「祭領→祭礼」「奨領→奨励」を補正してから検証する。補正箇所は `manifest.json` と `review.md` に明記し、元のモデル応答は変更しない。ほかの誤字や内容の誤りは自動修正しない。
+保存した応答を再検証するには `--recheck data/story-work/川越の出力先.failed.json` を付け、新規の `--output` を指定する。同じ資料・モデル・digestであることを確認し、新しいモデル生成は行わない。古い保存応答に生成条件の記録がない場合、再検証後の条件は `null` とし、今回の指定値を過去の生成条件として記録しない。
 公開する際は確認済み本文を既存の記事追加手順で登録する。このコマンドはサーバー登録や公開記事の変更を行わない。
 
 ## 開発時の検証
@@ -92,5 +94,6 @@ python3 scripts/browser-story-preview-check.py data/story-work/kusatsu-draft
 単体テストを通っても執筆品質は分からないため、実モデルで草津と川越を生成し、本文と根拠を別途読んで評価する。
 初回の12bモデルは要約が短く、源泉の使用を混合と読める表現にした。川越では「奨領」「祭領」という誤字も見つかった。この観察から、本文長と見比べ方の指示、源泉に関する編集上の制約、禁止表現のチェックを補強した。一般的な誤字校正や事実の意味の検証ができるわけではない。
 検証データは `data/story-work` に保存し、GitとCloud Runのビルド対象から除外する。
+実生成の観察と編集上の限界は [ollama-stories-evaluation.md](ollama-stories-evaluation.md) に記録した。
 
 Ollamaとモデルの利用条件は [story-generation-license.yaml](story-generation-license.yaml)、APIと構造化出力は [Ollama公式API](https://docs.ollama.com/api/chat) と [構造化出力の説明](https://docs.ollama.com/capabilities/structured-outputs) を参照する。

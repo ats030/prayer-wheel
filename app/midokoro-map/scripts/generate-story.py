@@ -198,6 +198,28 @@ def validate_draft(draft, packet):
         used.add(q["relation_id"])
 
 
+def normalize_known_typos(draft, packet):
+    """Restore only observed misspellings when the source facts contain the term."""
+    evidence = " ".join(f["text"] for f in packet["facts"])
+    rules = {wrong: right for wrong, right in {"祭領": "祭礼", "奨領": "奨励"}.items()
+             if right in evidence and wrong not in evidence}
+    changes = []
+    def visit(value, path=""):
+        if isinstance(value, str):
+            for wrong, right in rules.items():
+                count = value.count(wrong)
+                if count:
+                    changes.append({"path": path, "from": wrong, "to": right, "count": count})
+                    value = value.replace(wrong, right)
+            return value
+        if isinstance(value, list):
+            return [visit(v, f"{path}/{i}") for i, v in enumerate(value)]
+        if isinstance(value, dict):
+            return {k: visit(v, f"{path}/{k}") for k, v in value.items()}
+        return value
+    return visit(draft), changes
+
+
 def request_json(base, path, payload=None, timeout=600):
     url = base.rstrip("/") + path
     data = None if payload is None else json.dumps(payload, ensure_ascii=False).encode()
@@ -263,6 +285,10 @@ def review_text(draft, packet, manifest):
              "構造・ID・引用元の存在を検証済みです。本文が事実から導けるかは未検証です。",
              "公開前に出典本文、固有名詞・年代・因果関係、関係の注意書き、冒頭の表現を確認してください。\n",
              "## 導入\n", draft["lead"], draft["intro"], "\n## 問い\n"]
+    if manifest.get("normalizations"):
+        parts.insert(2, "出典の表記に合わせて補正した誤字（元の応答はresponse.jsonに保存）:\n" +
+                     "\n".join(f"- {change['path']}: {change['from']} → {change['to']}（{change['count']}件）"
+                               for change in manifest["normalizations"]))
     parts.extend(q["label"] for q in draft["questions"])
     for kind in ("places", "relations"):
         index = {x["id"]: x for x in packet[kind]}
@@ -280,7 +306,7 @@ def review_text(draft, packet, manifest):
     return "\n\n".join(parts) + "\n"
 
 
-def generate(packet_path, output, base, model, timeout=600, num_predict=4096):
+def generate(packet_path, output, base, model, timeout=600, num_predict=4096, recheck=None):
     packet_raw = Path(packet_path).read_bytes()
     packet = json.loads(packet_raw)
     validate_packet(packet)  # Refuse weak inputs before spending any model work.
@@ -304,7 +330,17 @@ def generate(packet_path, output, base, model, timeout=600, num_predict=4096):
                "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}],
                "options": {"temperature": 0.2, "seed": 42, "num_ctx": 16384, "num_predict": num_predict}}
     started = time.monotonic()
-    response = request_json(base, "/api/chat", payload, timeout)
+    previous = None
+    if recheck is not None:
+        previous = json.loads(Path(recheck).read_text())
+        require(isinstance(previous, dict) and previous.get("status") == "rejected"
+                and previous.get("packet") == packet, "再検証には同じ入力資料のfailed.jsonが必要です")
+        require(previous.get("requested_model") == model and previous.get("model_digest") == candidates[0]["digest"],
+                "再検証のモデル/digestが現在の指定と異なります")
+        response = previous.get("response")
+        require(isinstance(response, dict), "保存されたモデル応答がありません")
+    else:
+        response = request_json(base, "/api/chat", payload, timeout)
     try:
         require(response.get("done") is True and response.get("done_reason") == "stop", "Ollama生成が完了していません（出力上限等）")
         require(response.get("model") == model, "応答モデルが指定と異なります。proxyのルーティングを確認してください")
@@ -314,6 +350,7 @@ def generate(packet_path, output, base, model, timeout=600, num_predict=4096):
             draft = json.loads(message["content"])
         except json.JSONDecodeError as exc:
             raise StoryError("生成本文がJSONではありません。出力上限やモデルを確認してください") from exc
+        draft, normalizations = normalize_known_typos(draft, packet)
         validate_draft(draft, packet)
         rendered = render(draft, packet)
     except StoryError as exc:
@@ -322,15 +359,26 @@ def generate(packet_path, output, base, model, timeout=600, num_predict=4096):
         with failure_path.open("x") as failed:
             json.dump({"status": "rejected", "error": str(exc), "packet": packet, "response": response,
                        "prompt_version": PROMPT_VERSION, "requested_model": model,
-                       "model_digest": candidates[0]["digest"]}, failed, ensure_ascii=False, indent=2)
+                       "model_digest": candidates[0]["digest"],
+                       "options": previous.get("options") if previous else payload["options"],
+                       "think": previous.get("think") if previous else False,
+                       "system_prompt_sha256": previous.get("system_prompt_sha256") if previous else hashlib.sha256(SYSTEM.encode()).hexdigest()},
+                      failed, ensure_ascii=False, indent=2)
         raise StoryError(f"{exc}（未検証の応答: {failure_path}）") from exc
     manifest = {"schema_version": 1, "prompt_version": PROMPT_VERSION,
                 "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(), "requested_model": model,
                 "actual_model": response["model"], "model_digest": candidates[0]["digest"],
-                "packet_sha256": hashlib.sha256(packet_raw).hexdigest(), "options": payload["options"],
-                "system_prompt_sha256": hashlib.sha256(SYSTEM.encode()).hexdigest(),
-                "request_sha256": hashlib.sha256(json.dumps(payload, ensure_ascii=False).encode()).hexdigest(),
-                "think": False, "elapsed_seconds": round(time.monotonic() - started, 2),
+                "packet_sha256": hashlib.sha256(packet_raw).hexdigest(),
+                "options": previous.get("options") if previous else payload["options"],
+                "system_prompt_sha256": previous.get("system_prompt_sha256") if previous else hashlib.sha256(SYSTEM.encode()).hexdigest(),
+                "request_sha256": None if recheck else hashlib.sha256(json.dumps(payload, ensure_ascii=False).encode()).hexdigest(),
+                "generation_mode": "recheck" if recheck else "ollama",
+                "original_prompt_version": previous.get("prompt_version") if previous else PROMPT_VERSION,
+                "rechecked_response_sha256": hashlib.sha256(Path(recheck).read_bytes()).hexdigest() if recheck else None,
+                "normalizations": normalizations,
+                "think": previous.get("think") if previous else False,
+                "elapsed_seconds": round(time.monotonic() - started, 2),
+                "ollama_total_duration_ns": response.get("total_duration"),
                 "prompt_eval_count": response.get("prompt_eval_count"), "eval_count": response.get("eval_count"),
                 "done_reason": response["done_reason"], "validation": "structure-and-reference-ids-only",
                 "editorial_review": "pending", "slug": packet["slug"]}
@@ -368,6 +416,7 @@ def main():
     parser.add_argument("--model", default=os.environ.get("MIDOKORO_STORY_MODEL", "gemma4:12b"))
     parser.add_argument("--timeout", type=int, default=600)
     parser.add_argument("--num-predict", type=int, default=4096)
+    parser.add_argument("--recheck", type=Path, help="同じ資料のfailed.jsonを再検証する。新しいモデル生成はしない")
     parser.add_argument("--validate-only", action="store_true", help="入力検証のみ。Ollamaへ接続しない")
     args = parser.parse_args()
     try:
@@ -377,7 +426,7 @@ def main():
             print(json.dumps({"packet": str(args.packet), "valid": True, "slug": packet["slug"]}))
             return
         require(args.output is not None, "--outputを指定してください")
-        manifest = generate(args.packet, args.output, args.ollama_url, args.model, args.timeout, args.num_predict)
+        manifest = generate(args.packet, args.output, args.ollama_url, args.model, args.timeout, args.num_predict, args.recheck)
         print(json.dumps({"output": str(args.output), **manifest}, ensure_ascii=False, indent=2))
     except (StoryError, OSError, json.JSONDecodeError, UnicodeError) as exc:
         print(f"生成失敗: {exc}", file=sys.stderr)
