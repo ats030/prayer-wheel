@@ -14,7 +14,7 @@ python3 scripts/generate-story.py \
   --output data/story-work/kusatsu-draft
 ```
 
-川越は入力を `docs/story-packets/kawagoe-festival.json` に変える。
+川越は入力を `docs/story-packets/kawagoe-festival.json`、有田は `docs/story-packets/arita-porcelain.json` に変える。
 出力先は新しいディレクトリを指定する。既存の下書きや公開用 `frontend` は上書きできない。
 モデルは `--model` または `MIDOKORO_STORY_MODEL`、接続先は `--ollama-url` または `OLLAMA_URL` で変更できる。
 既存要約ワーカーの `OLLAMA_MODEL` とは独立している。
@@ -30,7 +30,7 @@ workloadヘッダーでモデルを差し替えず、応答モデルが指定と
 
 ## 入力資料を用意する
 
-入力例の2テーマは、公開済みの記事で確認した一次資料と代表座標に基づく。
+入力例の3テーマは、公開済みの記事で確認した一次資料と代表座標に基づく。
 モデルに渡すのは独自に書いた事実メモであり、公開記事の完成本文や第三者の文章・画像ではない。
 資料の自動収集、場所の選定、座標の推定は行わない。
 
@@ -98,3 +98,5 @@ python3 scripts/browser-story-preview-check.py data/story-work/kusatsu-draft
 実生成の観察と編集上の限界は [ollama-stories-evaluation.md](ollama-stories-evaluation.md) に記録した。
 
 Ollamaとモデルの利用条件は [story-generation-license.yaml](story-generation-license.yaml)、APIと構造化出力は [Ollama公式API](https://docs.ollama.com/api/chat) と [構造化出力の説明](https://docs.ollama.com/capabilities/structured-outputs) を参照する。
+
+2026年10月7日に3記事を新たに生成し、出典照合・編集後に公開本文を差し替えた。生成応答と編集の対応は [公開版の記録](published-stories/README.md) を参照。

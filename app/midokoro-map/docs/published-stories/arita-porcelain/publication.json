@@ -1,0 +1,8 @@
+{
+  "slug": "arita-porcelain",
+  "editorial_review": "completed",
+  "response_sha256": "bb47ba4abfd6cee05440e52bd29582fbb77be441796527bcfede7ee8422d758f",
+  "html_sha256": "3d2a7d44a2cd3c899b5e6b7f1f3d6ab9faee1258cba1ad3f0f864bbbacfdaf96",
+  "reviewed_draft_sha256": "0fd2bcf47e4ef59a17f19658328fba2abe632a25994b68408687a267dedd04de",
+  "review_note": "入力の一次資料と各段落を照合。伝承・比較・配管・祭礼起源の範囲を確認。修正はeditorial-changes.jsonに記録。"
+}

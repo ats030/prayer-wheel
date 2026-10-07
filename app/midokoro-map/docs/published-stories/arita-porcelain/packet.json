@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "slug": "arita-porcelain",
+  "title": "有田焼は、なぜこの町で生まれた？",
+  "region": "佐賀県・有田町",
+  "checked_at": "2026-10-07",
+  "angle": "陶石、焼成、道具の再利用、陶祖の記憶、仕事を描く大皿を見比べる。李参平による発見は伝承として扱う。天狗谷の道具が実際に塀へ運ばれたとは断定しない。問いはstone-kiln、kiln-wall、stone-shrineの3つにする。温度や年代など入力にない数字を足さない。",
+  "sources": [
+    {
+      "id": "source-1",
+      "url": "https://www.arita.jp/spot/post_16.html",
+      "label": "有田観光協会・泉山磁石場",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-2",
+      "url": "https://www.town.arita.lg.jp/rekishi/kiji003812/index.html",
+      "label": "有田町・天狗谷窯跡の解説",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-3",
+      "url": "https://www.town.arita.lg.jp/dynamic/info/pub/detail.aspx?c_id=26&id=88",
+      "label": "施設・位置の案内",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-4",
+      "url": "https://www.arita.jp/spot/post_20.html",
+      "label": "有田観光協会・トンバイ塀",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-5",
+      "url": "https://www.arita.jp/spot/post_22.html",
+      "label": "有田観光協会・陶山神社と参拝案内",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-6",
+      "url": "https://www.arita.jp/spot/post.html",
+      "label": "有田観光協会・大皿の解説",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-7",
+      "url": "https://www.town.arita.lg.jp/kiji0031926/index.html",
+      "label": "有田町・美術館の案内",
+      "checked_at": "2026-10-07"
+    },
+    {
+      "id": "source-8",
+      "url": "https://online.bunka.go.jp/heritages/detail/163981",
+      "label": "文化庁・肥前磁器窯跡",
+      "checked_at": "2026-10-07"
+    }
+  ],
+  "facts": [
+    {
+      "id": "izumiyama-facts",
+      "text": "泉山磁石場は有田の磁器づくりに使う陶石の採掘場である。観光協会は陶石の発見を李参平らに結び付けて紹介しているが、発見者の紹介は伝承として扱う。",
+      "source_ids": [
+        "source-1"
+      ]
+    },
+    {
+      "id": "tengudani-facts",
+      "text": "天狗谷窯跡は17世紀の初期磁器生産を示す登り窯の遺跡である。発掘で複数の窯と器の廃棄場所が確認されている。",
+      "source_ids": [
+        "source-2",
+        "source-3"
+      ]
+    },
+    {
+      "id": "tonbai-facts",
+      "text": "トンバイ塀は登り窯で使った耐火レンガや窯道具を再利用した塀である。裏通りは泉山から大樽にかけて分布する。材料が天狗谷窯のものかは未確認である。",
+      "source_ids": [
+        "source-4"
+      ]
+    },
+    {
+      "id": "sueyama-facts",
+      "text": "陶山神社には有田焼の鳥居、狛犬、李参平碑がある。陶祖を記憶する場所である。",
+      "source_ids": [
+        "source-5"
+      ]
+    },
+    {
+      "id": "museum-facts",
+      "text": "有田陶磁美術館で紹介される染付有田皿山職人尽し絵図大皿には、泉山での採石、原料の粉砕、器の成形が描かれている。美術館は元の焼き物倉庫を使っている。",
+      "source_ids": [
+        "source-6",
+        "source-7"
+      ]
+    },
+    {
+      "id": "heritage-facts",
+      "text": "文化庁は泉山磁石場という原料供給地と天狗谷などの窯跡を肥前磁器窯跡としてまとめて紹介している。",
+      "source_ids": [
+        "source-8"
+      ]
+    }
+  ],
+  "places": [
+    {
+      "id": "izumiyama",
+      "name": "泉山磁石場",
+      "lat": 33.194538,
+      "lng": 129.908834,
+      "role": "原料",
+      "visit_note": "有田町泉山1-33。採掘坑の内部には入れません。",
+      "fact_ids": [
+        "izumiyama-facts"
+      ]
+    },
+    {
+      "id": "tengudani",
+      "name": "天狗谷窯跡",
+      "lat": 33.19253,
+      "lng": 129.89513,
+      "role": "焼成",
+      "visit_note": "有田町白川一丁目1804番地4ほか。位置は有田町の施設地図に基づきます。",
+      "fact_ids": [
+        "tengudani-facts"
+      ]
+    },
+    {
+      "id": "tonbai",
+      "name": "トンバイ塀のある裏通り",
+      "lat": 33.191406,
+      "lng": 129.900261,
+      "role": "町並み",
+      "visit_note": "泉山から大樽にかけての裏通りに分布。地図の点は上幸平の代表地点です。",
+      "fact_ids": [
+        "tonbai-facts"
+      ]
+    },
+    {
+      "id": "sueyama",
+      "name": "陶山神社",
+      "lat": 33.188942,
+      "lng": 129.899299,
+      "role": "信仰",
+      "visit_note": "有田町大樽2-5-1。入口の踏切には遮断機がありません。警報中は踏切に入らず、白線の外で待ってください。",
+      "fact_ids": [
+        "sueyama-facts"
+      ]
+    },
+    {
+      "id": "museum",
+      "name": "有田陶磁美術館",
+      "lat": 33.19048,
+      "lng": 129.898736,
+      "role": "仕事の記録",
+      "visit_note": "有田町大樽1-4-2。開館日と展示の状況は公式案内で確認できます。",
+      "fact_ids": [
+        "museum-facts"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "id": "stone-kiln",
+      "from": "izumiyama",
+      "to": "tengudani",
+      "kind": "documented",
+      "note": "出典に基づく関係です。",
+      "fact_ids": [
+        "izumiyama-facts",
+        "tengudani-facts",
+        "heritage-facts"
+      ]
+    },
+    {
+      "id": "kiln-wall",
+      "from": "tengudani",
+      "to": "tonbai",
+      "kind": "thematic",
+      "note": "テーマで結ぶ関係：塀の材料が天狗谷窯から来たかどうかは未確認です。",
+      "fact_ids": [
+        "tengudani-facts",
+        "tonbai-facts"
+      ]
+    },
+    {
+      "id": "stone-shrine",
+      "from": "izumiyama",
+      "to": "sueyama",
+      "kind": "tradition",
+      "note": "伝承を含む関係：発見者と創業の経緯は、観光協会の紹介に基づきます。",
+      "fact_ids": [
+        "izumiyama-facts",
+        "sueyama-facts"
+      ]
+    },
+    {
+      "id": "stone-museum",
+      "from": "izumiyama",
+      "to": "museum",
+      "kind": "documented",
+      "note": "出典に基づく関係です。",
+      "fact_ids": [
+        "izumiyama-facts",
+        "museum-facts"
+      ]
+    },
+    {
+      "id": "wall-museum",
+      "from": "tonbai",
+      "to": "museum",
+      "kind": "thematic",
+      "note": "テーマで結ぶ関係：道具と作品の残り方を見比べる編集上の関係です。",
+      "fact_ids": [
+        "tonbai-facts",
+        "museum-facts"
+      ]
+    }
+  ]
+}
