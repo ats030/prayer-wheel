@@ -86,3 +86,32 @@ Remaining migration checks include route-specific CPU and memory, daily quotas
 and stopping at limits, persistent metrics, real AI quality and device HEIC,
 complete old-record/share migration, public SEO, dekita score transfer, and old
 paid-resource retirement. No paid plan or old-service shutdown was performed.
+
+## Static-assets experiment — 2026-10-09 JST
+
+Deployed version: `cacbf9b8-5e19-4931-985b-b7794b2acd3e`.
+Rollback version: `402d1c1d-c449-4c4a-a4ac-809f3f91d653`.
+Allowlisted static resources use existing ASSETS after Basic authentication and
+Host/method validation. All 14 assembled app modules matched original bytes.
+Models, prompts, image preprocessing, metadata handling and postprocessing did
+not change. Local and deployed `check.py --oauth` passed, including static body
+equality, HEAD lengths, cache validation, security headers, APK filenames and
+auth rejection. Forged Host is tested locally; Cloudflare rejects it at the edge.
+Two medium reviews identified download-header and measurement failure-handling
+issues; these were corrected and checked.
+
+Route-tail experiments were incomplete and are not valid matched comparisons.
+Before: 15/16 traces observed, with some HTTP500/outcome exception; successful
+static requests observed 24–27ms. The exception cause is unproven.
+After: 12/16 traces observed, all 16 HTTP responses 200; observed index.js CPU
+6, 9, 10ms; libheif CPU 6, 8, 18, 6ms. This run overlapped HTTP validation, so
+load was uncontrolled. Dynamic requests observed 21–503ms and readiness 270ms.
+Missing traces prevent a full comparison. A later run failed during readiness
+and produced an explicitly ineligible diagnostic.
+
+`measure_cpu.py` uses a tail header filter to isolate operator probes. It retains
+reduced route/sample/status/body-hash/timing/error fields, without raw logs or
+credentials, and calls no external AI. Only complete successful records from one
+version qualify; failed, missing, nonfinite and network-error samples do not.
+The observed static reduction does not prove free-plan fitness. The migration
+remains in progress; old production and data are retained.

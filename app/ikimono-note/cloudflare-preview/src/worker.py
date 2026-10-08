@@ -2,7 +2,7 @@
 import base64
 import hmac
 import os
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 from workers import asgi, env, Request, Response
 
 for name in ("IKIMONO_SESSION_SECRET", "IKIMONO_PREVIEW_PASSWORD"):
@@ -19,7 +19,7 @@ os.environ["IKIMONO_BACKGROUND_JOBS"] = "0"
 os.environ["IKIMONO_BROWSER_PHOTOS"] = "1"
 
 import bundled_resources
-from _resources import RESOURCES, BUNDLE_SHA256
+from _resources import RESOURCES, BUNDLE_SHA256, NATIVE_ASSET_PATHS, NATIVE_ASSET_LENGTHS
 bundled_resources.configure(RESOURCES)
 import main
 from fastapi.routing import APIRoute, request_response
@@ -51,11 +51,18 @@ class Default(asgi.entrypoint(app)):
         # handle. Require the runtime binding before serving authenticated work.
         if getattr(self.env, "DB", None) is None:
             return Response("Database unavailable", status=503, headers={"Cache-Control": "no-store"})
-        path = urlsplit(request.url).path
+        path = unquote(urlsplit(request.url).path)
         if path.startswith("/probe/"):
             return Response("Not found", status=404)
-        if path.startswith("/vendor/photo/sources/"):
-            result = await self.env.ASSETS.fetch(request.js_object)
+        native_asset = path in NATIVE_ASSET_PATHS
+        if native_asset:
+            host = request.headers.get("host", urlsplit(request.url).netloc).split(":")[0]
+            if host not in main.ALLOWED_HOSTS:
+                result = Response("Invalid host header", status=400)
+            elif request.method not in {"GET", "HEAD"}:
+                result = Response("Method not allowed", status=405, headers={"Allow": "GET, HEAD"})
+            else:
+                result = await self.env.ASSETS.fetch(request.js_object)
         elif path == "/identify" and request.method == "POST":
             length = request.headers.get("content-length", "")
             if not length.isdigit() or int(length) > 6 * 1024 * 1024 + 16384:
@@ -106,6 +113,17 @@ class Default(asgi.entrypoint(app)):
         response = js.Response.new(native.body, native)
         response.headers.set("X-Robots-Tag", "noindex, nofollow")
         response.headers.set("Cache-Control", "no-store")
+        if native_asset:
+            if request.method == "HEAD" and response.status == 200:
+                response.headers.set("Content-Length", str(NATIVE_ASSET_LENGTHS[path]))
+            if path.startswith("/downloads/") and response.status in {200, 206}:
+                response.headers.set("Content-Disposition", 'attachment; filename="' + path.rsplit("/", 1)[1] + '"')
+            response.headers.set("X-Content-Type-Options", "nosniff")
+            response.headers.set("X-Frame-Options", "DENY")
+            response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
+            response.headers.set("Permissions-Policy", "camera=(self), geolocation=(self)")
+            response.headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups")
+            response.headers.set("Content-Security-Policy", main.CONTENT_SECURITY_POLICY)
         if path == "/health":
             response.headers.set("X-Preview-Bundle-SHA256", BUNDLE_SHA256)
         return Response(response)

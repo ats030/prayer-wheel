@@ -118,6 +118,39 @@ def check(origin, oauth_enabled=False):
         assert status == 200, (name, status)
         assert hashlib.sha256(body).hexdigest() == record["sha256"]
         assert "noindex" in headers["X-Robots-Tag"]
+    reference_headers = fetch("/login")[2]
+    security_headers = ("Content-Security-Policy", "X-Content-Type-Options", "X-Frame-Options",
+                        "Referrer-Policy", "Permissions-Policy", "Cross-Origin-Opener-Policy")
+    for path in namespace.get("NATIVE_ASSET_PATHS", ()):
+        if path.startswith("/vendor/photo/sources/"):
+            continue  # Source archive integrity is checked above.
+        assert fetch(path, False)[0] == 401, path
+        status, body, headers = fetch(path)
+        assert status == 200 and body == (HERE / "assets" / path.lstrip("/")).read_bytes(), path
+        assert all(headers.get(name) == reference_headers.get(name) for name in security_headers), path
+        status, head_body, head_headers = fetch(path, method="HEAD")
+        assert status == 200 and not head_body, path
+        assert head_headers["Content-Length"] == str(len(body)), path
+        if path.startswith("/downloads/"):
+            assert headers["Content-Disposition"] == 'attachment; filename="' + path.rsplit("/", 1)[1] + '"', path
+    path = "/assets/index.js"
+    status, body, headers = fetch(path)
+    assert headers["Content-Type"].split(";")[0] in {"text/javascript", "application/javascript"}
+    if namespace.get("NATIVE_ASSET_PATHS"):
+        assert fetch(path, extra={"If-None-Match": headers["ETag"]})[0] == 304
+        status, _, headers = fetch(path, method="POST", body=b"ignored")
+        assert status == 405 and headers["Allow"] == "GET, HEAD"
+        assert headers["Cache-Control"] == "no-store" and "noindex" in headers["X-Robots-Tag"]
+        if urlsplit(origin).hostname in {"localhost", "127.0.0.1"}:
+            # Cloudflare rejects mismatched Host at its edge; exercise the
+            # Worker's own guard without sending credentials to another host.
+            assert fetch(path, extra={"Host": "attacker.invalid"})[0] == 400
+        for unknown in ("/assets/not-allowed.js", "/vendor/photo/sources/not-allowed"):
+            assert fetch(unknown)[0] == 404, unknown
+        status, body, headers = fetch("/assets/%2e%2e/.env")
+        # URL normalization can reach the same login guard as /.env.
+        assert status == 404 or (oauth_enabled and status == 303
+                                 and headers["Location"] == "/login" and not body)
     status, body, _ = fetch("/identify", method="POST", body=b"x" * (6 * 1024 * 1024 + 16385))
     assert status == 400, (status, body[:200])
     print("PASS: auth gate, real app, current bundle, sources, settings, OAuth start/state rejection, no diagnostics, upload bound")

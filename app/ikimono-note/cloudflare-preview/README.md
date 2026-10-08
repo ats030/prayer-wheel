@@ -69,9 +69,22 @@ Googleのログイン画面まで進むことをログイン前のHTTP要求で�
 ローカルの `python3 check.py --oauth` で認可URL、PKCE/state/nonce、Secure/HttpOnly Cookie、
 未ログイン画面/API拒否と不正callbackの拒否を確認しています。
 確認処理はリダイレクトを追わず、Basic認証を別originへ転送しません。
-実Googleログイン・Drive保存・実データ移行は未検証です。
+利用者からGoogleログイン、Drive接続、写真記録保存と別ブラウザでの再読込の成功報告を受けています。旧データ全体の移行は未検証です。
 Google設定追加後のデプロイを調べる際は `--oauth` を付けます。
 Google未設定の版を調べる際は付けません。bundle SHAは手元ビルドとの一致も確認します。
 
 切戻しはCloudflareのバージョンrollbackを使います。外部アクセスを停止する場合は
 この検証版だけを `workers_dev: false` にして再デプロイします。D1は削除しません。
+
+## 静的配信のCPU削減実験（2026-10-09 JST）
+
+許可リストに含まれる静的ファイルを既存ASSETS bindingから配信します。
+Basic認証、Host/メソッド制限、セキュリティヘッダー、APK保存名を維持します。
+アプリ14モジュールは元ソースとバイト一致し、生成モデル、プロンプト、画像処理、後処理を変えていません。
+ローカルと公開環境の `check.py --oauth` が成功しました。
+
+`python3 measure_cpu.py --output /tmp/ikimono-cpu.json` は固定4経路を計測し、外部AIを呼びません。
+生ログと認証情報を出力せず、失敗・欠測・版不一致は比較不適格として終了コード2にします。
+静的配信の観測値は減りましたが、動的経路と初回要求は10msを超え、tailにも欠測があります。
+無料枠での全体運用は未成立です。詳細と切戻し元は
+[本番計測記録](../docs/cloudflare-preview-production-evidence.md)に記載しています。
