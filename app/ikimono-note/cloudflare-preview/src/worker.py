@@ -44,7 +44,8 @@ for route in app.routes:
 # pinned AnyIO resolver; this imports its backend without starting an event loop.
 from anyio._core._eventloop import get_async_backend
 get_async_backend("asyncio")
-app.middleware_stack = app.build_middleware_stack()
+import worker_middleware
+worker_middleware.prepare(app, main)
 
 class Default(asgi.entrypoint(app)):
     async def fetch(self, request):

@@ -262,3 +262,46 @@ sandbox and was rerun). The preview changelog was deployed with the performance
 experiment; its Drive verification wording now reflects the user's successful
 manual check. Old production/data remain intact; no public switch, paid plan,
 external AI call or user-data migration occurred.
+
+## Reviewed policy adapters in protected preview (2026-10-09 JST)
+
+Deployed `6ea2d2c0-c519-4a8c-ae44-87968cfb4e83`; rollback is
+`851e9a73-87ad-4b96-9fd8-580ed77d8bf2`. The reviewed Workers-only ASGI adapters
+call the unchanged security_headers, require_login and keep_one_origin policies
+in their existing order. TrustedHost and FastAPI's cleanup middleware remain.
+AnyIO startup preparation and the existing identify FormData wrapper remain.
+All 15 allowlisted assembled modules are byte-identical to their original files;
+models, prompts, photo conditions and postprocessing did not change.
+
+The first run (20:15:11–20:16:23 UTC) returned HTTP200 for all 24 requests but
+captured only 23 tails. The missing tail belonged to a runtime invocation 1 on
+me. It exited 2 and is ineligible for a successful comparison. Observed health
+CPU included 12/14ms; this counterexample is retained rather than discarded.
+No exceptions occurred in the captured tails. The missing request CPU is unknown.
+
+The retry (20:16:44–20:17:15 UTC) captured 24/24 plus readiness; all HTTP200,
+outcome ok, no exceptions, one deployed version and valid runtime sequences.
+Every measured invocation was greater than 1: this run does not measure cold start.
+
+| Route | Previous snapshot-prepared observation, invocation >1 | Adapter retry, invocation >1 |
+|---|---:|---:|
+| health | 11–26ms (4 requests) | 3–9ms (6 requests) |
+| signed-out me | 10–26ms (5 requests) | 3–7ms (6 requests) |
+| index.js | 3–6ms (6 requests) | 3–6ms (6 requests) |
+| libheif | 3–12ms (6 requests) | 3–5ms (6 requests) |
+
+Sequential observations used different runtimes and did not control hardware,
+traffic or the number of prior invocations. These values support lower observed
+dynamic request cost, not a guaranteed upper bound or whole-app Free compliance.
+The incomplete run still contains health above 10ms. Real AI, authenticated
+data routes, uploads, memory, quotas and persistent metrics remain unmeasured.
+The historical HTTP500 cause remains unknown and did not reproduce here.
+
+Evidence: [incomplete run](cloudflare-cpu-policy-incomplete.json) and
+[complete retry](cloudflare-cpu-policy.json), retaining reduced metadata only.
+Validation: 19 policy parity tests passed; local and deployed `check.py --oauth`
+passed; all 15 modules matched source bytes; medium code review found no actionable
+auth/security/response/integration defect. The preview changelog was deployed.
+Management OAuth refresh succeeded without printing credentials (0600 retained);
+automatic launcher refresh is still absent. Old production/data remain intact;
+no paid plan, general-public switch, external AI call or user-data migration.
