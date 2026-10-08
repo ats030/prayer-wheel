@@ -137,7 +137,29 @@ class Default(asgi.entrypoint(app)):
             forwarded = Request(f"{url.scheme}://{url.netloc}{path}",
                                 headers=dict(request.headers.items()))
             return await asgi.fetch(target, forwarded, self.env, self.ctx)
-        if url.path in {"/probe/profile/native-upload", "/probe/profile/native-identify", "/probe/profile/native-gemini-payload", "/probe/profile/native-gemini-payload-checked"} and request.method == "POST":
+        if url.path == "/probe/profile/gemini-template" and request.method == "GET":
+            # Small template from the actual provider function, no copied prompt
+            # or independent generation settings and no external HTTP call.
+            import types
+            import httpx
+            captured = []
+
+            def capture_template(target, *, json, headers, timeout):
+                captured.append(json)
+                return httpx.Response(200, request=httpx.Request("POST", target), json={"candidates": [{
+                    "content": {"parts": [{"text": '{"category":"動物","candidates":[]}'}]}
+                }]})
+
+            original = main.vision.identify_gemini
+            shim = types.SimpleNamespace(post=capture_template, HTTPStatusError=httpx.HTTPStatusError,
+                                         HTTPError=httpx.HTTPError)
+            provider = types.FunctionType(original.__code__, {**original.__globals__, "httpx": shim},
+                                          original.__name__, original.__defaults__, original.__closure__)
+            provider.__kwdefaults__ = original.__kwdefaults__
+            provider([b""], "synthetic-key", "gemini-3.5-flash-lite")
+            assert captured[0]["contents"][0]["parts"][0]["inline_data"]["data"] == ""
+            return Response.from_json({"template": captured[0], "network_calls": 0})
+        if url.path in {"/probe/profile/native-upload", "/probe/profile/native-identify", "/probe/profile/native-gemini-payload", "/probe/profile/native-gemini-payload-checked", "/probe/profile/native-gemini-payload-js", "/probe/profile/native-gemini-payload-js-checked"} and request.method == "POST":
             length = request.headers.get("content-length", "")
             if not length.isdigit() or int(length) > 6 * 1024 * 1024 + 16384:
                 return Response.from_json({"error": "Bounded Content-Length required"}, status=400)
@@ -153,9 +175,31 @@ class Default(asgi.entrypoint(app)):
                 import types
                 import httpx
                 captured = []
+                native_encoding = "payload-js" in url.path
+                if native_encoding:
+                    import js
+                    from pyodide.ffi import to_js
+
+                    class EncodedASCII:
+                        def __init__(self, raw):
+                            self.value = to_js(raw).toBase64()
+
+                        def decode(self, encoding):
+                            assert encoding == "ascii"
+                            return self.value
+
+                    encoding = types.SimpleNamespace(b64encode=EncodedASCII)
+                else:
+                    encoding = base64
 
                 def synthetic_post(target, *, json, headers, timeout):
-                    outgoing = httpx.Request("POST", target, json=json, headers=headers)
+                    if native_encoding:
+                        serialized = js.JSON.stringify(to_js(json, dict_converter=js.Object.fromEntries))
+                        # Include the same Python boundary and HTTPX Request cost.
+                        # The checked twin additionally verifies semantic parity.
+                        outgoing = httpx.Request("POST", target, content=serialized.encode(), headers=headers)
+                    else:
+                        outgoing = httpx.Request("POST", target, json=json, headers=headers)
                     captured.append(outgoing.content)
                     return httpx.Response(200, request=outgoing, json={"candidates": [{
                         "content": {"parts": [{"text": '{"category":"動物","candidates":[]}'}]}
@@ -164,7 +208,7 @@ class Default(asgi.entrypoint(app)):
                 shim = types.SimpleNamespace(post=synthetic_post, HTTPStatusError=httpx.HTTPStatusError,
                                              HTTPError=httpx.HTTPError)
                 original = main.vision.identify_gemini
-                provider = types.FunctionType(original.__code__, {**original.__globals__, "httpx": shim},
+                provider = types.FunctionType(original.__code__, {**original.__globals__, "httpx": shim, "base64": encoding},
                                               original.__name__, original.__defaults__, original.__closure__)
                 provider.__kwdefaults__ = original.__kwdefaults__
                 images = [await file.bytes() for file in files]
@@ -175,6 +219,24 @@ class Default(asgi.entrypoint(app)):
                     recovered = [base64.b64decode(part["inline_data"]["data"], validate=True)
                                  for part in parts if "inline_data" in part]
                     assert recovered == images, "Provider serialization changed photo bytes"
+                    if native_encoding:
+                        baseline = []
+
+                        def baseline_post(target, *, json, headers, timeout):
+                            outgoing = httpx.Request("POST", target, json=json, headers=headers)
+                            baseline.append(outgoing.content)
+                            return httpx.Response(200, request=outgoing, json={"candidates": [{
+                                "content": {"parts": [{"text": '{"category":"動物","candidates":[]}'}]}
+                            }]})
+
+                        baseline_shim = types.SimpleNamespace(post=baseline_post, HTTPStatusError=httpx.HTTPStatusError,
+                                                              HTTPError=httpx.HTTPError)
+                        baseline_provider = types.FunctionType(original.__code__,
+                            {**original.__globals__, "httpx": baseline_shim}, original.__name__,
+                            original.__defaults__, original.__closure__)
+                        baseline_provider.__kwdefaults__ = original.__kwdefaults__
+                        baseline_provider(images, "synthetic-key", "gemini-3.5-flash-lite")
+                        assert json.loads(wire) == json.loads(baseline[0]), "Provider prompt/config/photo payload changed"
                 return Response.from_json({"probe": {"sha256": [sha256(raw).hexdigest() for raw in images]},
                                            "wire_bytes": len(wire), "wire_sha256": sha256(wire).hexdigest(),
                                            "network_calls": 0})

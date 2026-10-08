@@ -59,14 +59,15 @@ def check_startup():
                                 if ready:
                                     for route in ("native-health", "asgi-health", "fastapi-async-health",
                                                   "fastapi-sync-health", "router-health", "router-me",
-                                                  "full-health", "full-me", "optimized-health", "optimized-me"):
+                                                  "full-health", "full-me", "optimized-health", "optimized-me",
+                                                  "gemini-template", "native-gemini-payload-js", "native-gemini-payload-js-checked"):
                                         try:
                                             urlopen("http://localhost:8794/probe/profile/" + route, timeout=1)
                                         except HTTPError as error:
                                             assert error.code == 403, route
                                         else:
                                             raise AssertionError("Disabled profile route accepted: " + route)
-                                    print("PASS: profiling flag OFF rejects all 10 runtime diagnostics", flush=True)
+                                    print("PASS: profiling flag OFF rejects all 13 runtime/transport diagnostics", flush=True)
                                     break
                             except (URLError, TimeoutError):
                                 pass

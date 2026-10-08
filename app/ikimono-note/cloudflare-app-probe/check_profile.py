@@ -50,6 +50,15 @@ def check():
         status, raw, _ = fetch("/probe/profile/native-gemini-payload-checked", "POST", body, headers)
         assert status == 200, raw
         assert json.loads(raw) == result, "Measured payload differs from byte-verified payload"
+        body, headers = multipart([(photo, "image/jpeg")] * count, report)
+        status, raw, _ = fetch("/probe/profile/native-gemini-payload-js", "POST", body, headers)
+        assert status == 200, raw
+        native_result = json.loads(raw)
+        assert native_result["probe"] == result["probe"] and native_result["network_calls"] == 0
+        body, headers = multipart([(photo, "image/jpeg")] * count, report)
+        status, raw, _ = fetch("/probe/profile/native-gemini-payload-js-checked", "POST", body, headers)
+        assert status == 200, raw
+        assert json.loads(raw) == native_result, "Native encoder parity check failed"
     for path in ("/identify", "/probe/profile/native-identify"):
         body, headers = multipart([(photo, "image/jpeg")], report)
         status, raw, _ = fetch(path, "POST", body, headers)

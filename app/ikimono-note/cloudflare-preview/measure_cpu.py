@@ -51,16 +51,19 @@ def valid_sequence(rows):
     return True
 
 
-def measure(samples):
+def measure(samples, *, origin=ORIGIN, paths=PATHS, request_factory=None, wrangler_config=None):
     started = datetime.now(timezone.utc).isoformat()
     state = json.loads((Path.home() / ".local/state/ikimono-cloudflare-preview/secrets.json").read_text())
     credential = "Basic " + base64.b64encode(
         ("preview:" + state["IKIMONO_PREVIEW_PASSWORD"]).encode()).decode()
     marker = secrets.token_hex(4)
     events = queue.Queue()
+    tail_command = ["python3", str(HERE / "run_wrangler.py"), "tail", "--format", "json",
+                    "--header", "X-Ikimono-CPU-Probe:" + marker]
+    if wrangler_config is not None:
+        tail_command.extend(["--config", str(wrangler_config)])
     process = subprocess.Popen(
-        ["python3", str(HERE / "run_wrangler.py"), "tail", "--format", "json",
-         "--header", "X-Ikimono-CPU-Probe:" + marker], cwd=HERE,
+        tail_command, cwd=HERE,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, start_new_session=True)
 
     def read_events():
@@ -84,7 +87,7 @@ def measure(samples):
             # sanitization can transform opaque query markers; numeric sample
             # IDs and the allowlisted route are the correlation fields.
             sample = query.get("sample", [""])[0]
-            if url.path not in PATHS or not (sample.isdigit() or sample in {"-1", "-2", "-3", "-4", "-5"}):
+            if url.path not in paths or not (sample.isdigit() or sample in {"-1", "-2", "-3", "-4", "-5"}):
                 continue
             # Reduce the event immediately: never retain credentials, logs,
             # cookies, client addresses, full exception traces, or arbitrary URLs.
@@ -105,8 +108,10 @@ def measure(samples):
     reader.start()
     requests = {}
     def fetch(path, sample):
-        request = Request(ORIGIN + path + "?cpu_check=" + marker + "&sample=" + sample,
-                          headers={"Authorization": credential, "User-Agent": "ikimono-cpu-check/1.0",
+        options = request_factory(path) if request_factory else {}
+        request = Request(origin + path + "?cpu_check=" + marker + "&sample=" + sample,
+                          data=options.get("data"), method=options.get("method", "GET"),
+                          headers={**options.get("headers", {}), "Authorization": credential, "User-Agent": "ikimono-cpu-check/1.0",
                                    "X-Ikimono-CPU-Probe": marker})
         try:
             response = build_opener(NoRedirect).open(request, timeout=30)
@@ -118,7 +123,10 @@ def measure(samples):
             with response:
                 body = response.read()
                 invocation = response.headers.get("X-Preview-Isolate-Invocation", "")
-                return {"status": response.status, "bytes": len(body),
+                return {**{key: response.headers[header] for key, header in (
+                            ("transport_source_sha256", "X-Transport-Source-SHA256"),
+                            ("transport_wrapper_sha256", "X-Transport-Wrapper-SHA256")) if header in response.headers},
+                        "status": response.status, "bytes": len(body),
                         "sha256": hashlib.sha256(body).hexdigest(),
                         "isolate_id": response.headers.get("X-Preview-Isolate", ""),
                         "isolate_invocation": int(invocation) if invocation.isdigit() else None}
@@ -147,7 +155,7 @@ def measure(samples):
                 break
         else:
             raise RuntimeError("Tail did not confirm the subscription")
-        for path in PATHS:
+        for path in paths:
             for turn in range(samples + 1):
                 sample = str(len(requests))
                 requests[sample] = {"path": path, "turn": turn, **fetch(path, sample)}
@@ -173,7 +181,7 @@ def measure(samples):
         eligible = complete and len({r["version"] for r in paired} | {
             subscription_probe["version"]}) == 1 and successful(subscription_probe) and all(
                 successful(r) for r in paired) and valid_sequence([subscription_probe, *paired])
-        return {"origin": ORIGIN, "cpu_unit": "milliseconds",
+        return {"origin": origin, "cpu_unit": "milliseconds",
                 "started_at_utc": started, "completed_at_utc": datetime.now(timezone.utc).isoformat(),
                 "expected_records": len(requests), "observed_records": len(records),
                 "complete": complete, "eligible_for_success_cpu_comparison": eligible,

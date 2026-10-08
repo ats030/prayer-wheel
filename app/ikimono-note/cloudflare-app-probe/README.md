@@ -146,6 +146,13 @@ finallyで削除します。hexは転送サイズが2倍になるため、700KiB
 
 ## Python / ASGI / アプリ全体の切り分け
 
+送信データの生成には、`native-gemini-payload-js` と対応する `-checked` を追加しました。
+元のプロバイダー関数を再利用し、base64とJSONの生成だけをJavaScript標準機能へ切り替えます。
+写真、プロンプト、生成設定の一致を検証しましたが、ローカルで遅くなったため本体には採用していません。
+`gemini-template` は元のプロバイダーから小さな送信テンプレートを取り出します。
+これらも `PROFILE_IO` がOFFなら403で、外部AIを呼びません。
+JavaScript内で大きな写真データを扱う比較と本番CPU会計は、[写真転送probe](../cloudflare-transport-probe/README.md)に記録しています。
+
 同じInspector付きローカルWorkerに対して以下を実行します。新しい依存や
 本番デプロイは不要です。外部AI・本物のcookie・利用者データは使いません。
 

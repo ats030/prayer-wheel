@@ -305,3 +305,89 @@ auth/security/response/integration defect. The preview changelog was deployed.
 Management OAuth refresh succeeded without printing credentials (0600 retained);
 automatic launcher refresh is still absent. Old production/data remain intact;
 no paid plan, general-public switch, external AI call or user-data migration.
+
+## Synthetic provider serialization and native streams (2026-10-09 JST)
+
+The new [transport diagnostic](../cloudflare-transport-probe/README.md) isolates
+the remaining large-photo transfer cost without external AI, Google, DB or real
+user data. Input is seed=3 JPEG, 1600x1600, 1,997,593 bytes, with one or three
+photos. The prompt and generation settings come from the unchanged actual
+`vision.identify_gemini` function through a no-network capture shim. Checked
+twins verify complete payload semantics and reconstructed photo bytes.
+
+Python payload construction had local active-sample medians 52.594/147.740ms
+for 1/3 photos. Switching base64/JSON to JS after conversion into Python bytes
+increased same-run medians from 54.737/148.588 to 82.364/234.996ms; reject this
+approach. Keeping the photos inside JS reduced the local medians to
+25.769/70.103ms. Pure streaming in the local development bridge produced large
+anonymous/program samples and GC; these samples cannot be mapped to billed CPU.
+All local figures are approximations, not Free-plan judgments. Small JS paths
+use 20-request batches x5; measured direct/stream cases have 400 checked HTTP200
+requests. Local sources and provider bundle hashes are checked before runs.
+
+To resolve the local ambiguity, a separate Basic-protected synthetic Worker was
+temporarily deployed. It has no outbound fetch, DB, provider key or user storage.
+The real app preview stayed at `6ea2d2c0-c519-4a8c-ae44-87968cfb4e83`.
+
+| Synthetic route | JS identity-transform version | Native stream version |
+|---|---:|---:|
+| health | 0–1ms | 0–1ms |
+| assemble 1 photo | 23–49ms | 23–35ms |
+| assemble 3 photos | 72–101ms | 66–102ms |
+| transfer provider JSON, 1 photo | 25–54ms | 0ms, all 6 requests |
+| transfer provider JSON, 3 photos | 98–168ms | 0ms, all 6 requests |
+
+Transform run: version `eb66158e-55d7-4be3-8a87-43b3fdf8ad14`, UTC
+20:41:32–20:42:28. Native run: version `f759130e-a01d-4582-a5f6-90a6d48e4fca`,
+UTC20:45:42–20:46:29. Each collected30/30 plus readiness, all HTTP200/outcome ok,
+no exceptions, one version and valid runtime counter sequences. Every wire
+response SHA equals the exact original synthetic provider JSON. Payload result
+SHA matches expected photo SHA/serialized-wire SHA/length. Native run checks
+current transport/wrapper source SHA in every response and the provider bundle
+SHA in fixture provenance. The transform run payload SHA was also verified
+against the expected complete fixture after collection.
+
+0ms is the emitted accounting value, not proof of mathematically zero CPU.
+Runs used different runtimes, hardware and network conditions. The native
+streaming change uses the original native request body, avoiding the JS identity
+TransformStream required by the local development bridge, and avoids an extra
+Request/Response wrapper. UTF-8 Basic encoding was corrected in the same bounded
+experiment. Do not allocate the measured difference to one isolated factor.
+
+This supports moving large payload assembly into the browser and transferring
+it natively. It does not prove the full app works within Free limits: Google
+authentication, provider selection, existing photo/quality validation, actual AI,
+postprocessing, persistence and quotas are excluded. These semantics must be
+preserved when integrating; this echo endpoint is not an acceptable production
+AI proxy. The standard app collector regression captured8/8 plus readiness
+without errors; signed-out me on runtime invocation1 still consumed28ms. Python
+cold/dynamic request costs therefore remain a material full-app issue.
+
+Validation includes local original/native payload parity for1/3 images and input
+rejects;13 flag-OFF diagnostic rejects; missing secret/DB startup rejects; local
+wrapper Basic/Host/Unicode/no-diagnostics checks; remote401/current SHA/no ordinary
+runtime IDs/404 diagnostics checks; unchanged default collector CLI. Medium
+reviews found missing build wiring/HTTP timeouts and UTF-8 auth/stale provider
+fixtures, all corrected before handoff. HTTP waits and inspector operations are
+bounded, with cleanup on failure. Wrangler was4.149.0 throughout these new runs;
+pywrangler's unpinned npx changed the shared cache from4.148.0. Version pinning is
+tracked separately as `ats030-g1gd1`; this is not an app dependency change.
+
+Artifacts: [local approximations](cloudflare-transport-local.json),
+[transform accounting](cloudflare-transport-remote-transform.json),
+[native accounting](cloudflare-transport-remote-native.json), and
+[default collector regression](cloudflare-cpu-collector-regression.json).
+They contain reduced measurements, hashes and ephemeral runtime IDs, no secrets,
+raw logs, cookies, real photos or user records.
+
+The temporary Worker was subsequently set to `workers_dev:false` (version
+`19b86850-7a7e-4fb1-962d-ffdbe1df9d81`); its external health URL returned404.
+The real app, old production and data remain intact; no paid plan/public switch,
+external AI fee or data migration occurred. This operator-only diagnostic is
+exempt from the real app changelog; integration must have its own release note.
+
+Official constraints checked2026-10-08:
+[Workers limits](https://developers.cloudflare.com/workers/platform/limits/#cpu-time)
+specify10ms Free CPU, occasional isolate flexibility and termination on repeated
+overruns. Successful high-CPU responses are not proof of Free compliance. Python
+interop uses the [official FFI](https://developers.cloudflare.com/workers/languages/python/ffi/).

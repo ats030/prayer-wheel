@@ -1,0 +1,1103 @@
+{
+  "scope": "local V8 diagnostic approximation; not Cloudflare CPU or Free compliance",
+  "wrangler_version": "4.149.0",
+  "runs": [
+    {
+      "file_label": "ikimono-payload-baseline.jsonl",
+      "records": [
+        {
+          "name": "native-gemini-payload-1x-1997593-bytes",
+          "repetition": 0,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "64e252f55b7d4d12ed9ccdc18bd1145a6d6fb1b15e4504b9c5f9abe9ea34a6fb",
+          "wall_ms": 54.473,
+          "active_sampled_ms": 52.594,
+          "idle_sampled_ms": 156.773,
+          "samples": 45
+        },
+        {
+          "name": "native-gemini-payload-1x-1997593-bytes",
+          "repetition": 1,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "64e252f55b7d4d12ed9ccdc18bd1145a6d6fb1b15e4504b9c5f9abe9ea34a6fb",
+          "wall_ms": 54.583,
+          "active_sampled_ms": 53.476,
+          "idle_sampled_ms": 156.259,
+          "samples": 48
+        },
+        {
+          "name": "native-gemini-payload-1x-1997593-bytes",
+          "repetition": 2,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "64e252f55b7d4d12ed9ccdc18bd1145a6d6fb1b15e4504b9c5f9abe9ea34a6fb",
+          "wall_ms": 53.249,
+          "active_sampled_ms": 51.362,
+          "idle_sampled_ms": 151.125,
+          "samples": 46
+        },
+        {
+          "name": "native-gemini-payload-3x-1997593-bytes",
+          "repetition": 0,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "64e252f55b7d4d12ed9ccdc18bd1145a6d6fb1b15e4504b9c5f9abe9ea34a6fb",
+          "wall_ms": 149.307,
+          "active_sampled_ms": 147.74,
+          "idle_sampled_ms": 161.26,
+          "samples": 131
+        },
+        {
+          "name": "native-gemini-payload-3x-1997593-bytes",
+          "repetition": 1,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "64e252f55b7d4d12ed9ccdc18bd1145a6d6fb1b15e4504b9c5f9abe9ea34a6fb",
+          "wall_ms": 151.122,
+          "active_sampled_ms": 149.528,
+          "idle_sampled_ms": 169.785,
+          "samples": 134
+        },
+        {
+          "name": "native-gemini-payload-3x-1997593-bytes",
+          "repetition": 2,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "64e252f55b7d4d12ed9ccdc18bd1145a6d6fb1b15e4504b9c5f9abe9ea34a6fb",
+          "wall_ms": 149.302,
+          "active_sampled_ms": 147.473,
+          "idle_sampled_ms": 157.931,
+          "samples": 130
+        }
+      ],
+      "median_sampled_ms_per_request": {
+        "native-gemini-payload-1x-1997593-bytes": 52.594,
+        "native-gemini-payload-3x-1997593-bytes": 147.74
+      }
+    },
+    {
+      "file_label": "ikimono-payload-native.jsonl",
+      "records": [
+        {
+          "name": "native-gemini-payload-1x-1997593-bytes",
+          "repetition": 0,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "b29d17473fa81b62b39265d9b69147d3a3798c4e45510a32cedacb1734f73618",
+          "wall_ms": 58.913,
+          "active_sampled_ms": 56.876,
+          "idle_sampled_ms": 46.472,
+          "samples": 48
+        },
+        {
+          "name": "native-gemini-payload-1x-1997593-bytes",
+          "repetition": 1,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "b29d17473fa81b62b39265d9b69147d3a3798c4e45510a32cedacb1734f73618",
+          "wall_ms": 55.229,
+          "active_sampled_ms": 53.459,
+          "idle_sampled_ms": 46.848,
+          "samples": 46
+        },
+        {
+          "name": "native-gemini-payload-1x-1997593-bytes",
+          "repetition": 2,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "b29d17473fa81b62b39265d9b69147d3a3798c4e45510a32cedacb1734f73618",
+          "wall_ms": 55.712,
+          "active_sampled_ms": 54.737,
+          "idle_sampled_ms": 47.241,
+          "samples": 47
+        },
+        {
+          "name": "native-gemini-payload-js-1x-1997593-bytes",
+          "repetition": 0,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "b29d17473fa81b62b39265d9b69147d3a3798c4e45510a32cedacb1734f73618",
+          "wall_ms": 83.827,
+          "active_sampled_ms": 82.364,
+          "idle_sampled_ms": 35.84,
+          "samples": 73
+        },
+        {
+          "name": "native-gemini-payload-js-1x-1997593-bytes",
+          "repetition": 1,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "b29d17473fa81b62b39265d9b69147d3a3798c4e45510a32cedacb1734f73618",
+          "wall_ms": 83.605,
+          "active_sampled_ms": 82.21,
+          "idle_sampled_ms": 36.002,
+          "samples": 73
+        },
+        {
+          "name": "native-gemini-payload-js-1x-1997593-bytes",
+          "repetition": 2,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "b29d17473fa81b62b39265d9b69147d3a3798c4e45510a32cedacb1734f73618",
+          "wall_ms": 84.396,
+          "active_sampled_ms": 83.271,
+          "idle_sampled_ms": 36.715,
+          "samples": 75
+        },
+        {
+          "name": "native-gemini-payload-3x-1997593-bytes",
+          "repetition": 0,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "b29d17473fa81b62b39265d9b69147d3a3798c4e45510a32cedacb1734f73618",
+          "wall_ms": 148.335,
+          "active_sampled_ms": 147.126,
+          "idle_sampled_ms": 76.863,
+          "samples": 129
+        },
+        {
+          "name": "native-gemini-payload-3x-1997593-bytes",
+          "repetition": 1,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "b29d17473fa81b62b39265d9b69147d3a3798c4e45510a32cedacb1734f73618",
+          "wall_ms": 153.155,
+          "active_sampled_ms": 151.692,
+          "idle_sampled_ms": 75.088,
+          "samples": 132
+        },
+        {
+          "name": "native-gemini-payload-3x-1997593-bytes",
+          "repetition": 2,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "b29d17473fa81b62b39265d9b69147d3a3798c4e45510a32cedacb1734f73618",
+          "wall_ms": 150.494,
+          "active_sampled_ms": 148.588,
+          "idle_sampled_ms": 76.067,
+          "samples": 132
+        },
+        {
+          "name": "native-gemini-payload-js-3x-1997593-bytes",
+          "repetition": 0,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "b29d17473fa81b62b39265d9b69147d3a3798c4e45510a32cedacb1734f73618",
+          "wall_ms": 250.919,
+          "active_sampled_ms": 249.212,
+          "idle_sampled_ms": 78.078,
+          "samples": 223
+        },
+        {
+          "name": "native-gemini-payload-js-3x-1997593-bytes",
+          "repetition": 1,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "b29d17473fa81b62b39265d9b69147d3a3798c4e45510a32cedacb1734f73618",
+          "wall_ms": 235.357,
+          "active_sampled_ms": 233,
+          "idle_sampled_ms": 78.546,
+          "samples": 212
+        },
+        {
+          "name": "native-gemini-payload-js-3x-1997593-bytes",
+          "repetition": 2,
+          "scope": "local V8 samples, not production CPU",
+          "bundle_sha256": "b29d17473fa81b62b39265d9b69147d3a3798c4e45510a32cedacb1734f73618",
+          "wall_ms": 237.551,
+          "active_sampled_ms": 234.996,
+          "idle_sampled_ms": 83.592,
+          "samples": 212
+        }
+      ],
+      "median_sampled_ms_per_request": {
+        "native-gemini-payload-1x-1997593-bytes": 54.737,
+        "native-gemini-payload-js-1x-1997593-bytes": 82.364,
+        "native-gemini-payload-3x-1997593-bytes": 148.588,
+        "native-gemini-payload-js-3x-1997593-bytes": 234.996
+      }
+    },
+    {
+      "file_label": "ikimono-payload-stream-final.jsonl",
+      "records": [
+        {
+          "name": "js-native-gemini-payload-1x-1997593-bytes",
+          "repetition": 0,
+          "scope": "local V8 samples, not production CPU",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "network_calls": 0,
+          "active_sampled_ms": 518.202,
+          "active_sampled_ms_per_request": 25.91,
+          "wall_ms": 520.332,
+          "samples": 337,
+          "hot_samples": [
+            {
+              "frame": "digest @ ",
+              "sampled_ms": 184.628
+            },
+            {
+              "frame": " @ ",
+              "sampled_ms": 151.505
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 146.979
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 29.759
+            },
+            {
+              "frame": "encode @ ",
+              "sampled_ms": 17.094
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 10.728
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 6.198
+            },
+            {
+              "frame": "arrayBuffer @ ",
+              "sampled_ms": 1.07
+            }
+          ]
+        },
+        {
+          "name": "js-native-gemini-payload-1x-1997593-bytes",
+          "repetition": 1,
+          "scope": "local V8 samples, not production CPU",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "network_calls": 0,
+          "active_sampled_ms": 513.072,
+          "active_sampled_ms_per_request": 25.654,
+          "wall_ms": 514.094,
+          "samples": 326,
+          "hot_samples": [
+            {
+              "frame": "digest @ ",
+              "sampled_ms": 197.161
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 139.465
+            },
+            {
+              "frame": " @ ",
+              "sampled_ms": 121.909
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 27.921
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 17.932
+            },
+            {
+              "frame": "encode @ ",
+              "sampled_ms": 12.924
+            },
+            {
+              "frame": "getAll @ ",
+              "sampled_ms": 11.228
+            },
+            {
+              "frame": "formData @ ",
+              "sampled_ms": 7.437
+            }
+          ]
+        },
+        {
+          "name": "js-native-gemini-payload-1x-1997593-bytes",
+          "repetition": 2,
+          "scope": "local V8 samples, not production CPU",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "network_calls": 0,
+          "active_sampled_ms": 518.479,
+          "active_sampled_ms_per_request": 25.924,
+          "wall_ms": 520.2,
+          "samples": 339,
+          "hot_samples": [
+            {
+              "frame": "digest @ ",
+              "sampled_ms": 201.479
+            },
+            {
+              "frame": " @ ",
+              "sampled_ms": 155.503
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 130.336
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 28.99
+            },
+            {
+              "frame": "encode @ ",
+              "sampled_ms": 15.082
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 11.768
+            },
+            {
+              "frame": "arrayBuffer @ ",
+              "sampled_ms": 2.14
+            },
+            {
+              "frame": "sha256 @ worker.js",
+              "sampled_ms": 1.088
+            }
+          ]
+        },
+        {
+          "name": "js-native-gemini-payload-1x-1997593-bytes",
+          "repetition": 3,
+          "scope": "local V8 samples, not production CPU",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "network_calls": 0,
+          "active_sampled_ms": 509.723,
+          "active_sampled_ms_per_request": 25.486,
+          "wall_ms": 511.178,
+          "samples": 334,
+          "hot_samples": [
+            {
+              "frame": "digest @ ",
+              "sampled_ms": 202.221
+            },
+            {
+              "frame": " @ ",
+              "sampled_ms": 154.133
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 130.846
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 31.767
+            },
+            {
+              "frame": "encode @ ",
+              "sampled_ms": 10.737
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 9.641
+            },
+            {
+              "frame": "arrayBuffer @ ",
+              "sampled_ms": 1.073
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 1.072
+            }
+          ]
+        },
+        {
+          "name": "js-native-gemini-payload-1x-1997593-bytes",
+          "repetition": 4,
+          "scope": "local V8 samples, not production CPU",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "network_calls": 0,
+          "active_sampled_ms": 515.372,
+          "active_sampled_ms_per_request": 25.769,
+          "wall_ms": 522.086,
+          "samples": 340,
+          "hot_samples": [
+            {
+              "frame": "digest @ ",
+              "sampled_ms": 200.087
+            },
+            {
+              "frame": " @ ",
+              "sampled_ms": 141.794
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 133.803
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 34.289
+            },
+            {
+              "frame": "encode @ ",
+              "sampled_ms": 17.214
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 10.712
+            },
+            {
+              "frame": "__facade_invoke__ @ worker.js",
+              "sampled_ms": 8.52
+            },
+            {
+              "frame": "arrayBuffer @ ",
+              "sampled_ms": 2.169
+            }
+          ]
+        },
+        {
+          "name": "js-native-gemini-payload-3x-1997593-bytes",
+          "repetition": 0,
+          "scope": "local V8 samples, not production CPU",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "network_calls": 0,
+          "active_sampled_ms": 1388.214,
+          "active_sampled_ms_per_request": 69.411,
+          "wall_ms": 1397.585,
+          "samples": 1053,
+          "hot_samples": [
+            {
+              "frame": "digest @ ",
+              "sampled_ms": 554.564
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 442.382
+            },
+            {
+              "frame": " @ ",
+              "sampled_ms": 303.83
+            },
+            {
+              "frame": "encode @ ",
+              "sampled_ms": 45.88
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 35.479
+            },
+            {
+              "frame": "__facade_invokeChain__ @ worker.js",
+              "sampled_ms": 8.573
+            },
+            {
+              "frame": "__facade_invoke__ @ worker.js",
+              "sampled_ms": 7.262
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 6.438
+            }
+          ]
+        },
+        {
+          "name": "js-native-gemini-payload-3x-1997593-bytes",
+          "repetition": 1,
+          "scope": "local V8 samples, not production CPU",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "network_calls": 0,
+          "active_sampled_ms": 1461.568,
+          "active_sampled_ms_per_request": 73.078,
+          "wall_ms": 1462.865,
+          "samples": 1078,
+          "hot_samples": [
+            {
+              "frame": "digest @ ",
+              "sampled_ms": 574.693
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 451.277
+            },
+            {
+              "frame": " @ ",
+              "sampled_ms": 343.464
+            },
+            {
+              "frame": "encode @ ",
+              "sampled_ms": 45.503
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 29.45
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 28.358
+            },
+            {
+              "frame": "arrayBuffer @ ",
+              "sampled_ms": 6.476
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 5.357
+            }
+          ]
+        },
+        {
+          "name": "js-native-gemini-payload-3x-1997593-bytes",
+          "repetition": 2,
+          "scope": "local V8 samples, not production CPU",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "network_calls": 0,
+          "active_sampled_ms": 1418.226,
+          "active_sampled_ms_per_request": 70.911,
+          "wall_ms": 1420.29,
+          "samples": 1062,
+          "hot_samples": [
+            {
+              "frame": "digest @ ",
+              "sampled_ms": 564.879
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 443.564
+            },
+            {
+              "frame": " @ ",
+              "sampled_ms": 321.682
+            },
+            {
+              "frame": "encode @ ",
+              "sampled_ms": 42.535
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 28.797
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 28.28
+            },
+            {
+              "frame": "arrayBuffer @ ",
+              "sampled_ms": 10.82
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 4.884
+            }
+          ]
+        },
+        {
+          "name": "js-native-gemini-payload-3x-1997593-bytes",
+          "repetition": 3,
+          "scope": "local V8 samples, not production CPU",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "network_calls": 0,
+          "active_sampled_ms": 1370.792,
+          "active_sampled_ms_per_request": 68.54,
+          "wall_ms": 1386.117,
+          "samples": 1057,
+          "hot_samples": [
+            {
+              "frame": "digest @ ",
+              "sampled_ms": 562.789
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 437.053
+            },
+            {
+              "frame": " @ ",
+              "sampled_ms": 267.836
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 44.002
+            },
+            {
+              "frame": "encode @ ",
+              "sampled_ms": 43.369
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 41.48
+            },
+            {
+              "frame": "arrayBuffer @ ",
+              "sampled_ms": 5.393
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 5.382
+            }
+          ]
+        },
+        {
+          "name": "js-native-gemini-payload-3x-1997593-bytes",
+          "repetition": 4,
+          "scope": "local V8 samples, not production CPU",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "network_calls": 0,
+          "active_sampled_ms": 1402.065,
+          "active_sampled_ms_per_request": 70.103,
+          "wall_ms": 1403.847,
+          "samples": 1055,
+          "hot_samples": [
+            {
+              "frame": "digest @ ",
+              "sampled_ms": 561.156
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 436.342
+            },
+            {
+              "frame": " @ ",
+              "sampled_ms": 288.631
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 59.372
+            },
+            {
+              "frame": "encode @ ",
+              "sampled_ms": 44.803
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 29.201
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 4.278
+            },
+            {
+              "frame": "arrayBuffer @ ",
+              "sampled_ms": 3.214
+            }
+          ]
+        },
+        {
+          "name": "js-wire-forward-1x-1997593-bytes",
+          "repetition": 0,
+          "scope": "local V8 samples, not production CPU; forwarding only, no validation/auth/network",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "wire_sha256": "0b7b6a599e6a4cf752acde2d0df742956b842d7ab5b1afd1c170df94aaf23e38",
+          "network_calls": 0,
+          "active_sampled_ms": 1521.895,
+          "active_sampled_ms_per_request": 76.095,
+          "wall_ms": 1929.463,
+          "samples": 479,
+          "hot_samples": [
+            {
+              "frame": " @ ",
+              "sampled_ms": 846.064
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 579.065
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 431.16
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 75.776
+            },
+            {
+              "frame": "pipeThrough @ ",
+              "sampled_ms": 20.99
+            }
+          ]
+        },
+        {
+          "name": "js-wire-forward-1x-1997593-bytes",
+          "repetition": 1,
+          "scope": "local V8 samples, not production CPU; forwarding only, no validation/auth/network",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "wire_sha256": "0b7b6a599e6a4cf752acde2d0df742956b842d7ab5b1afd1c170df94aaf23e38",
+          "network_calls": 0,
+          "active_sampled_ms": 1488.054,
+          "active_sampled_ms_per_request": 74.403,
+          "wall_ms": 1862.322,
+          "samples": 412,
+          "hot_samples": [
+            {
+              "frame": " @ ",
+              "sampled_ms": 894.552
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 594.505
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 560.434
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 27.733
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 5.335
+            }
+          ]
+        },
+        {
+          "name": "js-wire-forward-1x-1997593-bytes",
+          "repetition": 2,
+          "scope": "local V8 samples, not production CPU; forwarding only, no validation/auth/network",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "wire_sha256": "0b7b6a599e6a4cf752acde2d0df742956b842d7ab5b1afd1c170df94aaf23e38",
+          "network_calls": 0,
+          "active_sampled_ms": 1572.804,
+          "active_sampled_ms_per_request": 78.64,
+          "wall_ms": 1816.634,
+          "samples": 402,
+          "hot_samples": [
+            {
+              "frame": " @ ",
+              "sampled_ms": 838.671
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 676.927
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 377.059
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 33.059
+            },
+            {
+              "frame": "pipeThrough @ ",
+              "sampled_ms": 16.637
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 7.51
+            }
+          ]
+        },
+        {
+          "name": "js-wire-forward-1x-1997593-bytes",
+          "repetition": 3,
+          "scope": "local V8 samples, not production CPU; forwarding only, no validation/auth/network",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "wire_sha256": "0b7b6a599e6a4cf752acde2d0df742956b842d7ab5b1afd1c170df94aaf23e38",
+          "network_calls": 0,
+          "active_sampled_ms": 1470.555,
+          "active_sampled_ms_per_request": 73.528,
+          "wall_ms": 1844.155,
+          "samples": 413,
+          "hot_samples": [
+            {
+              "frame": " @ ",
+              "sampled_ms": 870.378
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 546.865
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 453.944
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 38.358
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 14.954
+            }
+          ]
+        },
+        {
+          "name": "js-wire-forward-1x-1997593-bytes",
+          "repetition": 4,
+          "scope": "local V8 samples, not production CPU; forwarding only, no validation/auth/network",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "wire_sha256": "0b7b6a599e6a4cf752acde2d0df742956b842d7ab5b1afd1c170df94aaf23e38",
+          "network_calls": 0,
+          "active_sampled_ms": 1492.439,
+          "active_sampled_ms_per_request": 74.622,
+          "wall_ms": 1903.352,
+          "samples": 472,
+          "hot_samples": [
+            {
+              "frame": " @ ",
+              "sampled_ms": 900.254
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 547.38
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 451.87
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 38.456
+            },
+            {
+              "frame": "TransformStream @ ",
+              "sampled_ms": 6.349
+            }
+          ]
+        },
+        {
+          "name": "js-wire-forward-3x-1997593-bytes",
+          "repetition": 0,
+          "scope": "local V8 samples, not production CPU; forwarding only, no validation/auth/network",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "wire_sha256": "4b4d609e9c433357534e435921deb39637a08ea7a7ee8dba016451a2ad9bb767",
+          "network_calls": 0,
+          "active_sampled_ms": 4367.1,
+          "active_sampled_ms_per_request": 218.355,
+          "wall_ms": 5406.934,
+          "samples": 1239,
+          "hot_samples": [
+            {
+              "frame": " @ ",
+              "sampled_ms": 2559.893
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 1723.746
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 1063.621
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 64.171
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 9.65
+            },
+            {
+              "frame": "set supportedEntryTypes @ ",
+              "sampled_ms": 9.64
+            }
+          ]
+        },
+        {
+          "name": "js-wire-forward-3x-1997593-bytes",
+          "repetition": 1,
+          "scope": "local V8 samples, not production CPU; forwarding only, no validation/auth/network",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "wire_sha256": "4b4d609e9c433357534e435921deb39637a08ea7a7ee8dba016451a2ad9bb767",
+          "network_calls": 0,
+          "active_sampled_ms": 4338.555,
+          "active_sampled_ms_per_request": 216.928,
+          "wall_ms": 5384.119,
+          "samples": 1250,
+          "hot_samples": [
+            {
+              "frame": " @ ",
+              "sampled_ms": 2627.804
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 1588.816
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 1169.671
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 110.075
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 11.86
+            }
+          ]
+        },
+        {
+          "name": "js-wire-forward-3x-1997593-bytes",
+          "repetition": 2,
+          "scope": "local V8 samples, not production CPU; forwarding only, no validation/auth/network",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "wire_sha256": "4b4d609e9c433357534e435921deb39637a08ea7a7ee8dba016451a2ad9bb767",
+          "network_calls": 0,
+          "active_sampled_ms": 4271.136,
+          "active_sampled_ms_per_request": 213.557,
+          "wall_ms": 5381.016,
+          "samples": 1261,
+          "hot_samples": [
+            {
+              "frame": " @ ",
+              "sampled_ms": 2564.863
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 1603.254
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 1112.903
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 103.019
+            }
+          ]
+        },
+        {
+          "name": "js-wire-forward-3x-1997593-bytes",
+          "repetition": 3,
+          "scope": "local V8 samples, not production CPU; forwarding only, no validation/auth/network",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "wire_sha256": "4b4d609e9c433357534e435921deb39637a08ea7a7ee8dba016451a2ad9bb767",
+          "network_calls": 0,
+          "active_sampled_ms": 4278.565,
+          "active_sampled_ms_per_request": 213.928,
+          "wall_ms": 5425.164,
+          "samples": 1302,
+          "hot_samples": [
+            {
+              "frame": " @ ",
+              "sampled_ms": 2443.429
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 1692.098
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 1254.379
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 117.728
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 15.231
+            },
+            {
+              "frame": "TransformStream @ ",
+              "sampled_ms": 10.079
+            }
+          ]
+        },
+        {
+          "name": "js-wire-forward-3x-1997593-bytes",
+          "repetition": 4,
+          "scope": "local V8 samples, not production CPU; forwarding only, no validation/auth/network",
+          "source_sha256": "0330479cc731a1ded09e2fd2d0050d3b73af1fd6d69c835be7c37de61b5abaab",
+          "python_bundle_sha256": "93553eff6f2b8639dcc23574a29efad074a6fbb1e0be470aed695685ac9608bb",
+          "status": 200,
+          "checked_requests": 20,
+          "photo_sha256": "0132c57ed5d59623f2984d8f3799513de84d434f48a43173888cd8897747a1a3",
+          "wire_sha256": "4b4d609e9c433357534e435921deb39637a08ea7a7ee8dba016451a2ad9bb767",
+          "network_calls": 0,
+          "active_sampled_ms": 4322.183,
+          "active_sampled_ms_per_request": 216.109,
+          "wall_ms": 5462.646,
+          "samples": 1295,
+          "hot_samples": [
+            {
+              "frame": " @ ",
+              "sampled_ms": 2602.366
+            },
+            {
+              "frame": "(program) @ ",
+              "sampled_ms": 1611.867
+            },
+            {
+              "frame": "(idle) @ ",
+              "sampled_ms": 1135.721
+            },
+            {
+              "frame": "(garbage collector) @ ",
+              "sampled_ms": 72.563
+            },
+            {
+              "frame": "fetch @ worker.js",
+              "sampled_ms": 13.872
+            },
+            {
+              "frame": "pipeThrough @ ",
+              "sampled_ms": 11.796
+            },
+            {
+              "frame": "TransformStream @ ",
+              "sampled_ms": 9.719
+            }
+          ]
+        }
+      ],
+      "median_sampled_ms_per_request": {
+        "js-native-gemini-payload-1x-1997593-bytes": 25.769,
+        "js-native-gemini-payload-3x-1997593-bytes": 70.103,
+        "js-wire-forward-1x-1997593-bytes": 74.622,
+        "js-wire-forward-3x-1997593-bytes": 216.109
+      }
+    }
+  ]
+}

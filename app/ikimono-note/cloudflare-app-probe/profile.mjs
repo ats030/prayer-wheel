@@ -55,7 +55,7 @@ const cases=[
   ['html',()=>request('/')],
   ['heic-decoder-asset',()=>request('/vendor/photo/libheif.mjs')],
 ];
-for(const count of [1,3])for(const parser of ['identify','native-upload','native-identify','native-gemini-payload'])cases.push([`${parser}-${count}x-${jpeg.length}-bytes`,async()=>{
+for(const count of [1,3])for(const parser of ['identify','native-upload','native-identify','native-gemini-payload','native-gemini-payload-js'])cases.push([`${parser}-${count}x-${jpeg.length}-bytes`,async()=>{
   const form=new FormData();
   for(let i=0;i<count;i++)form.append('files',new Blob([jpeg],{type:'image/jpeg'}),`synthetic-${i}.jpg`);
   form.append('client_photos',JSON.stringify(Array.from({length:count},()=>({metadata:{},measured}))));
