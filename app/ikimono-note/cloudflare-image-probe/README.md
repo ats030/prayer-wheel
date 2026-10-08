@@ -3,6 +3,7 @@
 `pillow-heif` を除いたPillow単独のローカル検証です。本番へデプロイしないでください。
 秘密・利用者データ・本番モジュールを読みません。入力は合成画像だけです。
 既存の `docs/tool-license-python-workers-probe.yaml` の条件を適用します。
+Workerの収集対象は `src` に限定し、仮想環境と検証スクリプトは含めません。
 
 ## 再現
 
@@ -28,6 +29,11 @@ Wrangler 4.148.0、FastAPI 0.136.1を使用しました。
 JPEGとPNGの2000×1200合成画像に撮影日時とorientation=6を埋め込み、
 デコード、撮影日時取得、向き補正、960×1600への縮小、JPEG再圧縮、
 出力のEXIF除去を確認しました。入力にEXIFがあり、出力では空になることをassertします。
+
+Wrangler dry-runも成功し、未圧縮11595.15 KiB、gzip 3091.58 KiBでした。
+2026-10-08確認の[公式制限](https://developers.cloudflare.com/workers/platform/limits/)は
+Freeも未圧縮64 MiB、圧縮サイズ制限なしです。容量上限は超えていませんが、
+CPU 10 ms、メモリ128 MB、起動時間の検証は残っています。
 
 これは `pillow-heif` のwheel不足とPillow全体の不適合を区別する検証です。
 HEIC、GPS、実写真、画質判定、CPU/メモリ、公開環境、Workers Freeへの適合は未検証です。
