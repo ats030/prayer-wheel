@@ -156,3 +156,38 @@ only the operator credential file changed, retaining mode 0600. No credential
 values were printed or committed. Automatic refresh in the launcher remains
 unimplemented. No deployment, user-data migration, public switch, paid-plan
 change, or old-service shutdown occurred.
+
+## Local runtime decomposition — 2026-10-09 JST
+
+Added localhost-only diagnostic comparisons to the existing synthetic app probe.
+The production preview was not changed or deployed. The local bundle was
+`c7c06d8155ab873cf3f9c54d7e90b75523105eb361de4d5c4e1ac2e05bee334c`;
+all 14 assembled app modules remained byte-identical to the originals.
+
+Eight cases, five alternating-order rounds, and 20 requests per capture produced
+40 complete captures / 800 checked HTTP200 responses. Median local active sampled
+time per request: native Python response 4.924ms, minimal ASGI 6.063ms, minimal
+FastAPI async/sync 5.938/6.154ms, existing health/me router plus required cleanup
+stack 5.975/5.930ms, full app health/me 9.928/9.849ms. The full app retains its
+original middleware. The probe-specific revision middleware was removed from
+the comparison; revision headers remain on ordinary `/health` responses.
+
+These are local Inspector samples at 1000µs intervals, not production CPU
+accounting. The roughly 4ms difference between router and full app identifies
+app wrapping as a candidate for further investigation, without allocating the
+difference to individual middleware or exception handling. The local probe has
+no Google OAuth configuration and does not reproduce the preview's Basic auth,
+isolate initialization, AI identification, photo transfer, or memory use. It
+does not explain production 200–300ms requests or the prior HTTP500. Full results,
+method and limitations are in the
+[local probe README](../cloudflare-app-probe/README.md#python--asgi--アプリ全体の切り分け).
+
+Validation passed: 58 public resources/API/header/HEAD/D1-read boundaries;
+original and native-parsed synthetic identification hashes/metadata/input
+rejections; missing secret/DB startup refusal; profiling disabled rejects all
+eight runtime diagnostics; diagnostic POST404 and nonlocal Host403. Medium code
+review flagged single-request profiling quantization; batching 20 requests per
+capture addressed it, the repeated measurement passed, and a medium follow-up
+review reported no concrete remaining correctness issue. No real AI calls or
+user data were used. This is internal diagnostic work, with no public changelog
+or production behavior change.

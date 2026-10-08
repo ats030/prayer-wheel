@@ -35,6 +35,26 @@ from fastapi.routing import APIRoute, request_response
 SYNTHETIC_AI = str(getattr(env, "IKIMONO_SYNTHETIC_AI", "")) == "1"
 PROFILE_IO = SYNTHETIC_AI and str(getattr(env, "IKIMONO_PROFILE_IO", "")) == "1"
 
+if PROFILE_IO:
+    from fastapi import FastAPI
+    from fastapi.middleware.asyncexitstack import AsyncExitStackMiddleware
+    runtime_app = FastAPI()
+    # FastAPI requires its file-cleanup stack even without app middleware.
+    runtime_router = AsyncExitStackMiddleware(app.router)
+
+    @runtime_app.get("/async-health")
+    async def runtime_async_health():
+        return {"ok": True}
+
+    @runtime_app.get("/sync-health")
+    def runtime_sync_health():
+        return {"ok": True}
+
+    async def runtime_asgi_health(scope, receive, send):
+        await send({"type": "http.response.start", "status": 200,
+                    "headers": [(b"content-type", b"application/json")]})
+        await send({"type": "http.response.body", "body": b'{"ok":true}'})
+
 
 def cached_form_handler(handler):
     async def handle(request):
@@ -70,22 +90,22 @@ if SYNTHETIC_AI:
     main.image_quality.judge = forbid_pixel_processing
 
 
-@app.middleware("http")
-async def probe_revision(request, call_next):
-    response = await call_next(request)
-    if request.url.path == "/health":
-        response.headers["X-Probe-Bundle-SHA256"] = BUNDLE_SHA256
-        response.headers["X-Probe-Synthetic-AI"] = "1" if SYNTHETIC_AI else "0"
-        response.headers["X-Probe-Profile-IO"] = "1" if PROFILE_IO else "0"
-    return response
-
-
 class Default(asgi.entrypoint(app)):
     async def fetch(self, request):
         from urllib.parse import urlsplit
         url = urlsplit(request.url)
         if not url.path.startswith("/probe/profile/"):
-            return await super().fetch(request)
+            result = await super().fetch(request)
+            if url.path == "/health":
+                import js
+                from workers import Response
+                native = result.js_object if isinstance(result, Response) else result
+                response = js.Response.new(native.body, native)
+                response.headers.set("X-Probe-Bundle-SHA256", BUNDLE_SHA256)
+                response.headers.set("X-Probe-Synthetic-AI", "1" if SYNTHETIC_AI else "0")
+                response.headers.set("X-Probe-Profile-IO", "1" if PROFILE_IO else "0")
+                return Response(response)
+            return result
         from workers import Response
         if (not PROFILE_IO
                 or url.hostname not in {"localhost", "127.0.0.1"}
@@ -96,6 +116,21 @@ class Default(asgi.entrypoint(app)):
         from hashlib import sha256
         if url.path == "/probe/profile/native-health" and request.method == "GET":
             return Response.from_json({"ok": True})
+        runtime_routes = {
+            "/probe/profile/asgi-health": (runtime_asgi_health, "/health"),
+            "/probe/profile/fastapi-async-health": (runtime_app, "/async-health"),
+            "/probe/profile/fastapi-sync-health": (runtime_app, "/sync-health"),
+            "/probe/profile/router-health": (runtime_router, "/health"),
+            "/probe/profile/router-me": (runtime_router, "/api/me"),
+            "/probe/profile/full-health": (app, "/health"),
+            "/probe/profile/full-me": (app, "/api/me"),
+        }
+        if url.path in runtime_routes and request.method == "GET":
+            from workers import Request
+            target, path = runtime_routes[url.path]
+            forwarded = Request(f"{url.scheme}://{url.netloc}{path}",
+                                headers=dict(request.headers.items()))
+            return await asgi.fetch(target, forwarded, self.env, self.ctx)
         if url.path in {"/probe/profile/native-upload", "/probe/profile/native-identify", "/probe/profile/native-gemini-payload", "/probe/profile/native-gemini-payload-checked"} and request.method == "POST":
             length = request.headers.get("content-length", "")
             if not length.isdigit() or int(length) > 6 * 1024 * 1024 + 16384:

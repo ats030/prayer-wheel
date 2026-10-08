@@ -57,13 +57,17 @@ def check_startup():
                                 with urlopen("http://localhost:8794/health", timeout=1) as response:
                                     ready = response.status == 200 and response.headers.get("X-Probe-Profile-IO") == "0"
                                 if ready:
-                                    try:
-                                        urlopen("http://localhost:8794/probe/profile/native-health", timeout=1)
-                                    except HTTPError as error:
-                                        assert error.code == 403
-                                        print("PASS: profiling flag OFF rejects diagnostic routes", flush=True)
-                                        break
-                                    raise AssertionError("Disabled profile route accepted")
+                                    for route in ("native-health", "asgi-health", "fastapi-async-health",
+                                                  "fastapi-sync-health", "router-health", "router-me",
+                                                  "full-health", "full-me"):
+                                        try:
+                                            urlopen("http://localhost:8794/probe/profile/" + route, timeout=1)
+                                        except HTTPError as error:
+                                            assert error.code == 403, route
+                                        else:
+                                            raise AssertionError("Disabled profile route accepted: " + route)
+                                    print("PASS: profiling flag OFF rejects all 8 runtime diagnostics", flush=True)
+                                    break
                             except (URLError, TimeoutError):
                                 pass
                         elif message in text:
