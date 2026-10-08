@@ -44,6 +44,8 @@ const cases = [
   ['full-health', '/probe/profile/full-health'],
   ['router-me', '/probe/profile/router-me'],
   ['full-me', '/probe/profile/full-me'],
+  ['optimized-health', '/probe/profile/optimized-health'],
+  ['optimized-me', '/probe/profile/optimized-me'],
 ];
 const expectedMe = await timedFetch(origin + '/api/me').then(r => {
   assert.equal(r.status, 200); return r.json();

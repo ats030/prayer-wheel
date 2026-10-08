@@ -13,7 +13,8 @@
     "photo_archive.py",
     "protected_species.py",
     "bundled_resources.py",
-    "prepared_photos.py"
+    "prepared_photos.py",
+    "worker_middleware.py"
   ],
   "resources": [
     "data/protected_species.json",

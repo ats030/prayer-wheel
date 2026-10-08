@@ -36,11 +36,15 @@ SYNTHETIC_AI = str(getattr(env, "IKIMONO_SYNTHETIC_AI", "")) == "1"
 PROFILE_IO = SYNTHETIC_AI and str(getattr(env, "IKIMONO_PROFILE_IO", "")) == "1"
 
 if PROFILE_IO:
+    from copy import copy
+    import worker_middleware
     from fastapi import FastAPI
     from fastapi.middleware.asyncexitstack import AsyncExitStackMiddleware
     runtime_app = FastAPI()
     # FastAPI requires its file-cleanup stack even without app middleware.
     runtime_router = AsyncExitStackMiddleware(app.router)
+    runtime_optimized = copy(app)
+    worker_middleware.prepare(runtime_optimized, main)
 
     @runtime_app.get("/async-health")
     async def runtime_async_health():
@@ -124,6 +128,8 @@ class Default(asgi.entrypoint(app)):
             "/probe/profile/router-me": (runtime_router, "/api/me"),
             "/probe/profile/full-health": (app, "/health"),
             "/probe/profile/full-me": (app, "/api/me"),
+            "/probe/profile/optimized-health": (runtime_optimized, "/health"),
+            "/probe/profile/optimized-me": (runtime_optimized, "/api/me"),
         }
         if url.path in runtime_routes and request.method == "GET":
             from workers import Request
