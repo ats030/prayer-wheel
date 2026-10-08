@@ -88,7 +88,11 @@ def judge(data: bytes) -> dict[str, object]:
     弾くのは、何が写っているか分からない場合だけにする。迷う程度のものまで
     止めると、条件の悪い場所でしか会えない生きものを調べられなくなる。
     """
-    measured = measure(data)
+    return judge_measured(measure(data))
+
+
+def judge_measured(measured: dict) -> dict[str, object]:
+    """Apply the same guidance to native or bounded browser measurements."""
     edge = min(measured["width"], measured["height"])
     problems: list[dict[str, str]] = []
 

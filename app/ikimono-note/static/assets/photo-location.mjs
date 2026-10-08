@@ -30,6 +30,7 @@ export async function photoFingerprint(file) {
 }
 
 export async function readOriginalZip(file) {
+  if(document.body.dataset.browserPhotos === "1")return (await import("./photo-browser.mjs")).originalFromZip(file);
   if (file.size > 15 * 1024 * 1024) throw new Error("ZIPは15MB以下にしてください");
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000);
@@ -62,6 +63,7 @@ export async function readOriginalZip(file) {
 }
 
 export async function readPhotoLocation(files) {
+  if(document.body.dataset.browserPhotos === "1")return (await import("./photo-browser.mjs")).metadataForPhotos(files);
   // The original ZIP response already read EXIF from these same bytes. Avoid a second upload.
   if (files.length && files.every(file => originalMetadata.has(file))) {
     const combined = {};

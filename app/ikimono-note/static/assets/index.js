@@ -6,6 +6,10 @@ const $=id=>document.getElementById(id);let plantnetReady=false;let affiliate=nu
    identify 側はこの Promise を待ってから座標を確定する */
 let locationReady=Promise.resolve();
 let photoSelection=0;
+let photoInputReady=Promise.resolve();
+let previewSelection=0;
+const browserPhotos=()=>document.body.dataset.browserPhotos==="1";
+function queueBrowserSelection(files,append){const snapshot=[...files];photoInputReady=photoInputReady.then(async()=>{const {normalizePhotos}=await import("/assets/photo-browser.mjs");const chosen=await normalizePhotos(snapshot);if(append)addFilesNow(chosen);else setFilesNow(chosen);await locationReady}).catch(error=>showStatus(error.message,true));return photoInputReady}
 let captureLocationPicker=null;
 const locationPickerReady=import('/assets/location-picker.mjs').then(({createLocationPicker,locationLabel})=>{
   captureLocationPicker=createLocationPicker($('captureLocation'),{onChange(point){
@@ -49,15 +53,17 @@ if(window.speciesTrial&&!readApiKey(window.speciesTrial.provider)&&!readApiKey(p
 window.speciesRuntimeModel=model;
   showTrialNote(data);plantnetReady=Boolean(data.api_key_configured.plantnet||(window.speciesPublicMode&&readApiKey("plantnet")));affiliate=data.affiliate;document.getElementById("affiliateDisclosure").classList.toggle("hidden",!affiliate.enabled);document.getElementById("plantnetOption").classList.toggle("hidden",!plantnetReady);if(plantnetReady)$("usePlantnet").checked=true;$("providerStatus").textContent=providerName+" · "+model+(provider==="local"?" · LAN内のOllamaへ送ります":" · 写真は保存しません")}catch(e){showStatus("設定を読み込めませんでした。",true)}}
 const MAX_PHOTOS=3;let previewUrls=[];
-function renderPreviews(){previewUrls.forEach(URL.revokeObjectURL);previewUrls=selected.map(file=>URL.createObjectURL(file));document.body.classList.add("has-selection");/* 枚数で列を変える。3列固定だと、1枚のときも横幅の3分の1しか使わない。 携帯では110pxほどになり、ピントや被写体の位置を確かめられない */previews.className="previews count-"+selected.length;previews.innerHTML=previewUrls.map((url,index)=>'<div class="preview-item"><img class="preview" src="'+url+'" alt="調べる写真 '+(index+1)+'"><button class="btn preview-remove" type="button" data-index="'+index+'">この写真を外す</button></div>').join("");previews.querySelectorAll(".preview-remove").forEach(button=>button.onclick=()=>removeSelectedPhoto(Number(button.dataset.index)));$("previewEmpty").classList.add("hidden");identify.classList.remove("hidden");$("captureTitle").textContent=selected.length+"枚の写真を選択中"}
+async function renderPreviews(){const revision=++previewSelection;const snapshot=[...selected];let photos=snapshot;if(browserPhotos()){try{const {preparePhoto}=await import("/assets/photo-browser.mjs");photos=await Promise.all(snapshot.map(async file=>(await preparePhoto(file)).photo));if(revision!==previewSelection)return}catch(error){if(revision===previewSelection)showStatus(error.message,true);return}}previewUrls.forEach(URL.revokeObjectURL);previewUrls=photos.map(file=>URL.createObjectURL(file));document.body.classList.add("has-selection");/* 枚数で列を変える。3列固定だと、1枚のときも横幅の3分の1しか使わない。 携帯では110pxほどになり、ピントや被写体の位置を確かめられない */previews.className="previews count-"+selected.length;previews.innerHTML=previewUrls.map((url,index)=>'<div class="preview-item"><img class="preview" src="'+url+'" alt="調べる写真 '+(index+1)+'"><button class="btn preview-remove" type="button" data-index="'+index+'">この写真を外す</button></div>').join("");previews.querySelectorAll(".preview-remove").forEach(button=>button.onclick=()=>removeSelectedPhoto(Number(button.dataset.index)));$("previewEmpty").classList.add("hidden");identify.classList.remove("hidden");$("captureTitle").textContent=selected.length+"枚の写真を選択中"}
 function removeSelectedPhoto(index){if(selected.length<=1){showStatus("調べる写真は1枚以上必要です。",true);return}setFiles(selected.filter((_,i)=>i!==index))}
-function setFiles(files){const chosen=[...files].filter(file=>file.type.startsWith("image/"));if(!chosen.length){showStatus("画像ファイルを選んでください。",true);return}if(chosen.length>MAX_PHOTOS){showStatus("写真は最大"+MAX_PHOTOS+"枚です。",true);return}selected=chosen;gps=null;captureLocationPicker?.reset();$("captureLocation").classList.remove("hidden");renderPreviews();showStatus("写真の情報を確認しています。",false,true);locationReady=readPhotoMetadata(chosen)}
+function setFiles(files){if(browserPhotos())return queueBrowserSelection(files,false);setFilesNow(files)}
+function setFilesNow(files){const chosen=[...files].filter(file=>browserPhotos()||file.type.startsWith("image/"));if(!chosen.length){showStatus("画像ファイルを選んでください。",true);return}if(chosen.length>MAX_PHOTOS){showStatus("写真は最大"+MAX_PHOTOS+"枚です。",true);return}selected=chosen;gps=null;captureLocationPicker?.reset();$("captureLocation").classList.remove("hidden");renderPreviews();showStatus("写真の情報を確認しています。",false,true);locationReady=readPhotoMetadata(chosen)}
 /* 足すときは、いま選んでいる写真を残す。置き換えると、最初に撮った全体像が消えて
    候補が振り出しに戻る。「もっと確かめたいこと」を読んで撮り足す人が欲しいのは、
    全体像に寄りの1枚を加えた組であって、寄りの1枚だけではない。
    場所は追加後の写真から読み直し、外した写真の位置を残さない。 */
-function addFiles(files){
-  const chosen=[...files].filter(file=>file.type.startsWith("image/"));
+function addFiles(files){if(browserPhotos())return queueBrowserSelection(files,true);addFilesNow(files)}
+function addFilesNow(files){
+  const chosen=[...files].filter(file=>browserPhotos()||file.type.startsWith("image/"));
   if(!chosen.length){showStatus("画像ファイルを選んでください。",true);return}
   if(!selected.length){setFiles(chosen);return}
   const room=MAX_PHOTOS-selected.length;
@@ -102,6 +108,7 @@ async function readPhotoMetadata(files){
 }
 
 async function waitForPhotoLocation(){
+  let input;do{input=photoInputReady;await input}while(input!==photoInputReady);
   let pending;
   do{pending=locationReady;await pending}while(pending!==locationReady);
 }
@@ -329,7 +336,7 @@ identify.onclick=async()=>{
   const startedAt=Date.now();
   showWorking(startedAt);
   const fd=new FormData();
-  files.forEach(file=>fd.append("files",file));
+  if(!browserPhotos())files.forEach(file=>fd.append("files",file));
   fd.append("background","true");
   fd.append("location",$("location").value);
   fd.append("observed_date",$("observedDate").value);
@@ -342,8 +349,9 @@ identify.onclick=async()=>{
     fd.append("request_api_key",readApiKey(provider));
     fd.append("request_plantnet_key",readApiKey("plantnet"));
   }
-  const photos=await pendingPhotos(files);
   try{
+    const photos=await pendingPhotos(files);
+    if(browserPhotos()){const {appendPreparedPhotos}=await import("/assets/photo-browser.mjs");await appendPreparedPhotos(fd,files)}
     /* 公開版で「手元のAI」を選んだときは、写真をサーバーへ送らない。ブラウザから
        その場の Ollama を直接呼び、返ってきた本文だけをサーバーで仕上げる。
        プロンプトと仕上げ (証拠ゲート・種の保存法) はサーバーに1つだけ置き、

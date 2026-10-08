@@ -120,8 +120,9 @@ def ollama_models(ollama_url: str = OLLAMA_URL) -> tuple[list[dict[str, str]], l
 def model_catalog(
     current_local: str | None = None,
     ollama_url: str = OLLAMA_URL,
+    *, include_local: bool = True,
 ) -> tuple[dict[str, list[dict[str, str]]], list[str]]:
-    local, incompatible = ollama_models(ollama_url)
+    local, incompatible = ollama_models(ollama_url) if include_local else ([], [])
     if not local:
         fallback = current_local or DEFAULT_MODELS["local"]
         local = [{"id": fallback, "label": f"{fallback}（保存済み）"}]
@@ -180,9 +181,9 @@ def load() -> dict[str, Any]:
     return data
 
 
-def public(data: dict[str, Any] | None = None) -> dict[str, Any]:
+def public(data: dict[str, Any] | None = None, *, include_local: bool = True) -> dict[str, Any]:
     data = data or load()
-    catalog, incompatible = model_catalog(data["models"]["local"], data["local_llm"]["url"])
+    catalog, incompatible = model_catalog(data["models"]["local"], data["local_llm"]["url"], include_local=include_local)
     return {
         "provider": data["provider"],
         "models": data["models"],

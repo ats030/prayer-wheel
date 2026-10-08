@@ -8,6 +8,7 @@
   ],
   "workers_dev": false,
   "vars": {
+    "IKIMONO_SYNTHETIC_AI": "1",
     "IKIMONO_SESSION_SECRET": "synthetic-local-app-probe-never-deploy",
     "IKIMONO_ALLOWED_HOSTS": "localhost,127.0.0.1",
     "IKIMONO_PUBLIC_ORIGIN": "http://localhost:8793"

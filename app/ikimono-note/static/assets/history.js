@@ -282,17 +282,17 @@ function addRerunControls(){
     const camera=document.createElement("input");
     camera.type="file";camera.accept="image/*";camera.capture="environment";camera.hidden=true;
     const library=document.createElement("input");
-    library.type="file";library.accept="image/*";library.multiple=true;library.hidden=true;
+    library.type="file";library.accept=document.body.dataset.browserPhotos==="1"?"image/*,.heic,.heif,.zip":"image/*";library.multiple=true;library.hidden=true;
     box.append(camera,library);detail.append(box);
 
-    const keptIndexes=originals.map((_,index)=>index),extras=[];let urls=[];
+    const keptIndexes=originals.map((_,index)=>index),extras=[];const preparedPreviews=new WeakMap();let urls=[];
     const message=box.querySelector(".rerun-message");
     const say=text=>{message.textContent=text;message.hidden=!text};
     const paint=()=>{
       urls.forEach(URL.revokeObjectURL);
       const items=[...keptIndexes.map(index=>({file:originals[index],kind:"original",index,label:"元の写真"})),
                    ...extras.map((file,index)=>({file,kind:"extra",index,label:"足した写真"}))];
-      urls=items.map(item=>URL.createObjectURL(item.file));
+      urls=items.map(item=>URL.createObjectURL(preparedPreviews.get(item.file)||item.file));
       box.querySelector(".rerun-previews").innerHTML=items.map((item,i)=>
         '<div class="rerun-preview"><img src="'+urls[i]+'" alt="'+item.label+' '+(i+1)+'">'
         +'<button class="btn rerun-remove" type="button" data-kind="'+item.kind+'" data-index="'+item.index+'">この写真を外す</button></div>').join("");
@@ -307,14 +307,16 @@ function addRerunControls(){
       box.querySelector(".rerun-camera").disabled=full;
       box.querySelector(".rerun-library").disabled=full;
     };
-    const add=files=>{
-      const chosen=[...files].filter(file=>file.type.startsWith("image/"));
+    const add=async files=>{try{
+      const snapshot=[...files];
+      const chosen=document.body.dataset.browserPhotos==="1"?await(await import("/assets/photo-browser.mjs")).normalizePhotos(snapshot):snapshot.filter(file=>file.type.startsWith("image/"));
       if(!chosen.length){say("画像ファイルを選んでください。");return}
       const room=RERUN_MAX_PHOTOS-keptIndexes.length-extras.length;
       if(room<=0){say("合わせて"+RERUN_MAX_PHOTOS+"枚までです。写真を外すと別の写真を足せます。");return}
+      if(document.body.dataset.browserPhotos==="1"){const {preparePhoto}=await import("/assets/photo-browser.mjs");for(const file of chosen.slice(0,room))preparedPreviews.set(file,(await preparePhoto(file)).photo)}
       extras.push(...chosen.slice(0,room));paint();
       say(chosen.length>room?"（合わせて"+RERUN_MAX_PHOTOS+"枚までなので"+room+"枚だけ足しました）":"");
-    };
+    }catch(error){say(error.message)}};
     camera.onchange=e=>{add(e.target.files);e.target.value=""};
     library.onchange=e=>{add(e.target.files);e.target.value=""};
     box.querySelector(".rerun-camera").onclick=()=>camera.click();
@@ -390,8 +392,8 @@ async function reidentify(record,button,message,selection=null){
     const settings=await fetch("/api/settings").then(r=>r.ok?r.json():null);
     if(!settings)throw new Error("設定を読み込めませんでした");
     const fd=new FormData();
-    kept.forEach((blob,i)=>fd.append("files",blob,"photo-"+(i+1)+".jpg"));
-    extras.forEach((file,i)=>fd.append("files",file,"added-"+(i+1)+".jpg"));
+    if(settings.browser_photos){const {appendPreparedPhotos}=await import("/assets/photo-browser.mjs");await appendPreparedPhotos(fd,[...kept,...extras])}
+    else{kept.forEach((blob,i)=>fd.append("files",blob,"photo-"+(i+1)+".jpg"));extras.forEach((file,i)=>fd.append("files",file,"added-"+(i+1)+".jpg"))}
     fd.append("location",record.context?.location||"");fd.append("observed_date",record.context?.observedDate||"");fd.append("size",record.context?.size||"");
     if(settings.public_mode){const saved=JSON.parse(localStorage.getItem("species-public-settings")||"{}");const provider=saved.provider||settings.provider;fd.append("request_provider",provider);fd.append("request_model",saved.models?.[provider]||settings.models?.[provider]||"");fd.append("request_api_key",readApiKey(provider));fd.append("request_plantnet_key",readApiKey("plantnet"))}
     fd.append("background","true");

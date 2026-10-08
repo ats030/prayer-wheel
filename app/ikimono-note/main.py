@@ -39,6 +39,7 @@ import pipeline
 import shares
 import vision
 import photo_archive
+import prepared_photos
 
 class SettingsUpdate(BaseModel):
     provider: str
@@ -59,6 +60,7 @@ app = FastAPI(
     openapi_url=None if PUBLIC_MODE else "/openapi.json",
 )
 STATIC_DIR = Path(__file__).parent / "static"
+BROWSER_PHOTOS = os.getenv("IKIMONO_BROWSER_PHOTOS") == "1"
 PUBLIC_LOCAL_ENABLED = os.getenv("IKIMONO_PUBLIC_LOCAL", "").lower() in {"1", "true", "yes"}
 PUBLIC_AFFILIATE_ENABLED = os.getenv("IKIMONO_PUBLIC_AFFILIATE", "").lower() in {"1", "true", "yes"}
 # 識別を後ろで走らせるか。サーバーレスの置き場ではレスポンスを返した瞬間に CPU を
@@ -154,6 +156,8 @@ CONTENT_SECURITY_POLICY = "; ".join([
     "http://localhost:11434 http://127.0.0.1:11434 http://192.168.11.13:11434",
     "img-src 'self' blob: data: https://tile.openstreetmap.org https://cyberjapandata.gsi.go.jp https://www.j-shis.bosai.go.jp https://nlftp.mlit.go.jp https://arc-gis.biodic.go.jp https://*.media-amazon.com https://*.ssl-images-amazon.com",
 ])
+if BROWSER_PHOTOS:
+    CONTENT_SECURITY_POLICY = CONTENT_SECURITY_POLICY.replace("script-src 'self'", "script-src 'self' 'wasm-unsafe-eval'")
 
 
 def _inject_site_verification(html: str) -> str:
@@ -179,6 +183,9 @@ def _page(name: str) -> HTMLResponse:
     # 失っていた
     show_local = "1"
     html = html.replace("<body", f'<body data-app-mode="{mode}" data-show-local="{show_local}"', 1)
+    if BROWSER_PHOTOS:
+        html = html.replace("<body", '<body data-browser-photos="1"', 1)
+        html = html.replace('accept="image/*" multiple', 'accept="image/*,.heic,.heif,.zip" multiple')
     if PUBLIC_MODE:
         html = html.replace("</head>", '<link rel="stylesheet" href="/assets/analytics.css"><script src="/assets/analytics.js" defer></script></head>', 1)
     return HTMLResponse(_inject_site_verification(html))
@@ -575,8 +582,9 @@ app.mount("/assets", bundled_resources.static_files(directory=STATIC_DIR / "asse
 
 @app.get("/api/settings")
 def get_settings() -> dict[str, object]:
-    result = config_store.public()
+    result = config_store.public(include_local=False) if PUBLIC_MODE and BROWSER_PHOTOS else config_store.public()
     result["public_mode"] = PUBLIC_MODE
+    result["browser_photos"] = BROWSER_PHOTOS
     # お試し枠で走るモデルは、利用者が選んだものではなくこちらが決める。
     # 画面が別の名前を出したままだと、どのAIに写真が行くのかを偽ることになる
     if trial_enabled():
@@ -773,6 +781,8 @@ def health() -> dict[str, object]:
 
 @app.post("/api/photo-original")
 async def photo_original(request: Request) -> Response:
+    if BROWSER_PHOTOS:
+        raise HTTPException(status_code=400, detail="写真を選び直してください。ZIPは画面で読み取ります。")
     if PUBLIC_MODE:
         _rate_limit(request, "original-photo", 10)
     # Read the raw ZIP body, avoiding multipart UploadFile's temporary-disk spool.
@@ -795,6 +805,8 @@ async def photo_original(request: Request) -> Response:
 
 @app.post("/api/photo-metadata")
 async def photo_metadata(request: Request, files: list[UploadFile] = File(default=[])) -> dict[str, object]:
+    if BROWSER_PHOTOS:
+        raise HTTPException(status_code=400, detail="写真を選び直してください。撮影情報は画面で読み取ります。")
     if PUBLIC_MODE:
         _rate_limit(request, "metadata", 20)
     if not files or len(files) > 3:
@@ -1056,9 +1068,12 @@ async def identify(
     request_model: str = Form(default=""),
     request_api_key: str = Form(default=""),
     request_plantnet_key: str = Form(default=""),
+    client_photos: str = Form(default=""),
 ) -> JSONResponse:
     if PUBLIC_MODE:
         _rate_limit(request, "identify", 6)
+    if BROWSER_PHOTOS and not client_photos:
+        raise HTTPException(status_code=400, detail="写真を選び直してください。画面を再読み込みしてお試しください。")
     settings = config_store.load()
     provider = request_provider if PUBLIC_MODE else settings["provider"]
     if provider not in config_store.MODELS:
@@ -1067,10 +1082,10 @@ async def identify(
         raise HTTPException(status_code=403, detail="公開版ではOllamaを使えません")
     if PUBLIC_MODE:
         model = request_model
-        catalog, _ = config_store.model_catalog(
+        catalog = config_store.MODELS if BROWSER_PHOTOS else config_store.model_catalog(
             settings["models"]["local"],
             (settings.get("local_llm") or {}).get("url", vision.OLLAMA_URL),
-        )
+        )[0]
         if model not in {item["id"] for item in catalog[provider]}:
             raise HTTPException(status_code=400, detail="モデルを選び直してください")
         api_key = request_api_key.strip()
@@ -1096,11 +1111,12 @@ async def identify(
         raise HTTPException(status_code=400, detail="写真は1〜3枚選んでください")
     if any(upload.content_type and not upload.content_type.startswith("image/") for upload in uploads):
         raise HTTPException(status_code=415, detail="写真を選んでください")
-    raw_images = [await upload.read(vision.MAX_UPLOAD_BYTES + 1) for upload in uploads]
+    raw_limit = prepared_photos.MAX_PREPARED_BYTES if BROWSER_PHOTOS else vision.MAX_UPLOAD_BYTES
+    raw_images = [await upload.read(raw_limit + 1) for upload in uploads]
     work = dict(
         provider=provider, model=model, api_key=api_key, settings=settings,
         location=location, observed_date=observed_date, size=size,
-        use_plantnet=use_plantnet, request_plantnet_key=request_plantnet_key)
+        use_plantnet=use_plantnet, request_plantnet_key=request_plantnet_key, client_photos=client_photos)
     if background and BACKGROUND_JOBS:
         # 写真はこのあとの仕事の中にしか残らない。終わったら捨てる (jobs.py)
         job_id = jobs.start(_job_owner(request))
@@ -1112,13 +1128,13 @@ async def identify(
     return JSONResponse(await _identify_images(
         raw_images, provider=provider, model=model, api_key=api_key, settings=settings,
         location=location, observed_date=observed_date, size=size,
-        use_plantnet=use_plantnet, request_plantnet_key=request_plantnet_key))
+        use_plantnet=use_plantnet, request_plantnet_key=request_plantnet_key, client_photos=client_photos))
 
 
 async def _identify_images(
     raw_images: list[bytes], *, provider: str, model: str, api_key: str,
     settings: dict, location: str, observed_date: str, size: str,
-    use_plantnet: bool, request_plantnet_key: str,
+    use_plantnet: bool, request_plantnet_key: str, client_photos: str = "",
 ) -> dict:
     """写真の生バイトから結果を作る。HTTP 層と、後ろで走らせる仕事の共通部分。
 
@@ -1126,14 +1142,17 @@ async def _identify_images(
     2か所に書くと、質のゲートや EXIF の扱いが片方だけ古くなる。
     """
     try:
-        photo_metadata: dict[str, object] = {}
-        for raw in raw_images:
-            candidate_metadata = await run_in_threadpool(vision.extract_exif_context, raw)
-            for key, value in candidate_metadata.items():
-                photo_metadata.setdefault(key, value)
-        # 質を見てから送る。暗すぎる・小さすぎる写真をAIへ送っても、返るのは
-        # 自信のない推測かもっともらしい誤りで、利用者の枠を使うだけになる。
-        quality = [await run_in_threadpool(image_quality.judge, raw) for raw in raw_images]
+        if BROWSER_PHOTOS:
+            photo_metadata, quality = prepared_photos.read_reports(client_photos, len(raw_images))
+            for raw in raw_images:
+                prepared_photos.jpeg_dimensions(raw)
+        else:
+            photo_metadata: dict[str, object] = {}
+            for raw in raw_images:
+                candidate_metadata = await run_in_threadpool(vision.extract_exif_context, raw)
+                for key, value in candidate_metadata.items():
+                    photo_metadata.setdefault(key, value)
+            quality = [await run_in_threadpool(image_quality.judge, raw) for raw in raw_images]
         unusable = [q for q in quality if not q["ok"]]
         if unusable:
             raise HTTPException(status_code=422, detail={
@@ -1141,7 +1160,7 @@ async def _identify_images(
                 "problems": [p for q in unusable for p in q["problems"] if p["level"] == image_quality.BLOCK],
             })
 
-        prepared = [await run_in_threadpool(vision.prepare_image, raw) for raw in raw_images]
+        prepared = raw_images if BROWSER_PHOTOS else [await run_in_threadpool(vision.prepare_image, raw) for raw in raw_images]
         context = {
             "location": location or str(photo_metadata.get("location", "")),
             "observed_date": observed_date or str(photo_metadata.get("observed_date", "")),

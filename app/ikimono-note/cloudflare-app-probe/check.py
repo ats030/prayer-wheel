@@ -31,6 +31,7 @@ def fetch(path, method="GET", data=None, headers=None):
 
 def check():
     manifest = json.loads((HERE / "manifest.json").read_text())
+    assert fetch("/health")[2]["X-Probe-Synthetic-AI"] == "1", "Probe requires synthetic AI; never use real keys"
     for name in manifest["modules"]:
         assert (HERE / "src" / name).read_bytes() == (HERE.parent / name).read_bytes(), (
             "Stale module; run build.py", name)

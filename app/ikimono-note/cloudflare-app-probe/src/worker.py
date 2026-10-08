@@ -25,7 +25,30 @@ import bundled_resources
 from _resources import RESOURCES, BUNDLE_SHA256
 
 bundled_resources.configure(RESOURCES)
-from main import app
+import main
+app = main.app
+
+SYNTHETIC_AI = str(getattr(env, "IKIMONO_SYNTHETIC_AI", "")) == "1"
+if SYNTHETIC_AI:
+    from hashlib import sha256
+
+    def synthetic_identify(images, **context):
+        return {"category": "動物", "summary": "合成検証", "model": context["model"],
+                "provider": context["provider"], "candidates": [{
+                    "common_name_ja": "合成候補", "scientific_name": "Acheilognathus longipinnis",
+                    "confidence": 30, "traits": ["合成特徴"], "uncertainty": "合成検証",
+                }], "probe": {"sha256": [sha256(raw).hexdigest() for raw in images],
+                              "location": context["location"], "observed_date": context["observed_date"]}}
+
+    main.pipeline.identify_all = synthetic_identify
+    main.vision._lookup_taxon = lambda name: [{"name": name, "preferred_common_name": "イタセンパラ",
+                                              "rank": "species", "id": 0}]
+
+    def forbid_pixel_processing(*args, **kwargs):
+        raise AssertionError("Workers photo routes must not decode pixels")
+    main.vision.prepare_image = forbid_pixel_processing
+    main.vision.extract_exif_context = forbid_pixel_processing
+    main.image_quality.judge = forbid_pixel_processing
 
 
 @app.middleware("http")
@@ -33,6 +56,7 @@ async def probe_revision(request, call_next):
     response = await call_next(request)
     if request.url.path == "/health":
         response.headers["X-Probe-Bundle-SHA256"] = BUNDLE_SHA256
+        response.headers["X-Probe-Synthetic-AI"] = "1" if SYNTHETIC_AI else "0"
     return response
 
 

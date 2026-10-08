@@ -12,9 +12,11 @@
     "vision.py",
     "photo_archive.py",
     "protected_species.py",
-    "bundled_resources.py"
+    "bundled_resources.py",
+    "prepared_photos.py"
   ],
   "resources": [
+    "data/protected_species.json",
     "static/android-original.html",
     "static/apple-touch-icon.png",
     "static/assets/account.css",
@@ -35,7 +37,12 @@
     "static/assets/login.css",
     "static/assets/login.js",
     "static/assets/mode.css",
+    "static/assets/photo-browser.mjs",
     "static/assets/photo-location.mjs",
+    "static/assets/photo-quality.mjs",
+    "static/assets/photo-resample.mjs",
+    "static/assets/photo-round.mjs",
+    "static/assets/photo-zip.mjs",
     "static/assets/products.js",
     "static/assets/settings.css",
     "static/assets/settings.js",
@@ -68,6 +75,6 @@
     "static/vendor/leaflet/images/marker-shadow.png",
     "static/vendor/leaflet/leaflet.css",
     "static/vendor/leaflet/leaflet.js",
-    "data/protected_species.json"
+    "static/vendor/photo/PILLOW-LICENSE.txt"
   ]
 }
