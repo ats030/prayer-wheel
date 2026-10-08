@@ -115,3 +115,44 @@ credentials, and calls no external AI. Only complete successful records from one
 version qualify; failed, missing, nonfinite and network-error samples do not.
 The observed static reduction does not prove free-plan fitness. The migration
 remains in progress; old production and data are retained.
+
+## Complete route observation — 2026-10-09 JST
+
+Read-only measurement window: `2026-10-08T18:58:20.925096Z` through
+`2026-10-08T18:58:43.374118Z`, version
+`cacbf9b8-5e19-4931-985b-b7794b2acd3e`, using
+`measure_cpu.py --samples 2`. All 12 requested traces and the subscription
+probe were observed. All returned HTTP200 with outcome `ok`, no exceptions,
+and the same version. Bodies had consistent SHA256 values within each route.
+The measurement's eligibility check passed. No external AI was called.
+
+| Route | First measured request CPU (ms) | Subsequent request CPU (ms) |
+| --- | ---: | --- |
+| `/health` | 302 | 16, 29 |
+| `/api/me` (signed out) | 206 | 270, 15 |
+| `/assets/index.js` | 12 | 6, 5 |
+| `/vendor/photo/libheif.mjs` | 4 | 5, 4 |
+
+The subscription readiness request used 285ms CPU. “Subsequent” means request
+order, not a verified warm isolate: tail does not establish isolate reuse or
+attribute initialization separately. The 270ms later `/api/me` request must
+not be assigned to cold start without additional evidence. No simultaneous
+validation was launched by this session; other preview traffic was not ruled
+out. This is a complete observation of the current version, not a matched
+before/after comparison or a load/AI/photo-memory test.
+
+Dynamic CPU exceeded 10ms in every measured dynamic request. Static subsequent
+requests used 4–6ms, while the first index.js request used 12ms. Thus neither
+dynamic nor whole-app Free-plan compliance is established. The prior HTTP500
+was not reproduced; its cause remains unknown. The next diagnostic should
+separate Python entrypoint/native response, minimal ASGI, and full middleware
+costs without changing identification conditions or user data.
+
+Before this run, the management launcher failed authentication with Cloudflare
+code 9109 and the measurement correctly returned an ineligible empty diagnostic.
+Ordinary Wrangler `whoami` did not discover authentication. The existing refresh
+grant was renewed using the installed Wrangler's client ID and token endpoint;
+only the operator credential file changed, retaining mode 0600. No credential
+values were printed or committed. Automatic refresh in the launcher remains
+unimplemented. No deployment, user-data migration, public switch, paid-plan
+change, or old-service shutdown occurred.
