@@ -1,0 +1,47 @@
+"""Assemble only reviewed modules and resources; never copy settings or .env."""
+import json
+import hashlib
+from pathlib import Path
+import shutil
+
+HERE = Path(__file__).resolve().parent
+APP = HERE.parent
+
+
+def bundle_digest(manifest):
+    digest = hashlib.sha256()
+    for name in ["cloudflare-app-probe/src/worker.py", *manifest["modules"], *manifest["resources"]]:
+        content = (APP / name).read_bytes()
+        digest.update(name.encode() + b"\0" + str(len(content)).encode() + b"\0" + content)
+    return digest.hexdigest()
+
+
+def build():
+    manifest = json.loads((HERE / "manifest.json").read_text())
+    for name in manifest["modules"] + manifest["resources"]:
+        path = APP / name
+        if Path(name).is_absolute() or any(part in {".", ".."} or part.startswith(".")
+                                         for part in Path(name).parts):
+            raise ValueError(f"Invalid resource name: {name}")
+        if path.is_symlink() or not path.resolve().is_relative_to(APP.resolve()):
+            raise ValueError(f"Resource escapes application: {name}")
+        if name.startswith("static/") or name == "data/protected_species.json":
+            continue
+        if "/" in name or not name.endswith(".py"):
+            raise ValueError(f"Invalid module: {name}")
+    target = HERE / "src"
+    target.mkdir(exist_ok=True)
+    allowed = {"worker.py", "_resources.py", *manifest["modules"]}
+    unexpected = [p.name for p in target.iterdir() if p.is_symlink() or not p.is_file() or p.name not in allowed]
+    if unexpected:
+        raise ValueError(f"Unexpected files in Worker bundle: {unexpected}")
+    for name in manifest["modules"]:
+        shutil.copyfile(APP / name, target / name)
+    resources = {name: (APP / name).read_bytes() for name in manifest["resources"]}
+    (target / "_resources.py").write_text(
+        "BUNDLE_SHA256 = " + repr(bundle_digest(manifest)) + "\nRESOURCES = " + repr(resources) + "\n")
+    print(f"Assembled {len(manifest['modules'])} modules and {len(resources)} resources")
+
+
+if __name__ == "__main__":
+    build()

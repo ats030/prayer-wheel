@@ -21,16 +21,15 @@ import secrets
 
 import httpx
 
-import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
-from starlette.staticfiles import StaticFiles
 from PIL import Image
 
 import auth
+import bundled_resources
 import d1_store
 import config_store
 import image_quality
@@ -172,7 +171,7 @@ def _page(name: str) -> HTMLResponse:
     書き換えると、どこが違うのかコードを追わないと分からず、確定するまで一瞬
     反対側が見える。サーバーが最初から決めておけばその両方が起きない。
     """
-    html = (STATIC_DIR / name).read_text(encoding="utf-8")
+    html = bundled_resources.read_text(STATIC_DIR / name)
     mode = "public" if PUBLIC_MODE else "operator"
     # 公開版で Ollama を出すかは PUBLIC_LOCAL の設定次第。モードとは別の軸
     # 公開版でも手元の Ollama は選べる。サーバーからは呼べないが、ブラウザからは
@@ -288,7 +287,7 @@ def android_original() -> HTMLResponse:
 
 @app.get("/downloads/ikimono-original-0.1.0.apk", include_in_schema=False)
 def android_original_apk() -> FileResponse:
-    return FileResponse(STATIC_DIR / "downloads" / "ikimono-original-0.1.0.apk",
+    return bundled_resources.file_response(STATIC_DIR / "downloads" / "ikimono-original-0.1.0.apk",
                         media_type="application/vnd.android.package-archive",
                         filename="ikimono-original-0.1.0.apk",
                         headers={"Cache-Control": "public, max-age=86400"})
@@ -296,7 +295,7 @@ def android_original_apk() -> FileResponse:
 
 @app.get("/downloads/ikimono-original-0.1.1.apk", include_in_schema=False)
 def android_original_apk_diagnostics() -> FileResponse:
-    return FileResponse(STATIC_DIR / "downloads" / "ikimono-original-0.1.1.apk",
+    return bundled_resources.file_response(STATIC_DIR / "downloads" / "ikimono-original-0.1.1.apk",
                         media_type="application/vnd.android.package-archive",
                         filename="ikimono-original-0.1.1.apk",
                         headers={"Cache-Control": "public, max-age=86400"})
@@ -538,40 +537,40 @@ def site_verification_file(name: str) -> Response:
 
 @app.get("/robots.txt", include_in_schema=False)
 def robots() -> FileResponse:
-    return FileResponse(STATIC_DIR / "robots.txt", media_type="text/plain")
+    return bundled_resources.file_response(STATIC_DIR / "robots.txt", media_type="text/plain")
 
 
 @app.get("/sitemap.xml", include_in_schema=False)
 def sitemap() -> FileResponse:
-    return FileResponse(STATIC_DIR / "sitemap.xml", media_type="application/xml")
+    return bundled_resources.file_response(STATIC_DIR / "sitemap.xml", media_type="application/xml")
 
 
 @app.get("/ogp.png", include_in_schema=False)
 def ogp() -> FileResponse:
-    return FileResponse(STATIC_DIR / "ogp.png", media_type="image/png")
+    return bundled_resources.file_response(STATIC_DIR / "ogp.png", media_type="image/png")
 
 
 @app.get("/favicon.png", include_in_schema=False)
 def favicon() -> FileResponse:
-    return FileResponse(STATIC_DIR / "favicon.png", media_type="image/png")
+    return bundled_resources.file_response(STATIC_DIR / "favicon.png", media_type="image/png")
 
 
 @app.get("/apple-touch-icon.png", include_in_schema=False)
 def apple_touch_icon() -> FileResponse:
-    return FileResponse(STATIC_DIR / "apple-touch-icon.png", media_type="image/png")
+    return bundled_resources.file_response(STATIC_DIR / "apple-touch-icon.png", media_type="image/png")
 
 
 @app.get("/theme.js", include_in_schema=False)
 def theme_script() -> FileResponse:
-    return FileResponse(STATIC_DIR / "theme.js", media_type="text/javascript")
+    return bundled_resources.file_response(STATIC_DIR / "theme.js", media_type="text/javascript")
 
 
 # Leaflet は同梱して配信する。CDN から読むと、地図を見た利用者のIPが第三者へ渡り、
 # プライバシーポリシーの送信先一覧と実態がずれる (BSD-2-Clause, vendor/leaflet/LICENSE)
-app.mount("/vendor", StaticFiles(directory=STATIC_DIR / "vendor"), name="vendor")
+app.mount("/vendor", bundled_resources.static_files(directory=STATIC_DIR / "vendor"), name="vendor")
 # ページのCSS/JSは外部ファイルに置く。インラインのままだと CSP に 'unsafe-inline' が
 # 必要になり、BYOKでブラウザにAPIキーを預けるこのアプリでは守りとして弱すぎる
-app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
+app.mount("/assets", bundled_resources.static_files(directory=STATIC_DIR / "assets"), name="assets")
 
 
 @app.get("/api/settings")
@@ -938,7 +937,7 @@ async def share_page(request: Request, token: str) -> HTMLResponse:
     traits = candidates[0]["traits"]
     if traits:
         description += " ／ 写真から見えた特徴：" + "、".join(traits)
-    page = (STATIC_DIR / "share.html").read_text(encoding="utf-8")
+    page = bundled_resources.read_text(STATIC_DIR / "share.html")
     for key, value in {
         "{{TITLE}}": f'{candidates[0]["name"]} · 生きものノートで調べました',
         "{{HEADING}}": candidates[0]["name"],
@@ -1178,4 +1177,6 @@ async def _run_identify_job(job_id: str, raw_images: list[bytes], work: dict) ->
 
 
 if __name__ == "__main__":
+    import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8523)

@@ -13,6 +13,7 @@ tool-license-collection-regulation-data.yaml)。種だけは座標を要らず�
 from __future__ import annotations
 
 import json
+import bundled_resources
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -24,7 +25,7 @@ DATA_PATH = Path(__file__).parent / "data" / "protected_species.json"
 def _table() -> tuple[dict[str, dict[str, str]], str]:
     """学名 (小文字化) から指定内容への表と、同梱した版の基準を返す。"""
     try:
-        data = json.loads(DATA_PATH.read_text(encoding="utf-8"))
+        data = json.loads(bundled_resources.read_text(DATA_PATH))
     except (OSError, ValueError) as error:
         # リストを読めなくても識別は続ける。出せないのは注意書き1つで、
         # 「持ち帰ってよいか：確認が必要」は元から出ている。ただし黙って消えると
