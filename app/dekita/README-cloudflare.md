@@ -1,7 +1,11 @@
-# Cloudflare 移行（準備中）
+# Cloudflare 公開とデータ引き継ぎ
 
 Cloudflare Workers Static Assets の無料標準URLへ配信する構成です。
-2026-10-07時点では公開・スコア移行の確認は未完了です。Cloud Runは停止しません。
+2026-10-08に [https://dekita.ats030.workers.dev](https://dekita.ats030.workers.dev) へ公開しました。
+利用者がWorkers Freeプランを確認し、公開URLで6つのゲームの起動、音声のHTTP配信、
+ヘッダ、開発ファイルの非公開、スコア引き継ぎと不正ファイルの拒否を検証済みです。
+ゲーム終了後にスコアが残ること、高得点で更新できること、破損した保存値からの復旧も
+検証しました。実際の利用者の保存済みスコア移行と旧Cloud Runの停止は未完了です。
 
 ## ビルドと検証
 
@@ -16,6 +20,10 @@ npx wrangler@4.148.0 dev --port 8787
 別の端末で`node scripts/check-cloudflare.mjs`を実行すると、6つのゲームの起動、
 音声配信、開発ファイルの非公開、スコア引き継ぎ、不正ファイルの拒否を確認できます。
 既存のPlaywright依存とChromiumを使用します。公開URLも引数で指定できます。
+
+```sh
+node scripts/check-cloudflare.mjs https://dekita.ats030.workers.dev
+```
 
 `dist`だけを配信します。テスト、依存ライブラリ、Docker設定、秘密情報は含めません。
 配信するJS・音声は既存ゲームのものです。
