@@ -1,6 +1,7 @@
 .venv/
 .venv-workers/
 .wrangler/
+python_modules/
 uv.lock
 src/auth.py
 src/shares.py
