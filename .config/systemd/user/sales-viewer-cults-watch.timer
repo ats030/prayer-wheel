@@ -1,8 +1,8 @@
 [Unit]
-Description=sales-viewer - Cults3D売上CSV自動取込みタイマー(10分毎にDownloadsフォルダを確認)
+Description=sales-viewer - Cults3D売上CSV自動取込みタイマー(毎日09:00 JSTにDownloadsフォルダを確認)
 
 [Timer]
-OnCalendar=*:0/10
+OnCalendar=*-*-* 09:00:00 Asia/Tokyo
 Persistent=true
 AccuracySec=1min
 
