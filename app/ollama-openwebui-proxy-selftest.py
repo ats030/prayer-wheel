@@ -74,6 +74,9 @@ proxy.TRUSTED_NETWORKS = (
     proxy.ipaddress.ip_network("172.19.0.0/16"),
 )
 check("Open WebUI コンテナ", AccessProbe("172.19.0.6").request_allowed(), True)
+proxy.TRUSTED_NETWORKS += (proxy.ipaddress.ip_network("192.168.11.8/32"),)
+check("ubuntu-server-app OpenCode", AccessProbe("192.168.11.8", command="POST", path="/v1/chat/completions").request_allowed(), True)
+check("loopback OpenCode", AccessProbe("127.0.0.1", command="POST", path="/v1/chat/completions").request_allowed(), True)
 lan = AccessProbe("192.168.11.13")
 check("LAN は Origin なしを拒否", lan.request_allowed(), False)
 check("LAN の拒否理由", lan.error, (403, "Browser origin is required from LAN"))
