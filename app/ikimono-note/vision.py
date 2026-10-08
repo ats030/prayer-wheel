@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+from copy import deepcopy
 import io
 import json
 import math
@@ -523,19 +524,54 @@ def _openai_output_text(data: dict[str, Any]) -> str:
     return "\n".join(texts)
 
 
+def provider_payload(provider: str, model: str, images: list[str], *, location: str = "", observed_date: str = "", size: str = "") -> dict[str, Any]:
+    """Build the authoritative external-provider request, without API keys.
+
+    An empty image list supplies a browser template. Callers still own login,
+    model/key selection, photo validation and quality gates; this is not a
+    permission to forward a client-supplied request to an arbitrary endpoint.
+    """
+    if provider == "openai":
+        return {
+            "model": model,
+            "input": [{
+                "role": "user",
+                "content": [
+                    *[{"type": "input_image", "image_url": f"data:image/jpeg;base64,{image}"} for image in images],
+                    {"type": "input_text", "text": identification_prompt(location, observed_date, size)},
+                ],
+            }],
+            "reasoning": {"effort": "low"},
+        }
+    if provider == "anthropic":
+        return {
+            "model": model,
+            "max_tokens": 1200,
+            "messages": [{"role": "user", "content": [
+                *[{"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": image}} for image in images],
+                {"type": "text", "text": identification_prompt(location, observed_date, size)},
+            ]}],
+        }
+    if provider == "gemini":
+        return {
+            "contents": [{"role": "user", "parts": [
+                *[{"inline_data": {"mime_type": "image/jpeg", "data": image}} for image in images],
+                {"text": gemini_identification_prompt(location, observed_date, size)},
+            ]}],
+            "generationConfig": {
+                "temperature": 0.1,
+                "maxOutputTokens": GEMINI_MAX_OUTPUT_TOKENS,
+                "responseMimeType": "application/json",
+                "responseSchema": deepcopy(GEMINI_RESPONSE_SCHEMA),
+                "thinkingConfig": {"thinkingLevel": GEMINI_THINKING_LEVEL},
+            },
+        }
+    raise VisionError("使うAIを選び直してください")
+
+
 def identify_openai(image_bytes: bytes | list[bytes], api_key: str, model: str = OPENAI_MODEL, *, location: str = "", observed_date: str = "", size: str = "") -> dict[str, Any]:
-    images = _image_list(image_bytes)
-    payload = {
-        "model": model,
-        "input": [{
-            "role": "user",
-            "content": [
-                *[{"type": "input_image", "image_url": f"data:image/jpeg;base64,{base64.b64encode(image).decode("ascii")}"} for image in images],
-                {"type": "input_text", "text": identification_prompt(location, observed_date, size)},
-            ],
-        }],
-        "reasoning": {"effort": "low"},
-    }
+    payload = provider_payload("openai", model, [base64.b64encode(image).decode("ascii") for image in _image_list(image_bytes)],
+                               location=location, observed_date=observed_date, size=size)
     try:
         response = httpx.post(
             OPENAI_URL,
@@ -564,25 +600,8 @@ def _anthropic_output_text(data: dict[str, Any]) -> str:
 
 
 def identify_anthropic(image_bytes: bytes | list[bytes], api_key: str, model: str = ANTHROPIC_MODEL, *, location: str = "", observed_date: str = "", size: str = "") -> dict[str, Any]:
-    images = _image_list(image_bytes)
-    payload = {
-        "model": model,
-        "max_tokens": 1200,
-        "messages": [{
-            "role": "user",
-            "content": [
-                *[{
-                    "type": "image",
-                    "source": {
-                        "type": "base64",
-                        "media_type": "image/jpeg",
-                        "data": base64.b64encode(image).decode("ascii"),
-                    },
-                } for image in images],
-                {"type": "text", "text": identification_prompt(location, observed_date, size)},
-            ],
-        }],
-    }
+    payload = provider_payload("anthropic", model, [base64.b64encode(image).decode("ascii") for image in _image_list(image_bytes)],
+                               location=location, observed_date=observed_date, size=size)
     try:
         response = httpx.post(
             ANTHROPIC_URL,
@@ -628,20 +647,8 @@ def _gemini_output_text(data: dict[str, Any]) -> str:
 
 
 def identify_gemini(image_bytes: bytes | list[bytes], api_key: str, model: str, *, location: str = "", observed_date: str = "", size: str = "") -> dict[str, Any]:
-    images = _image_list(image_bytes)
-    payload = {
-        "contents": [{"role": "user", "parts": [
-            *[{"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(image).decode("ascii")}} for image in images],
-            {"text": gemini_identification_prompt(location, observed_date, size)},
-        ]}],
-        "generationConfig": {
-            "temperature": 0.1,
-            "maxOutputTokens": GEMINI_MAX_OUTPUT_TOKENS,
-            "responseMimeType": "application/json",
-            "responseSchema": GEMINI_RESPONSE_SCHEMA,
-            "thinkingConfig": {"thinkingLevel": GEMINI_THINKING_LEVEL},
-        },
-    }
+    payload = provider_payload("gemini", model, [base64.b64encode(image).decode("ascii") for image in _image_list(image_bytes)],
+                               location=location, observed_date=observed_date, size=size)
     try:
         response = httpx.post(GEMINI_URL.format(model=model), json=payload, headers={"x-goog-api-key": api_key, "content-type": "application/json"}, timeout=180)
         response.raise_for_status()

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile, writeFile, mkdir} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
+import {assembleProviderPayload} from '../static/assets/provider-payload.mjs';
 const health = await fetch('http://127.0.0.1:8793/health', {signal: AbortSignal.timeout(15000)});
 assert.equal(health.headers.get('X-Probe-Synthetic-AI'), '1'); assert.equal(health.headers.get('X-Probe-Profile-IO'), '1');
 const providerDigest = execFileSync('python3', ['-c', 'import json; from build import bundle_digest,HERE; print(bundle_digest(json.loads((HERE/"manifest.json").read_text())))'],
@@ -23,8 +24,14 @@ for (const count of [1, 3]) {
   const request = new Request('http://localhost/payload', {method: 'POST', body: form});
   await writeFile(new URL(`multipart-${count}.bin`, directory), Buffer.from(await request.arrayBuffer()));
   await writeFile(new URL(`multipart-${count}.type`, directory), request.headers.get('Content-Type'));
-  const payload = structuredClone(template);
-  payload.contents[0].parts = [...Array.from({length: count}, () => ({inline_data: {mime_type: 'image/jpeg', data: photo.toString('base64')}})), template.contents[0].parts[1]];
+  // The diagnostic endpoint captures one dummy image followed by the original
+  // prompt. Strip only that image before using the application's browser builder.
+  assert.equal(template.contents[0].parts.length, 2);
+  assert.equal(typeof template.contents[0].parts[1].text, 'string');
+  const browserTemplate = structuredClone(template);
+  browserTemplate.contents[0].parts = [browserTemplate.contents[0].parts[1]];
+  const payload = assembleProviderPayload('gemini', browserTemplate,
+    Array.from({length: count}, () => photo.toString('base64')));
   await writeFile(new URL(`wire-${count}.json`, directory), JSON.stringify(payload));
   for (const name of [`multipart-${count}.bin`, `multipart-${count}.type`, `wire-${count}.json`]) {
     provenance.fixtures[name] = createHash('sha256').update(await readFile(new URL(name, directory))).digest('hex');

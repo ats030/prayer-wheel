@@ -45,6 +45,7 @@
     "static/assets/photo-round.mjs",
     "static/assets/photo-zip.mjs",
     "static/assets/products.js",
+    "static/assets/provider-payload.mjs",
     "static/assets/settings.css",
     "static/assets/settings.js",
     "static/assets/share-page.js",
