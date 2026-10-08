@@ -1,0 +1,11 @@
+src/*
+!src/worker.py
+assets/
+python_modules
+.wrangler/
+.dev.vars
+secrets.json
+deployment-check.json
+manifest.json
+pyproject.toml
+pylock.toml

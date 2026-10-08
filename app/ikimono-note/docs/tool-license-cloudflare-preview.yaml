@@ -1,0 +1,30 @@
+tool: Protected ikimono-note preview on Cloudflare Workers and D1
+plan_or_version: Workers Free; D1 Free; Wrangler 4.148.0; existing Python Workers dependencies
+reviewed_at: 2026-10-08
+status: conditional
+cost:
+  condition: Keep the account on Workers Free; no upgrade, R2, paid build or paid add-on.
+  limits: 100000 requests/day and 10ms CPU/request; D1 5M rows read/day, 100k written/day, 5GB total.
+  failure: Worker executions or D1 operations stop at Free limits; no automatic paid-plan adoption.
+license:
+  commercial_use: Cloudflare terms permit entity use subject to terms; existing Python package licences are retained.
+  libheif_js: LGPL-3.0, exact npm version 1.23.5.
+  exifr: MIT, exact version 7.1.3, notice retained.
+conditions:
+  - Basic authentication protects every path, including source archives and assets.
+  - Keep an independent preview D1 and fixed secrets; do not import real users or shares.
+  - Supply four corresponding-source archives, pinned in cloudflare-preview/sources.json, alongside the browser decoder.
+  - Preserve original LGPL/GPL/MIT notices; do not modify the library binary.
+  - Keep the decoder separately importable and replaceable; no SRI or application integrity check prevents replacement.
+  - No copyright licence implies codec patent clearance.
+  - External AI requests use the user's own key and its existing provider terms; no operator trial key is supplied.
+adoption: approved_for_owner_only_protected_remote_preview; general release requires functional and resource validation.
+sources:
+  - https://developers.cloudflare.com/workers/platform/pricing/
+  - https://developers.cloudflare.com/workers/platform/limits/
+  - https://developers.cloudflare.com/d1/platform/pricing/
+  - https://www.cloudflare.com/terms/
+  - https://registry.npmjs.org/libheif-js/1.23.5
+  - https://github.com/catdad-experiments/libheif-js/blob/d8ec4bc3bc5bf8055975577bccbbc7e1d7313c2d/scripts/install.js
+  - https://github.com/catdad-experiments/libheif-emscripten/tree/5c8968a44e9c68ae677e24790d77d001ed7fe7cc
+  - https://github.com/strukturag/libheif/blob/413e2a87e6a70b3eccc3a3adc5801179dd2d9e00/build-emscripten.sh

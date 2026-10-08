@@ -22,9 +22,9 @@ def vendor_resources():
     return {name: (root / source).read_bytes() for name, source in VENDOR.items()}
 
 
-def bundle_digest(manifest):
+def bundle_digest(manifest, entrypoint="cloudflare-app-probe/src/worker.py"):
     digest = hashlib.sha256()
-    for name in ["cloudflare-app-probe/src/worker.py", *manifest["modules"], *manifest["resources"]]:
+    for name in [entrypoint, *manifest["modules"], *manifest["resources"]]:
         content = (APP / name).read_bytes()
         digest.update(name.encode() + b"\0" + str(len(content)).encode() + b"\0" + content)
     for name, content in vendor_resources().items():
