@@ -18,7 +18,7 @@ if getattr(env, "DB", None) is None:
     raise RuntimeError("DB binding is required")
 os.environ["IKIMONO_PUBLIC_MODE"] = "1"
 os.environ["IKIMONO_BACKGROUND_JOBS"] = "0"
-# Startup-only experiment. The browser upload path is not integrated yet.
+# Local experiment: browser preparation keeps native image CPU off Workers.
 os.environ["IKIMONO_BROWSER_PHOTOS"] = "1"
 
 import bundled_resources
@@ -28,7 +28,26 @@ bundled_resources.configure(RESOURCES)
 import main
 app = main.app
 
+# A request-local form cache lets the isolated comparison reuse the exact
+# existing FastAPI validation and identification handler after native parsing.
+# Requests without this internal scope value follow the original route.
+from fastapi.routing import APIRoute, request_response
 SYNTHETIC_AI = str(getattr(env, "IKIMONO_SYNTHETIC_AI", "")) == "1"
+PROFILE_IO = SYNTHETIC_AI and str(getattr(env, "IKIMONO_PROFILE_IO", "")) == "1"
+
+
+def cached_form_handler(handler):
+    async def handle(request):
+        if "profile_form" in request.scope:
+            request._form = request.scope["profile_form"]
+        return await handler(request)
+    return handle
+
+
+for route in app.routes:
+    if PROFILE_IO and isinstance(route, APIRoute) and route.path == "/identify":
+        route.app = request_response(cached_form_handler(route.get_route_handler()))
+
 if SYNTHETIC_AI:
     from hashlib import sha256
 
@@ -57,7 +76,119 @@ async def probe_revision(request, call_next):
     if request.url.path == "/health":
         response.headers["X-Probe-Bundle-SHA256"] = BUNDLE_SHA256
         response.headers["X-Probe-Synthetic-AI"] = "1" if SYNTHETIC_AI else "0"
+        response.headers["X-Probe-Profile-IO"] = "1" if PROFILE_IO else "0"
     return response
 
 
-Default = asgi.entrypoint(app)
+class Default(asgi.entrypoint(app)):
+    async def fetch(self, request):
+        from urllib.parse import urlsplit
+        url = urlsplit(request.url)
+        if not url.path.startswith("/probe/profile/"):
+            return await super().fetch(request)
+        from workers import Response
+        if (not PROFILE_IO
+                or url.hostname not in {"localhost", "127.0.0.1"}
+                or request.headers.get("host", "").split(":")[0] not in {"localhost", "127.0.0.1"}):
+            return Response.from_json({"error": "Local synthetic profiling only"}, status=403)
+        # These paths never use real identities or arbitrary database keys.
+        # Do not publish this local harness or enable this flag in production.
+        from hashlib import sha256
+        if url.path == "/probe/profile/native-health" and request.method == "GET":
+            return Response.from_json({"ok": True})
+        if url.path in {"/probe/profile/native-upload", "/probe/profile/native-identify", "/probe/profile/native-gemini-payload", "/probe/profile/native-gemini-payload-checked"} and request.method == "POST":
+            length = request.headers.get("content-length", "")
+            if not length.isdigit() or int(length) > 6 * 1024 * 1024 + 16384:
+                return Response.from_json({"error": "Bounded Content-Length required"}, status=400)
+            form = await request.form_data()
+            files = form.get_all("files")
+            if not 1 <= len(files) <= 3 or any(isinstance(file, str) or file.size > 2 * 1024 * 1024 for file in files):
+                return Response.from_json({"error": "Invalid synthetic files"}, status=400)
+            if "/native-gemini-payload" in url.path:
+                # Run the real provider's payload construction and HTTPX JSON
+                # serialization without a network call or global monkeypatch.
+                import base64
+                import json
+                import types
+                import httpx
+                captured = []
+
+                def synthetic_post(target, *, json, headers, timeout):
+                    outgoing = httpx.Request("POST", target, json=json, headers=headers)
+                    captured.append(outgoing.content)
+                    return httpx.Response(200, request=outgoing, json={"candidates": [{
+                        "content": {"parts": [{"text": '{"category":"動物","candidates":[]}'}]}
+                    }]})
+
+                shim = types.SimpleNamespace(post=synthetic_post, HTTPStatusError=httpx.HTTPStatusError,
+                                             HTTPError=httpx.HTTPError)
+                original = main.vision.identify_gemini
+                provider = types.FunctionType(original.__code__, {**original.__globals__, "httpx": shim},
+                                              original.__name__, original.__defaults__, original.__closure__)
+                provider.__kwdefaults__ = original.__kwdefaults__
+                images = [await file.bytes() for file in files]
+                provider(images, "synthetic-key", "gemini-3.5-flash-lite")
+                wire = captured[0]
+                if url.path.endswith("-checked"):
+                    parts = json.loads(wire)["contents"][0]["parts"]
+                    recovered = [base64.b64decode(part["inline_data"]["data"], validate=True)
+                                 for part in parts if "inline_data" in part]
+                    assert recovered == images, "Provider serialization changed photo bytes"
+                return Response.from_json({"probe": {"sha256": [sha256(raw).hexdigest() for raw in images]},
+                                           "wire_bytes": len(wire), "wire_sha256": sha256(wire).hexdigest(),
+                                           "network_calls": 0})
+            if url.path.endswith("native-identify"):
+                import io
+                from workers import Request
+                from starlette.datastructures import FormData, UploadFile, Headers
+                items = []
+                for name, value in form.items():
+                    if isinstance(value, str):
+                        if len(value) > 8192:
+                            return Response.from_json({"error": "Oversize synthetic field"}, status=400)
+                    else:
+                        if name != "files":
+                            return Response.from_json({"error": "Unexpected synthetic file"}, status=400)
+                        raw = await value.bytes()
+                        value = UploadFile(io.BytesIO(raw), size=len(raw), filename=value.name,
+                                           headers=Headers({"content-type": value.content_type}))
+                    items.append((name, value))
+                parsed = FormData(items)
+
+                async def cached_app(scope, receive, send):
+                    scope["profile_form"] = parsed
+                    await app(scope, receive, send)
+
+                forwarded = Request(f"{url.scheme}://{url.netloc}/identify", method="POST",
+                                    headers=dict(request.headers.items()))
+                return await asgi.fetch(cached_app, forwarded, self.env, self.ctx)
+            hashes = [sha256(await file.bytes()).hexdigest() for file in files]
+            return Response.from_json({"probe": {"sha256": hashes}})
+        parts = url.path.split("/")
+        if len(parts) == 6 and parts[3] == "d1" and parts[4] in {"blob", "hex"}:
+            import d1_store
+            store = d1_store.D1Store(self.env.DB)
+            mode, action = parts[4:]
+            token = "synthetic-profile-" + mode
+            photo = bytes([37]) * (700 * 1024)
+            if action == "write" and request.method == "POST":
+                value = photo if mode == "blob" else photo.hex()
+                expression = "?" if mode == "blob" else "unhex(?)"
+                await store.statement(
+                    "INSERT INTO shares(token,owner,created_at,payload,photo,photo_type) "
+                    f"VALUES(?,?,?,?,{expression},?)",
+                    token, "synthetic-profile", "2001-01-01T00:00:00Z", '{"synthetic":true}', value,
+                    "image/png").run()
+                return Response.from_json({"ok": True})
+            if action == "read" and request.method == "GET":
+                if mode == "blob":
+                    value = await store.share_photo(token)
+                    raw = value[0] if value else b""
+                else:
+                    row = await store.statement("SELECT hex(photo) AS encoded FROM shares WHERE token=?", token).first()
+                    raw = bytes.fromhex(row.encoded) if row else b""
+                return Response.from_json({"photo_bytes": len(raw), "sha256": sha256(raw).hexdigest()})
+            if action == "delete" and request.method == "POST":
+                await store.delete_share(token, "synthetic-profile")
+                return Response.from_json({"ok": True})
+        return Response.from_json({"error": "Unknown synthetic operation"}, status=404)

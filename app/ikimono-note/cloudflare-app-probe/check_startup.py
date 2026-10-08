@@ -6,22 +6,27 @@ import signal
 import subprocess
 import tempfile
 import time
+from urllib.error import HTTPError, URLError
+from urllib.request import urlopen
 
 HERE = Path(__file__).resolve().parent
 NODE = "/home/ats030/.nvm/versions/node/v24.19.0/bin/node"
-WRANGLER = "/tmp/cloudflare-migration-tools/node_modules/wrangler/bin/wrangler.js"
+WRANGLER = os.environ.get("IKIMONO_PROBE_WRANGLER", "/tmp/cloudflare-migration-tools/node_modules/wrangler/bin/wrangler.js")
 
 
 def check_startup():
     for missing, message in (
         ("secret", "IKIMONO_SESSION_SECRET binding is required"),
         ("db", "DB binding is required"),
+        ("profile", None),
     ):
         config = json.loads((HERE / "wrangler.jsonc").read_text())
         if missing == "secret":
             del config["vars"]["IKIMONO_SESSION_SECRET"]
-        else:
+        elif missing == "db":
             del config["d1_databases"]
+        else:
+            config["vars"]["IKIMONO_PROFILE_IO"] = "0"
         with tempfile.TemporaryDirectory(prefix=".startup-", dir=HERE) as temporary:
             config["main"] = str(HERE / "src" / "worker.py")
             config["base_dir"] = str(HERE / "src")
@@ -47,7 +52,21 @@ def check_startup():
                     deadline = time.monotonic() + 45
                     while time.monotonic() < deadline:
                         text = log.read_text(errors="replace")
-                        if message in text:
+                        if message is None:
+                            try:
+                                with urlopen("http://localhost:8794/health", timeout=1) as response:
+                                    ready = response.status == 200 and response.headers.get("X-Probe-Profile-IO") == "0"
+                                if ready:
+                                    try:
+                                        urlopen("http://localhost:8794/probe/profile/native-health", timeout=1)
+                                    except HTTPError as error:
+                                        assert error.code == 403
+                                        print("PASS: profiling flag OFF rejects diagnostic routes", flush=True)
+                                        break
+                                    raise AssertionError("Disabled profile route accepted")
+                            except (URLError, TimeoutError):
+                                pass
+                        elif message in text:
                             print(f"PASS: missing {missing} rejected by local workerd", flush=True)
                             break
                         if process.poll() is not None:

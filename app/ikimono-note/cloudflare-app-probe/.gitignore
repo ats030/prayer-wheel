@@ -19,3 +19,4 @@ src/bundled_resources.py
 .venv-workers/
 .startup-*/
 src/prepared_photos.py
+profile-fixtures/
