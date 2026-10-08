@@ -31,6 +31,7 @@ from starlette.staticfiles import StaticFiles
 from PIL import Image
 
 import auth
+import d1_store
 import config_store
 import image_quality
 import creators_api
@@ -453,7 +454,7 @@ def auth_google(request: Request) -> RedirectResponse:
 
 
 @app.get("/auth/callback", include_in_schema=False)
-def auth_callback(request: Request, code: str = "", state: str = "", error: str = "") -> RedirectResponse:
+async def auth_callback(request: Request, code: str = "", state: str = "", error: str = "") -> RedirectResponse:
     if error or not code:
         return RedirectResponse("/login?failed=1", status_code=303)
     flow = auth.read_session(request.cookies.get(LOGIN_FLOW_COOKIE))
@@ -467,7 +468,14 @@ def auth_callback(request: Request, code: str = "", state: str = "", error: str 
         print("login failed: state が一致しない", flush=True)
         return RedirectResponse("/login?failed=1", status_code=303)
     try:
-        user = await_free(auth.finish_login, code, flow["verifier"], flow["nonce"])
+        store = d1_store.for_request(request)
+        if store is None:
+            user = await run_in_threadpool(auth.finish_login, code, flow["verifier"], flow["nonce"])
+        else:
+            # Workers' synchronous HTTP is supported; do not depend on the
+            # SDK's AnyIO inline-threadpool patch for this persistence path.
+            identity = await_free(auth.login_identity, code, flow["verifier"], flow["nonce"])
+            user = await store.upsert_user(identity["subject"], identity["email"])
     except auth.AuthError as exc:
         print(f"login failed: {exc}", flush=True)
         return RedirectResponse("/login?failed=1", status_code=303)
@@ -498,12 +506,16 @@ def api_me(request: Request) -> JSONResponse:
 
 
 @app.post("/api/me/delete")
-def api_me_delete(request: Request) -> JSONResponse:
+async def api_me_delete(request: Request) -> JSONResponse:
     """退会。持っているものが少ないので、消すのも一度で終わる。"""
     session = auth.read_session(request.cookies.get(auth.SESSION_COOKIE))
     if not session:
         raise HTTPException(status_code=401, detail="ログインしていません")
-    auth.delete_user(session["sub"])
+    store = d1_store.for_request(request)
+    if store is None:
+        await run_in_threadpool(auth.delete_user, session["sub"])
+    else:
+        await store.delete_user(session["sub"])
     response = JSONResponse({"ok": True})
     response.delete_cookie(auth.SESSION_COOKIE, path="/")
     return response
@@ -866,8 +878,11 @@ async def create_share(request: Request, photo: UploadFile = File(...),
         raise HTTPException(status_code=400, detail="共有できる候補がありません")
     raw = await photo.read(shares.MAX_PHOTO_BYTES + 1)
     try:
-        token = await run_in_threadpool(shares.create, owner, payload, raw,
-                                        photo.content_type or "")
+        store = d1_store.for_request(request)
+        if store is None:
+            token = await run_in_threadpool(shares.create, owner, payload, raw, photo.content_type or "")
+        else:
+            token = await store.create_share(owner, payload, raw, photo.content_type or "")
     except shares.PhotoTooLarge as exc:
         raise HTTPException(status_code=413, detail="共有する写真が大きすぎます") from exc
     except shares.PhotoTypeNotAllowed as exc:
@@ -881,7 +896,10 @@ async def delete_share(request: Request, token: str) -> dict[str, bool]:
     owner = _share_owner(request)
     if PUBLIC_MODE and not owner:
         raise HTTPException(status_code=401, detail="ログインしてください")
-    if not await run_in_threadpool(shares.delete, token, owner):
+    store = d1_store.for_request(request)
+    deleted = (await run_in_threadpool(shares.delete, token, owner) if store is None
+               else await store.delete_share(token, owner))
+    if not deleted:
         raise HTTPException(status_code=404, detail="この公開は見つかりませんでした")
     return {"deleted": True}
 
@@ -908,7 +926,9 @@ def _share_body(payload: dict, token: str) -> str:
 
 @app.get("/s/{token}", include_in_schema=False)
 async def share_page(request: Request, token: str) -> HTMLResponse:
-    record = await run_in_threadpool(shares.read, token)
+    store = d1_store.for_request(request)
+    record = (await run_in_threadpool(shares.read, token) if store is None
+              else await store.read_share(token))
     if not record:
         raise HTTPException(status_code=404, detail="この共有は見つかりませんでした")
     candidates = record["payload"]["candidates"]
@@ -941,8 +961,10 @@ async def share_page(request: Request, token: str) -> HTMLResponse:
 
 
 @app.get("/s/{token}/photo", include_in_schema=False)
-async def share_photo(token: str) -> Response:
-    found = await run_in_threadpool(shares.photo, token)
+async def share_photo(request: Request, token: str) -> Response:
+    store = d1_store.for_request(request)
+    found = (await run_in_threadpool(shares.photo, token) if store is None
+             else await store.share_photo(token))
     if not found:
         raise HTTPException(status_code=404, detail="この写真は見つかりませんでした")
     raw, content_type = found

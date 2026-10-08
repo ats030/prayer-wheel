@@ -118,12 +118,16 @@ def _connect() -> sqlite3.Connection:
 
 
 # ── 外向きの口 ────────────────────────────────────────────
-def create(owner: str, payload: dict, photo: bytes, photo_type: str) -> str:
-    """公開ページを1つ作り、その名前を返す。"""
+def validate_photo(photo: bytes, photo_type: str) -> None:
     if photo_type not in ALLOWED_PHOTO_TYPES:
         raise PhotoTypeNotAllowed(photo_type)
     if not photo or len(photo) > MAX_PHOTO_BYTES:
         raise PhotoTooLarge(str(len(photo)))
+
+
+def create(owner: str, payload: dict, photo: bytes, photo_type: str) -> str:
+    """公開ページを1つ作り、その名前を返す。"""
+    validate_photo(photo, photo_type)
     token = new_token()
     record = {"owner": owner, "created_at": _now(),
               "payload": json.dumps(payload, ensure_ascii=False), "photo_type": photo_type}

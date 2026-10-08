@@ -1,0 +1,8 @@
+.venv/
+.venv-workers/
+.wrangler/
+uv.lock
+src/auth.py
+src/shares.py
+src/d1_store.py
+__pycache__/

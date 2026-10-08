@@ -318,7 +318,7 @@ def _claims_from_id_token(id_token: str, nonce: str) -> dict:
     return claims
 
 
-def finish_login(code: str, verifier: str, nonce: str) -> dict[str, str]:
+def login_identity(code: str, verifier: str, nonce: str) -> dict[str, str]:
     try:
         with httpx.Client(timeout=30) as client:
             response = client.post(GOOGLE_TOKEN_URL, data={
@@ -337,4 +337,9 @@ def finish_login(code: str, verifier: str, nonce: str) -> dict[str, str]:
     if not id_token:
         raise AuthError("Google の応答にログイン情報がありませんでした")
     claims = _claims_from_id_token(id_token, nonce)
-    return upsert_user(claims["sub"], claims["email"])
+    return {"subject": claims["sub"], "email": claims["email"]}
+
+
+def finish_login(code: str, verifier: str, nonce: str) -> dict[str, str]:
+    identity = login_identity(code, verifier, nonce)
+    return upsert_user(identity["subject"], identity["email"])
