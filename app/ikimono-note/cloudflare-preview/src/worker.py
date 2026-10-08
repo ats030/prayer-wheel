@@ -9,7 +9,8 @@ for name in ("IKIMONO_SESSION_SECRET", "IKIMONO_PREVIEW_PASSWORD"):
     value = getattr(env, name, None)
     if value is None or not str(value).strip():
         raise RuntimeError(f"{name} binding is required")
-for name in ("IKIMONO_SESSION_SECRET", "IKIMONO_ALLOWED_HOSTS", "IKIMONO_PUBLIC_ORIGIN"):
+for name in ("IKIMONO_SESSION_SECRET", "IKIMONO_ALLOWED_HOSTS", "IKIMONO_PUBLIC_ORIGIN",
+             "IKIMONO_GOOGLE_CLIENT_ID", "IKIMONO_GOOGLE_CLIENT_SECRET"):
     value = getattr(env, name, None)
     if value is not None:
         os.environ[name] = str(value)

@@ -14,6 +14,8 @@ URL: https://ikimono-note-preview.ats030.workers.dev
 CloudflareがPython-urllibの標準User-Agentを403にしたため、検証には明示的なUser-Agentを使います。
 直後の404/1042は再確認で解消しました。原因は確定していません。
 
+2026-10-08にGoogle設定を追加した版 `402d1c1d-c449-4c4a-a4ac-809f3f91d653` をデプロイしました。
+
 `src/worker.py` は実識別APIへ接続し、合成識別/図鑑/診断を含みません。
 写真解析には検証済みSDKのnative formを使い、元のFastAPI入力検証へ渡します。
 繰り返された `files` を保持するSDKの `items()` とFastAPIの `getlist()` を使用します。
@@ -23,8 +25,8 @@ D1は独立した `ikimono-note-preview` で、旧ユーザー/共有データ�
 本番アップロード検証では生きたD1ハンドルを起動時に参照できず10021になったためです。
 DB欠落時は503で止め、SQLite/Firestoreへ逃がしません。
 
-Google OAuthは設定していません。Basic認証の内側で撮影・ブラウザ内の記録保存・
-BYOK識別を検証するための版です。実写真の識別/HEIC/CPU/メモリは未検証です。
+Google OAuthの設定を追加し、Basic認証の内側でも記録・設定画面にはGoogleログインを要求します。
+実ログイン・Drive保存・実写真の識別/HEIC/CPU/メモリは未検証です。
 既存の公開版・ローカル版・データは維持しています。検証版専用の `/changelog` を同時配信し、
 公開サイトの更新履歴を公開済みとして変更していません。
 
@@ -52,6 +54,24 @@ python3 check.py https://ikimono-note-preview.ats030.workers.dev
 再取得時の不一致を拒否します。GNU LGPL/GPLとMIT通知は元ライブラリと一緒に残します。
 HEICモジュールは独立した通常のimportで、改変版へ置換でき、SRIによる固定はありません。
 一般公開への認証解除や旧サービス停止は、この検証版の作業範囲外です。
+
+## Google接続
+
+入口は任意の `IKIMONO_GOOGLE_CLIENT_ID` / `IKIMONO_GOOGLE_CLIENT_SECRET` bindingを
+本体へ渡せます。既存設定は秘密の値を表示せず、Git対象外の0600ファイルへ準備済みです。
+Googleへの認可要求で検証版callbackは最初 `redirect_uri_mismatch` になりました。
+利用者が既存OAuthクライアントに次の承認済みリダイレクトURIを追加し、
+Googleのログイン画面まで進むことをログイン前のHTTP要求で確認しました。
+
+`https://ikimono-note-preview.ats030.workers.dev/auth/callback`
+
+旧サービスの登録は残します。有効にすると記録・設定画面はGoogleログインを要求します。
+ローカルの `python3 check.py --oauth` で認可URL、PKCE/state/nonce、Secure/HttpOnly Cookie、
+未ログイン画面/API拒否と不正callbackの拒否を確認しています。
+確認処理はリダイレクトを追わず、Basic認証を別originへ転送しません。
+実Googleログイン・Drive保存・実データ移行は未検証です。
+Google設定追加後のデプロイを調べる際は `--oauth` を付けます。
+Google未設定の版を調べる際は付けません。bundle SHAは手元ビルドとの一致も確認します。
 
 切戻しはCloudflareのバージョンrollbackを使います。外部アクセスを停止する場合は
 この検証版だけを `workers_dev: false` にして再デプロイします。D1は削除しません。

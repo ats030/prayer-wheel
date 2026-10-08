@@ -1,31 +1,44 @@
 """Check the protected real app without user data or external AI requests."""
 import base64
 import hashlib
+from http.cookies import SimpleCookie
 import json
 from pathlib import Path
 import sys
 from urllib.error import HTTPError
-from urllib.request import Request, urlopen
+from urllib.parse import parse_qs, urlsplit
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 HERE = Path(__file__).resolve().parent
 STATE = Path('/home/ats030/.local/state/ikimono-cloudflare-preview/secrets.json')
 
-def check(origin):
-    password = json.loads(STATE.read_text())["IKIMONO_PREVIEW_PASSWORD"]
+class NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, request, response, code, message, headers, new_url):
+        return None
+
+def check(origin, oauth_enabled=False):
+    secrets = json.loads(STATE.read_text())
+    password = secrets["IKIMONO_PREVIEW_PASSWORD"]
+    client_id = secrets.get("IKIMONO_GOOGLE_CLIENT_ID", "")
+    if oauth_enabled:
+        assert client_id and secrets.get("IKIMONO_GOOGLE_CLIENT_SECRET"), "OAuth bindings missing from private state"
     credential = "Basic " + base64.b64encode(("preview:" + password).encode()).decode()
     def fetch(path, authenticated=True, method="GET", body=None, extra=None):
         headers = {"Authorization": credential} if authenticated else {}
         headers["User-Agent"] = "ikimono-note-deployment-check/1.0"
         headers.update(extra or {})
         try:
-            response = urlopen(Request(origin + path, data=body, method=method, headers=headers), timeout=30)
+            # Inspect redirects locally; never forward preview credentials to Google.
+            response = build_opener(NoRedirect).open(
+                Request(origin + path, data=body, method=method, headers=headers), timeout=30)
         except HTTPError as error:
             response = error
         with response:
             return response.status, response.read(), response.headers
 
     for path in ("/", "/health", "/assets/index.js", "/vendor/photo/libheif.mjs",
-                 "/vendor/photo/sources/libheif.tar.gz", "/api/settings", "/probe/profile/native-health"):
+                 "/vendor/photo/sources/libheif.tar.gz", "/api/settings", "/auth/google",
+                 "/auth/callback", "/probe/profile/native-health"):
         status, body, headers = fetch(path, False)
         assert status == 401, (path, status, body[:200])
         assert headers["Cache-Control"] == "no-store"
@@ -38,18 +51,68 @@ def check(origin):
     assert status == 200, (status, body[:100])
     assert headers["X-Preview-Bundle-SHA256"] == namespace["BUNDLE_SHA256"]
     assert "noindex" in headers["X-Robots-Tag"]
-    for path in ("/", "/settings", "/history", "/changelog", "/assets/index.js", "/vendor/photo/libheif.mjs"):
+    me = json.loads(fetch("/api/me")[1])
+    assert me["available"] is oauth_enabled and me["signed_in"] is False, me.keys()
+    for path in ("/", "/login", "/changelog", "/assets/index.js", "/vendor/photo/libheif.mjs"):
         status, body, headers = fetch(path)
         assert status == 200, (path, status, body[:100])
         assert headers["Cache-Control"] == "no-store"
     assert "Cloudflare検証版" in fetch("/changelog")[1].decode()
-    for path in ("/probe/profile/native-health", "/.env", "/src/worker.py", "/secrets.json"):
-        assert fetch(path)[0] == 404, path
-    settings = json.loads(fetch("/api/settings")[1])
-    assert settings.get("browser_photos") is True, settings.keys()
-    assert settings.get("google_client_id") == ""
-    assert not any(settings["api_key_configured"].values())
-    assert fetch("/api/settings", method="POST", body=b'{"provider":"gemini"}', extra={"Content-Type": "application/json"})[0] == 403
+    assert fetch("/probe/profile/native-health")[0] == 404
+    for path in ("/.env", "/src/worker.py", "/secrets.json"):
+        status, body, headers = fetch(path)
+        if oauth_enabled:
+            assert status == 303 and headers["Location"] == "/login" and not body, path
+        else:
+            assert status == 404, path
+    for path in ("/settings", "/history"):
+        status, _, headers = fetch(path)
+        if oauth_enabled:
+            assert status == 303 and headers["Location"] == "/login", (path, status)
+        else:
+            assert status == 200, (path, status)
+    if oauth_enabled:
+        assert fetch("/api/settings")[0] == 401
+    else:
+        settings = json.loads(fetch("/api/settings")[1])
+        assert settings.get("browser_photos") is True, settings.keys()
+        assert settings.get("google_client_id") == ""
+        assert not any(settings["api_key_configured"].values())
+    status, _, headers = fetch("/auth/google")
+    flow_cookie = None
+    if oauth_enabled:
+        assert status == 303, status
+        target = urlsplit(headers["Location"])
+        assert (target.scheme, target.hostname, target.path) == (
+            "https", "accounts.google.com", "/o/oauth2/v2/auth")
+        params = parse_qs(target.query)
+        assert params["client_id"] == [client_id]
+        public_origin = json.loads((HERE / "wrangler.jsonc").read_text())["vars"]["IKIMONO_PUBLIC_ORIGIN"]
+        assert params["redirect_uri"] == [public_origin + "/auth/callback"]
+        assert params["response_type"] == ["code"]
+        assert params["code_challenge_method"] == ["S256"]
+        assert params.get("state") and params.get("nonce") and params.get("code_challenge")
+        cookie = headers["Set-Cookie"].lower()
+        assert all(flag in cookie for flag in ("httponly", "secure", "samesite=lax", "path=/auth"))
+        cookies = SimpleCookie()
+        cookies.load(headers["Set-Cookie"])
+        flow_cookie = "ikimono_login=" + cookies["ikimono_login"].value
+        second_status, _, second_headers = fetch("/auth/google")
+        assert second_status == 303
+        second_params = parse_qs(urlsplit(second_headers["Location"]).query)
+        for name in ("state", "nonce", "code_challenge"):
+            assert second_params.get(name) and second_params[name] != params[name], name
+    else:
+        assert status == 503, status
+    status, _, headers = fetch("/auth/callback?code=invalid&state=invalid")
+    assert status == 303 and headers["Location"] == "/login?failed=1"
+    assert "ikimono_session=" not in headers.get("Set-Cookie", "")
+    if flow_cookie:
+        status, _, headers = fetch("/auth/callback?code=invalid&state=invalid",
+                                   extra={"Cookie": flow_cookie})
+        assert status == 303 and headers["Location"] == "/login?failed=1"
+        assert "ikimono_session=" not in headers.get("Set-Cookie", "")
+    assert fetch("/api/settings", method="POST", body=b'{"provider":"gemini"}', extra={"Content-Type": "application/json"})[0] == (401 if oauth_enabled else 403)
     for name, record in json.loads((HERE / "sources.json").read_text()).items():
         status, body, headers = fetch("/vendor/photo/sources/" + name)
         assert status == 200, (name, status)
@@ -57,7 +120,12 @@ def check(origin):
         assert "noindex" in headers["X-Robots-Tag"]
     status, body, _ = fetch("/identify", method="POST", body=b"x" * (6 * 1024 * 1024 + 16385))
     assert status == 400, (status, body[:200])
-    print("PASS: auth gate, real app, current bundle, sources, settings, no diagnostics, upload bound")
+    print("PASS: auth gate, real app, current bundle, sources, settings, OAuth start/state rejection, no diagnostics, upload bound")
 
 if __name__ == "__main__":
-    check(sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8795")
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("origin", nargs="?", default="http://127.0.0.1:8795")
+    parser.add_argument("--oauth", action="store_true", help="Expect configured Google login (does not sign in)")
+    args = parser.parse_args()
+    check(args.origin, args.oauth)
