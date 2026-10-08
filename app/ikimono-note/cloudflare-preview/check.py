@@ -5,6 +5,7 @@ from http.cookies import SimpleCookie
 import json
 from pathlib import Path
 import sys
+import uuid
 from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -51,6 +52,21 @@ def check(origin, oauth_enabled=False):
     assert status == 200, (status, body[:100])
     assert headers["X-Preview-Bundle-SHA256"] == namespace["BUNDLE_SHA256"]
     assert "noindex" in headers["X-Robots-Tag"]
+    for name in ("X-Preview-Isolate", "X-Preview-Isolate-Invocation"):
+        assert name not in headers, "Ordinary response exposed operator observation"
+    probe_headers = {"X-Ikimono-CPU-Probe": "0123abcd"}
+    previous = {}
+    for path in ("/health", "/api/me", "/assets/index.js", "/health"):
+        status, _, observed = fetch(path, extra=probe_headers)
+        assert status == 200, path
+        identifier = observed["X-Preview-Isolate"]
+        assert str(uuid.UUID(identifier)) == identifier
+        invocation = int(observed["X-Preview-Isolate-Invocation"])
+        assert invocation > previous.get(identifier, 0)
+        previous[identifier] = invocation
+    for authenticated, marker in ((False, "0123abcd"), (True, "invalid")):
+        _, _, observed = fetch("/health", authenticated, extra={"X-Ikimono-CPU-Probe": marker})
+        assert "X-Preview-Isolate" not in observed and "X-Preview-Isolate-Invocation" not in observed
     me = json.loads(fetch("/api/me")[1])
     assert me["available"] is oauth_enabled and me["signed_in"] is False, me.keys()
     for path in ("/", "/login", "/changelog", "/assets/index.js", "/vendor/photo/libheif.mjs"):

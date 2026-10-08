@@ -13,6 +13,7 @@ import signal
 import subprocess
 import threading
 import time
+import uuid
 from urllib.parse import parse_qs, urlsplit
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, build_opener
@@ -26,6 +27,28 @@ def successful(row):
     cpu = row.get("cpu_ms")
     return bool(row.get("version") and row.get("status") == 200 and row.get("outcome") == "ok"
                 and type(cpu) in (int, float) and math.isfinite(cpu) and cpu >= 0)
+
+
+def valid_isolate(row):
+    identifier = row.get("isolate_id", "")
+    try:
+        parsed = uuid.UUID(identifier)
+    except (ValueError, TypeError, AttributeError):
+        return False
+    return (str(parsed) == identifier and parsed.version == 4
+            and type(row.get("isolate_invocation")) is int and row["isolate_invocation"] > 0)
+
+
+def valid_sequence(rows):
+    observed = {}
+    for row in rows:
+        if not valid_isolate(row):
+            return False
+        identifier, invocation = row["isolate_id"], row["isolate_invocation"]
+        if invocation <= observed.get(identifier, 0):
+            return False
+        observed[identifier] = invocation
+    return True
 
 
 def measure(samples):
@@ -61,7 +84,7 @@ def measure(samples):
             # sanitization can transform opaque query markers; numeric sample
             # IDs and the allowlisted route are the correlation fields.
             sample = query.get("sample", [""])[0]
-            if url.path not in PATHS or not (sample.isdigit() or sample == "-1"):
+            if url.path not in PATHS or not (sample.isdigit() or sample in {"-1", "-2", "-3", "-4", "-5"}):
                 continue
             # Reduce the event immediately: never retain credentials, logs,
             # cookies, client addresses, full exception traces, or arbitrary URLs.
@@ -94,8 +117,11 @@ def measure(samples):
         try:
             with response:
                 body = response.read()
+                invocation = response.headers.get("X-Preview-Isolate-Invocation", "")
                 return {"status": response.status, "bytes": len(body),
-                        "sha256": hashlib.sha256(body).hexdigest()}
+                        "sha256": hashlib.sha256(body).hexdigest(),
+                        "isolate_id": response.headers.get("X-Preview-Isolate", ""),
+                        "isolate_invocation": int(invocation) if invocation.isdigit() else None}
         except OSError as error:
             return {"status": None, "bytes": 0, "sha256": None, "network_error": type(error).__name__}
     try:
@@ -106,13 +132,18 @@ def measure(samples):
         # tagged event before collecting the complete comparison sample set.
         subscription_probe = None
         for attempt in range(5):
-            probe_response = fetch("/health", "-1")
-            try:
-                subscription_probe = events.get(timeout=3)
-            except queue.Empty:
-                continue
-            if subscription_probe["sample"] == "-1":
-                subscription_probe.update(probe_response)
+            probe_sample = str(-1 - attempt)
+            probe_response = fetch("/health", probe_sample)
+            readiness_deadline = time.monotonic() + 3
+            while time.monotonic() < readiness_deadline:
+                try:
+                    event = events.get(timeout=max(0.001, readiness_deadline - time.monotonic()))
+                except queue.Empty:
+                    break
+                if event["sample"] == probe_sample:
+                    subscription_probe = {**event, **probe_response}
+                    break
+            if subscription_probe is not None:
                 break
         else:
             raise RuntimeError("Tail did not confirm the subscription")
@@ -141,12 +172,12 @@ def measure(samples):
                   for i in range(len(requests))]
         eligible = complete and len({r["version"] for r in paired} | {
             subscription_probe["version"]}) == 1 and successful(subscription_probe) and all(
-                successful(r) for r in paired)
+                successful(r) for r in paired) and valid_sequence([subscription_probe, *paired])
         return {"origin": ORIGIN, "cpu_unit": "milliseconds",
                 "started_at_utc": started, "completed_at_utc": datetime.now(timezone.utc).isoformat(),
                 "expected_records": len(requests), "observed_records": len(records),
                 "complete": complete, "eligible_for_success_cpu_comparison": eligible,
-                "first_request_per_route_excluded_from_warm_summary": True,
+                "first_request_per_route_excluded_from_subsequent_summary": True,
                 "subscription_probe": subscription_probe,
                 "records": paired}
     finally:
@@ -170,7 +201,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if not 1 <= args.samples <= 5:
-        parser.error("Use 1 to 5 warm samples per route")
+        parser.error("Use 1 to 5 subsequent samples per route")
     try:
         result = measure(args.samples)
     except (RuntimeError, OSError) as error:
@@ -182,4 +213,5 @@ if __name__ == "__main__":
         raise SystemExit(2)
     for path in PATHS:
         rows = [r for r in result["records"] if r["path"] == path and r["turn"] > 0]
-        print(path, "warm CPU ms/status/outcome:", [(r["cpu_ms"], r["status"], r["outcome"]) for r in rows])
+        print(path, "subsequent CPU ms/isolate/invocation:",
+              [(r["cpu_ms"], r["isolate_id"], r["isolate_invocation"]) for r in rows])

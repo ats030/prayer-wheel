@@ -24,6 +24,9 @@ bundled_resources.configure(RESOURCES)
 import main
 from fastapi.routing import APIRoute, request_response
 app = main.app
+# Ephemeral per-isolate observations, never persisted or shared with users.
+_probe_isolate_id = None
+_invocation_count = 0
 
 def cached_form_handler(handler):
     async def handle(request):
@@ -36,8 +39,18 @@ for route in app.routes:
     if isinstance(route, APIRoute) and route.path == "/identify":
         route.app = request_response(cached_form_handler(route.get_route_handler()))
 
+# Keep lazy library imports and stack construction in the deployment snapshot,
+# rather than paying for them in the first authenticated ASGI request. Reuse the
+# pinned AnyIO resolver; this imports its backend without starting an event loop.
+from anyio._core._eventloop import get_async_backend
+get_async_backend("asyncio")
+app.middleware_stack = app.build_middleware_stack()
+
 class Default(asgi.entrypoint(app)):
     async def fetch(self, request):
+        global _probe_isolate_id, _invocation_count
+        _invocation_count += 1
+        invocation = _invocation_count
         expected = "Basic " + base64.b64encode(
             ("preview:" + str(self.env.IKIMONO_PREVIEW_PASSWORD)).encode()).decode()
         provided = request.headers.get("authorization", "")
@@ -113,6 +126,13 @@ class Default(asgi.entrypoint(app)):
         response = js.Response.new(native.body, native)
         response.headers.set("X-Robots-Tag", "noindex, nofollow")
         response.headers.set("Cache-Control", "no-store")
+        marker = request.headers.get("X-Ikimono-CPU-Probe", "")
+        if len(marker) == 8 and all(char in "0123456789abcdef" for char in marker):
+            if _probe_isolate_id is None:
+                # Randomness runs in request context, never in the snapshot.
+                _probe_isolate_id = str(js.crypto.randomUUID())
+            response.headers.set("X-Preview-Isolate", _probe_isolate_id)
+            response.headers.set("X-Preview-Isolate-Invocation", str(invocation))
         if native_asset:
             if request.method == "HEAD" and response.status == 200:
                 response.headers.set("Content-Length", str(NATIVE_ASSET_LENGTHS[path]))

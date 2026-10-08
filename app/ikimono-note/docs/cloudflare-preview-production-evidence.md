@@ -191,3 +191,74 @@ capture addressed it, the repeated measurement passed, and a medium follow-up
 review reported no concrete remaining correctness issue. No real AI calls or
 user data were used. This is internal diagnostic work, with no public changelog
 or production behavior change.
+
+## Runtime identity and snapshot preparation — 2026-10-09 JST
+
+Instrumented version: `d360ac3a-1170-41d7-b606-842b76c97d98`.
+Current optimized version: `851e9a73-87ad-4b96-9fd8-580ed77d8bf2`.
+Optimization rollback: instrumented version above; entire experiment rollback:
+`cacbf9b8-5e19-4931-985b-b7794b2acd3e`.
+
+Authenticated requests with the operator measurement marker receive an
+ephemeral UUID and the runtime's fetch invocation number. The UUID is generated
+in request context; no event loop/task is started and no invocation is counted
+in the deployment snapshot. Ordinary/unauthenticated/invalid-marker responses
+do not carry these headers. The marker selects measurements; Basic remains the
+authorization boundary. Counts include early rejected requests. Neither value
+identifies a user or photo. This establishes repeated requests to the observed
+Python runtime, without asserting a physical host or regional placement.
+
+Before: `2026-10-08T19:40:38.872778Z`–`19:41:14.325708Z`.
+After: `2026-10-08T19:45:23.480131Z`–`19:45:58.049901Z`.
+Each run captured 24/24 requested traces, all HTTP200/outcome `ok`, no exceptions,
+and one version. Within each run, all runtime UUIDs were valid and invocation
+counts strictly increased whenever an identity recurred. Four identities were
+observed in each run. No remote validation was run concurrently by this session.
+
+| Observation (CPU ms) | Instrumented baseline | Snapshot preparation |
+| --- | --- | --- |
+| Measured first health invocations | 206, 133 | 62, 29 |
+| Measured first me invocation | 301 | 47 |
+| Repeated health invocations (4 requests) | 14–30; median 18 | 11–26; median 18.5 |
+| Repeated me invocations (5 requests) | 8–14; median 10 | 10–26; median 13 |
+| index.js (6 repeated requests) | 3–13; median 4.5 | 3–6; median 5 |
+| libheif (6 repeated requests) | 5–19; median 9 | 3–12; median 3.5 |
+
+The baseline's later-in-route 133/206/301ms requests were invocation 1 in different
+runtimes, resolving the previous uncertainty about whether route order implied
+reuse. In the optimized observation no requested trace exceeded 62ms. This is
+consistent with less first-request initialization, but the small sequential
+runs use different runtimes and do not control physical CPU or other users'
+traffic. It is not a causal allocation between the two preparation changes, a
+universal cold-start benchmark, or proof of Free-plan compliance. Repeated health
+and me still exceed 10ms. AI, uploads, memory, quotas and persistent metrics were
+not tested; the prior HTTP500 cause remains unresolved.
+
+The change moves the pinned AnyIO 4.15.1 asyncio backend's lazy import and the
+unchanged FastAPI middleware stack construction into module startup. It uses
+the existing private resolver with an explicit backend name, without opening
+an event loop. Stack construction occurs after the existing identify FormData
+route wrapping. All 14 assembled app modules are byte-identical to the original
+app, and models/prompts/photo preprocessing/postprocessing remain unchanged.
+Reported deployment startup times were 4258ms before and 2955ms after; these
+deployment values are separate from request CPU and are not an isolate startup
+comparison. Dependency updates require revalidation of the private resolver.
+
+Reduced evidence artifacts: [baseline JSON](cloudflare-cpu-isolate-baseline.json)
+and [snapshot preparation JSON](cloudflare-cpu-preloaded.json). They retain only
+route/sample/status/hash/timing/version/ephemeral identity fields, not credentials,
+raw logs, cookies, user data or request headers. Subscription readiness is excluded
+from the comparison table: the baseline collector reused `-1` for retry attempts;
+the collector now uses unique negative IDs and rejects delayed unmatched events.
+The 24 numbered measurement requests had distinct sample IDs in both runs.
+
+Local and remote `check.py --oauth` passed before and after preparation. Checks
+include UUID/counter progression and absence on ordinary/unauthenticated requests,
+Basic and OAuth boundaries, current bundle/source hashes, static body/HEAD/security
+headers, diagnosis404 and oversized upload400. Invalid/missing/duplicate/reversed
+counters and nonfinite CPU were rejected by the collector check. Both medium
+reviews reported no concrete bug (the first review attempt failed due to the
+sandbox and was rerun). The preview changelog was deployed with the performance
+experiment; its Drive verification wording now reflects the user's successful
+manual check. Old production/data remain intact; no public switch, paid plan,
+external AI call or user-data migration occurred.
