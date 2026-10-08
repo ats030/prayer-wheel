@@ -5,3 +5,8 @@ node_modules/
 python_modules/
 uv.lock
 package-lock.json
+fixtures/
+src/quality_reference.py
+src/photo_archive.py
+src/vision.py
+src/reference_info.py

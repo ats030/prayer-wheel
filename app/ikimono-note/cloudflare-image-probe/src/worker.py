@@ -1,7 +1,9 @@
 """Synthetic JPEG/PNG compatibility probe; no HEIF or production imports."""
 from io import BytesIO
+from hashlib import sha256
 from PIL import Image, ImageOps
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+import time
 from workers import asgi
 
 app = FastAPI()
@@ -26,6 +28,41 @@ async def health():
             results[fmt] = {"size": list(decoded.size), "exif": len(decoded.getexif()),
                             "bytes": len(output.getvalue()), "original_date": original_date}
     return {"ok": True, "results": results}
+
+
+@app.post("/measure")
+async def measure(request: Request):
+    # Optional imports keep the original health probe usable before preparation.
+    import quality_reference
+    import vision
+    from reference_info import SOURCE_HASHES
+    raw = await request.body()
+    if len(raw) > vision.MAX_UPLOAD_BYTES:
+        return {"ok": False, "error": "oversized"}
+    started = time.perf_counter()
+    quality = quality_reference.judge(raw)
+    judged = time.perf_counter()
+    jpeg = vision.prepare_image(raw)
+    prepared = time.perf_counter()
+    return {"ok": True, "quality": quality, "source_hashes": SOURCE_HASHES,
+            "jpeg_bytes": len(jpeg),
+            "quality_wall_ms": round((judged-started)*1000, 3),
+            "prepare_wall_ms": round((prepared-judged)*1000, 3)}
+
+
+@app.post("/zip")
+async def read_zip(request: Request):
+    import photo_archive
+    import vision
+    raw = await request.body()
+    started = time.perf_counter()
+    try:
+        photo, name, mime = photo_archive.read_original(raw)
+        return {"ok": True, "name": name, "mime": mime, "bytes": len(photo),
+                "sha256": sha256(photo).hexdigest(),
+                "wall_ms": round((time.perf_counter()-started)*1000, 3)}
+    except vision.VisionError as exc:
+        return {"ok": False, "error": str(exc)}
 
 
 Default = asgi.entrypoint(app)

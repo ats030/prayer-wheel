@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "exifr": "7.1.3",
+    "libheif-js": "1.23.5"
+  }
+}
