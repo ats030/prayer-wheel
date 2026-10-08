@@ -1,0 +1,17 @@
+tool: Pillow-compatible browser grayscale resampling experiment
+plan_or_version: Pillow 12.2.0 reference algorithm
+reviewed_at: 2026-10-08
+status: approved
+cost:
+  condition: Local JavaScript execution; no service, usage fee, or added dependency.
+license:
+  spdx: MIT-CMU
+  commercial_use: Permitted for any purpose without fee subject to notice requirements.
+conditions:
+  - Preserve copyright and permission notices with copies and supporting documentation.
+  - Do not use author or Secret Labs names in advertising without prior permission.
+  - PILLOW-LICENSE.txt accompanies the adapted resampling module.
+adoption: approved_for_isolated_local_probe_only
+sources:
+  - https://raw.githubusercontent.com/python-pillow/Pillow/12.2.0/LICENSE
+  - https://raw.githubusercontent.com/python-pillow/Pillow/12.2.0/src/libImaging/Resample.c
