@@ -32,14 +32,23 @@ workers-py 1.17.7、workers-runtime-sdk 1.9.3、uv 0.12.3です。
 これは現行依存をそのまま移せないという結果です。ブラウザ側へHEIC処理を移す案の
 成否、JPEG/PNG処理、CPU時間、無料枠内の運用を検証済みと扱ってはいけません。
 
+2026-10-08に画像依存を分離して追加検証しました。
+[HTTP検証](../cloudflare-http-probe/README.md)では同期・非同期httpx、POST、multipart、
+FastAPI同期ルートとSDKによる同一スレッド内のthreadpool呼出しが成功しました。
+[画像検証](../cloudflare-image-probe/README.md)ではPillow単独のJPEG/PNG、撮影日時、
+向き補正、縮小、JPEG化、EXIF除去が成功しました。いずれもローカルWorkersだけの結果です。
+`pillow-heif`の不適合は残りますが、同期HTTP・Pillow全体の置き換えを必須とはしません。
+
 ## 移行を続けるために必要な確認
 
 - ブラウザ側のHEICデコード、EXIF取得、ZIP読み込み、縮小・EXIF除去、画質チェック。
   Android/PC/iOSの実機と写真で、現行結果との差を確認します。
-- Workersの非同期HTTP、Googleログインとセッション検証、ユーザー・共有データの保存。
-  ローカルファイル・スレッド・GCPメタデータ認証に依存する箇所を変更する必要があります。
+- 公開WorkersでのHTTP、Googleログインとセッション検証、ユーザー・共有データの保存。
+  永続ローカルファイル・直接のスレッド生成・GCPメタデータ認証に依存する箇所は変更が必要です。
+  SDKのthreadpool互換処理はCPU処理を並列化しません。識別ジョブの状態と寿命も検証が必要です。
 - 共有ページと写真、広告、地図の照会、利用者のローカルOllama連携を含む既存APIの検証。
-- Cloudflareアカウントの接続とFreeプラン確認。標準URL決定後にGoogle OAuthの登録を追加。
+- Cloudflare接続とFreeプランは利用者確認済み。D1権限は未付与です。
+  ikimono-noteの標準URL決定後にGoogle OAuthの登録を追加します。
 - 旧サイトの記録をGoogle Driveへ保存し、新サイトで写真付き記録を読み込む確認。
   APIキーは移行しません。同期未完了の写真や未接続端末の記録を確認するまで旧サイトを停止しません。
 - Firestoreのユーザー・共有情報の移行と、既存共有URLの扱い。
