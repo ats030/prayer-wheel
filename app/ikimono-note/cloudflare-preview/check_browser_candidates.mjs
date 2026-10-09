@@ -41,6 +41,11 @@ try{
         }
         if(url.pathname==='/api/gemini/result'){
           completed++;const body=request.postDataJSON();
+          if(scenario.kind==='verified'&&scenario.count===3){
+            assert.ok(Buffer.byteLength(body.reply)<8192);
+            const reply=JSON.parse(body.reply);assert.equal(reply.usageMetadata.thoughtsTokenCount,7);
+            assert.equal(Object.hasOwn(reply.usageMetadata,'unused'),false);
+          }
           const lookup=async name=>scenario.kind==='gbif'?lookupTaxon(name,async url=>{
             if(new URL(url).origin==='https://api.inaturalist.org')return new Response(null,{status:429});
             assert.equal(new URL(url).origin,'https://api.gbif.org');
@@ -54,7 +59,12 @@ try{
       }
       if(url.origin==='https://generativelanguage.googleapis.com'){
         assert.ok(!scenario.plantnet);
-        return fulfill(200,{candidates:[{content:{parts:[{text:JSON.stringify(scenario.kind==='empty'?{category:'不明',candidates:[]}:data)}]}}]});
+        const reply={candidates:[{content:{parts:[{text:JSON.stringify(scenario.kind==='empty'?{category:'不明',candidates:[]}:data)}]}}]};
+        if(scenario.kind==='verified'&&scenario.count===3){
+          reply.usageMetadata={thoughtsTokenCount:7,unused:''};
+          reply.usageMetadata.unused='x'.repeat(2*1024*1024-Buffer.byteLength(JSON.stringify(reply)));
+        }
+        return fulfill(200,reply);
       }
       return route.abort();
     });

@@ -3,6 +3,21 @@ import {assembleProviderPayload} from './provider-payload.mjs';
 const MAX_PHOTO = 2 * 1024 * 1024, MAX_REPLY = 2 * 1024 * 1024;
 const inputError = () => new Error('写真の送信形式を確認してください。写真を選び直してください。');
 
+// Preserve exactly the fields consumed by the authoritative result parser.
+// Candidate text is never truncated, summarized or trusted in the browser.
+export function compactGeminiReply(reply) {
+  const candidate=reply?.candidates?.[0];
+  if(!candidate||typeof candidate!=='object'||Array.isArray(candidate))return {candidates:[]};
+  const parts=candidate.content?.parts;
+  const compact={candidates:[{finishReason:candidate.finishReason,content:{parts:Array.isArray(parts)
+    ?parts.filter(part=>part&&typeof part==='object'&&!Array.isArray(part)&&part.text).map(part=>({text:part.text}))
+    :parts}}]};
+  // Python's MAX_TOKENS diagnostic consumes this single usage field.
+  if(reply.usageMetadata&&Object.hasOwn(reply.usageMetadata,'thoughtsTokenCount'))
+    compact.usageMetadata={thoughtsTokenCount:reply.usageMetadata.thoughtsTokenCount};
+  return compact;
+}
+
 // Same bounded header policy as prepared_photos.jpeg_dimensions. These are
 // already browser-prepared JPEGs, never the original HEIC/EXIF-bearing files.
 function checkJpeg(raw) {
@@ -108,5 +123,5 @@ export async function identifyWithBrowserGemini(form, fetcher = fetch) {
   try {reply = await replyJSON(response);} catch {throw new Error('Geminiの応答を読み取れませんでした');}
   // Keep normalization, independent taxonomy/evidence and protected-species
   // checks in the existing authoritative pipeline before displaying/saving.
-  return sameOriginJSON(fetcher, '/api/gemini/result', {...context, reply: JSON.stringify(reply)});
+  return sameOriginJSON(fetcher, '/api/gemini/result', {...context, reply: JSON.stringify(compactGeminiReply(reply))});
 }

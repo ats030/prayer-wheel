@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {identifyWithBrowserGemini} from '../static/assets/gemini-browser.mjs';
+import {identifyWithBrowserGemini,compactGeminiReply} from '../static/assets/gemini-browser.mjs';
 import {assembleProviderPayload} from '../static/assets/provider-payload.mjs';
 import {Buffer} from 'node:buffer';
 let input = '';
@@ -76,3 +76,11 @@ await assert.rejects(identifyWithBrowserGemini(form(), async url => url === '/ap
   }, cancel() {canceled = true;}}))), /応答/);
 assert.ok(canceled);
 console.log('PASS: browser Gemini byte parity, key/photos only to fixed provider, server auth/quality before AI, quota stop and output bound');
+const largeReply={...reply,usageMetadata:{thoughtsTokenCount:157,ignored:'x'.repeat(2*1024*1024-500)},
+  candidates:[{...reply.candidates[0],content:{parts:[{text:'first',thought:true,thoughtSignature:'discard'},
+    {text:'second'},{inlineData:{data:'discard'}},null]},finishReason:'MAX_TOKENS',ignored:'discard'},
+    {content:{parts:[{text:'other candidate'}]}}]};
+assert.deepEqual(compactGeminiReply(largeReply),{candidates:[{finishReason:'MAX_TOKENS',content:{parts:[{text:'first'},{text:'second'}]}}],usageMetadata:{thoughtsTokenCount:157}});
+assert.deepEqual(compactGeminiReply({candidates:[]}),{candidates:[]});
+assert.equal(largeReply.candidates[0].content.parts[0].thoughtSignature,'discard');
+console.log('PASS: compact reply preserves all consumed text/order/finishReason, leaves original unchanged and drops unused metadata/extra candidates');

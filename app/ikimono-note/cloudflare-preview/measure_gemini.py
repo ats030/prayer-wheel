@@ -55,7 +55,7 @@ def sized_reply(reply, target_bytes=0):
     return data
 
 
-def collect(samples,output,case="empty",reply_bytes=0):
+def collect(samples,output,case="empty",reply_bytes=0,compact_reply=False):
     state=json.loads((Path.home()/'.local/state/ikimono-cloudflare-preview/secrets.json').read_text())
     encode=lambda value:base64.urlsafe_b64encode(value).decode().rstrip('=')
     session=encode(json.dumps({'sub':'synthetic-gemini-cpu','email':'synthetic@example.invalid','exp':int(time.time())+300}).encode())
@@ -74,7 +74,16 @@ def collect(samples,output,case="empty",reply_bytes=0):
             for name in ['Felis catus','Panthera tigris','Panthera leo']]}
     reply={'candidates':[{'content':{'parts':[{'text':json.dumps(identified,ensure_ascii=False,separators=(',',':'))}]}}]}
     reply=sized_reply(reply,reply_bytes)
-    result_body={**body,'reply':json.dumps(reply,ensure_ascii=False,separators=(',',':'))}
+    serialized=json.dumps(reply,ensure_ascii=False,separators=(',',':'))
+    original_reply_bytes=len(serialized.encode())
+    if compact_reply:
+        projected=subprocess.run(['/home/ats030/.nvm/versions/node/v24.19.0/bin/node','--input-type=module','-e',
+            'import {compactGeminiReply} from "./static/assets/gemini-browser.mjs";'
+            'let s="";for await(const c of process.stdin)s+=c;'
+            'process.stdout.write(JSON.stringify(compactGeminiReply(JSON.parse(s))));'],
+            cwd=HERE.parent,input=serialized,text=True,capture_output=True,check=True)
+        serialized=projected.stdout
+    result_body={**body,'reply':serialized}
     metadata,quality=main.prepared_photos.read_reports(body['client_photos'],3)
     expected={PATHS[0]:main.vision.provider_payload('gemini',body['model'],[],location=prepare['location'],
                      observed_date=prepare['observed_date'],size=prepare['size']),
@@ -115,6 +124,8 @@ def collect(samples,output,case="empty",reply_bytes=0):
     evidence['provenance_verified']=True
     evidence['case']=case
     evidence['synthetic_reply_bytes']=len(result_body['reply'].encode())
+    evidence['original_synthetic_reply_bytes']=original_reply_bytes
+    evidence['browser_reply_compacted']=compact_reply
     evidence['synthetic_reply_padding']=bool(reply_bytes)
     evidence['taxonomy_reference_verified_candidates']=len(results[0]['candidates'])
     evidence['taxonomy_reference_response_hashes']=hashes[PATHS[1]]
@@ -132,9 +143,10 @@ if __name__=='__main__':
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--case',choices=('empty','taxonomy'),default='empty')
     parser.add_argument('--reply-bytes',type=int,default=0,help='Synthetic reply size, at most existing2MiB limit; no extra AI calls')
+    parser.add_argument('--compact-reply',action='store_true',help='Use actual browser projection; reference still uses full original reply')
     args=parser.parse_args()
     args.output.unlink(missing_ok=True)
-    try:collect(args.samples,args.output,args.case,args.reply_bytes)
+    try:collect(args.samples,args.output,args.case,args.reply_bytes,args.compact_reply)
     except (AssertionError,ValueError,RuntimeError,OSError,subprocess.CalledProcessError,json.JSONDecodeError) as error:
         diagnostic=json.loads(args.output.read_text()) if args.output.exists() else {'records':[]}
         diagnostic.update({'eligible_for_success_cpu_comparison':False,'failure_type':type(error).__name__})

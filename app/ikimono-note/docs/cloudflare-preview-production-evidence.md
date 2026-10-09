@@ -733,3 +733,40 @@ soft-target exception, with the1200×1200 regression passing.
 Protected preview only, with the dated preview changelog. The original public
 deployment is unchanged and its changelog is exempt. This photo improvement
 does not solve the separate large-result-JSON CPU issue above.
+
+## Browser Gemini reply projection — 2026-10-10 JST
+
+Protected gateway `e6369a23-5488-4a22-a881-771e3409e625`, private Python
+`6fee16f6-abc0-41cb-8aee-b7a63fa2dfbb`, gateway SHA
+`d02c2839f0e15bacdd6c4ff24dee5fbd95191868aec90b4b3eff7d18e9e56be9`.
+The browser forwards the first provider candidate's finishReason and every
+consumed text part in order, plus usageMetadata.thoughtsTokenCount for the
+Python MAX_TOKENS diagnostic. Unused provider fields and extra provider
+candidates are omitted. Text is not truncated or rewritten; independent
+taxonomy/evidence/protected-species checks remain server-side. Provider read
+limit2MiB, original generation settings and server API limits are unchanged.
+
+[Complete CPU evidence](cloudflare-gemini-compact-reply-cpu.json) applies the
+actual browser helper to a2MiB synthetic response. Sent reply is1004bytes;
+Python reference still uses the full original response. All6/6 traces plus
+readiness, HTTP200, current hashes, JS execution and exact Python output hashes
+passed with3verified candidates. Prepare CPU2/2/3ms; result6/10/6ms. Invocation
+counts exceed1. This is neither cold proof nor a guaranteed Free margin; one
+observation reaches10ms. Historical62/66ms runs used other runtimes and versions,
+so do not assign an exact CPU saving to a specific operation from these samples.
+
+Real Chromium on the final deployed URL received an intercepted2MiB provider
+response, forwarded under8KiB while retaining the diagnostic count, and displayed
+and saved candidates/photos. The same suite covers1/3photos, GBIF source/history,
+genuine no-match and failed lookup/quota without false records. External AI and
+Drive were mocked. Auth/OAuth/assets/source/changelog HTTP checks passed.
+Native/provider/measurement tests27 passed; final core/measurement/transport9
+passed including full-vs-projected evidence/protected-species/error comparisons.
+Medium review found the missing thought-token diagnostic; restored and tested.
+
+The preview changelog was published on the same JST date. General production
+and its changelog are unchanged. This removes unused-envelope overhead from the
+normal browser route; large consumed text or manually submitted2MiB bodies still
+remain possible and require validation before declaring complete Free fit.
+Python photo/provider routes, cold/memory/quotas and real data/share migration
+remain on the parent issue. No public switch, paid plan or old shutdown occurred.

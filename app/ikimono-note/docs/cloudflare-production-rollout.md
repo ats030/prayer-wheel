@@ -10,9 +10,9 @@
 | --- | --- |
 | 旧公開サイト | https://ikimono-note-736831430371.asia-northeast1.run.app 、health200を確認。維持する |
 | Cloudflare検証版 | https://ikimono-note-preview.ats030.workers.dev 、Basic認証付き |
-| JavaScript入口 | `548569fc-8f6c-4602-8994-ea730dac1be3` |
-| 非公開Python | `1566ca9a-1f33-4356-a88a-52d7fd4e4562` 、外部URL無効 |
-| 入口SHA | `12938c513cb44bd01192d7161cd3cd8e302434f774be461ce0f465bb8528c718` |
+| JavaScript入口 | `e6369a23-5488-4a22-a881-771e3409e625` |
+| 非公開Python | `6fee16f6-abc0-41cb-8aee-b7a63fa2dfbb` 、外部URL無効 |
+| 入口SHA | `d02c2839f0e15bacdd6c4ff24dee5fbd95191868aec90b4b3eff7d18e9e56be9` |
 | D1 | 検証専用 `ikimono-note-preview` 。旧Firestoreの内容をコピーしていない |
 
 本番公開へはまだ切り替えない。候補表示・Googleログイン・Drive保存・別ブラウザでの
@@ -42,8 +42,9 @@ Google/Driveへの通信はなく、実利用者の記録や共有データは�
 ## 公開条件と実施順
 
 1. **無料枠の適合を検証する。** 通常候補の結果CPU3msだけで判断しない。
-   現行上限2MiBの合成応答では62〜66msを観測した。不要な応答項目を減らす案は、
-   識別本文・finishReason・生成設定を保つ条件で検証する。初回・未キャッシュ・
+   上限2MiBの合成応答では62〜66msを観測した。その後、不要な項目をブラウザで除いた
+   経路では6〜10msを観測した。識別本文・finishReason・生成設定・診断のトークン数は保持する。
+   大きい本文やAPIへの直接送信は未解決であり、10msに達する観測もある。初回・未キャッシュ・
    最大入力・併用/他AI/再識別・OAuth・共有のCPUとメモリ、日次上限も確認する。
    実測・失敗記録は [計測証拠](cloudflare-preview-production-evidence.md) にある。
    [Cloudflare公式上限](https://developers.cloudflare.com/workers/platform/limits/) に合わせ、
