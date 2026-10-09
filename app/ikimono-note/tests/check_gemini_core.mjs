@@ -21,3 +21,5 @@ for(const row of cases.results) {
   assert.deepEqual(await result(body,context(body),lookup),row.full);
 }
 console.log(`PASS: Python/JS reports ${cases.reports.length}, templates ${cases.templates.length}, normalize/evidence/protected-species ${cases.results.length}`);
+await assert.rejects(finish(normalize({category:'動物',candidates:[{common_name_ja:'候補',scientific_name:'Synthetic taxon'}]},'synthetic'),async()=>null),
+  error=>error.status===503&&error.detail.includes('分類サービスに接続できず'));

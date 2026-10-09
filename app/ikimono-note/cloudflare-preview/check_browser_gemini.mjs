@@ -75,7 +75,9 @@ try {
     await page.locator('#identify').waitFor({state: 'visible'});
     await page.evaluate(() => {document.getElementById('observedDate').value = '2026-10-09';});
     await page.locator('#identify').click();
-    await page.waitForFunction(() => document.getElementById('status').textContent.includes('似ている生きものを表示しました'));
+    await page.waitForFunction(() => document.getElementById('status').textContent.includes('図鑑データで確認できる候補が見つかりませんでした'));
+    assert.equal(await page.locator('article.candidate').count(),0);
+    assert.ok(!(await page.locator('#status').textContent()).includes('表示しました'));
     // Rendering precedes saveHistory's awaited image conversion/transaction.
     // Observe its completion rather than treating the first rendered frame as
     // proof that IndexedDB has committed the record.

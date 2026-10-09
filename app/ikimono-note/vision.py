@@ -155,6 +155,18 @@ class VisionError(RuntimeError):
     pass
 
 
+class TaxonomyUnavailable(RuntimeError):
+    """A failed independent check is not an identification with no matches."""
+
+    def __init__(self, status: int = 503, retry_after: int = 60):
+        message = ("分類サービスの利用制限に達しました。時間をおいてから再試行してください"
+                   if status == 429 else
+                   "分類サービスに接続できず、候補を確認できませんでした。写真はそのままで、時間をおいてから再試行してください")
+        super().__init__(message)
+        self.status = status
+        self.retry_after = retry_after
+
+
 def extract_exif_context(raw: bytes) -> dict[str, Any]:
     """Read only capture date and GPS before the image is re-encoded."""
     try:
@@ -383,9 +395,15 @@ def _lookup_taxon(name: str) -> list[dict[str, Any]] | None:
                 timeout=5,
             )
             _LAST_TAXONOMY_REQUEST = time.monotonic()
+        if response.status_code == 429:
+            header = response.headers.get("Retry-After", "")
+            seconds = min(3600, max(1, int(header))) if header.isascii() and header.isdigit() and len(header) <= 10 else 60
+            raise TaxonomyUnavailable(429, seconds)
         response.raise_for_status()
-        results = response.json().get("results") or []
-        parsed = results if isinstance(results, list) else []
+        results = response.json().get("results")
+        if not isinstance(results, list):
+            return None
+        parsed = results
         _TAXONOMY_CACHE[name] = parsed
         return parsed
     except (httpx.HTTPError, ValueError, AttributeError):
@@ -402,8 +420,7 @@ def verify_taxonomy(result: dict[str, Any]) -> dict[str, Any]:
             continue
         taxa = _lookup_taxon(scientific_name)
         if taxa is None:
-            candidate["taxonomy_status"] = "unavailable"
-            continue
+            raise TaxonomyUnavailable()
         match = next((taxon for taxon in taxa if str(taxon.get("name") or "").casefold() == scientific_name.casefold()), None)
         if match:
             candidate["taxonomy_status"] = "verified"

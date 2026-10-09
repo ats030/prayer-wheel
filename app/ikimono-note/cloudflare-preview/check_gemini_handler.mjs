@@ -42,6 +42,14 @@ try {
 } finally {globalThis.setTimeout=originalTimer;}
 console.log('PASS: runtime generation overrides, chunked byte bounds, stalled-body cancel/deadline, bounded taxonomy queue/wait and names-only HTTP');
 
+const unavailableOutput=await handleGemini(request(JSON.stringify({...JSON.parse(body),reply:JSON.stringify({candidates:[{content:{parts:[{
+  text:JSON.stringify({category:'動物',candidates:[{common_name_ja:'合成候補',scientific_name:'Synthetic unavailable'}]})}]}}]})}),
+  '192.0.2.56'),'/api/gemini/result',async()=>null);
+assert.equal(unavailableOutput.status,503);
+assert.ok((await unavailableOutput.json()).detail.includes('分類サービスに接続できず'));
+assert.equal(await lookupTaxon('Synthetic malformed',async()=>Response.json({results:{}})),null);
+assert.deepEqual(await lookupTaxon('Synthetic malformed',async()=>Response.json({results:[]})),[],'Malformed reply was cached as no-match');
+
 let quotaCalls=0,quotaCanceled=false;
 await assert.rejects(lookupTaxon('Synthetic quota',async()=>{
   quotaCalls++;

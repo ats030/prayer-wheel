@@ -51,6 +51,23 @@ def test_native_runs_existing_normalization_and_finish(native, monkeypatch):
     assert template == main.vision.provider_payload('gemini', model, [], observed_date='2026-10-09')
 
 
+@pytest.mark.parametrize('status', [429, 503])
+def test_taxonomy_failure_propagates_through_both_gemini_paths(native, monkeypatch, status):
+    client, fields, calls = native
+    monkeypatch.setattr(main, 'BROWSER_GEMINI', True)
+    def unavailable(result):
+        raise main.vision.TaxonomyUnavailable(status, 120)
+    monkeypatch.setattr(main.pipeline, 'finish', unavailable)
+    body = {'model': fields['request_model'], 'count': 1, 'client_photos': fields['client_photos'],
+            'reply': '{"candidates":[{"content":{"parts":[{"text":"{\\"candidates\\":[]}"}]}}]}'}
+    for response in [client.post('/identify', data=fields), client.post('/api/gemini/result', json=body),
+                     client.post('/api/local/result', json={'text': '{"candidates":[]}'})]:
+        assert response.status_code == status
+        assert response.headers['Retry-After'] == '120'
+        assert '分類サービス' in response.json()['detail']
+        assert 'candidates' not in response.json()
+
+
 @pytest.mark.parametrize('change,status', [
     ({'request_model': 'unlisted'}, 400), ({'request_api_key': ''}, 400),
     ({'request_provider': 'openai'}, 400), ({'use_plantnet': 'true'}, 400),

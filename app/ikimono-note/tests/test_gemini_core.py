@@ -64,7 +64,7 @@ def test_generated_js_gemini_rules_match_authoritative_python(monkeypatch):
                 expected=pipeline.finish(copy.deepcopy(normalized))
                 full={**expected,'photo_metadata':{},'photo_notes':[]}
                 results.append({'data':data,'model':model,'taxa':taxa,'normalized':normalized,'expected':expected,'full':full,'reports':[basic]})
-    for taxa in ({'Taxon one':None},{'Taxon one':[]},{'Taxon one':[{'name':'TAXON ONE','preferred_common_name':'English','id':0}]}):
+    for taxa in ({'Taxon one':[]},{'Taxon one':[{'name':'TAXON ONE','preferred_common_name':'English','id':0}]}):
         data={'category':'動物','candidates':[{'common_name_ja':'候補','scientific_name':'Taxon one','confidence':'100','traits':['a','b'],'distinguishing_features':['c']}]}
         monkeypatch.setattr(vision,'_lookup_taxon',lambda query,table=taxa: table.get(query,[]))
         normalized=vision.normalize(data,model=model,provider='gemini');expected=pipeline.finish(copy.deepcopy(normalized))

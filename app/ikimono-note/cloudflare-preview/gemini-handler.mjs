@@ -84,7 +84,8 @@ export async function lookupTaxon(name, fetcher=fetch) {
       }
       if(!response.ok){await response.body?.cancel();return null;}
       const body=JSON.parse(await boundedText(response,2*1024*1024));
-      const taxa=Array.isArray(body?.results)?body.results:[];
+      if(!Array.isArray(body?.results))return null;
+      const taxa=body.results;
       if(cache.size>=256) cache.delete(cache.keys().next().value);
       cache.set(name,taxa);return taxa;
     } catch(error) {if(error instanceof InputError && error.status===429)throw error;return null;}

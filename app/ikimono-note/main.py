@@ -60,6 +60,14 @@ app = FastAPI(
     openapi_url=None if PUBLIC_MODE else "/openapi.json",
 )
 STATIC_DIR = Path(__file__).parent / "static"
+
+
+@app.exception_handler(vision.TaxonomyUnavailable)
+async def taxonomy_unavailable(request: Request, error: vision.TaxonomyUnavailable) -> JSONResponse:
+    return JSONResponse({"detail": str(error)}, status_code=error.status,
+                        headers={"Retry-After": str(error.retry_after)})
+
+
 BROWSER_PHOTOS = os.getenv("IKIMONO_BROWSER_PHOTOS") == "1"
 NATIVE_TRANSPORT = BROWSER_PHOTOS and PUBLIC_MODE and os.getenv("IKIMONO_NATIVE_TRANSPORT") == "1"
 BROWSER_GEMINI = BROWSER_PHOTOS and PUBLIC_MODE and os.getenv("IKIMONO_BROWSER_GEMINI") == "1"
@@ -1307,6 +1315,8 @@ async def _run_identify_job(job_id: str, raw_images: list[bytes], work: dict) ->
         jobs.finish(job_id, await _identify_images(raw_images, **work))
     except HTTPException as exc:
         jobs.fail(job_id, exc.status_code, exc.detail)
+    except vision.TaxonomyUnavailable as exc:
+        jobs.fail(job_id, exc.status, str(exc))
     except Exception as exc:  # noqa: BLE001 - 何であれ札に残さないと画面が待ち続ける
         print(f"[ikimono-note] 識別 {job_id} が落ちました: {exc!r}", flush=True)
         jobs.fail(job_id, 500, "調べられませんでした。もう一度お試しください。")

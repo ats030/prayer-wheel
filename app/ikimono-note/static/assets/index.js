@@ -286,10 +286,10 @@ function pendingToBlobs(urls){return (urls||[]).map(dataUrlToBlob).filter(Boolea
 async function finishIdentification(data,pending){
   const historyPhotos=pendingToBlobs(pending?.photos);
   render(data,historyPhotos);
-  showStatus('似ている生きものを表示しました。実物と見くらべてください。');
+  showStatus(data.candidates.length?'似ている生きものを表示しました。実物と見くらべてください。':'図鑑データで確認できる候補が見つかりませんでした。',!data.candidates.length);
   writePending(null);
   try{await saveHistory(data,{...pending,photos:historyPhotos})}
-  catch(error){showStatus("候補は表示できましたが、この端末の記録には保存できませんでした。 "+error.message,true)}
+  catch(error){showStatus("この端末の記録には保存できませんでした。 "+error.message,true)}
 }
 
 async function pollIdentification(pending){
@@ -386,7 +386,8 @@ identify.onclick=async()=>{
     pollIdentification(pending);
   }catch(e){
     stopWorking();
-    $('results').innerHTML='<div class="placeholder">結果を取得できませんでした。</div>';
+    $('results').className='';
+    $('results').innerHTML='<div class="placeholder">'+esc(e.message)+'</div>';
     showStatus(e.message,true);
   }
 };

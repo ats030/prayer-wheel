@@ -143,16 +143,14 @@ def test_taxonomy_verification_accepts_exact_scientific_name(monkeypatch):
     assert verified["candidates"][0]["confidence"] == 82
 
 
-def test_taxonomy_outage_keeps_candidate_and_confidence(monkeypatch):
+def test_taxonomy_outage_is_not_a_successful_no_match(monkeypatch):
     monkeypatch.setattr(vision, "_lookup_taxon", lambda name: None)
     result = vision.normalize({"category": "動物", "candidates": [{
         "common_name_ja": "候補", "scientific_name": "Known species", "confidence": 73
     }]})
 
-    verified = vision.verify_taxonomy(result)
-
-    assert verified["candidates"][0]["taxonomy_status"] == "unavailable"
-    assert verified["candidates"][0]["confidence"] == 73
+    with pytest.raises(vision.TaxonomyUnavailable, match="分類サービスに接続できず"):
+        vision.verify_taxonomy(result)
 
 
 def test_taxonomy_verification_caps_unverified_name(monkeypatch):
@@ -353,12 +351,37 @@ def test_evidence_gate_marks_candidate_with_contradiction_uncertain(monkeypatch)
 
 def test_evidence_gate_rejects_vlm_candidate_when_taxonomy_is_unavailable(monkeypatch):
     monkeypatch.setattr(vision, "_lookup_taxon", lambda _name: None)
-    result = vision.apply_evidence_gate({
-        "provider": "anthropic", "summary": "", "candidates": [{
-            "common_name_ja": "候補", "scientific_name": "Known species", "confidence": 70,
-        }],
-    })
-    assert result["candidates"] == []
+    with pytest.raises(vision.TaxonomyUnavailable):
+        vision.apply_evidence_gate({
+            "provider": "anthropic", "summary": "", "candidates": [{
+                "common_name_ja": "候補", "scientific_name": "Known species", "confidence": 70,
+            }],
+        })
+
+
+@pytest.mark.parametrize("body,expected", [({"results": []}, []), ({}, None), ({"results": {}}, None)])
+def test_taxonomy_distinguishes_valid_no_match_from_invalid_service_reply(monkeypatch, body, expected):
+    monkeypatch.setattr(vision, "_TAXONOMY_CACHE", {})
+    monkeypatch.setattr(vision, "_LAST_TAXONOMY_REQUEST", -10000)
+    monkeypatch.setattr(vision.httpx, "get", lambda *a, **k: httpx.Response(200, json=body,
+        request=httpx.Request("GET", vision.INATURALIST_URL)))
+    assert vision._lookup_taxon("Synthetic species") == expected
+
+
+def test_taxonomy_quota_stops_after_first_candidate(monkeypatch):
+    calls = []
+    monkeypatch.setattr(vision, "_TAXONOMY_CACHE", {})
+    monkeypatch.setattr(vision, "_LAST_TAXONOMY_REQUEST", -10000)
+    def get(*args, **kwargs):
+        calls.append(kwargs["params"]["q"])
+        return httpx.Response(429, headers={"Retry-After": "120"},
+                              request=httpx.Request("GET", vision.INATURALIST_URL))
+    monkeypatch.setattr(vision.httpx, "get", get)
+    with pytest.raises(vision.TaxonomyUnavailable) as caught:
+        vision.apply_evidence_gate({"candidates": [
+            {"scientific_name": "Synthetic one"}, {"scientific_name": "Synthetic two"}]})
+    assert caught.value.status == 429 and caught.value.retry_after == 120
+    assert calls == ["Synthetic one"]
 
 
 def test_evidence_gate_marks_independent_plantnet_agreement():

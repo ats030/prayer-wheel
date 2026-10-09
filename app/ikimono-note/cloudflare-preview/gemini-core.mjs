@@ -139,7 +139,7 @@ export async function finish(result, lookup) {
     const scientific = chars(strip(candidate.scientific_name),160);
     if (!scientific) continue;
     const taxa = await lookup(scientific);
-    if (taxa === null) continue;
+    if (taxa === null) throw new InputError('分類サービスに接続できず、候補を確認できませんでした。写真はそのままで、時間をおいてから再試行してください',503);
     const match = taxa.find(taxon => object(taxon) && casefold(text(taxon.name)) === casefold(scientific));
     if (!match) continue;
     const japanese = strip(text(match.preferred_common_name));
