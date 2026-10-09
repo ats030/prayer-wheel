@@ -98,6 +98,34 @@ const jpeg = (canvas, quality) => new Promise((resolve, reject) => {
   canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('写真を準備できませんでした')), 'image/jpeg', quality);
 });
 
+// Keep fine detail at1600px when it fits. The target is soft: do not discard
+// a usable photo merely because it cannot fit768KiB at the detail floor.
+export async function compressPhotoCanvas(canvas) {
+  const target=768*1024, maximum=2*1024*1024;
+  const longest=Math.max(canvas.width,canvas.height);
+  const output=document.createElement('canvas');
+  let blob;
+  try {
+    for(const [edge,quality] of [[1600,.86],[1600,.78],[1440,.82],[1280,.82],[1200,.82]]) {
+      const scale=Math.min(1,edge/longest);
+      output.width=Math.max(1,Math.round(canvas.width*scale));
+      output.height=Math.max(1,Math.round(canvas.height*scale));
+      const context=output.getContext('2d');context.imageSmoothingQuality='high';
+      context.drawImage(canvas,0,0,output.width,output.height);
+      blob=await jpeg(output,quality);
+      if(blob.size<=target)return blob;
+      // Small originals are not enlarged or repeatedly resampled.
+      if(longest<=1200&&quality===.78)break;
+    }
+    if(blob.size<=maximum)return blob;
+    for(const quality of [.78,.68,.55]) {
+      blob=await jpeg(output,quality);
+      if(blob.size<=maximum)return blob;
+    }
+    throw new Error('写真を送信できる大きさにできませんでした。別の写真を選んでください。');
+  } finally {output.width=output.height=0;}
+}
+
 async function decode(file, raw) {
   const heic = raw.length >= 12 && String.fromCharCode(...raw.subarray(4, 8)) === 'ftyp';
   if (heic) {
@@ -144,19 +172,7 @@ export function preparePhoto(file) {
       const canvas = await decode(file, raw);
       try {
         const quality = judgeCanvas(canvas);
-        const scale = Math.min(1, 1600 / Math.max(canvas.width, canvas.height));
-        const output = document.createElement('canvas');
-        output.width = Math.max(1, Math.round(canvas.width * scale));
-        output.height = Math.max(1, Math.round(canvas.height * scale));
-        const context = output.getContext('2d'); context.imageSmoothingQuality = 'high';
-        context.drawImage(canvas, 0, 0, output.width, output.height);
-        let blob;
-        for (const quality of [.86, .78, .68, .55]) {
-          blob = await jpeg(output, quality);
-          if (blob.size <= 2 * 1024 * 1024) break;
-        }
-        if (blob.size > 2 * 1024 * 1024) throw new Error('写真を送信できる大きさにできませんでした。別の写真を選んでください。');
-        output.width = output.height = 0;
+        const blob = await compressPhotoCanvas(canvas);
         return {photo: blob, metadata: captureContext(metadata), quality,
                 dimensions: [canvas.width, canvas.height]};
       } finally { canvas.width = canvas.height = 0; }

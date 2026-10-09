@@ -699,3 +699,37 @@ Measurement tests7 passed and medium review found no actionable issue. This
 is operator tooling/evidence only; no app deployment or user-visible change,
 so the changelog is exempt. Maximum-input Free compatibility remains unresolved
 on `ats030-paskw`; public migration and the old-service shutdown remain pending.
+
+## Browser photo compression — 2026-10-10 JST
+
+User-authorized photo resize/compression only. The browser first tries1600px
+JPEG quality.86, then.78, before reducing large originals through1440/1280/1200px
+at.82. The soft target is768KiB; preserving1200px detail takes priority over
+meeting that target. Small originals are not enlarged. Existing hard2MiB bound
+and low-quality fallback remain. Original capture metadata and quality metrics
+are extracted before this compression; original files are retained separately.
+No split AI calls, model/prompt changes or response-JSON changes were made.
+
+Real Chromium with deterministic grayscale noise and dense checker patterns,
+without external HTTP, produced the following examples:
+
+| Original fixture | Previous JPEG bytes | New JPEG bytes | New dimensions |
+| --- | ---: | ---: | --- |
+| 3200×2400 noise | 1001812 | 682006 | 1440×1080 |
+| 2400×3200 noise | 1001969 | 682089 | 1080×1440 |
+| 1600×1200 noise | 1239865 | 650692 | 1280×960 |
+| 1200×1200 noise | 930001 | 816255 | 1200×1200 |
+| 3200×2400 dense pattern | 983493 | 774713 | 1440×1080 |
+| 640×480 pattern | 25567 | 25567 | 640×480 |
+
+All outputs remain JPEG, preserve aspect ratio and the original canvas, and
+respect the detail floor/hard byte bound. The soft-target exception is exercised
+by1200×1200 noise. This is encoder/transport evidence, not proof of equivalent
+species-identification accuracy on real photographs. Original HEIC/EXIF logic
+is unchanged. Related photo/provider/quality pytest27 passed. Medium review
+found premature exit for small originals; fixed to try.78 before accepting a
+soft-target exception, with the1200×1200 regression passing.
+
+Protected preview only, with the dated preview changelog. The original public
+deployment is unchanged and its changelog is exempt. This photo improvement
+does not solve the separate large-result-JSON CPU issue above.
