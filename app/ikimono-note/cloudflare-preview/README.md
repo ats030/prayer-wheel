@@ -2,6 +2,9 @@
 
 URL: https://ikimono-note-preview.ats030.workers.dev
 
+[Cloudflare本番化の準備・引継ぎ・切戻し手順](../docs/cloudflare-production-rollout.md)をまとめています。
+現在は保護付き検証版で、本番公開への切替は未実施です。
+
 ## JavaScript入口（2026-10-09）
 
 `front.jsonc` は同じ検証URLの入口です。`GET /api/me` とGemini直接経路の準備・結果APIをJavaScriptで返し、
