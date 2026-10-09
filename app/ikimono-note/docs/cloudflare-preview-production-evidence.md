@@ -623,3 +623,44 @@ complete. Final scoped changes were manually reviewed, without claiming an
 automated review pass. Remaining work includes final full taxonomy/AI CPU,
 maximum replies/cold/memory, actual Gemini and Drive behavior, migration/shares,
 and global/daily quotas. No paid plan, general public switch or old shutdown.
+
+## Current GBIF candidate-result measurement — 2026-10-10 JST
+
+The user confirmed identification succeeded on the protected preview after the
+GBIF fallback fix. This is a user report, without a captured photo, AI response,
+photo count or provider selection. Earlier issue notes also record successful
+Google login, Drive save and reload in another browser; these reports are distinct
+from the operator's synthetic checks.
+
+[Current candidate CPU evidence](cloudflare-gemini-gbif-current.json) has all6/6
+traces plus readiness from gateway `fafc1f6d-5dbc-4092-8bfa-1ba881555b61`, SHA
+`61c3d2e7f094a55be2320019a28d6e61416f7edfd9ef460f30bb3a027e2ddd1d`.
+All HTTP200, runtime sequences, JS execution, gateway/backend hashes and Python
+response hashes passed. Synthetic three-photo reports and three known Latin
+names were used; taxonomy HTTP was real, but no photo, AI key, Gemini call or
+Drive operation was performed. Prepare CPU was1,2,2ms; candidate-result CPU was
+3,3,3ms. All measured invocation counts exceed1, so this is not cold-start evidence.
+
+The reference collector now obtains real matching taxa from both sources and
+computes the exact Python output for each available source combination. Eight
+reference hashes cover the three candidates' iNaturalist/GBIF combinations;
+other changes to response bytes still fail. Lookup failures and nonmatching
+names do not become references. Incomplete or mismatched evidence stays
+ineligible, with its reduced diagnostic retained.
+
+[The first run](cloudflare-gemini-gbif-parity-diagnostic.json) collected8/8 traces
+but failed its single-source response hash; result CPU included13ms. It is not
+an eligible success comparison or evidence that Free fits. After correcting
+the reference collector, [the next run](cloudflare-gemini-gbif-missing-traces.json)
+lost3/8 traces and was also excluded. The complete final run does not erase
+those observations or guarantee every runtime/cache state fits the Free budget.
+Cloudflare's [current limits](https://developers.cloudflare.com/workers/platform/limits/)
+still specify10ms CPU per Free invocation; checked2026-10-09 UTC.
+
+Measurement regression/core/fallback tests17 passed. Required medium review of
+the collector and tests found no actionable issue; its attempted test command
+was blocked by sandbox setup, while the main agent's targeted run passed.
+This changes operator tooling only, with no app behavior or deployment change;
+the user-facing changelog is exempt. Remaining work is cold/uncached and maximum
+input CPU/memory, the other Python paths, daily limits, old records/shares and
+complete migration. The old service and protected-preview deployment remain.

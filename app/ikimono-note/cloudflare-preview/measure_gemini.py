@@ -1,13 +1,16 @@
 """Actual JS auth/quality/template/result CPU; synthetic reply, no AI/photos."""
 import argparse
+import copy
 import base64
 import hashlib
 import hmac
 import json
+from itertools import product
 from pathlib import Path
 import subprocess
 import sys
 import time
+from unittest.mock import patch
 
 HERE=Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE.parent))
@@ -16,6 +19,28 @@ import main
 from measure_cpu import measure
 
 PATHS=('/api/gemini/prepare','/api/gemini/result')
+
+
+def taxonomy_references(reply, model, metadata, quality, names):
+    """Accept only Python outputs grounded in both live taxonomy sources."""
+    choices=[]
+    for name in names:
+        alternatives=[]
+        for lookup in (main.vision._lookup_inaturalist,main.vision._lookup_gbif):
+            try: taxa=lookup(name)
+            except main.vision.TaxonomyUnavailable: continue
+            if taxa and any(str(t.get('name') or '').casefold()==name.casefold() for t in taxa):
+                alternatives.append(taxa)
+        assert alternatives,'Taxonomy reference unavailable'
+        choices.append(alternatives)
+    references=[]
+    for selected in product(*choices):
+        by_name=dict(zip(names,selected))
+        with patch.object(main.vision,'_lookup_taxon',side_effect=lambda name:copy.deepcopy(by_name[name])):
+            result=main._finish_gemini(reply,model,metadata,quality)
+        assert len(result['candidates'])==len(names),'Python taxonomy reference rejected candidates'
+        references.append(result)
+    return references
 
 
 def collect(samples,output,case="empty"):
@@ -40,15 +65,19 @@ def collect(samples,output,case="empty"):
     metadata,quality=main.prepared_photos.read_reports(body['client_photos'],3)
     expected={PATHS[0]:main.vision.provider_payload('gemini',body['model'],[],location=prepare['location'],
                      observed_date=prepare['observed_date'],size=prepare['size']),
-              PATHS[1]:main._finish_gemini(reply,body['model'],metadata,quality)}
-    if case=='taxonomy':
-        assert len(expected[PATHS[1]]['candidates'])==3,'Python taxonomy reference unavailable'
+              PATHS[1]:None}
+    results=taxonomy_references(reply,body['model'],metadata,quality,
+        [c['scientific_name'] for c in identified['candidates']]) if case=='taxonomy' else [
+            main._finish_gemini(reply,body['model'],metadata,quality)]
+    expected[PATHS[1]]=results[0]
+    expected={path:[value] for path,value in expected.items()}
+    expected[PATHS[1]]=results
     # JS and Python differ in spelling integer-valued floats (35 vs35.0).
     # Canonicalize expected bytes with JS outside the measured Worker.
     canonical=subprocess.run(['/home/ats030/.nvm/versions/node/v24.19.0/bin/node','--input-type=module','-e',
         'import {createHash} from "node:crypto";let s="";for await(const c of process.stdin)s+=c;'
         'const out={};for(const [k,v] of Object.entries(JSON.parse(s)))'
-        'out[k]=createHash("sha256").update(JSON.stringify(v)).digest("hex");'
+        'out[k]=v.map(x=>createHash("sha256").update(JSON.stringify(x)).digest("hex"));'
         'process.stdout.write(JSON.stringify(out));'],
         input=json.dumps(expected,ensure_ascii=False),text=True,capture_output=True,check=True)
     hashes=json.loads(canonical.stdout)
@@ -66,13 +95,14 @@ def collect(samples,output,case="empty"):
         assert row['preview_bundle_sha256']==manifest['bundle_sha256'],'Stale gateway'
         if row['path'] in hashes:
             assert row['preview_gemini_engine']=='javascript','Python fallback was measured'
-            assert row['sha256']==hashes[row['path']],'Python result/template parity changed'
+            assert row['sha256'] in hashes[row['path']],'Python result/template parity changed'
         else:
             assert row['preview_backend_bundle_sha256']==manifest['python_bundle_sha256'],'Stale private backend'
     evidence['scope']='Synthetic signed-in JS context for3 photos: auth/reports/quality/template and '+('3candidate result with real taxonomy HTTP/cache' if case=='taxonomy' else 'empty-candidate result')+'/metadata; no photo upload, AI, Drive or memory guarantee'
     evidence['provenance_verified']=True
     evidence['case']=case
-    evidence['taxonomy_reference_verified_candidates']=len(expected[PATHS[1]]['candidates'])
+    evidence['taxonomy_reference_verified_candidates']=len(results[0]['candidates'])
+    evidence['taxonomy_reference_response_hashes']=hashes[PATHS[1]]
     evidence['network_ai_calls']=0
     evidence['gateway_bundle_sha256']=manifest['bundle_sha256']
     evidence['python_bundle_sha256']=manifest['python_bundle_sha256']

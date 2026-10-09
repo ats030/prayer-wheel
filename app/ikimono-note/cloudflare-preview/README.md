@@ -257,6 +257,12 @@ origin制限関数を同じ順序で呼び、TrustedHostとFastAPIの終了処�
 
 ### 分類取得の修正と残る条件
 
+2026-10-10 JSTの[現行版CPU記録](../docs/cloudflare-gemini-gbif-current.json)では、
+合成3候補・実分類APIの6/6要求を取得し、Python応答との一致も確認しました。
+準備1〜2ms、結果3msでしたが、runtime初回要求・写真処理・Drive・全経路の無料適合は未検証です。
+計測側は実iNaturalist/GBIFの各組合せから期待応答のSHAを作り、異なる出典による誤判定を避けます。
+欠測・版違い・その他の応答不一致は採用しません。失敗した先行2回と13msの観測も本番計測記録に残しています。
+
 導入済みworkerdでは `Request(..., {redirect:'error'})` が通信前にTypeErrorになることを実ランタイムで再現した。[workerdの実装](https://github.com/cloudflare/workerd/blob/main/src/workerd/api/http.c%2B%2B)にもfollow/manual以外を拒否する条件がある。分類取得をmanualへ変更し、3xxは既存の非成功応答条件で拒否・キャンセルする。`check_gemini_runtime.mjs` は導入済みMiniflare/workerdでこの処理を検証し、外部通信を行わない。
 
 実分類サービスは一部の照合にHTTP429を返した。最終版はこの時点で照合を中断し、HTTP429と待機時間を返す。ブラウザは結果を保存せずエラーを表示し、自動再試行しない。待機時間は数値Retry-Afterを1〜3600秒に制限し、不明なら60秒。既に検証したメモリキャッシュは使えるが、未取得の名前への再照合を同じisolateで停止する。全isolate共通の制限管理や永続キャッシュは実装していない。

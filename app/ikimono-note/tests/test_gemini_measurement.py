@@ -20,7 +20,7 @@ def collector(monkeypatch, tmp_path):
     secret_path = Path.home()/".local/state/ikimono-cloudflare-preview/secrets.json"
     monkeypatch.setattr(Path,"read_text",lambda path,*args,**kwargs: json.dumps({"IKIMONO_SESSION_SECRET":"synthetic"})
         if path==secret_path else original(path,*args,**kwargs))
-    hashes = {module.PATHS[0]:"a"*64,module.PATHS[1]:"b"*64}
+    hashes = {module.PATHS[0]:["a"*64],module.PATHS[1]:["b"*64]}
     monkeypatch.setattr(module.subprocess,"run",lambda *args,**kwargs:SimpleNamespace(stdout=json.dumps(hashes)))
     return module,tmp_path,hashes
 
@@ -29,7 +29,26 @@ def evidence(module, hashes):
     return {"complete":True,"eligible_for_success_cpu_comparison":True,
         "subscription_probe":{"path":"/health","preview_bundle_sha256":"gateway","preview_backend_bundle_sha256":"python"},
         "records":[{"path":path,"preview_bundle_sha256":"gateway","preview_gemini_engine":"javascript",
-                    "sha256":digest,"cpu_ms":1,"isolate_invocation":2} for path,digest in hashes.items()]}
+                    "sha256":digest[0],"cpu_ms":1,"isolate_invocation":2} for path,digest in hashes.items()]}
+
+
+def test_taxonomy_references_cover_only_verified_source_combinations(collector,monkeypatch):
+    module,_,_=collector
+    names=['Felis catus','Panthera leo']
+    monkeypatch.setattr(module.main.vision,'_lookup_inaturalist',lambda name:[{'name':name,'source':'inaturalist'}])
+    monkeypatch.setattr(module.main.vision,'_lookup_gbif',lambda name:[{'name':name,'source':'gbif'}])
+    def finish(*args):
+        return {'candidates':[module.main.vision._lookup_taxon(n)[0] for n in names]}
+    monkeypatch.setattr(module.main,'_finish_gemini',finish)
+    rows=module.taxonomy_references({},'model',{},[],names)
+    assert len(rows)==4
+    assert {tuple(c['source'] for c in r['candidates']) for r in rows}=={
+        ('inaturalist','inaturalist'),('inaturalist','gbif'),('gbif','inaturalist'),('gbif','gbif')}
+    monkeypatch.setattr(module.main.vision,'_lookup_gbif',lambda name:[{'name':'different'}])
+    assert len(module.taxonomy_references({},'model',{},[],names))==1
+    monkeypatch.setattr(module.main.vision,'_lookup_inaturalist',lambda name:[])
+    with pytest.raises(AssertionError,match='Taxonomy reference unavailable'):
+        module.taxonomy_references({},'model',{},[],names)
 
 
 def test_missing_trace_is_retained_and_ineligible(collector,monkeypatch):
