@@ -38,3 +38,29 @@ export function assembleProviderPayload(provider, template, images) {
   }
   return payload;
 }
+
+export async function appendNativeGeminiPayload(form, fetcher = fetch) {
+  const files = form.getAll('files');
+  const fields = name => String(form.get(name) || '');
+  const response = await fetcher('/api/provider/template', {
+    method: 'POST', headers: {'content-type': 'application/json'},
+    body: JSON.stringify({model: fields('request_model'), count: files.length,
+      client_photos: fields('client_photos'), location: fields('location'),
+      observed_date: fields('observed_date'), size: fields('size')}),
+  });
+  const template = await response.json();
+  if (!response.ok) throw new Error(typeof template.detail === 'string' ? template.detail : '写真の情報を確認してください');
+  const images = [];
+  for (const file of files) {
+    const encoded = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('写真を読み取れませんでした'));
+      reader.onload = () => resolve(String(reader.result).split(',')[1]);
+      reader.readAsDataURL(file);
+    });
+    images.push(encoded);
+  }
+  const payload = assembleProviderPayload('gemini', template, images);
+  form.delete('files');
+  form.append('provider_payload', new Blob([JSON.stringify(payload)], {type: 'application/json'}), 'provider.json');
+}

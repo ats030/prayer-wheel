@@ -16,6 +16,7 @@
     "prepared_photos.py",
     "worker_middleware.py"
   ],
+  "javascript": ["worker_transport.mjs"],
   "resources": [
     "data/protected_species.json",
     "static/android-original.html",

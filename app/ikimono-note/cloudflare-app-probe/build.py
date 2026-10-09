@@ -24,7 +24,7 @@ def vendor_resources():
 
 def bundle_digest(manifest, entrypoint="cloudflare-app-probe/src/worker.py"):
     digest = hashlib.sha256()
-    for name in [entrypoint, *manifest["modules"], *manifest["resources"]]:
+    for name in [entrypoint, *manifest["modules"], *manifest.get("javascript", []), *manifest["resources"]]:
         content = (APP / name).read_bytes()
         digest.update(name.encode() + b"\0" + str(len(content)).encode() + b"\0" + content)
     for name, content in vendor_resources().items():
@@ -34,7 +34,8 @@ def bundle_digest(manifest, entrypoint="cloudflare-app-probe/src/worker.py"):
 
 def build():
     manifest = json.loads((HERE / "manifest.json").read_text())
-    for name in manifest["modules"] + manifest["resources"]:
+    javascript = manifest.get("javascript", [])
+    for name in manifest["modules"] + javascript + manifest["resources"]:
         path = APP / name
         if Path(name).is_absolute() or any(part in {".", ".."} or part.startswith(".")
                                          for part in Path(name).parts):
@@ -43,15 +44,16 @@ def build():
             raise ValueError(f"Resource escapes application: {name}")
         if name.startswith("static/") or name == "data/protected_species.json":
             continue
-        if "/" in name or not name.endswith(".py"):
+        extension = ".mjs" if name in javascript else ".py"
+        if "/" in name or not name.endswith(extension):
             raise ValueError(f"Invalid module: {name}")
     target = HERE / "src"
     target.mkdir(exist_ok=True)
-    allowed = {"worker.py", "_resources.py", *manifest["modules"]}
+    allowed = {"worker.py", "_resources.py", *manifest["modules"], *javascript}
     unexpected = [p.name for p in target.iterdir() if p.is_symlink() or not p.is_file() or p.name not in allowed]
     if unexpected:
         raise ValueError(f"Unexpected files in Worker bundle: {unexpected}")
-    for name in manifest["modules"]:
+    for name in manifest["modules"] + javascript:
         shutil.copyfile(APP / name, target / name)
     resources = {name: (APP / name).read_bytes() for name in manifest["resources"]}
     resources.update(vendor_resources())

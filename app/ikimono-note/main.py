@@ -61,6 +61,7 @@ app = FastAPI(
 )
 STATIC_DIR = Path(__file__).parent / "static"
 BROWSER_PHOTOS = os.getenv("IKIMONO_BROWSER_PHOTOS") == "1"
+NATIVE_TRANSPORT = BROWSER_PHOTOS and PUBLIC_MODE and os.getenv("IKIMONO_NATIVE_TRANSPORT") == "1"
 PUBLIC_LOCAL_ENABLED = os.getenv("IKIMONO_PUBLIC_LOCAL", "").lower() in {"1", "true", "yes"}
 PUBLIC_AFFILIATE_ENABLED = os.getenv("IKIMONO_PUBLIC_AFFILIATE", "").lower() in {"1", "true", "yes"}
 # 識別を後ろで走らせるか。サーバーレスの置き場ではレスポンスを返した瞬間に CPU を
@@ -389,7 +390,8 @@ async def require_login(request: Request, call_next):
     # その設定がログインの内側だと、案内が行き止まりになる。公開版の設定は
     # ブラウザの中だけに書く (POST /api/settings は公開版では403) ので、開けても安全
     if trial_enabled() and (path in {"/", "/settings", "/identify",
-                                     "/api/settings", "/api/photo-metadata", "/api/photo-original"}
+                                     "/api/settings", "/api/photo-metadata", "/api/photo-original",
+                                     "/api/provider/template"}
                             or path.startswith("/identify/job/")):
         return await call_next(request)
     if auth.read_session(request.cookies.get(auth.SESSION_COOKIE)):
@@ -585,6 +587,7 @@ def get_settings() -> dict[str, object]:
     result = config_store.public(include_local=False) if PUBLIC_MODE and BROWSER_PHOTOS else config_store.public()
     result["public_mode"] = PUBLIC_MODE
     result["browser_photos"] = BROWSER_PHOTOS
+    result["native_transport"] = NATIVE_TRANSPORT
     # お試し枠で走るモデルは、利用者が選んだものではなくこちらが決める。
     # 画面が別の名前を出したままだと、どのAIに写真が行くのかを偽ることになる
     if trial_enabled():
@@ -1053,6 +1056,71 @@ def local_result(request: Request, body: LocalResult) -> dict[str, object]:
     return pipeline.finish(parsed)
 
 
+def _ensure_usable_photos(quality: list[dict]) -> None:
+    unusable = [q for q in quality if not q["ok"]]
+    if unusable:
+        raise HTTPException(status_code=422, detail={
+            "message": "この写真では調べられません。",
+            "problems": [p for q in unusable for p in q["problems"] if p["level"] == image_quality.BLOCK],
+        })
+
+
+class ProviderTemplateRequest(BaseModel):
+    model: str = Field(max_length=120)
+    count: int = Field(ge=1, le=3)
+    client_photos: str = Field(max_length=8192)
+    location: str = Field(default="", max_length=8192)
+    observed_date: str = Field(default="", max_length=8192)
+    size: str = Field(default="", max_length=8192)
+
+
+@app.post("/api/provider/template")
+def provider_template(request: Request, body: ProviderTemplateRequest) -> dict:
+    if not NATIVE_TRANSPORT:
+        raise HTTPException(status_code=404, detail="Not found")
+    _rate_limit(request, "provider-template", 20)
+    if body.model not in {item["id"] for item in config_store.MODELS["gemini"]}:
+        raise HTTPException(status_code=400, detail="モデルを選び直してください")
+    try:
+        metadata, quality = prepared_photos.read_reports(body.client_photos, body.count)
+        _ensure_usable_photos(quality)
+        return vision.provider_payload("gemini", body.model, [],
+            location=body.location or str(metadata.get("location", "")),
+            observed_date=body.observed_date or str(metadata.get("observed_date", "")), size=body.size)
+    except vision.VisionError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+async def _identify_native(request: Request, *, model: str, api_key: str, client_photos: str,
+                           location: str, observed_date: str, size: str) -> dict:
+    try:
+        reports = json.loads(client_photos)
+        metadata, quality = prepared_photos.read_reports(client_photos, len(reports) if isinstance(reports, list) else 0)
+        _ensure_usable_photos(quality)
+        template = vision.provider_payload("gemini", model, [],
+            location=location or str(metadata.get("location", "")),
+            observed_date=observed_date or str(metadata.get("observed_date", "")), size=size)
+        reply = await request.scope["native_identify"](template, len(reports), model, api_key)
+        if reply.get("error") == "input":
+            raise HTTPException(status_code=400, detail="写真の送信形式を確認してください。写真を選び直してください。")
+        if reply.get("error") or "status" not in reply:
+            raise vision.VisionError("Gemini APIに接続できませんでした")
+        status = reply["status"]
+        if not 200 <= status < 300:
+            response = httpx.Response(status, request=httpx.Request("POST", vision.GEMINI_URL.format(model=model)))
+            raise vision._provider_error("Gemini", httpx.HTTPStatusError("Provider error", request=response.request, response=response))
+        content = vision._gemini_output_text(reply["data"])
+        parsed = vision.normalize(vision._extract_json(content), model=model, provider="gemini")
+        result = await run_in_threadpool(pipeline.finish, parsed)
+        result["photo_metadata"] = metadata
+        result["photo_notes"] = [problem for q in quality for problem in q["problems"]]
+        return result
+    except vision.VisionError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    except (ValueError, KeyError, TypeError, AttributeError) as error:
+        raise HTTPException(status_code=422, detail="写真の情報またはGeminiの応答を読み取れませんでした") from error
+
+
 @app.post("/identify")
 async def identify(
     request: Request,
@@ -1106,6 +1174,11 @@ async def identify(
         api_key = settings["api_keys"].get(provider, "")
     if provider != "local" and not api_key:
         raise HTTPException(status_code=400, detail="設定画面でAPIキーを登録してください")
+    if "native_identify" in request.scope:
+        if not NATIVE_TRANSPORT or provider != "gemini" or use_plantnet or files or file:
+            raise HTTPException(status_code=400, detail="写真を選び直してください")
+        return JSONResponse(await _identify_native(request, model=model, api_key=api_key,
+            client_photos=client_photos, location=location, observed_date=observed_date, size=size))
     uploads = [*files, *([file] if file else [])]
     if not uploads or len(uploads) > 3:
         raise HTTPException(status_code=400, detail="写真は1〜3枚選んでください")
@@ -1153,12 +1226,7 @@ async def _identify_images(
                 for key, value in candidate_metadata.items():
                     photo_metadata.setdefault(key, value)
             quality = [await run_in_threadpool(image_quality.judge, raw) for raw in raw_images]
-        unusable = [q for q in quality if not q["ok"]]
-        if unusable:
-            raise HTTPException(status_code=422, detail={
-                "message": "この写真では調べられません。",
-                "problems": [p for q in unusable for p in q["problems"] if p["level"] == image_quality.BLOCK],
-            })
+        _ensure_usable_photos(quality)
 
         prepared = raw_images if BROWSER_PHOTOS else [await run_in_threadpool(vision.prepare_image, raw) for raw in raw_images]
         context = {

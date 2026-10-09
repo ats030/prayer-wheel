@@ -1,6 +1,7 @@
 """Real API, protected preview. No synthetic identity or diagnostic routes."""
 import base64
 import hmac
+import json
 import os
 from urllib.parse import unquote, urlsplit
 from workers import asgi, env, Request, Response
@@ -17,6 +18,7 @@ for name in ("IKIMONO_SESSION_SECRET", "IKIMONO_ALLOWED_HOSTS", "IKIMONO_PUBLIC_
 os.environ["IKIMONO_PUBLIC_MODE"] = "1"
 os.environ["IKIMONO_BACKGROUND_JOBS"] = "0"
 os.environ["IKIMONO_BROWSER_PHOTOS"] = "1"
+os.environ["IKIMONO_NATIVE_TRANSPORT"] = str(getattr(env, "IKIMONO_NATIVE_TRANSPORT", ""))
 
 import bundled_resources
 from _resources import RESOURCES, BUNDLE_SHA256, NATIVE_ASSET_PATHS, NATIVE_ASSET_LENGTHS
@@ -79,7 +81,8 @@ class Default(asgi.entrypoint(app)):
                 result = await self.env.ASSETS.fetch(request.js_object)
         elif path == "/identify" and request.method == "POST":
             length = request.headers.get("content-length", "")
-            if not length.isdigit() or int(length) > 6 * 1024 * 1024 + 16384:
+            body_limit = 9 * 1024 * 1024 if main.NATIVE_TRANSPORT else 6 * 1024 * 1024 + 16384
+            if not length.isdigit() or int(length) > body_limit:
                 if request.body is not None:
                     # Finish the incoming stream without retaining bytes. The
                     # local proxy otherwise resets a still-uploading client
@@ -96,12 +99,30 @@ class Default(asgi.entrypoint(app)):
             except (TypeError, ValueError):
                 return Response("Invalid multipart form", status=400)
             files = form.get_all("files")
-            if not 1 <= len(files) <= 3 or any(isinstance(f, str) or f.size > 2 * 1024 * 1024 for f in files):
+            native_payloads = form.get_all("provider_payload")
+            native_payload = None
+            if native_payloads:
+                if len(native_payloads) != 1 or files or isinstance(native_payloads[0], str):
+                    return Response("Invalid payload", status=400)
+                native_payload = native_payloads[0]
+                if native_payload.content_type != "application/json" or not 0 < native_payload.size <= 3 * 2796204 + 32768:
+                    return Response("Invalid payload", status=400)
+            elif (int(length) > 6 * 1024 * 1024 + 16384 or not 1 <= len(files) <= 3
+                  or any(isinstance(f, str) or f.size > 2 * 1024 * 1024 for f in files)):
                 return Response("Invalid photos", status=400)
             import io
             from starlette.datastructures import FormData, UploadFile, Headers
             items = []
+            native_fields = {"background", "location", "observed_date", "size", "verify_names", "use_plantnet",
+                             "request_provider", "request_model", "request_api_key", "request_plantnet_key", "client_photos"}
+            seen = set()
             for name, value in form.items():
+                if native_payload is not None:
+                    if name == "provider_payload":
+                        continue
+                    if name not in native_fields or name in seen:
+                        return Response("Unexpected field", status=400)
+                    seen.add(name)
                 if isinstance(value, str):
                     if len(value) > 8192:
                         return Response("Oversize field", status=400)
@@ -115,6 +136,14 @@ class Default(asgi.entrypoint(app)):
             parsed = FormData(items)
             async def cached_app(scope, receive, send):
                 scope["preview_form"] = parsed
+                if native_payload is not None:
+                    async def native_identify(template, count, model, api_key):
+                        from workers import import_from_javascript
+                        transport = import_from_javascript("worker_transport.mjs")
+                        reply = await transport.identify(native_payload.js_object,
+                            json.dumps(template, ensure_ascii=False), count, model, api_key)
+                        return json.loads(str(reply))
+                    scope["native_identify"] = native_identify
                 await app(scope, receive, send)
             forwarded = Request(request.url, method="POST", headers=dict(request.headers.items()))
             result = await asgi.fetch(cached_app, forwarded, self.env, self.ctx)
