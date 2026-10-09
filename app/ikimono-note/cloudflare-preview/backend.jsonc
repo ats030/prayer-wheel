@@ -11,6 +11,7 @@
   "assets": {"directory": "assets", "binding": "ASSETS", "run_worker_first": true},
   "vars": {
     "IKIMONO_BROWSER_GEMINI": "1",
+    "IKIMONO_GBIF_FALLBACK": "1",
     "IKIMONO_ALLOWED_HOSTS": "ikimono-note-preview.ats030.workers.dev,localhost,127.0.0.1",
     "IKIMONO_PUBLIC_ORIGIN": "https://ikimono-note-preview.ats030.workers.dev"
   },

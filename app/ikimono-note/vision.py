@@ -40,10 +40,17 @@ GEMINI_THINKING_LEVEL = os.getenv("IKIMONO_GEMINI_THINKING_LEVEL", "high")
 PLANTNET_URL = "https://my-api.plantnet.org/v2/identify/all"
 INATURALIST_URL = "https://api.inaturalist.org/v1/taxa/autocomplete"
 INATURALIST_USER_AGENT = "IkimonoNote/1.0 (https://github.com/ats030/ubuntu-server-app)"
+GBIF_MATCH_URL = "https://api.gbif.org/v2/species/match"
+GBIF_CHECKLIST = "7ddf754f-d193-4cc9-b351-99906754a03b"
+GBIF_FALLBACK = os.getenv("IKIMONO_GBIF_FALLBACK") == "1"
+_GBIF_CACHE: dict[str, list[dict[str, Any]]] = {}
+_LAST_GBIF_REQUEST = 0.0
+_GBIF_RETRY_AT = 0.0
 # 画面に出る文字列。旧値 "和名未登録" は端末内履歴に残るため、UI側は両方を同義に扱う
 NO_JAPANESE_NAME = "日本語名なし"
 _TAXONOMY_LOCK = threading.Lock()
 _LAST_TAXONOMY_REQUEST = 0.0
+_TAXONOMY_RETRY_AT = 0.0
 _TAXONOMY_CACHE: dict[str, list[dict[str, Any]]] = {}
 _JAPANESE_NAME_RE = re.compile(r"[ぁ-んァ-ヶ一-龯々]")
 MAX_UPLOAD_BYTES = 15 * 1024 * 1024
@@ -379,12 +386,14 @@ def merge_plant_results(vlm: dict[str, Any], specialist: dict[str, Any]) -> dict
     }
 
 
-def _lookup_taxon(name: str) -> list[dict[str, Any]] | None:
-    global _LAST_TAXONOMY_REQUEST
+def _lookup_inaturalist(name: str) -> list[dict[str, Any]] | None:
+    global _LAST_TAXONOMY_REQUEST, _TAXONOMY_RETRY_AT
     if name in _TAXONOMY_CACHE:
         return _TAXONOMY_CACHE[name]
     try:
         with _TAXONOMY_LOCK:
+            if time.monotonic() < _TAXONOMY_RETRY_AT:
+                raise TaxonomyUnavailable(429, max(1, math.ceil(_TAXONOMY_RETRY_AT - time.monotonic())))
             delay = 1.0 - (time.monotonic() - _LAST_TAXONOMY_REQUEST)
             if delay > 0:
                 time.sleep(delay)
@@ -395,10 +404,11 @@ def _lookup_taxon(name: str) -> list[dict[str, Any]] | None:
                 timeout=5,
             )
             _LAST_TAXONOMY_REQUEST = time.monotonic()
-        if response.status_code == 429:
-            header = response.headers.get("Retry-After", "")
-            seconds = min(3600, max(1, int(header))) if header.isascii() and header.isdigit() and len(header) <= 10 else 60
-            raise TaxonomyUnavailable(429, seconds)
+            if response.status_code == 429:
+                header = response.headers.get("Retry-After", "")
+                seconds = min(3600, max(1, int(header))) if header.isascii() and header.isdigit() and len(header) <= 10 else 60
+                _TAXONOMY_RETRY_AT = time.monotonic() + seconds
+                raise TaxonomyUnavailable(429, seconds)
         response.raise_for_status()
         results = response.json().get("results")
         if not isinstance(results, list):
@@ -408,6 +418,86 @@ def _lookup_taxon(name: str) -> list[dict[str, Any]] | None:
         return parsed
     except (httpx.HTTPError, ValueError, AttributeError):
         return None
+
+
+def _gbif_taxa(name: str, data: dict) -> list[dict[str, Any]] | None:
+    """Accept an exact accepted scientific name, never fuzzy/higher-rank matches."""
+    if not isinstance(data, dict) or not isinstance(data.get("diagnostics"), dict):
+        return None
+    diagnostics = data["diagnostics"]
+    if diagnostics.get("issues") is not None and not isinstance(diagnostics["issues"], list):
+        return None
+    if not isinstance(diagnostics.get("matchType"), str) or diagnostics["matchType"] not in {"NONE", "FUZZY", "HIGHERRANK", "EXACT"}:
+        return None
+    if diagnostics["matchType"] != "EXACT":
+        return []
+    usage = data.get("usage")
+    if not isinstance(usage, dict) or not isinstance(usage.get("canonicalName"), str):
+        return None
+    key, score = usage.get("key"), diagnostics.get("confidence")
+    if not isinstance(key, str) or not re.fullmatch(r"[A-Za-z0-9]{1,32}", key):
+        return None
+    if (usage["canonicalName"].casefold() != name.casefold() or usage.get("status") != "ACCEPTED"
+            or usage.get("type") != "SCIENTIFIC" or data.get("synonym") is not False
+            or type(score) not in (int, float) or not 95 <= score <= 100 or diagnostics.get("issues")):
+        return []
+    classification = data.get("classification")
+    if not isinstance(classification, list) or not isinstance(usage.get("rank"), str):
+        return None
+    group = next((row.get("name", "") for row in classification
+                  if isinstance(row, dict) and row.get("rank") == "CLASS"), "")
+    return [{"name": usage["canonicalName"], "preferred_common_name": "", "rank": usage["rank"].lower(),
+             "iconic_taxon_name": group if isinstance(group, str) else "", "source": "gbif", "gbif_key": key}]
+
+
+def _lookup_gbif(name: str) -> list[dict[str, Any]]:
+    global _LAST_GBIF_REQUEST, _GBIF_RETRY_AT
+    if name in _GBIF_CACHE:
+        return _GBIF_CACHE[name]
+    try:
+        with _TAXONOMY_LOCK:
+            if name in _GBIF_CACHE:
+                return _GBIF_CACHE[name]
+            if time.monotonic() < _GBIF_RETRY_AT:
+                raise TaxonomyUnavailable(429, max(1, math.ceil(_GBIF_RETRY_AT - time.monotonic())))
+            delay = 1.0 - (time.monotonic() - _LAST_GBIF_REQUEST)
+            if delay > 0:
+                time.sleep(delay)
+            # Only the scientific name; no photos, capture fields, keys or cookies.
+            with httpx.stream("GET", GBIF_MATCH_URL, params={"scientificName": name, "checklistKey": GBIF_CHECKLIST},
+                              headers={"User-Agent": INATURALIST_USER_AGENT}, timeout=5, follow_redirects=False) as response:
+                _LAST_GBIF_REQUEST = time.monotonic()
+                if response.status_code == 429:
+                    header = response.headers.get("Retry-After", "")
+                    seconds = min(3600, max(1, int(header))) if header.isascii() and header.isdigit() and len(header) <= 10 else 60
+                    _GBIF_RETRY_AT = time.monotonic() + seconds
+                    raise TaxonomyUnavailable(429, seconds)
+                response.raise_for_status()
+                raw = bytearray()
+                for chunk in response.iter_bytes():
+                    if len(raw) + len(chunk) > 256 * 1024:
+                        raise TaxonomyUnavailable()
+                    raw.extend(chunk)
+            taxa = _gbif_taxa(name, json.loads(raw))
+            if taxa is None:
+                raise TaxonomyUnavailable()
+            if len(_GBIF_CACHE) >= 256:
+                _GBIF_CACHE.pop(next(iter(_GBIF_CACHE)))
+            _GBIF_CACHE[name] = taxa
+            return taxa
+    except (httpx.HTTPError, ValueError, AttributeError) as error:
+        raise TaxonomyUnavailable() from error
+
+
+def _lookup_taxon(name: str) -> list[dict[str, Any]] | None:
+    try:
+        taxa = _lookup_inaturalist(name)
+        if taxa is not None or not GBIF_FALLBACK:
+            return taxa
+    except TaxonomyUnavailable:
+        if not GBIF_FALLBACK:
+            raise
+    return _lookup_gbif(name)
 
 
 def verify_taxonomy(result: dict[str, Any]) -> dict[str, Any]:
@@ -430,6 +520,9 @@ def verify_taxonomy(result: dict[str, Any]) -> dict[str, Any]:
             candidate["animal_group"] = str(match.get("iconic_taxon_name") or "")
             taxon_id = match.get("id")
             candidate["taxonomy_url"] = f"https://www.inaturalist.org/taxa/{taxon_id}" if taxon_id else ""
+            if match.get("source") == "gbif":
+                candidate["taxonomy_source"] = "gbif"
+                candidate["taxonomy_url"] = "https://www.catalogueoflife.org/data/taxon/" + match["gbif_key"]
         else:
             candidate["taxonomy_status"] = "unverified"
             candidate["confidence"] = min(candidate.get("confidence", 0), 40)

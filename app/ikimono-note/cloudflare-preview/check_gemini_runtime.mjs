@@ -16,7 +16,15 @@ export default {async fetch(){
   };
   const positive=await lookupTaxon('Synthetic success',fetcher);
   const redirected=await lookupTaxon('Synthetic redirect',fetcher);
-  return Response.json({positive,redirected,calls,canceled});
+  let fallbackCalls=0;
+  const recovered=await lookupTaxon('Felis catus',async(url,options)=>{
+    const request=new Request(url,options);if(request.redirect!=='manual')throw Error('Redirect following allowed');
+    fallbackCalls++;
+    if(new URL(url).origin==='https://api.inaturalist.org')return new Response(null,{status:429});
+    return Response.json({usage:{key:'3DXV3',canonicalName:'Felis catus',rank:'SPECIES',status:'ACCEPTED',type:'SCIENTIFIC'},
+      classification:[{rank:'CLASS',name:'Mammalia'}],diagnostics:{matchType:'EXACT',confidence:99},synonym:false});
+  },true);
+  return Response.json({positive,redirected,calls,canceled,fallbackCalls,recovered:recovered[0].source});
 }};`;
 const modules=[{type:'ESModule',path:resolve('gemini-runtime-test.mjs'),contents:script}];
 for(const name of ['gemini-handler.mjs','gemini-core.mjs','_gemini_policy.mjs'])
@@ -25,6 +33,6 @@ const mf=new Miniflare(convertV4MiniflareOptions({workers:[{name:'gemini-runtime
 try{
   const response=await mf.dispatchFetch('http://localhost');
   assert.equal(response.status,200);
-  assert.deepEqual(await response.json(),{positive:[{name:'Synthetic success',id:1}],redirected:null,calls:2,canceled:true});
-  console.log('PASS: actual workerd taxonomy Request construction, positive response, 302 reject/cancel, no redirect follow or external network');
+  assert.deepEqual(await response.json(),{positive:[{name:'Synthetic success',id:1}],redirected:null,calls:2,canceled:true,fallbackCalls:2,recovered:'gbif'});
+  console.log('PASS: actual workerd taxonomy Request construction, positive response, 302 reject/cancel, GBIF recovery after429, no redirect follow or external network');
 }finally{await mf.dispose();}

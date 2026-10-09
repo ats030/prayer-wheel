@@ -13,6 +13,12 @@ URL・要求本文・リダイレクト・複数のSet-Cookieを維持し、外�
 `backend.jsonc` のPython Workerは外部URLとpreview URLを無効にし、同じ検証用D1・固定鍵・Google戻り先を使います。
 新しいユーザーデータやセッション表を作りません。写真のnative transportは引き続きOFFです。
 
+分類サービス障害時の `IKIMONO_GBIF_FALLBACK=1` は、GBIF API v2のCatalogue of Life XRで
+学名を再照合します。完全一致・採用名・非異名・科学名のみを受け入れ、曖昧一致や上位分類への置換は除外します。
+和名をAIから補わず、未確認として学名を表示します。出典・CC BY 4.0表記は撮影画面と記録画面に残します。
+[無料条件・商用利用の確認記録](../docs/tool-license-gbif.yaml)を保存しています。
+両Workerのこの変数を `0` に戻せば既存照合へ戻ります。一般公開版では既定OFFです。
+
 入口のbundle SHAにはPythonの意図した版も含めます。`/health` は実バックエンドのSHAと比較し、
 異なる場合は503で止めます。成功時の `X-Preview-Backend-Bundle-SHA256` が実バックエンド版です。
 通常応答にはruntime識別子を出さず、CPU測定の明示的マーカーがある要求だけに付けます。

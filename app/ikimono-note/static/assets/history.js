@@ -62,7 +62,7 @@ function evidence(label,items){return items?.length?'<div class="label">'+label+
   if(name)links.push('<a target="_blank" rel="noopener noreferrer" href="'+esc(sourceUrl(name))+'">図鑑を検索 ↗</a>');
   const wiki=wikipediaUrl(c);
   if(wiki)links.push('<a target="_blank" rel="noopener noreferrer" href="'+esc(wiki)+'">Wikipedia ↗</a>');
-  if(c?.taxonomy_url)links.push('<a target="_blank" rel="noopener noreferrer" href="'+esc(c.taxonomy_url)+'">iNaturalist ↗</a>');
+  if(c && c.taxonomy_url)links.push(taxonomySourceHtml(c));
   const ref=animalReference(c,category);
   if(ref)links.push('<a target="_blank" rel="noopener noreferrer" href="'+esc(ref.url)+'">'+esc(ref.label)+' ↗</a>');
   return links.length?'<div class="links">'+links.join("")+'</div>':"";

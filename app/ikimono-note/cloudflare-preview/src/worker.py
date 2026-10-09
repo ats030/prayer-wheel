@@ -21,6 +21,7 @@ os.environ["IKIMONO_BACKGROUND_JOBS"] = "0"
 os.environ["IKIMONO_BROWSER_PHOTOS"] = "1"
 os.environ["IKIMONO_NATIVE_TRANSPORT"] = str(getattr(env, "IKIMONO_NATIVE_TRANSPORT", ""))
 os.environ["IKIMONO_BROWSER_GEMINI"] = str(getattr(env, "IKIMONO_BROWSER_GEMINI", ""))
+os.environ["IKIMONO_GBIF_FALLBACK"] = str(getattr(env, "IKIMONO_GBIF_FALLBACK", ""))
 
 import bundled_resources
 from _resources import RESOURCES, BUNDLE_SHA256, NATIVE_ASSET_PATHS, NATIVE_ASSET_LENGTHS

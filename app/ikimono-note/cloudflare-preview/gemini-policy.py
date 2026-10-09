@@ -38,6 +38,7 @@ def build():
         'messages': messages,
         'protected': json.loads((APP / 'data/protected_species.json').read_text()),
         'taxonomy_url': vision['INATURALIST_URL'], 'taxonomy_agent': vision['INATURALIST_USER_AGENT'],
+        'gbif_url': vision['GBIF_MATCH_URL'], 'gbif_checklist': vision['GBIF_CHECKLIST'],
         'no_japanese_name': vision['NO_JAPANESE_NAME'],
     }
     assignments = {node.targets[0].id: node.value for node in ast.parse((APP / 'vision.py').read_text()).body

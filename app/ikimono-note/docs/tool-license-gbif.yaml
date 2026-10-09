@@ -1,0 +1,37 @@
+tool: GBIF Species Match API v2 with Catalogue of Life Extended Release
+reviewed_at: 2026-10-09
+decision: approved
+scope: protected preview taxonomy fallback; exact accepted scientific names only
+version: /v2/species/match
+checklist_key: 7ddf754f-d193-4cc9-b351-99906754a03b
+cost:
+  condition: public free/open data API; no account, API key, subscription or billing configuration
+  sources:
+    - https://www.gbif.org/
+    - https://data-blog.gbif.org/post/gbif-api-beginners-guide/
+    - https://techdocs.gbif.org/en/openapi/v1/species
+  limitation: no availability guarantee; Cloudflare Free suitability remains unproven
+license:
+  identifier: CC-BY-4.0
+  evidence: https://api.gbif.org/v1/dataset/7ddf754f-d193-4cc9-b351-99906754a03b
+  legal_terms: https://creativecommons.org/licenses/by/4.0/
+  commercial_use: permitted with attribution
+  attribution: Bánki et al. / Catalogue of Life Foundation / GBIF; Catalogue of Life; classification excerpt/formatting
+  source_citation_observed: Catalogue of Life (2026-08-26 XR), DOI 10.48580/dgyy9
+  conditions:
+    - Show publisher, dataset source and license links in capture and stored-record references.
+    - Do not retrieve photos, occurrence records or data from other checklist licenses.
+    - Do not use logos or imply endorsement.
+operation:
+  privacy: scientific name only; no photos, location, keys, cookies or user identity
+  bounds: one fallback request per candidate; fixed host/path/checklist; 5s timeout; 256KiB response; bounded isolate cache
+  rate: at most one lookup per second per isolate; honor Retry-After; no automatic retry on 429
+  rollback: disable IKIMONO_GBIF_FALLBACK in both protected-preview Workers
+  persistence: no new database, table, scheduler or data migration
+notes:
+  - Attribution/source/license conditions are implemented in capture and history; regression checks cover both views.
+  - Official current taxonomy migration recommends v2 with this COL XR checklist; legacy 2023 GBIF backbone is not used.
+  - Skill references templates/tool-license.yaml, but that template is absent from the installed package; this is the equivalent review record.
+sources:
+  - https://data-blog.gbif.org/post/catalogue-of-life-taxonomic-backbone/
+  - https://www.inaturalist.org/pages/api+recommended+practices

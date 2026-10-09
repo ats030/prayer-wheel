@@ -7,7 +7,7 @@ const object = value => value !== null && typeof value === 'object' && !Array.is
 const keys = (value, expected) => object(value) && Object.keys(value).length === expected.length && expected.every(key => Object.hasOwn(value, key));
 const text = value => value == null || value === false || value === 0 ? '' : String(value);
 const chars = (value, limit) => Array.from(value).slice(0, limit).join('');
-const casefold = value => value.toLowerCase().replaceAll('ß', 'ss').replaceAll('ς', 'σ');
+export const casefold = value => value.toLowerCase().replaceAll('ß', 'ss').replaceAll('ς', 'σ');
 const pythonSpace = '[\\u0009-\\u000d\\u001c-\\u0020\\u0085\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000]';
 const splitSpace = new RegExp(pythonSpace + '+','u');
 const stripSpace = new RegExp('^' + pythonSpace + '+|' + pythonSpace + '+$','gu');
@@ -147,6 +147,8 @@ export async function finish(result, lookup) {
       common_name_ja:/[ぁ-んァ-ヶ一-龯々]/.test(japanese) ? japanese : policy.no_japanese_name,
       taxon_rank:text(match.rank),animal_group:text(match.iconic_taxon_name),
       taxonomy_url:match.id ? 'https://www.inaturalist.org/taxa/' + match.id : ''});
+    if(match.source==='gbif')Object.assign(candidate,{taxonomy_source:'gbif',
+      taxonomy_url:'https://www.catalogueoflife.org/data/taxon/'+match.gbif_key});
     const gaps = [];
     if (candidate.traits.length < 2) gaps.push('写真で確認できる特徴が不足');
     if (!candidate.distinguishing_features.length) gaps.push('類似種と区別する決め手が未確認');

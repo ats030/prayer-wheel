@@ -11,6 +11,8 @@ function noJapaneseName(name) {
 
 /* 画面に出す和名。古い記録に残る旧値も、いまの表記で見せる */
 function commonNameLabel(candidate) {
+  if (candidate?.taxonomy_source === "gbif" && noJapaneseName(candidate?.common_name_ja))
+    return String(candidate.scientific_name || "候補") + "（和名未確認）";
   if (noJapaneseName(candidate?.common_name_ja)) return "日本語名なし";
   return String(candidate?.common_name_ja || "").trim() || "候補";
 }
@@ -37,6 +39,18 @@ function wikipediaUrl(candidate) {
 /* 図鑑を検索 (一般の検索エンジン) */
 function sourceUrl(name) {
   return "https://www.google.com/search?q=" + encodeURIComponent(name + " 生物 図鑑");
+}
+
+/* 代替照合の出典とライセンスは、保存した記録からも確認できるようにする。 */
+function taxonomySourceHtml(candidate) {
+  if (!candidate?.taxonomy_url) return "";
+  const escape = value => String(value).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch]);
+  const gbif = candidate.taxonomy_source === "gbif";
+  return '<a target="_blank" rel="noopener noreferrer" href="'+escape(candidate.taxonomy_url)+'">'
+    +(gbif ? 'Catalogue of Life（GBIF）' : 'iNaturalist')+' ↗</a>'
+    +(gbif ? '<span class="muted">分類情報：Bánkiほか / Catalogue of Life Foundation / GBIF（抜粋・整形）。'
+      +'<a target="_blank" rel="noopener noreferrer" href="https://www.gbif.org/dataset/7ddf754f-d193-4cc9-b351-99906754a03b">データ出典</a> · '
+      +'<a target="_blank" rel="noopener noreferrer" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></span>' : '');
 }
 
 /* 分類群ごとの参考資料。iNaturalist が返した iconic taxon で振り分ける。

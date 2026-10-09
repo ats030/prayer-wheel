@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {createHmac} from 'node:crypto';
 import {chromium} from '../../dekita/node_modules/playwright/index.mjs';
 import {context as captureContext,providerTemplate,result,InputError} from './gemini-core.mjs';
+import {lookupTaxon} from './gemini-handler.mjs';
 const origin=process.argv[2]||'http://localhost:8795';
 assert.ok(['http://localhost:8795','https://ikimono-note-preview.ats030.workers.dev'].includes(origin));
 const secrets=JSON.parse(await readFile('/home/ats030/.local/state/ikimono-cloudflare-preview/secrets.json','utf8'));
@@ -15,7 +16,7 @@ const data={category:'動物',candidates:[{common_name_ja:'ネコ',scientific_na
 const taxa=[{id:47867,name:'Felis catus',preferred_common_name:'イエネコ',rank:'species',iconic_taxon_name:'Mammalia'}];
 const browser=await chromium.launch({headless:true});
 try{
-  for(const scenario of [{kind:'verified',count:1},{kind:'verified',count:3},{kind:'empty',count:1},
+  for(const scenario of [{kind:'verified',count:1},{kind:'verified',count:3},{kind:'gbif',count:3},{kind:'empty',count:1},
     {kind:'unavailable',count:1},{kind:'quota',count:1,plantnet:true}]){
     const ctx=await browser.newContext({httpCredentials:{username:'preview',password:secrets.IKIMONO_PREVIEW_PASSWORD}});
     await ctx.addCookies([{name:'ikimono_session',value:cookie,url:origin}]);
@@ -40,7 +41,13 @@ try{
         }
         if(url.pathname==='/api/gemini/result'){
           completed++;const body=request.postDataJSON();
-          try{return fulfill(200,await result(body,captureContext(body),async()=>scenario.kind==='unavailable'?null:taxa));}
+          const lookup=async name=>scenario.kind==='gbif'?lookupTaxon(name,async url=>{
+            if(new URL(url).origin==='https://api.inaturalist.org')return new Response(null,{status:429});
+            assert.equal(new URL(url).origin,'https://api.gbif.org');
+            return Response.json({usage:{key:'3DXV3',canonicalName:'Felis catus',rank:'SPECIES',status:'ACCEPTED',type:'SCIENTIFIC'},
+              classification:[{rank:'CLASS',name:'Mammalia'}],diagnostics:{matchType:'EXACT',confidence:99},synonym:false});
+          },true):scenario.kind==='unavailable'?null:taxa;
+          try{return fulfill(200,await result(body,captureContext(body),lookup));}
           catch(error){assert.ok(error instanceof InputError);return fulfill(error.status,{detail:error.detail});}
         }
         return route.continue();
@@ -64,18 +71,23 @@ try{
     await page.locator('#identify').waitFor({state:'visible'});
     assert.equal(await page.locator('#usePlantnet').isChecked(),Boolean(scenario.plantnet));
     await page.locator('#identify').click();
-    const expected=scenario.kind==='verified'?'似ている生きものを表示しました':scenario.kind==='empty'?
+    const positive=['verified','gbif'].includes(scenario.kind);
+    const expected=positive?'似ている生きものを表示しました':scenario.kind==='empty'?
       '図鑑データで確認できる候補が見つかりませんでした':scenario.kind==='quota'?quota:unavailable;
     await page.waitForFunction(text=>document.getElementById('status').textContent.includes(text),expected);
     assert.equal(completed,1);assert.deepEqual(errors,[]);
-    assert.equal(await page.locator('article.candidate').count(),scenario.kind==='verified'?1:0);
+    assert.equal(await page.locator('article.candidate').count(),positive?1:0);
     if(scenario.kind==='verified')assert.ok((await page.locator('article.candidate .name').textContent()).includes('イエネコ'));
+    if(scenario.kind==='gbif'){
+      assert.ok((await page.locator('article.candidate .name').textContent()).includes('Felis catus（和名未確認）'));
+      assert.ok((await page.locator('article.candidate').textContent()).includes('CC BY 4.0'));
+    }
     if(['quota','unavailable'].includes(scenario.kind)){
       assert.ok((await page.locator('#results').textContent()).includes(expected));
       assert.ok(!(await page.locator('#results').textContent()).includes('別の角度'));
       assert.equal(await page.locator('#identify').isDisabled(),false);
     }
-    const shouldSave=['verified','empty'].includes(scenario.kind);
+    const shouldSave=positive||scenario.kind==='empty';
     const saved=await page.evaluate(async save=>{
       const deadline=Date.now()+10000;
       while(Date.now()<deadline){
@@ -91,8 +103,14 @@ try{
       }
       throw Error('Save did not commit: '+document.getElementById('status').textContent);
     },shouldSave);
-    assert.deepEqual(saved,shouldSave?{candidates:scenario.kind==='verified'?1:0,photos:scenario.count}:null);
+    assert.deepEqual(saved,shouldSave?{candidates:positive?1:0,photos:scenario.count}:null);
+    if(scenario.kind==='gbif'){
+      await page.goto(origin+'/history');
+      await page.locator('.entry').first().waitFor();
+      assert.ok((await page.locator('.entry').first().textContent()).includes('CC BY 4.0'));
+      assert.ok((await page.locator('.entry').first().textContent()).includes('Catalogue of Life'));
+    }
     await ctx.close();
   }
-  console.log('PASS: synthetic core + real browser verified candidates 1/3 photos/save, genuine empty status, direct503 and Plantnet-fallback429 visible/no failed record; external HTTP mocked');
+  console.log('PASS: synthetic core + real browser verified 1/3photos/save, GBIF recovery after429/source/license/history, genuine empty status, direct503 and Plantnet-fallback429 visible/no failed record; external HTTP mocked');
 }finally{await browser.close();}

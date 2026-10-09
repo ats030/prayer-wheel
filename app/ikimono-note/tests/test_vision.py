@@ -361,6 +361,7 @@ def test_evidence_gate_rejects_vlm_candidate_when_taxonomy_is_unavailable(monkey
 
 @pytest.mark.parametrize("body,expected", [({"results": []}, []), ({}, None), ({"results": {}}, None)])
 def test_taxonomy_distinguishes_valid_no_match_from_invalid_service_reply(monkeypatch, body, expected):
+    monkeypatch.setattr(vision, "_TAXONOMY_RETRY_AT", 0)
     monkeypatch.setattr(vision, "_TAXONOMY_CACHE", {})
     monkeypatch.setattr(vision, "_LAST_TAXONOMY_REQUEST", -10000)
     monkeypatch.setattr(vision.httpx, "get", lambda *a, **k: httpx.Response(200, json=body,
@@ -369,6 +370,7 @@ def test_taxonomy_distinguishes_valid_no_match_from_invalid_service_reply(monkey
 
 
 def test_taxonomy_quota_stops_after_first_candidate(monkeypatch):
+    monkeypatch.setattr(vision, "_TAXONOMY_RETRY_AT", 0)
     calls = []
     monkeypatch.setattr(vision, "_TAXONOMY_CACHE", {})
     monkeypatch.setattr(vision, "_LAST_TAXONOMY_REQUEST", -10000)
