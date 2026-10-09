@@ -81,6 +81,33 @@ export async function validatePayload(blob, expectedJSON, count) {
   consume(suffix);
 }
 
+// Binary-upload candidate. The caller must authorize the request and supply
+// the server's template; this helper never accepts a client-selected prompt.
+export async function prepareBinaryPayload(files, expectedJSON) {
+  if (!Array.isArray(files) || files.length < 1 || files.length > 3 ||
+      files.some(file => !(file instanceof Blob) || file.type !== 'image/jpeg' ||
+        !file.size || file.size > MAX_PHOTO)) throw new TypeError('photo');
+  if (typeof expectedJSON !== 'string' || expectedJSON.length > 32768) throw new TypeError('template');
+  const template = JSON.parse(expectedJSON), parts = template.contents?.[0]?.parts;
+  if (!Array.isArray(parts) || parts.length !== 1) throw new TypeError('template');
+  const canonical = JSON.stringify(template);
+  let marker = '__ikimono_binary_parts__';
+  while (canonical.includes(marker)) marker += '_';
+  template.contents[0].parts = marker;
+  const frame = JSON.stringify(template), token = JSON.stringify(marker), offset = frame.indexOf(token);
+  const chunks = [frame.slice(0, offset), '['];
+  for (const [index, file] of files.entries()) {
+    const raw = new Uint8Array(await file.arrayBuffer());
+    jpegDimensions(raw);
+    if (index) chunks.push(',');
+    chunks.push('{"inline_data":{"mime_type":"image/jpeg","data":"', raw.toBase64(), '"}}');
+  }
+  chunks.push(',', JSON.stringify(parts[0]), ']', frame.slice(offset + token.length));
+  const payload = new Blob(chunks, {type: 'application/json'});
+  if (payload.size > MAX_WIRE) throw new TypeError('template');
+  return payload;
+}
+
 export async function identify(blob, expectedJSON, count, model, key, fetcher = fetch) {
   try {await validatePayload(blob, expectedJSON, count);}
   catch {return JSON.stringify({error: 'input'});}

@@ -114,3 +114,7 @@ Google利用可能状態は合成値で、OAuthやDBにはアクセスしませ�
 [縮約証拠](../docs/cloudflare-session-native-remote.json)に応答・ソースSHA・版・runtime順序の照合結果を保存しました。
 測定後は一時Workerを停止し、外部404を確認して一時秘密ファイルを削除しました。
 本体への接続、Googleログイン、識別全体の無料適合は未完了です。
+
+## バイナリ案の終了
+
+2026-10-09の完全18件の実測は `../docs/cloudflare-binary-gemini-remote.json`。1枚6〜11ms、3枚19〜35msで、採用条件の10msに収まらない。実AI・認証・保存を含まない値であり、無料移行成立の証拠ではない。診断URLは無効化済み。利用者が選択したブラウザからGeminiへの直接送信を、preview側で未公開実装している。

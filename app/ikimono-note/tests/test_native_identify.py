@@ -103,3 +103,57 @@ def test_malformed_provider_structure_returns_user_error(native, monkeypatch):
     assert response.status_code == 422
     assert 'Gemini' in response.json()['detail']
     assert len(calls) == 1
+
+
+def test_browser_gemini_preserves_authoritative_template_result_and_metadata(native, monkeypatch):
+    client, fields, calls = native
+    monkeypatch.setattr(main, 'BROWSER_GEMINI', True)
+    body = {'model': fields['request_model'], 'count': 1, 'client_photos': fields['client_photos']}
+    template = client.post('/api/gemini/prepare', json=body)
+    assert template.status_code == 200
+    assert template.json() == main.vision.provider_payload('gemini', body['model'], [], observed_date='2026-10-09')
+    assert not calls
+    reply = {'candidates': [{'content': {'parts': [{'text': '{"category":"不明","summary":"観察","candidates":[]}'}]}}]}
+    response = client.post('/api/gemini/result', json={**body, 'reply': json.dumps(reply)})
+    reference = client.post('/identify', data=fields)
+    assert response.status_code == reference.status_code == 200
+    assert response.json() == reference.json()
+    assert response.json()['provider'] == 'gemini'
+    assert response.json()['strict_mode']
+    assert response.json()['photo_metadata']['observed_date'] == '2026-10-09'
+    assert response.json()['image_saved'] is False
+
+
+def test_browser_gemini_auth_flag_quality_model_and_result_bounds(native, monkeypatch):
+    client, fields, calls = native
+    body = {'model': fields['request_model'], 'count': 1, 'client_photos': fields['client_photos']}
+    result_body = {**body, 'reply': '{}'}
+    for path, payload in [('/api/gemini/prepare', body), ('/api/gemini/result', result_body)]:
+        assert client.post(path, json=payload).status_code == 404
+    monkeypatch.setattr(main, 'BROWSER_GEMINI', True)
+    client.cookies.clear()
+    for path, payload in [('/api/gemini/prepare', body), ('/api/gemini/result', result_body)]:
+        assert client.post(path, json=payload, follow_redirects=False).status_code == 401
+    client.cookies.set('ikimono_session', 'signed')
+    reports = json.loads(fields['client_photos']); reports[0]['measured']['brightness'] = 0
+    for path, payload in [('/api/gemini/prepare', body), ('/api/gemini/result', result_body)]:
+        assert client.post(path, json={**payload, 'model': 'unlisted'}).status_code == 400
+        assert client.post(path, json={**payload, 'count': 3}).status_code == 422
+        assert client.post(path, json={**payload, 'client_photos': json.dumps(reports)}).status_code == 422
+    for reply in ['broken', '[]', json.dumps({'candidates': [{'finishReason': 'MAX_TOKENS'}]}),
+                  json.dumps({'candidates': [{'content': 'bad'}]})]:
+        assert client.post('/api/gemini/result', json={**body, 'reply': reply}).status_code == 422
+    assert client.post('/api/gemini/result', json={**body, 'reply': 'x' * (2 * 1024 * 1024 + 1)}).status_code == 422
+    assert not calls
+
+
+def test_browser_gemini_enforces_identify_rate_before_provider_work(native, monkeypatch):
+    client, fields, calls = native
+    monkeypatch.setattr(main, 'BROWSER_GEMINI', True)
+    def limit(request, scope, count):
+        assert scope == 'identify' and count == 6
+        raise main.HTTPException(429, '上限')
+    monkeypatch.setattr(main, '_rate_limit', limit)
+    assert client.post('/api/gemini/prepare', json={'model': fields['request_model'], 'count': 1,
+        'client_photos': fields['client_photos']}).status_code == 429
+    assert not calls

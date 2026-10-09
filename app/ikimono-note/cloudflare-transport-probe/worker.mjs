@@ -1,8 +1,22 @@
 // Local synthetic serialization only: no outbound fetch, secrets, DB or AI.
 import sourceDigest, {checkedTemplate} from './_digest.mjs';
-import {validatePayload} from '../worker_transport.mjs';
+import {validatePayload, prepareBinaryPayload} from '../worker_transport.mjs';
 const MAX_BODY = 6 * 1024 * 1024 + 16384;
 const encoder = new TextEncoder();
+export async function binaryWire(request, count) {
+  if (request.method !== 'POST') return new Response('Method not allowed', {status: 405});
+  const length = request.headers.get('content-length') || '';
+  if (!/^\d+$/.test(length) || Number(length) > MAX_BODY) return new Response('Invalid length', {status: 400});
+  if (!Number.isInteger(count) || count < 1 || count > 3) return new Response('Invalid count', {status: 400});
+  try {
+    const form = await request.formData();
+    if ([...form.keys()].some(key => key !== 'files')) throw new TypeError('field');
+    const files = form.getAll('files');
+    if (files.length !== count) throw new TypeError('count');
+    const payload = await prepareBinaryPayload(files, JSON.stringify(checkedTemplate));
+    return new Response(payload.stream(), {headers: {'content-type': 'application/json', 'X-Probe-Network-Calls': '0'}});
+  } catch {return new Response('Invalid binary input', {status: 400});}
+}
 export async function checkedWire(request, count) {
   if (request.method !== 'POST') return new Response('Method not allowed', {status: 405});
   const length = request.headers.get('content-length') || '';

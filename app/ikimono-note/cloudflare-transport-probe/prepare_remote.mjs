@@ -24,6 +24,11 @@ for (const count of [1, 3]) {
   const request = new Request('http://localhost/payload', {method: 'POST', body: form});
   await writeFile(new URL(`multipart-${count}.bin`, directory), Buffer.from(await request.arrayBuffer()));
   await writeFile(new URL(`multipart-${count}.type`, directory), request.headers.get('Content-Type'));
+  const binaryForm = new FormData();
+  for (let i = 0; i < count; i++) binaryForm.append('files', new Blob([photo], {type: 'image/jpeg'}), 'synthetic.jpg');
+  const binaryRequest = new Request('http://localhost/binary', {method: 'POST', body: binaryForm});
+  await writeFile(new URL(`binary-${count}.bin`, directory), Buffer.from(await binaryRequest.arrayBuffer()));
+  await writeFile(new URL(`binary-${count}.type`, directory), binaryRequest.headers.get('Content-Type'));
   // The diagnostic endpoint captures one dummy image followed by the original
   // prompt. Strip only that image before using the application's browser builder.
   assert.equal(template.contents[0].parts.length, 2);
@@ -33,7 +38,7 @@ for (const count of [1, 3]) {
   const payload = assembleProviderPayload('gemini', browserTemplate,
     Array.from({length: count}, () => photo.toString('base64')));
   await writeFile(new URL(`wire-${count}.json`, directory), JSON.stringify(payload));
-  for (const name of [`multipart-${count}.bin`, `multipart-${count}.type`, `wire-${count}.json`]) {
+  for (const name of [`multipart-${count}.bin`, `multipart-${count}.type`, `binary-${count}.bin`, `binary-${count}.type`, `wire-${count}.json`]) {
     provenance.fixtures[name] = createHash('sha256').update(await readFile(new URL(name, directory))).digest('hex');
   }
 }

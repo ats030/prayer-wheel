@@ -1,5 +1,5 @@
 // Protected, temporary CPU-accounting experiment. No provider HTTP or DB.
-import localWorker, {forwardWire, checkedWire} from './worker.mjs';
+import localWorker, {forwardWire, checkedWire, binaryWire} from './worker.mjs';
 import sourceDigest, {wrapperDigest, nativeDigest, templateDigest, sessionDigest} from './_digest.mjs';
 import {sessionStatus} from '../worker_session.mjs';
 let runtimeId, invocation = 0;
@@ -18,6 +18,7 @@ export default {
     // Only transport/health measurements, no checked payload reflection route.
     const routes = {'/health': '/health', '/payload/1': '/payload', '/payload/3': '/payload', '/wire/1': '/wire', '/wire/3': '/wire',
       '/checked/1': '/checked', '/checked/3': '/checked',
+      '/binary/1': '/binary', '/binary/3': '/binary',
       '/session/out': '/session', '/session/in': '/session', '/session/tampered': '/session', '/session/expired': '/session'};
     if (!Object.hasOwn(routes, url.pathname)) return new Response('Not found', {status: 404});
     url.pathname = routes[url.pathname];
@@ -30,6 +31,8 @@ export default {
       const cookies = request.headers.get('Cookie') || '';
       const cookie = cookies.split(';').map(s => s.trim()).find(s => s.startsWith('ikimono_session='))?.slice(16);
       response = Response.json(await sessionStatus(cookie, env.IKIMONO_PROBE_SESSION_SECRET, true));
+    } else if (url.pathname === '/binary') {
+      response = await binaryWire(request, Number(new URL(request.url).pathname.split('/').at(-1)));
     } else if (url.pathname === '/checked') {
       response = await checkedWire(request, Number(new URL(request.url).pathname.split('/').at(-1)));
     } else if (url.pathname === '/wire') {

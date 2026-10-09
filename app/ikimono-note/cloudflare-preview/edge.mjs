@@ -1,6 +1,7 @@
 // Same protected preview URL; Python owns all routes except session status.
 import {readSession} from '../worker_session.mjs';
 import {bundleDigest, pythonBundleDigest, securityHeaders} from './_edge_policy.mjs';
+import {handleGemini} from './gemini-handler.mjs';
 let isolateId, invocation = 0;
 function sessionCookie(header) {
   let result;
@@ -33,8 +34,15 @@ export default {
     let path;
     try {path = decodeURIComponent(url.pathname);} catch {return reject('Invalid path', 400);}
     if (path.startsWith('/probe/')) return reject('Not found', 404);
-    let response;
-    if (path === '/api/me' && env.IKIMONO_JS_SESSION === '1') {
+    let response, geminiEngine = false;
+    if (['/api/gemini/prepare','/api/gemini/result'].includes(path) && env.IKIMONO_JS_GEMINI === '1') {
+      geminiEngine = true;
+      const configured = ['IKIMONO_GOOGLE_CLIENT_ID','IKIMONO_GOOGLE_CLIENT_SECRET','IKIMONO_PUBLIC_ORIGIN']
+        .every(name => !!String(env[name] || '').trim().replace(name === 'IKIMONO_PUBLIC_ORIGIN' ? /\/+$/ : /$^/, ''));
+      const session = await readSession(sessionCookie(request.headers.get('Cookie')), env.IKIMONO_SESSION_SECRET.trim());
+      response = configured && !session ? Response.json({detail:'ログインしてください'},{status:401}) : await handleGemini(request,path,undefined,env);
+      for (const [name,value] of Object.entries(securityHeaders)) response.headers.set(name,value);
+    } else if (path === '/api/me' && env.IKIMONO_JS_SESSION === '1') {
       if (request.method !== 'GET') response = new Response('Method not allowed', {status: 405, headers: {Allow: 'GET'}});
       else {
         const names = ['IKIMONO_GOOGLE_CLIENT_ID', 'IKIMONO_GOOGLE_CLIENT_SECRET', 'IKIMONO_PUBLIC_ORIGIN'];
@@ -60,10 +68,12 @@ export default {
     for (const [name, value] of Object.entries(headers)) response.headers.set(name, value);
     // Runtime observations are owned by the outer entrypoint for every route.
     response.headers.delete('X-Preview-Isolate'); response.headers.delete('X-Preview-Isolate-Invocation');
+    response.headers.delete('X-Preview-Gemini-Engine');
     if (/^[0-9a-f]{8}$/.test(request.headers.get('X-Ikimono-CPU-Probe') || '')) {
       isolateId ||= crypto.randomUUID();
       response.headers.set('X-Preview-Isolate', isolateId);
       response.headers.set('X-Preview-Isolate-Invocation', String(sequence));
+      if (geminiEngine) response.headers.set('X-Preview-Gemini-Engine','javascript');
     }
     response.headers.set('X-Preview-Bundle-SHA256', bundleDigest);
     return response;

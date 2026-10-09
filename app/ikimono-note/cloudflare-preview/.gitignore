@@ -7,6 +7,7 @@ python_modules
 secrets.json
 deployment-check.json
 _edge_policy.mjs
+_gemini_policy.mjs
 edge-manifest.json
 manifest.json
 pyproject.toml

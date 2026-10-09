@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {Buffer} from 'node:buffer';
-import {identify, validatePayload, jpegDimensions} from '../worker_transport.mjs';
+import {identify, validatePayload, jpegDimensions, prepareBinaryPayload} from '../worker_transport.mjs';
 import {legacyValidate} from './legacy_payload_validator.mjs';
 
 // Node24 lacks the Workers API. The shim is only used in this test process.
@@ -8,6 +8,9 @@ if (!Uint8Array.fromBase64) Uint8Array.fromBase64 = encoded => {
   const raw = Buffer.from(encoded, 'base64');
   if (raw.toString('base64') !== encoded) throw new TypeError('base64');
   return new Uint8Array(raw);
+};
+if (!Uint8Array.prototype.toBase64) Uint8Array.prototype.toBase64 = function () {
+  return Buffer.from(this).toString('base64');
 };
 let input = '';
 for await (const chunk of process.stdin) input += chunk;
@@ -17,6 +20,16 @@ const blob = payload => new Blob([JSON.stringify(payload)], {type: 'application/
 const payloadFor = images => ({...structuredClone(template), contents: [{role: 'user', parts: [
   ...images.map(data => ({inline_data: {mime_type: 'image/jpeg', data}})), ...structuredClone(template.contents[0].parts),
 ]}]});
+const photoBlob = encoded => new Blob([Buffer.from(encoded, 'base64')], {type: 'image/jpeg'});
+for (const photos of [[good], [good, good], [good, good, good], [large, large, large]]) {
+  const result = await prepareBinaryPayload(photos.map(photoBlob), expected);
+  assert.equal(result.type, 'application/json');
+  assert.equal(await result.text(), JSON.stringify(payloadFor(photos)));
+  await validatePayload(result, expected, photos.length);
+}
+for (const photos of [[], Array(4).fill(photoBlob(good)), ...badPhotos.map(value => [photoBlob(value)]),
+  [new Blob([Buffer.from(good, 'base64')], {type: 'image/png'})], ['not-a-blob'],
+  [new Blob([], {type: 'image/jpeg'})]]) await assert.rejects(prepareBinaryPayload(photos, expected));
 let calls = 0;
 for (const count of [1, 3]) {
   const payload = payloadFor(Array(count).fill(good));
@@ -116,6 +129,7 @@ for (const padding of [0, 1, 2]) {
 const nested = structuredClone(template); nested.contents[0].parts[0].text += '__ikimono_photo_parts__';
 const nestedWire = structuredClone(payloadFor([good])); nestedWire.contents[0].parts[nestedWire.contents[0].parts.length - 1] = nested.contents[0].parts[0];
 await compare(JSON.stringify(nestedWire), 1, JSON.stringify(nested));
+assert.equal(await (await prepareBinaryPayload([photoBlob(good)], JSON.stringify(nested))).text(), JSON.stringify(nestedWire));
 // A decoder must not silently remove a BOM inside the photo string.
 const largeBytes = Buffer.from(large, 'base64');
 const unpadded = Buffer.concat([largeBytes.subarray(0, -4), largeBytes.subarray(-2)]).toString('base64');

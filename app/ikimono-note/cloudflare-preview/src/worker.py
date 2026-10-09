@@ -11,7 +11,8 @@ for name in ("IKIMONO_SESSION_SECRET", "IKIMONO_PREVIEW_PASSWORD"):
     if value is None or not str(value).strip():
         raise RuntimeError(f"{name} binding is required")
 for name in ("IKIMONO_SESSION_SECRET", "IKIMONO_ALLOWED_HOSTS", "IKIMONO_PUBLIC_ORIGIN",
-             "IKIMONO_GOOGLE_CLIENT_ID", "IKIMONO_GOOGLE_CLIENT_SECRET"):
+             "IKIMONO_GOOGLE_CLIENT_ID", "IKIMONO_GOOGLE_CLIENT_SECRET",
+             "IKIMONO_GEMINI_MAX_OUTPUT_TOKENS", "IKIMONO_GEMINI_THINKING_LEVEL"):
     value = getattr(env, name, None)
     if value is not None:
         os.environ[name] = str(value)
@@ -19,6 +20,7 @@ os.environ["IKIMONO_PUBLIC_MODE"] = "1"
 os.environ["IKIMONO_BACKGROUND_JOBS"] = "0"
 os.environ["IKIMONO_BROWSER_PHOTOS"] = "1"
 os.environ["IKIMONO_NATIVE_TRANSPORT"] = str(getattr(env, "IKIMONO_NATIVE_TRANSPORT", ""))
+os.environ["IKIMONO_BROWSER_GEMINI"] = str(getattr(env, "IKIMONO_BROWSER_GEMINI", ""))
 
 import bundled_resources
 from _resources import RESOURCES, BUNDLE_SHA256, NATIVE_ASSET_PATHS, NATIVE_ASSET_LENGTHS

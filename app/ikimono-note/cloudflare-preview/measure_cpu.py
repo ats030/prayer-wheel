@@ -127,6 +127,7 @@ def measure(samples, *, origin=ORIGIN, paths=PATHS, request_factory=None, wrangl
                             ("preview_bundle_sha256", "X-Preview-Bundle-SHA256"),
                             ("preview_backend_bundle_sha256", "X-Preview-Backend-Bundle-SHA256"),
                             ("session_source_sha256", "X-Session-Source-SHA256"),
+                            ("preview_gemini_engine", "X-Preview-Gemini-Engine"),
                             ("transport_source_sha256", "X-Transport-Source-SHA256"),
                             ("transport_wrapper_sha256", "X-Transport-Wrapper-SHA256"),
                             ("transport_native_sha256", "X-Transport-Native-SHA256"),

@@ -43,7 +43,7 @@ async function showSignIn(){
     link.classList.toggle("hidden",!(me&&me.available&&!me.signed_in));
   }catch(e){/* 出せなくても使える */}
 }
-async function loadSettings(){try{const r=await fetch("/api/settings");const data=await r.json();window.speciesNativeTransport=Boolean(data.native_transport);window.speciesPublicMode=Boolean(data.public_mode);if(window.speciesPublicMode){const saved=JSON.parse(localStorage.getItem("species-public-settings")||"{}");if(saved.provider&&(saved.provider!=="local"||data.available_models.local.length||data.local_in_browser))data.provider=saved.provider;if(saved.models)data.models={...data.models,...saved.models}}provider=data.provider;providerName=providerLabel(provider);let model=data.models[provider];
+async function loadSettings(){try{const r=await fetch("/api/settings");const data=await r.json();window.speciesNativeTransport=Boolean(data.native_transport);window.speciesBrowserGemini=Boolean(data.browser_gemini);window.speciesPublicMode=Boolean(data.public_mode);if(window.speciesPublicMode){const saved=JSON.parse(localStorage.getItem("species-public-settings")||"{}");if(saved.provider&&(saved.provider!=="local"||data.available_models.local.length||data.local_in_browser))data.provider=saved.provider;if(saved.models)data.models={...data.models,...saved.models}}provider=data.provider;providerName=providerLabel(provider);let model=data.models[provider];
 /* 自分のキーを持たない人は、運営者のお試し枠で走る。その場合に動くのはこちらが決めた
    プロバイダーとモデルなので、選択中のものを出したままだと写真の行き先を偽ることになる */
 window.speciesTrial=data.trial||null;
@@ -362,6 +362,12 @@ identify.onclick=async()=>{
       stopWorking();
       await finishIdentification(data,{photos,context,coordinates});
       return;
+    }
+    if(browserPhotos()&&window.speciesBrowserGemini&&provider==='gemini'&&
+       String(fd.get('request_api_key')||'').trim()&&!document.getElementById('usePlantnet').checked){
+      const {identifyWithBrowserGemini}=await import('/assets/gemini-browser.mjs');
+      const data=await identifyWithBrowserGemini(fd);
+      stopWorking();await finishIdentification(data,{photos,context,coordinates});return;
     }
     if(browserPhotos()&&window.speciesNativeTransport&&provider==='gemini'&&
        String(fd.get('request_api_key')||'').trim()&&!document.getElementById('usePlantnet').checked){

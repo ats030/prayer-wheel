@@ -63,4 +63,28 @@ assert.equal((await worker.fetch(request('/health'), env)).status, 503, 'Stale b
 const healthEnv = {...env, PYTHON: {async fetch() {return new Response('{}', {headers: {'X-Preview-Bundle-SHA256': pythonBundleDigest}});}}};
 const health = await worker.fetch(request('/health'), healthEnv);
 assert.equal(health.status, 200); assert.equal(health.headers.get('X-Preview-Backend-Bundle-SHA256'), pythonBundleDigest);
+const jsGemini = {...env, IKIMONO_JS_GEMINI:'1', PYTHON:{async fetch(){assert.fail('Gemini API crossed Python boundary');}}};
+const {default:policy} = await import('./_gemini_policy.mjs');
+const reports = JSON.stringify([{metadata:{observed_date:'2026-10-09'}, measured:{width:600,height:450,pixels:270000,
+  brightness:120,sharpness:200,contrast:30}}]);
+const body = {model:policy.models[0],count:1,client_photos:reports};
+const jsRequest = (path,payload,extra={}) => request(path,{Cookie:'ikimono_session='+cookie,
+  'Content-Type':'application/json','CF-Connecting-IP':'192.0.2.42',...extra},'POST',JSON.stringify(payload));
+assert.equal((await worker.fetch(jsRequest('/api/gemini/prepare',body,{Cookie:''}),jsGemini)).status,401);
+assert.equal((await worker.fetch(jsRequest('/api/gemini/prepare',body,{Host:'attacker.invalid'}),jsGemini)).status,400);
+const prepared = await worker.fetch(jsRequest('/api/gemini/prepare',body),jsGemini);
+assert.equal(prepared.status,200);const template=await prepared.json();
+assert.equal(template.contents[0].parts.length,1);assert.ok(template.contents[0].parts[0].text.includes('2026-10-09'));
+const finished = await worker.fetch(jsRequest('/api/gemini/result',{...body,
+  reply:JSON.stringify({candidates:[{content:{parts:[{text:'{"category":"不明","candidates":[]}'}]}}]})}),jsGemini);
+assert.equal(finished.status,200);const output=await finished.json();
+assert.equal(output.provider,'gemini');assert.ok(output.strict_mode&&output.taxonomy_checked);
+assert.equal(output.photo_metadata.observed_date,'2026-10-09');assert.equal(finished.headers.get('X-Preview-Isolate'),null);
+const dark=JSON.parse(reports);dark[0].measured.brightness=0;
+assert.equal((await worker.fetch(jsRequest('/api/gemini/prepare',{...body,client_photos:JSON.stringify(dark)}),jsGemini)).status,422);
+assert.equal((await worker.fetch(jsRequest('/api/gemini/prepare',{...body,model:'unlisted'}),jsGemini)).status,400);
+for(let index=0;index<3;index++) assert.equal((await worker.fetch(jsRequest('/api/gemini/prepare',body),jsGemini)).status,200);
+const limited=await worker.fetch(jsRequest('/api/gemini/prepare',body),jsGemini);
+assert.equal(limited.status,429);assert.equal(limited.headers.get('Retry-After'),'60');
 console.log('PASS: JS me avoids Python, existing cookie/config/security, Basic/Host/DB/flag guards, original proxy body/redirect/repeated cookies');
+console.log('PASS: JS Gemini prepares/finishes without Python/provider HTTP; auth/model/quality/rate guards and metadata retained');

@@ -34,3 +34,7 @@ def test_native_transport_boundary_and_byte_parity():
     assert result.returncode == 0, result.stderr
     assert 'PASS:' in result.stdout
     assert 'legacy/new acceptance comparisons' in result.stdout
+    browser = subprocess.run([node, 'tests/check_browser_gemini.mjs'], cwd=APP,
+        input=json.dumps(cases), text=True, capture_output=True, timeout=30)
+    assert browser.returncode == 0, browser.stderr
+    assert 'key/photos only to fixed provider' in browser.stdout

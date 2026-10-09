@@ -43,6 +43,18 @@ const denied = await worker.fetch(request('/health', {'X-Ikimono-CPU-Probe': '01
 assert.equal(denied.status, 401); assert.equal(denied.headers.get('X-Preview-Isolate'), null);
 for (const count of [1, 3]) {
   const wire = await readFile(new URL(`./fixtures/wire-${count}.json`, import.meta.url));
+  const binary = await readFile(new URL(`./fixtures/binary-${count}.bin`, import.meta.url));
+  const binaryType = await readFile(new URL(`./fixtures/binary-${count}.type`, import.meta.url), 'utf8');
+  const binaryHeaders = {Authorization: auth, 'Content-Type': binaryType, 'Content-Length': String(binary.length)};
+  const composed = await worker.fetch(request(`/binary/${count}`, binaryHeaders, 'POST', binary), env);
+  assert.equal(composed.status, 200);
+  assert.equal(composed.headers.get('X-Probe-Network-Calls'), '0');
+  assert.equal(composed.headers.get('X-Preview-Isolate'), null);
+  assert.deepEqual(Buffer.from(await composed.arrayBuffer()), wire);
+  assert.equal((await worker.fetch(request(`/binary/${count}`, {...binaryHeaders, Authorization: ''}, 'POST', binary), env)).status, 401);
+  assert.equal((await worker.fetch(request(`/binary/${count === 1 ? 3 : 1}`, binaryHeaders, 'POST', binary), env)).status, 400);
+  assert.equal((await worker.fetch(request(`/binary/${count}`, {Authorization: auth}), env)).status, 405);
+  assert.equal((await worker.fetch(request(`/binary/${count}`, {...binaryHeaders, 'Content-Length': '99999999'}, 'POST', binary), env)).status, 400);
   const echo = await worker.fetch(request(`/wire/${count}`, {Authorization: auth, 'Content-Type': 'application/json',
     'Content-Length': String(wire.length)}, 'POST', wire), env);
   assert.equal(echo.status, 200); assert.deepEqual(Buffer.from(await echo.arrayBuffer()), wire);
@@ -55,6 +67,8 @@ for (const count of [1, 3]) {
     'Content-Length': String(invalid.length)}, 'POST', invalid), env)).status, 400);
   const form = await readFile(new URL(`./fixtures/multipart-${count}.bin`, import.meta.url));
   const type = await readFile(new URL(`./fixtures/multipart-${count}.type`, import.meta.url), 'utf8');
+  assert.equal((await worker.fetch(request(`/binary/${count}`, {Authorization: auth, 'Content-Type': type,
+    'Content-Length': String(form.length)}, 'POST', form), env)).status, 400);
   const payload = await worker.fetch(request(`/payload/${count}`, {Authorization: auth, 'Content-Type': type,
     'Content-Length': String(form.length)}, 'POST', form), env);
   assert.equal(payload.status, 200);

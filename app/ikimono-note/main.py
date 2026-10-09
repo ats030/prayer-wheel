@@ -62,6 +62,7 @@ app = FastAPI(
 STATIC_DIR = Path(__file__).parent / "static"
 BROWSER_PHOTOS = os.getenv("IKIMONO_BROWSER_PHOTOS") == "1"
 NATIVE_TRANSPORT = BROWSER_PHOTOS and PUBLIC_MODE and os.getenv("IKIMONO_NATIVE_TRANSPORT") == "1"
+BROWSER_GEMINI = BROWSER_PHOTOS and PUBLIC_MODE and os.getenv("IKIMONO_BROWSER_GEMINI") == "1"
 PUBLIC_LOCAL_ENABLED = os.getenv("IKIMONO_PUBLIC_LOCAL", "").lower() in {"1", "true", "yes"}
 PUBLIC_AFFILIATE_ENABLED = os.getenv("IKIMONO_PUBLIC_AFFILIATE", "").lower() in {"1", "true", "yes"}
 # 識別を後ろで走らせるか。サーバーレスの置き場ではレスポンスを返した瞬間に CPU を
@@ -159,6 +160,8 @@ CONTENT_SECURITY_POLICY = "; ".join([
 ])
 if BROWSER_PHOTOS:
     CONTENT_SECURITY_POLICY = CONTENT_SECURITY_POLICY.replace("script-src 'self'", "script-src 'self' 'wasm-unsafe-eval'")
+if BROWSER_GEMINI:
+    CONTENT_SECURITY_POLICY = CONTENT_SECURITY_POLICY.replace("connect-src 'self'", "connect-src 'self' https://generativelanguage.googleapis.com")
 
 
 def _inject_site_verification(html: str) -> str:
@@ -588,6 +591,7 @@ def get_settings() -> dict[str, object]:
     result["public_mode"] = PUBLIC_MODE
     result["browser_photos"] = BROWSER_PHOTOS
     result["native_transport"] = NATIVE_TRANSPORT
+    result["browser_gemini"] = BROWSER_GEMINI
     # お試し枠で走るモデルは、利用者が選んだものではなくこちらが決める。
     # 画面が別の名前を出したままだと、どのAIに写真が行くのかを偽ることになる
     if trial_enabled():
@@ -1074,6 +1078,58 @@ class ProviderTemplateRequest(BaseModel):
     size: str = Field(default="", max_length=8192)
 
 
+@app.post("/api/gemini/prepare")
+def browser_gemini_prepare(request: Request, body: ProviderTemplateRequest) -> dict:
+    if not BROWSER_GEMINI:
+        raise HTTPException(status_code=404, detail="Not found")
+    _rate_limit(request, "identify", 6)
+    if body.model not in {item["id"] for item in config_store.MODELS["gemini"]}:
+        raise HTTPException(status_code=400, detail="モデルを選び直してください")
+    try:
+        metadata, quality = prepared_photos.read_reports(body.client_photos, body.count)
+        _ensure_usable_photos(quality)
+        return vision.provider_payload("gemini", body.model, [],
+            location=body.location or str(metadata.get("location", "")),
+            observed_date=body.observed_date or str(metadata.get("observed_date", "")), size=body.size)
+    except vision.VisionError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+class BrowserGeminiResult(BaseModel):
+    model: str = Field(max_length=120)
+    count: int = Field(ge=1, le=3)
+    client_photos: str = Field(max_length=8192)
+    reply: str = Field(max_length=2 * 1024 * 1024)
+
+
+def _finish_gemini(data: dict, model: str, metadata: dict, quality: list[dict]) -> dict:
+    content = vision._gemini_output_text(data)
+    parsed = vision.normalize(vision._extract_json(content), model=model, provider="gemini")
+    result = pipeline.finish(parsed)
+    result["photo_metadata"] = metadata
+    result["photo_notes"] = [problem for q in quality for problem in q["problems"]]
+    return result
+
+
+@app.post("/api/gemini/result")
+def browser_gemini_result(request: Request, body: BrowserGeminiResult) -> dict:
+    if not BROWSER_GEMINI:
+        raise HTTPException(status_code=404, detail="Not found")
+    _rate_limit(request, "gemini-result", 6)
+    if body.model not in {item["id"] for item in config_store.MODELS["gemini"]}:
+        raise HTTPException(status_code=400, detail="モデルを選び直してください")
+    try:
+        metadata, quality = prepared_photos.read_reports(body.client_photos, body.count)
+        _ensure_usable_photos(quality)
+        if len(body.reply.encode("utf-8")) > 2 * 1024 * 1024:
+            raise ValueError("response")
+        return _finish_gemini(json.loads(body.reply), body.model, metadata, quality)
+    except vision.VisionError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    except (ValueError, KeyError, TypeError, AttributeError) as error:
+        raise HTTPException(status_code=422, detail="写真の情報またはGeminiの応答を読み取れませんでした") from error
+
+
 @app.post("/api/provider/template")
 def provider_template(request: Request, body: ProviderTemplateRequest) -> dict:
     if not NATIVE_TRANSPORT:
@@ -1109,12 +1165,7 @@ async def _identify_native(request: Request, *, model: str, api_key: str, client
         if not 200 <= status < 300:
             response = httpx.Response(status, request=httpx.Request("POST", vision.GEMINI_URL.format(model=model)))
             raise vision._provider_error("Gemini", httpx.HTTPStatusError("Provider error", request=response.request, response=response))
-        content = vision._gemini_output_text(reply["data"])
-        parsed = vision.normalize(vision._extract_json(content), model=model, provider="gemini")
-        result = await run_in_threadpool(pipeline.finish, parsed)
-        result["photo_metadata"] = metadata
-        result["photo_notes"] = [problem for q in quality for problem in q["problems"]]
-        return result
+        return await run_in_threadpool(_finish_gemini, reply["data"], model, metadata, quality)
     except vision.VisionError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
     except (ValueError, KeyError, TypeError, AttributeError) as error:

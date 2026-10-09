@@ -4,9 +4,14 @@ import hashlib
 import json
 from pathlib import Path
 import runpy
+import importlib.util
 
 HERE = Path(__file__).resolve().parent
 runpy.run_path(str(HERE / 'build.py'))
+spec = importlib.util.spec_from_file_location('gemini_policy', HERE / 'gemini-policy.py')
+policy = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(policy)
+policy.build()
 namespace = {}
 exec((HERE / 'src/_resources.py').read_text(), namespace)
 tree = ast.parse((HERE.parent / 'main.py').read_text())
@@ -19,6 +24,8 @@ security = {'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
             'Cross-Origin-Opener-Policy': 'same-origin-allow-popups', 'Content-Security-Policy': csp}
 digest = hashlib.sha256((namespace['BUNDLE_SHA256'] + '\0').encode()
                         + (HERE / 'edge.mjs').read_bytes() + (HERE.parent / 'worker_session.mjs').read_bytes()
+                        + (HERE / 'gemini-core.mjs').read_bytes() + (HERE / 'gemini-handler.mjs').read_bytes()
+                        + (HERE / '_gemini_policy.mjs').read_bytes()
                         + json.dumps(security, sort_keys=True).encode()).hexdigest()
 (HERE / '_edge_policy.mjs').write_text('export const bundleDigest = ' + json.dumps(digest)
                                     + ';\nexport const pythonBundleDigest = ' + json.dumps(namespace['BUNDLE_SHA256'])

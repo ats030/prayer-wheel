@@ -29,6 +29,7 @@
     "static/assets/dashboard.css",
     "static/assets/dashboard.js",
     "static/assets/gdrive.js",
+    "static/assets/gemini-browser.mjs",
     "static/assets/history.css",
     "static/assets/history.js",
     "static/assets/index.css",
