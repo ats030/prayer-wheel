@@ -568,3 +568,58 @@ the saved evidence is tied to the pre-fix source hash, not the final source.
 Temporary diagnostic shutdown version `6f893e64-ee34-4de9-9b1f-5fbff8af5d8a`
 has workers_dev/preview_urls false; external404 verified. Local dev was stopped
 and the temporary0600 secrets file deleted.
+
+## Browser-direct Gemini preview — 2026-10-09 JST
+
+Protected preview only. Final gateway version `9c8561af-a754-4f14-ab9a-988bc7bb2c04`,
+private Python version `420e3109-964d-4d4d-a206-fac1095f21c7`.
+Gateway SHA `be634a0fff3ffe2df1bc827553a21640305bcb0c0cf6d37ab62f18dfe6697fc5`;
+Python SHA `a568ed4a610415719965461c26e282d9612b2a98c3fea4b5563f977a10ff5756`.
+Both Gemini flags are enabled; the earlier Worker photo relay remains OFF.
+
+For new photos from the capture page, own-key Gemini without Pl@ntNet sends
+prepared JPEGs and the key from the browser directly to the fixed Google API.
+Only capture/quality reports and the provider reply reach this preview server.
+Other providers, Pl@ntNet, and history re-identification retain the old paths.
+Original production and user data were not switched or migrated.
+
+Remote auth/OAuth-start/source/hash checks passed. Real Chromium on the final
+URL used synthetic sessions, a synthetic key and intercepted Gemini HTTP for
+1/3 photos. Current gateway SHA and JS engine were asserted for both APIs;
+original result rendering and all photos/capture date committed to isolated
+IndexedDB. No actual Gemini, Drive, or real Google login was performed in these
+checks. The dated preview changelog was published with the behavior change.
+
+[Complete initial context CPU](cloudflare-gemini-context-remote.json) contains
+12/12 traces plus readiness from gateway `e319b493-635e-4d33-9d29-acd6d21d852c`.
+All HTTP200/outcome ok/current measured hashes/JS engine/Python response bytes
+matched. Prepare CPU was 3,3,1,1,4,1ms; empty-candidate result 1,0,2,1,1,1ms.
+Some prepare requests were invocation1 (3/4ms). This historical run predates
+taxonomy redirect/quota fixes and does not prove the final whole path fits Free.
+Earlier combined health runs lost traces and were excluded. The collector now
+retains reduced diagnostics, keeps files ineligible until provenance validation,
+and measures the two native APIs with mandatory health readiness/backend hash.
+
+The installed workerd rejected redirect:error before network I/O. The taxonomy
+fetch now uses manual and refuses/cancels3xx; an actual workerd regression covers
+Request construction and the redirect guard without external traffic.
+[The subsequent taxonomy diagnostic](cloudflare-gemini-taxonomy-diagnostic.json)
+has 12/12 traces from gateway `cb8cd66d-8aa8-4c35-b678-2d50c3dc102b`, but varying
+candidate results failed the expected body hash, so it is ineligible. A result
+request used13ms CPU. Operator-only temporary checks observed upstream HTTP429;
+those temporary diagnostics were removed. Final remote HTTP confirmed explicit
+result429/Retry-After60 instead of an empty successful result. An isolate-local
+cooldown suppresses further uncached lookups; no cross-isolate or persistent
+cache/quota contract was introduced.
+
+[CORS preflight](cloudflare-gemini-cors.json) is OPTIONS-only: no key or photo,
+HTTP200 with the preview origin/POST/header names allowed. This is not proof of
+model availability, API-key validity, or actual generation.
+
+121 related pytest tests, JS edge/handler and actual workerd checks passed.
+The initial medium review's missing evidence link was fixed. The later required
+medium review was attempted but interrupted by the Codex usage cap; it did not
+complete. Final scoped changes were manually reviewed, without claiming an
+automated review pass. Remaining work includes final full taxonomy/AI CPU,
+maximum replies/cold/memory, actual Gemini and Drive behavior, migration/shares,
+and global/daily quotas. No paid plan, general public switch or old shutdown.

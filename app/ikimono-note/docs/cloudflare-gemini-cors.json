@@ -1,0 +1,11 @@
+{
+  "status": 200,
+  "observed_date": "Fri, 09 Oct 2026 07:18:28 GMT",
+  "origin": "https://ikimono-note-preview.ats030.workers.dev",
+  "allow_origin": "https://ikimono-note-preview.ats030.workers.dev",
+  "allow_methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+  "allow_headers": "content-type,x-goog-api-key",
+  "method": "OPTIONS",
+  "network_ai_calls": 0,
+  "scope": "CORS preflight only; no API key/photo; not model existence or actual generation proof"
+}

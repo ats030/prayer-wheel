@@ -3,12 +3,14 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHmac} from 'node:crypto';
 import {chromium} from '../../dekita/node_modules/playwright/index.mjs';
-const origin = 'http://localhost:8795';
+const origin = process.argv[2] || 'http://localhost:8795';
+assert.ok(['http://localhost:8795','https://ikimono-note-preview.ats030.workers.dev'].includes(origin),'Unsupported check origin');
 const secrets = JSON.parse(await readFile('/home/ats030/.local/state/ikimono-cloudflare-preview/secrets.json', 'utf8'));
 const body = Buffer.from(JSON.stringify({sub: 'synthetic-browser-gemini-check', email: 'synthetic@example.invalid',
   exp: Math.floor(Date.now()/1000)+300})).toString('base64url');
 const cookie = body + '.' + createHmac('sha256', secrets.IKIMONO_SESSION_SECRET).update(body).digest('base64url');
 const key = 'synthetic-never-forward-key';
+const expectedDigest=JSON.parse(await readFile(new URL('./edge-manifest.json',import.meta.url),'utf8')).bundle_sha256;
 const browser = await chromium.launch({headless: true});
 try {
   for (const count of [1, 3]) {
@@ -19,6 +21,7 @@ try {
       localStorage.setItem('species-public-settings', JSON.stringify({provider: 'gemini'}));
     }, key);
     let providerCalls = 0, prepareCalls = 0, resultCalls = 0, jsResponses = 0;
+    const bundleHashes=[];
     await context.route('**/*', async route => {
       const request = route.request(), url = new URL(request.url());
       if (url.origin === origin) {
@@ -50,7 +53,9 @@ try {
     });
     const page = await context.newPage();
     page.on('response', response => {
-      if(new URL(response.url()).pathname.startsWith('/api/gemini/') && response.headers()['x-preview-gemini-engine']==='javascript') jsResponses++;
+      if(new URL(response.url()).pathname.startsWith('/api/gemini/') && response.headers()['x-preview-gemini-engine']==='javascript'){
+        jsResponses++;bundleHashes.push(response.headers()['x-preview-bundle-sha256']);
+      }
     });
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
@@ -109,6 +114,7 @@ try {
     assert.ok(records[0].strict && records[0].taxonomy); assert.equal(records[0].date, '2026-10-09');
     assert.equal(providerCalls, 1); assert.equal(prepareCalls, 1); assert.equal(resultCalls, 1);
     assert.equal(jsResponses,2,'Gemini APIs did not use the native JS entrypoint');
+    assert.deepEqual(bundleHashes,[expectedDigest,expectedDigest],'Browser used a stale deployment');
     await context.close();
   }
   console.log('PASS: real browser 1/3 photos direct Gemini mock, real auth/quality/template/finish, metadata and all photos saved in isolated IndexedDB; zero external AI');

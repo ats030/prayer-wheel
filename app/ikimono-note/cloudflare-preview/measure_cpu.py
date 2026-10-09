@@ -87,7 +87,7 @@ def measure(samples, *, origin=ORIGIN, paths=PATHS, request_factory=None, wrangl
             # sanitization can transform opaque query markers; numeric sample
             # IDs and the allowlisted route are the correlation fields.
             sample = query.get("sample", [""])[0]
-            if url.path not in paths or not (sample.isdigit() or sample in {"-1", "-2", "-3", "-4", "-5"}):
+            if url.path not in (*paths, readiness_path) or not (sample.isdigit() or sample in {"-1", "-2", "-3", "-4", "-5"}):
                 continue
             # Reduce the event immediately: never retain credentials, logs,
             # cookies, client addresses, full exception traces, or arbitrary URLs.

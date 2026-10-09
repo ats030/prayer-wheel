@@ -4,11 +4,11 @@ URL: https://ikimono-note-preview.ats030.workers.dev
 
 ## JavaScript入口（2026-10-09）
 
-`front.jsonc` は同じ検証URLの入口です。`GET /api/me` だけをJavaScriptで返し、
+`front.jsonc` は同じ検証URLの入口です。`GET /api/me` とGemini直接経路の準備・結果APIをJavaScriptで返し、
 既存Python形式のセッションCookieを検証します。Googleの3設定による利用可否・未設定理由、
 セキュリティヘッダー、Basic認証・Host制限・D1必須条件を維持します。
 `IKIMONO_JS_SESSION` が `1` でなければ、このAPIもPythonへ引き継ぎます。
-Googleログイン、ログアウト、識別、記録などは固定のService Binding経由で既存Pythonへ渡します。
+Googleログイン、ログアウト、その他の識別経路、記録などは固定のService Binding経由で既存Pythonへ渡します。
 URL・要求本文・リダイレクト・複数のSet-Cookieを維持し、外部originへ秘密を転送しません。
 `backend.jsonc` のPython Workerは外部URLとpreview URLを無効にし、同じ検証用D1・固定鍵・Google戻り先を使います。
 新しいユーザーデータやセッション表を作りません。写真のnative transportは引き続きOFFです。
@@ -51,7 +51,7 @@ GoogleログインやDBのユーザー作成を行いません。最初のtail�
 runtime要求回数が1の場合だけ、そのruntimeの初回要求の証拠として扱います。
 本物の利用者Cookieや秘密値を測定JSONへ残しません。
 
-反映版は入口 `1aa67de5-bd31-4f88-8636-ba2d70260e2d`、非公開Pythonは
+セッションAPI導入時の版は入口 `1aa67de5-bd31-4f88-8636-ba2d70260e2d`、非公開Pythonは
 `712fe511-afdb-4ec6-95d1-533cfac7e677` です。公開URLの既存検査と実Python署名によるHTTP比較がPASSしました。
 未ログインの `/api/me` はCPU0〜1msで、runtime初回要求も1msでした。
 合成ログインは0〜2msでしたが、この条件のcold要求は未測定です。
@@ -235,16 +235,28 @@ origin制限関数を同じ順序で呼び、TrustedHostとFastAPIの終了処�
 縮約記録と比較条件は本番計測記録を参照してください。
 切戻し先は `851e9a73-87ad-4b96-9fd8-580ed77d8bf2` です。
 
-## Gemini直接送信の未公開実装（2026-10-09）
+## Gemini直接送信の保護付き検証版（2026-10-09）
 
-利用者の選択に従い、写真と本人のGeminiキーをブラウザからGoogleへ直接送る経路を実装した。サーバーへ送るのは品質・撮影情報とGemini応答だけ。写真1枚・3枚の実Chromium検証で、JavaScript入口の実行、元の表示処理、撮影情報と全写真のIndexedDB保存を確認した。外部Geminiは模擬応答で、実AI呼び出しはゼロ。
+利用者の選択に従い、写真と本人のGeminiキーをブラウザからGoogleへ直接送る経路を実装した。サーバーへ送るのは品質・撮影情報とGemini応答だけ。写真1枚・3枚の実Chromium検証をローカルと配備済みURLで行い、JavaScript入口の実行、元の表示処理、撮影情報と全写真のIndexedDB保存を確認した。外部Geminiは模擬応答で、実AI呼び出しはゼロ。
 
 `gemini-policy.py` は既存Pythonのプロンプト・モデル・スキーマ・品質条件・保護種データからポリシーを生成する。`gemini-core.mjs` は結果の正規化・分類照合・証拠判定を担当し、Pythonとの比較テストで検証する。生成設定の環境変数も引き継ぐ。新APIの品質レポートは既存ブラウザの `JSON.stringify` 形式に限定する。任意の非正規JSON入力との完全互換は保証しない。
 
 `gemini-handler.mjs` は認証済み要求の頻度制限、入力サイズと読取期限、分類照合の待機件数・期限を制限する。分類サービスへ渡すのは名前だけ。既存Google認証、写真品質判定、保存処理を維持する。Pl@ntNet併用、他AI、履歴の再識別は従来経路を使う。
 
-**未デプロイ**。`front.jsonc` の `IKIMONO_JS_GEMINI` と `backend.jsonc` の `IKIMONO_BROWSER_GEMINI` はともに0。既存公開版と保護付き検証版は変更していない。有効化には両方1としてバックエンド→入口の順にビルド・配備する。同時に公開日の検証版更新履歴を追記する。無効化は両方0として同じ順に配備する。
+**保護付き検証版へ反映済み**。`front.jsonc` の `IKIMONO_JS_GEMINI` と `backend.jsonc` の `IKIMONO_BROWSER_GEMINI` はともに1。最終入口版 `9c8561af-a754-4f14-ab9a-988bc7bb2c04`、非公開Python版 `420e3109-964d-4d4d-a206-fac1095f21c7`。認証・Google開始処理・Cookie互換・配信物の完全一致を公開URLで確認した。公開日の検証版更新履歴も同時配信した。既存の一般公開版は変更していない。無効化は両方0としてバックエンド→入口の順に配備する。
 
-`measure_gemini.py` は合成ログインと合成応答で、認証・品質・テンプレート・候補なし結果のCPUを測る準備済みスクリプト。まだ本番では実行していない。証跡は現在の版・ハッシュ・JavaScript実行ヘッダ・Python期待値を照合する。分類HTTP、実AI、Drive、初回CPU、メモリ、全工程の無料適合を証明するものではない。
+`measure_gemini.py` は合成ログインと合成応答で、認証・品質・テンプレート・候補なし結果のCPUを測る準備済みスクリプト。本番での[候補なし計測証跡](../docs/cloudflare-gemini-context-remote.json)は初回導入版 `e319b493-635e-4d33-9d29-acd6d21d852c` の全12件とhealth接続確認を取得した。準備CPU1〜4ms、結果CPU0〜2ms。版・JavaScript実行ヘッダ・Python期待応答のSHA一致を確認した。準備APIでruntime初回要求も3ms・4msを記録したが、全経路の初回性能を保証しない。証跡は現在の版・ハッシュ・JavaScript実行ヘッダ・Python期待値を照合する。分類HTTP、実AI、Drive、初回CPU、メモリ、全工程の無料適合を証明するものではない。
 
 先行バイナリ送信実験の完全18件は `../docs/cloudflare-binary-gemini-remote.json` に保存した。1枚CPU6〜11ms、3枚19〜35msで、写真をWorkerで処理する案は10ms条件を満たせなかった。測定版・ソースは証跡の値に限り、現在のアプリ全体の性能値ではない。診断Workerは測定後に公開URLを無効化し、外部404を確認した。
+
+### 分類取得の修正と残る条件
+
+導入済みworkerdでは `Request(..., {redirect:'error'})` が通信前にTypeErrorになることを実ランタイムで再現した。[workerdの実装](https://github.com/cloudflare/workerd/blob/main/src/workerd/api/http.c%2B%2B)にもfollow/manual以外を拒否する条件がある。分類取得をmanualへ変更し、3xxは既存の非成功応答条件で拒否・キャンセルする。`check_gemini_runtime.mjs` は導入済みMiniflare/workerdでこの処理を検証し、外部通信を行わない。
+
+実分類サービスは一部の照合にHTTP429を返した。最終版はこの時点で照合を中断し、HTTP429と待機時間を返す。ブラウザは結果を保存せずエラーを表示し、自動再試行しない。待機時間は数値Retry-Afterを1〜3600秒に制限し、不明なら60秒。既に検証したメモリキャッシュは使えるが、未取得の名前への再照合を同じisolateで停止する。全isolate共通の制限管理や永続キャッシュは実装していない。
+
+[分類照合の診断](../docs/cloudflare-gemini-taxonomy-diagnostic.json)は429停止前の版 `cb8cd66d-8aa8-4c35-b678-2d50c3dc102b`。全12件のログは取得したが、返る候補が変動してPython期待応答のSHAと一致せず、採用不可。合成候補3件を入力した結果APIでCPU13msも観測した。この値を無料適合の成功証拠にはしない。最終版の分類成功を含む全件CPU、最大応答、全経路の初回CPU・メモリ、実Gemini識別、Drive、旧記録・共有の移行は引き続き未確定。
+
+[GoogleへのCORS事前確認](../docs/cloudflare-gemini-cors.json)はHTTP200で、検証版origin・POST・content-type/x-goog-api-keyを許可した。OPTIONSだけで、キーも写真も送らず、モデルの存在や実生成は証明しない。
+
+最終検証は関連121pytest、JS入口/handler検査、実workerd検査、公開URLのcheck.py --oauth --edge、写真1枚・3枚の実Chromium・現行SHA・IndexedDB保存がPASS。Gemini応答は模擬値で実AI呼び出しゼロ。初期のmediumレビューは証跡リンクの指摘に対応済みだが、修正後のmedium自動レビューは利用上限で中断し未完了。最終差分は手動確認した。移行issueは未完了のまま。
