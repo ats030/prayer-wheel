@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {Buffer} from 'node:buffer';
 import {identify, validatePayload, jpegDimensions} from '../worker_transport.mjs';
+import {legacyValidate} from './legacy_payload_validator.mjs';
 
 // Node24 lacks the Workers API. The shim is only used in this test process.
 if (!Uint8Array.fromBase64) Uint8Array.fromBase64 = encoded => {
@@ -75,4 +76,64 @@ for (const fetcher of [async () => {throw new Error('private connection detail')
 }
 assert.deepEqual(jpegDimensions(Uint8Array.fromBase64(good)), [600, 450]);
 await validatePayload(validBlob, expected, 1);
+let comparisons = 0;
+const compare = async (text, count = 1, authoritative = expected) => {
+  const input = new Blob([text], {type: 'application/json'});
+  const accepted = async fn => {try {await fn(input, authoritative, count); return true;} catch {return false;}};
+  assert.equal(await accepted(validatePayload), await accepted(legacyValidate), 'Legacy acceptance changed at case ' + comparisons);
+  comparisons++;
+};
+for (const count of [1, 2, 3]) await compare(JSON.stringify(payloadFor(Array(count).fill(good))), count);
+await compare(JSON.stringify(payloadFor([large, large, large])), 3);
+for (const mutate of mutations) {const value = payloadFor([good]); mutate(value); await compare(JSON.stringify(value));}
+for (const value of [correct + ' ', ' ' + correct, correct.replace('"contents":', '"contents":[],"contents":'),
+  correct.replace('"data":', '"data":"ignored","data":'), correct.replace('image/jpeg', 'image\\/jpeg'),
+  correct.replace('"data":', '"data" :'), correct.replace('"inline_data":', '"other":{},"inline_data":')]) await compare(value);
+for (const encoded of [...badPhotos, '', '====', 'A===', good.slice(0, 4) + '=' + good.slice(5),
+  good.slice(0, 4) + ' ' + good.slice(5), good + '=', good.slice(0, -1), good.slice(0, 4) + '\\n' + good.slice(4)])
+  await compare(JSON.stringify(payloadFor([encoded])));
+const bytes = Buffer.from(good, 'base64');
+for (let i = 0; i < 128; i++) {
+  const value = Buffer.from(bytes); value[(i * 37) % Math.min(bytes.length, 1000)] ^= 1 << (i % 8);
+  await compare(JSON.stringify(payloadFor([value.toString('base64')])));
+}
+for (const length of [64000, 65000, 65340, 65400, 65500, 65520, 65530, 65534]) {
+  const value = Buffer.concat([bytes.subarray(0, 2), Buffer.from([255, 226, length >> 8, length & 255]),
+    Buffer.alloc(length - 2), bytes.subarray(2)]);
+  await compare(JSON.stringify(payloadFor([value.toString('base64')])));
+}
+for (const padding of [0, 1, 2]) {
+  const value = Buffer.concat([bytes.subarray(0, -2), Buffer.alloc(padding), bytes.subarray(-2)]).toString('base64');
+  await compare(JSON.stringify(payloadFor([value])));
+  if (value.endsWith('=')) {
+    const index = value.length - (value.endsWith('==') ? 3 : 2);
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    const altered = value.slice(0, index) + alphabet[alphabet.indexOf(value[index]) ^ 1] + value.slice(index + 1);
+    await compare(JSON.stringify(payloadFor([altered])));
+  }
+}
+// The authoritative prompt can itself contain strings resembling our frame marker.
+const nested = structuredClone(template); nested.contents[0].parts[0].text += '__ikimono_photo_parts__';
+const nestedWire = structuredClone(payloadFor([good])); nestedWire.contents[0].parts[nestedWire.contents[0].parts.length - 1] = nested.contents[0].parts[0];
+await compare(JSON.stringify(nestedWire), 1, JSON.stringify(nested));
+// A decoder must not silently remove a BOM inside the photo string.
+const largeBytes = Buffer.from(large, 'base64');
+const unpadded = Buffer.concat([largeBytes.subarray(0, -4), largeBytes.subarray(-2)]).toString('base64');
+assert.ok(!unpadded.endsWith('='));
+const bomPhoto = '\uFEFF' + unpadded.slice(0, 90000) + 'A' + unpadded.slice(90000);
+await compare(JSON.stringify(payloadFor([bomPhoto])));
+await assert.rejects(validatePayload(blob(payloadFor([bomPhoto])), expected, 1));
+// Intentional tightening: malformed UTF-8 must not become a matching U+FFFD.
+const replacement = structuredClone(template);
+replacement.contents[0].parts[0].text += '\uFFFD';
+const replacementWire = structuredClone(payloadFor([good]));
+replacementWire.contents[0].parts.at(-1).text = replacement.contents[0].parts[0].text;
+const malformed = Buffer.from(JSON.stringify(replacementWire));
+const replacementOffset = malformed.indexOf(Buffer.from('\uFFFD'));
+assert.ok(replacementOffset >= 0);
+const malformedBlob = new Blob([Buffer.concat([malformed.subarray(0, replacementOffset),
+  Buffer.from([255]), malformed.subarray(replacementOffset + 3)])], {type: 'application/json'});
+await legacyValidate(malformedBlob, JSON.stringify(replacement), 1);
+await assert.rejects(validatePayload(malformedBlob, JSON.stringify(replacement), 1));
+console.log('PASS: ' + comparisons + ' legacy/new acceptance comparisons, base64 bits/padding and 64KiB JPEG boundary');
 console.log('PASS: 1/3-photo wire parity, fixed endpoint, prompt/config/photo tamper rejection, provider status/output bounds');

@@ -33,3 +33,4 @@ def test_native_transport_boundary_and_byte_parity():
         input=json.dumps(cases), text=True, capture_output=True, timeout=30)
     assert result.returncode == 0, result.stderr
     assert 'PASS:' in result.stdout
+    assert 'legacy/new acceptance comparisons' in result.stdout

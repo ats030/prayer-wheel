@@ -3,9 +3,13 @@ const MAX_PHOTO = 2 * 1024 * 1024;
 export const MAX_WIRE = 3 * Math.ceil(MAX_PHOTO / 3) * 4 + 32768;
 
 export function jpegDimensions(raw) {
+  return jpegHeaderDimensions(raw, raw.length, raw);
+}
+
+function jpegHeaderDimensions(raw, totalLength, tail) {
   const invalid = () => {throw new TypeError('photo');};
-  if (!raw.length || raw.length > MAX_PHOTO || raw[0] !== 255 || raw[1] !== 216 ||
-      raw.at(-2) !== 255 || raw.at(-1) !== 217) invalid();
+  if (!raw.length || totalLength > MAX_PHOTO || raw[0] !== 255 || raw[1] !== 216 ||
+      tail.at(-2) !== 255 || tail.at(-1) !== 217) invalid();
   let cursor = 2, dimensions;
   const word = offset => (raw[offset] << 8) | raw[offset + 1];
   for (let index = 0; index < 128; index++) {
@@ -33,24 +37,48 @@ export function jpegDimensions(raw) {
 export async function validatePayload(blob, expectedJSON, count) {
   if (!(blob instanceof Blob) || blob.type !== 'application/json' || !blob.size || blob.size > MAX_WIRE ||
       !Number.isInteger(count) || count < 1 || count > 3) throw new TypeError('template');
-  const wire = await blob.text();
-  const payload = JSON.parse(wire), expected = JSON.parse(expectedJSON);
-  // Canonical browser JSON excludes duplicate keys and ambiguous encodings.
-  if (JSON.stringify(payload) !== wire) throw new TypeError('template');
-  const parts = payload.contents?.[0]?.parts;
-  if (!Array.isArray(parts) || parts.length !== count + 1) throw new TypeError('template');
-  for (const part of parts.slice(0, count)) {
-    if (Object.keys(part).join() !== 'inline_data' ||
-        Object.keys(part.inline_data).join() !== 'mime_type,data' ||
-        part.inline_data.mime_type !== 'image/jpeg') throw new TypeError('photo');
-    const encoded = part.inline_data.data;
-    if (typeof encoded !== 'string' || !encoded.length || encoded.length > Math.ceil(MAX_PHOTO / 3) * 4 ||
-        encoded.length % 4 !== 0 || /[^A-Za-z0-9+/=]/.test(encoded)) throw new TypeError('photo');
-    const raw = Uint8Array.fromBase64(encoded, {lastChunkHandling: 'strict'});
-    jpegDimensions(raw);
+  const expected = JSON.parse(expectedJSON);
+  const parts = expected.contents?.[0]?.parts;
+  if (!Array.isArray(parts) || parts.length !== 1) throw new TypeError('template');
+  // A unique marker locates this exact parts value even if the prompt contains
+  // JSON fragments. Only the small authoritative template is parsed/generated.
+  const canonical = JSON.stringify(expected);
+  let marker = '__ikimono_photo_parts__';
+  while (canonical.includes(marker)) marker += '_';
+  expected.contents[0].parts = marker;
+  const frame = JSON.stringify(expected), token = JSON.stringify(marker);
+  const offset = frame.indexOf(token);
+  const prefix = frame.slice(0, offset) + '[';
+  const suffix = ',' + JSON.stringify(parts[0]) + ']' + frame.slice(offset + token.length);
+  // Separate ASCII photos from the small Unicode template. Do not widen every
+  // photo character into one multi-MB UTF-16 string or schedule per-chunk work.
+  const raw = new Uint8Array(await blob.arrayBuffer()), encoder = new TextEncoder();
+  // Preserve BOM bytes as U+FEFF so canonical/ASCII checks can reject them.
+  const decoder = new TextDecoder('utf-8', {fatal: true, ignoreBOM: true});
+  let cursor = 0;
+  const consume = text => {
+    const length = encoder.encode(text).length;
+    if (cursor + length > raw.length || decoder.decode(raw.subarray(cursor, cursor + length)) !== text) throw new TypeError('template');
+    cursor += length;
+  };
+  consume(prefix);
+  for (let index = 0; index < count; index++) {
+    if (index) consume(',');
+    consume('{"inline_data":{"mime_type":"image/jpeg","data":"');
+    const end = raw.indexOf(34, cursor), length = end - cursor;
+    if (end < 0 || !length || length > Math.ceil(MAX_PHOTO / 3) * 4 || length % 4) throw new TypeError('photo');
+    const encoded = decoder.decode(raw.subarray(cursor, end));
+    if (/[^A-Za-z0-9+/=]/.test(encoded)) throw new TypeError('photo');
+    const equals = encoded.indexOf('=');
+    if (equals !== -1 && (equals < length - 2 || !/^={1,2}$/.test(encoded.slice(equals)))) throw new TypeError('photo');
+    const padding = equals === -1 ? 0 : length - equals;
+    // Strict final chunks validate padding/unused bits and both EOI bytes.
+    jpegHeaderDimensions(Uint8Array.fromBase64(encoded.slice(0, Math.ceil(65536 / 3) * 4), {lastChunkHandling: 'strict'}),
+      length / 4 * 3 - padding, Uint8Array.fromBase64(encoded.slice(-8), {lastChunkHandling: 'strict'}));
+    cursor = end; consume('"}}');
   }
-  payload.contents[0].parts = [parts[count]];
-  if (JSON.stringify(payload) !== JSON.stringify(expected)) throw new TypeError('template');
+  if (raw.length - cursor !== encoder.encode(suffix).length) throw new TypeError('template');
+  consume(suffix);
 }
 
 export async function identify(blob, expectedJSON, count, model, key, fetcher = fetch) {

@@ -526,3 +526,45 @@ shutdown occurred. Internal connectivity uses the existing Workers service;
 conditional Free plan and remaining quota obligations. Service splitting does
 not establish Free compliance. `ats030-paskw` remains in_progress for the photo
 validation cost, full auth/identify/storage paths, memory/quota and full migration.
+
+## Native photo validation candidate, 2026-10-09 (not enabled)
+
+The unpublished `worker_transport.mjs` candidate removes whole uploaded JSON
+parse/stringify and whole-photo Base64 decoding. It validates the exact canonical
+frame against the authoritative template, checks all Base64 characters/padding,
+and strictly decodes the JPEG header and tail. Count/size/dimensions/metadata,
+prompt/config and fixed provider boundaries remain tested. Invalid UTF-8 is
+intentionally rejected instead of silently matching a replacement character.
+An independent frozen legacy validator provides differential acceptance tests;
+targeted maximum-size, unused-bit, JPEG boundary and malformed-UTF8 tests pass.
+The related Python/JS regression suite passes92 tests. Actual Workers rejection
+checks pass without provider calls.
+
+[Pre-BOM-fix candidate evidence](cloudflare-native-validation-ascii-remote.json)
+captures18/18 plus readiness, allHTTP200/no exceptions/current source hashes and
+monotonic runtime sequences. One-photo CPU was9,10,15,8,10,9ms; three-photo
+CPU51,23,31,33,34,25ms. All runtime invocations exceed1: no cold or memory proof.
+This still exceeds10ms before Python auth/quality, multipart, AI, postprocessing
+or persistence. Native identify remainsOFF; the existing gateway/backend were
+not redeployed. This is an experiment, not a Free-compatible release.
+
+An [earlier whole-string candidate](cloudflare-native-validation-string-remote.json) observed7–13ms /18–43ms; the current candidate
+is not established as fastest. A chunked-stream candidate was slower and had
+incomplete tail evidence, so it was abandoned. The current candidate's first
+run also missed one health trace; only the complete retry above supports its
+CPU claim. Earlier measurements use different runtimes and do not establish
+causal CPU allocation. Local resource reload briefly read an incomplete generated
+file; stopping dev before building resolves the immediate failure. Atomic output
+replacement is tracked separately as `ats030-l7vhn`.
+
+No real AI, user-data migration, paid plan, public switch or old-service shutdown
+occurred. Operator diagnostics and the disabled unpublished path are changelog
+exempt. Remaining candidate selection/review and full migration stay on
+`ats030-paskw`; do not enable this path on the strength of validation-only CPU.
+Medium review found that TextDecoder stripped a photo-leading BOM, allowing a
+noncanonical input. `ignoreBOM:true` now preserves it for rejection; an explicit
+attack test and the92-test suite pass. Final source CPU was not remeasured;
+the saved evidence is tied to the pre-fix source hash, not the final source.
+Temporary diagnostic shutdown version `6f893e64-ee34-4de9-9b1f-5fbff8af5d8a`
+has workers_dev/preview_urls false; external404 verified. Local dev was stopped
+and the temporary0600 secrets file deleted.
