@@ -455,3 +455,74 @@ the temporary0600 secret file was removed. `workers_dev:false` and
 no user-visible changelog. Remaining `ats030-paskw` work includes a real JS
 entrypoint preserving Basic/Host/DB/config boundaries, cold/full auth accounting,
 and the previously identified photo validation cost.
+
+## Real preview JS session entrypoint, 2026-10-09
+
+The existing protected URL now uses `cloudflare-preview/front.jsonc` and
+`edge.mjs`. Only `GET /api/me` bypasses Python, behind `IKIMONO_JS_SESSION=1`.
+Basic authentication, URL/header Host allowlist, fixed session key, required
+D1/backend bindings, original3-setting Google availability/reasons, API security
+headers and existing signed session format are retained. All other requests use
+one fixed HTTP Service Binding to `ikimono-note-preview-backend`, preserving the
+original public URL, headers, stream, redirects and repeated Set-Cookie. Google
+callbacks/logout remain Python and keep the same origin/key/database. Native
+photo transport remains OFF. The private backend has no workers.dev/preview URL
+or route; external health returned404. The earlier diagnostic also remains404.
+
+Active gateway: `1aa67de5-bd31-4f88-8636-ba2d70260e2d`; private Python:
+`712fe511-afdb-4ec6-95d1-533cfac7e677`. Gateway bundle SHA:
+`68ee29c8e8e5f63245f464a50506edeffcbf5e2edf7033fd8863816871bc3ed9`.
+The gateway digest incorporates its source, shared session verifier, generated
+security policy and intended Python bundle. `/health` verifies the actual Python
+bundle before stamping gateway identity and returns503 for a stale backend.
+`check.py --oauth --edge` verified both bundle identities plus original protected
+pages/assets/source archives/settings/upload/OAuth-start contracts on the actual
+URL. `/changelog` contains the dated session-status change. Actual Google login
+was not repeated in this turn; no new OAuth configuration or user migration was
+performed. The old production/local app remains unchanged.
+
+Gateway tail accounting,18/18 plus readiness per run, allHTTP200/no exceptions,
+current bundle/response hashes and monotonic runtime sequences:
+
+- [Signed out](cloudflare-edge-session-out.json): `/api/me` CPU0,1,0,0,0,0ms.
+  The readiness request was `/api/me` with runtime invocation1 and1ms CPU;
+  two additional recorded session requests also had invocation1 (1ms and0ms).
+  This demonstrates first requests for those observed gateway runtimes, not a
+  universal cold-start guarantee or Python cold accounting.
+- [Synthetic signed in](cloudflare-edge-session-in.json): `/api/me`
+  CPU2,1,0,0,1,1ms; readiness1ms with invocation10. No cold signed-in proof.
+  The short-lived synthetic cookie was generated in memory using the existing
+  preview key and sent only to `/api/me`; it never created or queried a DB user.
+- [Default collector regression](cloudflare-edge-collector-regression.json):
+  unchanged CLI captured8/8 plus readiness successfully. Its default readiness
+  remains `/health`; the new optional readiness path does not alter old callers.
+
+Frontend CPU does not establish fallback CPU. A separate tail of the private
+Python service, with requests still sent through the real gateway, captured
+12/12 plus readiness, allHTTP200/no exceptions/current gateway+Python hashes:
+[backend accounting](cloudflare-edge-backend.json). Its health CPU was
+4,5,4,4,8,4ms; assets3,6,3,4,4,3ms; readiness9ms. The trace version is the
+private backend, but response runtime IDs/counts belong to the gateway. Those
+counts cannot prove Python cold behavior. These are separate request sets and
+must not be added sample-by-sample or used to causally allocate the earlier28ms
+Python measurement. Google OAuth, authenticated DB reads/writes, actual AI,
+photo handling, postprocessing, persistent metrics and memory remain unproven.
+
+Validation: local real JS/Python multi-worker check PASS; original Python
+session-forgery pytest1PASS; actual Python sign/read differential PASS; real local
+and remote HTTP comparison for UTF-8/signed-in/out/tamper/expiry PASS; JS boundary
+tests cover Basic/Host/DB/backend/flag/config, zero Python calls for session API,
+proxy body/redirect/repeated cookies and stale-backend rejection. Medium reviews
+identified missing backend build, missing backend provenance validation and a
+redirect-following credential risk in the test helper; all were fixed. Generated
+output caused a dev rebuild loop; source-only custom-build watchers fixed it,
+and local checks passed again. Local dev was stopped before final deployment.
+
+Rollback is the retained `wrangler.jsonc` Python entrypoint: rebuild and deploy
+with the same preview secrets, then run ordinary `check.py --oauth`. No paid
+plan/add-on, real AI fee, user-data migration, general public switch or old-app
+shutdown occurred. Internal connectivity uses the existing Workers service;
+[cost/terms review](tool-license-cloudflare-service-binding.yaml) records the
+conditional Free plan and remaining quota obligations. Service splitting does
+not establish Free compliance. `ats030-paskw` remains in_progress for the photo
+validation cost, full auth/identify/storage paths, memory/quota and full migration.

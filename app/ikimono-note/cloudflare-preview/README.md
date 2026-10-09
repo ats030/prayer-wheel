@@ -2,6 +2,68 @@
 
 URL: https://ikimono-note-preview.ats030.workers.dev
 
+## JavaScript入口（2026-10-09）
+
+`front.jsonc` は同じ検証URLの入口です。`GET /api/me` だけをJavaScriptで返し、
+既存Python形式のセッションCookieを検証します。Googleの3設定による利用可否・未設定理由、
+セキュリティヘッダー、Basic認証・Host制限・D1必須条件を維持します。
+`IKIMONO_JS_SESSION` が `1` でなければ、このAPIもPythonへ引き継ぎます。
+Googleログイン、ログアウト、識別、記録などは固定のService Binding経由で既存Pythonへ渡します。
+URL・要求本文・リダイレクト・複数のSet-Cookieを維持し、外部originへ秘密を転送しません。
+`backend.jsonc` のPython Workerは外部URLとpreview URLを無効にし、同じ検証用D1・固定鍵・Google戻り先を使います。
+新しいユーザーデータやセッション表を作りません。写真のnative transportは引き続きOFFです。
+
+入口のbundle SHAにはPythonの意図した版も含めます。`/health` は実バックエンドのSHAと比較し、
+異なる場合は503で止めます。成功時の `X-Preview-Backend-Bundle-SHA256` が実バックエンド版です。
+通常応答にはruntime識別子を出さず、CPU測定の明示的マーカーがある要求だけに付けます。
+JS入口の署名検証が軽くても、Pythonへ渡す要求のCPUは残ります。無料適合は要求全体で確認します。
+
+ローカルでは以下を使います。ソースや生成物を手でビルドし直すときは先にdevを停止してください。
+生成物をcustom buildで再監視しないよう、監視対象は入口・ビルドスクリプトなどのソースに限定しています。
+他のPythonモジュールを変更した場合は手動再ビルドしてdevを再起動します。
+
+```sh
+python3 edge-build.py
+node check_edge.mjs
+python3 run_wrangler.py dev --config front.jsonc --config backend.jsonc --port 8795
+python3 check.py --oauth --edge
+/home/ats030/.venv/bin/python check_me.py
+```
+
+保護された検証版への反映はバックエンドを先に行います。両方が独立してビルドします。
+既存の固定秘密ファイルを使い、値を表示・Git保存しません。
+
+```sh
+python3 run_wrangler.py deploy --config backend.jsonc --secrets-file /home/ats030/.local/state/ikimono-cloudflare-preview/secrets.json
+python3 run_wrangler.py deploy --config front.jsonc --secrets-file /home/ats030/.local/state/ikimono-cloudflare-preview/secrets.json
+python3 check.py https://ikimono-note-preview.ats030.workers.dev --oauth --edge
+/home/ats030/.venv/bin/python check_me.py https://ikimono-note-preview.ats030.workers.dev
+```
+
+従来のPython入口へ戻す場合は `python3 build.py` の後、同じ秘密ファイルで
+`python3 run_wrangler.py deploy --config wrangler.jsonc --secrets-file /home/ats030/.local/state/ikimono-cloudflare-preview/secrets.json`
+を実行し、`check.py` を `--edge` なしで確認します。非公開バックエンドは外部から使えないままです。
+
+本番CPUは `python3 measure_edge.py --output /tmp/edge-out.json` と
+`python3 measure_edge.py --signed-in --output /tmp/edge-in.json` で測ります。
+後者は検証用の既存鍵で短命な合成Cookieをメモリ内に作り、`/api/me` だけに渡します。
+GoogleログインやDBのユーザー作成を行いません。最初のtail確認も `/api/me` で行い、
+runtime要求回数が1の場合だけ、そのruntimeの初回要求の証拠として扱います。
+本物の利用者Cookieや秘密値を測定JSONへ残しません。
+
+反映版は入口 `1aa67de5-bd31-4f88-8636-ba2d70260e2d`、非公開Pythonは
+`712fe511-afdb-4ec6-95d1-533cfac7e677` です。公開URLの既存検査と実Python署名によるHTTP比較がPASSしました。
+未ログインの `/api/me` はCPU0〜1msで、runtime初回要求も1msでした。
+合成ログインは0〜2msでしたが、この条件のcold要求は未測定です。
+このCPUは入口の値です。Python経由の要求については
+`python3 measure_edge.py --backend --output /tmp/edge-backend.json` で別にtailを記録します。
+別測定のPython側はhealth4〜8ms、静的ファイル3〜6msで、tail確認要求は9msでした。
+応答のruntime回数は入口に属するため、Python側のcold証明には使いません。
+前後の異なる測定・runtimeの差を特定処理の寄与と断定せず、全経路の無料適合も未完了です。
+[本番計測記録](../docs/cloudflare-preview-production-evidence.md)に範囲と縮約証拠を保存しています。
+
+以下は導入までの過去の検証記録と、従来Python単体での再現手順です。
+
 全要求にBasic認証を要求します。ユーザー名は `preview`、秘密は
 `~/.local/state/ikimono-cloudflare-preview/access.txt`（0600）に保存しています。
 公開originから別originへ認証を転送する処理はありません。

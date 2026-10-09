@@ -1,0 +1,26 @@
+tool: Existing Cloudflare Workers HTTP Service Binding for private Python fallback
+plan_or_version: Workers Free; existing D1 Free; Wrangler 4.149.0
+reviewed_at: 2026-10-09
+status: conditional
+cost:
+  condition: Keep the existing Workers Free account; no upgrade or paid add-on.
+  limits: Existing Free daily request and CPU quotas remain applicable.
+  failure: Stop at Free limits; service splitting does not establish full-app CPU compliance.
+  service_binding: Official overview describes a zero-cost abstraction; pricing totals CPU across the call chain on Standard. Do not treat worker splitting as quota circumvention or assume a Free-specific accounting allocation.
+license:
+  commercial_use: Existing self-serve agreement permits entity use subject to service terms; no new software licence or redistributable library.
+  spdx: not-applicable-hosted-service
+  attribution: No new bundled library or asset; existing notices retained.
+  restrictions: Follow self-serve and service-specific terms; no service resale, prohibited content or quota evasion.
+conditions:
+  - Python backend workers_dev and preview_urls are false, no routes.
+  - Same Basic password, session key, public origin and preview D1; no user-data migration.
+  - Gate every gateway route with Basic, allowed Host and required runtime bindings.
+  - Preserve request body, redirect and repeated Set-Cookie through the fixed service binding.
+  - Measure both gateway and fallback paths; retain original Python rollback config.
+adoption: approved_for_existing_owner_only_protected_preview_under_recorded_conditions
+sources:
+  - https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/
+  - https://developers.cloudflare.com/workers/platform/pricing/
+  - https://www.cloudflare.com/terms/
+  - https://www.cloudflare.com/service-specific-terms-application-services/

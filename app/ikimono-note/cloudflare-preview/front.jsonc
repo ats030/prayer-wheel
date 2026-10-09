@@ -1,0 +1,16 @@
+{
+  "name": "ikimono-note-preview",
+  "main": "edge.mjs",
+  "compatibility_date": "2026-10-08",
+  "workers_dev": true,
+  "preview_urls": false,
+  "build": {"command": "python3 edge-build.py", "watch_dir": ["edge.mjs", "edge-build.py", "changelog.html", "../worker_session.mjs"]},
+  "services": [{"binding": "PYTHON", "service": "ikimono-note-preview-backend"}],
+  "vars": {
+    "IKIMONO_JS_SESSION": "1",
+    "IKIMONO_ALLOWED_HOSTS": "ikimono-note-preview.ats030.workers.dev,localhost,127.0.0.1",
+    "IKIMONO_PUBLIC_ORIGIN": "https://ikimono-note-preview.ats030.workers.dev"
+  },
+  "d1_databases": [{"binding": "DB", "database_name": "ikimono-note-preview",
+    "database_id": "779b52d2-66f6-4f29-8a4b-7f268fdc85d9"}]
+}

@@ -6,6 +6,8 @@ python_modules
 .dev.vars
 secrets.json
 deployment-check.json
+_edge_policy.mjs
+edge-manifest.json
 manifest.json
 pyproject.toml
 pylock.toml

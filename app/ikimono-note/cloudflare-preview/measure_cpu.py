@@ -51,7 +51,7 @@ def valid_sequence(rows):
     return True
 
 
-def measure(samples, *, origin=ORIGIN, paths=PATHS, request_factory=None, wrangler_config=None):
+def measure(samples, *, origin=ORIGIN, paths=PATHS, request_factory=None, wrangler_config=None, readiness_path="/health"):
     started = datetime.now(timezone.utc).isoformat()
     state = json.loads((Path.home() / ".local/state/ikimono-cloudflare-preview/secrets.json").read_text())
     credential = "Basic " + base64.b64encode(
@@ -124,6 +124,8 @@ def measure(samples, *, origin=ORIGIN, paths=PATHS, request_factory=None, wrangl
                 body = response.read()
                 invocation = response.headers.get("X-Preview-Isolate-Invocation", "")
                 return {**{key: response.headers[header] for key, header in (
+                            ("preview_bundle_sha256", "X-Preview-Bundle-SHA256"),
+                            ("preview_backend_bundle_sha256", "X-Preview-Backend-Bundle-SHA256"),
                             ("session_source_sha256", "X-Session-Source-SHA256"),
                             ("transport_source_sha256", "X-Transport-Source-SHA256"),
                             ("transport_wrapper_sha256", "X-Transport-Wrapper-SHA256"),
@@ -144,7 +146,7 @@ def measure(samples, *, origin=ORIGIN, paths=PATHS, request_factory=None, wrangl
         subscription_probe = None
         for attempt in range(5):
             probe_sample = str(-1 - attempt)
-            probe_response = fetch("/health", probe_sample)
+            probe_response = fetch(readiness_path, probe_sample)
             readiness_deadline = time.monotonic() + 3
             while time.monotonic() < readiness_deadline:
                 try:

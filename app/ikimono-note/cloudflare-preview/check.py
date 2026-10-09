@@ -17,7 +17,7 @@ class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, request, response, code, message, headers, new_url):
         return None
 
-def check(origin, oauth_enabled=False):
+def check(origin, oauth_enabled=False, edge=False):
     secrets = json.loads(STATE.read_text())
     password = secrets["IKIMONO_PREVIEW_PASSWORD"]
     client_id = secrets.get("IKIMONO_GOOGLE_CLIENT_ID", "")
@@ -50,7 +50,10 @@ def check(origin, oauth_enabled=False):
     exec((HERE / "src/_resources.py").read_text(), namespace)
     status, body, headers = fetch("/health")
     assert status == 200, (status, body[:100])
-    assert headers["X-Preview-Bundle-SHA256"] == namespace["BUNDLE_SHA256"]
+    expected_digest = json.loads((HERE / 'edge-manifest.json').read_text())['bundle_sha256'] if edge else namespace['BUNDLE_SHA256']
+    assert headers["X-Preview-Bundle-SHA256"] == expected_digest
+    if edge:
+        assert headers['X-Preview-Backend-Bundle-SHA256'] == namespace['BUNDLE_SHA256'], 'Backend release mismatch'
     assert "noindex" in headers["X-Robots-Tag"]
     for name in ("X-Preview-Isolate", "X-Preview-Isolate-Invocation"):
         assert name not in headers, "Ordinary response exposed operator observation"
@@ -176,5 +179,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("origin", nargs="?", default="http://127.0.0.1:8795")
     parser.add_argument("--oauth", action="store_true", help="Expect configured Google login (does not sign in)")
+    parser.add_argument("--edge", action="store_true", help="Expect JS gateway bundle identity")
     args = parser.parse_args()
-    check(args.origin, args.oauth)
+    check(args.origin, args.oauth, args.edge)

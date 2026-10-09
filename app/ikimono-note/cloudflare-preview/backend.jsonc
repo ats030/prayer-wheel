@@ -1,0 +1,19 @@
+{
+  "name": "ikimono-note-preview-backend",
+  "main": "src/worker.py",
+  "base_dir": "src",
+  "compatibility_date": "2026-10-08",
+  "compatibility_flags": ["python_workers"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "build": {"command": "python3 build.py", "watch_dir": ["src/worker.py", "changelog.html"]},
+  "rules": [{"type": "ESModule", "globs": ["**/*.mjs"]}],
+  "assets": {"directory": "assets", "binding": "ASSETS", "run_worker_first": true},
+  "vars": {
+    "IKIMONO_ALLOWED_HOSTS": "ikimono-note-preview.ats030.workers.dev,localhost,127.0.0.1",
+    "IKIMONO_PUBLIC_ORIGIN": "https://ikimono-note-preview.ats030.workers.dev"
+  },
+  "d1_databases": [{"binding": "DB", "database_name": "ikimono-note-preview",
+    "database_id": "779b52d2-66f6-4f29-8a4b-7f268fdc85d9",
+    "migrations_dir": "../cloudflare/migrations"}]
+}
