@@ -25,7 +25,7 @@ try {
   let releaseFetch, calls=0;
   const fetcher=async(url,options)=>{
     calls++;assert.equal(new URL(url).origin,'https://api.inaturalist.org');
-    assert.deepEqual(Object.keys(options.headers),['User-Agent']);assert.equal(options.redirect,'error');
+    assert.deepEqual(Object.keys(options.headers),['User-Agent']);assert.equal(options.redirect,'manual');
     if(calls===1) await new Promise(resolve=>{releaseFetch=resolve;});
     return Response.json({results:[]});
   };
@@ -41,3 +41,18 @@ try {
   assert.deepEqual(await lookupTaxon('Synthetic first',async()=>assert.fail('Cache miss')),[]);
 } finally {globalThis.setTimeout=originalTimer;}
 console.log('PASS: runtime generation overrides, chunked byte bounds, stalled-body cancel/deadline, bounded taxonomy queue/wait and names-only HTTP');
+
+let quotaCalls=0,quotaCanceled=false;
+await assert.rejects(lookupTaxon('Synthetic quota',async()=>{
+  quotaCalls++;
+  return new Response(new ReadableStream({cancel(){quotaCanceled=true;}}),{status:429,headers:{'Retry-After':'120'}});
+}),error=>error.status===429&&error.retryAfter===120);
+await assert.rejects(lookupTaxon('Synthetic next',async()=>{quotaCalls++;assert.fail('Retried taxonomy after429');}),error=>error.status===429);
+assert.equal(quotaCalls,1);assert.ok(quotaCanceled);
+const {InputError}=await import('./gemini-core.mjs');
+const quotaError=new InputError('Synthetic limit',429);quotaError.retryAfter=120;
+const output=await handleGemini(request(JSON.stringify({...JSON.parse(body),reply:JSON.stringify({candidates:[{content:{parts:[{
+  text:JSON.stringify({category:'動物',candidates:[{common_name_ja:'合成候補',scientific_name:'Synthetic taxon'}]})}]}}]})}),
+  '192.0.2.55'),'/api/gemini/result',()=>{throw quotaError;});
+assert.equal(output.status,429);assert.equal(output.headers.get('Retry-After'),'120');
+console.log('PASS: taxonomy429 stops further HTTP, cancels body, bounded isolate cooldown, explicit result429/Retry-After');
