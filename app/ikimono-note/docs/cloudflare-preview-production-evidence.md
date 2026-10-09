@@ -664,3 +664,38 @@ This changes operator tooling only, with no app behavior or deployment change;
 the user-facing changelog is exempt. Remaining work is cold/uncached and maximum
 input CPU/memory, the other Python paths, daily limits, old records/shares and
 complete migration. The old service and protected-preview deployment remain.
+
+## Accepted reply-size stress comparison — 2026-10-10 JST
+
+Current gateway version and source are unchanged from the preceding section.
+The collector adds an ignored ASCII `probe_padding` field to the synthetic
+three-candidate Gemini envelope, preserving all identification content. The
+exact UTF-8 envelope size is measured, not the size of a real Gemini response.
+Both runs obtained4/4 traces plus readiness, allHTTP200, JS execution and exact
+Python response hash matches. These are valid CPU observations, not Free-fit
+verdicts. No AI, real photos, keys, Drive or database writes were used.
+
+| Synthetic reply | Prepare CPU | Result CPU | Evidence |
+| --- | --- | --- | --- |
+| 2MiB, existing accepted upper bound | 2/1ms | 66/62ms | [Maximum](cloudflare-gemini-max-reply-cpu.json) |
+| 128KiB | 2/1ms | 4/3ms | [Comparison](cloudflare-gemini-128k-reply-cpu.json) |
+
+Invocation counts exceed1 throughout. Names may use cached classification;
+these runs do not establish cold or uncached performance, peak memory, or the
+size distribution of real provider responses. Separate runtime/sample sizes
+do not prove an exact allocation of CPU to parsing, copying or normalization.
+They do establish that the existing accepted maximum consumes far more than
+the Free10ms budget despite producing the same verified candidate result.
+
+The browser currently forwards the entire provider response, while the result
+parser uses the first candidate's finishReason and content.parts. A next bounded
+design review should consider removing unused provider fields before forwarding
+and validating a bounded result envelope. Do not silently cut identification
+text, lower the existing32768-token generation setting, or treat128KiB as a
+proven safe new limit. Actual text/escape sizes, compatibility, failure handling
+and uncached/cold CPU need evidence before changing that input contract.
+
+Measurement tests7 passed and medium review found no actionable issue. This
+is operator tooling/evidence only; no app deployment or user-visible change,
+so the changelog is exempt. Maximum-input Free compatibility remains unresolved
+on `ats030-paskw`; public migration and the old-service shutdown remain pending.

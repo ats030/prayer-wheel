@@ -262,6 +262,10 @@ origin制限関数を同じ順序で呼び、TrustedHostとFastAPIの終了処�
 準備1〜2ms、結果3msでしたが、runtime初回要求・写真処理・Drive・全経路の無料適合は未検証です。
 計測側は実iNaturalist/GBIFの各組合せから期待応答のSHAを作り、異なる出典による誤判定を避けます。
 欠測・版違い・その他の応答不一致は採用しません。失敗した先行2回と13msの観測も本番計測記録に残しています。
+`--reply-bytes 2097152` で現行2MiB上限まで合成応答を増やした実測は結果62〜66ms、
+`--reply-bytes 131072` の128KiB比較は3〜4msでした。両方とも全ログ・期待応答一致を確認済みです。
+これは未使用フィールドを含む合成負荷です。初回・未キャッシュ・実応答の分布は未確認で、
+新しい上限を決める根拠や全面無料適合とはしません。詳細は本番計測記録を参照してください。
 
 導入済みworkerdでは `Request(..., {redirect:'error'})` が通信前にTypeErrorになることを実ランタイムで再現した。[workerdの実装](https://github.com/cloudflare/workerd/blob/main/src/workerd/api/http.c%2B%2B)にもfollow/manual以外を拒否する条件がある。分類取得をmanualへ変更し、3xxは既存の非成功応答条件で拒否・キャンセルする。`check_gemini_runtime.mjs` は導入済みMiniflare/workerdでこの処理を検証し、外部通信を行わない。
 

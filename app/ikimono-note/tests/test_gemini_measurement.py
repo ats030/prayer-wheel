@@ -62,6 +62,16 @@ def test_missing_trace_is_retained_and_ineligible(collector,monkeypatch):
     assert stored["provenance_verified"] is False and stored["eligible_for_success_cpu_comparison"] is False
 
 
+def test_sized_reply_preserves_content_and_exact_utf8_bound(collector):
+    module,_,_=collector
+    original={'candidates':[{'content':{'parts':[{'text':'日本語'}]}}]}
+    padded=module.sized_reply(original,2*1024*1024)
+    assert len(json.dumps(padded,ensure_ascii=False,separators=(',',':')).encode())==2*1024*1024
+    assert padded['candidates']==original['candidates'] and 'probe_padding' not in original
+    for size in [1,2*1024*1024+1]:
+        with pytest.raises(ValueError):module.sized_reply(original,size)
+
+
 @pytest.mark.parametrize("failure",["engine","body","gateway","backend"])
 def test_mismatched_provenance_never_persists_eligible(collector,monkeypatch,failure):
     module,tmp_path,hashes=collector

@@ -43,7 +43,19 @@ def taxonomy_references(reply, model, metadata, quality, names):
     return references
 
 
-def collect(samples,output,case="empty"):
+def sized_reply(reply, target_bytes=0):
+    """Stress the accepted reply bound without altering identification content."""
+    data=copy.deepcopy(reply)
+    if target_bytes:
+        data['probe_padding']=''
+        size=len(json.dumps(data,ensure_ascii=False,separators=(',',':')).encode())
+        if target_bytes<size or target_bytes>2*1024*1024:
+            raise ValueError('Reply size must fit the existing 2MiB bound')
+        data['probe_padding']='x'*(target_bytes-size)
+    return data
+
+
+def collect(samples,output,case="empty",reply_bytes=0):
     state=json.loads((Path.home()/'.local/state/ikimono-cloudflare-preview/secrets.json').read_text())
     encode=lambda value:base64.urlsafe_b64encode(value).decode().rstrip('=')
     session=encode(json.dumps({'sub':'synthetic-gemini-cpu','email':'synthetic@example.invalid','exp':int(time.time())+300}).encode())
@@ -61,6 +73,7 @@ def collect(samples,output,case="empty"):
              'contradictions':[],'sex':'判別不能','sex_evidence':[],'uncertainty':''}
             for name in ['Felis catus','Panthera tigris','Panthera leo']]}
     reply={'candidates':[{'content':{'parts':[{'text':json.dumps(identified,ensure_ascii=False,separators=(',',':'))}]}}]}
+    reply=sized_reply(reply,reply_bytes)
     result_body={**body,'reply':json.dumps(reply,ensure_ascii=False,separators=(',',':'))}
     metadata,quality=main.prepared_photos.read_reports(body['client_photos'],3)
     expected={PATHS[0]:main.vision.provider_payload('gemini',body['model'],[],location=prepare['location'],
@@ -101,6 +114,8 @@ def collect(samples,output,case="empty"):
     evidence['scope']='Synthetic signed-in JS context for3 photos: auth/reports/quality/template and '+('3candidate result with real taxonomy HTTP/cache' if case=='taxonomy' else 'empty-candidate result')+'/metadata; no photo upload, AI, Drive or memory guarantee'
     evidence['provenance_verified']=True
     evidence['case']=case
+    evidence['synthetic_reply_bytes']=len(result_body['reply'].encode())
+    evidence['synthetic_reply_padding']=bool(reply_bytes)
     evidence['taxonomy_reference_verified_candidates']=len(results[0]['candidates'])
     evidence['taxonomy_reference_response_hashes']=hashes[PATHS[1]]
     evidence['network_ai_calls']=0
@@ -116,10 +131,11 @@ if __name__=='__main__':
     parser.add_argument('--samples',type=int,choices=range(1,6),default=5)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--case',choices=('empty','taxonomy'),default='empty')
+    parser.add_argument('--reply-bytes',type=int,default=0,help='Synthetic reply size, at most existing2MiB limit; no extra AI calls')
     args=parser.parse_args()
     args.output.unlink(missing_ok=True)
-    try:collect(args.samples,args.output,args.case)
-    except (AssertionError,RuntimeError,OSError,subprocess.CalledProcessError,json.JSONDecodeError) as error:
+    try:collect(args.samples,args.output,args.case,args.reply_bytes)
+    except (AssertionError,ValueError,RuntimeError,OSError,subprocess.CalledProcessError,json.JSONDecodeError) as error:
         diagnostic=json.loads(args.output.read_text()) if args.output.exists() else {'records':[]}
         diagnostic.update({'eligible_for_success_cpu_comparison':False,'failure_type':type(error).__name__})
         if isinstance(error,(AssertionError,RuntimeError)):
