@@ -1,7 +1,17 @@
 // Local synthetic serialization only: no outbound fetch, secrets, DB or AI.
-import sourceDigest from './_digest.mjs';
+import sourceDigest, {checkedTemplate} from './_digest.mjs';
+import {validatePayload} from '../worker_transport.mjs';
 const MAX_BODY = 6 * 1024 * 1024 + 16384;
 const encoder = new TextEncoder();
+export async function checkedWire(request, count) {
+  if (request.method !== 'POST') return new Response('Method not allowed', {status: 405});
+  const length = request.headers.get('content-length') || '';
+  if (!/^\d+$/.test(length) || Number(length) > 9 * 1024 * 1024) return new Response('Invalid length', {status: 400});
+  if (request.headers.get('content-type') !== 'application/json') return new Response('Invalid type', {status: 415});
+  try {await validatePayload(await request.blob(), JSON.stringify(checkedTemplate), count);}
+  catch {return new Response('Invalid provider input', {status: 400});}
+  return Response.json({validated: true, photos: count, network_calls: 0});
+}
 export function forwardWire(request, transform = true) {
   // Transfer cost only; excludes model/input/auth validation and external HTTP.
   if (request.method !== 'POST') return new Response('Method not allowed', {status: 405});

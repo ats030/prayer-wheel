@@ -125,7 +125,9 @@ def measure(samples, *, origin=ORIGIN, paths=PATHS, request_factory=None, wrangl
                 invocation = response.headers.get("X-Preview-Isolate-Invocation", "")
                 return {**{key: response.headers[header] for key, header in (
                             ("transport_source_sha256", "X-Transport-Source-SHA256"),
-                            ("transport_wrapper_sha256", "X-Transport-Wrapper-SHA256")) if header in response.headers},
+                            ("transport_wrapper_sha256", "X-Transport-Wrapper-SHA256"),
+                            ("transport_native_sha256", "X-Transport-Native-SHA256"),
+                            ("transport_template_sha256", "X-Transport-Template-SHA256")) if header in response.headers},
                         "status": response.status, "bytes": len(body),
                         "sha256": hashlib.sha256(body).hexdigest(),
                         "isolate_id": response.headers.get("X-Preview-Isolate", ""),

@@ -54,3 +54,18 @@ Node24にはWorkersの `Uint8Array.toBase64()` がないため、この機能だ
 CPU会計の測定はshimを使わない実Workersで行います。
 
 今回の変更は運営者用の隔離診断で、本体の利用者向け動作を公開していないため、更新履歴の対象外です。
+
+## 本体の入力検証を含めた計測（2026-10-09）
+
+`python3 measure_remote.py --checked-only --samples 5 --output /tmp/checked.json` は、本体の `worker_transport.mjs` の `validatePayload` と元のPythonから生成した固定テンプレートを使います。
+Basic認証下の `/checked/1` と `/checked/3` だけで写真とテンプレートを検証し、外部AIへ送信しません。
+ソース・wrapper・native検証・テンプレートの4つのSHAを照合します。
+ローカル検査ではWorkers固有の `fromBase64()` にもテスト専用shimを使います。
+
+約2MBの合成JPEGで、本番CPUは1枚25〜47ms、3枚71〜116msでした。
+本体のPython認証、multipart、後処理などを含める前にFreeの10msを超えています。
+ネイティブ転送の本体フラグはOFFのままです。
+測定は成功18件、欠測・例外なしですが、runtimeの初回要求は含まず、cold CPUやメモリは未測定です。
+[縮約証拠](../docs/cloudflare-native-validation-remote.json)を保存しました。
+測定後は `workers_dev:false`、`preview_urls:false` で再デプロイし、外部404を確認しました。
+次の検討対象は全体JSONの解析・再生成と写真全体のbase64復号のコストです。最適化は未実装です。

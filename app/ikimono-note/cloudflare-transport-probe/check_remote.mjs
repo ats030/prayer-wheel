@@ -7,6 +7,11 @@ import worker from './remote.mjs';
 if (!Uint8Array.prototype.toBase64) Object.defineProperty(Uint8Array.prototype, 'toBase64', {
   value() { return Buffer.from(this).toString('base64'); }
 });
+if (!Uint8Array.fromBase64) Uint8Array.fromBase64 = encoded => {
+  const bytes = Buffer.from(encoded, 'base64');
+  if (bytes.toString('base64') !== encoded) throw new TypeError('Invalid base64');
+  return new Uint8Array(bytes);
+};
 const origin = 'https://ikimono-note-transport-preview.ats030.workers.dev';
 const env = {IKIMONO_PREVIEW_PASSWORD: 'synthetic-wrapper-check'};
 const auth = 'Basic ' + btoa('preview:' + env.IKIMONO_PREVIEW_PASSWORD);
@@ -33,6 +38,13 @@ for (const count of [1, 3]) {
   const echo = await worker.fetch(request(`/wire/${count}`, {Authorization: auth, 'Content-Type': 'application/json',
     'Content-Length': String(wire.length)}, 'POST', wire), env);
   assert.equal(echo.status, 200); assert.deepEqual(Buffer.from(await echo.arrayBuffer()), wire);
+  const checked = await worker.fetch(request(`/checked/${count}`, {Authorization: auth, 'Content-Type': 'application/json',
+    'Content-Length': String(wire.length)}, 'POST', wire), env);
+  assert.equal(checked.status, 200); assert.deepEqual(await checked.json(), {validated: true, photos: count, network_calls: 0});
+  const altered = JSON.parse(wire); altered.generationConfig.temperature = 1;
+  const invalid = Buffer.from(JSON.stringify(altered));
+  assert.equal((await worker.fetch(request(`/checked/${count}`, {Authorization: auth, 'Content-Type': 'application/json',
+    'Content-Length': String(invalid.length)}, 'POST', invalid), env)).status, 400);
   const form = await readFile(new URL(`./fixtures/multipart-${count}.bin`, import.meta.url));
   const type = await readFile(new URL(`./fixtures/multipart-${count}.type`, import.meta.url), 'utf8');
   const payload = await worker.fetch(request(`/payload/${count}`, {Authorization: auth, 'Content-Type': type,

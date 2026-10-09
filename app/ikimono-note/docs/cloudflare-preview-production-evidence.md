@@ -391,3 +391,35 @@ Official constraints checked2026-10-08:
 specify10ms Free CPU, occasional isolate flexibility and termination on repeated
 overruns. Successful high-CPU responses are not proof of Free compliance. Python
 interop uses the [official FFI](https://developers.cloudflare.com/workers/languages/python/ffi/).
+
+## Native input validator accounting, 2026-10-09
+
+The integrated validator remains OFF in the real app. A separate Basic/Host
+protected diagnostic called the exact `worker_transport.mjs` `validatePayload`
+with the original Python-generated Gemini template and synthetic JPEGs of
+1,997,593 bytes each. It made zero external AI calls and reflected no input.
+The collector verified all four source/template SHA fingerprints, response
+bytes, version and runtime sequence. All18 numbered requests plus readiness
+succeeded without exceptions; the reduced artifact is
+[native validation accounting](cloudflare-native-validation-remote.json).
+
+Measured version: `2cba20c6-585d-4f20-8b47-0a969554994a`.
+Health CPU was0ms for all6 requests. Photo1 CPU was25,30,29,47,27,28ms;
+photo3 CPU was79,78,81,82,71,116ms. Even this isolated validation path exceeds
+the Free10ms CPU allowance. HTTP200 does not demonstrate Free suitability.
+All recorded runtime invocation numbers exceed1: this is not cold-start proof.
+Python application authentication/report/quality checks, multipart ingestion,
+AI, postprocessing, persistence and memory consumption remain unmeasured here.
+Earlier bare native forwarding measurements do not cover this validator cost.
+
+The temporary diagnostic was disabled with `workers_dev:false` and
+`preview_urls:false`, version `91ebd536-4547-41da-aecc-9e19cb5eeb84`;
+external health returned404 and the temporary0600 secret file was removed.
+The real preview/old app and user data were unchanged. No paid plan, general
+public switch or AI fee occurred. Local boundary/tamper tests and a medium
+code review passed. Operator-only diagnostics have no user-facing changelog.
+
+Remaining work on `ats030-paskw`: optimize the full JSON parse/stringify and
+whole-photo base64 decode while preserving input rejection semantics, rerun
+differential/edge tests and real CPU accounting, then validate full app costs
+before enabling native transport. No optimization has yet been implemented.

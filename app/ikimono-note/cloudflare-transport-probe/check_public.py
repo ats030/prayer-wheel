@@ -28,7 +28,7 @@ def fetch(path, authenticated=True, extra=None):
         return response.status, response.read(), response.headers
 
 
-for path in ('/health', '/payload/1', '/wire/3', '/payload-checked', '/remote.mjs'):
+for path in ('/health', '/payload/1', '/wire/3', '/checked/1', '/payload-checked', '/remote.mjs'):
     assert fetch(path, False)[0] == 401
 assert fetch('/health', extra={'Authorization': 'Basic invalid'})[0] == 401
 status, body, headers = fetch('/health')
@@ -36,8 +36,11 @@ assert status == 200 and json.loads(body)['network_calls'] == 0
 assert headers['Cache-Control'] == 'no-store' and 'noindex' in headers['X-Robots-Tag']
 assert headers['X-Transport-Source-SHA256'] == hashlib.sha256((HERE / 'worker.mjs').read_bytes()).hexdigest()
 assert headers['X-Transport-Wrapper-SHA256'] == hashlib.sha256((HERE / 'remote.mjs').read_bytes()).hexdigest()
+assert headers['X-Transport-Native-SHA256'] == hashlib.sha256((HERE.parent / 'worker_transport.mjs').read_bytes()).hexdigest()
+assert headers['X-Transport-Template-SHA256'] == hashlib.sha256((HERE / 'fixtures/template.json').read_bytes()).hexdigest()
 assert 'X-Preview-Isolate' not in headers
 assert 'X-Preview-Isolate' not in fetch('/health', extra={'X-Ikimono-CPU-Probe': 'invalid'})[2]
 assert fetch('/payload-checked')[0] == 404 and fetch('/remote.mjs')[0] == 404
 assert fetch('/wire/3')[0] == 405
+assert fetch('/checked/1')[0] == 405
 print('PASS: remote Basic gate, no ordinary runtime IDs, current source SHAs, no source/checked diagnostics')

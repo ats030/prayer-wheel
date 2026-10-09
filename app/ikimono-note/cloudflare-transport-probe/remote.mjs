@@ -1,6 +1,6 @@
 // Protected, temporary CPU-accounting experiment. No provider HTTP or DB.
-import localWorker, {forwardWire} from './worker.mjs';
-import sourceDigest, {wrapperDigest} from './_digest.mjs';
+import localWorker, {forwardWire, checkedWire} from './worker.mjs';
+import sourceDigest, {wrapperDigest, nativeDigest, templateDigest} from './_digest.mjs';
 let runtimeId, invocation = 0;
 export default {
   async fetch(request, env) {
@@ -15,12 +15,15 @@ export default {
     const url = new URL(request.url);
     if (url.hostname !== 'ikimono-note-transport-preview.ats030.workers.dev') return new Response('Invalid host', {status: 400});
     // Only transport/health measurements, no checked payload reflection route.
-    const routes = {'/health': '/health', '/payload/1': '/payload', '/payload/3': '/payload', '/wire/1': '/wire', '/wire/3': '/wire'};
+    const routes = {'/health': '/health', '/payload/1': '/payload', '/payload/3': '/payload', '/wire/1': '/wire', '/wire/3': '/wire',
+      '/checked/1': '/checked', '/checked/3': '/checked'};
     if (!Object.hasOwn(routes, url.pathname)) return new Response('Not found', {status: 404});
     url.pathname = routes[url.pathname];
     url.hostname = 'localhost';
     let response;
-    if (url.pathname === '/wire') {
+    if (url.pathname === '/checked') {
+      response = await checkedWire(request, Number(new URL(request.url).pathname.split('/').at(-1)));
+    } else if (url.pathname === '/wire') {
       // The local development bridge needs an identity TransformStream to
       // avoid reusing a consumed body. Measure the native production stream
       // separately, using the original request rather than making a copy.
@@ -33,6 +36,8 @@ export default {
     response.headers.set('Cache-Control', 'no-store'); response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     response.headers.set('X-Transport-Source-SHA256', sourceDigest);
     response.headers.set('X-Transport-Wrapper-SHA256', wrapperDigest);
+    response.headers.set('X-Transport-Native-SHA256', nativeDigest);
+    response.headers.set('X-Transport-Template-SHA256', templateDigest);
     const marker = request.headers.get('X-Ikimono-CPU-Probe') || '';
     if (/^[0-9a-f]{8}$/.test(marker)) {
       runtimeId ||= crypto.randomUUID();
