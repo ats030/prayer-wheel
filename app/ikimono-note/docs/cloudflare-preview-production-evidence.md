@@ -423,3 +423,35 @@ Remaining work on `ats030-paskw`: optimize the full JSON parse/stringify and
 whole-photo base64 decode while preserving input rejection semantics, rerun
 differential/edge tests and real CPU accounting, then validate full app costs
 before enabling native transport. No optimization has yet been implemented.
+
+## JavaScript session verification experiment, 2026-10-09
+
+The next bounded experiment reused the existing Basic/Host-protected diagnostic
+with a separate random synthetic HMAC key. `worker_session.mjs` reads the exact
+existing Python-issued session format using Web Crypto HMAC-SHA256. Differential
+tests against actual `auth.py` cover valid UTF-8 sessions, forgery, expiry, invalid
+signature encodings and wrong keys; oversized cookies are additionally rejected.
+No real session key/cookie, OAuth credential, Google request, database or AI was
+used. Availability was simulated configured state, not a Google health check.
+The diagnostic response helper is not a complete replacement for real `/api/me`
+configuration/reason handling. Existing app deployment remains unchanged.
+
+Measured version `82cafde4-b1fc-4504-8ce9-079ba90f7911` yielded30/30 successful
+requests plus readiness, with correct source/wrapper SHA and exact response
+hashes. Signed-out CPU was0ms for all6 samples. Signed-in CPU was0,0,0,1,1,0ms;
+tampered0,1,0,0,0,0ms; expired0,0,1,0,0,0ms; health1,0,0,0,0,0ms.
+Zero is accounting precision, not zero execution. All runtime invocation counts
+exceed1; cold behavior remains unproven. These isolated synthetic results support
+moving session reads out of Python but do not allocate the earlier Python28ms
+to a particular cause or prove full-app Free fit. OAuth, DB, photos, result
+processing, memory and persistence are excluded.
+
+[Reduced accounting](cloudflare-session-native-remote.json) contains no secrets,
+cookies or raw logs. Medium bounded review found no actionable defects; local
+session differential and existing wrapper regressions passed. The diagnostic
+was disabled, version `96ad98f6-d5d7-4557-9cc8-cffa587ca191`, with external404;
+the temporary0600 secret file was removed. `workers_dev:false` and
+`preview_urls:false` remain the committed defaults. Internal synthetic work has
+no user-visible changelog. Remaining `ats030-paskw` work includes a real JS
+entrypoint preserving Basic/Host/DB/config boundaries, cold/full auth accounting,
+and the previously identified photo validation cost.

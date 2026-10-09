@@ -1,6 +1,7 @@
 // Protected, temporary CPU-accounting experiment. No provider HTTP or DB.
 import localWorker, {forwardWire, checkedWire} from './worker.mjs';
-import sourceDigest, {wrapperDigest, nativeDigest, templateDigest} from './_digest.mjs';
+import sourceDigest, {wrapperDigest, nativeDigest, templateDigest, sessionDigest} from './_digest.mjs';
+import {sessionStatus} from '../worker_session.mjs';
 let runtimeId, invocation = 0;
 export default {
   async fetch(request, env) {
@@ -16,12 +17,20 @@ export default {
     if (url.hostname !== 'ikimono-note-transport-preview.ats030.workers.dev') return new Response('Invalid host', {status: 400});
     // Only transport/health measurements, no checked payload reflection route.
     const routes = {'/health': '/health', '/payload/1': '/payload', '/payload/3': '/payload', '/wire/1': '/wire', '/wire/3': '/wire',
-      '/checked/1': '/checked', '/checked/3': '/checked'};
+      '/checked/1': '/checked', '/checked/3': '/checked',
+      '/session/out': '/session', '/session/in': '/session', '/session/tampered': '/session', '/session/expired': '/session'};
     if (!Object.hasOwn(routes, url.pathname)) return new Response('Not found', {status: 404});
     url.pathname = routes[url.pathname];
     url.hostname = 'localhost';
     let response;
-    if (url.pathname === '/checked') {
+    if (url.pathname === '/session') {
+      if (request.method !== 'GET') return new Response('Method not allowed', {status: 405});
+      if (!env.IKIMONO_PROBE_SESSION_SECRET) return new Response('Unavailable', {status: 503});
+      // Only synthetic credentials issued with the separate diagnostic key.
+      const cookies = request.headers.get('Cookie') || '';
+      const cookie = cookies.split(';').map(s => s.trim()).find(s => s.startsWith('ikimono_session='))?.slice(16);
+      response = Response.json(await sessionStatus(cookie, env.IKIMONO_PROBE_SESSION_SECRET, true));
+    } else if (url.pathname === '/checked') {
       response = await checkedWire(request, Number(new URL(request.url).pathname.split('/').at(-1)));
     } else if (url.pathname === '/wire') {
       // The local development bridge needs an identity TransformStream to
@@ -38,6 +47,7 @@ export default {
     response.headers.set('X-Transport-Wrapper-SHA256', wrapperDigest);
     response.headers.set('X-Transport-Native-SHA256', nativeDigest);
     response.headers.set('X-Transport-Template-SHA256', templateDigest);
+    response.headers.set('X-Session-Source-SHA256', sessionDigest);
     const marker = request.headers.get('X-Ikimono-CPU-Probe') || '';
     if (/^[0-9a-f]{8}$/.test(marker)) {
       runtimeId ||= crypto.randomUUID();

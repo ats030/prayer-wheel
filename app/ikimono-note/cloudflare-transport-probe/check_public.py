@@ -28,7 +28,7 @@ def fetch(path, authenticated=True, extra=None):
         return response.status, response.read(), response.headers
 
 
-for path in ('/health', '/payload/1', '/wire/3', '/checked/1', '/payload-checked', '/remote.mjs'):
+for path in ('/health', '/payload/1', '/wire/3', '/checked/1', '/session/in', '/payload-checked', '/remote.mjs'):
     assert fetch(path, False)[0] == 401
 assert fetch('/health', extra={'Authorization': 'Basic invalid'})[0] == 401
 status, body, headers = fetch('/health')
@@ -39,6 +39,10 @@ assert headers['X-Transport-Wrapper-SHA256'] == hashlib.sha256((HERE / 'remote.m
 assert headers['X-Transport-Native-SHA256'] == hashlib.sha256((HERE.parent / 'worker_transport.mjs').read_bytes()).hexdigest()
 assert headers['X-Transport-Template-SHA256'] == hashlib.sha256((HERE / 'fixtures/template.json').read_bytes()).hexdigest()
 assert 'X-Preview-Isolate' not in headers
+assert headers['X-Session-Source-SHA256'] == hashlib.sha256((HERE.parent / 'worker_session.mjs').read_bytes()).hexdigest()
+status, body, session_headers = fetch('/session/out')
+assert status == 200 and json.loads(body) == {'available': True, 'reason': '', 'signed_in': False, 'email': None}
+assert 'X-Preview-Isolate' not in session_headers
 assert 'X-Preview-Isolate' not in fetch('/health', extra={'X-Ikimono-CPU-Probe': 'invalid'})[2]
 assert fetch('/payload-checked')[0] == 404 and fetch('/remote.mjs')[0] == 404
 assert fetch('/wire/3')[0] == 405

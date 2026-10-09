@@ -69,3 +69,22 @@ Basic認証下の `/checked/1` と `/checked/3` だけで写真とテンプレ�
 [縮約証拠](../docs/cloudflare-native-validation-remote.json)を保存しました。
 測定後は `workers_dev:false`、`preview_urls:false` で再デプロイし、外部404を確認しました。
 次の検討対象は全体JSONの解析・再生成と写真全体のbase64復号のコストです。最適化は未実装です。
+
+## JavaScriptセッション検証の比較（2026-10-09）
+
+`worker_session.mjs` は既存 `auth.py` のHMAC-SHA256セッションCookieを検証します。
+`/home/ats030/.venv/bin/python check_session.py` で実際のPython署名・読み取りとの一致を検査します。
+Cookieは4096文字以内に制限し、署名の非正規表現、改ざん、期限切れ、異なる鍵、壊れた入力を拒否します。
+これはGoogleログインの移植ではなく、セッション読み取り部分だけの候補です。
+`sessionStatus` は診断用の応答整形です。Google設定の有無と未設定理由は本体へ接続する際に既存3設定と照合する必要があります。
+
+一時秘密ファイルに、既存Basicパスワードと別のランダム鍵 `IKIMONO_PROBE_SESSION_SECRET` を用意します。
+本体のセッション鍵・Google資格情報・実Cookieは使いません。
+`python3 measure_auth.py --secrets-file /tmp/session-secrets.json --output /tmp/session-cpu.json` は、未ログイン・合成ログイン・署名改ざん・期限切れを測ります。
+Google利用可能状態は合成値で、OAuthやDBにはアクセスしません。
+測定30件すべて成功し、各セッション経路はCPU0〜1msでした。
+0msは会計表示の精度による値で、CPU処理がないという意味ではありません。
+全要求のruntime回数は1より大きく、cold要求は未測定です。
+[縮約証拠](../docs/cloudflare-session-native-remote.json)に応答・ソースSHA・版・runtime順序の照合結果を保存しました。
+測定後は一時Workerを停止し、外部404を確認して一時秘密ファイルを削除しました。
+本体への接続、Googleログイン、識別全体の無料適合は未完了です。
