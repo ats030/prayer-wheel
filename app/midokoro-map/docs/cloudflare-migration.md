@@ -75,3 +75,14 @@ Cloud Runとの比較で24,968件（史跡20,203、祭り1,428、温泉1,418、�
 地図5画面幅、特集4画面幅、URL復元・共有・DNT・地図失敗時の表示が合格。
 公開ログの最終API比較では通常Worker 17呼び出しのCPU最大4ms、Durable Object 5呼び出しのCPU最大28ms、いずれもoutcome=ok、例外0。
 現在の料金プランの参照はOAuth権限不足（403）で未確認。プラン変更は行っていない。
+
+最終公開バージョン: `6fe622ae-723b-41f2-9b9f-9d8117ab6a4b`。上記検証版とWorkerコードは同一で、配信ファイル数のmanifest記録を修正した。
+ポータルの公開リンクをCloudflareへ変更し、稼働中APIへの反映を確認。
+旧Cloud Runサービス `midokoro-map` を削除し、旧URLの404とCloudflareのhealth応答を確認。
+他のCloud Runサービス、ローカルの地図サービスと要約生成ワーカーは継続稼働。
+
+停止後のAPI比較は稼働中の自己ホスト版を参照する。データ更新後は先にスナップショットを再公開してから比較する。
+
+```sh
+python3 scripts/check-cloudflare-api.py https://midokoro-map.ats030.workers.dev --reference http://ubuntu-server-app:8533
+```
