@@ -7,11 +7,16 @@ from urllib.parse import unquote, urlsplit
 from workers import asgi, env, Request, Response
 
 PUBLIC_ACCESS = str(getattr(env, "IKIMONO_LOGIN_REQUIRED", "1")) == "0"
-for name in (("IKIMONO_SESSION_SECRET",) if PUBLIC_ACCESS else
+BASIC_REQUIRED = str(getattr(env, "IKIMONO_PREVIEW_BASIC_REQUIRED", "0" if PUBLIC_ACCESS else "1")) != "0"
+for name in (("IKIMONO_SESSION_SECRET",) if not BASIC_REQUIRED else
              ("IKIMONO_SESSION_SECRET", "IKIMONO_PREVIEW_PASSWORD")):
     value = getattr(env, name, None)
     if value is None or not str(value).strip():
         raise RuntimeError(f"{name} binding is required")
+if not PUBLIC_ACCESS and not BASIC_REQUIRED:
+    for name in ("IKIMONO_GOOGLE_CLIENT_ID", "IKIMONO_GOOGLE_CLIENT_SECRET", "IKIMONO_PUBLIC_ORIGIN"):
+        if not str(getattr(env, name, "") or "").strip().rstrip("/"):
+            raise RuntimeError(f"{name} binding is required for production login")
 for name in ("IKIMONO_SESSION_SECRET", "IKIMONO_ALLOWED_HOSTS", "IKIMONO_PUBLIC_ORIGIN",
              "IKIMONO_GOOGLE_CLIENT_ID", "IKIMONO_GOOGLE_CLIENT_SECRET",
              "IKIMONO_GEMINI_MAX_OUTPUT_TOKENS", "IKIMONO_GEMINI_THINKING_LEVEL"):
@@ -64,7 +69,7 @@ class Default(asgi.entrypoint(app)):
             ("preview:" + str(getattr(self.env, "IKIMONO_PREVIEW_PASSWORD", ""))).encode()).decode()
         provided = request.headers.get("authorization", "")
         # Bytes comparison also rejects non-ASCII credentials without raising.
-        if not PUBLIC_ACCESS and not hmac.compare_digest(provided.encode(), expected.encode()):
+        if BASIC_REQUIRED and not hmac.compare_digest(provided.encode(), expected.encode()):
             return Response("Authentication required", status=401, headers={
                 "WWW-Authenticate": 'Basic realm="ikimono-note preview", charset="UTF-8"',
                 "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow",

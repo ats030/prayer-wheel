@@ -416,11 +416,6 @@ async def require_login(request: Request, call_next):
         return await call_next(request)
     if path.startswith("/api/"):
         return JSONResponse({"detail": "ログインしてください"}, status_code=401)
-    if path == "/":
-        # トップは転送せず、そのまま入口を出す。公開サイトの表紙が /login なのは
-        # 不自然だし、Search Console の所有権確認は転送を挟むと通らない。
-        # ログイン済みの人はここへ来ない (上で素通ししている)
-        return _page("login.html")
     return RedirectResponse("/login", status_code=303)
 
 
@@ -505,7 +500,8 @@ async def auth_callback(request: Request, code: str = "", state: str = "", error
     except auth.AuthError as exc:
         print(f"login failed: {exc}", flush=True)
         return RedirectResponse("/login?failed=1", status_code=303)
-    response = RedirectResponse("/settings", status_code=303)
+    # AI設定はブラウザ内にある。入口で確認して、設定済みなら撮影へ進む。
+    response = RedirectResponse("/login?continue=1", status_code=303)
     response.set_cookie(auth.SESSION_COOKIE, auth.session_for(user),
                         max_age=auth.SESSION_DAYS * 86400, httponly=True, secure=True, samesite="lax", path="/")
     response.delete_cookie(LOGIN_FLOW_COOKIE, path="/auth")

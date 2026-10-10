@@ -8,7 +8,8 @@
   "build": {"command": "python3 build.py --front"},
   "services": [{"binding": "PYTHON", "service": "ikimono-note-backend"}],
   "vars": {
-    "IKIMONO_LOGIN_REQUIRED": "0",
+    "IKIMONO_LOGIN_REQUIRED": "1",
+    "IKIMONO_PREVIEW_BASIC_REQUIRED": "0",
     "IKIMONO_JS_SESSION": "1",
     "IKIMONO_JS_GEMINI": "1",
     "IKIMONO_GBIF_FALLBACK": "1",

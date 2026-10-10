@@ -28,12 +28,33 @@
     </div>
     <div class="top-actions">
       <button class="control theme-toggle" id="themeToggle" type="button"><span class="theme-icon" aria-hidden="true">◐</span><span class="theme-label">自動</span></button>
-      <a class="control" href="/">撮影へ戻る</a>
     </div>
   </header>
 
   <p class="lede">草花、虫、鳥、きのこ。撮った写真を選ぶと、似ている生きものの候補と、
     そう考えた理由が出ます。名前を言い当てる道具ではなく、<strong>見くらべるための手がかり</strong>を出す道具です。</p>
+
+  <section class="section">
+    <div class="section-head"><h2>はじめるのに必要なもの</h2></div>
+    <div class="panel">
+      <ol class="needs">
+        <li><strong>Google アカウント</strong>
+          <span class="help">利用と共有記録の管理にはGoogleログインが必要です。パスワードは本サービスでは預かりません。</span></li>
+        <li><strong>利用するAIの設定</strong>
+          <span class="help">初めての方には、ご自身のGemini APIキーを登録する設定へ案内します。設定済みの方は撮影へ進みます。他のAIも設定画面で選べます。OllamaにはAPIキーは不要です。
+            運営者のAIは使いません。AIサービスの利用条件と料金を確認してください。料金が発生する場合は、登録した方（成年の方）のご負担になります。</span></li>
+      </ol>
+      <p class="help">キーの取り方は、ログインしたあとの設定画面で案内します。</p>
+      <p class="help"><strong>Googleログイン → AIの設定 → 写真を選ぶ</strong>の順に進みます。</p>
+      <p class="help" id="login-storage-note">記録はこの端末に保存します。<strong>ログインだけでは記録は同期されません。</strong>ほかの端末でも使いたい場合は、設定画面でGoogle Driveに連携できます。連携は任意です。端末内の記録とAI設定は、同じブラウザを使う別のGoogleアカウントにも残ります。</p>
+
+      <div class="actions">
+        <a class="button primary" id="google-login" href="/auth/google">Google でログイン</a>
+      </div>
+      <p class="message" id="login-message" aria-live="polite" hidden></p>
+      <a class="button" id="login-settings-fallback" href="/settings" hidden>設定画面を開く</a>
+    </div>
+  </section>
 
   <section class="section">
     <div class="section-head"><h2>できること</h2></div>
@@ -49,33 +70,14 @@
   </section>
 
   <section class="section">
-    <div class="section-head"><h2>はじめるのに必要なもの</h2></div>
-    <div class="panel">
-      <ol class="needs">
-        <li><strong>Google アカウント</strong>
-          <span class="help">ログインに使います。パスワードは本サービスでは預かりません。</span></li>
-        <li><strong>利用するAIの設定</strong>
-          <span class="help">外部AIを選ぶ場合は、ご自身のAPIキーを登録します。写真とAPIキーは調べるときだけサーバーへ送り、サーバーがあなたの選んだAIを呼びます。OllamaにはAPIキーは不要です。写真を同じLAN内のOllamaへ直接送ります。
-            写真は保存せず、調べ終わったら捨てます。運営者のAIは使いません。
-            <strong>Gemini には無料枠があります。</strong>料金が発生する場合は、登録した方（成年の方）のご負担になります。</span></li>
-      </ol>
-      <p class="help">キーの取り方は、ログインしたあとの設定画面で案内します。</p>
-
-      <div class="actions">
-        <a class="button primary" id="google-login" href="/auth/google">Google でログイン</a>
-      </div>
-      <p class="message" id="login-message" aria-live="polite" hidden></p>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-head"><h2>ログインしても、預かるものは増えません</h2></div>
+    <div class="section-head"><h2>写真と記録の扱い</h2></div>
     <div class="panel">
       <ul class="security">
-        <li>本サービスが保存するのは<strong>アカウントの識別子とメールアドレスだけ</strong>です。</li>
+        <li>ログインのために保存するのは<strong>アカウントの識別子とメールアドレスだけ</strong>です。</li>
         <li>写真から位置情報などを取り除き、判定履歴としてサーバーへ保存しません。Ollamaを選んだ写真は、同じLAN内のOllamaへ直接送ります。</li>
         <li>調べた記録はこの端末の中に残ります。保存先を決めた場合は、その保存先にだけ届きます。</li>
-        <li>APIキーはこのブラウザの中だけに置き、調べるときに送るだけです。</li>
+        <li>APIキーはこのブラウザに保存します。Cloudflare版のGeminiの簡単設定では、写真とキーをブラウザからGeminiへ直接送ります。他のAIや植物専門サービスを併用する経路では、本サービスを経由する場合があります。</li>
+        <li>共有操作をした記録の写真と候補は、公開ページ用に本サービスへ保存されます。公開ページはログインなしで閲覧できます。</li>
         <li>いつでも退会できます。設定画面から、預けた情報をまとめて削除できます。</li>
       </ul>
     </div>
@@ -93,6 +95,7 @@
     <a href="/changelog">更新履歴</a>
   </nav>
 </main>
+<script src="/assets/species-links.js" defer></script>
 <script src="/assets/login.js" defer></script>
 </body>
 </html>

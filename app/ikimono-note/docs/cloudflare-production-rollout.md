@@ -15,8 +15,8 @@
 | 非公開Python | `6fee16f6-abc0-41cb-8aee-b7a63fa2dfbb` 、外部URL無効 |
 | 入口SHA | `d02c2839f0e15bacdd6c4ff24dee5fbd95191868aec90b4b3eff7d18e9e56be9` |
 | 検証D1 | `ikimono-note-preview` 。旧Firestoreの内容をコピーしていない |
-| 本番候補D1 | `ikimono-note-production-candidate` / `35c18d62-4de8-4c50-96eb-14b7d3e9e6d5` 。利用者2件・共有1件を読戻し照合済み、本番Workerへ接続、通常利用はログイン不要 |
-| 本番候補Worker | https://ikimono-note.ats030.workers.dev 、通常利用はログイン不要。入口 `2c452d51-2fed-4f62-b747-4aaffa6ea252` / Python `41eea04f-0b76-417a-8c42-336fab58e580` 、本番候補D1接続済み |
+| 本番候補D1 | `ikimono-note-production-candidate` / `35c18d62-4de8-4c50-96eb-14b7d3e9e6d5` 。利用者2件・共有1件を読戻し照合済み、本番Workerへ接続、通常利用はGoogleログイン必須 |
+| 本番候補Worker | https://ikimono-note.ats030.workers.dev 、通常利用はGoogleログイン必須。入口 `4ada42d5-b03b-4df9-8689-b0369f0dec0e` / Python `5aa52f0a-a55a-4706-b394-a54bcf4a2a59` 、本番候補D1接続済み |
 
 本番公開へはまだ切り替えない。候補表示・Googleログイン・Drive保存・別ブラウザでの
 読込には利用者の成功報告があり、写真圧縮の合成画像検証も通過した。一方、
@@ -50,7 +50,7 @@ Google/Driveへの通信はなく、実利用者の記録や共有データは�
 保存直後に照合し、同じデータを新規D1へ取り込んで全列・全写真バイトを再照合した。
 旧Firestoreへの書き込みと既存検証D1への投入は行っていない。
 本番候補D1は分離したWorkerへ接続し、実際の共有ページ・写真も照合した。
-利用者の指定で本番Workerの通常利用をログイン不要にした。旧サイトからの転送・完全移行は未実施。[配備・検査記録](../cloudflare-production/README.md)に詳細を記録する。
+利用者の最新指定で本番Workerの通常利用をGoogleログイン必須に変更した。旧サイトからの転送・完全移行は未実施。[配備・検査記録](../cloudflare-production/README.md)に詳細を記録する。
 手順と制約は [データ移行の読み取り検証](cloudflare-data-migration.md) に記録する。
 
 1. **無料枠の適合を検証する。** 通常候補の結果CPU3msだけで判断しない。
@@ -76,7 +76,7 @@ Google/Driveへの通信はなく、実利用者の記録や共有データは�
    既存共有リンク、公開ページのcanonical/robots/sitemapを確認する。公開用更新履歴は
    実公開日の日本時間で同時配信する。検証版の履歴をそのまま本番公開済みとして転記しない。
 
-本番Workerの通常利用の認証解除は利用者の指定で実施した。この順序を終えるまでは
+本番Workerの通常利用は、最新の利用者指定でGoogleログイン必須にした。この順序を終えるまでは
 旧サイトからの自動転送、有料プランへの変更、
 旧データや旧サービスの削除・停止を行わない。残件の進捗は文書内のチェック印ではなく課題で管理する。
 

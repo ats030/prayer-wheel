@@ -21,14 +21,18 @@ export default {
     const headers = {'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow'};
     const reject = (text, status, extra = {}) => new Response(text, {status, headers: {...headers, ...extra}});
     const publicAccess = env.IKIMONO_LOGIN_REQUIRED === '0';
-    // Missing/invalid flags retain the protected default. Production alone opts in.
-    if (!env.IKIMONO_SESSION_SECRET?.trim() || (!publicAccess && !env.IKIMONO_PREVIEW_PASSWORD?.trim())) return reject('Unavailable', 503);
+    // Google login and the preview's additional Basic gate are independent.
+    // Keep existing deployments' behavior when the new flag is omitted.
+    const basicRequired = env.IKIMONO_PREVIEW_BASIC_REQUIRED === undefined ? !publicAccess : env.IKIMONO_PREVIEW_BASIC_REQUIRED !== '0';
+    if (!env.IKIMONO_SESSION_SECRET?.trim() || (basicRequired && !env.IKIMONO_PREVIEW_PASSWORD?.trim())) return reject('Unavailable', 503);
     const expected = 'Basic ' + btoa(String.fromCharCode(...new TextEncoder().encode('preview:' + env.IKIMONO_PREVIEW_PASSWORD)));
     const supplied = request.headers.get('Authorization') || '';
     let difference = supplied.length ^ expected.length;
     for (let i = 0; i < expected.length; i++) difference |= (supplied.charCodeAt(i) || 0) ^ expected.charCodeAt(i);
-    if (!publicAccess && difference) return reject('Authentication required', 401, {'WWW-Authenticate': 'Basic realm="ikimono-note preview", charset="UTF-8"'});
+    if (basicRequired && difference) return reject('Authentication required', 401, {'WWW-Authenticate': 'Basic realm="ikimono-note preview", charset="UTF-8"'});
     if (!env.DB || !env.PYTHON) return reject('Database or backend unavailable', 503);
+    if (!publicAccess && !basicRequired && ['IKIMONO_GOOGLE_CLIENT_ID','IKIMONO_GOOGLE_CLIENT_SECRET','IKIMONO_PUBLIC_ORIGIN']
+        .some(name => !String(env[name] || '').trim().replace(name === 'IKIMONO_PUBLIC_ORIGIN' ? /\/+$/ : /$^/, ''))) return reject('Login unavailable', 503);
     const url = new URL(request.url);
     const host = (request.headers.get('Host') || url.host).split(':')[0];
     if (!(env.IKIMONO_ALLOWED_HOSTS || '').split(',').map(s => s.trim()).includes(host) ||

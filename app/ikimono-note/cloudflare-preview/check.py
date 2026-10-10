@@ -18,7 +18,8 @@ class NoRedirect(HTTPRedirectHandler):
         return None
 
 def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_public_origin=None,
-          guest=False, bundle_dir=HERE):
+          guest=False, bundle_dir=HERE, login_required=None):
+    needs_login = oauth_enabled and (not guest if login_required is None else login_required)
     secrets = json.loads(state_path.read_text())
     password = secrets.get("IKIMONO_PREVIEW_PASSWORD", "") if guest else secrets["IKIMONO_PREVIEW_PASSWORD"]
     client_id = secrets.get("IKIMONO_GOOGLE_CLIENT_ID", "")
@@ -43,6 +44,8 @@ def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_pu
                  "/auth/callback", "/probe/profile/native-health"):
         status, body, headers = fetch(path, False)
         expected = 404 if path.startswith('/probe/') else (303 if path.startswith('/auth/') else 200)
+        if needs_login and path == "/": expected = 303
+        if needs_login and path == "/api/settings": expected = 401
         assert status == (expected if guest else 401), (path, status, body[:200])
         assert headers["Cache-Control"] == "no-store"
         assert "noindex" in headers["X-Robots-Tag"]
@@ -76,7 +79,8 @@ def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_pu
     assert me["available"] is oauth_enabled and me["signed_in"] is False, me.keys()
     for path in ("/", "/login", "/changelog", "/assets/index.js", "/vendor/photo/libheif.mjs"):
         status, body, headers = fetch(path)
-        assert status == 200, (path, status, body[:100])
+        assert status == (303 if needs_login and path == "/" else 200), (path, status, body[:100])
+        if needs_login and path == "/": assert headers["Location"] == "/login"
         assert headers["Cache-Control"] == "no-store"
     assert ("Cloudflare本番Worker" if guest else "Cloudflare検証版") in fetch("/changelog")[1].decode()
     assert fetch("/probe/profile/native-health")[0] == 404
@@ -88,11 +92,11 @@ def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_pu
             assert status == 404, path
     for path in ("/settings", "/history"):
         status, _, headers = fetch(path)
-        if oauth_enabled and not guest:
+        if needs_login:
             assert status == 303 and headers["Location"] == "/login", (path, status)
         else:
             assert status == 200, (path, status)
-    if oauth_enabled and not guest:
+    if needs_login:
         assert fetch("/api/settings")[0] == 401
     else:
         settings = json.loads(fetch("/api/settings")[1])
@@ -133,11 +137,12 @@ def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_pu
                                    extra={"Cookie": flow_cookie})
         assert status == 303 and headers["Location"] == "/login?failed=1"
         assert "ikimono_session=" not in headers.get("Set-Cookie", "")
-    assert fetch("/api/settings", method="POST", body=b'{"provider":"gemini"}', extra={"Content-Type": "application/json"})[0] == (401 if oauth_enabled and not guest else 403)
+    assert fetch("/api/settings", method="POST", body=b'{"provider":"gemini"}', extra={"Content-Type": "application/json"})[0] == (401 if needs_login else 403)
     if guest:
         for path in ('/api/me/delete','/api/share','/api/share/synthetic/delete'):
             assert fetch(path,method='POST',body=b'')[0] == 401, path
-        assert fetch('/api/gemini/prepare',method='POST',body=b'{}',extra={'Content-Type':'application/json'})[0] == 400
+        for path in ('/api/gemini/prepare','/api/gemini/result'):
+            assert fetch(path,method='POST',body=b'{}',extra={'Content-Type':'application/json'})[0] == (401 if needs_login else 400)
     for name, record in json.loads((HERE / "sources.json").read_text()).items():
         status, body, headers = fetch("/vendor/photo/sources/" + name)
         assert status == 200, (name, status)

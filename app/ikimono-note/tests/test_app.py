@@ -2851,7 +2851,7 @@ def test_the_entrance_says_what_the_app_is_before_asking_to_sign_in():
     assert page.index("利用するAIの設定") < page.index('id="google-login"')
     assert "OllamaにはAPIキーは不要です" in page
     assert "写真を、写真を" not in page
-    assert "Gemini には無料枠があります" in page
+    assert "AIサービスの利用条件と料金を確認" in page
     # 検索や共有で出たときに、何のページか分かるようにする
     assert '<meta name="description"' in page
     assert "ログイン｜生きものノート" not in page      # 何のサイトか分からない題名
@@ -3020,16 +3020,12 @@ def test_the_health_check_can_be_reached_from_outside():
     assert "if PUBLIC_MODE:\n        return {\"ok\": True}" in source
 
 
-def test_the_front_page_does_not_bounce_anonymous_visitors():
-    """公開サイトの表紙が /login なのは不自然で、所有権の確認も転送を挟むと通らない。
-
-    未ログインの / は転送せず、そのまま入口を出す。ログイン済みの人はアプリが出る。
-    """
-    source = Path("main.py").read_text(encoding="utf-8")
-    assert 'if path == "/":' in source
-    assert 'return _page("login.html")' in source
-    # /login も残す。失敗の印つきで戻る先になっている
-    assert '@app.get("/login", include_in_schema=False)' in source
+def test_the_entrance_explains_login_and_device_storage():
+    page = client.get("/login").text
+    assert "Googleログイン → AIの設定 → 写真を選ぶ" in page
+    assert "ログインだけでは記録は同期されません" in page
+    assert "連携は任意です" in page
+    assert "共有操作をした記録の写真と候補" in page
 
 
 def test_the_ownership_token_can_be_set_without_rebuilding():
@@ -3047,19 +3043,10 @@ def test_the_ownership_token_can_be_set_without_rebuilding():
 
 
 def test_the_entrance_describes_the_real_data_path():
-    """識別はサーバー経由。ブラウザから直接ではない。
-
-    /identify は request_api_key を受け取り、サーバーが事業者を呼ぶ。入口に
-    「ブラウザから直接つなぎます」と書いていたが、これは事実と違った。
-    データの流れを誤って公表することになる。
-    """
     page = client.get("/login").text
-    assert "ブラウザから直接つなぎます" not in page
-    assert "サーバーへ送り、サーバーがあなたの選んだAIを呼びます" in page
-    assert "写真は保存せず" in page
-    # サーバーが受け取る作りであることを、実装の側でも確かめる
-    source = Path("main.py").read_text(encoding="utf-8")
-    assert "request_api_key" in source
+    assert "ブラウザからGeminiへ直接送ります" in page
+    assert "本サービスを経由する場合があります" in page
+    assert "共有操作をした記録の写真と候補" in page
 
 
 def test_a_visitor_can_use_their_own_ollama_without_exposing_it():

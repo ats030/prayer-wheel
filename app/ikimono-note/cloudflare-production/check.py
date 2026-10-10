@@ -38,7 +38,7 @@ def main():
     checks=importlib.util.module_from_spec(spec);spec.loader.exec_module(checks)
     STAGE='deployment-contract'
     checks.check(ORIGIN,oauth_enabled=True,edge=True,state_path=STATE,expected_public_origin=ORIGIN,
-                 guest=True,bundle_dir=HERE)
+                 guest=True,bundle_dir=HERE,login_required=True)
     STAGE='private-snapshot'
     rows=load_snapshot(Path('/var/tmp/ikimono-cloudflare-migration-private/firestore-20261010-production-candidate.sqlite3'),
         '049f0bad77707ed3e193f4eff3065a15f98c1a1347629137c712f3b1628b3a51')

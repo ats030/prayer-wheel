@@ -88,3 +88,24 @@ const limited=await worker.fetch(jsRequest('/api/gemini/prepare',body),jsGemini)
 assert.equal(limited.status,429);assert.equal(limited.headers.get('Retry-After'),'60');
 console.log('PASS: JS me avoids Python, existing cookie/config/security, Basic/Host/DB/flag guards, original proxy body/redirect/repeated cookies');
 console.log('PASS: JS Gemini prepares/finishes without Python/provider HTTP; auth/model/quality/rate guards and metadata retained');
+// Public production entry requires Google sessions without a preview Basic prompt.
+const production={...env, IKIMONO_LOGIN_REQUIRED:'1', IKIMONO_PREVIEW_BASIC_REQUIRED:'0',
+ IKIMONO_PREVIEW_PASSWORD:undefined};
+const anonymous=path=>new Request(origin+path,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+const publicMe=await worker.fetch(new Request(origin+'/api/me'),production);
+assert.equal(publicMe.status,200);assert.equal((await publicMe.json()).signed_in,false);
+assert.equal(publicMe.headers.get('WWW-Authenticate'),null);
+for(const path of ['/api/gemini/prepare','/api/gemini/result']){
+ const denied=await worker.fetch(anonymous(path),{...production,IKIMONO_JS_GEMINI:'1'});
+ assert.equal(denied.status,401);assert.equal(denied.headers.get('WWW-Authenticate'),null);
+}
+assert.equal((await worker.fetch(jsRequest('/api/gemini/prepare',{...body,model:'unlisted'},{'CF-Connecting-IP':'192.0.2.43'}),
+ {...production,IKIMONO_JS_GEMINI:'1'})).status,400,'Valid signed session did not reach model validation');
+assert.equal((await worker.fetch(new Request(origin+'/api/me'),
+ {...production,IKIMONO_PREVIEW_BASIC_REQUIRED:'invalid'})).status,503,'Invalid Basic flag silently opened preview');
+console.log('PASS: production Google session gate is independent from preview Basic auth');
+
+for(const name of ['IKIMONO_GOOGLE_CLIENT_ID','IKIMONO_GOOGLE_CLIENT_SECRET','IKIMONO_PUBLIC_ORIGIN']){
+ assert.equal((await worker.fetch(new Request(origin+'/api/me'),{...production,[name]:''})).status,503,
+  'Production opened with missing Google configuration');
+}

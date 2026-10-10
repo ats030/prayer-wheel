@@ -101,6 +101,8 @@ def test_d1_login_callback_and_account_delete(d1_client, monkeypatch):
     client.cookies.set(main.LOGIN_FLOW_COOKIE, flow)
     response = client.get("/auth/callback?code=synthetic&state=s", follow_redirects=False)
     assert response.status_code == 303
+    assert response.headers["location"] == "/login?continue=1"
+    assert "HttpOnly" in response.headers["set-cookie"]
     assert db.execute("SELECT email FROM users WHERE subject='owner'").fetchone()[0] == "changed@example.invalid"
     # TestClient keeps the pre-existing insecure local cookie as well as the
     # production Secure cookie. Set the signed cookie explicitly for HTTP tests.
