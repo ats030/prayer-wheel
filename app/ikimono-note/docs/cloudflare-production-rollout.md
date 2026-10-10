@@ -15,7 +15,8 @@
 | 非公開Python | `6fee16f6-abc0-41cb-8aee-b7a63fa2dfbb` 、外部URL無効 |
 | 入口SHA | `d02c2839f0e15bacdd6c4ff24dee5fbd95191868aec90b4b3eff7d18e9e56be9` |
 | 検証D1 | `ikimono-note-preview` 。旧Firestoreの内容をコピーしていない |
-| 本番候補D1 | `ikimono-note-production-candidate` / `35c18d62-4de8-4c50-96eb-14b7d3e9e6d5` 。利用者2件・共有1件を読戻し照合済み、Worker未接続 |
+| 本番候補D1 | `ikimono-note-production-candidate` / `35c18d62-4de8-4c50-96eb-14b7d3e9e6d5` 。利用者2件・共有1件を読戻し照合済み、認証付き本番候補Workerへ接続 |
+| 本番候補Worker | https://ikimono-note.ats030.workers.dev 、専用Basic認証付き。入口 `78e3cbcc-8151-4a01-b379-76e2333d0dcb` / Python `52ea1047-6ca2-4ce2-bba9-0a63b3da76f7` 、本番候補D1接続済み |
 
 本番公開へはまだ切り替えない。候補表示・Googleログイン・Drive保存・別ブラウザでの
 読込には利用者の成功報告があり、写真圧縮の合成画像検証も通過した。一方、
@@ -47,7 +48,9 @@ Google/Driveへの通信はなく、実利用者の記録や共有データは�
 `readTime` として、利用者2件・共有1件（写真28,200 bytes）を既存D1スキーマの
 ローカルSQLiteへ変換した。所有者・共有token・payload・写真・利用者情報の全列を
 保存直後に照合し、同じデータを新規D1へ取り込んで全列・全写真バイトを再照合した。
-旧Firestoreへの書き込み、既存検証D1への投入、本番Workerへの接続は行っていない。
+旧Firestoreへの書き込みと既存検証D1への投入は行っていない。
+本番候補D1は分離した認証付きWorkerへ接続し、実際の共有ページ・写真も照合した。
+一般公開への切替は未実施。[配備・検査記録](../cloudflare-production/README.md)に詳細を記録する。
 手順と制約は [データ移行の読み取り検証](cloudflare-data-migration.md) に記録する。
 
 1. **無料枠の適合を検証する。** 通常候補の結果CPU3msだけで判断しない。
@@ -62,7 +65,9 @@ Google/Driveへの通信はなく、実利用者の記録や共有データは�
    共有リンク・所有権・削除の挙動を照合する。旧FirestoreやDriveの実データを扱う前に、
    対象とバックアップ・書込先を確定する。検証用D1を本番DBとして黙って流用しない。
 3. **本番構成を確定する。** 本番URL・D1・固定秘密・OAuth戻り先を揃え、非公開Pythonを
-   固定Service Binding経由だけで呼ぶ。本番URLはまだ作成・割当していない。
+   固定Service Binding経由だけで呼ぶ。本番予定URLは認証付き候補として配備した。
+   Googleの戻り先・JavaScript生成元は利用者から登録完了報告があり、認証開始要求も確認した。
+   実ログイン完了・新originでのDrive接続・保存再読込は未確認。
    現入口とPythonは両方でBasic認証とnoindexを強制しているので、入口だけの認証解除では
    本番化できない。検証版の認証は維持し、本番設定を明示的に分けて検証する。
    ログイン必須API、Host制限、CSP、秘密の非配信、出典・ライセンス表記を維持する。

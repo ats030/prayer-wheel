@@ -17,8 +17,8 @@ class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, request, response, code, message, headers, new_url):
         return None
 
-def check(origin, oauth_enabled=False, edge=False):
-    secrets = json.loads(STATE.read_text())
+def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_public_origin=None):
+    secrets = json.loads(state_path.read_text())
     password = secrets["IKIMONO_PREVIEW_PASSWORD"]
     client_id = secrets.get("IKIMONO_GOOGLE_CLIENT_ID", "")
     if oauth_enabled:
@@ -106,7 +106,7 @@ def check(origin, oauth_enabled=False, edge=False):
             "https", "accounts.google.com", "/o/oauth2/v2/auth")
         params = parse_qs(target.query)
         assert params["client_id"] == [client_id]
-        public_origin = json.loads((HERE / "wrangler.jsonc").read_text())["vars"]["IKIMONO_PUBLIC_ORIGIN"]
+        public_origin = expected_public_origin or json.loads((HERE / "wrangler.jsonc").read_text())["vars"]["IKIMONO_PUBLIC_ORIGIN"]
         assert params["redirect_uri"] == [public_origin + "/auth/callback"]
         assert params["response_type"] == ["code"]
         assert params["code_challenge_method"] == ["S256"]
