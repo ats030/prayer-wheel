@@ -5,7 +5,8 @@ import json
 import shutil
 from pathlib import Path
 
-HERE = Path(__file__).resolve().parent
+SOURCE = Path(__file__).resolve().parent
+HERE = Path(globals().get("OUTPUT_DIR", SOURCE))
 PROBE = HERE.parent / "cloudflare-app-probe"
 spec = importlib.util.spec_from_file_location("probe_builder", PROBE / "build.py")
 builder = importlib.util.module_from_spec(spec)
@@ -27,10 +28,16 @@ namespace["RESOURCES"]["static/changelog.html"] = (HERE / "changelog.html").read
 native = {name: raw for name, raw in namespace["RESOURCES"].items()
           if name.startswith(("static/assets/", "static/vendor/", "static/downloads/"))
           or name in {"static/theme.js", "static/favicon.png", "static/apple-touch-icon.png", "static/ogp.png"}}
-source_names = set(json.loads((HERE / "sources.json").read_text())) | {"README.txt"}
+source_names = set(json.loads((SOURCE / "sources.json").read_text())) | {"README.txt"}
 allowed_assets = {name.removeprefix("static/") for name in native} | {
     "vendor/photo/sources/" + name for name in source_names}
 assets = HERE / "assets"
+if HERE != SOURCE:
+    for name in source_names:
+        source = SOURCE / "assets/vendor/photo/sources" / name
+        target = assets / "vendor/photo/sources" / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
 for path in assets.rglob("*"):
     if path.is_symlink() or (path.is_file() and path.relative_to(assets).as_posix() not in allowed_assets):
         raise ValueError("Unexpected asset: " + path.relative_to(assets).as_posix())

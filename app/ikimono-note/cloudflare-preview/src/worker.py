@@ -6,7 +6,9 @@ import os
 from urllib.parse import unquote, urlsplit
 from workers import asgi, env, Request, Response
 
-for name in ("IKIMONO_SESSION_SECRET", "IKIMONO_PREVIEW_PASSWORD"):
+PUBLIC_ACCESS = str(getattr(env, "IKIMONO_LOGIN_REQUIRED", "1")) == "0"
+for name in (("IKIMONO_SESSION_SECRET",) if PUBLIC_ACCESS else
+             ("IKIMONO_SESSION_SECRET", "IKIMONO_PREVIEW_PASSWORD")):
     value = getattr(env, name, None)
     if value is None or not str(value).strip():
         raise RuntimeError(f"{name} binding is required")
@@ -17,6 +19,7 @@ for name in ("IKIMONO_SESSION_SECRET", "IKIMONO_ALLOWED_HOSTS", "IKIMONO_PUBLIC_
     if value is not None:
         os.environ[name] = str(value)
 os.environ["IKIMONO_PUBLIC_MODE"] = "1"
+os.environ["IKIMONO_LOGIN_REQUIRED"] = "0" if PUBLIC_ACCESS else "1"
 os.environ["IKIMONO_BACKGROUND_JOBS"] = "0"
 os.environ["IKIMONO_BROWSER_PHOTOS"] = "1"
 os.environ["IKIMONO_NATIVE_TRANSPORT"] = str(getattr(env, "IKIMONO_NATIVE_TRANSPORT", ""))
@@ -58,10 +61,10 @@ class Default(asgi.entrypoint(app)):
         _invocation_count += 1
         invocation = _invocation_count
         expected = "Basic " + base64.b64encode(
-            ("preview:" + str(self.env.IKIMONO_PREVIEW_PASSWORD)).encode()).decode()
+            ("preview:" + str(getattr(self.env, "IKIMONO_PREVIEW_PASSWORD", ""))).encode()).decode()
         provided = request.headers.get("authorization", "")
         # Bytes comparison also rejects non-ASCII credentials without raising.
-        if not hmac.compare_digest(provided.encode(), expected.encode()):
+        if not PUBLIC_ACCESS and not hmac.compare_digest(provided.encode(), expected.encode()):
             return Response("Authentication required", status=401, headers={
                 "WWW-Authenticate": 'Basic realm="ikimono-note preview", charset="UTF-8"',
                 "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow",

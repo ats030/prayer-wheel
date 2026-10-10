@@ -25,3 +25,11 @@ def test_distinct_candidate_credentials_are_accepted():
 def test_secret_comparison_supports_utf8_without_logging():
     checks.validate_separation({'IKIMONO_PREVIEW_PASSWORD':'新規パスワード','IKIMONO_SESSION_SECRET':'new-session'},
         {'IKIMONO_PREVIEW_PASSWORD':'旧パスワード','IKIMONO_SESSION_SECRET':'old-session'})
+
+
+def test_guest_needs_a_distinct_session_key_but_no_basic_password():
+    preview={'IKIMONO_PREVIEW_PASSWORD':'old-password','IKIMONO_SESSION_SECRET':'old-session'}
+    checks.validate_separation({'IKIMONO_SESSION_SECRET':'new-session'},preview,guest=True)
+    for value in ('old-session','',' '):
+        with pytest.raises(ValueError,match='credentials'):
+            checks.validate_separation({'IKIMONO_SESSION_SECRET':value},preview,guest=True)

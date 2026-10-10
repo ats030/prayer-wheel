@@ -6,11 +6,13 @@ from pathlib import Path
 import runpy
 import importlib.util
 
-HERE = Path(__file__).resolve().parent
-runpy.run_path(str(HERE / 'build.py'))
-spec = importlib.util.spec_from_file_location('gemini_policy', HERE / 'gemini-policy.py')
+SOURCE = Path(__file__).resolve().parent
+HERE = Path(globals().get('OUTPUT_DIR', SOURCE))
+runpy.run_path(str(SOURCE / 'build.py'), init_globals={'OUTPUT_DIR': HERE})
+spec = importlib.util.spec_from_file_location('gemini_policy', SOURCE / 'gemini-policy.py')
 policy = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(policy)
+policy.HERE = HERE
 policy.build()
 namespace = {}
 exec((HERE / 'src/_resources.py').read_text(), namespace)

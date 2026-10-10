@@ -1,6 +1,6 @@
 {
   "name": "ikimono-note",
-  "main": "../cloudflare-preview/edge.mjs",
+  "main": "edge.mjs",
   "compatibility_date": "2026-10-08",
   "workers_dev": true,
   "preview_urls": false,
@@ -8,6 +8,7 @@
   "build": {"command": "python3 build.py --front"},
   "services": [{"binding": "PYTHON", "service": "ikimono-note-backend"}],
   "vars": {
+    "IKIMONO_LOGIN_REQUIRED": "0",
     "IKIMONO_JS_SESSION": "1",
     "IKIMONO_JS_GEMINI": "1",
     "IKIMONO_GBIF_FALLBACK": "1",

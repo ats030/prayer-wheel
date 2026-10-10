@@ -17,15 +17,16 @@ class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, request, response, code, message, headers, new_url):
         return None
 
-def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_public_origin=None):
+def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_public_origin=None,
+          guest=False, bundle_dir=HERE):
     secrets = json.loads(state_path.read_text())
-    password = secrets["IKIMONO_PREVIEW_PASSWORD"]
+    password = secrets.get("IKIMONO_PREVIEW_PASSWORD", "") if guest else secrets["IKIMONO_PREVIEW_PASSWORD"]
     client_id = secrets.get("IKIMONO_GOOGLE_CLIENT_ID", "")
     if oauth_enabled:
         assert client_id and secrets.get("IKIMONO_GOOGLE_CLIENT_SECRET"), "OAuth bindings missing from private state"
     credential = "Basic " + base64.b64encode(("preview:" + password).encode()).decode()
     def fetch(path, authenticated=True, method="GET", body=None, extra=None):
-        headers = {"Authorization": credential} if authenticated else {}
+        headers = {"Authorization": credential} if authenticated and not guest else {}
         headers["User-Agent"] = "ikimono-note-deployment-check/1.0"
         headers.update(extra or {})
         try:
@@ -41,16 +42,17 @@ def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_pu
                  "/vendor/photo/sources/libheif.tar.gz", "/api/settings", "/auth/google",
                  "/auth/callback", "/probe/profile/native-health"):
         status, body, headers = fetch(path, False)
-        assert status == 401, (path, status, body[:200])
+        expected = 404 if path.startswith('/probe/') else (303 if path.startswith('/auth/') else 200)
+        assert status == (expected if guest else 401), (path, status, body[:200])
         assert headers["Cache-Control"] == "no-store"
         assert "noindex" in headers["X-Robots-Tag"]
     status, _, _ = fetch("/health", extra={"Authorization": "Basic invalid"})
-    assert status == 401
+    assert status == (200 if guest else 401)
     namespace = {}
-    exec((HERE / "src/_resources.py").read_text(), namespace)
+    exec((bundle_dir / "src/_resources.py").read_text(), namespace)
     status, body, headers = fetch("/health")
     assert status == 200, (status, body[:100])
-    expected_digest = json.loads((HERE / 'edge-manifest.json').read_text())['bundle_sha256'] if edge else namespace['BUNDLE_SHA256']
+    expected_digest = json.loads((bundle_dir / 'edge-manifest.json').read_text())['bundle_sha256'] if edge else namespace['BUNDLE_SHA256']
     assert headers["X-Preview-Bundle-SHA256"] == expected_digest
     if edge:
         assert headers['X-Preview-Backend-Bundle-SHA256'] == namespace['BUNDLE_SHA256'], 'Backend release mismatch'
@@ -67,7 +69,7 @@ def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_pu
         invocation = int(observed["X-Preview-Isolate-Invocation"])
         assert invocation > previous.get(identifier, 0)
         previous[identifier] = invocation
-    for authenticated, marker in ((False, "0123abcd"), (True, "invalid")):
+    for authenticated, marker in (((True, "invalid"),) if guest else ((False, "0123abcd"), (True, "invalid"))):
         _, _, observed = fetch("/health", authenticated, extra={"X-Ikimono-CPU-Probe": marker})
         assert "X-Preview-Isolate" not in observed and "X-Preview-Isolate-Invocation" not in observed
     me = json.loads(fetch("/api/me")[1])
@@ -76,7 +78,7 @@ def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_pu
         status, body, headers = fetch(path)
         assert status == 200, (path, status, body[:100])
         assert headers["Cache-Control"] == "no-store"
-    assert "Cloudflare検証版" in fetch("/changelog")[1].decode()
+    assert ("Cloudflare本番Worker" if guest else "Cloudflare検証版") in fetch("/changelog")[1].decode()
     assert fetch("/probe/profile/native-health")[0] == 404
     for path in ("/.env", "/src/worker.py", "/secrets.json"):
         status, body, headers = fetch(path)
@@ -86,16 +88,16 @@ def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_pu
             assert status == 404, path
     for path in ("/settings", "/history"):
         status, _, headers = fetch(path)
-        if oauth_enabled:
+        if oauth_enabled and not guest:
             assert status == 303 and headers["Location"] == "/login", (path, status)
         else:
             assert status == 200, (path, status)
-    if oauth_enabled:
+    if oauth_enabled and not guest:
         assert fetch("/api/settings")[0] == 401
     else:
         settings = json.loads(fetch("/api/settings")[1])
         assert settings.get("browser_photos") is True, settings.keys()
-        assert settings.get("google_client_id") == ""
+        assert settings.get("google_client_id") == (client_id if oauth_enabled else "")
         assert not any(settings["api_key_configured"].values())
     status, _, headers = fetch("/auth/google")
     flow_cookie = None
@@ -131,7 +133,11 @@ def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_pu
                                    extra={"Cookie": flow_cookie})
         assert status == 303 and headers["Location"] == "/login?failed=1"
         assert "ikimono_session=" not in headers.get("Set-Cookie", "")
-    assert fetch("/api/settings", method="POST", body=b'{"provider":"gemini"}', extra={"Content-Type": "application/json"})[0] == (401 if oauth_enabled else 403)
+    assert fetch("/api/settings", method="POST", body=b'{"provider":"gemini"}', extra={"Content-Type": "application/json"})[0] == (401 if oauth_enabled and not guest else 403)
+    if guest:
+        for path in ('/api/me/delete','/api/share','/api/share/synthetic/delete'):
+            assert fetch(path,method='POST',body=b'')[0] == 401, path
+        assert fetch('/api/gemini/prepare',method='POST',body=b'{}',extra={'Content-Type':'application/json'})[0] == 400
     for name, record in json.loads((HERE / "sources.json").read_text()).items():
         status, body, headers = fetch("/vendor/photo/sources/" + name)
         assert status == 200, (name, status)
@@ -143,9 +149,9 @@ def check(origin, oauth_enabled=False, edge=False, state_path=STATE, expected_pu
     for path in namespace.get("NATIVE_ASSET_PATHS", ()):
         if path.startswith("/vendor/photo/sources/"):
             continue  # Source archive integrity is checked above.
-        assert fetch(path, False)[0] == 401, path
+        assert fetch(path, False)[0] == (200 if guest else 401), path
         status, body, headers = fetch(path)
-        assert status == 200 and body == (HERE / "assets" / path.lstrip("/")).read_bytes(), path
+        assert status == 200 and body == (bundle_dir / "assets" / path.lstrip("/")).read_bytes(), path
         assert all(headers.get(name) == reference_headers.get(name) for name in security_headers), path
         status, head_body, head_headers = fetch(path, method="HEAD")
         assert status == 200 and not head_body, path

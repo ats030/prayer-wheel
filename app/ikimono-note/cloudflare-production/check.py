@@ -1,5 +1,4 @@
 """Read-only checks of the protected production candidate and migrated shares."""
-import base64
 import importlib.util
 import json
 import hmac
@@ -16,8 +15,11 @@ sys.path.insert(0,str(HERE.parent/'cloudflare'))
 from import_d1 import load_snapshot
 
 
-def validate_separation(state,preview):
-    for name in ('IKIMONO_PREVIEW_PASSWORD','IKIMONO_SESSION_SECRET'):
+def validate_separation(state,preview,guest=False):
+    names = ['IKIMONO_SESSION_SECRET']
+    if not guest or 'IKIMONO_PREVIEW_PASSWORD' in state:
+        names.append('IKIMONO_PREVIEW_PASSWORD')
+    for name in names:
         value=state.get(name)
         previous=preview.get(name)
         if not isinstance(value,str) or not value.strip() or not isinstance(previous,str) or not previous.strip():
@@ -31,20 +33,20 @@ def main():
     STAGE='credential-separation'
     state=json.loads(STATE.read_text())
     preview=json.loads((Path.home()/'.local/state/ikimono-cloudflare-preview/secrets.json').read_text())
-    validate_separation(state,preview)
+    validate_separation(state,preview,guest=True)
     spec=importlib.util.spec_from_file_location('preview_checks',PREVIEW/'check.py')
     checks=importlib.util.module_from_spec(spec);spec.loader.exec_module(checks)
     STAGE='deployment-contract'
-    checks.check(ORIGIN,oauth_enabled=True,edge=True,state_path=STATE,expected_public_origin=ORIGIN)
+    checks.check(ORIGIN,oauth_enabled=True,edge=True,state_path=STATE,expected_public_origin=ORIGIN,
+                 guest=True,bundle_dir=HERE)
     STAGE='private-snapshot'
     rows=load_snapshot(Path('/var/tmp/ikimono-cloudflare-migration-private/firestore-20261010-production-candidate.sqlite3'),
         '049f0bad77707ed3e193f4eff3065a15f98c1a1347629137c712f3b1628b3a51')
-    credential='Basic '+base64.b64encode(('preview:'+state['IKIMONO_PREVIEW_PASSWORD']).encode()).decode()
     for token,owner,created_at,payload,photo,mime in rows['shares']:
         # Never log private token/URL/body; never mint an owner session or write.
         for suffix in ('','/photo'):
             STAGE='migrated-share-photo' if suffix else 'migrated-share-page'
-            request=Request(ORIGIN+'/s/'+token+suffix,headers={'Authorization':credential,
+            request=Request(ORIGIN+'/s/'+token+suffix,headers={
                 'User-Agent':'ikimono-note-deployment-check/1.0'})
             with build_opener(checks.NoRedirect()).open(request,timeout=30) as response:
                 if response.status!=200:raise ValueError('Migrated share unavailable')

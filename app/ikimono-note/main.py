@@ -51,6 +51,7 @@ class SettingsUpdate(BaseModel):
 
 
 PUBLIC_MODE = os.getenv("IKIMONO_PUBLIC_MODE", "").lower() in {"1", "true", "yes"}
+LOGIN_REQUIRED = os.getenv("IKIMONO_LOGIN_REQUIRED", "1") != "0"
 # 一般公開では API ドキュメントを閉じる。Swagger UI は CDN から読み込むため CSP に
 # 阻まれて白紙になるうえ、公開の入口に晒す必要がない
 app = FastAPI(
@@ -338,6 +339,12 @@ OPEN_PATHS = {"/login", "/auth/google", "/auth/callback", "/api/me", "/privacy",
 # 共有した記録の公開ページ。ログインを求めると、受け取った人にも X のクローラにも
 # 見えない。ここが開いていないと共有そのものが成り立たない
 OPEN_PREFIXES = ("/assets/", "/vendor/", "/static/", "/s/")
+GUEST_PATHS = {"/", "/settings", "/history", "/dashboard", "/identify",
+               "/api/settings", "/api/photo-metadata", "/api/photo-original",
+               "/api/provider/template", "/api/gemini/prepare", "/api/gemini/result",
+               "/api/local/prompt", "/api/local/result", "/api/map/land-use",
+               "/api/map/vegetation", "/api/amazon/products", "/affiliate/click",
+               "/api/affiliate/impression", "/api/affiliate/click"}
 
 # 見知らぬ人が、その場で1回試せるようにするための枠。
 #
@@ -391,6 +398,8 @@ async def require_login(request: Request, call_next):
     path = request.url.path
     if (not PUBLIC_MODE or not auth.configured()
             or path in OPEN_PATHS or path.startswith(OPEN_PREFIXES)):
+        return await call_next(request)
+    if not LOGIN_REQUIRED and (path in GUEST_PATHS or path.startswith("/identify/job/")):
         return await call_next(request)
     # お試し枠があるなら、撮影画面と識別はログイン前でも通す。ここを閉じたままだと
     # 枠を用意しても誰も辿り着けない (記録・設定はログインの内側のまま)

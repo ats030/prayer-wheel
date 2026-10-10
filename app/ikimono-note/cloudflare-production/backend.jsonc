@@ -1,7 +1,7 @@
 {
   "name": "ikimono-note-backend",
-  "main": "../cloudflare-preview/src/worker.py",
-  "base_dir": "../cloudflare-preview/src",
+  "main": "src/worker.py",
+  "base_dir": "src",
   "compatibility_date": "2026-10-08",
   "compatibility_flags": ["python_workers"],
   "workers_dev": false,
@@ -9,8 +9,9 @@
   "observability": {"enabled": false},
   "build": {"command": "python3 build.py"},
   "rules": [{"type": "ESModule", "globs": ["**/*.mjs"]}],
-  "assets": {"directory": "../cloudflare-preview/assets", "binding": "ASSETS", "run_worker_first": true},
+  "assets": {"directory": "assets", "binding": "ASSETS", "run_worker_first": true},
   "vars": {
+    "IKIMONO_LOGIN_REQUIRED": "0",
     "IKIMONO_BROWSER_GEMINI": "1",
     "IKIMONO_GBIF_FALLBACK": "1",
     "IKIMONO_ALLOWED_HOSTS": "ikimono-note.ats030.workers.dev",

@@ -1,86 +1,69 @@
-# 本番候補Workerの接続
+# 本番Workerの接続とログイン不要の利用
 
 2026年10月10日（日本時間）、課題 `ats030-paskw`。
-本番候補D1を実際のWorkerへ接続した。一般公開への切替は未実施。
+利用者の「本番Workerではログイン不要」という指定に合わせ、本番URLの通常利用を公開した。
+旧サイトからの転送・停止は行っていない。全経路の無料枠適合と移行完了は未確認である。
 
 | 対象 | 配備済みの値 |
 | --- | --- |
-| 入口 | https://ikimono-note.ats030.workers.dev / `78e3cbcc-8151-4a01-b379-76e2333d0dcb` |
-| 非公開Python | `ikimono-note-backend` / `52ea1047-6ca2-4ce2-bba9-0a63b3da76f7` |
+| 入口 | https://ikimono-note.ats030.workers.dev / `706b1211-8bc3-47df-b87f-b2005c442b2e` |
+| 非公開Python | `ikimono-note-backend` / `9f3a999a-b3b2-4df7-9ab0-1172c0d32f40` |
 | D1 | `ikimono-note-production-candidate` / `35c18d62-4de8-4c50-96eb-14b7d3e9e6d5` |
-| 入口ソースSHA256 | `d02c2839f0e15bacdd6c4ff24dee5fbd95191868aec90b4b3eff7d18e9e56be9` |
+| 入口ソースSHA256 | `ecec30fbc80e3f1bb864e66d54e3c13f8d54937ca87735a19ed9136071e11561` |
 
-既存のレビュー済み検証版コードを使い、Basic認証とnoindexを維持する。
-本番候補のパスワード・セッション鍵は検証版と別にし、同じGoogleクライアントを使う。
-秘密はGit外の `/var/tmp/ikimono-cloudflare-production-private/secrets.json` に0600で保管する。
-ローカル保存先はOS清掃・端末故障への保証を持たない。秘密の保全方法は公開前に確定する。
-両Workerの自動保存ログを無効にし、共有tokenを含むURLを保存しない。
+## 認証の範囲
+
+両Workerで `IKIMONO_LOGIN_REQUIRED=0` を明示し、Basic認証と通常利用のGoogleログイン要求を外した。
+撮影・設定・履歴・地図・識別の許可リストだけを未ログインで通す。共有作成・取り消し・
+アカウント操作にはGoogleログインと所有者確認を残す。公開版のサーバー設定変更は403のまま。
+Drive連携はブラウザ側で別途Googleの許可を得る。AIは利用者自身のAPIキーを使い、運営者の試用枠は有効にしない。
+
+設定の省略・誤った値は従来の認証必須に戻る。検証版の配備・認証は変更していない。
+公開版モード、Host制限、CSP、入力上限、識別の利用制限を維持する。
+全移行完了までnoindexと自動保存ログ無効を維持する。Googleクライアントは任意のログインとDrive用に残す。
+本番のセッション鍵は検証版と分離する。秘密はGit外の
+`/var/tmp/ikimono-cloudflare-production-private/secrets.json` に0600で保管し、内容を出力しない。
+このローカル保存先はOS清掃・端末故障への保証を持たない。
 
 ## ビルドと配備
 
-Wranglerのcustom buildは実行ディレクトリに依存するため、以下はこのディレクトリから実行する。
-`build.py` は既存のallowlistビルダーを使い、固定済み依存関係をconfigのルートへ参照する。
-依存ライブラリの更新・新規インストールは行わない。
+このディレクトリから実行する。既存のallowlistと固定依存関係を再利用するが、
+本番の生成コード・assets・SHA・更新履歴は本番ディレクトリへ独立して生成する。
+検証版の生成物・配備SHAを上書きしない。依存ライブラリの追加・更新は行わない。
 
 ```sh
 python3 ../cloudflare-preview/run_wrangler.py deploy --config backend.jsonc \
   --secrets-file /var/tmp/ikimono-cloudflare-production-private/secrets.json
 python3 ../cloudflare-preview/run_wrangler.py deploy --config front.jsonc \
   --secrets-file /var/tmp/ikimono-cloudflare-production-private/secrets.json
-```
-
-Pythonは外部URL・preview URL・routesを持たず、入口の固定Service Bindingでだけ呼ぶ。
-DB・allowed hosts・public originは入口とPythonで揃える。既存検証版の配備は変更しない。
-共有する生成物は実行時に変数へ依存するコードを持ち、各Workerのorigin設定と秘密を起動時に適用する。
-生成物の更新を別の配備成功と同義にせず、配備後に両ソースSHAと実bindingを検査する。
-
-## 確認結果
-
-`check.py` は秘密の分離、認証、配備SHA、対応ソース、設定、OAuth開始・不正state拒否、
-診断経路の非公開、入力上限と、移行済み共有ページ・全写真バイト/MIMEを確認する。
-実利用者のセッションを作ったり、記録・共有・利用者情報を書き換えたりしない。
-
-```sh
 /home/ats030/.venv/bin/python check.py
 ```
 
-検査はすべて通過した。D1全列の独立した再照合も通過し、利用者2件・共有1件・写真28,200 bytesを維持する。
-Cloudflare APIで両WorkerのD1 IDとService Binding、Python外部URL無効を確認した。
-検証版のDBは従来の `779b52d2-66f6-4f29-8a4b-7f268fdc85d9` のまま。
-検証版health・旧Cloud Run healthは200。
-関連pytest29件とJavaScript入口の認証・転送契約検査が通過した。
+Pythonは外部URL・preview URL・routesを持たず、入口の固定Service Bindingだけで呼ぶ。
+入口とPythonのD1・Host・origin・認証設定を揃え、healthの両SHAを照合する。
 
-初回配備は依存関係の探索先が違い、workers SDKを見つけられず10021になった。
-既存依存ツリーを新configルートへ参照して修正し、実配備成功で確認した。
-共有検査の初回HTTP403はUser-Agent条件の差だった。同一URL・同一認証で既存検査のUser-Agentは200。
-検査プログラムを既存検査と同じ条件に揃え、全体の再実行が通過した。
+## 確認結果
 
-mediumレビューの秘密使い回し検査不足は修正済み。追加レビューはbwrapで読取不能だったため、
-対象コードを直接渡したmediumレビューで確認した。そのレビューは参照先の既存ビルダーを含まず、
-追加された対象コードだけでは指摘なしという限定結果。参照先を含む実ビルド・配備・HTTP検査は別途通過した。
+実URLへの認証情報なしの要求で撮影・設定・履歴・地図・設定API・更新履歴が200。
+共有・アカウント操作は401、サーバー設定変更は403。
+`check.py` は両SHA、全assetsと対応ソース、OAuth開始・不正state拒否、入力上限、
+移行済み共有ページと写真全バイト/MIMEを確認し通過した。実データへの書込みは行っていない。
+関連pytest33件とJavaScriptのゲスト利用・従来認証・識別契約検査も通過した。
 
-## Google設定と公開前の条件
+mediumの差分レビューで、ゲスト検査が不要なBasicパスワードを要求する指摘を修正し、
+パスワードなしでもセッション鍵の分離を確認する回帰テストを追加した。
+レビューは秘密を除いた提供差分・対象ソースに限定される。実ビルド・配備・HTTP検査は別に実施した。
+検証版は未認証401・認証後health200で以前のSHAを維持し、旧Cloud Run healthも200。
+Googleクライアントの新URL登録は利用者から完了報告がある。実アカウントでの新URLへのログイン完了と
+Drive保存・読み戻しはこの自動検査では行っていない。
 
-利用者から新URLの登録完了報告がある。Googleへの認証開始要求は302でGoogleのログインへ進み、
-OAuthエラー経路・redirect_uri_mismatchは検出されなかった。実アカウントのログイン完了・
-トークン交換・Drive接続は今回の自動検査では行っていない。
+## 残件と切戻し
 
-既存の[Google認証クライアント](https://console.cloud.google.com/auth/clients)に、
-旧URL・検証版を残したまま次の値を追加する。
+[本番移行手順](../docs/cloudflare-production-rollout.md)の無料枠、差分データ、Drive全写真、
+旧共有URLの継続は未完了。大きい識別入力と併用・他AIなどのCPU超過・未計測を解消するまで、
+旧サイトからの転送・停止や完全移行を完了扱いしない。有料プランへ変更していない。
 
-| 項目 | 値 |
-| --- | --- |
-| 承認済みリダイレクトURI | `https://ikimono-note.ats030.workers.dev/auth/callback` |
-| 承認済みJavaScript生成元 | `https://ikimono-note.ats030.workers.dev` |
-
-設定根拠は[サーバー側OAuth](https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred)と
-[ブラウザ側OAuth](https://developers.google.com/identity/oauth2/web/guides/get-google-api-clientid)。
-本番公開には[本番化手順](../docs/cloudflare-production-rollout.md)の無料枠・差分データ・
-Drive全写真・旧共有URL・公開設定を確認する。特に、大きな入力でのCPU超過と未検証経路を残したまま
-Basic認証を外さない。Google登録だけでは公開条件を満たさない。
-
-## 切戻し
-
-旧サイトへの案内を維持する。候補URLを停止する必要があれば、入口の `workers_dev` をfalseにして配備する。
-DB・旧Firestore・Drive・既存検証版を削除しない。一般公開用の認証解除はこの構成に実装していない。
-公開版更新履歴は未公開の移行を完了済みとして記載せず、一般公開の変更と同時に配信する。
+認証を戻す場合は両configを `IKIMONO_LOGIN_REQUIRED=1` にしてバックエンド→入口の順に配備する。
+専用Basicパスワードは切戻しのため保管したまま。停止が必要なら入口の `workers_dev=false` を配備する。
+D1・Firestore・Drive・検証版は削除しない。入口だけ以前のSHAへ戻すとhealthが整合しないため、
+必ず整合する両Worker版を揃える。

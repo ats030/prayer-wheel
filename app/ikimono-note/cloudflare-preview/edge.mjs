@@ -20,12 +20,14 @@ export default {
     const sequence = ++invocation;
     const headers = {'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow'};
     const reject = (text, status, extra = {}) => new Response(text, {status, headers: {...headers, ...extra}});
-    if (!env.IKIMONO_PREVIEW_PASSWORD?.trim() || !env.IKIMONO_SESSION_SECRET?.trim()) return reject('Unavailable', 503);
+    const publicAccess = env.IKIMONO_LOGIN_REQUIRED === '0';
+    // Missing/invalid flags retain the protected default. Production alone opts in.
+    if (!env.IKIMONO_SESSION_SECRET?.trim() || (!publicAccess && !env.IKIMONO_PREVIEW_PASSWORD?.trim())) return reject('Unavailable', 503);
     const expected = 'Basic ' + btoa(String.fromCharCode(...new TextEncoder().encode('preview:' + env.IKIMONO_PREVIEW_PASSWORD)));
     const supplied = request.headers.get('Authorization') || '';
     let difference = supplied.length ^ expected.length;
     for (let i = 0; i < expected.length; i++) difference |= (supplied.charCodeAt(i) || 0) ^ expected.charCodeAt(i);
-    if (difference) return reject('Authentication required', 401, {'WWW-Authenticate': 'Basic realm="ikimono-note preview", charset="UTF-8"'});
+    if (!publicAccess && difference) return reject('Authentication required', 401, {'WWW-Authenticate': 'Basic realm="ikimono-note preview", charset="UTF-8"'});
     if (!env.DB || !env.PYTHON) return reject('Database or backend unavailable', 503);
     const url = new URL(request.url);
     const host = (request.headers.get('Host') || url.host).split(':')[0];
@@ -40,7 +42,7 @@ export default {
       const configured = ['IKIMONO_GOOGLE_CLIENT_ID','IKIMONO_GOOGLE_CLIENT_SECRET','IKIMONO_PUBLIC_ORIGIN']
         .every(name => !!String(env[name] || '').trim().replace(name === 'IKIMONO_PUBLIC_ORIGIN' ? /\/+$/ : /$^/, ''));
       const session = await readSession(sessionCookie(request.headers.get('Cookie')), env.IKIMONO_SESSION_SECRET.trim());
-      response = configured && !session ? Response.json({detail:'ログインしてください'},{status:401}) : await handleGemini(request,path,undefined,env);
+      response = !publicAccess && configured && !session ? Response.json({detail:'ログインしてください'},{status:401}) : await handleGemini(request,path,undefined,env);
       for (const [name,value] of Object.entries(securityHeaders)) response.headers.set(name,value);
     } else if (path === '/api/me' && env.IKIMONO_JS_SESSION === '1') {
       if (request.method !== 'GET') response = new Response('Method not allowed', {status: 405, headers: {Allow: 'GET'}});
