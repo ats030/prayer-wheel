@@ -1,0 +1,59 @@
+reviewed_at: 2026-10-10
+issue: ats030-uyfgz
+tools:
+  - name: Cloudflare Workers Free, Static Assets, SQLite-backed Durable Objects
+    version_or_plan: Workers Free
+    decision: conditional
+    commercial_use: permitted under the self-serve agreement for individuals and entities; no personal-use-only restriction
+    cost: No charge within Free quotas; no subscription upgrade authorized
+    conditions:
+      - Keep worker requests within 100000 per UTC day across the account and CPU within 10ms per invocation.
+      - Keep static assets within 20000 files and 25MiB per file; static asset requests are free.
+      - SQLite-backed Durable Objects have separate daily request, duration, and storage quotas; excess Free operations fail.
+      - Retain attribution and licences for Wikipedia, Commons, and official-source content.
+      - Retain local originals; free hosted services may be limited or terminated and have no retention guarantee.
+    adoption: Use asset snapshots for read-only data, a Worker for forwarding, and SQLite-backed Durable Objects for upstream article processing and global Nominatim spacing. Live article processing exceeded the stateless Free CPU budget; no plan upgrade.
+    sources:
+      - https://www.cloudflare.com/terms/
+      - https://www.cloudflare.com/service-specific-terms-developer-platform/
+      - https://developers.cloudflare.com/workers/platform/pricing/
+      - https://developers.cloudflare.com/workers/platform/limits/
+      - https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/
+      - https://developers.cloudflare.com/durable-objects/platform/pricing/
+      - https://developers.cloudflare.com/durable-objects/platform/limits/
+  - name: Wrangler
+    version_or_plan: 4.149.0, existing installation
+    decision: approved
+    license: MIT OR Apache-2.0
+    commercial_use: permitted
+    cost: free CLI; hosting is separately metered
+    conditions:
+      - Preserve notices if redistributing; CLI is not shipped to visitors.
+    adoption: Reuse installed Wrangler and OAuth; credentials stay outside the repository and logs.
+    sources:
+      - https://raw.githubusercontent.com/cloudflare/workers-sdk/main/LICENSE-MIT
+      - https://github.com/cloudflare/workers-sdk
+    local_evidence: Installed wrangler/package.json version and license fields
+  - name: Node.js
+    version_or_plan: 24.19.0, existing installation
+    decision: approved
+    license: MIT, with bundled third-party notices
+    commercial_use: permitted
+    cost: free local runtime
+    conditions:
+      - Preserve bundled notices if redistributing; runtime is not shipped to visitors.
+    adoption: Reuse existing Node 24 because installed Wrangler requires Node 22 or newer.
+    sources:
+      - https://github.com/nodejs/node/blob/v24.19.0/LICENSE
+  - name: Nominatim public endpoint
+    version_or_plan: existing public reverse-geocoding service
+    decision: conditional
+    license: ODbL-1.0 for OpenStreetMap data; hosted endpoint governed separately by usage policy
+    commercial_use: subject to the public endpoint usage policy and OSM attribution
+    cost: no per-request payment; no service guarantee
+    conditions:
+      - Use identifying User-Agent, at most one request per second across the app, and cache repeated lookups.
+      - Do not use for bulk geocoding; retain existing OSM attribution in the map.
+    adoption: Keep existing functionality; coordinate actual outbound requests centrally and cache responses at the edge for one day.
+    sources:
+      - https://operations.osmfoundation.org/policies/nominatim/

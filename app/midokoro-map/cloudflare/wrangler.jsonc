@@ -1,0 +1,21 @@
+{
+  "name": "midokoro-map",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-10",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "assets",
+    "binding": "ASSETS",
+    "html_handling": "none",
+    "run_worker_first": ["/api/*", "/health", "/_data/*"]
+  },
+  "vars": {
+    "MIDOKORO_DEFAULT_KIND": "shiseki",
+    "MIDOKORO_PUBLIC_ORIGIN": "https://midokoro-map.ats030.workers.dev",
+    "MIDOKORO_AFFILIATE_ORIGINS": ""
+  },
+  "durable_objects": {"bindings": [{"name": "GEOCODING_GATE", "class_name": "GeocodingGate"}, {"name": "EXTERNAL_API", "class_name": "ExternalAPI"}]},
+  "migrations": [{"tag": "v1", "new_sqlite_classes": ["GeocodingGate"]}, {"tag": "v2", "new_sqlite_classes": ["ExternalAPI"]}],
+  "observability": {"enabled": true}
+}

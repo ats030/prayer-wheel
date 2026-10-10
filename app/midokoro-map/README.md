@@ -2,6 +2,8 @@
 
 祭り・温泉・史跡・特産物の4アプリを、一つのGoサーバーと共有Leaflet地図へ統合したアプリ。
 
+Cloudflareへの公開移行と更新・検証・復旧手順は [docs/cloudflare-migration.md](docs/cloudflare-migration.md) を参照。
+
 ## 起動と検証
 
 ```sh
