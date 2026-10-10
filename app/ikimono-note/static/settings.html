@@ -11,6 +11,18 @@
 </head>
 <body><main class="app">
   <header class="top"><div><div class="eyebrow">生きものノート</div><h1>設定</h1></div><div class="top-actions"><button class="control theme-toggle" id="themeToggle" type="button"><span class="theme-icon" aria-hidden="true">◐</span><span class="theme-label">自動</span></button><a class="control" href="/dashboard">ダッシュボード</a><a class="control" href="/">撮影へ戻る</a></div></header>
+  <section id="quickSetup" class="panel quick-setup" hidden aria-labelledby="quickSetupTitle">
+    <p class="eyebrow">はじめての設定</p><h2 id="quickSetupTitle">Geminiで写真を調べる準備</h2>
+    <p class="help">APIキーは、Geminiを使うためのご自身の鍵です。契約者ご本人が設定してください。利用条件や料金はGoogleの契約に従います。</p>
+    <ol class="setup-steps"><li><strong>Googleでキーを用意する</strong><p><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI StudioでAPIキーを作る ↗</a></p><p class="help">Googleの画面でキーを作成・コピーして、この画面に戻ってください。キーは他の人に見せないでください。</p></li>
+    <li><strong>コピーしたキーを入力する</strong>
+    <form id="quickSetupForm"><label class="setup-key" for="quickGeminiKey">GeminiのAPIキー<input id="quickGeminiKey" type="password" required maxlength="1024" autocomplete="off" spellcheck="false" autocapitalize="none" aria-describedby="quickKeyHelp"></label>
+    <p id="quickKeyHelp" class="help">この設定ではキーをサーバーへ送りません。写真を調べるときにGeminiへ送ります。</p>
+    <label class="check"><input id="quickKeepKey" type="checkbox" checked><span>この端末にAPIキーを残す</span></label><p class="help">共用端末ではチェックを外してください。その場合、キーはこのタブを閉じると消えます。</p>
+    <div class="actions"><button class="button primary" type="submit">保存して写真を選ぶ</button></div><p id="quickSetupMessage" class="message" role="status" aria-live="polite"></p></form></li></ol>
+    <a class="setup-full-link" href="/settings">ほかのAI・くわしい設定を開く</a>
+  </section>
+  <div id="fullSettings">
   <div class="status-strip which-app" data-only="operator"><span>この画面</span><strong>運営者用（設定はサーバーに保存されます）</strong><a class="button" href="https://ubuntu-server-app.tailf74832.ts.net/settings" target="_blank" rel="noopener">公開版を開く</a></div><p class="help" data-only="operator">公開版とはブラウザの保存領域が別です（ポートが違うため）。利用者と同じ動きを見たいときは、公開版で確かめてください。</p>
   <div class="status-strip" aria-live="polite"><span>いま使うAI</span><strong id="active-provider">読み込み中…</strong></div>
   <details class="panel stacked guardian-note" data-only="public"><summary><span><span class="detail-title">大人の方へ</span><span class="detail-copy">料金とお子さまの利用について</span></span></summary><div class="detail-body"><p class="help">このページではAPIキー（有料サービスの鍵）を入力します。料金が発生する場合があるため、設定は契約者ご本人が行ってください。お子さんが使うときは、設定を済ませてから撮影画面をお渡しください。写真を撮って調べるだけなら、この画面を開く必要はありません。</p></div></details><div class="status-strip guardian-note" data-only="operator"><span>運営者用</span><strong>この画面は運営者用です。ここで保存したAPIキーとモデルはサーバーに記録され、公開版の既定値としても使われます。公開版の利用者に自分のAPIキーを使わせる運用なら、ここでキーを登録する必要はありません。</strong></div>
@@ -51,4 +63,5 @@
   </section>
 
   <section class="section" aria-labelledby="security-heading"><div class="section-head"><h2 id="security-heading">保存と安全性</h2></div><details class="panel stacked"><summary><span><span class="detail-title">預かるもの・預からないもの</span><span class="detail-copy">APIキー、写真、記録の扱い</span></span></summary><div class="detail-body"><ul class="notes"><li data-only="operator">この画面にはパスワードがありません。APIキーは所有者だけが読めるサーバー設定へ保存し、画面には再表示しません。</li><li data-only="public">APIキーはこのブラウザの中だけに保存します。この端末に残すか、タブを閉じたら消すかを選べます。</li><li data-only="public">外部AIのAPIキーは調べるときだけ本サービスへ送り、設定や記録には残しません。</li><li>写真から位置情報などを取り除き、判定履歴としてサーバーへ保存しません。</li><li data-only="public">Ollamaを選ぶと、写真は同じLAN内のOllamaへ直接送られ、本サービスのサーバーを経由しません。</li><li>調べた記録はこの端末に保存し、希望した場合だけGoogle ドライブとも同期します。</li><li>アプリの利用に年齢制限はありません。APIキーの登録と料金の負担は、契約者ご本人が行ってください。</li></ul></div></details></section>
+</div>
 <nav aria-label="法務情報" class="legal-nav"><a href="/privacy">プライバシー</a><a href="/terms">利用規約</a><a href="/changelog">更新履歴</a></nav></main></body></html>

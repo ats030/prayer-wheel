@@ -3175,46 +3175,23 @@ def test_records_saved_on_another_device_arrive_when_you_come_back():
     assert "if (!driveLinked() || !driveTokenAlive()) return false;" in drive
 
 
-def test_public_analytics_waits_for_explicit_consent(monkeypatch):
-    private_page = client.get("/login").text
-    assert "/assets/analytics.js" not in private_page
-    monkeypatch.setattr(main, "PUBLIC_MODE", True)
-    public_page = client.get("/login")
-    assert 'src="/assets/analytics.js" defer' in public_page.text
-    assert 'href="/assets/analytics.css"' in public_page.text
-    csp = public_page.headers["content-security-policy"]
-    assert "https://www.googletagmanager.com" in csp
-    assert "https://www.google-analytics.com" in csp
+def test_app_does_not_load_google_analytics(monkeypatch):
+    for public in (False, True):
+        monkeypatch.setattr(main, "PUBLIC_MODE", public)
+        for path in ("/login", "/privacy"):
+            page = client.get(path)
+            assert "/assets/analytics.js" not in page.text
+            assert "/assets/analytics.css" not in page.text
+            csp = page.headers["content-security-policy"]
+            assert "googletagmanager.com" not in csp
+            assert "google-analytics.com" not in csp
+            assert "https://accounts.google.com" in csp
+    # An older open page may request the old asset URL: it must remain inert.
     script = client.get("/assets/analytics.js").text
-    assert 'ANALYTICS_ID="G-T9FSRF5Q4F"' in script
-    assert 'if(choice==="granted")loadAnalytics()' in script
-    assert 'script.src="https://www.googletagmanager.com/gtag/js?id="' in script
-    assert 'ad_storage:"denied"' in script
-    assert "allow_google_signals:false" in script
-    # パネルの居場所は CSS ファイルに預けない。analytics.css はファイル名で止められやすく、
-    # 落ちると position:static に戻ってページ末尾へ流れ、押しても出ないように見える
-    assert "PANEL_ANCHOR" in script and 'position:"fixed"' in script
-    # Cookie通知フィルタに ##.analytics-consent という汎用ルールがあり、どのサイトでも
-    # そのクラスを display:none にする。当たる名前を使うと、スクリプトもボタンも動いて
-    # いるのにパネルだけ消え、外からは「押しても何も起きない」としか見えない
-    assert 'panel.className="usage-choice"' in script
-    # 見るのはクラス名としての使用だけ。localStorage のキー
-    # (ikimono-analytics-consent) は CSS セレクタではないので当たらないし、
-    # 変えると保存済みの選択が失われる
-    assert 'className="analytics-consent"' not in script
-    assert ".analytics-consent" not in client.get("/assets/analytics.css").text
-    assert "Object.assign(panel.style,PANEL_ANCHOR)" in script
-    assert "写真、位置情報、調べた結果は送りません" in script
+    assert "gtag" not in script and "loadAnalytics" not in script
     privacy = client.get("/privacy").text
-    # 保持期間は GA4 側で2か月に設定済み。読み手が確かめようのない「管理画面で設定されます」
-    # ではなく、実際に設定した値を書く
-    assert "2か月保持したのち削除されます" in privacy
-    # ボタンはスクリプトが置く。HTMLに直接書くと、解析を読み込まない側や、拡張機能に
-    # このファイルを止められた画面に、押しても動かないボタンだけが残る
-    assert 'id="analytics-reset"' not in privacy
-    assert 'id="analytics-reset-slot"' in privacy
-    assert "mountAnalyticsReset" in client.get("/assets/analytics.js").text
-    assert "同意しない場合はGoogleのタグを読み込みません" in privacy
+    assert "Google Analyticsによるアクセス解析は行いません" in privacy
+    assert 'id="analytics-reset-slot"' not in privacy
 
 
 def test_result_and_history_sharing_use_one_safe_helper():

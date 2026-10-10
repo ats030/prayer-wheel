@@ -6,10 +6,39 @@
 
 | 対象 | 配備済みの値 |
 | --- | --- |
-| 入口 | https://ikimono-note.ats030.workers.dev / `706b1211-8bc3-47df-b87f-b2005c442b2e` |
-| 非公開Python | `ikimono-note-backend` / `9f3a999a-b3b2-4df7-9ab0-1172c0d32f40` |
+| 入口 | https://ikimono-note.ats030.workers.dev / `2c452d51-2fed-4f62-b747-4aaffa6ea252` |
+| 非公開Python | `ikimono-note-backend` / `41eea04f-0b76-417a-8c42-336fab58e580` |
 | D1 | `ikimono-note-production-candidate` / `35c18d62-4de8-4c50-96eb-14b7d3e9e6d5` |
-| 入口ソースSHA256 | `ecec30fbc80e3f1bb864e66d54e3c13f8d54937ca87735a19ed9136071e11561` |
+| 入口ソースSHA256 | `ad6c431a9c22570631e5f2b9e24852e8d05c9a87d3dde28bdcf4903cbe687ec9` |
+
+## 初回利用とアクセス解析（ats030-8pa4l）
+
+未設定の利用者に「利用の準備」を表示し、`/settings?setup=gemini` の簡単設定へ案内する。
+本番の既定AIがGeminiのときにだけ簡単設定を使い、Geminiキーと保存期間の選択を既存の
+ブラウザ保存処理で保存する。provider・modelsは書き換えない。他AIや既存設定があれば通常設定を使う。
+保存成功後は撮影へ戻り、失敗時は保存期間の選択を復元して、その場で再試行を案内する。
+
+Google AnalyticsはHTMLに挿入せず、同意画面を廃止した。以前に同意していても動作しない。
+以前開いたページが使うanalytics asset URLは、解析機能を持たないファイルを返す。
+CSPからGAのscript/connect許可だけを外し、Google認証・Drive・Geminiの通信許可は維持する。
+既に古い解析コードを実行中のタブには、新しいページへの再読込みが必要である。
+旧Cloud Run・検証版はこの作業では再配備していない。変更は本番Workerに反映した。
+
+Chromiumの390px/1280pxで、初回導線、キーボード、端末/タブ保存、既存/別タブのAI選択、
+書込み失敗時の復元、設定読込み失敗、以前の解析同意がある場合を確認した。
+ローカルの対象ソースと本番配信の両方で通過。合成キーだけを使い、識別API・Google/Driveには接続しない。
+本番配信のテストでも設定APIとログイン状態は公開設定の合成応答に固定し、外部通信とPOSTを拒否する。
+
+```sh
+cd ..
+/home/ats030/.nvm/versions/node/v24.19.0/bin/node tests/check_onboarding.mjs --live
+```
+
+引数なしなら対象HTML/CSS/JSをローカルから読む。設定JSONを第1引数で指定でき、指定がなければ
+本番の公開設定を1回だけ読む。ブラウザからの実Googleログイン・Drive保存・実AI識別を証明するテストではない。
+mediumレビューのprovider上書き・保存失敗時の保存期間復元の指摘を修正し、提供ソースの再レビューは指摘なし。
+既存のAI選択表示が既定値のままになる不具合も、同じ設定経路で再現して修正した。
+プライバシー説明に残る旧環境の認証・ホスティング記述は別課題 `ats030-tlv7j` で扱う。
 
 ## 認証の範囲
 
@@ -62,6 +91,9 @@ Drive保存・読み戻しはこの自動検査では行っていない。
 [本番移行手順](../docs/cloudflare-production-rollout.md)の無料枠、差分データ、Drive全写真、
 旧共有URLの継続は未完了。大きい識別入力と併用・他AIなどのCPU超過・未計測を解消するまで、
 旧サイトからの転送・停止や完全移行を完了扱いしない。有料プランへ変更していない。
+
+初回導線だけを切り戻す場合もGoogle Analyticsの停止を維持し、ソースを修正して両Workerを再配備する。
+過去のGA有効版へそのまま戻さない。
 
 認証を戻す場合は両configを `IKIMONO_LOGIN_REQUIRED=1` にしてバックエンド→入口の順に配備する。
 専用Basicパスワードは切戻しのため保管したまま。停止が必要なら入口の `workers_dev=false` を配備する。

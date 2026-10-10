@@ -75,7 +75,7 @@ $("model-local").addEventListener("input",()=>{$("local-model-note").textContent
 document.querySelectorAll("[name=provider]").forEach(input=>input.addEventListener("change",()=>{refreshActive();syncProviderFields()}));
 for(const provider of ["openai","anthropic","gemini"]){$("model-"+provider).addEventListener("change",refreshActive)}
 function render(data){current=data;document.querySelector('[name=provider][value="'+data.provider+'"]').checked=true;$("active-provider").textContent=providerLabels[data.provider]+" · "+data.models[data.provider];$("local-llm-url").value=data.local_llm.url;$("local-model-options").innerHTML=data.available_models.local.map(item=>'<option value="'+esc(item.id)+'">'+esc(item.label)+'</option>').join("");$("model-local").value=data.models.local;for(const provider of ["openai","anthropic","gemini"]){const select=$("model-"+provider);select.innerHTML=data.available_models[provider].map(item=>'<option value="'+esc(item.id)+'">'+esc(item.label)+'</option>').join("");select.value=data.models[provider]}const incompatible=data.incompatible_local_models||[];$("local-model-note").textContent=incompatible.length?"画像非対応: "+incompatible.join("、"):"画像対応モデル（名前の直接入力も可能）";for(const provider of ["openai","anthropic","gemini","plantnet"]){$("configured-"+provider).textContent=data.api_key_configured[provider]?"登録済み（変更時だけ入力）":"未登録"}$("affiliate-title").value=data.affiliate.title||"";$("affiliate-url").value=data.affiliate.url||"";$("affiliate-enabled").checked=Boolean(data.affiliate.enabled);$("affiliate-partner-tag").value=data.affiliate.partner_tag||"";$("affiliate-product-enabled").checked=Boolean(data.affiliate.product_enabled);$("configured-amazon-creators").textContent=data.affiliate.creators_api_configured?"認証情報を登録済み":"認証情報は未登録";renderCreatorsState(data.creators_api_state);$("affiliate-metrics").textContent="表示 "+data.affiliate.metrics.impressions+" · クリック "+data.affiliate.metrics.clicks;syncProviderFields()}
-async function load(){try{const response=await fetch("/api/settings");if(!response.ok)throw new Error("設定を読み込めませんでした");const data=await response.json();render(data);if(data.public_mode)setupPublicSettings(data);else{operatorNote();}}catch(error){show(error.message,"error")}}
+async function load(){try{const response=await fetch("/api/settings");if(!response.ok)throw new Error("設定を読み込めませんでした");const data=await response.json();render(data);if(data.public_mode){setupPublicSettings(data);setupFirstUse(data);}else{operatorNote();}}catch(error){$("active-provider").textContent="設定を読み込めませんでした";show(error.message,"error")}}
 document.querySelectorAll("[data-delete]").forEach(button=>button.onclick=()=>{const provider=button.dataset.delete;deleteKeys.add(provider);$("key-"+provider).value="";const note=$("configured-"+provider);if(note)note.textContent="保存すると登録を削除します"});
 $("settingsForm").onsubmit=async event=>{event.preventDefault();const provider=document.querySelector("[name=provider]:checked")?.value;if(!provider)return;const payload={provider,models:{},local_llm:{url:$("local-llm-url").value.trim()},api_keys:{},delete_keys:[...deleteKeys],affiliate:{title:$("affiliate-title").value.trim(),url:$("affiliate-url").value.trim(),enabled:$("affiliate-enabled").checked,partner_tag:$("affiliate-partner-tag").value.trim(),product_enabled:$("affiliate-product-enabled").checked}};for(const name of ["local","openai","anthropic","gemini"])payload.models[name]=$("model-"+name).value;for(const name of ["openai","anthropic","gemini","plantnet","amazon_creators_id","amazon_creators_secret"]){const key=$("key-"+name).value.trim();if(key)payload.api_keys[name]=key}const save=$("save-button");save.disabled=true;save.textContent="保存中…";show("設定を確認しています…");try{const response=await fetch("/api/settings",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});const data=await response.json();if(!response.ok)throw new Error(data.detail||"保存できませんでした");deleteKeys.clear();document.querySelectorAll('input[type="password"]').forEach(input=>input.value="");render(data);show("設定を保存しました。","success")}catch(error){show(error.message,"error")}finally{save.disabled=false;save.textContent="変更を保存"}};
 load();
@@ -280,4 +280,48 @@ function renderCreatorsState(state){
     ? "最後の呼び出しは成功しました" + (when?"（"+when+"）":"")
     : "Amazonが受け付けていません" + (state.status?"（"+state.status+(state.reason?" "+state.reason:"")+"）":"")
       + (when?" "+when:"") + (state.hint?" — "+state.hint:"");
+}
+
+
+function setupFirstUse(data){
+  if(new URLSearchParams(location.search).get("setup")!=="gemini"||data.provider!=="gemini")return;
+  const stored=JSON.parse(localStorage.getItem("species-public-settings")||"{}");
+  const hasKeys=()=>["gemini","openai","anthropic","plantnet"].some(name=>Boolean(readApiKey(name)));
+  // Existing choices belong to the user: this form never writes provider/models.
+  if(stored.provider||hasKeys())return;
+  $("fullSettings").hidden=true;$("quickSetup").hidden=false;
+  document.body.classList.add("simple-setup");
+  document.querySelector("h1").textContent="利用の準備";
+  $("quickKeepKey").checked=keepingKeys();
+  $("quickSetupForm").onsubmit=event=>{
+    event.preventDefault();
+    const key=$("quickGeminiKey").value.trim();
+    const message=$("quickSetupMessage");
+    if(!key){message.textContent="APIキーを入力してください。";$("quickGeminiKey").focus();return}
+    let previousRetention;
+    try{
+      const latest=JSON.parse(localStorage.getItem("species-public-settings")||"{}");
+      if(latest.provider||hasKeys()){
+        message.textContent="設定が更新されました。下の「ほかのAI・くわしい設定を開く」で現在の設定を確認してください。";
+        return;
+      }
+      previousRetention=localStorage.getItem(KEEP_KEYS_FLAG);
+      const keep=$("quickKeepKey").checked;
+      setKeepingKeys(keep);
+      if(keepingKeys()!==keep)throw new Error("storage");
+      writeApiKey("gemini",key);
+      if(readApiKey("gemini")!==key)throw new Error("storage");
+      $("quickGeminiKey").value="";
+      location.assign("/?setup=done");
+    }catch(error){
+      try{
+        if(previousRetention===null)localStorage.removeItem(KEEP_KEYS_FLAG);
+        else if(previousRetention!==undefined)localStorage.setItem(KEEP_KEYS_FLAG,previousRetention);
+      }catch(ignored){}
+      for(const name of ["localStorage","sessionStorage"]){
+        try{const store=window[name];if(store.getItem("species-key-gemini")===key)store.removeItem("species-key-gemini");}catch(ignored){}
+      }
+      message.textContent="このブラウザに設定を保存できませんでした。保存を許可してから、もう一度お試しください。";
+    }
+  };
 }

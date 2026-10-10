@@ -43,6 +43,22 @@ async function showSignIn(){
     link.classList.toggle("hidden",!(me&&me.available&&!me.signed_in));
   }catch(e){/* 出せなくても使える */}
 }
+function showSetupWelcome(data){
+  const welcome=$("setupWelcome");
+  if(!welcome)return;
+  if(!data.public_mode){welcome.hidden=true;return}
+  const hasKey=["gemini","openai","anthropic"].some(name=>Boolean(readApiKey(name)));
+  const ready=provider==="local"||Boolean(readApiKey(provider))||Boolean(data.trial);
+  const stored=JSON.parse(localStorage.getItem("species-public-settings")||"{}");
+  welcome.hidden=!data.public_mode||ready||hasKey;
+  if(!welcome.hidden&&stored.provider){
+    $("setupWelcomeTitle").textContent="使うAIの設定を確認";
+    welcome.querySelector("p").textContent="選んでいるAIのAPIキーが未登録です。設定を開いてキーを登録してください。";
+    $("startSetup").href="/settings";$("startSetup").textContent="設定を開く";
+  }
+  if(ready&&new URLSearchParams(location.search).get("setup")==="done")
+    showStatus("設定を保存しました。写真を選んで、名前を調べましょう。");
+}
 async function loadSettings(){try{const r=await fetch("/api/settings");const data=await r.json();window.speciesNativeTransport=Boolean(data.native_transport);window.speciesBrowserGemini=Boolean(data.browser_gemini);window.speciesPublicMode=Boolean(data.public_mode);if(window.speciesPublicMode){const saved=JSON.parse(localStorage.getItem("species-public-settings")||"{}");if(saved.provider&&(saved.provider!=="local"||data.available_models.local.length||data.local_in_browser))data.provider=saved.provider;if(saved.models)data.models={...data.models,...saved.models}}provider=data.provider;providerName=providerLabel(provider);let model=data.models[provider];
 /* 自分のキーを持たない人は、運営者のお試し枠で走る。その場合に動くのはこちらが決めた
    プロバイダーとモデルなので、選択中のものを出したままだと写真の行き先を偽ることになる */
@@ -51,7 +67,7 @@ if(window.speciesTrial&&!readApiKey(window.speciesTrial.provider)&&!readApiKey(p
   provider=window.speciesTrial.provider;providerName=providerLabel(provider);model=window.speciesTrial.model;
 }
 window.speciesRuntimeModel=model;
-  showTrialNote(data);plantnetReady=Boolean(data.api_key_configured.plantnet||(window.speciesPublicMode&&readApiKey("plantnet")));affiliate=data.affiliate;document.getElementById("affiliateDisclosure").classList.toggle("hidden",!affiliate.enabled);document.getElementById("plantnetOption").classList.toggle("hidden",!plantnetReady);if(plantnetReady)$("usePlantnet").checked=true;$("providerStatus").textContent=providerName+" · "+model+(provider==="local"?" · LAN内のOllamaへ送ります":" · 写真は保存しません")}catch(e){showStatus("設定を読み込めませんでした。",true)}}
+  showTrialNote(data);showSetupWelcome(data);plantnetReady=Boolean(data.api_key_configured.plantnet||(window.speciesPublicMode&&readApiKey("plantnet")));affiliate=data.affiliate;document.getElementById("affiliateDisclosure").classList.toggle("hidden",!affiliate.enabled);document.getElementById("plantnetOption").classList.toggle("hidden",!plantnetReady);if(plantnetReady)$("usePlantnet").checked=true;$("providerStatus").textContent=providerName+" · "+model+(provider==="local"?" · LAN内のOllamaへ送ります":" · 写真は保存しません")}catch(e){showStatus("設定を読み込めませんでした。",true)}}
 const MAX_PHOTOS=3;let previewUrls=[];
 async function renderPreviews(){const revision=++previewSelection;const snapshot=[...selected];let photos=snapshot;if(browserPhotos()){try{const {preparePhoto}=await import("/assets/photo-browser.mjs");photos=await Promise.all(snapshot.map(async file=>(await preparePhoto(file)).photo));if(revision!==previewSelection)return}catch(error){if(revision===previewSelection)showStatus(error.message,true);return}}previewUrls.forEach(URL.revokeObjectURL);previewUrls=photos.map(file=>URL.createObjectURL(file));document.body.classList.add("has-selection");/* 枚数で列を変える。3列固定だと、1枚のときも横幅の3分の1しか使わない。 携帯では110pxほどになり、ピントや被写体の位置を確かめられない */previews.className="previews count-"+selected.length;previews.innerHTML=previewUrls.map((url,index)=>'<div class="preview-item"><img class="preview" src="'+url+'" alt="調べる写真 '+(index+1)+'"><button class="btn preview-remove" type="button" data-index="'+index+'">この写真を外す</button></div>').join("");previews.querySelectorAll(".preview-remove").forEach(button=>button.onclick=()=>removeSelectedPhoto(Number(button.dataset.index)));$("previewEmpty").classList.add("hidden");identify.classList.remove("hidden");$("captureTitle").textContent=selected.length+"枚の写真を選択中"}
 function removeSelectedPhoto(index){if(selected.length<=1){showStatus("調べる写真は1枚以上必要です。",true);return}setFiles(selected.filter((_,i)=>i!==index))}

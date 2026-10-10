@@ -23,3 +23,7 @@
 .api-state.warn{color:var(--color-danger)}
 .ollama-url-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.ollama-url-row .button{padding-inline:12px}.ollama-check-ok{color:var(--color-success)}.ollama-check-error{color:var(--color-danger)}
 @media(max-width:520px){.ollama-url-row{grid-template-columns:minmax(0,1fr)}.ollama-url-row .button{width:100%}}
+
+.quick-setup{max-width:640px;margin:24px auto}.quick-setup[hidden],#fullSettings[hidden]{display:none}.quick-setup h2{margin:8px 0 16px;font-size:24px;line-height:1.4}.setup-steps{padding-left:24px}.setup-steps>li{padding-left:8px;margin:24px 0}.setup-steps p{line-height:1.7}.setup-key{display:flex;flex-direction:column;gap:8px;margin-top:16px}.setup-key input{width:100%;min-width:0}.setup-full-link{display:inline-block;margin:8px 0}.quick-setup .check{align-items:flex-start}.quick-setup .actions{margin-top:20px}.quick-setup .button{white-space:normal}@media(max-width:600px){.quick-setup{margin:16px 0}.quick-setup h2{font-size:21px}}
+
+.simple-setup .top-actions a[href="/dashboard"]{display:none}.simple-setup h1{white-space:nowrap}.setup-key input{min-height:44px;padding:0 11px;border:1px solid var(--color-line);border-radius:var(--radius-control);background:var(--color-raised);color:var(--color-text)}@media(max-width:360px){.simple-setup .top{flex-wrap:wrap}.simple-setup .top-actions{justify-content:flex-start}}

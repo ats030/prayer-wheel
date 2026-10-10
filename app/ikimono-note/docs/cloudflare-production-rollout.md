@@ -16,7 +16,7 @@
 | 入口SHA | `d02c2839f0e15bacdd6c4ff24dee5fbd95191868aec90b4b3eff7d18e9e56be9` |
 | 検証D1 | `ikimono-note-preview` 。旧Firestoreの内容をコピーしていない |
 | 本番候補D1 | `ikimono-note-production-candidate` / `35c18d62-4de8-4c50-96eb-14b7d3e9e6d5` 。利用者2件・共有1件を読戻し照合済み、本番Workerへ接続、通常利用はログイン不要 |
-| 本番候補Worker | https://ikimono-note.ats030.workers.dev 、通常利用はログイン不要。入口 `706b1211-8bc3-47df-b87f-b2005c442b2e` / Python `9f3a999a-b3b2-4df7-9ab0-1172c0d32f40` 、本番候補D1接続済み |
+| 本番候補Worker | https://ikimono-note.ats030.workers.dev 、通常利用はログイン不要。入口 `2c452d51-2fed-4f62-b747-4aaffa6ea252` / Python `41eea04f-0b76-417a-8c42-336fab58e580` 、本番候補D1接続済み |
 
 本番公開へはまだ切り替えない。候補表示・Googleログイン・Drive保存・別ブラウザでの
 読込には利用者の成功報告があり、写真圧縮の合成画像検証も通過した。一方、

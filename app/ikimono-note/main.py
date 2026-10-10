@@ -157,13 +157,13 @@ CONTENT_SECURITY_POLICY = "; ".join([
     "frame-src https://accounts.google.com",
     "frame-ancestors 'none'",
     "form-action 'self'",
-    "script-src 'self' https://accounts.google.com https://www.googletagmanager.com",
+    "script-src 'self' https://accounts.google.com",
     "style-src 'self'",
     # Ollama はブラウザから同じ端末またはLAN内の専用プロキシへ直接呼ぶ。
     # LAN宛先は固定し、任意の接続先をCSPで許可しない
     "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com "
     "https://www.googleapis.com https://cyberjapandata.gsi.go.jp https://www.j-shis.bosai.go.jp "
-    "https://cyberjapandata2.gsi.go.jp https://www.google-analytics.com https://region1.google-analytics.com "
+    "https://cyberjapandata2.gsi.go.jp "
     "http://localhost:11434 http://127.0.0.1:11434 http://192.168.11.13:11434",
     "img-src 'self' blob: data: https://tile.openstreetmap.org https://cyberjapandata.gsi.go.jp https://www.j-shis.bosai.go.jp https://nlftp.mlit.go.jp https://arc-gis.biodic.go.jp https://*.media-amazon.com https://*.ssl-images-amazon.com",
 ])
@@ -199,8 +199,6 @@ def _page(name: str) -> HTMLResponse:
     if BROWSER_PHOTOS:
         html = html.replace("<body", '<body data-browser-photos="1"', 1)
         html = html.replace('accept="image/*" multiple', 'accept="image/*,.heic,.heif,.zip" multiple')
-    if PUBLIC_MODE:
-        html = html.replace("</head>", '<link rel="stylesheet" href="/assets/analytics.css"><script src="/assets/analytics.js" defer></script></head>', 1)
     return HTMLResponse(_inject_site_verification(html))
 
 
