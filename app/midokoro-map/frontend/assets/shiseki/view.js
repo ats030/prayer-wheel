@@ -265,14 +265,13 @@ function detail(o){
   const category=categoryDetailText(o);
   const source=safeUrl(o.designation_source||o.source_url);
   const aboutBody=context.summariesOnly?'要約を読み込んでいます…':o.description?esc(o.description):(qid?'記事の概要を読み込んでいます…':'概要情報は未登録です。');
-  const access=!context.summariesOnly&&o.access_note?`<p>${esc(o.access_note)}</p>`:'';
   const sourceName=o.source_name?esc(o.source_name):'';
   const dataset=safeUrl(o.source_url);
   const visit=safeUrl(o.visit_url);
   const licenseUrl={'CC BY 4.0':'https://creativecommons.org/licenses/by/4.0/deed.ja','文化庁 国指定文化財等データベース 利用規約':'https://kunishitei.bunka.go.jp/top/policy'}[o.source_license];
   const license=licenseUrl?`<a href="${licenseUrl}" target="_blank" rel="noopener noreferrer">${o.source_license==='CC BY 4.0'?'CC BY 4.0':'利用規約'}<span aria-hidden="true">↗</span></a>`:'';
   const sourceLinks=`${sourceName&&dataset?`<a href="${esc(dataset)}" target="_blank" rel="noopener noreferrer">${sourceName}（表示用に加工）<span aria-hidden="true">↗</span></a>${license}`:''}${visit?`<a href="${esc(visit)}" target="_blank" rel="noopener noreferrer">現行の訪問案内<span aria-hidden="true">↗</span></a>`:''}`;
-  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(o.label_ja||o.label_en||'名称未登録')}</h2>${designationBadge(o)}</header><dl class="detail-facts"><div><dt>所在地</dt><dd id="detail-location">${locationMarkup(o.prefecture||'地域未登録',o)}<span class="location-loading">詳細を確認中…</span></dd></div><div><dt>カテゴリ</dt><dd id="detail-category">${esc(category||'その他')}</dd></div><div><dt>時代</dt><dd>${esc(o.era||'未登録')}</dd></div><div><dt>指定情報</dt><dd>${esc(o.designation_label||designationLabel(designationRank(o)))}${source?` <a href="${esc(source)}" target="_blank" rel="noopener noreferrer">根拠↗</a>`:''}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">概要</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status"></p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section" id="detail-history-section" aria-labelledby="detail-history"><h3 id="detail-history">歴史</h3><div class="detail-history" id="detail-history-body"></div><p class="detail-history-status" id="detail-history-status">読み込んでいます…</p></section><section class="detail-section" id="detail-remains-section" aria-labelledby="detail-remains"><h3 id="detail-remains">遺構・見どころ</h3><div class="detail-remains" id="detail-remains-body"></div><p class="detail-remains-status" id="detail-remains-status">読み込んでいます…</p></section><section class="detail-section" id="detail-access-section" aria-labelledby="detail-access"><h3 id="detail-access">アクセス</h3><div class="detail-access" id="detail-access-body">${access}</div><p class="detail-access-status" id="detail-access-status">${visit?'訪問前にリンク先の最新情報をご確認ください。':'読み込んでいます…'}</p></section>${context.summariesOnly?'<section class="detail-section" id="detail-highlights-section" aria-labelledby="detail-highlights"><h3 id="detail-highlights">周辺の見どころ</h3><div id="detail-highlights-body"></div><p id="detail-highlights-status">要約を読み込んでいます…</p></section>':''}<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" id="detail-links" aria-label="出典">${sourceLinks}${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}</nav></section><section class="detail-section detail-affiliate" id="detail-affiliate-section" aria-labelledby="detail-affiliate-heading"><h3 id="detail-affiliate-heading">近くの宿</h3><div class="affiliate" id="detail-affiliate" aria-label="宿泊検索"><p class="detail-affiliate-status">近くの宿を検索しています…</p></div></section></article>`;
+  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(o.label_ja||o.label_en||'名称未登録')}</h2>${designationBadge(o)}</header><dl class="detail-facts"><div><dt>所在地</dt><dd id="detail-location">${locationMarkup(o.prefecture||'地域未登録',o)}<span class="location-loading">詳細を確認中…</span></dd></div><div><dt>カテゴリ</dt><dd id="detail-category">${esc(category||'その他')}</dd></div><div><dt>時代</dt><dd>${esc(o.era||'未登録')}</dd></div><div><dt>指定情報</dt><dd>${esc(o.designation_label||designationLabel(designationRank(o)))}${source?` <a href="${esc(source)}" target="_blank" rel="noopener noreferrer">根拠↗</a>`:''}</dd></div></dl><section class="detail-section" aria-labelledby="detail-about"><h3 id="detail-about">概要</h3><p class="detail-description">${aboutBody}</p><p class="detail-description-status"></p></section><section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section><section class="detail-section" id="detail-history-section" aria-labelledby="detail-history"><h3 id="detail-history">歴史</h3><div class="detail-history" id="detail-history-body"></div><p class="detail-history-status" id="detail-history-status">読み込んでいます…</p></section><section class="detail-section" id="detail-remains-section" aria-labelledby="detail-remains"><h3 id="detail-remains">遺構・見どころ</h3><div class="detail-remains" id="detail-remains-body"></div><p class="detail-remains-status" id="detail-remains-status">読み込んでいます…</p></section><section class="detail-section" id="detail-access-section" aria-labelledby="detail-access"><h3 id="detail-access">アクセス</h3><div class="detail-access" id="detail-access-body"></div><p class="detail-access-status" id="detail-access-status">${visit?'訪問前にリンク先の最新情報をご確認ください。':'読み込んでいます…'}</p></section>${context.summariesOnly?'<section class="detail-section" id="detail-highlights-section" aria-labelledby="detail-highlights"><h3 id="detail-highlights">周辺の見どころ</h3><div id="detail-highlights-body"></div><p id="detail-highlights-status">要約を読み込んでいます…</p></section>':''}<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典・関連情報</h3><nav class="detail-links" id="detail-links" aria-label="出典">${sourceLinks}${wiki?`<a href="${wiki}" target="_blank" rel="noopener noreferrer">Wikidata<span aria-hidden="true">↗</span></a>`:''}${pedia?`<a href="${pedia}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`:''}</nav></section><section class="detail-section detail-affiliate" id="detail-affiliate-section" aria-labelledby="detail-affiliate-heading"><h3 id="detail-affiliate-heading">近くの宿</h3><div class="affiliate" id="detail-affiliate" aria-label="宿泊検索"><p class="detail-affiliate-status">近くの宿を検索しています…</p></div></section></article>`;
 }
 function selectShiseki(key,origin){
   const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;
@@ -327,60 +326,45 @@ async function hydrateWikiSection(o,key,config){
   if(!section)return;
   const body=document.querySelector(config.bodyId),status=document.querySelector(config.statusId);
   if(!wikiQID(o)&&!o.wikipedia_title){
-    if(config.field!=='access'||!o.access_note){
-      if(body)body.innerHTML='<p class="detail-empty">情報なし</p>';
-      if(status)status.textContent='';
-    }
+    section.hidden=true;
+    if(body)body.innerHTML='';
+    if(status)status.textContent='';
     return;
   }
   const data=await loadWikipediaContent(o);
   if(selectedKey!==key)return;
+  if(!body)return;
   const wikiLink=url=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Wikipedia<span aria-hidden="true">↗</span></a>`;
   const ccLink=url=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0<span aria-hidden="true">↗</span></a>`;
   if(!data||data.sections_unavailable){
-    if(body)body.innerHTML='';
-    if(status)status.textContent='読み込みに失敗しました。もう一度開いてください。';
+    body.innerHTML='';
+    status.textContent='読み込みに失敗しました。もう一度開いてください。';
     return;
   }
   const payload=data[config.field]||{};
   const summary=String(payload.summary||'').trim();
-  const blocks=Array.isArray(payload.blocks)?payload.blocks:[];
   const source=safeUrl(payload.source_url)||safeUrl(data.source_url);
   const license=safeUrl(data.content_license_url);
-  if(!body)return;
-  if(!summary&&!blocks.length&&payload.raw_omitted){
-    body.innerHTML='<p class="detail-empty">要約はまだありません。</p>';
-    if(status)status.innerHTML=source?`原文：${wikiLink(source)}`:'';
+  if(!summary){
+    body.innerHTML='';
+    status.textContent='';
+    section.hidden=true;
     return;
   }
-  if(!summary&&!blocks.length){
-    body.innerHTML=`<p class="detail-empty">${esc(config.placeholder)}</p>`;
-    if(status)status.textContent='';
-    return;
-  }
-  const blockMarkup=blocks.map(b=>{
-    const heading=esc(String(b.heading||'')),text=esc(String(b.text||''));
-    return (heading?`<p class="detail-subheading">${heading}</p>`:'')+`<p>${text}</p>`;
-  }).join('');
-  if(summary){
-    body.innerHTML=`<p class="detail-summary">${esc(summary)}</p>`+(blocks.length?blockMarkup:'');
-    if(status)status.innerHTML='AIによる要約'+(source?` · ${wikiLink(source)}`:'')+(license?` · ${ccLink(license)}`:'');
-  }else{
-    body.innerHTML=blockMarkup;
-    if(status)status.innerHTML=(source?wikiLink(source):'')+(license?`${source?' · ':''}${ccLink(license)}`:'')+' · 編集あり';
-  }
+  body.innerHTML=`<p class="detail-summary">${esc(summary)}</p>`;
+  if(status)status.innerHTML='AIによる要約'+(source?` · ${wikiLink(source)}`:'')+(license?` · ${ccLink(license)}`:'');
 }
 async function hydrateHistory(o,key){
-  await hydrateWikiSection(o,key,{sectionId:'#detail-history-section',bodyId:'#detail-history-body',statusId:'#detail-history-status',field:'history',placeholder:'この記事には歴史の記述がありません。'});
+  await hydrateWikiSection(o,key,{sectionId:'#detail-history-section',bodyId:'#detail-history-body',statusId:'#detail-history-status',field:'history'});
 }
 async function hydrateRemains(o,key){
-  await hydrateWikiSection(o,key,{sectionId:'#detail-remains-section',bodyId:'#detail-remains-body',statusId:'#detail-remains-status',field:'remains',placeholder:'この記事には遺構・見どころの記述がありません。'});
+  await hydrateWikiSection(o,key,{sectionId:'#detail-remains-section',bodyId:'#detail-remains-body',statusId:'#detail-remains-status',field:'remains'});
 }
 async function hydrateAccess(o,key){
-  await hydrateWikiSection(o,key,{sectionId:'#detail-access-section',bodyId:'#detail-access-body',statusId:'#detail-access-status',field:'access',placeholder:'この記事にはアクセスの記述がありません。'});
+  await hydrateWikiSection(o,key,{sectionId:'#detail-access-section',bodyId:'#detail-access-body',statusId:'#detail-access-status',field:'access'});
 }
 async function hydrateHighlights(o,key){
-  await hydrateWikiSection(o,key,{sectionId:'#detail-highlights-section',bodyId:'#detail-highlights-body',statusId:'#detail-highlights-status',field:'highlights',placeholder:'この記事には周辺・近隣の観光地に関する記述がありません。'});
+  await hydrateWikiSection(o,key,{sectionId:'#detail-highlights-section',bodyId:'#detail-highlights-body',statusId:'#detail-highlights-status',field:'highlights'});
 }
 async function hydrateLocation(o,key){
   const location=await detailedLocation(o),element=document.querySelector('#detail-location');

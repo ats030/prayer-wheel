@@ -34,7 +34,4 @@
 .section-items div{min-width:0;display:grid;grid-template-columns:minmax(4rem,7rem) minmax(0,1fr);gap:var(--space-xs) var(--space-sm);align-items:baseline}
 .section-items dt{margin:0;color:var(--color-ink-2);font-size:.8125rem;font-weight:700;line-height:1.7;letter-spacing:.03em;overflow-wrap:anywhere}
 .section-items dd{margin:0;font-size:1rem;font-weight:600;line-height:1.75;overflow-wrap:anywhere}
-.section-source{margin-top:var(--space-sm)}.section-source summary{cursor:pointer;color:var(--color-ink-2);font-size:.875rem;font-weight:700;line-height:1.75}
-.section-source p,.section-source-text p{margin:var(--space-sm) 0 0;font-size:1rem;line-height:1.85;overflow-wrap:anywhere}
-.section-source .detail-subheading,.section-source-text .detail-subheading{color:var(--color-ink-2);font-size:.875rem;font-weight:700}
 @media(max-width:360px){.section-items div{grid-template-columns:minmax(0,1fr);gap:.25rem}}

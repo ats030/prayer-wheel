@@ -292,28 +292,21 @@ function renderSections(o,sections){
     const payload=sections[key]||{};
     const summary=String(payload.summary||'').trim();
     const items=Array.isArray(payload.items)?payload.items:[];
-    const blocks=!context.summariesOnly&&Array.isArray(payload.blocks)?payload.blocks:[];
-    if(!summary&&!items.length&&!blocks.length)return'';
+    if(!summary&&!items.length)return'';
     const itemsMarkup=items.map(item=>{
       const from=String(item.from||'').trim(),to=String(item.to||'').trim();
       const text=[from&&to?`${from} → ${to}`:'',String(item.value||'').trim()].filter(Boolean).join(' ');
       return `<div><dt>${esc(String(item.label||'').trim())}</dt><dd>${esc(text)}</dd></div>`;
     }).join('');
-    const blockMarkup=blocks.map(b=>{
-      const h=String(b.heading||'').trim();
-      return (h?`<p class="detail-subheading">${esc(h)}</p>`:'')+`<p>${esc(String(b.text||''))}</p>`;
-    }).join('');
     const source=safeUrl(payload.source_url)||safeUrl(o.source_url);
     const official=Boolean(o.description);
-    const summarized=Boolean(summary||items.length);
-    const attribution=[official&&summarized?'AIによる要約(出典をもとに編集)':official?'出典をもとに編集':summarized?'AIによる要約':'編集あり'];
+    const attribution=[official?'AIによる要約(出典をもとに編集)':'AIによる要約'];
     if(source)attribution.push(link(source,official?o.source_name||'公式情報':'Wikipedia'));
     if(official&&source&&['www.maff.go.jp','www.rinya.maff.go.jp','www.meti.go.jp'].includes(new URL(source).hostname))attribution.push(link('https://www.digital.go.jp/resources/open_data/public_data_license_v1.0','PDL1.0'));
     if(!official)attribution.push(link('https://creativecommons.org/licenses/by-sa/4.0/deed.ja','CC BY-SA 4.0'));
     const body=[
       summary?`<p class="detail-summary">${esc(summary)}</p>`:'',
       items.length?`<dl class="section-items">${itemsMarkup}</dl>`:'',
-      blockMarkup?(summary||items.length?`<details class="section-source"><summary>原文を読む</summary>${blockMarkup}</details>`:`<div class="section-source-text">${blockMarkup}</div>`):'',
     ].join('');
     return `<section class="detail-section" aria-labelledby="detail-${key}"><h3 id="detail-${key}">${esc(heading(o))}</h3>${body}<p class="image-license">${attribution.join(' · ')}</p></section>`;
   }).join('');

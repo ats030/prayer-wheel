@@ -309,15 +309,15 @@ async function hydrateWikiSection(o,key,config){
   const payload=data[config.field]||{};
   const summary=String(payload.summary||'').trim();
   const items=Array.isArray(payload.items)?payload.items:[];
-  const blocks=Array.isArray(payload.blocks)?payload.blocks:[];
   const source=safeUrl(payload.source_url)||safeUrl(data.source_url);
   // Set only when the server filled this section from the municipality
   // article because the onsen article had nothing; always say so up front.
   const sourceTitle=String(payload.source_title||'').trim();
   const license=safeUrl(data.content_license_url);
   if(!body)return;
-  if(!summary&&!items.length&&!blocks.length){
-    body.innerHTML=`<p class="detail-empty">${esc(config.placeholder)}</p>`;
+  if(!summary&&!items.length){
+    section.hidden=true;
+    body.innerHTML='';
     if(status)status.textContent='';
     return;
   }
@@ -330,28 +330,10 @@ async function hydrateWikiSection(o,key,config){
     return `<div><dt>${esc(label)}</dt><dd>${esc(bodyText)}</dd></div>`;
   };
   const itemsMarkup=items.map(renderItem).join('');
-  const sourceBlocks=blocks.flatMap(b=>{
-    // Block text joins paragraphs with blank lines; split on them so each
-    // paragraph becomes its own <p> (blank lines stay suppressed, paragraph
-    // breaks survive as margins).
-    const out=[];
-    const heading=String(b.heading||'');
-    if(heading)out.push(`<p class="detail-subheading">${esc(heading)}</p>`);
-    String(b.text||'').split(/\n{2,}/).map(s=>s.trim()).filter(Boolean)
-      .forEach(s=>out.push(`<p>${esc(s)}</p>`));
-    return out;
-  }).join('');
-  // When structured content is present the source text is redundant;
-  // keep it available collapsed. On the fallback paths (no items) it shows
-  // directly, as before.
-  const blockMarkup=sourceBlocks
-    ?(items.length?`<details class="section-source"><summary>原文を読む</summary>${sourceBlocks}</details>`:`<div class="section-source">${sourceBlocks}</div>`)
-    :'';
   const bodyParts=[
     sourceTitle?`<p class="detail-origin">${esc(sourceTitle)}の記事より</p>`:'',
     summary?`<p class="detail-summary">${esc(summary)}</p>`:'',
     items.length?`<dl class="section-items">${itemsMarkup}</dl>`:'',
-    blockMarkup,
   ].filter(Boolean).join('');
   body.innerHTML=bodyParts;
   const attribution=[];
@@ -365,19 +347,19 @@ async function hydrateWikiSection(o,key,config){
   if(status)status.innerHTML=attribution.join(' · ');
 }
 async function hydrateHistory(o,key){
-  await hydrateWikiSection(o,key,{sectionId:'#detail-history-section',bodyId:'#detail-history-body',statusId:'#detail-history-status',field:'history',placeholder:'この記事には歴史の記述がありません。'});
+  await hydrateWikiSection(o,key,{sectionId:'#detail-history-section',bodyId:'#detail-history-body',statusId:'#detail-history-status',field:'history'});
 }
 async function hydrateFood(o,key){
-  await hydrateWikiSection(o,key,{sectionId:'#detail-food-section',bodyId:'#detail-food-body',statusId:'#detail-food-status',field:'food',placeholder:'この記事には名物の記述がありません。'});
+  await hydrateWikiSection(o,key,{sectionId:'#detail-food-section',bodyId:'#detail-food-body',statusId:'#detail-food-status',field:'food'});
 }
 async function hydrateEfficacy(o,key){
-  await hydrateWikiSection(o,key,{sectionId:'#detail-efficacy-section',bodyId:'#detail-efficacy-body',statusId:'#detail-efficacy-status',field:'efficacy',placeholder:'この記事には効能の記述がありません。'});
+  await hydrateWikiSection(o,key,{sectionId:'#detail-efficacy-section',bodyId:'#detail-efficacy-body',statusId:'#detail-efficacy-status',field:'efficacy'});
 }
 async function hydrateAccess(o,key){
-  await hydrateWikiSection(o,key,{sectionId:'#detail-access-section',bodyId:'#detail-access-body',statusId:'#detail-access-status',field:'access',placeholder:'この記事にはアクセスの記述がありません。'});
+  await hydrateWikiSection(o,key,{sectionId:'#detail-access-section',bodyId:'#detail-access-body',statusId:'#detail-access-status',field:'access'});
 }
 async function hydrateTourism(o,key){
-  await hydrateWikiSection(o,key,{sectionId:'#detail-tourism-section',bodyId:'#detail-tourism-body',statusId:'#detail-tourism-status',field:'tourism',placeholder:'この記事には周辺・近隣の観光地に関する記述がありません。'});
+  await hydrateWikiSection(o,key,{sectionId:'#detail-tourism-section',bodyId:'#detail-tourism-body',statusId:'#detail-tourism-status',field:'tourism'});
 }
 async function hydrateLocation(o,key){
   const location=await detailedLocation(o),element=document.querySelector('#detail-location');

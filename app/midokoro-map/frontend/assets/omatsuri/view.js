@@ -466,12 +466,12 @@ async function hydrateWikiSection(f,key,config){
   const payload=data[config.field]||{};
   const summary=String(payload.summary||'').trim();
   const items=Array.isArray(payload.items)?payload.items:[];
-  const blocks=Array.isArray(payload.blocks)?payload.blocks:[];
   const source=safeUrl(payload.source_url)||safeUrl(data.source_url);
   const license=safeUrl(data.content_license_url);
   if(!body)return;
-  if(!summary&&!items.length&&!blocks.length){
-    body.innerHTML=`<p class="detail-empty">${esc(config.placeholder)}</p>`;
+  if(!summary&&!items.length){
+    section.hidden=true;
+    body.innerHTML='';
     if(status)status.textContent='';
     return;
   }
@@ -484,17 +484,9 @@ async function hydrateWikiSection(f,key,config){
     return `<div><dt>${esc(label)}</dt><dd>${esc(bodyText)}</dd></div>`;
   };
   const itemsMarkup=items.map(renderItem).join('');
-  const blockMarkup=blocks.map(b=>{
-    const heading=esc(String(b.heading||'')),text=esc(String(b.text||''));
-    return (heading?`<p class="detail-subheading">${heading}</p>`:'')+`<p>${text}</p>`;
-  }).join('');
-  const sourceMarkup=blockMarkup
-    ?(items.length?`<details class="section-source"><summary>原文を読む</summary>${blockMarkup}</details>`:blockMarkup)
-    :'';
   body.innerHTML=[
     summary?`<p class="detail-summary">${esc(summary)}</p>`:'',
     items.length?`<dl class="section-items">${itemsMarkup}</dl>`:'',
-    sourceMarkup,
   ].filter(Boolean).join('');
   const attribution=[summary?'AIによる要約':'編集あり'];
   if(source)attribution.push(wikiLink(source));
@@ -502,10 +494,10 @@ async function hydrateWikiSection(f,key,config){
   if(status)status.innerHTML=attribution.join(' · ');
 }
 async function hydrateHistory(f,key){
-  await hydrateWikiSection(f,key,{sectionId:'#detail-history-section',bodyId:'#detail-history-body',statusId:'#detail-history-status',field:'history',placeholder:'この記事には歴史の記述がありません。'});
+  await hydrateWikiSection(f,key,{sectionId:'#detail-history-section',bodyId:'#detail-history-body',statusId:'#detail-history-status',field:'history'});
 }
 const WIKI_EXTRA_SECTIONS=[{field:'highlights',title:'見どころ'},{field:'flow',title:'お祭りの流れ'},{field:'access',title:'アクセス'},{field:'tourism',title:'周辺観光'}];
-function wikiSectionHasContent(payload){const p=payload||{};return Boolean(String(p.summary||'').trim()||(Array.isArray(p.items)&&p.items.length)||(Array.isArray(p.blocks)&&p.blocks.length))}
+function wikiSectionHasContent(payload){const p=payload||{};return Boolean(String(p.summary||'').trim()||(Array.isArray(p.items)&&p.items.length))}
 function wikiSectionMarkup({field,title}){return `<section class="detail-section" id="detail-${field}-section" aria-labelledby="detail-${field}"><h3 id="detail-${field}">${title}</h3><div class="detail-history" id="detail-${field}-body"></div><p class="detail-history-status" id="detail-${field}-status">読み込んでいます…</p></section>`}
 async function hydrateExtraSections(f,key){
   await Promise.all(WIKI_EXTRA_SECTIONS.map(({field})=>hydrateWikiSection(f,key,{sectionId:`#detail-${field}-section`,bodyId:`#detail-${field}-body`,statusId:`#detail-${field}-status`,field,hideWhenEmpty:true})));
