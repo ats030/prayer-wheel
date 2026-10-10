@@ -112,6 +112,7 @@ function setupPublicSettings(data){
     return chosen;
   };
   applyStored();
+  refreshActive();
   /* 別の端末の設定は、この画面を描いたあとに届く (ドライブの取り込みは非同期)。
      画面へ入れ直さないと、利用者が何も触らずに「保存」を押しただけで、届いた設定を
      古い表示で上書きしてしまう。そのままドライブへも書き戻るので、もう片方の端末の
