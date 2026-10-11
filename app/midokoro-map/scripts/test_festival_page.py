@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Per-festival pages carry only sourced facts and point back to the map."""
 from datetime import date
+import json
 import unittest
 
 from festival_page import render_page
@@ -51,6 +52,21 @@ class PageChecks(unittest.TestCase):
     def test_no_upcoming_dates_says_so(self):
         html = render_page(dict(FESTIVAL, occurrences=[]), TODAY)
         self.assertIn('次回の日程は確認できていません。', html)
+        self.assertNotIn('application/ld+json', html)
+
+    def test_page_shares_the_site_frame(self):
+        for part in ('name="viewport"', 'name="description"', 'property="og:url" content="https://midokoro-map.ats030.workers.dev/festivals/Q1"',
+                     'href="/app.css"', 'href="/stories/story.css"', 'class="story-page"', 'class="skip-link"', 'class="site-header"'):
+            self.assertIn(part, self.html)
+
+    def test_event_data_lists_only_shown_dates(self):
+        raw = self.html.split('<script type="application/ld+json">', 1)[1].split('</script>', 1)[0]
+        self.assertNotIn('<', raw)
+        events = json.loads(raw)
+        self.assertEqual([(e['startDate'], e['endDate']) for e in events],
+                         [('2026-10-20', '2026-10-21'), ('2026-11-03', '2026-11-03')])
+        self.assertEqual(events[0]['name'], '秋<祭>')
+        self.assertEqual(events[0]['location']['address']['addressRegion'], '群馬県')
 
 
 if __name__ == '__main__':
