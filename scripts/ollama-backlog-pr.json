@@ -12,6 +12,30 @@
       ],
       "read_only": []
     },
+    "ats030-c3mwp": {
+      "repo": ".",
+      "base": "master",
+      "files": [
+        "app/ollama-openwebui-proxy.py",
+        "app/ollama-openwebui-proxy-selftest.py"
+      ],
+      "tests": [
+        "python3 app/ollama-openwebui-proxy-selftest.py"
+      ],
+      "read_only": []
+    },
+    "ats030-nw38q": {
+      "repo": ".",
+      "base": "master",
+      "files": [
+        "app/ollama-openwebui-proxy.py",
+        "app/ollama-openwebui-proxy-selftest.py"
+      ],
+      "tests": [
+        "python3 app/ollama-openwebui-proxy-selftest.py"
+      ],
+      "read_only": []
+    },
     "ats030-xglsh.1": {
       "repo": ".",
       "base": "master",
