@@ -1,5 +1,25 @@
 reviewed_at: 2026-10-02
 intended_use: Personal internal historical research; public release is a separate review
+public_auth_review:
+  reviewed_at: 2026-10-11
+  tool: Google OpenID Connect server flow
+  version_or_plan: Direct Google OAuth web client; not Google Cloud Identity Platform or Firebase Authentication
+  status: review_required
+  adoption: User selected Google login; no provider connection, SDK, account registration or deployment in this change
+  commercial_use: Governed by Google APIs Terms and OAuth policies; consent, privacy and brand requirements must be checked for the configured public client
+  cost: Official sign-in codelab states Google Cloud account/project are free; this is not a verified price guarantee for a configured production client
+  license_url: https://developers.google.com/terms
+  terms_url: https://developers.google.com/identity/protocols/oauth2/policies
+  pricing_evidence_url: https://codelabs.developers.google.com/codelabs/sign-in-with-google-button
+  identity_spec_url: https://developers.google.com/identity/openid-connect/openid-connect
+  evidence_retrieved: 2026-10-11
+  release_conditions:
+    - Verify the exact client, free cost conditions and commercial terms before connecting the provider
+    - Register the actual HTTPS domain, callback URI, consent and privacy information
+    - Use server-verified issuer/audience/expiry/nonce/subject; decoded browser claims are not authentication
+    - Request only authentication scopes; do not store email, name or provider tokens in the trial ledger
+    - Do not use an Access invitation cap as the public account system
+  notes: public_security.py uses only the already reviewed Python standard library and makes no Google or other external calls
 decisions:
   - tool: SQLite via existing Python sqlite3
     version_or_plan: Existing SQLite 3.45.1 library; no installation or redistribution
