@@ -1,6 +1,6 @@
 import unittest
 
-from bunka_shiseki import designation_of, find_match, merge_bunka, normalize, p4275_map, similar
+from bunka_shiseki import components, designation_of, find_match, join_kinds, merge_bunka, merge_meisho, normalize, p4275_map, same_place, similar
 from fetch_shiseki import category
 
 
@@ -82,6 +82,75 @@ class BunkaShisekiTest(unittest.TestCase):
                               lambda lat, lon: "鳥取県")
         self.assertEqual(rows[0]["prefecture"], "鳥取県")
         self.assertEqual(rows[0]["address"], "鳥取県八頭郡智頭町、岡山県英田郡西粟倉村")
+
+    def test_meisho_on_a_designated_shiseki_keeps_one_row_with_both_labels(self):
+        shiseki = {**row("毛越寺境内", lat=38.98, lon=141.11, pref="岩手県"), "designation": "special",
+                   "designation_label": "特別史跡", "designation_source": "s", "heritage_id": "401/100",
+                   "categories": ["社寺・宗教遺跡"]}
+        dual = item(heritage="100", name="毛越寺庭園", pref="岩手県", lat="38.98", lon="141.11",
+                    kind1="特別史跡", kind2="特別名勝")
+        rows, stats = merge_meisho([shiseki], [dual], {}, category)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(shiseki["designation_label"], "特別史跡・特別名勝")
+        self.assertEqual(shiseki["designation_source"], "s")
+        self.assertEqual(shiseki["categories"], ["社寺・宗教遺跡", "名勝"])
+        self.assertEqual(stats["heritage_id"], 1)
+
+    def test_meisho_on_an_undesignated_row_takes_the_meisho_source(self):
+        temple = {**row("天龍寺", pref="京都府", lat=35.0157, lon=135.6737), "designation_label": "", "categories": ["社寺・宗教遺跡"]}
+        rows, stats = merge_meisho([temple], [item(heritage="200", name="天龍寺庭園", pref="京都府", lat="35.0158",
+                                                   lon="135.6738", kind1="史跡", kind2="特別名勝")], {}, category)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual((temple["designation"], temple["designation_label"]), ("special", "史跡・特別名勝"))
+        self.assertEqual(temple["designation_source"], "https://kunishitei.bunka.go.jp/heritage/detail/401/200")
+        self.assertIn("名勝", temple["categories"])
+        self.assertEqual(stats["near"], 1)
+
+    def test_new_meisho_row_has_source_category_and_components(self):
+        rows, stats = merge_meisho([], [
+            item(heritage="300", name="大和三山\n\u3000香具山\n\u3000畝傍山\n\u3000耳成山", pref="奈良県",
+                 lat="34.49", lon="135.80", kind1="名勝"),
+            item(heritage="301", name="六義園", pref="東京都", lat="35.73", lon="139.74", kind1="特別名勝"),
+            item(heritage="302", name="座標なし", lat="", lon="", kind1="名勝")], {}, category)
+        sanzan, garden = rows
+        self.assertEqual((sanzan["id"], sanzan["label_ja"]), ("bunka:401:300", "大和三山"))
+        self.assertEqual(sanzan["description"], "構成: 香具山、畝傍山、耳成山")
+        self.assertEqual((sanzan["designation"], sanzan["designation_label"]), ("national", "名勝"))
+        self.assertEqual(sanzan["categories"], ["名勝"])
+        self.assertEqual(sanzan["source_url"], "https://kunishitei.bunka.go.jp/heritage/detail/401/300")
+        self.assertEqual((garden["designation"], garden["designation_label"]), ("special", "特別名勝"))
+        self.assertEqual((stats["added"], stats["no_coordinates"]), (2, 1))
+
+    def test_same_place_rejects_a_facility_inside_the_meisho_and_garden_only_overlap(self):
+        self.assertFalse(same_place("室戸岬", "室戸岬灯台", "near"))
+        self.assertTrue(same_place("円通寺庭園", "円通寺", "near"))
+        self.assertTrue(same_place("鳳来寺山", "鳳来寺", "near"))
+        self.assertTrue(same_place("仙巌園", "仙巌園 (鹿児島市)", "near"))
+        self.assertFalse(same_place("安養院庭園", "太山寺成就院庭園", "close"))
+
+    def test_join_kinds_is_order_independent_and_keeps_the_higher_kind(self):
+        self.assertEqual(join_kinds(join_kinds("国指定史跡", ["名勝"]), ["特別名勝"]), "国指定史跡・特別名勝")
+        self.assertEqual(join_kinds(join_kinds("国指定史跡", ["特別名勝"]), ["名勝"]), "国指定史跡・特別名勝")
+        self.assertEqual(join_kinds("国指定史跡", ["史跡", "名勝"]), "国指定史跡・名勝")
+        self.assertEqual(join_kinds("国指定史跡", ["特別史跡", "特別名勝"]), "特別史跡・特別名勝")
+        self.assertEqual(join_kinds("登録有形文化財", ["名勝"]), "登録有形文化財・名勝")
+
+    def test_special_natural_monument_does_not_make_a_meisho_special(self):
+        rows, _ = merge_meisho([], [item(heritage="400", name="名勝X", kind1="名勝", kind2="特別天然記念物")], {}, category)
+        self.assertEqual(rows[0]["designation"], "national")
+
+    def test_raised_designation_points_to_the_meisho_record(self):
+        shiseki = {**row("毛越寺", lat=38.98, lon=141.11, pref="岩手県"), "designation": "national",
+                   "designation_label": "国指定史跡", "designation_source": "s", "heritage_id": "401/100",
+                   "categories": []}
+        merge_meisho([shiseki], [item(heritage="101", name="毛越寺庭園", pref="岩手県", lat="38.98", lon="141.11",
+                                      kind1="特別名勝")], {}, category)
+        self.assertEqual((shiseki["designation"], shiseki["heritage_id"]), ("special", "401/101"))
+        self.assertEqual(shiseki["designation_source"], "https://kunishitei.bunka.go.jp/heritage/detail/401/101")
+
+    def test_components_reads_lines_after_the_name(self):
+        self.assertEqual(components("黒部峡谷\n\u3000附\u3000猿飛並びに奥鐘山"), ["附 猿飛並びに奥鐘山"])
+        self.assertEqual(components("六義園"), [])
 
 
 if __name__ == "__main__":

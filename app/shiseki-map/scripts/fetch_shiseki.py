@@ -468,15 +468,17 @@ def main():
             "heritage_id": "", "source_url": "https://www.wikidata.org/wiki/" + qid,
         })
     fill_infobox_eras(rows, articles)
-    from bunka_shiseki import P4275_QUERY, load_csv, merge_bunka, p4275_map
+    from bunka_shiseki import P4275_QUERY, load_csv, load_meisho_csv, merge_bunka, merge_meisho, p4275_map
     from merge_public_sites import merge_rows
 
     def locate(lat, lon):
         return containing_prefecture(lon, lat, features) or nearest_prefecture(lon, lat, features) or ""
 
-    rows, bunka_stats = merge_bunka(rows, load_csv(), p4275_map(query_cached("p4275_shiseki", P4275_QUERY)),
-                                    category, locate)
+    p4275 = p4275_map(query_cached("p4275_shiseki", P4275_QUERY))
+    rows, bunka_stats = merge_bunka(rows, load_csv(), p4275, category, locate)
     print("bunka match breakdown:", bunka_stats)
+    rows, meisho_stats = merge_meisho(rows, load_meisho_csv(), p4275, category, locate)
+    print("meisho match breakdown:", meisho_stats)
 
     rows = merge_rows(rows)
     if OUTPUT.exists():

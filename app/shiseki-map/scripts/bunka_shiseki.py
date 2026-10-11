@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""文化庁 国指定文化財等データベースの史跡・特別史跡をスナップショットへ統合する。
+"""文化庁 国指定文化財等データベースの史跡・特別史跡と名勝・特別名勝をスナップショットへ統合する。
 
 出典: https://kunishitei.bunka.go.jp/ (利用規約 https://kunishitei.bunka.go.jp/top/policy
 「出典を記載の上、自由にご利用ください」)。CSVは data/bunka_cache に保存し、再実行時は再取得しない。
@@ -19,6 +19,11 @@ ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "data" / "bunka_cache"
 CSV_PATH = CACHE / "shiseki.csv"
 META_PATH = CACHE / "meta.json"
+MEISHO_CSV_PATH = CACHE / "meisho.csv"
+MEISHO_META_PATH = CACHE / "meisho_meta.json"
+# 検索フォームの種別チェックボックス(entry_kind1_401[n])
+SHISEKI_KINDS = {"entry_kind1_401[0]": "史跡", "entry_kind1_401[3]": "特別史跡"}
+MEISHO_KINDS = {"entry_kind1_401[1]": "名勝", "entry_kind1_401[4]": "特別名勝"}
 BASE = "https://kunishitei.bunka.go.jp"
 DETAIL_URL = BASE + "/heritage/detail/401/{}"
 SOURCE_NAME = "文化庁 国指定文化財等データベース"
@@ -30,16 +35,15 @@ HIDDEN = re.compile(r'<input type="hidden" name="([^"]+)"(?: autocomplete="off")
 TOKEN = re.compile(r'name="_csrfToken"[^>]*value="([^"]+)"')
 
 
-def fetch_csv() -> str:
-    """一覧検索のセッションとCSRFトークンを経由して史跡・特別史跡のCSVを取得する。"""
+def fetch_csv(kinds: dict[str, str]) -> str:
+    """一覧検索のセッションとCSRFトークンを経由して指定種別のCSVを取得する。"""
     session = requests.Session()
     session.headers["User-Agent"] = "ShisekiMap/1.0 (https://github.com/ats030/shiseki-map)"
     index = session.get(BASE + "/bsys/index", timeout=60)
     index.raise_for_status()
     listing = session.post(BASE + "/bsys/searchlist", timeout=120, data={
         "_method": "POST", "_csrfToken": TOKEN.search(index.text).group(1), "screen_id": "index",
-        "page_no": "1", "register_sub_id": "401",
-        "entry_kind1_401[0]": "史跡", "entry_kind1_401[3]": "特別史跡",
+        "page_no": "1", "register_sub_id": "401", **kinds,
     })
     listing.raise_for_status()
     # CSV出力フォームの hidden 項目(検索条件・トークン)をそのまま送る
@@ -53,13 +57,17 @@ def fetch_csv() -> str:
     return text
 
 
-def load_csv() -> list[dict]:
-    if not CSV_PATH.exists():
+def load_csv(path: Path = CSV_PATH, meta: Path = META_PATH, kinds: dict[str, str] = SHISEKI_KINDS) -> list[dict]:
+    if not path.exists():
         CACHE.mkdir(parents=True, exist_ok=True)
-        CSV_PATH.write_text(fetch_csv(), encoding="utf-8")
-        META_PATH.write_text(json.dumps({"fetched": date.today().isoformat(), "source": BASE + "/bsys/index"},
-                                        ensure_ascii=False) + "\n", encoding="utf-8")
-    return list(csv.DictReader(io.StringIO(CSV_PATH.read_text(encoding="utf-8"))))
+        path.write_text(fetch_csv(kinds), encoding="utf-8")
+        meta.write_text(json.dumps({"fetched": date.today().isoformat(), "source": BASE + "/bsys/index",
+                                    "kinds": list(kinds.values())}, ensure_ascii=False) + "\n", encoding="utf-8")
+    return list(csv.DictReader(io.StringIO(path.read_text(encoding="utf-8"))))
+
+
+def load_meisho_csv() -> list[dict]:
+    return load_csv(MEISHO_CSV_PATH, MEISHO_META_PATH, MEISHO_KINDS)
 
 
 def p4275_map(bindings: list[dict]) -> dict[str, list[str]]:
@@ -222,4 +230,122 @@ def merge_bunka(rows: list[dict], items: list[dict], p4275: dict[str, list[str]]
         print(f"bunka: designation shares an existing record: {label} -> {other}")
     for label, other in duplicates:
         print(f"bunka: new row within {DUPLICATE_METERS}m of existing record: {label} / {other}")
+    return rows + added, stats
+
+
+
+def kinds_of(item: dict) -> list[str]:
+    return [kind for kind in (item["種別1"], item["種別2"]) if kind]
+
+
+def components(name: str) -> list[str]:
+    """「ピリカノカ」のように1件で複数の構成地点をもつ指定の構成名(名称の2行目以降)。"""
+    return [re.sub(r"^附\s*", "附 ", line.strip(" \u3000")) for line in name.split("\n")[1:] if line.strip(" \u3000")]
+
+
+def same_place(label: str, other: str, method: str) -> bool:
+    """名称の部分一致・近接で見つけた行が名勝そのものか。
+
+    「室戸岬」→「室戸岬灯台」のように既存行の名称が名勝名を含む場合は名勝の中の一施設なので別行にする。
+    近接一致は「庭園」の共通だけで同一とみなさない。
+    """
+    if method == "near":
+        key, row_key = normalize(label), normalize(re.sub(r"\s*[(（][^)）]*[)）]$", "", other))
+        return not (key != row_key and key in row_key)
+    if method == "close":
+        return similar(label.replace("庭園", ""), other.replace("庭園", ""))
+    return True
+
+
+SPECIAL_KINDS = {"特別史跡", "特別名勝"}
+
+
+def join_kinds(present: str, kinds: list[str]) -> str:
+    """既存ラベルへ指定種別を重複なく足す。
+
+    「国指定史跡」に「史跡」は足さず、特別名勝・特別史跡があれば下位の名勝・史跡を省く。入力順に依らず同じ結果にする。
+    """
+    parts = [part for part in present.split("・") if part]
+    parts += [kind for kind in kinds if not any(part.endswith(kind) for part in parts)]
+    for special in SPECIAL_KINDS & set(parts):
+        base = special.removeprefix("特別")
+        parts = [part for part in parts if part == special or not part.endswith(base)]
+    return "・".join(parts)
+
+
+def merge_meisho(rows: list[dict], items: list[dict], p4275: dict[str, list[str]], category,
+                 locate=lambda lat, lon: "") -> tuple[list[dict], dict]:
+    """名勝・特別名勝を既存行へ指定として追記し、未掲載の名勝を新規行として加える。
+
+    史跡と同じ物件(二重指定や「○○寺庭園」と「○○寺」)は1行に保ち、designation_label に両方の指定を並べる。
+    複数の構成地点をもつ指定は文化庁DBの代表座標1点で表し、構成名を説明に残す。
+    """
+    by_heritage = {row["heritage_id"]: row for row in rows if row.get("heritage_id")}
+    rows_by_qid = {row["qid"]: row for row in rows if row.get("qid")}
+    stats = {"heritage_id": 0, "p4275": 0, "name": 0, "near": 0, "close": 0, "added": 0,
+             "no_coordinates": 0, "kept_source": 0, "rejected": 0}
+    added = []
+    for item in items:
+        point = coordinates(item)
+        address = item["都道府県"] + item["所在地"].strip()
+        if not item["都道府県"].strip() and point:
+            item = {**item, "都道府県": locate(*point)}
+        heritage = str(int(item["管理対象ID"]))
+        label = item["名称"].split("\n", 1)[0].strip(" \u3000")
+        kinds = kinds_of(item)
+        rank = "special" if SPECIAL_KINDS & set(kinds) else "national"
+        url = DETAIL_URL.format(heritage)
+        row = by_heritage.get("401/" + heritage)
+        method = "heritage_id"
+        if row is None:
+            row, method = find_match(item, label, rows_by_qid, rows + added, p4275.get(heritage, []))
+            if row is not None and not same_place(label, row["label_ja"], method):
+                stats["rejected"] += 1
+                row = None
+        if row is not None:
+            stats[method] += 1
+            tags = row.setdefault("categories", [])
+            if "名勝" not in tags:
+                tags.append("名勝")
+            if row.get("designation") in RANK:
+                # 史跡としての指定と根拠を保ち、名勝の指定名を表示ラベルへ足す
+                row["designation_label"] = join_kinds(row.get("designation_label", ""), kinds)
+                if RANK[rank] > RANK[row["designation"]]:
+                    # 引き上げた区分の根拠は名勝側の詳細ページにある
+                    row.update(designation=rank, designation_source=url, heritage_id="401/" + heritage)
+                elif row.get("heritage_id") != "401/" + heritage:
+                    stats["kept_source"] += 1
+            else:
+                if not JAPANESE.search(row["label_ja"]):
+                    row["label_ja"] = row["title_ja"] = label
+                present = row.get("designation_label", "")
+                row.update(designation=rank, designation_label=join_kinds(
+                               "" if present in ("未指定", "指定不明") else present, kinds),
+                           designation_source=url, heritage_id="401/" + heritage)
+            continue
+        if point is None:
+            stats["no_coordinates"] += 1
+            continue
+        qid = next((q for q in p4275.get(heritage, []) if q not in rows_by_qid), "")
+        parts = components(item["名称"])
+        new = {
+            "id": "" if qid else "bunka:401:" + heritage, "qid": qid,
+            "label_ja": label, "label_en": "", "prefecture": item["都道府県"],
+            "address": address,
+            "latitude": point[0], "longitude": point[1],
+            "description": "構成: " + "、".join(parts) if parts else "", "title_ja": label,
+            "categories": [tag for tag in category([], label) if tag != "その他"] + ["名勝"],
+            "era": "", "era_source": "",
+            "designation": rank, "designation_label": "・".join(kinds),
+            "designation_source": url, "heritage_id": "401/" + heritage, "source_url": url,
+            "source_name": SOURCE_NAME, "source_license": SOURCE_LICENSE,
+        }
+        if not qid:
+            del new["qid"]
+        else:
+            del new["id"]
+            rows_by_qid[qid] = new
+        by_heritage[new["heritage_id"]] = new
+        added.append(new)
+        stats["added"] += 1
     return rows + added, stats
