@@ -1,4 +1,4 @@
-import {esc, flyToItem, revealDetail, focusWithin, focusFirst} from '../detail-common.js';
+import {esc, flyToItem, revealDetail, focusWithin, focusFirst, announceDetailLoad} from '../detail-common.js';
 export function mount(context) {
 const {map, document, fetch} = context;
 
@@ -418,16 +418,10 @@ function openDetail(f,key,origin){
   const focusTarget=document.querySelector('#detail-title');
   panel.scrollTop=0;
   revealDetail(map,panel,focusTarget);
-  hydrateImage(f,key);
-  hydrateLocation(f,key);
-  if(context.summariesOnly)context.hydrateSummary(f.qid,()=>selectedKey===key);
-  else {
-  hydrateAbout(f,key);
-  hydrateHistory(f,key);
-  hydrateExtraSections(f,key);
-  }
-  hydrateLinks(f,key);
-  hydrateNearbyHotels(f,key);
+  const tasks=[hydrateImage(f,key),hydrateLocation(f,key),hydrateLinks(f,key),hydrateNearbyHotels(f,key)];
+  if(context.summariesOnly)tasks.push(context.hydrateSummary(f.qid,()=>selectedKey===key));
+  else tasks.push(hydrateAbout(f,key),hydrateHistory(f,key),hydrateExtraSections(f,key));
+  announceDetailLoad(panel,tasks);
 }
 async function hydrateNearbyHotels(f,key){
   const hotels=await loadNearbyHotels(f);

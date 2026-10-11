@@ -46,3 +46,33 @@ export function focusFirst(...candidates) {
   }
   return null;
 }
+
+const detailLoads = new WeakMap();
+
+// Keep the live region separate from the title and asynchronously rendered prose.
+// A new opening invalidates earlier loads, including reopening the same item.
+export function announceDetailLoad(panel, tasks) {
+  let status = panel.querySelector('#detail-load-status');
+  if (!status) {
+    status = panel.ownerDocument.createElement('p');
+    status.id = 'detail-load-status';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    status.setAttribute('aria-atomic', 'true');
+    status.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0';
+    panel.append(status);
+  }
+  status.textContent = '';
+  const load = {};
+  detailLoads.set(panel, load);
+  return Promise.allSettled(tasks).then(() => new Promise(resolve => {
+    // Even cached responses must finish after the initial title focus.
+    requestAnimationFrame(() => {
+      const host = panel.getRootNode().host;
+      if (detailLoads.get(panel) === load && panel.isConnected && !panel.hidden && !host?.hidden) {
+        status.textContent = '詳細情報を更新しました。';
+      }
+      resolve();
+    });
+  }));
+}

@@ -1,4 +1,4 @@
-import {esc, reducedMotion, flyToItem, revealDetail, focusWithin, focusFirst} from '../detail-common.js';
+import {esc, reducedMotion, flyToItem, revealDetail, focusWithin, focusFirst, announceDetailLoad} from '../detail-common.js';
 export function mount(context) {
 const {map, document, fetch} = context;
 
@@ -354,8 +354,7 @@ function showDetail(o,origin){
     ${furusatoLink(o)}
     ${links.length?`<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${links.map(([label,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label}<span aria-hidden="true">↗</span></a>`).join('')}</nav></section>`:''}
   </article>`;
-  hydrateImage(o);
-  hydrateSections(o);
+  announceDetailLoad(document.querySelector('#detail-panel'),[hydrateImage(o),hydrateSections(o)]);
 }
 
 let furusatoAffiliateCatalog={};
@@ -413,7 +412,7 @@ async function hydrateImage(o){
   const container=document.querySelector('#detail-image');
   if(!container)return;
   if(!imageCatalogReady){
-    try{await loadImageCatalog();if(selectedItem===o)hydrateImage(o)}
+    try{await loadImageCatalog();if(selectedItem===o)await hydrateImage(o)}
     catch{if(selectedItem===o)imageFailure(container,o,'写真の登録情報を取得できませんでした。')}
     return;
   }
