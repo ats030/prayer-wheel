@@ -20,7 +20,7 @@ import (
 	"midokoro-map/internal/tokusan"
 )
 
-var kinds = map[string]bool{"shiseki": true, "omatsuri": true, "onsen": true, "tokusan": true}
+var kinds = map[string]bool{"shiseki": true, "omatsuri": true, "onsen": true, "tokusan": true, "geo": true}
 
 type publicConfig struct {
 	DefaultKind      string   `json:"defaultKind"`

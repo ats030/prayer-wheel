@@ -16,113 +16,6 @@ function resizeWithoutMoving() {
   if (!sharedMap.getCenter().equals(center)) sharedMap.setView(center, zoom, {reset:true, animate:false});
 }
 
-const geoparkKinds = [['shiseki','史跡'],['omatsuri','祭り'],['onsen','温泉'],['tokusan','特産物']];
-
-function geoparkPopup(properties) {
-  const box = document.createElement('div');
-  const title = document.createElement('strong');
-  title.textContent = properties.name;
-  const lines = [title];
-  if (properties.unesco) lines.push('ユネスコ世界ジオパーク');
-  lines.push('構成自治体: '+properties.municipalities.join('、'));
-  if (properties.partial.length) lines.push('一部のみ: '+properties.partial.join('、')+'（範囲には含めていません）');
-  lines.push('範囲内: '+geoparkKinds.map(([kind,label])=>label+' '+properties.counts[kind]+'件').join(' / '));
-  const source = document.createElement('a');
-  source.href = properties.source; source.target = '_blank'; source.rel = 'noopener';
-  source.textContent = '日本ジオパークネットワーク';
-  const credit = document.createElement('span');
-  credit.append('出典: ', source, properties.fetched ? '（'+properties.fetched+'取得）' : '');
-  lines.push(credit);
-  for (const line of lines) {
-    const row = document.createElement('div');
-    row.append(line);
-    box.append(row);
-  }
-  return box;
-}
-
-// Geopark outlines are shared by every tab. Polygons stay non-interactive so they never cover a view's markers;
-// a map click that no marker handled looks up the region instead.
-function addGeoparkOverlay(map) {
-  map.createPane('geoparks').style.zIndex = 350;
-  const group = L.layerGroup();
-  let loading = null;
-  let regions = [];
-  const load = () => loading ||= fetch('/geo/geoparks.json').then(response => {
-    if (!response.ok) throw new Error('geopark layer unavailable');
-    return response.json();
-  }).then(data => {
-    regions = data.features;
-    L.geoJSON(data, {pane:'geoparks', interactive:false, style:{color:'#2f6f4f', weight:1.5, fillColor:'#2f6f4f', fillOpacity:.12}}).addTo(group);
-  }).catch(error => { loading = null; map.removeLayer(group); console.error(error); });
-  map.on('overlayadd', event => { if (event.layer === group) load(); });
-  map.on('click', event => {
-    if (!map.hasLayer(group) || event.sourceTarget !== map) return;
-    const {lng, lat} = event.latlng;
-    const hit = regions.find(feature => feature.geometry.coordinates.some(rings =>
-      insideRing(lng, lat, rings[0]) && !rings.slice(1).some(hole => insideRing(lng, lat, hole))));
-    if (hit) L.popup().setLatLng(event.latlng).setContent(geoparkPopup(hit.properties)).openOn(map);
-  });
-  return group;
-}
-
-function geositePopup(properties) {
-  const box = document.createElement('div');
-  const title = document.createElement('strong');
-  title.textContent = properties.name;
-  const source = document.createElement('a');
-  source.href = properties.source_url; source.target = '_blank'; source.rel = 'noopener';
-  source.textContent = '国指定文化財等データベース';
-  const credit = document.createElement('span');
-  credit.append('出典: ', source, '（'+properties.fetched+'取得）');
-  const place = [properties.prefecture, properties.address].filter(Boolean).join(' ');
-  for (const line of [title, properties.designation_label+'（地質鉱物）', place,
-    properties.criteria ? '指定基準: '+properties.criteria : '', credit]) {
-    if (!line) continue;
-    const row = document.createElement('div');
-    row.append(line);
-    box.append(row);
-  }
-  return box;
-}
-
-// Geological natural monuments. The ones a shiseki point already shows (properties.shiseki) are hidden on that tab
-// only. Markers stay in the default overlay pane: with preferCanvas a pane of their own would get a second canvas
-// that swallows clicks meant for the active tab's markers.
-let showGeositeShared = () => {};
-function addGeositeOverlay(map) {
-  const group = L.layerGroup(), shared = L.layerGroup();
-  showGeositeShared = () => {
-    if (activeKind === 'shiseki') group.removeLayer(shared); else group.addLayer(shared);
-  };
-  let loading = null;
-  const load = () => loading ||= fetch('/geo/geosites.json').then(response => {
-    if (!response.ok) throw new Error('geosite layer unavailable');
-    return response.json();
-  }).then(data => {
-    L.geoJSON(data, {
-      pointToLayer: (feature, latlng) => L.circleMarker(latlng, {radius:6, weight:1.5, color:'#5b3a1e',
-        fillColor: feature.properties.designation === 'special' ? '#c2410c' : '#b7791f', fillOpacity:.85}),
-      onEachFeature: (feature, layer) => {
-        layer.bindPopup(() => geositePopup(feature.properties));
-        (feature.properties.shiseki ? shared : group).addLayer(layer);
-      },
-    });
-    showGeositeShared();
-  }).catch(error => { loading = null; map.removeLayer(group); console.error(error); });
-  map.on('overlayadd', event => { if (event.layer === group) load(); });
-  return group;
-}
-
-function insideRing(x, y, ring) {
-  let hit = false;
-  for (let i = 1; i < ring.length; i++) {
-    const [x1, y1] = ring[i-1], [x2, y2] = ring[i];
-    if ((y1 > y) !== (y2 > y) && x < x1 + (y - y1) * (x2 - x1) / (y2 - y1)) hit = !hit;
-  }
-  return hit;
-}
-
 function attachMap(context) {
   const region = context.root.querySelector('.map-region');
   if (!container) {
@@ -132,13 +25,10 @@ function attachMap(context) {
       attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom:19,
     }).addTo(sharedMap);
-    L.control.layers(null, {'ジオパーク': addGeoparkOverlay(sharedMap), '天然記念物（地質鉱物）': addGeositeOverlay(sharedMap)},
-      {collapsed:false, position:'bottomleft'}).addTo(sharedMap);
   } else {
     context.root.querySelector('#map')?.remove();
     region.prepend(container);
   }
-  showGeositeShared();
   resizeWithoutMoving();
 }
 
@@ -213,7 +103,8 @@ async function buildView(kind, config) {
   const root = host.attachShadow({mode:'open'});
   const response = await fetch('/assets/'+kind+'/view.html');
   if (!response.ok) throw new Error('画面を読み込めませんでした。');
-  const css = ['/vendor/leaflet.css','/vendor/MarkerCluster.css','/vendor/MarkerCluster.Default.css','/assets/'+kind+'/app.css','/assets/'+kind+'/detail-panel.css'];
+  const css = ['/vendor/leaflet.css','/vendor/MarkerCluster.css','/vendor/MarkerCluster.Default.css','/assets/'+kind+'/app.css'];
+  if (kind !== 'geo') css.push('/assets/'+kind+'/detail-panel.css');
   root.innerHTML = css.map(href=>`<link rel="stylesheet" href="${href}">`).join('') + await response.text() +
     '<style>:host{display:block;height:100%;min-width:0;overflow-x:clip}h2{margin:0;font:700 1.3rem var(--font-display)}.app-shell{min-height:100%}#map{width:100%;height:100%}.leaflet-control-layers-selector{width:auto;height:auto;margin:0 .3rem 0 0;padding:0;accent-color:#2f6f4f}</style>';
   const legend = root.querySelector('.map-legend');

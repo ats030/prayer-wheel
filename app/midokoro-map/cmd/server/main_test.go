@@ -138,6 +138,11 @@ func TestDefaultCategoryConfig(t *testing.T) {
 	if err != nil || config.DefaultKind != "tokusan" {
 		t.Fatal(config, err)
 	}
+	t.Setenv("MIDOKORO_DEFAULT_KIND", "geo")
+	config, err = readConfig()
+	if err != nil || config.DefaultKind != "geo" {
+		t.Fatal(config, err)
+	}
 	t.Setenv("MIDOKORO_DEFAULT_KIND", "invalid")
 	if _, err := readConfig(); err == nil {
 		t.Fatal("invalid default must fail startup")

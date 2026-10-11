@@ -1,7 +1,7 @@
 import {prepare, activate} from './runtime.js';
 
-const kinds = ['shiseki','omatsuri','onsen','tokusan'];
-const labels = {shiseki:'史跡',omatsuri:'祭り',onsen:'温泉',tokusan:'特産物'};
+const kinds = ['shiseki','omatsuri','onsen','tokusan','geo'];
+const labels = {shiseki:'史跡',omatsuri:'祭り',onsen:'温泉',tokusan:'特産物',geo:'地形・地質'};
 const storageKey = 'midokoro-map:last-kind';
 let config;
 let requestNumber = 0;

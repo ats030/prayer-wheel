@@ -16,7 +16,7 @@ go build -o app-server ./cmd/server
 
 ## 設定
 
-- MIDOKORO_DEFAULT_KIND: shiseki（既定）/omatsuri/onsen/tokusan。初回のカテゴリ。再訪はブラウザ内の最後のカテゴリ、?kind=で直接指定できる。
+- MIDOKORO_DEFAULT_KIND: shiseki（既定）/omatsuri/onsen/tokusan/geo。初回のカテゴリ。再訪はブラウザ内の最後のカテゴリ、?kind=で直接指定できる。
 - MIDOKORO_DATA_DIR: data（既定）。DBと種類別要約を読む。MIDOKORO_FRONTEND_DIRはfrontend（既定）。
 - MIDOKORO_PUBLIC_ORIGIN、MIDOKORO_AFFILIATE_ORIGINS: 広告を許可するHTTPS公開先。後者はカンマ区切り。初期状態は空で通常検索。
 - MIDOKORO_OMATSURI_A8MAT/MIDOKORO_ONSEN_A8MAT/MIDOKORO_SHISEKI_A8MAT: 種類別広告ID。自己ホストは旧JALAN_A8MATもフォールバックする。TOKUSAN_AMAZON_URLは広告許可時のみ使う。
@@ -28,7 +28,7 @@ Cloud Runで広告を有効にする際はURL登録を先に済ませ、既存Se
 
 data/<kind>にDBと要約を隔離し、APIは/api/<kind>/<従来のAPIパスのapi以降>へ配置する（例 /api/onsen/onsen/）。元アプリのソース・DB・要約・収集スクリプトは保持する。更新は元アプリの収集スクリプトで出典・割当を検証し、統合版停止中にscripts/import-data.pyで取り込んで再ビルド・公開する。統合版で増えた要約を失わないよう、既存コピーがある場合は--replaceなしでは上書きしない。既存要約を別途保全してから置き換える。
 
-ジオパーク範囲は全タブ共通の重ね合わせレイヤー（地図左下のチェックボックス）で、正本は app/geo-map/data/geo.db。import-data.py が data/geo に取り込み、scripts/build-geo-layer.py が frontend/geo/geoparks.json（簡略化した範囲と各種別の範囲内件数）と frontend/geo/geosites.json（地質鉱物の天然記念物）を生成する。史跡タブに同じ文化庁 ID の点、または同名で1km以内の点がある天然記念物は properties.shiseki にその site_id を持ち、史跡タブでだけ隠す（対応一覧は meta.shown_by_shiseki）。点データを取り込み直したら build-geo-layer.py も再実行する。古いままだと build-cloudflare.py が停止する。
+「地形・地質」タブ（`?kind=geo`）でジオパーク範囲と地質鉱物の天然記念物を表示する。名称・地域・種別で絞り込み、一覧と地図から出典付きの情報を開ける。他4カテゴリには地質レイヤーを重ねない。正本は app/geo-map/data/geo.db。import-data.py が data/geo に取り込み、scripts/build-geo-layer.py が frontend/geo/geoparks.json（簡略化した範囲と各種別の範囲内件数）と frontend/geo/geosites.json（地質鉱物の天然記念物）を生成する。史跡タブに同じ文化庁 ID の点、または同名で1km以内の点がある天然記念物は properties.shiseki にその site_id を持ち、従来の重ね合わせ表示では史跡タブで隠していた（対応一覧は meta.shown_by_shiseki）。独立した地形・地質タブではこれらも表示する。点データを取り込み直したら build-geo-layer.py も再実行する。古いままだと build-cloudflare.py が停止する。
 
 cmd/warm-<kind>は統合版の種類別キャッシュへ書く。元版と統合版でデータ所有権を混ぜず、通常の閲覧は統合版のみで行う。migration-manifest.jsonは初回コピーのSHA256。
 
