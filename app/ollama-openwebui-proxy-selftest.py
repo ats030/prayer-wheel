@@ -80,6 +80,15 @@ check("loopback OpenCode", AccessProbe("127.0.0.1", command="POST", path="/v1/ch
 lan = AccessProbe("192.168.11.13")
 check("LAN は Origin なしを拒否", lan.request_allowed(), False)
 check("LAN の拒否理由", lan.error, (403, "Browser origin is required from LAN"))
+old_origins = proxy.ALLOWED_ORIGINS
+proxy.ALLOWED_ORIGINS = set()
+empty = AccessProbe("192.168.11.13", origin="https://ikimono-note.ats030.workers.dev")
+check("許可 origin が空なら全 origin を拒否", empty.request_allowed(), False)
+check("空のときの拒否理由", empty.error, (403, "Origin is not allowed"))
+proxy.ALLOWED_ORIGINS = {"https://ikimono-note.ats030.workers.dev"}
+check("許可した origin は通す", AccessProbe("192.168.11.13", origin="https://ikimono-note.ats030.workers.dev").request_allowed(), True)
+check("旧 Cloud Run origin は拒否", AccessProbe("192.168.11.13", origin="https://ikimono-note-vcxjhzkhsa-an.a.run.app").request_allowed(), False)
+proxy.ALLOWED_ORIGINS = old_origins
 proxy.ALLOWED_NETWORKS, proxy.TRUSTED_NETWORKS = old_allowed, old_trusted
 
 
