@@ -28,7 +28,7 @@ Cloud Runで広告を有効にする際はURL登録を先に済ませ、既存Se
 
 data/<kind>にDBと要約を隔離し、APIは/api/<kind>/<従来のAPIパスのapi以降>へ配置する（例 /api/onsen/onsen/）。元アプリのソース・DB・要約・収集スクリプトは保持する。更新は元アプリの収集スクリプトで出典・割当を検証し、統合版停止中にscripts/import-data.pyで取り込んで再ビルド・公開する。統合版で増えた要約を失わないよう、既存コピーがある場合は--replaceなしでは上書きしない。既存要約を別途保全してから置き換える。
 
-「地形・地質」タブ（`?kind=geo`）でジオパーク範囲と地質鉱物の天然記念物を表示する。名称・地域・種別で絞り込み、一覧と地図から出典付きの情報を開ける。他4カテゴリには地質レイヤーを重ねない。正本は app/geo-map/data/geo.db。import-data.py が data/geo に取り込み、scripts/build-geo-layer.py が frontend/geo/geoparks.json（簡略化した範囲と各種別の範囲内件数）と frontend/geo/geosites.json（地質鉱物の天然記念物）を生成する。史跡タブに同じ文化庁 ID の点、または同名で1km以内の点がある天然記念物は properties.shiseki にその site_id を持ち、従来の重ね合わせ表示では史跡タブで隠していた（対応一覧は meta.shown_by_shiseki）。独立した地形・地質タブではこれらも表示する。点データを取り込み直したら build-geo-layer.py も再実行する。古いままだと build-cloudflare.py が停止する。
+「地形・地質」タブ（`?kind=geo`）でジオパーク範囲と地質鉱物の天然記念物を表示する。名称・地域・種別で絞り込み、一覧と地図から出典付きの情報を開ける。他4カテゴリには地質レイヤーを重ねない。正本は app/geo-map/data/geo.db。import-data.py --kind geo --replace が明示的に data/geo に取り込み、scripts/build-geo-layer.py が frontend/geo/geoparks.json（簡略化した範囲と各種別の範囲内件数）と frontend/geo/geosites.json（地質鉱物の天然記念物）を生成する。史跡タブに同じ文化庁 ID の点、または同名で1km以内の点がある天然記念物は properties.shiseki にその site_id を持ち、従来の重ね合わせ表示では史跡タブで隠していた（対応一覧は meta.shown_by_shiseki）。独立した地形・地質タブではこれらも表示する。点データを取り込み直したら build-geo-layer.py も再実行する。古いままだと build-cloudflare.py が停止する。
 
 cmd/warm-<kind>は統合版の種類別キャッシュへ書く。元版と統合版でデータ所有権を混ぜず、通常の閲覧は統合版のみで行う。migration-manifest.jsonは初回コピーのSHA256。
 
@@ -124,3 +124,9 @@ Cloud Runの既存リクエストログは通常のプラットフォーム項�
 文化の地図は `/stories` から有田・草津・川越を選べます。追加テーマの根拠と検証は [docs/additional-stories.md](docs/additional-stories.md) に記録しています。
 
 Ollamaで同じ形式の記事下書きを作れます。確認済みの資料パケットから `python3 scripts/generate-story.py --packet docs/story-packets/kusatsu-yumomi.json --output data/story-work/kusatsu-draft` で本文・出典確認資料・探索プレビューを出力します。手順と検証範囲は [docs/ollama-stories.md](docs/ollama-stories.md) を参照してください。
+
+## ジオパーク境界とビルド用DB
+
+ジオパークの件数は所属判定用の約50m境界で数え、地図には正本で作成した約500mの表示用輪郭を使います。表示輪郭はShapelyでトポロジーを維持して簡略化します。境界付近ではクリックできる表示範囲と集計範囲が異なるため、詳細パネルにその差を明記します。所属判定を粗い表示範囲へ合わせません。
+
+`data/geo/geo.db` は統合版のビルドスナップショットです。正本DBの更新と統合版の公開を分け、Cloudflareビルドが公開JSONの鮮度を検査するために保持します。サーバーはこのDBを読まないため `.dockerignore` でDockerのビルド入力から除外します。4カテゴリのデータと `published-summaries.json` など既存の起動用データは維持します。通常のデータ取込はgeoを除外し、ジオデータを更新する際だけ `scripts/import-data.py --kind geo --replace` と `scripts/build-geo-layer.py` を実行します。

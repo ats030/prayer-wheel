@@ -23,6 +23,7 @@ USER_AGENT = "MidokoroMap/1.0 (https://github.com/ats030)"
 NOT_REGIONS = {"about", "access", "certification", "pamphlet", "geopark"}
 # Tolerance in degrees (about 50 m) keeps point membership close to the original boundary.
 SIMPLIFY = 0.0005
+DISPLAY_SIMPLIFY = 0.005
 # Regions whose list-page count disagrees with the region page; the region page is treated as authoritative.
 KNOWN_COUNT_GAPS = {"m_alps": "一覧の areaname は富士見町を含む2市1町1村、地域ページの構成自治体名は2市1村 (2026-10-11)"}
 PREFS = ("北海道 青森県 岩手県 宮城県 秋田県 山形県 福島県 茨城県 栃木県 群馬県 埼玉県 千葉県 東京都 神奈川県 新潟県 "
@@ -66,6 +67,7 @@ def municipalities(page: str) -> dict:
     pref = contact.group(1) if contact else ""
     pref = "鹿児島県" if pref == "鹿児島" else pref
     munis, partial, listed, pending = [], [], [], []
+    last_muni = None
     for token in re.split(r"([（(][^）)]*[）)]|[、・，,：:\s])", section):
         if not token or re.fullmatch(r"[、・，,：:\s]", token):
             continue
@@ -75,11 +77,13 @@ def municipalities(page: str) -> dict:
             for x in pending:
                 x[0] = m.group(1)
             pending = []
+            last_muni = None
             continue
         if re.fullmatch(r"[（(][^）)]*[）)]", token):
-            if munis and re.search(r"一部|地域|エリア", token) and munis[-1][2] not in partial:
-                partial.append(munis[-1][2])
+            if last_muni is not None and re.search(r"一部|地域|エリア", token) and last_muni not in partial:
+                partial.append(last_muni)
             continue
+        last_muni = None
         m = re.match(PREF + r"(.*)$", token)
         if m and not m.group(2):
             pref = m.group(1)
@@ -91,13 +95,16 @@ def municipalities(page: str) -> dict:
         m = re.match(r"(.+?郡)(.+)$", token)
         if m:
             district, token = m.groups()
-        if token.endswith("の一部"):
+        is_partial = token.endswith("の一部")
+        if is_partial:
             token = token[:-3]
-            partial.append(token)
         if re.fullmatch(r".+[市町村]", token):
             x = [pref, district, token]
             munis.append(x)
             pending.append(x)
+            last_muni = x
+            if is_partial:
+                partial.append(x)
     return {"munis": munis, "partial": partial, "listed": listed}
 
 
@@ -133,6 +140,15 @@ def resolve(muni: list, listed: list, lookup) -> tuple[str, str, dict] | None:
         if len(hits) == 1:
             return candidate, hits[0][0][0], hits[0][1]
     return None
+
+
+def display_boundary(area):
+    """Preserve topology, omit tiny display islands, and keep at least the largest island."""
+    from shapely.geometry import MultiPolygon
+    simplified = area.simplify(DISPLAY_SIMPLIFY, preserve_topology=True)
+    parts = list(simplified.geoms) if simplified.geom_type == 'MultiPolygon' else [simplified]
+    visible = [part for part in parts if part.area >= DISPLAY_SIMPLIFY ** 2]
+    return MultiPolygon(visible or [max(parts, key=lambda part: part.area)])
 
 
 def build(refresh: bool, out_path: Path) -> dict:
@@ -191,7 +207,7 @@ def build(refresh: bool, out_path: Path) -> dict:
                 report["unresolved"].append(f"{slug}:{''.join(muni)}")
                 continue
             pref, district, entry = hit
-            partial = muni[2] in parsed["partial"]
+            partial = any(muni is item for item in parsed["partial"])
             members.append({"prefecture": pref, "district": district, "name": muni[2],
                             "code": min(entry["codes"]), "partial": partial})
             if not partial:
@@ -199,19 +215,21 @@ def build(refresh: bool, out_path: Path) -> dict:
         if info["count"] and info["count"] != len(parsed["munis"]) and slug not in KNOWN_COUNT_GAPS:
             report["count_mismatch"][slug] = [info["count"], len(parsed["munis"])]
         if parsed["partial"]:
-            report["partial"][slug] = parsed["partial"]
+            report["partial"][slug] = ["".join(m) for m in parsed["partial"]]
         area = unary_union(shapes).simplify(SIMPLIFY, preserve_topology=True) if shapes else None
         rows.append((slug, info["name"], BASE + slug + "/", meta.get(slug, ""), info["certified"], int(info["unesco"]),
                      json.dumps(members, ensure_ascii=False),
                      json.dumps(mapping(area), separators=(",", ":")) if area else None,
-                     *(area.bounds if area else (None,) * 4)))
+                     *(area.bounds if area else (None,) * 4),
+                     json.dumps(mapping(display_boundary(area)), separators=(",", ":")) if area else None))
     replace_tables(out_path, """
         create table geopark(slug text primary key, name text not null, source_url text not null, fetched text not null,
             certified text not null, unesco integer not null, municipalities text not null, geometry text,
-            min_lon real, min_lat real, max_lon real, max_lat real);
+            min_lon real, min_lat real, max_lon real, max_lat real, display_geometry text);
     """, {"geopark": rows}, {
         "geopark_source": BASE, "geopark_list_fetched": meta.get("index", ""),
         "boundary_source": f"国土数値情報 行政区域データ {N03} (https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2026.html)",
+        "display_simplify_degrees": str(DISPLAY_SIMPLIFY),
         "boundary_simplify_degrees": str(SIMPLIFY), "built": date.today().isoformat()})
     report["geoparks"] = len(rows)
     report["without_area"] = [r[0] for r in rows if r[7] is None]

@@ -69,6 +69,26 @@ class ImportDataTest(unittest.TestCase):
         self.assertEqual(files["summaries.json"], hashlib.sha256(b"current summary").hexdigest())
         self.assertEqual(files["other.json"], "preserved")
 
+    def test_default_import_does_not_require_geo_snapshot(self):
+        for kind, db in [('omatsuri','festivals.db'),('onsen','onsen.db'),('tokusan','tokusan.db')]:
+            source=self.root.parent/(kind+'-map')/'frontend'
+            source.mkdir(parents=True)
+            (source/db).write_bytes(b'database')
+        result=subprocess.run([sys.executable,str(self.script)],capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertNotIn('geo',json.loads(self.manifest.read_text()))
+
+    def test_geo_replace_hint_does_not_mention_summaries(self):
+        source=self.root.parent/'geo-map'/'data';source.mkdir(parents=True)
+        (source/'geo.db').write_bytes(b'new geo')
+        target=self.root/'data'/'geo';target.mkdir()
+        (target/'geo.db').write_bytes(b'old geo')
+        result=subprocess.run([sys.executable,str(self.script),'--kind','geo'],capture_output=True,text=True)
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('--replace',result.stderr)
+        self.assertNotIn('summaries',result.stderr)
+        self.assertEqual((target/'geo.db').read_bytes(),b'old geo')
+
 
 if __name__ == "__main__":
     unittest.main()

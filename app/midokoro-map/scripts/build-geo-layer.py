@@ -2,7 +2,7 @@
 """Build frontend/geo/geoparks.json and geosites.json from geo.db.
 
 geoparks.json: coarse geopark outlines plus the number of each kind inside them. Membership is counted against the
-full geo.db boundary; only the drawn outline is simplified further.
+full geo.db boundary; the drawn outline is the topology-preserving display_geometry built by geo-map.
 geosites.json: geological natural monuments; `shiseki` names the shiseki point that already shows one, so the shiseki
 tab can hide it.
 """
@@ -15,8 +15,6 @@ from contextlib import closing
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-# About 500 m: enough to read a region outline at prefecture zoom while keeping the file small.
-DISPLAY_TOLERANCE = 0.005
 # A geosite whose name equals a shiseki point this close is the same place (e.g. a 名勝・天然記念物 row).
 NEAR_METERS = 1000
 POINTS = {"shiseki": ("shiseki/shiseki.db", "shiseki", "latitude", "longitude"),
@@ -42,40 +40,6 @@ def contains(geometry: dict, x: float, y: float) -> bool:
                for rings in polygons(geometry))
 
 
-def simplify(points: list, tolerance: float) -> list:
-    """Douglas-Peucker on one closed ring; the caller drops rings that collapse."""
-    keep = [False] * len(points)
-    keep[0] = keep[-1] = True
-    stack = [(0, len(points) - 1)]
-    while stack:
-        start, end = stack.pop()
-        (x1, y1), (x2, y2) = points[start], points[end]
-        dx, dy = x2 - x1, y2 - y1
-        length = (dx * dx + dy * dy) ** 0.5
-        best, index = 0.0, None
-        for i in range(start + 1, end):
-            px, py = points[i]
-            d = abs(dy * (px - x1) - dx * (py - y1)) / length if length else ((px - x1) ** 2 + (py - y1) ** 2) ** 0.5
-            if d > best:
-                best, index = d, i
-        if index is not None and best > tolerance:
-            keep[index] = True
-            stack += [(start, index), (index, end)]
-    return [[round(x, 4), round(y, 4)] for (x, y), k in zip(points, keep) if k]
-
-
-def outline(geometry: dict) -> dict:
-    out = []
-    for rings in polygons(geometry):
-        shell = simplify(rings[0], DISPLAY_TOLERANCE)
-        if len(shell) < 4:
-            continue
-        out.append([shell] + [h for h in (simplify(r, DISPLAY_TOLERANCE) for r in rings[1:]) if len(h) >= 4])
-    if not out:  # A region made only of small islands keeps its largest original polygon.
-        out = [max(polygons(geometry), key=lambda rings: len(rings[0]))]
-    return {"type": "MultiPolygon", "coordinates": out}
-
-
 def build(data: Path) -> dict:
     with closing(sqlite3.connect(f"file:{data / 'geo/geo.db'}?mode=ro", uri=True)) as con:
         con.row_factory = sqlite3.Row
@@ -91,7 +55,7 @@ def build(data: Path) -> dict:
         counts = {kind: sum(1 for x, y in rows if r["min_lon"] <= x <= r["max_lon"] and r["min_lat"] <= y <= r["max_lat"]
                             and contains(geometry, x, y)) for kind, rows in points.items()}
         members = json.loads(r["municipalities"])
-        features.append({"type": "Feature", "geometry": outline(geometry), "properties": {
+        features.append({"type": "Feature", "geometry": json.loads(r["display_geometry"]), "properties": {
             "slug": r["slug"], "name": r["name"], "unesco": bool(r["unesco"]), "certified": r["certified"],
             "municipalities": [m["name"] for m in members if not m["partial"]],
             "partial": [m["name"] for m in members if m["partial"]],

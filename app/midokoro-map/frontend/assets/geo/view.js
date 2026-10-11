@@ -21,7 +21,7 @@ function geoparkDetail(properties) {
   const partial = properties.partial?.length ? `<div><dt>一部のみ</dt><dd>${esc(properties.partial.join('、'))}<p class="detail-note">一部のみが含まれる自治体は範囲に含めていません。</p></dd></div>` : '';
   return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(properties.name)}</h2><p class="detail-kind">${properties.unesco ? 'ユネスコ世界ジオパーク' : '日本ジオパーク'}</p></header>`+
     `<dl class="detail-facts"><div><dt>構成自治体</dt><dd>${esc((properties.municipalities || []).join('、'))}</dd></div>${partial}</dl>`+
-    `<section class="detail-section" aria-labelledby="detail-counts"><h3 id="detail-counts">範囲内の見どころ</h3><dl class="detail-counts">${counts}</dl></section>`+
+    `<section class="detail-section" aria-labelledby="detail-counts"><h3 id="detail-counts">範囲内の見どころ</h3><p class="detail-note">件数は約50mの精度の自治体境界で集計しています。地図の輪郭は約500mの精度に簡略化しているため、境界付近では表示と集計が異なる場合があります。</p><dl class="detail-counts">${counts}</dl></section>`+
     `<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${sourceLink(properties.source, '日本ジオパークネットワーク')}</nav>${fetchedNote(properties.fetched)}</section></article>`;
 }
 

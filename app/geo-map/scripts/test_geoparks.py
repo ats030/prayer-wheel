@@ -38,7 +38,7 @@ def test_municipalities_apply_trailing_prefecture_marker_backwards():
 def test_municipalities_mark_partial_areas():
     parsed = municipalities(page("山口県萩市、阿武町、山口市（阿東地域）、美祢市の一部"))
     assert [m[2] for m in parsed["munis"]] == ["萩市", "阿武町", "山口市", "美祢市"]
-    assert parsed["partial"] == ["山口市", "美祢市"]
+    assert parsed["partial"] == [["山口県", "", "山口市"], ["山口県", "", "美祢市"]]
 
 
 def test_resolve_uses_district_to_pick_between_same_names():
@@ -50,3 +50,38 @@ def test_resolve_uses_district_to_pick_between_same_names():
     assert resolve(["熊本県", "阿蘇郡", "小国町"], [], lookup) == ("熊本県", "阿蘇郡", "d")
     assert resolve(["", "", "伊達市"], ["福島県"], lookup) == ("福島県", "", "c")
     assert resolve(["熊本県", "", "存在しない町"], [], lookup) is None
+
+
+def test_partial_does_not_spread_to_same_named_municipality():
+    parsed = municipalities(page("北海道伊達市（地域の一部）、福島県伊達市"))
+    assert parsed["partial"] == [["北海道", "", "伊達市"]]
+
+
+def test_annotation_after_non_municipality_is_not_attached():
+    parsed = municipalities(page("萩市、参考情報（地域の一部）"))
+    assert parsed["partial"] == []
+
+
+def test_partial_prefecture_marker_updates_the_same_municipality():
+    parsed = municipalities(page("小国町の一部（以上山形県）、熊本県阿蘇郡小国町"))
+    assert parsed["partial"] == [["山形県", "", "小国町"]]
+
+
+def test_display_boundary_keeps_largest_island_when_all_are_tiny():
+    from shapely.geometry import Polygon, MultiPolygon
+    from geoparks import display_boundary
+    small = Polygon([(0,0),(0.001,0),(0.001,0.001),(0,0.001)])
+    large = Polygon([(1,1),(1.002,1),(1.002,1.002),(1,1.002)])
+    result = display_boundary(MultiPolygon([small,large]))
+    assert result.is_valid and not result.is_empty
+    assert len(result.geoms) == 1 and result.bounds[0] == 1
+
+
+def test_display_boundary_preserves_holes_and_omits_tiny_display_islands():
+    from shapely.geometry import Polygon, MultiPolygon
+    from geoparks import display_boundary
+    land = Polygon([(0,0),(1,0),(1,1),(0,1)], holes=[[(.2,.2),(.8,.2),(.8,.8),(.2,.8)]])
+    island = Polygon([(2,2),(2.001,2),(2.001,2.001),(2,2.001)])
+    result = display_boundary(MultiPolygon([land,island]))
+    assert result.is_valid and len(result.geoms) == 1
+    assert len(result.geoms[0].interiors) == 1
