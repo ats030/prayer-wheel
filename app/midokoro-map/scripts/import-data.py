@@ -16,6 +16,11 @@ for kind,db in KINDS.items():
     if args.kind and kind not in args.kind: continue
     name,folder=SOURCES.get(kind,(kind+"-map","frontend")); source=root.parent/name
     files=manifest.get(kind,{}).get("files",{}) if args.database_only else {}
+    if args.database_only:
+        for summary in ("summaries.json", "official_summaries.json"):
+            existing=root/"data"/kind/summary
+            if existing.exists():
+                files[summary]=hashlib.sha256(existing.read_bytes()).hexdigest()
     manifest[kind]={"source":source.name,"database":db,"files":files}
     paths=[source/folder/db]+([] if args.database_only or kind in SOURCES else [source/"data/summaries.json", source/"data/official_summaries.json"])
     for path in paths:
@@ -24,7 +29,9 @@ for kind,db in KINDS.items():
             continue
         target=root/"data"/kind/path.name
         # The database is regenerated from the sibling source; only summaries can hold unified-only work.
-        if target.exists() and not args.replace and not args.database_only: parser.error(str(target)+" exists; back up unified summaries before --replace")
+        if target.exists() and not args.replace:
+            hint="pass --replace to overwrite the database" if args.database_only else "back up unified summaries before --replace"
+            parser.error(str(target)+" exists; "+hint)
         data=path.read_bytes();plan.append((target,data))
         manifest[kind]["files"][path.name]=hashlib.sha256(data).hexdigest()
 # Validate every input and destination before writing any file.
