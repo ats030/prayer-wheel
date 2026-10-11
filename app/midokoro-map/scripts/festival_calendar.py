@@ -1,4 +1,9 @@
-"""Render the static "this month / next month" festival page from dated occurrences only."""
+"""Render the festival month listing from dated occurrences only.
+
+Twelve months are built from the build date; /festivals/calendar.js then picks
+this/next month and hides ended items by the reader's date, so the page stays
+current between deploys without a scheduled rebuild.
+"""
 from datetime import date
 from html import escape
 from urllib.parse import quote, urlsplit
@@ -38,28 +43,38 @@ def period(start, end, status):
     return text + ('（予定）' if status == 'scheduled' else '')
 
 
-def section(title, anchor, rows):
+MONTHS = 12
+
+
+def section(first, rows):
+    month = f'{first.year:04d}-{first.month:02d}'
     items = []
     for start, end, f, o in rows:
         href = f"/?kind=omatsuri&amp;qid={quote(f['qid'])}"
         source = escape(o['source'])
         host = escape(urlsplit(o['source']).hostname or o['source'])
         items.append(
-            f'<li><p class="place-kicker">{escape(f.get("prefecture") or "所在地不明")}</p>'
+            f'<li data-end="{end.isoformat()}"><p class="place-kicker">{escape(f.get("prefecture") or "所在地不明")}</p>'
             f'<h3><a href="{href}">{escape(f["label_ja"])}</a></h3>'
             f'<p><time datetime="{start.isoformat()}">{period(start, end, o.get("status"))}</time></p>'
             f'<p class="calendar-source">日程の出典: <a href="{source}" rel="noopener">{host}</a></p></li>')
-    body = f'<ol class="calendar-list">{"".join(items)}</ol>' if items else '<p>この月に日程が確定している祭りはまだ登録されていません。</p>'
-    return f'<section class="story-reading" id="{anchor}" aria-labelledby="{anchor}-title"><h2 id="{anchor}-title">{title}</h2>{body}</section>'
+    listing = f'<ol class="calendar-list">{"".join(items)}</ol>' if items else ''
+    empty = f'<p class="calendar-empty"{" hidden" if items else ""}>この月に日程が確定している祭りはまだ登録されていません。</p>'
+    return (f'<section class="story-reading" id="m-{month}" data-month="{month}" aria-labelledby="m-{month}-title">'
+            f'<h2 id="m-{month}-title">{first.year}年{first.month}月</h2>{listing}{empty}</section>')
 
 
 def render(festivals, today):
-    this_first, next_first = month_bounds(today)
-    _, after_next = month_bounds(next_first)
-    this_rows = entries(festivals, this_first, next_first, today)
-    next_rows = entries(festivals, next_first, after_next, today)
+    firsts = [month_bounds(today)[0]]
+    while len(firsts) < MONTHS + 1:
+        firsts.append(month_bounds(firsts[-1])[1])
+    # This and next month always render (with an empty note); later empty months are left out.
+    sections = ''.join(section(first, rows) for i, (first, following) in enumerate(zip(firsts, firsts[1:]))
+                       if (rows := entries(festivals, first, following, today)) or i < 2)
     label = lambda d: f'{d.year}年{d.month}月'
-    description = f'{label(this_first)}・{label(next_first)}に開催される祭りの一覧。日程が確定し出典のあるものだけを載せています。'
+    anchor = lambda d: f'#m-{d.year:04d}-{d.month:02d}'
+    this_first, next_first = firsts[0], firsts[1]
+    description = '今月・来月に開催される祭りの一覧。日程が確定し出典のあるものだけを載せています。'
     return f'''<!doctype html>
 <html lang="ja">
 <head>
@@ -77,6 +92,7 @@ def render(festivals, today):
   <link rel="stylesheet" href="/app.css">
   <link rel="stylesheet" href="/stories/story.css">
   <script src="http://ubuntu-server-app:8526/v.js" data-site="midokoro-map" defer></script>
+  <script src="/festivals/calendar.js" defer></script>
 </head>
-<body class="story-page"><a class="skip-link" href="#calendar-main">本文へ</a><header class="site-header"><a class="brand" href="/"><img src="/favicon.svg" alt="" width="28" height="28"><span>みどころマップ</span></a><nav class="story-nav" aria-label="サイト"><a href="/?kind=omatsuri">祭りの地図</a></nav></header><main id="calendar-main"><section class="story-lead"><p class="eyebrow">時期から探す</p><h1>今月・来月の祭り</h1><p class="lead-copy">日程が確定し、出典を確かめられる祭りだけを載せています。<br>日付が未定の祭りは<a href="/?kind=omatsuri">地図</a>から探せます。</p><p class="place-kicker"><time datetime="{today.isoformat()}">{today.year}年{today.month}月{today.day}日</time>時点 · <a href="#this-month">{label(this_first)}</a> · <a href="#next-month">{label(next_first)}</a></p></section>{section(label(this_first), 'this-month', this_rows)}{section(label(next_first), 'next-month', next_rows)}</main></body></html>
+<body class="story-page"><a class="skip-link" href="#calendar-main">本文へ</a><header class="site-header"><a class="brand" href="/"><img src="/favicon.svg" alt="" width="28" height="28"><span>みどころマップ</span></a><nav class="story-nav" aria-label="サイト"><a href="/?kind=omatsuri">祭りの地図</a></nav></header><main id="calendar-main"><section class="story-lead"><p class="eyebrow">時期から探す</p><h1>今月・来月の祭り</h1><p class="lead-copy">日程が確定し、出典を確かめられる祭りだけを載せています。<br>日付が未定の祭りは<a href="/?kind=omatsuri">地図</a>から探せます。</p><p class="place-kicker">日程データ: <time datetime="{today.isoformat()}">{today.year}年{today.month}月{today.day}日</time>時点 · <a id="this-month-link" href="{anchor(this_first)}">今月（{label(this_first)}）</a> · <a id="next-month-link" href="{anchor(next_first)}">来月（{label(next_first)}）</a></p></section>{sections}</main></body></html>
 '''

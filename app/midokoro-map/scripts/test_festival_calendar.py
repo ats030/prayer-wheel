@@ -22,16 +22,46 @@ FESTIVALS = [
 ]
 
 
+def month(html, key):
+    start = html.index(f'<section class="story-reading" id="m-{key}"')
+    return html[start:html.index('</section>', start)]
+
+
 class CalendarChecks(unittest.TestCase):
     def setUp(self):
         self.html = render(FESTIVALS, date(2026, 10, 11))
-        self.this_month, self.next_month = self.html.split('id="next-month"', 1)
+        self.this_month = month(self.html, '2026-10')
+        self.next_month = month(self.html, '2026-11')
 
     def test_lists_only_dated_sourced_current_occurrences(self):
         self.assertIn('十月祭', self.this_month)
         self.assertIn('霜月祭', self.next_month)
-        for absent in ('未定祭', '終了祭', '出典なし祭', 'スクリプト祭', '師走祭'):
+        self.assertIn('師走祭', month(self.html, '2026-12'))
+        for absent in ('未定祭', '終了祭', '出典なし祭', 'スクリプト祭'):
             self.assertNotIn(absent, self.html)
+
+    def test_items_carry_end_date_for_reader_side_expiry(self):
+        self.assertIn('<li data-end="2026-11-02">', self.this_month)
+
+    def test_builds_twelve_months_but_omits_empty_later_months(self):
+        self.assertIn('id="m-2026-10"', self.html)
+        self.assertIn('id="m-2026-11"', self.html)
+        self.assertNotIn('id="m-2027-01"', self.html)
+        late = FESTIVALS + [festival('Q9', '晩夏祭', {'year': 2027, 'start': '2027-09-10', 'source': 'https://example.jp/sep'}),
+                            festival('Q10', '翌秋祭', {'year': 2027, 'start': '2027-10-10', 'source': 'https://example.jp/oct27'})]
+        html = render(late, date(2026, 10, 11))
+        self.assertIn('晩夏祭', month(html, '2027-09'))
+        self.assertNotIn('翌秋祭', html)
+
+    def test_empty_this_and_next_month_still_render_with_note(self):
+        html = render([], date(2026, 10, 11))
+        self.assertIn('この月に日程が確定している祭りはまだ登録されていません。</p>', month(html, '2026-10'))
+        self.assertIn('id="m-2026-11"', html)
+        self.assertIn('<p class="calendar-empty" hidden>', self.this_month)
+
+    def test_page_loads_reader_date_script(self):
+        self.assertIn('<script src="/festivals/calendar.js" defer></script>', self.html)
+        self.assertIn('href="#m-2026-10">今月（2026年10月）', self.html)
 
     def test_each_item_shows_source_and_links_to_map_detail(self):
         self.assertIn('href="/?kind=omatsuri&amp;qid=Q1"', self.html)
