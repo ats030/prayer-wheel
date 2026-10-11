@@ -50,14 +50,16 @@ def section(first, rows):
     month = f'{first.year:04d}-{first.month:02d}'
     items = []
     for start, end, f, o in rows:
-        href = f"/?kind=omatsuri&amp;qid={quote(f['qid'])}"
+        map_href = f"/?kind=omatsuri&amp;qid={quote(f['qid'])}"
+        page_href = f"/festivals/{quote(f['qid'])}"
         source = escape(o['source'])
         host = escape(urlsplit(o['source']).hostname or o['source'])
         items.append(
             f'<li data-end="{end.isoformat()}"><p class="place-kicker">{escape(f.get("prefecture") or "所在地不明")}</p>'
-            f'<h3><a href="{href}">{escape(f["label_ja"])}</a></h3>'
+            f'<h3><a href="{page_href}">{escape(f["label_ja"])}</a></h3>'
             f'<p><time datetime="{start.isoformat()}">{period(start, end, o.get("status"))}</time></p>'
-            f'<p class="calendar-source">日程の出典: <a href="{source}" rel="noopener">{host}</a></p></li>')
+            f'<p class="calendar-source">日程の出典: <a href="{source}" rel="noopener">{host}</a></p>'
+            f'<p><a href="{map_href}">地図で見る</a></p></li>')
     listing = f'<ol class="calendar-list">{"".join(items)}</ol>' if items else ''
     empty = f'<p class="calendar-empty"{" hidden" if items else ""}>この月に日程が確定している祭りはまだ登録されていません。</p>'
     return (f'<section class="story-reading" id="m-{month}" data-month="{month}" aria-labelledby="m-{month}-title">'
