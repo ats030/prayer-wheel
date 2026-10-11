@@ -55,6 +55,8 @@ def public_record(result, job_id, slug):
     """公開に必要な項目だけを取り出す。根拠の引用や生成の内部記録は出さない。"""
     if result.get('kind') != 'result' or not result.get('events'):
         raise PublishError('出来事のない年表は公開できません')
+    if result.get('source_mode') != 'wikipedia':
+        raise PublishError('Wikipedia限定の生成記録が必要です。出典URLだけでは検索経路を確認できません。')
     events = []
     for event in result['events']:
         source = event.get('source') or {}
@@ -63,6 +65,7 @@ def public_record(result, job_id, slug):
         events.append({'year': event['year'], 'date': event['date'], 'title': event['title'], 'description': event['description'],
                        'source': {'url': source['url'], 'title': source.get('title') or source['url']}})
     return {'slug': slug, 'theme': result['theme'], 'period': result.get('period'), 'events': events,
+            'source_mode': result['source_mode'],
             'pipeline_version': result.get('pipeline_version'), 'searched_at': result.get('searched_at'),
             'job_id': job_id, 'approved_at': datetime.now(timezone.utc).isoformat(timespec='seconds')}
 
@@ -102,7 +105,9 @@ def e(text):
 
 LICENSE = ('各出来事の題名と説明は、生成AIがWikipedia（日本語版・英語版）の記事をもとに要約・改変したものです。'
            '<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja">CC BY-SA 4.0</a> で提供します。'
-           '原文の著者は各出典記事の履歴を参照してください。')
+           '原文の著者は各出典記事の履歴を参照してください。'
+           'このライセンス表示の対象は年表本文です。サイトのロゴ・UI・広告素材は含みません。'
+           'WikipediaおよびWikimedia Foundationによる公認・推薦を示すものではありません。')
 
 
 def page(title, body, root):

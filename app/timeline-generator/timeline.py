@@ -1244,7 +1244,7 @@ def timeline_result(query, events, review_notes, started, stop_reason='sources_e
     return {'kind': 'result', 'theme': query.topic, 'query': query.original, 'period': query.period,
             'requested_milestones': query.requested_milestones,
             'events': events, 'notice': notice, 'review_notes': review_notes, 'stop_reason': stop_reason,
-            'max_events': MAX_EVENTS, 'pipeline_version': PIPELINE_VERSION,
+            'max_events': MAX_EVENTS, 'pipeline_version': PIPELINE_VERSION, 'source_mode': SOURCE,
             'elapsed_seconds': round(time.monotonic() - started, 1), 'searched_at': datetime.now(timezone.utc).isoformat()} | ({'trace': trace} if trace is not None else {})
 
 

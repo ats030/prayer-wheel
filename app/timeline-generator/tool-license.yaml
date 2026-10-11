@@ -113,6 +113,72 @@ decisions:
       - Link and name each source; show only short excerpts with the related explanation
       - Attribution alone is not a reuse licence; review destination terms before public release
     notes: Raw pages are processed in memory and not stored. General public release remains outside this implementation
+public_generation_review:
+  issue: ats030-esadh
+  reviewed_at: 2026-10-11
+  intended_use: Free public timeline generation with local inference and separate book affiliate links
+  verdict: Conditional Wikipedia route; quality measurement pending; manual affiliate links first
+  decisions:
+    - tool: Wikipedia ja/en text and Wikimedia APIs
+      version_or_plan: Public text APIs; dynamic per-article licence
+      category: dataset
+      status: conditional
+      license: CC-BY-SA-4.0
+      commercial_use: Permitted subject to underlying article licence and exceptions
+      cost: No per-request paid API adopted; quotas and access policies apply
+      terms_url:
+        - https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use
+        - https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_API_Usage_Guidelines
+        - https://creativecommons.org/licenses/by-sa/4.0/deed.ja
+      evidence_retrieved: 2026-10-11
+      restrictions:
+        - Preserve article links and additional attribution requirements; indicate adaptation
+        - License adapted timeline text under CC BY-SA 4.0; separate logos, UI and advertising
+        - Do not include images or assume article attribution proves source-route compliance
+        - Require recorded Wikipedia source_mode before static publication; unknown legacy routes fail closed
+      notes: See PUBLIC_LICENSE.md; API terms and content rights are separate from model licences
+    - tool: Rakuten Web Service Books API
+      version_or_plan: Current public developer terms
+      category: service
+      status: review_required
+      adoption: declined
+      commercial_use: Affiliate revenue requires Rakuten Affiliate and permitted usage environment
+      cost: Free usage cannot override restrictions; terms reserve charging changes
+      terms_url: https://webservice.rakuten.co.jp/guide/rule
+      evidence_retrieved: 2026-10-11
+      restrictions:
+        - Article 10 restricts limited-user environments, shared storage, and revenue outside Rakuten Affiliate
+        - Verify exact authenticated-screen and cache arrangement before adoption
+      notes: Initial design uses curated manual links; do not treat the older API recommendation as clearance for public-generation integration
+    - tool: Rakuten Affiliate manual book links
+      version_or_plan: Partner programme; publisher account and medium not yet verified
+      category: service
+      status: conditional
+      commercial_use: Affiliate remuneration subject to partner and media conditions
+      cost: No new paid API; commission is conditional on qualifying transactions
+      terms_url:
+        - https://affiliate.rakuten.co.jp/guideline/terms/
+        - https://affiliate.rakuten.co.jp/guideline/rule/
+      evidence_retrieved: 2026-10-11
+      restrictions:
+        - Register eligible media and verify account before inserting revenue links
+        - Clearly label advertising, use permitted assets, and avoid click incentives or invented claims
+      notes: Curated book titles and manual links first; no fake affiliate IDs, copied covers or prices
+    - tool: Existing Gemma4 12B and Qwen3.8 27B model distributions
+      version_or_plan: Digests in the existing model records above; no new download
+      category: model
+      status: conditional
+      license: Apache-2.0
+      commercial_use: Permitted for the reviewed distributions; no source-text clearance
+      cost: Existing local inference; electricity and maintenance remain
+      terms_url:
+        - https://ai.google.dev/gemma/apache_2
+        - https://huggingface.co/Qwen/Qwen3.8-27B/blob/main/LICENSE
+      evidence_retrieved: 2026-10-11
+      restrictions:
+        - Retain applicable notices on redistribution and recheck actual distribution at launch
+      notes: Publisher licence pages rechecked; do not generalize to other Qwen or Gemma releases
+
 public_release_review:
   issue: ats030-3l22f
   reviewed_at: 2026-10-04

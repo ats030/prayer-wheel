@@ -29,7 +29,23 @@ class PublishTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def result(self, *events):
-        return {'kind': 'result', 'theme': '昭和', 'period': None, 'events': list(events), 'trace': {'sources': []}, 'pipeline_version': 8}
+        return {'kind': 'result', 'theme': '昭和', 'period': None, 'events': list(events), 'trace': {'sources': []}, 'pipeline_version': 8, 'source_mode': 'wikipedia'}
+
+    def test_wikipedia_urls_do_not_prove_the_search_route(self):
+        for mode in (None, 'searxng'):
+            result = self.result(event(1964))
+            result.pop('source_mode') if mode is None else result.update(source_mode=mode)
+            with self.subTest(mode=mode), self.assertRaises(publish.PublishError):
+                publish.public_record(result, '1', 'showa')
+
+    def test_build_rechecks_missing_route_in_legacy_approval(self):
+        save(self.db, '1', self.result(event(1964)))
+        path = publish.approve(self.db, '1', 'showa', self.approved)
+        record = json.loads(path.read_text())
+        record.pop('source_mode')
+        path.write_text(json.dumps(record))
+        with self.assertRaises(publish.PublishError):
+            publish.build(self.dir / 'site', self.approved)
 
     def test_approve_keeps_only_public_fields(self):
         save(self.db, '1', self.result(event(1964)))

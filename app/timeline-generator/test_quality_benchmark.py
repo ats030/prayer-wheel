@@ -18,9 +18,33 @@ class BenchmarkTests(unittest.TestCase):
             (directory / name).write_text(json.dumps(gold))
         (directory / 'before').mkdir()
         benchmark.write_json(directory / 'before' / 'manifest.json', {
+            'core_rounds': 3, 'holdout_rounds': 1,
             'gold_sha256': {name: hashlib.sha256((directory / name).read_bytes()).hexdigest()
                            for name in ('quality_gold.json', 'quality_holdout.json')}})
         return gold
+
+    def test_source_comparison_uses_only_matching_rounds_and_keeps_pipeline_report(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            self.fixture(directory)
+            frozen = json.loads((directory / 'before' / 'manifest.json').read_text())
+            for label, source, rounds in [('before', 'searxng', 3), ('wiki', 'wikipedia', 1)]:
+                manifest = dict.fromkeys(benchmark.CONDITIONS, '') | frozen | {
+                    'source': source, 'core_rounds': rounds, 'holdout_rounds': 0, 'sha256': {'timeline.py': 'same'}}
+                benchmark.write_json(directory / label / 'manifest.json', manifest)
+                benchmark.write_json(directory / label / 'core-1-0.json', {
+                    'theme': '研究', 'record': {'kind': 'error', 'message': 'failed'}})
+            (directory / 'comparison.json').write_text('pipeline')
+            benchmark.compare(directory, ['before', 'wiki'], source_comparison=True)
+            report = json.loads((directory / 'source-comparison.json').read_text())
+            self.assertTrue(report['complete'])
+            self.assertFalse(report['conditions_equal'])
+            self.assertEqual(report['snapshots'][0]['groups']['core']['planned'], 1)
+            self.assertEqual((directory / 'comparison.json').read_text(), 'pipeline')
+            manifest['sha256'] = {'timeline.py': 'different'}
+            benchmark.write_json(directory / 'wiki' / 'manifest.json', manifest)
+            with self.assertRaisesRegex(ValueError, 'identical frozen code'):
+                benchmark.compare(directory, ['before', 'wiki'], source_comparison=True)
 
     def test_generation_errors_are_failures_not_excluded_from_pass_rate(self):
         with tempfile.TemporaryDirectory() as temporary:

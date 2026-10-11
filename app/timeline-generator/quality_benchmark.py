@@ -30,15 +30,22 @@ def validate_gold(directory, manifest):
             raise ValueError('Frozen evaluation changed: ' + name)
 
 
-def snapshot(directory, label):
+def snapshot(directory, label, core_rounds=3, holdout_rounds=1, from_snapshot=None):
     target = directory / label
     if target.exists():
         raise ValueError('Snapshot already exists; use --run to resume it.')
     code = target / 'code'
     code.mkdir(parents=True, mode=0o700)
     hashes = {}
+    origin = directory / from_snapshot / 'code' if from_snapshot else ROOT
+    if from_snapshot:
+        original = json.loads((directory / from_snapshot / 'manifest.json').read_text())
+        validate_gold(directory, original)
+        for name, digest in original['sha256'].items():
+            if hashlib.sha256((origin / name).read_bytes()).hexdigest() != digest:
+                raise ValueError('Snapshot code changed: ' + name)
     for name in MODULES:
-        shutil.copyfile(ROOT / name, code / name)
+        shutil.copyfile(origin / name, code / name)
         hashes[name] = hashlib.sha256((code / name).read_bytes()).hexdigest()
     for name in ('quality_gold.json', 'quality_holdout.json'):
         frozen = directory / name
@@ -54,7 +61,7 @@ def snapshot(directory, label):
         'verify_model': os.environ.get('TIMELINE_VERIFY_MODEL', 'qwen3.8:27b'),
         'search_url': os.environ.get('TIMELINE_SEARCH_URL', 'http://127.0.0.1:8081'),
         'ollama_url': os.environ.get('TIMELINE_OLLAMA_URL', 'http://127.0.0.1:11434'),
-        'time_limit_seconds': 3600, 'core_rounds': 3, 'holdout_rounds': 1,
+        'time_limit_seconds': 3600, 'core_rounds': core_rounds, 'holdout_rounds': holdout_rounds,
         'gold_sha256': {name: hashlib.sha256((directory / name).read_bytes()).hexdigest()
                         for name in ('quality_gold.json', 'quality_holdout.json')},
     })
@@ -89,7 +96,7 @@ def run(directory, label):
         if hashlib.sha256((target / 'code' / name).read_bytes()).hexdigest() != digest:
             raise ValueError('Snapshot code changed: ' + name)
     validate_gold(directory, manifest)
-    for group, filename, rounds in [('holdout', 'quality_holdout.json', 1), ('core', 'quality_gold.json', 3)]:
+    for group, filename, rounds in [('holdout', 'quality_holdout.json', manifest['holdout_rounds']), ('core', 'quality_gold.json', manifest['core_rounds'])]:
         themes = json.loads((directory / filename).read_text())['themes']
         for number in range(1, rounds + 1):
             for index, theme in enumerate(themes):
@@ -100,15 +107,16 @@ def run(directory, label):
                 subprocess.run([sys.executable, str(target / 'code' / 'quality_benchmark.py'),
                                 '--one', theme, '--output', str(output)],
                                cwd=target / 'code', env=environment, check=True, timeout=3630)
-    print(label + ': all 21 real-model cases completed', flush=True)
+    print(label + ': all planned real-model cases completed', flush=True)
 
 
 def summarize(directory, label):
     from quality_eval import evaluate_result
     target = directory / label
-    validate_gold(directory, json.loads((target / 'manifest.json').read_text()))
+    manifest = json.loads((target / 'manifest.json').read_text())
+    validate_gold(directory, manifest)
     rows = []
-    for group, filename, rounds in [('holdout', 'quality_holdout.json', 1), ('core', 'quality_gold.json', 3)]:
+    for group, filename, rounds in [('holdout', 'quality_holdout.json', manifest['holdout_rounds']), ('core', 'quality_gold.json', manifest['core_rounds'])]:
         gold = json.loads((directory / filename).read_text())
         for number in range(1, rounds + 1):
             for index, theme in enumerate(gold['themes']):
@@ -139,20 +147,39 @@ def summarize(directory, label):
     return {'label': label, 'groups': groups, 'cases': rows}
 
 
-def compare(directory, labels):
+def compare(directory, labels, source_comparison=False):
     manifests = [json.loads((directory / label / 'manifest.json').read_text()) for label in labels]
-    differences = [key for key in CONDITIONS if manifests[0][key] != manifests[1][key]]
+    ignored = {'source', 'core_rounds', 'holdout_rounds'} if source_comparison else set()
+    differences = [key for key in CONDITIONS if key not in ignored and manifests[0][key] != manifests[1][key]]
     if differences:
         raise ValueError('Conditions differ: ' + ', '.join(differences))
+    if source_comparison:
+        if {m['source'] for m in manifests} != {'searxng', 'wikipedia'}:
+            raise ValueError('Source comparison requires SearXNG and Wikipedia')
+        if manifests[0]['sha256'] != manifests[1]['sha256']:
+            raise ValueError('Source comparison requires identical frozen code')
     for manifest in manifests:
         validate_gold(directory, manifest)
     reports = [summarize(directory, label) for label in labels]
+    if source_comparison:
+        rounds = min(m['core_rounds'] for m in manifests)
+        if rounds < 1:
+            raise ValueError('Source comparison requires at least one core round')
+        for result in reports:
+            result['cases'] = [r for r in result['cases'] if r['group'] == 'core' and r['round'] <= rounds]
+            cases = result['cases']
+            finished = [r for r in cases if r['state'] != 'pending']
+            result['groups'] = {'core': {'planned': len(cases), 'finished': len(finished),
+                'passed': sum(r['passed'] is True for r in finished),
+                'failed_generations': sum(r['state'] == 'failed' for r in cases),
+                'pass_rate': sum(r['passed'] is True for r in finished) / len(finished) if finished else None}}
     complete = all(group['planned'] == group['finished'] for report in reports for group in report['groups'].values())
-    report = {'complete': complete, 'conditions_equal': True, 'snapshots': reports,
+    report = {'complete': complete, 'conditions_equal': not source_comparison,
+              'comparison_kind': 'source_route' if source_comparison else 'pipeline', 'snapshots': reports,
               'human_content_audit': 'required; automated matching does not establish factual accuracy',
               'limitations': ['Live retrieval and shared inference contention can vary between runs.',
                              'Held-out themes have one run per version; results are exploratory.']}
-    write_json(directory / 'comparison.json', report)
+    write_json(directory / ('source-comparison.json' if source_comparison else 'comparison.json'), report)
     for result in reports:
         for group, totals in result['groups'].items():
             rate = '-' if totals['pass_rate'] is None else f"{totals['pass_rate']:.1%}"
@@ -170,7 +197,7 @@ def wait_for(directory, label):
         finished = sum(group['finished'] for group in groups.values())
         if finished == sum(group['planned'] for group in groups.values()):
             return
-        print(f'Waiting for {label}: {finished}/21 cases finished', flush=True)
+        print(f'Waiting for {label}: {finished}/{sum(group["planned"] for group in groups.values())} cases finished', flush=True)
         time.sleep(45)
     raise TimeoutError('Previous experiment did not finish; do not overlap model runs.')
 
@@ -179,23 +206,29 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--directory', type=Path, default=ROOT / 'data' / 'quality-generalization-20261011')
     parser.add_argument('--snapshot')
+    parser.add_argument('--from-snapshot', help='Reuse frozen code for a source-route experiment')
+    parser.add_argument('--core-rounds', type=int, choices=range(1, 4), default=3)
+    parser.add_argument('--holdout-rounds', type=int, choices=range(0, 2), default=1)
     parser.add_argument('--run')
-    parser.add_argument('--wait-for', help='Wait for this snapshot to finish before --run; avoids inference overlap')
+    parser.add_argument('--wait-for', action='append', help='Wait for snapshots in order before --run; avoids inference overlap')
     parser.add_argument('--one')
     parser.add_argument('--compare', nargs=2, metavar=('BEFORE', 'AFTER'))
+    parser.add_argument('--compare-sources', nargs=2, metavar=('SEARXNG', 'WIKIPEDIA'))
     parser.add_argument('--output', type=Path)
     args = parser.parse_args()
     directory = args.directory.resolve()
     if args.one:
         one(args.one, args.output)
     elif args.snapshot:
-        print(snapshot(directory, args.snapshot))
+        print(snapshot(directory, args.snapshot, args.core_rounds, args.holdout_rounds, args.from_snapshot))
     elif args.run:
-        if args.wait_for:
-            wait_for(directory, args.wait_for)
+        for label in args.wait_for or []:
+            wait_for(directory, label)
         run(directory, args.run)
     elif args.compare:
         compare(directory, args.compare)
+    elif args.compare_sources:
+        compare(directory, args.compare_sources, source_comparison=True)
     else:
         parser.error('Specify --snapshot or --run')
 
