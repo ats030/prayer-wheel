@@ -22,6 +22,7 @@
         <p id="result-meta" hidden></p>
         <span id="job-status" class="job-state" role="status"></span>
         <a id="quality-link" class="quiet-link quality-link" href="#quality-section" hidden></a>
+        <a id="milestone-link" class="quiet-link" href="#milestones-section" hidden></a>
         <details id="generation-info" class="metadata" hidden>
           <summary>生成情報</summary>
           <div class="info-body"><p id="saved-at"></p><p id="generation-meta"></p><p id="source-summary"></p><p id="generation-notice"></p><div id="review-notes"></div></div>
@@ -32,7 +33,9 @@
       <section id="progress" class="progress-section" aria-labelledby="progress-heading" hidden>
         <h2 id="progress-heading" class="sr-only">生成の進捗</h2>
         <p id="progress-message" role="status"></p>
+        <p id="progress-time" class="help"></p>
         <ol class="steps"><li>資料を探す</li><li>本文を読む</li><li>年代を整理</li><li>根拠を照合</li></ol>
+        <p class="help">資料ごとに年代の整理と照合を繰り返します。表示件数は検証済みの数で、主要項目の網羅を保証するものではありません。画面を閉じても生成は続きます。</p>
       </section>
       <p id="old-result" class="notice" hidden>前回の生成結果を表示しています。再生成が成功すると更新されます。</p>
       <p id="legacy-period" class="notice" hidden></p>
@@ -54,11 +57,11 @@
           <fieldset id="milestones-fields">
             <legend class="sr-only">主要項目の編集</legend>
             <div id="milestones-rows"></div>
-            <div class="milestone-actions"><button id="milestone-add" type="button" class="text-button">項目を追加</button><button id="milestone-import" type="button" class="text-button" hidden>共通評価の項目を取り込む</button><button id="milestone-reload" type="button" class="text-button">保存内容に戻す</button><button type="submit" class="text-button">主要項目を保存</button></div>
+            <div class="milestone-actions"><button id="milestone-add" type="button" class="text-button">項目を追加</button><button id="milestone-import" type="button" class="text-button" hidden>共通評価の項目を取り込む</button><button id="milestone-reload" type="button" class="text-button">保存内容に戻す</button><button type="submit" class="text-button">主要項目を保存</button><button id="milestone-regenerate" type="button" class="text-button" hidden>保存した項目で再生成</button></div>
           </fieldset>
           <p id="milestones-message" class="help" role="status"></p>
           <p id="milestones-error" class="error" role="alert" hidden></p>
-          <p class="help">保存だけでは再生成しません。保存後、ページ上部の「再生成」で調べ直します。参考URLも出典として取得・照合し、根拠が確認できた出来事だけを収録します。</p>
+          <p class="help">保存だけでは再生成しません。保存後、「保存した項目で再生成」で調べ直します。参考URLも出典として取得・照合し、根拠が確認できた出来事だけを収録します。</p>
         </form>
       </details>
     </section>

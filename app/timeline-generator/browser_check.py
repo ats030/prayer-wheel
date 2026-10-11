@@ -134,8 +134,10 @@ with sync_playwright() as playwright:
     job = job | {"state": "running", "stage": "verify", "message": "テスト用の照合中"}
     page.locator("#progress").wait_for()
     assert page.locator(".steps li.current").inner_text() == "根拠を照合"
+    assert page.locator('.steps li').nth(2).get_attribute('class') != 'done'
     job = job | {"state": "complete", "has_result": True, "result": RESULT, "generated_at": "2026-10-02T09:00:00+00:00"}
     page.locator(".event").wait_for()
+    assert '主要項目は未評価' in page.locator('#quality-link').inner_text()
     assert not page.evaluate("Boolean(window.injected)")
     assert page.locator(".event p").first.inner_text().startswith("<script>")
     assert page.locator("#generation-info").get_attribute("open") is None

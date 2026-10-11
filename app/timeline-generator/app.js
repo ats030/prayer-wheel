@@ -26,10 +26,13 @@ async function api(path, body) {
 function error(id, message) { $(id).textContent = message; $(id).hidden = false; }
 function progress(data) {
   $("progress-message").textContent = data.message || "生成を始めています。";
+  const started = Date.parse(data.started_at);
+  $("progress-time").textContent = Number.isFinite(started) ? `経過 ${Math.max(0, Math.floor((Date.now() - started) / 60000))}分 · 上限60分（待機時間を除く）` : "上限60分（待機時間を除く）";
   const current = stages.indexOf(data.stage);
   document.querySelectorAll(".steps li").forEach((step, i) => {
     step.classList.toggle("current", i === current);
-    step.classList.toggle("done", i < current);
+    // Candidate generation and verification alternate for every group of sources.
+    step.classList.toggle("done", i < current && i < 2);
     if (i === current) step.setAttribute("aria-current", "step");
     else step.removeAttribute("aria-current");
   });
@@ -87,27 +90,45 @@ function axisRow(axis, title = axis.label, withNote = true) {
   if (withNote && axis.note) row.append(node("span", "axis-note", axis.note));
   return row;
 }
-function renderQuality(quality) {
+function renderQuality(quality, requestMissing) {
   const box = $("quality");
   box.replaceChildren();
   $("quality-section").hidden = !quality;
   $("quality-link").hidden = !quality;
   if (!quality) return;
   const off = quality.axes.filter((axis) => axis.passed === false).length;
-  $("quality-link").textContent = off ? `評価 目標外${off}` : "評価 すべて目標内";
+  const unevaluated = quality.axes.find(axis => axis.key === "recall")?.value == null;
+  $("quality-link").textContent = unevaluated ? `評価 主要項目は未評価${off ? ` · 目標外${off}` : ""}` : off ? `評価 目標外${off}` : "評価 すべて目標内";
   $("quality-basis").textContent = `再現率と既知の誤りは人手で選んだ主要項目（検証日 ${quality.gold_verified_at}）との照合です。出典の割合は機械的な集計で、内容の正しさの判定ではありません。総合点は出していません。`;
   const list = node("ul", "axes");
   for (const axis of quality.axes) list.append(axisRow(axis));
   box.append(list);
+  if (quality.missing?.length) {
+    box.append(node("h3", "quality-heading", "欠落した主要項目"));
+    const missing = node("ul", "missing-items");
+    for (const item of quality.missing) {
+      const row = node("li");
+      row.append(node("span", null, item.label));
+      if (requestMissing) {
+        const button = node("button", "text-button", "重点調査に追加");
+        button.type = "button";
+        button.dataset.missing = item.label;
+        button.addEventListener("click", () => requestMissing(item.label));
+        row.append(button);
+      }
+      missing.append(row);
+    }
+    box.append(missing);
+  }
 }
-function render(data, job) {
-  renderQuality(job.quality);
+function render(data, job, requestMissing) {
+  renderQuality(job.quality, requestMissing);
   $("result-meta").textContent = `${data.events.length}件`;
   $("generation-meta").textContent = `${job.period || "全期間"} · 生成時間 ${data.elapsed_seconds}秒`;
   $("source-summary").textContent = sourceSummary(data.events);
   $("generation-notice").textContent = data.notice;
   const alerts = [];
-  if (data.stop_reason === "time_limit") alerts.push(`時間上限により終了。検証済み${data.events.length}件を保存しました。`);
+  if (data.stop_reason === "time_limit") alerts.push(`時間上限により終了。検証済み${data.events.length}件を保存しました。残る主要項目は下の確認欄で指定して再生成できます。`);
   if (data.stop_reason === "processing_error") alerts.push(`途中で処理を終了。検証済み${data.events.length}件を保存しました。${job.legacy_period ? "年代条件を外して新しく登録できます。" : "再生成で調べ直せます。"}`);
   if (data.review_notes?.length) alerts.push(`採用を見送った候補${data.review_notes.length}件。詳細は「生成情報」で確認できます。`);
   $("result-notice").textContent = alerts.join(" ");
@@ -349,7 +370,30 @@ if ($("job-status")) {
     });
     if (!rows.length) rows.push(node("li", null, "主要項目はまだ指定されていません。"));
     $("milestone-report").replaceChildren(...rows);
+    const report = current.milestone_report || [];
+    const found = report.filter(item => item.status === "found").length;
+    const pending = report.filter(item => item.status === "pending").length;
+    $("milestone-link").hidden = current.legacy_period;
+    $("milestone-link").textContent = report.length ? `指定項目 ${found} / ${report.length}一致${pending ? ` · 次回調査${pending}` : ""}` : "重点的に調べる項目を指定";
+    const action = $("milestone-regenerate");
+    action.hidden = !current.has_result && !["failed", "cancelled"].includes(current.state);
+    action.textContent = current.has_result ? "保存した項目で再生成" : "保存した項目で再試行";
+    document.querySelectorAll('[data-missing]').forEach(button => { button.disabled = active(current) || acting || current.legacy_period; });
   }
+  function requestMissing(name) {
+    if (acting || active(job) || job.legacy_period) return;
+    const item = (job.suggested_milestones || []).find(item => item.name === name);
+    if (!item) return;
+    const existing = [...milestoneRows.querySelectorAll('[data-key="name"]')].find(input => input.value === name);
+    $("milestones-editor").open = true;
+    if (existing) { existing.focus(); return; }
+    const row = addMilestone(item);
+    if (!row) { error("milestones-error", "主要項目は12件までです。項目を外してから追加してください。"); return; }
+    editorDirty = true;
+    $("milestones-message").textContent = "重点調査の項目を追加しました。保存後、再生成で調べ直せます。";
+    row.querySelector("input").focus();
+  }
+  $("milestone-regenerate").addEventListener("click", () => $(job.has_result ? "regenerate" : "retry").click());
   $("milestone-add").addEventListener("click", () => { const row = addMilestone(); if (row) { editorDirty = true; $("milestones-message").textContent = "未保存の変更があります。"; row.querySelector("input").focus(); } });
   $("milestone-import").addEventListener("click", () => {
     const existing = [...milestoneRows.querySelectorAll('[data-key="name"]')].map(input => input.value);
@@ -368,6 +412,7 @@ if ($("job-status")) {
       const saved = await api(`/api/jobs/${id}/milestones`, {items, revision: editorRevision});
       editorDirty = false; editorRevision = undefined;
       saved.suggested_milestones = job.suggested_milestones;
+      saved.quality = job.quality;
       show(saved);
       $("milestones-message").textContent = "主要項目を保存しました。再生成で反映します。";
     } catch (exc) { error("milestones-error", exc.message); }
@@ -396,12 +441,13 @@ if ($("job-status")) {
     if (job.error) error("page-error", job.error);
     else $("page-error").hidden = true;
     if (job.result && (generatedAt !== job.generated_at || renderedResult !== JSON.stringify(job.result))) {
-      render(job.result, job);
+      render(job.result, job, requestMissing);
       generatedAt = job.generated_at;
       renderedResult = JSON.stringify(job.result);
       $("saved-at").textContent = `生成日時：${date(job.generated_at)}`;
     }
     $("old-result").hidden = job.legacy_period || !job.has_result || job.state === "complete";
+    document.querySelectorAll('[data-missing]').forEach(button => { button.disabled = active(job) || acting || job.legacy_period; });
   }
   async function load() {
     clearTimeout(timer);

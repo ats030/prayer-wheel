@@ -430,7 +430,7 @@ class BatchTests(unittest.TestCase):
         clock = [0]
         class Records(list):
             def append(self, record):
-                if '第1組を整理' in record.get('message', ''):
+                if '資料の第1 / ' in record.get('message', ''):
                     clock[0] = t.TIME_LIMIT - 9.5
                 super().append(record)
         with patch.object(t.time, 'monotonic', side_effect=lambda: clock[0]):
@@ -447,32 +447,43 @@ class BatchTests(unittest.TestCase):
             trace = self.run_generation(history_source(10))['trace']
         self.assertEqual({r['stage'] for r in trace['rejected']}, {'件数上限'})
 
-    def test_saturated_batch_is_regenerated_with_wider_limit(self):
+    def test_dense_batch_gets_wider_budget_without_repeated_generation(self):
         systems = []
         def model(system, prompt, deadline, schema):
             if schema is t.EVENT_SCHEMA:
                 systems.append(system)
-                if '最大14件' in system:
-                    # 再生成では1件目が同じ引用の言い換えで重複し、枠外だった別の引用の出来事が1件増える。
-                    events = grounded_model(system, prompt, deadline, schema)['events']
-                    paraphrase = events[0] | {'title': events[0]['title'] + 'が起こる'}
-                    return {'events': [paraphrase] + events + [events[0] | {'year': 1799, 'title': '枠外の出来事', 'quote': '1799年、枠外の出来事。'}]}
             return grounded_model(system, prompt, deadline, schema)
-        result = self.run_generation(history_source(t.BATCH_EVENTS + 3), model=model, saturated=14)
-        self.assertEqual(['最大7件' in s for s in systems], [True, False, True])
-        self.assertEqual(['最大14件' in s for s in systems], [False, True, False])
-        # 枠外の出来事は検証まで届き、そこで資料と照合される。
-        self.assertIn(1799, [r['year'] for r in result['trace']['rejected'] if r['batch'] == 1])
-        self.assertEqual(result['trace']['batches'][0]['proposed'], t.BATCH_EVENTS + 1)
-        self.assertNotIn('研究の出来事1800が起こる', [r['title'] for r in result['trace']['rejected']] + [e['title'] for e in result['events']])
+        with patch.object(t, 'model_json', side_effect=model):
+            generated = t.generate_batch(t.parse_query('研究'), [history_source(10)], time.monotonic() + 900)
+        self.assertEqual(len(systems), 1)
+        self.assertIn('最大14件', systems[0])
+        self.assertEqual(len(generated['valid']), 10)
+        self.assertEqual(generated['limit'], 14)
 
-    def test_saturated_retry_failure_keeps_first_proposals(self):
+    def test_wider_candidate_budget_has_room_for_json_on_the_first_call(self):
+        payloads = []
+        def response(url, payload, timeout):
+            payloads.append(payload)
+            return {'message': {'content': '{"events": []}'}}
+        with patch.object(t, 'json_request', side_effect=response):
+            t.model_json('最大14件', '資料', time.monotonic() + 60, t.EVENT_SCHEMA)
+        self.assertEqual(len(payloads), 1)
+        self.assertEqual(payloads[0]['options']['num_predict'], 6000)
+
+    def test_missing_article_retry_failure_keeps_first_proposals(self):
+        first, second = history_source(3), history_source(1)
+        second = dict(second, url='https://example.org/other')
+        calls = []
         def model(system, prompt, deadline, schema):
-            if schema is t.EVENT_SCHEMA and '最大14件' in system:
+            calls.append(prompt)
+            if len(calls) > 1:
                 raise t.TimelineError('busy')
-            return grounded_model(system, prompt, deadline, schema)
-        result = self.run_generation(history_source(t.BATCH_EVENTS), model=model, saturated=14)
-        self.assertEqual(len(result['events']), t.BATCH_EVENTS)
+            output = grounded_model(system, prompt, deadline, schema)
+            return {'events': [e for e in output['events'] if e['source_id'] == 1]}
+        with patch.object(t, 'model_json', side_effect=model):
+            generated = t.generate_batch(t.parse_query('研究'), [first, second], time.monotonic() + 900)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(len(generated['valid']), 3)
 
     def test_source_without_candidates_is_asked_again_alone(self):
         first = history_source(3)
@@ -514,6 +525,25 @@ class BatchTests(unittest.TestCase):
             generated = t.generate_batch(t.parse_query('研究'), [history_source(3)], time.monotonic() + 900)
         self.assertEqual(len(calls), 1)
         self.assertEqual(generated['limit'], t.BATCH_EVENTS)
+
+    def test_many_articles_do_not_trigger_repeated_unused_article_calls(self):
+        sources = [dict(history_source(5), url=f'https://example.org/{i}') for i in range(5)]
+        def first_only(system, prompt, deadline, schema):
+            output = grounded_model(system, prompt, deadline, schema)
+            return {'events': [e for e in output['events'] if e['source_id'] == 1]}
+        with patch.object(t, 'model_json', side_effect=first_only) as model:
+            generated = t.generate_batch(t.parse_query('研究'), sources, time.monotonic() + 900)
+        self.assertEqual(model.call_count, 1)
+        self.assertEqual(len(generated['valid']), 5)
+
+    def test_coverage_order_preserves_context_and_spreads_early_work_across_eras(self):
+        source = history_source(100)
+        source['passages'][80]['text'] += '方式を発明した。'
+        ordered = t.coverage_order(source['passages'])
+        self.assertEqual(len(ordered), 100)
+        self.assertEqual({id(p) for p in ordered}, {id(p) for p in source['passages']})
+        self.assertEqual({(int(p['date_heading'][:-1]) - 1800) // 20 for p in ordered[:5]}, set(range(5)))
+        self.assertIs(ordered[0], source['passages'][80])
 
     def test_trace_marks_unprocessed_batches_after_deadline(self):
         clock = [0]

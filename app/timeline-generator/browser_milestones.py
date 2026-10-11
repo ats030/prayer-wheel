@@ -36,6 +36,19 @@ def main():
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 page.goto(root + f"/timelines/{job['id']}")
                 page.locator('#milestones-section').wait_for(state='visible')
+                assert '重点的に調べる項目を指定' in page.locator('#milestone-link').inner_text()
+                # A missing evaluation item becomes an editable request, never an
+                # automatic save, model call, or change to the shared gold.
+                page.locator('[data-missing="東京オリンピック"]').click()
+                assert page.locator('#milestones-editor').evaluate('(element) => element.open')
+                assert page.locator('[data-key="name"]').input_value() == '東京オリンピック'
+                assert page.locator('[data-key="year"]').input_value() == '1964'
+                assert store.get(job['id'])['requested_milestones'] == []
+                assert not http.worker.wake.is_set()
+                page.locator('[data-missing="東京オリンピック"]').click()
+                assert page.locator('.milestone-row').count() == 1
+                page.locator('#milestone-reload').click()
+                page.locator('#milestones-editor summary').click()
                 page.locator('#milestones-editor summary').click()
                 page.locator('#milestone-import').click()
                 assert page.locator('.milestone-row').count() > 0
@@ -48,7 +61,7 @@ def main():
                 # Polling must not destroy in-progress input.
                 page.wait_for_timeout(2200)
                 assert page.locator('[data-key="name"]').input_value() == '沖縄返還'
-                page.locator('#regenerate').click()
+                page.locator('#milestone-regenerate').click()
                 assert '保存してから' in page.locator('#milestones-error').inner_text()
                 assert store.get(job['id'])['state'] == 'complete'
                 for width in [320, 375, 414, 768, 1280]:
@@ -64,6 +77,7 @@ def main():
                 assert saved['requested_milestones'][0]['name'] == '沖縄返還'
                 assert not http.worker.wake.is_set()
                 assert '一致する項目あり' in page.locator('#milestone-report').inner_text()
+                assert '1 / 1一致' in page.locator('#milestone-link').inner_text()
                 assert not page.evaluate('Boolean(window.injected)')
                 # Another tab updates the stored revision; preserve the local draft.
                 page.locator('[data-key="name"]').fill('東京オリンピック')
@@ -86,12 +100,13 @@ def main():
                 page.locator('[data-key="name"]').fill('沖縄返還')
                 page.locator('#milestones-form button[type="submit"]').click()
                 page.wait_for_function("document.getElementById('milestones-message').textContent.includes('保存しました')")
-                page.locator('#regenerate').click()
+                page.locator('#milestone-regenerate').click()
                 page.wait_for_function("document.getElementById('job-status').textContent === '待機中'")
                 assert page.locator('#milestones-fields').evaluate('(element) => element.disabled')
                 assert page.locator('[data-key="name"]').is_disabled()
                 assert store.get(job['id'])['requested_milestones'][0]['name'] == '沖縄返還'
                 assert store.get(job['id'])['result'] == result
+                assert page.locator('[data-missing]').first.is_disabled()
                 assert not errors, errors
                 browser.close()
             print('milestone browser: 5 widths, 200% text, edit/save/remove/import, unsaved guard, revision conflict, XSS, regeneration snapshot passed')
