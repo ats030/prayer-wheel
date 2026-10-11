@@ -18,7 +18,8 @@ def main():
         result = {'kind': 'result', 'theme': '昭和', 'period': '全期間', 'events': [
             {'year': 1972, 'date': '1972年', 'title': '沖縄返還', 'description': '沖縄が日本に返還された。',
              'source': {'url': 'https://example.org/history', 'title': '出典'}}],
-            'review_notes': [], 'notice': 'ブラウザ検証用', 'elapsed_seconds': 1, 'stop_reason': 'sources_exhausted'}
+            'review_notes': [], 'notice': 'ブラウザ検証用', 'elapsed_seconds': 1, 'stop_reason': 'sources_exhausted',
+            'trace': {'batches_total': 1, 'batches_processed': 1, 'sources': [], 'batches': [], 'rejected': []}}
         store.record(job['id'], result)
         http = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
         http.daemon_threads = True
@@ -102,6 +103,7 @@ def main():
                 page.wait_for_function("document.getElementById('milestones-message').textContent.includes('保存しました')")
                 page.locator('#milestone-regenerate').click()
                 page.wait_for_function("document.getElementById('job-status').textContent === '待機中'")
+                assert page.locator('#quality-link').is_visible()
                 assert page.locator('#milestones-fields').evaluate('(element) => element.disabled')
                 assert page.locator('[data-key="name"]').is_disabled()
                 assert store.get(job['id'])['requested_milestones'][0]['name'] == '沖縄返還'

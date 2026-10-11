@@ -419,6 +419,10 @@ if ($("job-status")) {
     finally { acting = false; $("milestones-fields").disabled = active(job); timer = setTimeout(load, 2000); }
   });
   function show(current) {
+    // Action responses omit evaluation metadata. Keep it for the same saved
+    // result until GET refreshes it, including when POST still contains trace.
+    if (current.quality === undefined && current.result && current.generated_at === job?.generated_at) current.quality = job?.quality;
+    if (current.suggested_milestones === undefined) current.suggested_milestones = job?.suggested_milestones;
     job = current;
     showMilestones(current);
     $("page-heading").textContent = job.query;
