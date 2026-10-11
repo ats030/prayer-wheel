@@ -1,4 +1,4 @@
-import {esc, reducedMotion, flyToItem, revealDetail, focusWithin, focusFirst, announceDetailLoad} from '../detail-common.js';
+import {esc, reducedMotion, flyToItem, revealDetail, closeDetailPanel, safeUrl, plainText, commonsFilePage, sourceLink, announceDetailLoad} from '../detail-common.js';
 export function mount(context) {
 const {map, document, fetch} = context;
 
@@ -79,16 +79,7 @@ let blockedImageFallback=new Set();
 const imageCache={};
 try{Object.assign(imageCache,JSON.parse(localStorage.getItem(IMAGE_CACHE_KEY)||'{}'))}catch{}
 
-function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}}
-function plainText(value){const document=new DOMParser().parseFromString(String(value||''),'text/html');return document.body.textContent.trim()}
-function commonsFilePage(value){
-  try{
-    const url=new URL(value);if(!['upload.wikimedia.org','thumb.wikimedia.org'].includes(url.hostname))return'';
-    const parts=url.pathname.split('/').filter(Boolean),thumbIndex=parts.indexOf('thumb');
-    const fileName=decodeURIComponent(thumbIndex>=0?parts[parts.length-2]:parts[parts.length-1]);
-    return fileName?`https://commons.wikimedia.org/wiki/File:${encodeURIComponent(fileName)}`:'';
-  }catch{return''}
-}
+
 async function fetchJSONWithRetry(url,timeout){
   let lastError;
   for(let attempt=0;attempt<2;attempt++){
@@ -292,7 +283,6 @@ async function hydrateSections(o){
   container.innerHTML=renderSections(o,data.sections&&typeof data.sections==='object'?data.sections:{});
 }
 function renderSections(o,sections){
-  const link=(url,label)=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label}<span aria-hidden="true">↗</span></a>`;
   return DETAIL_SECTIONS.map(([key,heading])=>{
     const payload=sections[key]||{};
     const summary=String(payload.summary||'').trim();
@@ -306,9 +296,9 @@ function renderSections(o,sections){
     const source=safeUrl(payload.source_url)||safeUrl(o.source_url);
     const official=Boolean(o.description);
     const attribution=[official?'AIによる要約(出典をもとに編集)':'AIによる要約'];
-    if(source)attribution.push(link(source,official?o.source_name||'公式情報':'Wikipedia'));
-    if(official&&source&&['www.maff.go.jp','www.rinya.maff.go.jp','www.meti.go.jp'].includes(new URL(source).hostname))attribution.push(link('https://www.digital.go.jp/resources/open_data/public_data_license_v1.0','PDL1.0'));
-    if(!official)attribution.push(link('https://creativecommons.org/licenses/by-sa/4.0/deed.ja','CC BY-SA 4.0'));
+    if(source)attribution.push(sourceLink(source,official?o.source_name||'公式情報':'Wikipedia'));
+    if(official&&source&&['www.maff.go.jp','www.rinya.maff.go.jp','www.meti.go.jp'].includes(new URL(source).hostname))attribution.push(sourceLink('https://www.digital.go.jp/resources/open_data/public_data_license_v1.0','PDL1.0'));
+    if(!official)attribution.push(sourceLink('https://creativecommons.org/licenses/by-sa/4.0/deed.ja','CC BY-SA 4.0'));
     const body=[
       summary?`<p class="detail-summary">${esc(summary)}</p>`:'',
       items.length?`<dl class="section-items">${itemsMarkup}</dl>`:'',
@@ -352,7 +342,7 @@ function showDetail(o,origin){
     <div id="detail-sections"></div>
     ${amazonLink(o)}
     ${furusatoLink(o)}
-    ${links.length?`<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${links.map(([label,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label}<span aria-hidden="true">↗</span></a>`).join('')}</nav></section>`:''}
+    ${links.length?`<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${links.map(([label,url])=>sourceLink(url,label)).join('')}</nav></section>`:''}
   </article>`;
   announceDetailLoad(document.querySelector('#detail-panel'),[hydrateImage(o),hydrateSections(o)]);
 }
@@ -485,8 +475,8 @@ async function loadImageCatalog(){
 function openLightbox(url,alt){const dialog=document.querySelector('#lightbox'),image=document.querySelector('#lightbox-image');image.src=url;image.alt=`${alt||'特産物'}の拡大画像`;dialog.showModal()}
 function closeLightbox(){const dialog=document.querySelector('#lightbox');if(dialog.open)dialog.close();document.querySelector('#lightbox-image').src='';document.querySelector('#lightbox-image').removeAttribute('alt')}
 
-function closeDetail(){
-  const key=selectedKey,origin=selectedOrigin,panel=document.querySelector('#detail-panel'),hadFocus=focusWithin(panel);
+function closeDetail(restoreFocus=true){
+  const key=selectedKey,origin=selectedOrigin,panel=document.querySelector('#detail-panel');
   if(selectedKey&&selectedItem){
     const m=markers.get(selectedKey);
     if(m)m.setIcon(markerIcon(selectedItem,false));
@@ -494,14 +484,9 @@ function closeDetail(){
   selectedItem=null;
   selectedKey=null;
   selectedOrigin=null;
-  panel.hidden=true;
-  document.querySelector('.app-shell').classList.remove('has-detail');
   document.querySelectorAll('.tokusan-card').forEach(card=>card.setAttribute('aria-current','false'));
   requestAnimationFrame(()=>map.invalidateSize());
-  if(key||hadFocus){
-    const mapElement=document.querySelector('#map'),card=key&&document.querySelector(`.tokusan-card[data-key="${CSS.escape(key)}"]`);
-    focusFirst(origin==='marker'?mapElement:card,document.querySelector('#keyword'),mapElement);
-  }
+  closeDetailPanel(panel,{key,origin,cardSelector:'.tokusan-card',restoreFocus});
 }
 
 document.querySelector('#keyword').addEventListener('input',applyFilters);

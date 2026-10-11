@@ -1,4 +1,4 @@
-import {esc, flyToItem, revealDetail, focusWithin, focusFirst, announceDetailLoad} from '../detail-common.js';
+import {esc, flyToItem, revealDetail, closeDetailPanel, safeUrl, plainText, commonsFilePage, announceDetailLoad} from '../detail-common.js';
 export function mount(context) {
 const {map, document, fetch} = context;
 
@@ -42,16 +42,7 @@ function matchesLifecycle(f,filter){
   if(filter==='current')return status==='active'||status==='legacy';
   return status===filter;
 }
-function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}}
-function plainText(value){const document=new DOMParser().parseFromString(String(value||''),'text/html');return document.body.textContent.trim()}
-function commonsFilePage(value){
-  try{
-    const url=new URL(value);if(!['upload.wikimedia.org','thumb.wikimedia.org'].includes(url.hostname))return'';
-    const parts=url.pathname.split('/').filter(Boolean),thumbIndex=parts.indexOf('thumb');
-    const fileName=decodeURIComponent(thumbIndex>=0?parts[parts.length-2]:parts[parts.length-1]);
-    return fileName?`https://commons.wikimedia.org/wiki/File:${encodeURIComponent(fileName)}`:'';
-  }catch{return''}
-}
+
 function venueData(f){return f.venue&&typeof f.venue==='object'&&f.venue.name&&safeUrl(f.venue.source)?f.venue:null}
 // 座標のない確認済み会場もある。そのときは祭り自体の座標で地図に置く。
 function venuePoint(venue){return!!venue&&typeof venue.latitude==='number'&&typeof venue.longitude==='number'}
@@ -503,13 +494,10 @@ async function hydrateLocation(f,key){
   if(element&&selectedKey===key){element.innerHTML=locationMarkup(location,f);if(aboutLocation)aboutLocation.textContent=location}
 }
 function closeDetail(restoreFocus=true){
-  const key=selectedKey,origin=selectedOrigin,panel=document.querySelector('#detail-panel'),hadFocus=focusWithin(panel);selectedKey=null;selectedOrigin=null;panel.hidden=true;document.querySelector('.app-shell').classList.remove('has-detail');
+  const key=selectedKey,origin=selectedOrigin,panel=document.querySelector('#detail-panel');selectedKey=null;selectedOrigin=null;
   showSelectedMarker(null);document.querySelectorAll('.festival-card').forEach(card=>card.setAttribute('aria-current','false'));
   requestAnimationFrame(()=>map.invalidateSize());
-  if((restoreFocus&&key)||hadFocus){
-    const mapElement=document.querySelector('#map'),card=key&&document.querySelector(`.festival-card[data-key="${CSS.escape(key)}"]`);
-    focusFirst(origin==='marker'?mapElement:card,document.querySelector('#keyword'),mapElement);
-  }
+  closeDetailPanel(panel,{key,origin,cardSelector:'.festival-card',restoreFocus});
 }
 async function hydrateImage(f,key){
   const [wikipediaContent,location]=await Promise.all([loadWikipediaContent(f),detailedLocation(f)]),contentIsRelevant=!wikipediaContent||isCompatibleWikipediaImage(wikipediaContent.description,f,location);

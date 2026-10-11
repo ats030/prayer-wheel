@@ -1,4 +1,4 @@
-import {esc, flyToItem, revealDetail, focusWithin, focusFirst, announceDetailLoad} from '../detail-common.js';
+import {esc, flyToItem, revealDetail, closeDetailPanel, safeUrl, plainText, commonsFilePage, announceDetailLoad} from '../detail-common.js';
 export function mount(context) {
 const {map, document, fetch} = context;
 
@@ -34,16 +34,7 @@ function persist(key,value){
 }
 function shisekiKey(o,index=0){return o.id||o.qid||`${o.label_ja}-${o.latitude}-${o.longitude}-${index}`}
 function wikiQID(o){return /^Q[1-9][0-9]*$/.test(o.qid||'')?o.qid:''}
-function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}}
-function plainText(value){const document=new DOMParser().parseFromString(String(value||''),'text/html');return document.body.textContent.trim()}
-function commonsFilePage(value){
-  try{
-    const url=new URL(value);if(!['upload.wikimedia.org','thumb.wikimedia.org'].includes(url.hostname))return'';
-    const parts=url.pathname.split('/').filter(Boolean),thumbIndex=parts.indexOf('thumb');
-    const fileName=decodeURIComponent(thumbIndex>=0?parts[parts.length-2]:parts[parts.length-1]);
-    return fileName?`https://commons.wikimedia.org/wiki/File:${encodeURIComponent(fileName)}`:'';
-  }catch{return''}
-}
+
 function categoryTags(o){
   const list=Array.isArray(o.categories)?o.categories:[];
   if(list.length)return list;
@@ -363,13 +354,10 @@ async function hydrateLocation(o,key){
   if(element&&selectedKey===key)element.innerHTML=locationMarkup(location,o);
 }
 function closeDetail(restoreFocus=true){
-  const key=selectedKey,origin=selectedOrigin,panel=document.querySelector('#detail-panel'),hadFocus=focusWithin(panel);selectedKey=null;selectedOrigin=null;panel.hidden=true;document.querySelector('.app-shell').classList.remove('has-detail');
+  const key=selectedKey,origin=selectedOrigin,panel=document.querySelector('#detail-panel');selectedKey=null;selectedOrigin=null;
   showSelectedMarker(null);document.querySelectorAll('.shiseki-card').forEach(card=>card.setAttribute('aria-current','false'));
   requestAnimationFrame(()=>map.invalidateSize());
-  if((restoreFocus&&key)||hadFocus){
-    const mapElement=document.querySelector('#map'),card=key&&document.querySelector(`.shiseki-card[data-key="${CSS.escape(key)}"]`);
-    focusFirst(origin==='marker'?mapElement:card,document.querySelector('#keyword'),mapElement);
-  }
+  closeDetailPanel(panel,{key,origin,cardSelector:'.shiseki-card',restoreFocus});
 }
 async function hydrateImage(o,key){
   const [wikipediaContent]=await Promise.all([loadWikipediaContent(o)]);

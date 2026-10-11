@@ -64,6 +64,21 @@ with sync_playwright() as p:
       return {stale,completed,count,closed};
     }""")
     assert result=={'stale':'','completed':'詳細情報を更新しました。','count':1,'closed':''},result
+    # Shared link helpers reject non-web URLs and escape untrusted source names.
+    result=page.evaluate("""async () => {
+      const {sourceLink,safeUrl,plainText,commonsFilePage}=await import('/assets/detail-common.js');
+      const holder=document.createElement('div');
+      holder.innerHTML=sourceLink('https://example.com/?a=1&b=2','<img src=x onerror=alert(1)>');
+      return {
+        rejected:['javascript:alert(1)','data:text/html,test','/relative','https://'].every(url=>sourceLink(url,'test')===''&&safeUrl(url)===''),
+        label:holder.querySelector('a').textContent,
+        injected:holder.querySelectorAll('img').length,
+        text:plainText('<b>作者</b> &amp; 提供者'),
+        commons:commonsFilePage('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Test%20image.jpg/300px-Test.jpg'),
+        wrongHost:commonsFilePage('https://example.com/Test.jpg')
+      };
+    }""")
+    assert result=={'rejected':True,'label':'<img src=x onerror=alert(1)>↗','injected':0,'text':'作者 & 提供者','commons':'https://commons.wikimedia.org/wiki/File:Test%20image.jpg','wrongHost':''},result
     # Every asynchronous category reaches its single live status with controlled responses.
     page=browser.new_context(reduced_motion='reduce').new_page()
     page.on('pageerror',lambda e:errors.append(str(e)))

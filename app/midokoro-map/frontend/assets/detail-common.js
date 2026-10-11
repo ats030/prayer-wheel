@@ -4,7 +4,30 @@ export function esc(value) {
 }
 
 export function sourceLink(href, label) {
-  return /^https?:\/\//.test(href || '') ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(label)}<span aria-hidden="true">↗</span></a>` : '';
+  const url = safeUrl(href);
+  return url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)}<span aria-hidden="true">↗</span></a>` : '';
+}
+
+export function safeUrl(value) {
+  try {
+    const url = new URL(value);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+  } catch { return ''; }
+}
+
+export function plainText(value) {
+  const document = new DOMParser().parseFromString(String(value || ''), 'text/html');
+  return document.body.textContent.trim();
+}
+
+export function commonsFilePage(value) {
+  try {
+    const url = new URL(value);
+    if (!['upload.wikimedia.org', 'thumb.wikimedia.org'].includes(url.hostname)) return '';
+    const parts = url.pathname.split('/').filter(Boolean), thumbIndex = parts.indexOf('thumb');
+    const fileName = decodeURIComponent(thumbIndex >= 0 ? parts[parts.length - 2] : parts[parts.length - 1]);
+    return fileName ? `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(fileName)}` : '';
+  } catch { return ''; }
 }
 
 export function reducedMotion() {
@@ -45,6 +68,17 @@ export function focusFirst(...candidates) {
     if (target.getRootNode().activeElement === target) return target;
   }
   return null;
+}
+
+export function closeDetailPanel(panel, {key, origin, cardSelector, restoreFocus = true}) {
+  const hadFocus = focusWithin(panel), root = panel.getRootNode();
+  panel.hidden = true;
+  root.querySelector('.app-shell')?.classList.remove('has-detail');
+  if ((restoreFocus && key) || hadFocus) {
+    const mapElement = root.querySelector('#map');
+    const card = key && root.querySelector(`${cardSelector}[data-key="${CSS.escape(key)}"]`);
+    focusFirst(origin === 'marker' ? mapElement : card, root.querySelector('#keyword'), mapElement);
+  }
 }
 
 const detailLoads = new WeakMap();

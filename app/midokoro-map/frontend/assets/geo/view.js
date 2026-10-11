@@ -1,4 +1,4 @@
-import {esc, sourceLink, flyToItem, fitItem, revealDetail, focusWithin, focusFirst} from '../detail-common.js';
+import {esc, sourceLink, flyToItem, fitItem, revealDetail, closeDetailPanel} from '../detail-common.js';
 
 const geoparkKinds = [['shiseki','史跡'],['omatsuri','祭り'],['onsen','温泉'],['tokusan','特産物']];
 const SELECTED_MARKER_Z_INDEX = 10000;
@@ -84,16 +84,12 @@ export function mount(context) {
     revealDetail(map, panel, root.querySelector('#detail-title'));
   }
   function closeDetail(restoreFocus = true) {
-    const key = selectedKey, origin = selectedOrigin, hadFocus = focusWithin(panel);
+    const key = selectedKey, origin = selectedOrigin;
     selectedKey = null; selectedOrigin = null;
-    panel.hidden = true; shell.classList.remove('has-detail');
     showSelection(null);
     list.querySelectorAll('.geo-card').forEach(card => card.setAttribute('aria-current', 'false'));
     requestAnimationFrame(() => map.invalidateSize());
-    if ((restoreFocus && key) || hadFocus) {
-      const mapElement = root.querySelector('#map'), card = key && list.querySelector(`.geo-card[data-key="${CSS.escape(key)}"]`);
-      focusFirst(origin === 'marker' ? mapElement : card, keyword, mapElement);
-    }
+    closeDetailPanel(panel, {key, origin, cardSelector:'.geo-card', restoreFocus});
   }
   function draw() {
     parkLayer.clearLayers(); pointLayer.clearLayers();
