@@ -246,6 +246,42 @@ check("GET /api/tags", measure("GET", "/api/tags"), False)
 check("POST /api/show", measure("POST", "/api/show"), False)
 check("クエリ付き", measure("POST", "/api/generate?x=1"), True)
 
+
+def upstream_headers(headers):
+    handler = object.__new__(proxy.ProxyHandler)
+    handler.command = "GET"
+    handler.path = "/api/tags"
+    handler.headers = headers
+    return proxy.ProxyHandler.forward_headers(handler)
+
+
+sent = upstream_headers({"Origin": "https://ikimono-note.ats030.workers.dev",
+                         "Accept": "application/json"})
+check("Origin は上流へ渡さない", [k for k in sent if k.lower() == "origin"], [])
+check("他のヘッダは渡す", sent.get("Accept"), "application/json")
+
+
+def response_headers(origin, upstream):
+    handler = object.__new__(proxy.ProxyHandler)
+    handler.headers = {"Origin": origin} if origin else {}
+    sent = []
+    handler.send_header = lambda key, value: sent.append((key, value))
+    proxy.ProxyHandler.copy_response_headers(handler, upstream)
+    return [value for key, value in sent if key.lower() == "access-control-allow-origin"]
+
+
+allowed_origins = proxy.ALLOWED_ORIGINS
+proxy.ALLOWED_ORIGINS = {"https://ikimono-note.ats030.workers.dev"}
+check("許可 origin には proxy が CORS を付ける",
+      response_headers("https://ikimono-note.ats030.workers.dev", [("Content-Type", "application/json")]),
+      ["https://ikimono-note.ats030.workers.dev"])
+check("上流の CORS は重ねない",
+      response_headers("https://ikimono-note.ats030.workers.dev", [("Access-Control-Allow-Origin", "*")]),
+      ["https://ikimono-note.ats030.workers.dev"])
+check("Origin なしなら CORS を付けない", response_headers("", [("Access-Control-Allow-Origin", "*")]), [])
+check("未許可 origin には付けない", response_headers("https://evil.example", []), [])
+proxy.ALLOWED_ORIGINS = allowed_origins
+
 print("9. 1リクエスト1行を月次ファイルへ書く")
 with tempfile.TemporaryDirectory() as tmp:
     proxy.USAGE_LOG_DIR = Path(tmp) / "ollama-proxy"

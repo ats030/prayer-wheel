@@ -926,6 +926,10 @@ class ProxyHandler(BaseHTTPRequestHandler):
             for key, value in self.headers.items()
             if key.lower() not in HOP_BY_HOP_HEADERS
         }
+        # Origin は do_* で検査済み。上流の Ollama は自前の OLLAMA_ORIGINS で
+        # 再検査して 403 を返すため渡さない。CORS 応答は proxy が付ける。
+        for key in [k for k in headers if k.lower() == "origin"]:
+            del headers[key]
         headers["Authorization"] = f"Bearer {OPENWEBUI_API_KEY}"
         headers.setdefault("Accept", "application/json")
         if self.should_measure():
@@ -942,7 +946,14 @@ class ProxyHandler(BaseHTTPRequestHandler):
             lower = key.lower()
             if lower in HOP_BY_HOP_HEADERS or lower in {"server", "date", "content-length"}:
                 continue
+            if lower == "access-control-allow-origin":
+                continue
             self.send_header(key, value)
+        # 上流へは Origin を渡さないので、許可済み origin の CORS は proxy が付ける。
+        origin = self.headers.get("Origin", "")
+        if origin in ALLOWED_ORIGINS:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
 
     def copy_body(self, response, keep_tail: bool = False) -> bytes:
         """上流の応答をそのまま流す。keep_tail のときだけ末尾を控える。
