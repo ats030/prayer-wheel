@@ -2,6 +2,7 @@
 """Isolated public authentication HTTP service; no private DB or generation worker."""
 import json
 import os
+import re
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
@@ -17,6 +18,7 @@ ASSETS = {"/": ("public-login.html", "text/html; charset=utf-8"),
           "/styles.css": ("styles.css", "text/css; charset=utf-8"),
           "/tokens.css": ("tokens.css", "text/css; charset=utf-8"),
           "/favicon.svg": ("favicon.svg", "image/svg+xml")}
+RECEIPT_ROUTE = re.compile(r"/api/receipts/([A-Za-z0-9_-]{16,64})(?:/(cancel|received))?")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -82,6 +84,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(200, (ROOT / name).read_bytes(), mime)
             if path == "/api/session":
                 return self.reply(200, login.boundary.session_view(self.headers))
+            route = RECEIPT_ROUTE.fullmatch(path)
+            if route and self.server.ledger is not None:
+                if route[2]:
+                    return self.reply(405, {"error": "post_required"})
+                return self.reply(200, login.boundary.receipt(self.server.ledger, self.headers, route[1]))
             if path in ("/auth/google/start", "/auth/logout"):
                 return self.reply(405, {"error": "post_required"})
             return self.reply(404, {"error": "not_found"})
@@ -93,6 +100,16 @@ class Handler(BaseHTTPRequestHandler):
         path = urlsplit(self.path).path
         try:
             login.boundary.check_origin(self.headers, write=True)
+            route = RECEIPT_ROUTE.fullmatch(path)
+            if route and route[2] and self.server.ledger is not None:
+                # Authenticate before reading input; owner/configuration cannot come from the client.
+                login.boundary.authorize(self.headers, write=True)
+                self.json_body()
+                if route[2] == "cancel":
+                    result = login.boundary.receipt(self.server.ledger, self.headers, route[1], cancel=True)
+                else:
+                    result = login.boundary.receive(self.server.ledger, self.headers, route[1])
+                return self.reply(200, result)
             if path not in ("/auth/google/start", "/auth/logout"):
                 return self.reply(404, {"error": "not_found"})
             self.json_body()
@@ -105,13 +122,14 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(exc.status, {"error": exc.code})
 
 
-def make_server(login, host="127.0.0.1", port=8534):
+def make_server(login, host="127.0.0.1", port=8534, *, ledger=None):
     # Deliberately loopback-only. Public TLS/reverse-proxy configuration is a
     # separate deployment prerequisite, not trusted X-Forwarded-* headers.
     if host != "127.0.0.1":
         raise ValueError("Public authentication backend must bind loopback only")
     server = ThreadingHTTPServer((host, port), Handler)
     server.login = login
+    server.ledger = ledger
     return server
 
 

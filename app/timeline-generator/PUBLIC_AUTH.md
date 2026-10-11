@@ -37,6 +37,7 @@ stateとブラウザ結び付けCookieは別々の256ビット乱数です。non
 | セッション情報 | `session_view(headers)` | 認証成功時にCSRFトークンと残り秒数だけを返す。ownerは返さない。 |
 | 自分の受付取得 | `receipt(ledger, headers, receipt_id)` | 所有者はセッションから導出。不明・他人の受付は同じ404。 |
 | 自分のキャンセル | `receipt(..., cancel=True)` | 固定Originと `X-CSRF-Token` が必要。台帳の未開始キャンセル返却を維持。 |
+| 自分の結果受領確認 | `receive(ledger, headers, receipt_id)` | 固定OriginとCSRFが必要。受領後の再取得猶予は10分。同じ確認を再送しても期限を延長しない。 |
 | ログアウト | `logout(headers)` | 固定OriginとCSRFが必要。返ったCookie削除ヘッダーを送る。 |
 
 `PublicBoundary.from_env(issuer)` は `TIMELINE_SOURCE=wikipedia`、固定HTTPSの `TIMELINE_PUBLIC_ORIGIN`、32バイトの運営秘密鍵を16進数64桁にした `TIMELINE_PUBLIC_OWNER_KEY` を要求します。未設定・別経路では起動用インスタンスを作れません。鍵は秘密の設定として扱い、Git・ログ・画面へ出しません。
@@ -47,7 +48,15 @@ Hostは設定した公開Originのホストと完全一致させます。`X-Forw
 
 HTTPアダプターは `PublicError.status/code` を固定JSONへ変換し、`Cache-Control: no-store` を付けます。本人の期限切れ結果は410、完了後キャンセルは409、不正な生成結果は502です。例外本文や内部データを返してはいけません。受付頻度・取得量の制限、HTTPサイズ上限、purge/backup、ワーカー停止、中継の直通防止は後続の公開サービス接続で検証します。
 
-現在の `public_server.py` は `/login`、固定した画面資産、`/api/session`、Google開始/コールバック、`POST /auth/logout` だけを配信します。任意ファイル、`/api/jobs`、私用評価、台帳、生成受付は配信しません。POSTは空JSONだけを受け、4KiB超過・重複Content-Length・Transfer-Encodingを拒否します。バックエンドは127.0.0.1のみで待ち受けます。
+現在の `public_server.py` は `/login`、固定した画面資産、`/api/session`、Google開始/コールバック、`POST /auth/logout` を配信します。`make_server(..., ledger=専用TrialLedger)` を明示的に接続した場合だけ、以下の本人操作を追加します。通常起動の `main()` は台帳を接続しません。台帳の所有・closeは呼び出し側の責務です。
+
+| メソッド・URL | 動作 |
+| --- | --- |
+| `GET /api/receipts/<受付ID>` | 本人の受付状態と、保存期限内の最小化した結果を取得 |
+| `POST /api/receipts/<受付ID>/cancel` | 本人の待機中・生成中受付を中止。未開始だけ元の受付日の枠を返却 |
+| `POST /api/receipts/<受付ID>/received` | 端末保存後の受領確認。期限を10分の再取得猶予へ短縮 |
+
+未認証401、他人・不明IDは404、CSRF不正403、状態競合409、本人の期限切れ410を返します。owner・入力payload・内部seq・引用quote・traceは返しません。新規受付、受付一覧、ワーカー起動は未接続です。任意ファイル、`/api/jobs`、私用評価、台帳ファイル、生成受付は配信しません。POSTは空JSONだけを受け、4KiB超過・重複Content-Length・Transfer-Encodingを拒否します。バックエンドは127.0.0.1のみで待ち受けます。
 
 ## 実接続の設定
 

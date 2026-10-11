@@ -180,6 +180,20 @@ class PublicBoundary:
             raise PublicError(404, "receipt_not_found")
         return receipt_view(row)
 
+    def receive(self, ledger, headers, receipt_id):
+        session = self.authorize(headers, write=True)
+        if not isinstance(receipt_id, str) or not RECEIPT.fullmatch(receipt_id):
+            raise PublicError(404, "receipt_not_found")
+        try:
+            row = ledger.receive(session.owner, receipt_id)
+        except ReceiptGone:
+            raise PublicError(410, "receipt_gone") from None
+        except ValueError:
+            raise PublicError(409, "receipt_state") from None
+        if row is None or row.get("owner") != session.owner:
+            raise PublicError(404, "receipt_not_found")
+        return {key: row[key] for key in ("receipt_id", "expires_at", "received_at")}
+
 
 def text(value, maximum, optional=False):
     if optional and value is None:

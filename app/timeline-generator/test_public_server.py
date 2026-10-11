@@ -1,13 +1,18 @@
 from http.client import HTTPConnection
 import json
 import threading
+import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlsplit
 
 from google_login import GoogleLogin, ISSUER
 from public_security import PublicBoundary, COOKIE
 from public_server import make_server
 from test_google_login import CLIENT, ORIGIN, jwt
+from test_public_security import result
+from trial import TrialLedger
 
 
 class PublicServerTests(unittest.TestCase):
@@ -49,6 +54,76 @@ class PublicServerTests(unittest.TestCase):
         self.nonce = params["nonce"]
         cookie = next(value for key, value in headers if key == "Set-Cookie").split(";", 1)[0]
         return params, cookie
+
+    def attach_ledger(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.now = datetime(2026, 10, 11, tzinfo=timezone.utc)
+        ledger = TrialLedger(Path(directory.name) / "trial.sqlite3", clock=lambda: self.now)
+        self.addCleanup(ledger.close)
+        self.server.ledger = ledger
+        token, session = self.login.boundary.issue_verified(ISSUER, "owner-one")
+        headers = {"Cookie": f"{COOKIE}={token}", "Origin": ORIGIN,
+                   "Content-Type": "application/json", "X-CSRF-Token": session.csrf}
+        return ledger, session.owner, headers
+
+    def test_receipt_http_ownership_csrf_and_cancel_refund(self):
+        ledger, owner, headers = self.attach_ledger()
+        receipt_id = "owned-receipt-0001"
+        ledger.accept(owner, receipt_id, "new", {"theme": "private input"})
+        path = "/api/receipts/" + receipt_id
+        self.assertEqual(self.request("GET", path)[0], 401)
+        token, other = self.login.boundary.issue_verified(ISSUER, "owner-two")
+        other_headers = {**headers, "Cookie": f"{COOKIE}={token}", "X-CSRF-Token": other.csrf}
+        for method, suffix, body in (("GET", "", None), ("POST", "/cancel", "{}"), ("POST", "/received", "{}")):
+            self.assertEqual(self.request(method, path + suffix, body, other_headers)[0], 404)
+        status, _, raw = self.request("GET", path, headers=headers)
+        self.assertEqual(status, 200)
+        self.assertEqual(set(json.loads(raw)), {"receipt_id", "state", "accepted_at", "updated_at"})
+        self.assertNotIn(b"private input", raw)
+        self.assertEqual(self.request("POST", path + "/cancel", "{}", {k: v for k, v in headers.items() if k != "X-CSRF-Token"})[0], 403)
+        self.assertEqual(ledger.usage()["used"], 1)
+        self.assertEqual(self.request("POST", path + "/cancel", '{"owner":"someone"}', headers)[0], 400)
+        self.assertEqual(self.request("POST", path + "/cancel", "{}", headers)[0], 200)
+        self.assertEqual(ledger.usage()["used"], 0)
+        self.assertEqual(self.request("POST", path + "/cancel", "{}", headers)[0], 200)
+        self.assertEqual(ledger.usage()["used"], 0)
+        for suffix in ("/cancel", "/received"):
+            self.assertEqual(self.request("GET", path + suffix, headers=headers)[0], 405)
+        self.assertEqual(self.request("POST", "/api/receipts", "{}", headers)[0], 404)
+
+    def test_result_receive_is_minimal_idempotent_and_expires(self):
+        ledger, owner, headers = self.attach_ledger()
+        receipt_id = "owned-receipt-0002"
+        ledger.accept(owner, receipt_id, "new", {"theme": "history"})
+        ledger.claim()
+        ledger.finish(owner, receipt_id, result())
+        path = "/api/receipts/" + receipt_id
+        status, _, raw = self.request("GET", path, headers=headers)
+        self.assertEqual(status, 200)
+        self.assertNotIn(b'"quote"', raw)
+        self.assertNotIn(b'"trace"', raw)
+        self.assertEqual(self.request("POST", path + "/cancel", "{}", headers)[0], 409)
+        status, _, raw = self.request("POST", path + "/received", "{}", headers)
+        received = json.loads(raw)
+        self.assertEqual(status, 200)
+        self.assertEqual(set(received), {"receipt_id", "expires_at", "received_at"})
+        self.assertEqual(datetime.fromisoformat(received["expires_at"]), self.now + timedelta(minutes=10))
+        self.assertEqual(self.request("POST", path + "/received", "{}", headers)[2], raw)
+        self.now += timedelta(minutes=10)
+        for method, suffix, body in (("GET", "", None), ("POST", "/received", "{}")):
+            self.assertEqual(self.request(method, path + suffix, body, headers)[0], 410)
+
+    def test_received_state_and_disabled_receipt_backend(self):
+        ledger, owner, headers = self.attach_ledger()
+        receipt_id = "owned-receipt-0003"
+        ledger.accept(owner, receipt_id, "new", {})
+        path = "/api/receipts/" + receipt_id
+        self.assertEqual(self.request("POST", path + "/received", "{}", headers)[0], 409)
+        self.assertEqual(ledger.get(owner, receipt_id)["state"], "queued")
+        self.server.ledger = None
+        self.assertEqual(self.request("GET", path, headers=headers)[0], 404)
+        self.assertEqual(self.request("POST", path + "/cancel", "{}", headers)[0], 404)
 
     def test_full_http_login_and_logout_no_generation_routes(self):
         self.assertEqual(self.request("GET", "/api/session")[0], 401)
