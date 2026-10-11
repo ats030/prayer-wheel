@@ -1,7 +1,14 @@
+import contextlib
+import io
+import json
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 from bunka_shiseki import components, designation_of, find_match, join_kinds, merge_bunka, merge_meisho, normalize, p4275_map, same_place, similar
 from fetch_shiseki import category
+import merge_public_sites
 
 
 def item(heritage="1260", name="関ヶ原古戦場", pref="岐阜県", lat="35.37", lon="136.46", kind1="史跡", kind2=""):
@@ -158,6 +165,35 @@ class BunkaShisekiTest(unittest.TestCase):
         rows, _ = merge_meisho([], [item(heritage="00003449", name="ゼロ詰め名勝", kind1="名勝")], {}, category)
         self.assertEqual(rows[0]["source_url"], "https://kunishitei.bunka.go.jp/heritage/detail/401/00003449")
         self.assertEqual((rows[0]["heritage_id"], rows[0]["id"]), ("401/3449", "bunka:401:3449"))
+
+    def test_meisho_new_row_near_existing_record_is_logged_and_counted(self):
+        existing = row("関ヶ原古戦場", qid="Q1")
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rows, stats = merge_meisho([existing], [item(heritage="500", name="別の庭園", kind1="名勝",
+                                                         lat="35.3701", lon="136.4601")], {}, category)
+        self.assertEqual((len(rows), stats["added"], stats["near_duplicates"]), (2, 1, 1))
+        self.assertIn("meisho: new row within 50m of existing record: 別の庭園 / 関ヶ原古戦場", out.getvalue())
+
+    def test_meisho_row_beside_a_supplement_record_does_not_stop_merge_rows(self):
+        for p4275, key in (({}, "bunka:401:501"), ({"501": ["Q501"]}, "Q501")):
+            with self.subTest(key=key):
+                self.check_meisho_beside_supplement(p4275, key)
+
+    def check_meisho_beside_supplement(self, p4275, key):
+        supplement = {"id": "tokyo:130001:1", "label_ja": "都指定史跡", "prefecture": "東京都",
+                      "latitude": 35.68, "longitude": 139.76, "source_url": "s", "visit_url": "v", "access_note": "a"}
+        with contextlib.redirect_stdout(io.StringIO()):
+            rows, _ = merge_meisho([], [item(heritage="501", name="近接名勝", pref="東京都", lat="35.6801",
+                                             lon="139.76", kind1="名勝")], p4275, category)
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "supplement.json"
+            path.write_text(json.dumps([supplement], ensure_ascii=False), encoding="utf-8")
+            out = io.StringIO()
+            with mock.patch.object(merge_public_sites, "SUPPLEMENT", path), contextlib.redirect_stdout(out):
+                merged = merge_public_sites.merge_rows(rows)
+        self.assertEqual({r.get("id") or r["qid"] for r in merged}, {key, "tokyo:130001:1"})
+        self.assertIn("public: supplement within 50m of 文化庁 record: 都指定史跡 / 近接名勝", out.getvalue())
 
     def test_components_reads_lines_after_the_name(self):
         self.assertEqual(components("黒部峡谷\n\u3000附\u3000猿飛並びに奥鐘山"), ["附 猿飛並びに奥鐘山"])

@@ -157,6 +157,12 @@ def similar(label: str, other: str) -> bool:
 RANK = {"national": 1, "special": 2}
 
 
+def near_record(new: dict, rows: list[dict]) -> dict | None:
+    """新規行と同じ県で DUPLICATE_METERS 未満にある既存行を返す(重複表示の疑いとしてログに出す)。"""
+    return next((other for other in rows if other["prefecture"] == new["prefecture"] and distance(
+        new["latitude"], new["longitude"], float(other["latitude"]), float(other["longitude"])) < DUPLICATE_METERS), None)
+
+
 def merge_bunka(rows: list[dict], items: list[dict], p4275: dict[str, list[str]], category,
                 locate=lambda lat, lon: "") -> tuple[list[dict], dict]:
     """照合した行へ指定情報を付け、未掲載の史跡を新規行として加える。
@@ -219,11 +225,8 @@ def merge_bunka(rows: list[dict], items: list[dict], p4275: dict[str, list[str]]
             del new["id"]
             rows_by_qid[qid] = new
             stats["added_qid"] += 1
-        for other in rows:
-            if other["prefecture"] == new["prefecture"] and distance(
-                    point[0], point[1], float(other["latitude"]), float(other["longitude"])) < DUPLICATE_METERS:
-                duplicates.append((label, other["label_ja"]))
-                break
+        if (other := near_record(new, rows)) is not None:
+            duplicates.append((label, other["label_ja"]))
         added.append(new)
         stats["added"] += 1
     stats["near_duplicates"] = len(duplicates)
@@ -285,7 +288,7 @@ def merge_meisho(rows: list[dict], items: list[dict], p4275: dict[str, list[str]
     rows_by_qid = {row["qid"]: row for row in rows if row.get("qid")}
     stats = {"heritage_id": 0, "p4275": 0, "name": 0, "near": 0, "close": 0, "added": 0,
              "no_coordinates": 0, "kept_source": 0, "rejected": 0}
-    added = []
+    added, duplicates = [], []
     for item in items:
         point = coordinates(item)
         address = item["都道府県"] + item["所在地"].strip()
@@ -348,6 +351,11 @@ def merge_meisho(rows: list[dict], items: list[dict], p4275: dict[str, list[str]
             del new["id"]
             rows_by_qid[qid] = new
         by_heritage[new["heritage_id"]] = new
+        if (other := near_record(new, rows)) is not None:
+            duplicates.append((label, other["label_ja"]))
         added.append(new)
         stats["added"] += 1
+    stats["near_duplicates"] = len(duplicates)
+    for label, other in duplicates:
+        print(f"meisho: new row within {DUPLICATE_METERS}m of existing record: {label} / {other}")
     return rows + added, stats

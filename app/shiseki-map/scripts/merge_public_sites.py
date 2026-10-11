@@ -20,7 +20,7 @@ def merge_rows(rows: list[dict]) -> list[dict]:
         raise ValueError("duplicate source-scoped ID in supplement")
     base = [row for row in rows if (row.get("id") or row.get("qid")) not in addition_ids]
     existing_ids = {row.get("id") or row.get("qid") for row in base}
-    kept, promoted = [], []
+    kept, promoted, beside_bunka = [], [], []
     for item in additions:
         if item["id"] in existing_ids or item.get("qid"):
             raise ValueError(f"source ID collision or unexpected Wikidata QID: {item['id']}")
@@ -48,6 +48,11 @@ def merge_rows(rows: list[dict]) -> list[dict]:
                 delta_lat = (float(row["latitude"]) - item["latitude"]) * 111_195
                 delta_lon = (float(row["longitude"]) - item["longitude"]) * 111_195 * math.cos(math.radians(item["latitude"]))
                 if math.hypot(delta_lat, delta_lon) < 50:
+                    # 文化庁DBで国指定と照合した行(新規行はQIDの有無を問わない)は、都指定と同じ物件ではない
+                    # (国指定されると都指定は解除される)。古い補足の重複はログで確認できるよう両方を残す
+                    if str(row.get("heritage_id", "")).startswith("401/"):
+                        beside_bunka.append(f"{item['label_ja']} / {row['label_ja']}")
+                        continue
                     raise ValueError(f"near-coincident map record: {item['label_ja']} / {row['label_ja']}")
             kept.append(item)
         else:
@@ -60,6 +65,8 @@ def merge_rows(rows: list[dict]) -> list[dict]:
                 if not same_name.get(field):
                     same_name[field] = item[field]
             promoted.append(item["id"])
+    for pair in beside_bunka:
+        print(f"public: supplement within 50m of 文化庁 record: {pair}")
     if promoted:
         print(f"supplement record already on Wikidata, evidence merged: {', '.join(promoted)}")
     merged = base + kept
