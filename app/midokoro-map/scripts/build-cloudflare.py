@@ -8,6 +8,9 @@ import re
 import shutil
 import subprocess
 import tempfile
+from datetime import date
+
+from festival_calendar import render as render_festival_calendar
 
 ROOT = Path(__file__).resolve().parents[1]
 KINDS = ('omatsuri', 'onsen', 'shiseki', 'tokusan')
@@ -55,8 +58,12 @@ def build():
                 if p.is_file():
                     hashes[f'{kind}/{p.name}'] = hashlib.sha256(p.read_bytes()).hexdigest()
         dump(assets / '_data/specs.json', specs)
+        # Month listing is fixed at build time; rebuild after the month changes.
+        calendar = json.loads((assets / '_data/omatsuri/list.json').read_text())
+        (assets / 'festivals').mkdir(exist_ok=True)
+        (assets / 'festivals/index.html').write_text(render_festival_calendar(calendar, date.fromisoformat(os.environ.get('MIDOKORO_BUILD_DATE') or date.today().isoformat())))
         # Explicit canonical story routes; retain the source HTML and visit-log tag.
-        (assets / '_redirects').write_text('/ /index.html 200\n/stories /stories/index.html 200\n' + ''.join(f'/stories/{slug} /stories/{slug}.html 200\n' for slug in ('arita-porcelain', 'kusatsu-yumomi', 'kawagoe-festival')) + '/changelog /changelog.html 200\n')
+        (assets / '_redirects').write_text('/ /index.html 200\n/stories /stories/index.html 200\n' + ''.join(f'/stories/{slug} /stories/{slug}.html 200\n' for slug in ('arita-porcelain', 'kusatsu-yumomi', 'kawagoe-festival')) + '/changelog /changelog.html 200\n/festivals /festivals/index.html 200\n')
         (assets / '_headers').write_text('/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n/_data/*\n  Cache-Control: public, max-age=0, must-revalidate\n/*.html\n  Cache-Control: no-store\n')
         files = list(p for p in assets.rglob('*') if p.is_file())
         if len(files) + 1 > 20000 or any(p.stat().st_size > 25 * 1024 * 1024 for p in files):

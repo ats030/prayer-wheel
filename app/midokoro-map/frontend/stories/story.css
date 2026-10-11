@@ -57,3 +57,6 @@
 .skip-link:focus{clip-path:none}
 @media(min-width:769px){.explorer-grid:has(#selection[hidden]){grid-template-columns:1fr}}
 @media(max-width:768px){.story-page main{padding:0 1rem}.story-lead{padding:2rem 0 1.5rem}.story-page .site-header{display:flex;flex-wrap:wrap}.story-nav{gap:1rem}.question-links{grid-template-columns:1fr;gap:0}.question-links a{border-top:0}.question-links a:first-child{border-top:1px solid var(--color-rule)}.explorer-grid{grid-template-columns:1fr}.map-wrap,#story-map{min-height:340px;height:340px}#selection{border-left:0;border-top:1px solid var(--color-rule);max-height:none}.place-articles{grid-template-columns:1fr}.section-heading{align-items:baseline}.story-page h2{font-size:1.2rem}#exploration-progress{white-space:nowrap}.story-nav{font-size:.75rem}}
+.calendar-list{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(16rem,1fr));gap:1rem 2rem;margin-top:1rem}
+.calendar-list li{padding-bottom:1rem;border-bottom:1px solid var(--color-rule)}
+.calendar-source{font-size:.85rem;color:var(--color-ink-2);overflow-wrap:anywhere}

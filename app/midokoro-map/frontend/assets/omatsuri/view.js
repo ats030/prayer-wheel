@@ -409,6 +409,8 @@ function selectFestival(key,origin){
   if(origin==='list')map.flyTo(entry.marker.getLatLng(),Math.max(map.getZoom(),8),{duration:.55});
   openDetail(entry.festival,key,origin);
 }
+// /festivals links here with ?qid= so a listed festival opens in the detail panel.
+function openLinkedFestival(){const qid=new URL(location.href).searchParams.get('qid');if(qid&&markers.has(qid))selectFestival(qid,'list')}
 function openDetail(f,key,origin){
   const panel=document.querySelector('#detail-panel'),content=document.querySelector('#detail-content'),originLabel=document.querySelector('#detail-origin');
   panel.hidden=false;document.querySelector('.app-shell').classList.add('has-detail');content.dataset.state='loading';content.innerHTML=detail(f);
@@ -572,7 +574,7 @@ document.querySelector('.lightbox-close').addEventListener('click',closeLightbox
 document.querySelector('#lightbox').addEventListener('click',event=>{if(event.target.id==='lightbox')closeLightbox()});
 
 renderLegend();
-fetch('/api/festivals/').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{festivals=Array.isArray(data)?data:[];populatePrefectures();populateCategories();applyFilters()}).catch(error=>{console.error('Festival data could not be loaded',error);document.querySelector('#festival-list').innerHTML='<p class="empty-state">祭りの情報を読み込めませんでした。時間をおいて再度お試しください。</p>';document.querySelector('#map-count').textContent='読み込み失敗'});
+fetch('/api/festivals/').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{festivals=Array.isArray(data)?data:[];populatePrefectures();populateCategories();applyFilters();openLinkedFestival()}).catch(error=>{console.error('Festival data could not be loaded',error);document.querySelector('#festival-list').innerHTML='<p class="empty-state">祭りの情報を読み込めませんでした。時間をおいて再度お試しください。</p>';document.querySelector('#map-count').textContent='読み込み失敗'});
 
 window.renderMapMarkers=(items,targetDate=null)=>{festivals=Array.isArray(items)?items:festivals;if(targetDate instanceof Date&&!Number.isNaN(targetDate.valueOf())){const iso=targetDate.toISOString().slice(0,10);document.querySelector('#festival-date-start').value=iso;document.querySelector('#festival-date-end').value=iso}applyFilters()};
 window.geocodingCacheQueue=geocodingCacheQueue;

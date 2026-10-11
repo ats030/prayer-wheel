@@ -24,7 +24,9 @@ async function choose(kind, focus=false) {
       tab.tabIndex = selected ? 0 : -1;
     }
     try { localStorage.setItem(storageKey,kind); } catch {}
-    const url = new URL(location.href); url.searchParams.set('kind',kind);
+    const url = new URL(location.href);
+    if (url.searchParams.get('kind') !== kind) url.searchParams.delete('qid');
+    url.searchParams.set('kind',kind);
     history.replaceState(null,'',url);
     document.title = 'みどころマップ｜'+labels[kind];
     status.hidden = true;
