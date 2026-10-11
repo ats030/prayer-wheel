@@ -12,4 +12,4 @@ Disallow: /api/
 Disallow: /auth/
 Disallow: /identify
 
-Sitemap: https://ubuntu-server-app.tailf74832.ts.net/sitemap.xml
+Sitemap: https://ikimono-note.ats030.workers.dev/sitemap.xml

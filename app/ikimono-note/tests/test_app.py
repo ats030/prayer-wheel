@@ -1359,7 +1359,8 @@ APP_NAME = "生きものノート"
 
 
 def test_every_page_carries_the_app_name():
-    for path, title in [("/", APP_NAME), ("/settings", f"設定 · {APP_NAME}"),
+    # 表紙は検索結果に出る入口なので、アプリ名の後ろに何ができるかを添える
+    for path, title in [("/", f"{APP_NAME}｜写真から生きものの名前を調べます"), ("/settings", f"設定 · {APP_NAME}"),
                         ("/history", f"調べた記録 · {APP_NAME}"),
                         ("/privacy", f"プライバシーポリシー · {APP_NAME}"),
                         ("/terms", f"利用規約 · {APP_NAME}"),
@@ -2914,10 +2915,12 @@ def test_the_public_pages_can_be_shared_and_found():
 
     sitemap = client.get("/sitemap.xml")
     assert sitemap.status_code == 200
-    # 表紙は / 。未ログインでも転送せずに入口が出る (所有権確認が転送を嫌う)
-    assert "run.app/</loc>" in sitemap.text
-    for path in ("/privacy", "/terms", "/changelog"):
-        assert f"run.app{path}</loc>" in sitemap.text
+    # 公開版の / はログイン画面へ転送する。転送先ではなく入口そのものを載せる
+    origin = "https://ikimono-note.ats030.workers.dev"
+    for path in ("/login", "/privacy", "/terms", "/changelog"):
+        assert f"<loc>{origin}{path}</loc>" in sitemap.text
+    assert f"<loc>{origin}/</loc>" not in sitemap.text
+    assert f"Sitemap: {origin}/sitemap.xml" in robots.text
 
     assert client.get("/ogp.png").status_code == 200
 
