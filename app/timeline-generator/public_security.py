@@ -39,7 +39,9 @@ def https_origin(value):
         valid = False
     if not valid:
         raise ValueError("A fixed HTTPS public origin is required")
-    return value.rstrip("/")
+    hostname = p.hostname
+    host = f"[{hostname}]" if ":" in hostname else hostname
+    return f"https://{host}"
 
 
 @dataclass(frozen=True)
@@ -77,7 +79,7 @@ class PublicBoundary:
         now = self.clock()
         self.sessions = {key: value for key, value in self.sessions.items() if value.expires > now}
 
-    def issue_verified(self, issuer, subject):
+    def issue_verified(self, issuer, subject, *, replace_token=None):
         """Internal callback only: caller MUST have verified the provider response.
 
         This is not a token verifier; never pass client-provided claims into it.
@@ -88,11 +90,19 @@ class PublicBoundary:
         owner = hmac.new(self.key, json.dumps([issuer, subject], separators=(",", ":")).encode(), hashlib.sha256).hexdigest()
         token = secrets.token_urlsafe(32)
         session = Session(owner, secrets.token_urlsafe(32), self.clock() + self.ttl)
+        if replace_token is not None and (not isinstance(replace_token, str) or not TOKEN.fullmatch(replace_token)):
+            raise ValueError("Invalid replacement token")
+        previous = hashlib.sha256(replace_token.encode()).digest() if replace_token else None
+        key = hashlib.sha256(token.encode()).digest()
         with self.lock:
             self.prune()
-            if len(self.sessions) >= self.capacity:
+            if key in self.sessions or (len(self.sessions) >= self.capacity and previous not in self.sessions):
                 raise PublicError(503, "session_capacity")
-            self.sessions[hashlib.sha256(token.encode()).digest()] = session
+            # Atomic rotation: do not discard the old session unless insertion
+            # succeeds, and do not reject a replacement at full capacity.
+            self.sessions[key] = session
+            if previous is not None:
+                self.sessions.pop(previous, None)
         return token, session
 
     @staticmethod

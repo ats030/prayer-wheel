@@ -5,13 +5,14 @@ public_auth_review:
   tool: Google OpenID Connect server flow
   version_or_plan: Direct Google OAuth web client; not Google Cloud Identity Platform or Firebase Authentication
   status: review_required
-  adoption: User selected Google login; no provider connection, SDK, account registration or deployment in this change
+  adoption: Direct server-flow adapter and isolated auth HTTP entry implemented and tested offline; no configured client, SDK, account registration or deployment
   commercial_use: Governed by Google APIs Terms and OAuth policies; consent, privacy and brand requirements must be checked for the configured public client
   cost: Official sign-in codelab states Google Cloud account/project are free; this is not a verified price guarantee for a configured production client
   license_url: https://developers.google.com/terms
   terms_url: https://developers.google.com/identity/protocols/oauth2/policies
   pricing_evidence_url: https://codelabs.developers.google.com/codelabs/sign-in-with-google-button
   identity_spec_url: https://developers.google.com/identity/openid-connect/openid-connect
+  discovery_url: https://accounts.google.com/.well-known/openid-configuration
   evidence_retrieved: 2026-10-11
   release_conditions:
     - Verify the exact client, free cost conditions and commercial terms before connecting the provider
@@ -19,7 +20,7 @@ public_auth_review:
     - Use server-verified issuer/audience/expiry/nonce/subject; decoded browser claims are not authentication
     - Request only authentication scopes; do not store email, name or provider tokens in the trial ledger
     - Do not use an Access invitation cap as the public account system
-  notes: public_security.py uses only the already reviewed Python standard library and makes no Google or other external calls
+  notes: Existing Python standard library only. google_login.py pins reviewed authorization/token endpoints; intermediary-free certificate-verified TLS code exchange with client secret is the documented trust exception. Browser ID tokens never accepted; state/binding/nonce/PKCE/claims validated. No real Google requests in this change; exact client/conditions remain unreviewed.
 decisions:
   - tool: SQLite via existing Python sqlite3
     version_or_plan: Existing SQLite 3.45.1 library; no installation or redistribution

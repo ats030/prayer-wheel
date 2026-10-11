@@ -57,6 +57,16 @@ class BoundaryTests(unittest.TestCase):
         stored = list(self.boundary.sessions)
         self.assertNotIn(self.token, stored)
 
+    def test_configured_origin_matches_browser_canonical_origin(self):
+        boundary = PublicBoundary("https://TIMELINE.EXAMPLE:443/", b"x" * 32, ISSUER)
+        token, session = boundary.issue_verified(ISSUER, "google-sub-1")
+        self.assertEqual(boundary.origin, ORIGIN)
+        self.assertEqual(boundary.host, "timeline.example")
+        headers = self.headers(Cookie=f"{COOKIE}={token}", **{"X-CSRF-Token": session.csrf})
+        self.assertEqual(boundary.authorize(headers, write=True), session)
+        ipv6 = PublicBoundary("https://[::1]:443", b"x" * 32, ISSUER)
+        self.assertEqual(ipv6.origin, "https://[::1]")
+
     def test_session_expiry_logout_and_restart(self):
         self.assertIn("Secure; HttpOnly; SameSite=Lax", self.boundary.cookie(self.token, 3600))
         self.assertIn("Path=/", self.boundary.cookie(self.token, 3600))

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>ログイン · タイムラインジェネレーター</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/public-login.css">
+  <script src="/public-login.js" defer></script>
+  <script src="http://ubuntu-server-app:8526/v.js" data-site="timeline-generator" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#login-heading">本文へ</a>
+  <header class="masthead"><a class="wordmark" href="/">タイムラインジェネレーター<span>Timeline Generator</span></a></header>
+  <main class="login-main">
+    <section aria-labelledby="login-heading">
+      <h1 id="login-heading" tabindex="-1">生成を使うための本人確認</h1>
+      <p>Googleアカウントでログインし、自分の生成依頼を確認・キャンセルできるようにします。</p>
+      <p id="login-status" role="status">ログイン状態を確認しています。</p>
+      <p id="login-error" class="error" role="alert" hidden></p>
+      <div class="login-actions">
+        <button id="login-start" type="button" hidden>本人確認を始める</button>
+        <button id="login-logout" type="button" hidden>ログアウト</button>
+        <button id="login-retry" type="button" hidden>もう一度確認する</button>
+      </div>
+      <p class="notice">公開生成は準備中です。ログインしても、まだ生成は依頼できません。</p>
+      <details class="help-panel"><summary>ログインとデータについて</summary><div class="info-body">
+        <p>Googleでは本人確認だけを行います。Googleドライブや連絡先へのアクセスは求めません。</p>
+        <p>このアプリはメールアドレス・氏名を保存しません。Googleが返すトークンは本人確認の処理中だけ使います。ログインを保つCookieは最大1時間で失効します。</p>
+        <p>Googleのログイン画面へ移動すると、Googleの利用規約とプライバシーポリシーが適用されます。<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Googleのプライバシーポリシー</a></p>
+        <p>個人の年表を自動公開することはありません。年表の端末保存とログインは別の機能です。</p>
+      </div></details>
+      <noscript><p>ログイン状態の確認にはJavaScriptを有効にしてください。</p></noscript>
+    </section>
+  </main>
+</body>
+</html>
