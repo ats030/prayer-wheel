@@ -4,7 +4,7 @@
 
 一般公開の本人確認はGoogleログインを使う方針です。Googleアカウントの識別には変更されない `sub` を用い、メールアドレスを受付の所有者IDにしません。[GoogleのOpenID Connect仕様](https://developers.google.com/identity/openid-connect/openid-connect)を参照してください。
 
-`public_security.py` は認証後の共通処理です。`google_login.py` と `public_server.py` にGoogleのサーバーフローと独立したログイン用HTTP入口を実装しました。公開URL・OAuthクライアントは未設定のため、実アカウントでの認証と外部配備は未検証です。生成ワーカーは接続していません。私用の `server.py` は変更しておらず、利用者別の公開認証を持たないままです。私用サーバーを公開サービスの上流に接続してはいけません。
+`public_security.py` は認証後の共通処理です。`google_login.py` と `public_server.py` にGoogleのサーバーフローと独立したHTTP入口を実装しました。公開URL・OAuthクライアントは未設定のため、実アカウントでの認証と外部配備は未検証です。`trial_runtime.py` にお試し受付・生成ワーカー・定期保守の接続を実装し、外部通信なしで検証しています。通常起動では接続しません。私用の `server.py` は変更しておらず、利用者別の公開認証を持たないままです。私用サーバーを公開サービスの上流に接続してはいけません。
 
 ## セッション
 
@@ -46,7 +46,7 @@ Hostは設定した公開Originのホストと完全一致させます。`X-Forw
 
 変更操作はOriginの省略も拒否します。取得操作はOrigin省略を許しますが、指定された別Originと `Sec-Fetch-Site: same-site/cross-site` は拒否します。Host・Origin・Cookie・CSRF・Fetch-Siteの重複ヘッダー、重複セッションCookieも拒否します。資格情報はCookieだけから読み、作成者を示す任意ヘッダーは使いません。
 
-HTTPアダプターは `PublicError.status/code` を固定JSONへ変換し、`Cache-Control: no-store` を付けます。本人の期限切れ結果は410、完了後キャンセルは409、不正な生成結果は502です。例外本文や内部データを返してはいけません。受付頻度・取得量の制限、HTTPサイズ上限、purge/backup、ワーカー停止、中継の直通防止は後続の公開サービス接続で検証します。
+HTTPアダプターは `PublicError.status/code` を固定JSONへ変換し、`Cache-Control: no-store` を付けます。本人の期限切れ結果は410、完了後キャンセルは409、不正な保存済み結果は502です。ワーカーは結果を保存する前に検査し、不正ならfailedにします。例外本文や内部データを返してはいけません。受付頻度・取得量、中継の直通防止と実生成の資源競合は公開前の検証が残っています。
 
 現在の `public_server.py` は `/login`、固定した画面資産、`/api/session`、Google開始/コールバック、`POST /auth/logout` を配信します。`make_server(..., ledger=専用TrialLedger)` を明示的に接続した場合だけ、以下の本人操作を追加します。通常起動の `main()` は台帳を接続しません。台帳の所有・closeは呼び出し側の責務です。
 
@@ -56,7 +56,19 @@ HTTPアダプターは `PublicError.status/code` を固定JSONへ変換し、`Ca
 | `POST /api/receipts/<受付ID>/cancel` | 本人の待機中・生成中受付を中止。未開始だけ元の受付日の枠を返却 |
 | `POST /api/receipts/<受付ID>/received` | 端末保存後の受領確認。期限を10分の再取得猶予へ短縮 |
 
-未認証401、他人・不明IDは404、CSRF不正403、状態競合409、本人の期限切れ410を返します。owner・入力payload・内部seq・引用quote・traceは返しません。新規受付、受付一覧、ワーカー起動は未接続です。任意ファイル、`/api/jobs`、私用評価、台帳ファイル、生成受付は配信しません。POSTは空JSONだけを受け、4KiB超過・重複Content-Length・Transfer-Encodingを拒否します。バックエンドは127.0.0.1のみで待ち受けます。
+未認証401、他人・不明IDは404、CSRF不正403、状態競合409、本人の期限切れ410を返します。owner・入力payload・内部seq・引用quote・traceは返しません。受付一覧は配信しません。任意ファイル、`/api/jobs`、私用評価、台帳ファイルは配信しません。本人操作とログインのPOSTは空JSONだけを受けます。4KiB超過・重複Content-Length・Transfer-Encoding・重複JSONキーを拒否します。バックエンドは127.0.0.1のみで待ち受けます。
+
+## お試し接続のローカル検証
+
+`TrialRuntime(専用台帳, 専用バックアップ先)` を開始し、`make_server(login, runtime=runtime)` に明示的に接続した場合だけ、`POST /api/trial/receipts` を追加します。通常の `main()` は接続しません。リクエストは `{"receipt_id":"16〜64文字の英数字・_・-","query":"検索キーワード"}` だけで、本人セッション・固定Origin・CSRFが必要です。経路と操作はサーバーが運営モデルのお試し新規生成に固定します。mode、owner、APIキー、任意URL、retry/regenerate指定は拒否します。BYOKと対象指定の再試行・再生成は別実装です。
+
+新規は201、同じ正規化入力の再送は200、入力違いは409、削除済みIDは410です。日次10件・未完了3件・台帳全体10,000件のいずれかに達すると429と `trial_daily` / `trial_pending` / `trial_storage`、`Retry-After` を返します。台帳上限はキャンセルによる保存容量の増大を止める制限で、未開始キャンセルのAI枠返却と独立しています。HTTP頻度と実ディスク容量の制限を代替しません。
+
+ワーカーは1件ずつclaimし、`public_pipeline.py` の独立した子プロセスで既存生成を実行します。実生成アダプターは `TIMELINE_SOURCE=wikipedia` を要求し、子プロセスもWikipediaに固定します。最大60分・キャンセル・停止で子プロセスを終了させ、検証済みcheckpointがあれば時間切れ・処理失敗の途中結果を残します。キャンセル確定後の結果は保存しません。停止時の開始済み受付は再起動でqueuedへ戻りますが、キャンセルで枠を返しません。保存前に最小項目だけを残し、quote・trace・キーを結果表やバックアップへ入れません。
+
+保守は起動時にpurge/backupを実行し、以後60秒ごとに期限削除、24時間ごとにバックアップと7日超のバックアップ削除を実行します。生成中も別の保守スレッドが動作します。保存・保守異常で新規受付を503 `trial_unavailable` にします。接続側はHTTPを停止し、`runtime.stop()` の完了を確認してから台帳をcloseします。停止が完了しない場合は台帳を閉じません。復元時に結果表を空にする手順、HTTP頻度制限、実モデルの品質・時間・資源競合、公開配備は未検証です。
+
+`python3 -m unittest test_trial_runtime test_trial test_public_server -v` で一時DBと生成fixtureを使い、20並行HTTP受付、再送・拒否・中止、最小結果保存、期限削除、バックアップ期限、異常時の受付停止を検証します。子プロセスの強制終了は実プロセスで確認しますが、Google・モデル・Wikipediaへ通信しません。実生成の品質や費用を証明する試験ではありません。
 
 ## 実接続の設定
 

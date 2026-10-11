@@ -148,6 +148,7 @@ class PublicServerTests(unittest.TestCase):
         for path in ("/api/jobs", "/api/quality", "/api/receipts", "/data/timelines.sqlite3", "/.env", "/server.py"):
             self.assertEqual(self.request("GET", path)[0], 404)
         self.assertEqual(self.request("POST", "/api/jobs", "{}", {"Origin": ORIGIN})[0], 404)
+        self.assertEqual(self.request("POST", "/api/trial/receipts", "{}", {"Origin": ORIGIN})[0], 404)
 
     def test_failure_redirect_does_not_echo_credentials_or_state(self):
         params, pending = self.start()

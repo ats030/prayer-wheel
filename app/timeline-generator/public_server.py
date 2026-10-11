@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Isolated public authentication HTTP service; no private DB or generation worker."""
+"""Isolated public authentication and explicitly connected trial HTTP service."""
 import json
 import os
 import re
@@ -9,6 +9,7 @@ from urllib.parse import urlsplit
 
 from google_login import GoogleLogin, CALLBACK
 from public_security import PublicError
+from trial import TrialLimit
 
 ROOT = Path(__file__).resolve().parent
 ASSETS = {"/": ("public-login.html", "text/html; charset=utf-8"),
@@ -32,7 +33,7 @@ class Handler(BaseHTTPRequestHandler):
         super().setup()
         self.connection.settimeout(15)
 
-    def reply(self, status, data, mime="application/json; charset=utf-8", cookies=(), location=None):
+    def reply(self, status, data, mime="application/json; charset=utf-8", cookies=(), location=None, retry_after=None):
         body = data if isinstance(data, bytes) else json.dumps(data, ensure_ascii=False).encode()
         self.send_response(status)
         for name, value in (("Content-Type", mime), ("Content-Length", str(len(body))),
@@ -44,12 +45,14 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Set-Cookie", cookie)
         if location:
             self.send_header("Location", location)
+        if retry_after is not None:
+            self.send_header("Retry-After", str(retry_after))
         self.send_header("Connection", "close")
         self.close_connection = True
         self.end_headers()
         self.wfile.write(body)
 
-    def json_body(self):
+    def json_body(self, *, empty=True):
         # No chunked/ambiguous bodies, no unbounded reads or client configuration.
         lengths = self.headers.get_all("Content-Length", [])
         if self.headers.get("Transfer-Encoding") is not None or len(lengths) != 1:
@@ -60,11 +63,19 @@ class Handler(BaseHTTPRequestHandler):
             length = int(lengths[0])
             if not 1 <= length <= 4096:
                 raise ValueError
-            value = json.loads(self.rfile.read(length))
-            if value != {}:
+            def unique_fields(pairs):
+                value = {}
+                for key, item in pairs:
+                    if key in value:
+                        raise ValueError
+                    value[key] = item
+                return value
+            value = json.loads(self.rfile.read(length), object_pairs_hook=unique_fields)
+            if not isinstance(value, dict) or (empty and value != {}):
                 raise ValueError
         except (ValueError, UnicodeError):
             raise PublicError(400, "invalid_request") from None
+        return value
 
     def do_GET(self):
         login = self.server.login
@@ -100,6 +111,10 @@ class Handler(BaseHTTPRequestHandler):
         path = urlsplit(self.path).path
         try:
             login.boundary.check_origin(self.headers, write=True)
+            if path == "/api/trial/receipts" and self.server.runtime is not None:
+                session = login.boundary.authorize(self.headers, write=True)
+                row, created = self.server.runtime.accept(session.owner, self.json_body(empty=False))
+                return self.reply(201 if created else 200, row)
             route = RECEIPT_ROUTE.fullmatch(path)
             if route and route[2] and self.server.ledger is not None:
                 # Authenticate before reading input; owner/configuration cannot come from the client.
@@ -120,16 +135,23 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(200, {"authenticated": False}, cookies=(cookie,))
         except PublicError as exc:
             return self.reply(exc.status, {"error": exc.code})
+        except TrialLimit as exc:
+            return self.reply(429, {"error": exc.reason}, retry_after=exc.retry_after)
 
 
-def make_server(login, host="127.0.0.1", port=8534, *, ledger=None):
+def make_server(login, host="127.0.0.1", port=8534, *, ledger=None, runtime=None):
     # Deliberately loopback-only. Public TLS/reverse-proxy configuration is a
     # separate deployment prerequisite, not trusted X-Forwarded-* headers.
     if host != "127.0.0.1":
         raise ValueError("Public authentication backend must bind loopback only")
+    if runtime is not None:
+        if ledger is not None and ledger is not runtime.ledger:
+            raise ValueError("Trial runtime and receipt ledger must match")
+        ledger = runtime.ledger
     server = ThreadingHTTPServer((host, port), Handler)
     server.login = login
     server.ledger = ledger
+    server.runtime = runtime
     return server
 
 

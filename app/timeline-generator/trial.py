@@ -27,6 +27,7 @@ OPERATIONS = {"new", "regenerate", "retry"}
 RECEIPT_ID = re.compile(r"[A-Za-z0-9_-]{16,64}")
 BACKUP_NAME = re.compile(r"trial-(\d{8}T\d{6}\d{6}Z)\.sqlite3")
 RUNNING_LIMIT = 1
+MAX_RECEIPTS = 10000
 
 
 class TrialLimit(Exception):
@@ -159,6 +160,9 @@ class TrialLedger:
                 raise TrialLimit("trial_daily", max(1, int((midnight - moment).total_seconds())))
             if pending >= PENDING_LIMIT:
                 raise TrialLimit("trial_pending", PENDING_RETRY_AFTER)
+            # Cancellation refunds AI quota, not unbounded disk capacity.
+            if db.execute("SELECT count(*) FROM receipts").fetchone()[0] >= MAX_RECEIPTS:
+                raise TrialLimit("trial_storage", 3600)
             seq = db.execute("SELECT coalesce(max(seq), 0) + 1 FROM receipts").fetchone()[0]
             db.execute("""INSERT INTO receipts (owner, receipt_id, fingerprint, operation, target, payload, day, state,
                 seq, accepted_at, updated_at) VALUES (?,?,?,?,?,?,?, 'queued', ?,?,?)""",
