@@ -9,7 +9,7 @@ from pathlib import Path
 import threading
 import time
 
-from byok import MODEL, validate_key
+from byok import MODEL, MIN_CALL_INTERVAL, INPUT_TOKENS_PER_MINUTE, validate_key
 from byok_pipeline import FetchBudget, bounded_byok
 from byok_runtime import ByokLimits
 from public_security import result_view
@@ -62,7 +62,8 @@ def configuration(time_limit, max_cost):
     limits = ByokLimits(concurrent=1, starts=1, owners=1, receipts=1, ttl=time_limit,
         time_limit=time_limit, fetch_calls=100, fetch_bytes=40_000_000,
         model_calls=60, input_bytes=100_000, output_tokens=6000, max_cost_microusd=max_cost)
-    return vars(limits)
+    return {**vars(limits), "model_min_call_interval_seconds": MIN_CALL_INTERVAL,
+            "model_input_tokens_per_minute": INPUT_TOKENS_PER_MINUTE}
 
 
 def measure(theme, route, key, options):
@@ -142,6 +143,7 @@ def main(argv=None):
                 if not os.isatty(0):
                     parser.error("A terminal is required for hidden key input; no key in argv/env/files")
                 print(f"Google Gemini {MODEL}; maximum USD {args.max_usd}, standard text rate estimate.\n"
+                      f"Calls start at least {MIN_CALL_INTERVAL} seconds apart; this is not a guarantee of free-tier quota.\n"
                       "Prompts/results go to Google. Free-tier data may be used for improvement and human review.\n"
                       "For adult developer evaluation only; public release is not enabled.\n"
                       "Cancellation cannot reverse an in-flight provider charge.")
@@ -152,7 +154,8 @@ def main(argv=None):
         with os.fdopen(fd, "w", encoding="utf-8") as stream:
             fd = None
             json.dump(report, stream, ensure_ascii=False, indent=2)
-        print(json.dumps({"state": report.get("state"), "passed": report["passed"], "usage": report.get("usage")}, ensure_ascii=False))
+        print(json.dumps({"state": report.get("state"), "error": report.get("error"),
+                          "passed": report["passed"], "usage": report.get("usage")}, ensure_ascii=False))
         return 0 if report["passed"] else 1
     finally:
         if fd is not None:

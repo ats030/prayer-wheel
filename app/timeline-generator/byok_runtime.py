@@ -163,6 +163,7 @@ class ByokRuntime:
                 known = {"time_limit", "cost_budget", "input_budget", "fetch_budget", "fetch_route",
                          "invalid_api_key", "provider_denied", "provider_rate", "provider_unavailable",
                          "provider_response", "provider_usage", "provider_request", "processing_error"}
+                known.update({"provider_daily", "provider_tokens"})
                 if record.get("error") is not None:
                     result = None
                     error = record.get("error") if record.get("error") in known else "processing_error"

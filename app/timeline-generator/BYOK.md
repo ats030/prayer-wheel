@@ -68,6 +68,19 @@ BYOKとお試しを同じHTTPサービスに接続する場合は、同じ `Gene
 同時数は `server_busy`、頻度は `request_rate`、取得上限は `fetch_budget`、モデル費用・回数は `cost_budget` で区別します。
 別プロセスの私用ワーカー・比較測定はこの枠を共有しないので、一般公開前に配備側で競合を制御します。
 
+Googleの無料枠で16回目の呼出しが429になったため、モデル送信開始を処理ごとに15秒以上空けます。
+本人が確認した枠はRPM15、入力TPM250000、RPD500です。
+処理内の直近60秒の入力トークンも250000以内へ制御します。
+送信前は本文バイト数＋8192を入力トークン上限として予約し、確認できた使用量だけ精算します。
+次の送信が枠を超える場合は古い呼出しが60秒の窓から外れるまで待機します。
+これらは検証用の制御で、プロジェクト全体のRPM・TPM・RPDに適合した保証ではありません。
+待機は処理・工程の時間上限に含み、中止や時間切れで未送信の呼出しを消費・費用予約しません。
+Googleの制限はプロジェクト単位なので、別の端末や処理で使った分はこの間隔制御では数えられません。
+429の限定したQuotaFailure情報だけから、日次枠は `provider_daily`、入力トークン/分は `provider_tokens`、
+回数/分や分類できない制限は `provider_rate` にします。複数ある場合は日次枠を優先します。
+エラー本文・キー・プロジェクト識別子は保存せず、429の呼出しを自動再試行しません。
+実際の制限は [Google AI Studio](https://aistudio.google.com/rate-limit) で確認します。
+
 ## 認証付きHTTP契約
 
 通常起動では無効です。接続試験には `make_server(..., byok=runtime)` を明示します。
@@ -110,9 +123,9 @@ Wikipediaの本文は測定間で変わりうるため、この比較だけで�
 既存モデルの測定と私用生成が動いていないことを確認してから運営モデルの比較を行います。
 
 ```bash
-python3 byok_eval.py --route byok --theme 昭和 --max-usd 0.50 --output data/byok-eval/showa-google-byok.json
-python3 byok_eval.py --route operator --theme 昭和 --max-usd 0.50 --output data/byok-eval/showa-google-operator.json
-python3 byok_eval.py --compare data/byok-eval/showa-google-operator.json data/byok-eval/showa-google-byok.json --output data/byok-eval/showa-google-comparison.json
+python3 byok_eval.py --route byok --theme 昭和 --max-usd 0.50 --output data/byok-eval/showa-google-free-byok.json
+python3 byok_eval.py --route operator --theme 昭和 --max-usd 0.50 --output data/byok-eval/showa-google-free-operator.json
+python3 byok_eval.py --compare data/byok-eval/showa-google-free-operator.json data/byok-eval/showa-google-free-byok.json --output data/byok-eval/showa-google-free-comparison.json
 ```
 
 運営モデル側の金額0は外部AIのAPI料金だけを指します。電気代・検索・維持管理は残ります。

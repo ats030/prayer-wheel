@@ -16,10 +16,44 @@ INPUT_RATE, OUTPUT_RATE = 3, 25
 # minimal is an effort setting, not a hard guarantee of zero thought tokens.
 THINKING_BOUND = 65536
 MAX_RESPONSE = 512 * 1024
+MAX_ERROR_RESPONSE = 16 * 1024
+MIN_CALL_INTERVAL = 15
+INPUT_TOKENS_PER_MINUTE = 250_000
 
 
 def token_cost(inputs, outputs):
     return (inputs * INPUT_RATE + outputs * OUTPUT_RATE + 9) // 10
+
+
+def quota_error(body):
+    """Only fixed codes leave this function; never retain provider messages/IDs."""
+    try:
+        data = json.loads(body)
+        details = data["error"]["details"]
+        dimensions = set()
+        for detail in details:
+            if not isinstance(detail, dict) or detail.get("@type") != "type.googleapis.com/google.rpc.QuotaFailure":
+                continue
+            for violation in detail.get("violations", []):
+                if not isinstance(violation, dict):
+                    continue
+                name = violation.get("quotaId", "")
+                if not isinstance(name, str):
+                    continue
+                if "PerDay" in name:
+                    dimensions.add("provider_daily")
+                elif "TokensPerMinute" in name:
+                    dimensions.add("provider_tokens")
+                elif "RequestsPerMinute" in name:
+                    dimensions.add("provider_rate")
+        # Daily exhaustion takes precedence: spacing cannot resolve it.
+        if "provider_daily" in dimensions:
+            return "provider_daily"
+        if "provider_tokens" in dimensions:
+            return "provider_tokens"
+    except Exception:
+        pass
+    return "provider_rate"
 
 
 class ByokError(Exception):
@@ -79,6 +113,13 @@ def transport(key, payload, timeout):
         if response.status != 200:
             code = {400: "provider_request", 401: "invalid_api_key", 403: "provider_denied",
                     429: "provider_rate"}.get(response.status, "provider_unavailable")
+            if response.status == 429:
+                try:
+                    body = response.read(MAX_ERROR_RESPONSE + 1)
+                    if len(body) <= MAX_ERROR_RESPONSE:
+                        code = quota_error(body)
+                except Exception:
+                    pass
             raise ByokError(code)
         body = response.read(MAX_RESPONSE + 1)
         if len(body) > MAX_RESPONSE:
@@ -94,13 +135,16 @@ def transport(key, payload, timeout):
 
 class ModelSession:
     def __init__(self, key, stopping, *, max_cost_microusd, max_calls,
-                 input_bytes, output_tokens, send=transport, on_usage=None):
+                 input_bytes, output_tokens, send=transport, on_usage=None,
+                 min_call_interval=MIN_CALL_INTERVAL, clock=time.monotonic):
         validate_key(key)
         values = (max_cost_microusd, max_calls, input_bytes, output_tokens)
         if (any(type(v) is not int or v <= 0 for v in values)
                 or max_cost_microusd > 5_000_000 or max_calls > 100
                 or input_bytes > 160_000 or output_tokens > 8192):
             raise ValueError("Explicit bounded model limits required")
+        if type(min_call_interval) is not int or not 0 <= min_call_interval <= 60:
+            raise ValueError("Bounded model call interval required")
         self._key, self.stopping, self.send = key, stopping, send
         self.on_usage = on_usage
         self.max_cost, self.max_calls = max_cost_microusd, max_calls
@@ -109,6 +153,28 @@ class ModelSession:
         self.calls = self.input_tokens = self.output_count = self.cost = 0
         self.uncertain = False
         self.failure = None
+        self.min_call_interval, self.clock = min_call_interval, clock
+        self.last_started = None
+        self.input_window = []
+
+    def wait_for_slot(self, deadline, input_bound):
+        if input_bound > INPUT_TOKENS_PER_MINUTE:
+            raise ByokError("input_budget")
+        while True:
+            if self.stopping.is_set():
+                raise ByokError("cancelled")
+            now = self.clock()
+            if deadline - now < 5:
+                raise ByokError("time_limit")
+            wait = 0 if self.last_started is None else self.last_started + self.min_call_interval - now
+            self.input_window = [(start, count) for start, count in self.input_window if now - start < 60]
+            if sum(count for _, count in self.input_window) + input_bound > INPUT_TOKENS_PER_MINUTE:
+                wait = max(wait, self.input_window[0][0] + 60 - now)
+            if wait <= 0:
+                return
+            if now + wait + 5 >= deadline:
+                raise ByokError("time_limit")
+            self.stopping.wait(min(0.2, wait, deadline - now - 5))
 
     def close(self):
         with self.lock:
@@ -120,6 +186,8 @@ class ModelSession:
                     "input_tokens": self.input_tokens, "output_tokens": self.output_count,
                     "cost_microusd": self.cost, "cost_is_upper_bound": self.uncertain,
                     "max_cost_microusd": self.max_cost,
+                    "min_call_interval_seconds": self.min_call_interval,
+                    "input_tokens_per_minute_limit": INPUT_TOKENS_PER_MINUTE,
                     "cost_basis": "standard_paid_rate_estimate"}
 
     def __call__(self, system, prompt, deadline, schema):
@@ -133,7 +201,7 @@ class ModelSession:
                     raise ByokError(self.failure)
                 if self._key is None:
                     raise ByokError("key_gone")
-                left = deadline - time.monotonic()
+                left = deadline - self.clock()
                 if left < 5:
                     raise ByokError("time_limit")
                 payload = json.dumps({
@@ -152,11 +220,16 @@ class ModelSession:
                 reservation = token_cost(input_bound, output_bound)
                 if self.calls >= self.max_calls or self.cost + reservation > self.max_cost:
                     raise ByokError("cost_budget")
+                # Wait before reserving cost/call count; this is not a retry.
+                self.wait_for_slot(deadline, input_bound)
+                left = deadline - self.clock()
                 self.calls += 1
                 self.cost += reservation
                 self.uncertain = True
                 if self.on_usage is not None:
                     self.on_usage(self.summary())
+                self.last_started = self.clock()
+                self.input_window.append((self.last_started, input_bound))
                 data = self.send(self._key, payload, min(120, left))
                 usage = data.get("usageMetadata") if isinstance(data, dict) else None
                 if (not isinstance(usage, dict) or any(type(usage.get(k)) is not int or usage[k] < 0
@@ -171,6 +244,7 @@ class ModelSession:
                         or usage["totalTokenCount"] != usage["promptTokenCount"] + usage["candidatesTokenCount"] + usage.get("thoughtsTokenCount", 0)):
                     raise ByokError("provider_usage")
                 charged_output = usage["candidatesTokenCount"] + usage.get("thoughtsTokenCount", 0)
+                self.input_window[-1] = (self.last_started, usage["promptTokenCount"])
                 self.input_tokens += usage["promptTokenCount"]
                 self.output_count += charged_output
                 # Implicit cache discounts are deliberately ignored in the estimate.

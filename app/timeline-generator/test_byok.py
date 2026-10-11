@@ -37,7 +37,7 @@ class ModelTests(unittest.TestCase):
     def session(self, **overrides):
         return ModelSession(KEY, threading.Event(), **{
             "max_cost_microusd": 500_000, "max_calls": 5, "input_bytes": 100_000,
-            "output_tokens": 3000, "send": lambda *_: response(), **overrides})
+            "output_tokens": 3000, "min_call_interval": 0, "send": lambda *_: response(), **overrides})
 
     def call(self, session, schema=SCHEMA):
         return session("JSONで回答", "テーマ", time.monotonic() + 30, schema)
@@ -100,6 +100,83 @@ class ModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ByokError, "provider_usage"):
             self.call(session)
         self.assertEqual(observed, [1])
+
+    def test_call_spacing_and_cancel_or_deadline_do_not_dispatch_or_reserve(self):
+        class FakeEvent:
+            now = 0
+            cancelled = False
+            cancel_on_wait = False
+            def is_set(self):
+                return self.cancelled
+            def wait(self, seconds):
+                self.now += seconds
+                if self.cancel_on_wait:
+                    self.cancelled = True
+        event, starts = FakeEvent(), []
+        session = self.session(min_call_interval=15, clock=lambda: event.now,
+            send=lambda *_: starts.append(event.now) or response())
+        session.stopping = event
+        for _ in range(3):
+            session("system", "prompt", 120, SCHEMA)
+        self.assertEqual(starts, [0, 15, 30])
+        before = session.summary()
+        with self.assertRaisesRegex(ByokError, "time_limit"):
+            session("system", "prompt", 40, SCHEMA)
+        self.assertEqual(session.summary(), before)
+        self.assertEqual(len(starts), 3)
+        event = FakeEvent()
+        session = self.session(min_call_interval=15, clock=lambda: event.now)
+        session.stopping = event
+        session("system", "prompt", 120, SCHEMA)
+        before = session.summary()
+        event.cancel_on_wait = True
+        with self.assertRaisesRegex(ByokError, "cancelled"):
+            session("system", "prompt", 120, SCHEMA)
+        self.assertEqual(session.summary(), before)
+
+    def test_quota_errors_are_classified_without_secret_or_raw_error(self):
+        from unittest.mock import Mock
+        def body(*identifiers):
+            return json.dumps({"error": {"message": KEY, "details": [{
+                "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+                "violations": [{"quotaId": value, "description": KEY} for value in identifiers]}]}}).encode()
+        for raw, expected in ((body("GenerateRequestsPerDayPerProjectPerModel-FreeTier"), "provider_daily"),
+                              (body("GenerateContentInputTokensPerMinutePerModel-FreeTier"), "provider_tokens"),
+                              (body("GenerateRequestsPerMinutePerProjectPerModel-FreeTier"), "provider_rate"),
+                              (body("RequestsPerDay", "TokensPerMinute"), "provider_daily"),
+                              (b"bad" + KEY.encode(), "provider_rate"),
+                              (b"x" * (byok.MAX_ERROR_RESPONSE + 1), "provider_rate")):
+            connection = Mock()
+            connection.getresponse.return_value.status = 429
+            connection.getresponse.return_value.read.return_value = raw
+            with patch.object(byok.http.client, "HTTPSConnection", return_value=connection):
+                with self.assertRaisesRegex(ByokError, expected) as error:
+                    byok.transport(KEY, b"{}", 5)
+            self.assertNotIn(KEY, repr(error.exception))
+            self.assertIsNone(error.exception.__cause__)
+            connection.request.assert_called_once()
+            connection.getresponse.return_value.read.assert_called_once_with(byok.MAX_ERROR_RESPONSE + 1)
+            connection.close.assert_called_once()
+
+    def test_input_token_window_waits_until_old_usage_expires(self):
+        class FakeEvent:
+            now = 0
+            def is_set(self):
+                return False
+            def wait(self, seconds):
+                self.now += seconds
+        event, starts, reservations = FakeEvent(), [], []
+        def send(*_):
+            starts.append(event.now)
+            reservations.append(sum(count for _, count in session.input_window))
+            return response(usageMetadata={"promptTokenCount": 95000,
+                "candidatesTokenCount": 10, "totalTokenCount": 95010})
+        session = self.session(min_call_interval=15, clock=lambda: event.now, send=send)
+        session.stopping = event
+        for _ in range(3):
+            session("system", "x" * 95000, 120, SCHEMA)
+        self.assertEqual(starts, [0, 15, 60])
+        self.assertTrue(all(n <= byok.INPUT_TOKENS_PER_MINUTE for n in reservations))
 
     def test_failure_latches_no_paid_retry_or_secret_error(self):
         for data in (response(candidates=[]),
