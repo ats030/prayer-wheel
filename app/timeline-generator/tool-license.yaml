@@ -1,9 +1,9 @@
 reviewed_at: 2026-10-02
 intended_use: Personal internal historical research; public release is a separate review
-byok_provider_review:
+byok_gemini_candidate_review:
   reviewed_at: 2026-10-11
   tool: Gemini Developer API candidate only
-  status: review_required
+  status: declined
   adoption: No adapter, dependency, provider call or model adoption in this review
   candidate_model: gemini-3.5-flash-lite; availability and timeline quality remain untested
   pricing_url: https://ai.google.dev/gemini-api/docs/pricing
@@ -20,7 +20,50 @@ byok_provider_review:
     - Recheck pricing, availability and exact account conditions before implementation and release
     - Keep Wikipedia retrieval and citation verification; no Google Search grounding, caching or batch service adopted
     - Bound calls and tokens, show user costs and data-use conditions, and never silently switch to operator AI
-  notes: Candidate research only. The provider remains unapproved for the public app; no API key was requested, read or transmitted, and no paid generation occurred.
+  notes: User chose on 2026-10-11 to preserve the audience and investigate another provider. Declined for this age-unrestricted history app; no provider call or key transfer occurred.
+byok_openai_candidate_review:
+  reviewed_at: 2026-10-11
+  tool: OpenAI API GPT-4.1 mini
+  version_or_plan: gpt-4.1-mini-2025-04-14; direct standard text API
+  status: review_required
+  adoption: declined for the server-relayed BYOK experiment; no adapter or call
+  commercial_use: Services Agreement section 2.2 permits API applications; section 3.3(g) prohibits buying, selling or transferring API keys with third parties
+  cost: Standard input USD 0.40 and output USD 1.60 per million tokens; no free availability promised
+  data_use: No training unless opted in; default chat/completions abuse logs up to 30 days with exceptions
+  terms_url: https://openai.com/policies/services-agreement/
+  pricing_url: https://developers.openai.com/api/docs/models/gpt-4.1-mini
+  data_url: https://developers.openai.com/api/docs/guides/your-data
+  minors_url: https://developers.openai.com/api/docs/guides/safety-checks/under-18-api-guidance
+  evidence_retrieved: 2026-10-11
+  notes: Do not assume the API-key-transfer clause permits accepting third-party keys on this server. Minors require parental consent and safeguards; children below digital-consent age need ZDR before processing personal data. This is an unresolved relay-suitability finding, not a claim that all BYOK is prohibited.
+byok_provider_review:
+  reviewed_at: 2026-10-11
+  tool: Anthropic Claude API
+  version_or_plan: claude-haiku-4-5-20251001; direct standard text Messages API with structured outputs
+  status: conditional
+  adoption: Bounded offline-tested experiment only; no public connection, real API call, dependency installation or quality-pass claim
+  commercial_use: Commercial Terms A.1 allows products offered to customers/end users; B assigns output rights and forbids training on Customer Content; D requires Usage Policy, supported regions and service-specific terms
+  cost: Standard uncached input USD 1 and output USD 5 per million tokens; paid account and credits may be required; taxes excluded; no free quota promise
+  data_use: General API retention is within 30 days with policy/legal exceptions (flagged inputs/outputs may be held up to 2 years). Structured-output docs describe ZDR prompt/response processing and schema caching up to 24 hours, excluding Covered Models. Do not generalize that feature statement to all accounts/models or claim zero retention at launch.
+  terms_url: https://www.anthropic.com/legal/commercial-terms
+  service_terms_url: https://www.anthropic.com/legal/service-specific-terms
+  pricing_url: https://platform.claude.com/docs/en/about-claude/pricing
+  lifecycle_url: https://platform.claude.com/docs/en/about-claude/model-deprecations
+  data_url: https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data
+  api_url: https://platform.claude.com/docs/en/build-with-claude/structured-outputs
+  usage_policy_urls:
+    - https://www.anthropic.com/legal/aup
+    - https://www.anthropic.com/legal/archive/22742366-2ef0-4c7a-a833-6523f10d3944
+  evidence_retrieved: 2026-10-11
+  release_conditions:
+    - Account owner must authorize processing with their own eligible API key and fee cap; never use consumer Claude login/session credentials
+    - Verify supported region, exact account conditions, key handling and configured privacy notices before any public relay
+    - Recheck applicable Usage Policy effective date. Live page says November 12 2026 (future at review); preceding archive says September 15 2025. Do not silently treat future policy as current
+    - Public audience is not restricted to adults by this decision; validate applicable minor-serving safeguards, AI disclosure, privacy, monitoring and consent obligations before public use
+    - Confirm Haiku 4.5 lifecycle again before real calls; table says Active with retirement not sooner than October 15 2026, not a promised retirement on that date
+    - Complete fixed-theme quality/cost measurements and independent source audit before public activation
+    - Keep fixed host/model, ephemeral keys, explicit call/token/cost/retrieval/concurrency/rate limits and no automatic retry or operator fallback
+  notes: No raw key, provider response, quote or trace is kept in public receipts or backups. Normal public_server startup does not enable trial or BYOK. Account-supplied API charges remain untested; operator infrastructure cost remains separate.
 public_auth_review:
   reviewed_at: 2026-10-11
   tool: Google OpenID Connect server flow

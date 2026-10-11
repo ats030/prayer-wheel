@@ -37,12 +37,13 @@ class Cancellation:
 
 class TrialRuntime:
     def __init__(self, ledger, backup_directory, *, generate=bounded_generation,
-                 maintenance_interval=60, backup_interval=86400):
+                 maintenance_interval=60, backup_interval=86400, slots=None):
         if not 0 < maintenance_interval <= 3600 or not 0 < backup_interval <= 86400:
             raise ValueError("Invalid maintenance interval")
         if generate is bounded_generation and os.environ.get("TIMELINE_SOURCE") != "wikipedia":
             raise ValueError("Public trial requires TIMELINE_SOURCE=wikipedia")
         self.ledger, self.backup_directory, self.generate = ledger, backup_directory, generate
+        self.slots = slots
         self.maintenance_interval, self.backup_interval = maintenance_interval, backup_interval
         self.stopping, self.wake = threading.Event(), threading.Event()
         self.lock = threading.RLock()
@@ -130,8 +131,19 @@ class TrialRuntime:
                 try:
                     query = request_input({"receipt_id": receipt["receipt_id"],
                                            "query": receipt["payload"]["query"]})[1]
-                    if not cancellation.is_set():
-                        self.generate(query, emit, cancellation)
+                    acquired = False
+                    try:
+                        if self.slots is not None:
+                            while not cancellation.is_set():
+                                if self.slots.acquire():
+                                    acquired = True
+                                    break
+                                self.stopping.wait(0.1)
+                        if not cancellation.is_set():
+                            self.generate(query, emit, cancellation)
+                    finally:
+                        if acquired:
+                            self.slots.release()
                 except Exception:
                     result = None
                 if not self.stopping.is_set():

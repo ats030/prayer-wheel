@@ -21,6 +21,7 @@ ASSETS = {"/": ("public-login.html", "text/html; charset=utf-8"),
           "/tokens.css": ("tokens.css", "text/css; charset=utf-8"),
           "/favicon.svg": ("favicon.svg", "image/svg+xml")}
 RECEIPT_ROUTE = re.compile(r"/api/receipts/([A-Za-z0-9_-]{16,64})(?:/(cancel|received))?")
+BYOK_ROUTE = re.compile(r"/api/byok/receipts/([A-Za-z0-9_-]{16,64})(?:/(cancel|received))?")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -121,6 +122,12 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/api/session":
                 self.authorize()
                 return self.reply(200, login.boundary.session_view(self.headers))
+            byok = BYOK_ROUTE.fullmatch(path)
+            if byok and self.server.byok is not None:
+                if byok[2]:
+                    return self.reply(405, {"error": "post_required"})
+                session = self.authorize()
+                return self.reply(200, self.server.byok.receipt(session.owner, byok[1]))
             route = RECEIPT_ROUTE.fullmatch(path)
             if route and self.server.ledger is not None:
                 if route[2]:
@@ -140,6 +147,20 @@ class Handler(BaseHTTPRequestHandler):
         path = urlsplit(self.path).path
         try:
             login.boundary.check_origin(self.headers, write=True)
+            if path == "/api/byok/receipts" and self.server.byok is not None:
+                session = self.authorize(write=True)
+                value = self.json_body(empty=False)
+                try:
+                    row, created = self.server.byok.accept(session.owner, value)
+                finally:
+                    value.clear()
+                return self.reply(201 if created else 200, row)
+            byok = BYOK_ROUTE.fullmatch(path)
+            if byok and byok[2] and self.server.byok is not None:
+                session = self.authorize(write=True)
+                self.json_body()
+                return self.reply(200, self.server.byok.receipt(session.owner, byok[1],
+                    cancel=byok[2] == "cancel", received=byok[2] == "received"))
             if path == "/api/trial/receipts" and self.server.runtime is not None:
                 session = self.authorize(write=True)
                 row, created = self.server.runtime.accept(session.owner, self.json_body(empty=False))
@@ -172,7 +193,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(429, {"error": exc.code}, retry_after=exc.retry_after)
 
 
-def make_server(login, host="127.0.0.1", port=8534, *, ledger=None, runtime=None, limits=None):
+def make_server(login, host="127.0.0.1", port=8534, *, ledger=None, runtime=None, limits=None, byok=None):
     # Deliberately loopback-only. Public TLS/reverse-proxy configuration is a
     # separate deployment prerequisite, not trusted X-Forwarded-* headers.
     if host != "127.0.0.1":
@@ -181,10 +202,13 @@ def make_server(login, host="127.0.0.1", port=8534, *, ledger=None, runtime=None
         if ledger is not None and ledger is not runtime.ledger:
             raise ValueError("Trial runtime and receipt ledger must match")
         ledger = runtime.ledger
+        if byok is not None and (runtime.slots is None or runtime.slots is not byok.slots):
+            raise ValueError("Trial and BYOK must share generation slots")
     server = ThreadingHTTPServer((host, port), Handler)
     server.login = login
     server.ledger = ledger
     server.runtime = runtime
+    server.byok = byok
     server.limits = PublicLimits() if limits is None else limits
     return server
 
