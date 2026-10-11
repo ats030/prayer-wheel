@@ -259,10 +259,23 @@ class BatchTests(unittest.TestCase):
         with self.assertRaises(t.TimelineError):
             self.run_with_failures({1, 3})
 
-    def test_truncated_model_json_is_reported_with_cause(self):
+    def test_truncated_model_json_is_retried_with_a_higher_token_limit(self):
         # The model hits num_predict and returns HTTP 200 with cut-off JSON.
-        response = {'message': {'content': '{"events": [{"year": 1958, "title": "チキン'}, 'done_reason': 'length', 'eval_count': 3000}
-        with patch.object(t, 'json_request', return_value=response):
+        truncated = {'message': {'content': '{"events": [{"year": 1958, "title": "チキン'}, 'done_reason': 'length', 'eval_count': 3000}
+        ok = {'message': {'content': '{"events": []}'}}
+        limits = []
+
+        def fake_request(url, payload, timeout=None):
+            limits.append(payload['options']['num_predict'])
+            return truncated if len(limits) == 1 else ok
+
+        with patch.object(t, 'json_request', side_effect=fake_request):
+            self.assertEqual(t.model_json('s', 'p', time.monotonic() + 60, t.EVENT_SCHEMA), {'events': []})
+        self.assertEqual(limits, [3000, 6000])
+
+    def test_truncated_model_json_reports_cause_when_the_retry_is_cut_short(self):
+        truncated = {'message': {'content': '{"events": [{"year": 1958, "title": "チキン'}, 'done_reason': 'length', 'eval_count': 8192}
+        with patch.object(t, 'json_request', return_value=truncated):
             with self.assertRaises(t.TimelineError) as caught:
                 t.model_json('s', 'p', time.monotonic() + 60, t.EVENT_SCHEMA)
         self.assertIn('done_reason=length', str(caught.exception.__cause__))

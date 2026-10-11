@@ -45,6 +45,7 @@ MODEL = os.environ.get("TIMELINE_MODEL", "gemma4:12b")
 VERIFY_MODEL = os.environ.get("TIMELINE_VERIFY_MODEL", "qwen3.8:27b")
 TIME_LIMIT = 3600
 MAX_EVENTS = 50
+MODEL_MAX_TOKENS = 8192
 BATCH_EVENTS = 7
 # 生成が BATCH_EVENTS 件で埋まった組だけ、この上限で再生成する。
 SATURATED_EVENTS = 14
@@ -604,7 +605,6 @@ def model_json(system, prompt, deadline, schema):
             # Bounded only by the job deadline: waiting in the shared proxy queue is expected,
             # and abandoning a queued request still costs GPU time once it is dispatched.
             response = json_request(OLLAMA_URL + "/api/chat", payload, timeout=left)
-            break
         except HTTPError as exc:
             # The upstream proxy treats VERIFY_MODEL as the interactive model and answers 503 after
             # its 120s interactive queue wait, so verify with MODEL instead (ats030-1nzpy).
@@ -618,14 +618,19 @@ def model_json(system, prompt, deadline, schema):
             raise TimelineError("年表の生成を完了できませんでした。少し待つか、テーマを絞って再検索してください。") from exc
         except (OSError, ValueError) as exc:
             raise TimelineError("年表の生成を完了できませんでした。少し待つか、テーマを絞って再検索してください。") from exc
-    message = response.get("message") if isinstance(response, dict) else None
-    content = message.get("content", "") if isinstance(message, dict) else ""
-    try:
-        return json.loads(content)
-    except (TypeError, ValueError) as exc:
-        # Keep the cause diagnosable without logging model output, which may echo the query.
-        detail = ValueError(f"unreadable model JSON: done_reason={response.get('done_reason') if isinstance(response, dict) else None} eval_count={response.get('eval_count') if isinstance(response, dict) else None} chars={len(content) if isinstance(content, str) else None}")
-        raise TimelineError("年表の生成を完了できませんでした。少し待つか、テーマを絞って再検索してください。") from detail
+        message = response.get("message") if isinstance(response, dict) else None
+        content = message.get("content", "") if isinstance(message, dict) else ""
+        try:
+            return json.loads(content)
+        except (TypeError, ValueError):
+            # num_predict 上限で出力が途中で切れると組全体の出来事が失われるため、上限を上げて
+            # もう一度だけ再生成する（ats030-klg1n）。
+            if response.get("done_reason") == "length" and payload["options"]["num_predict"] < MODEL_MAX_TOKENS and deadline - time.monotonic() > 5:
+                payload["options"]["num_predict"] = min(payload["options"]["num_predict"] * 2, MODEL_MAX_TOKENS)
+                continue
+            # Keep the cause diagnosable without logging model output, which may echo the query.
+            detail = ValueError(f"unreadable model JSON: done_reason={response.get('done_reason') if isinstance(response, dict) else None} eval_count={response.get('eval_count') if isinstance(response, dict) else None} chars={len(content) if isinstance(content, str) else None}")
+            raise TimelineError("年表の生成を完了できませんでした。少し待つか、テーマを絞って再検索してください。") from detail
 
 
 def crosscheck_sources(events, sources, query, deadline):
