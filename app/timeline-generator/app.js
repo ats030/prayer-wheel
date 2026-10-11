@@ -426,7 +426,7 @@ if ($("job-status")) {
     job = current;
     showMilestones(current);
     $("page-heading").textContent = job.query;
-    document.title = `${job.query} · 歴史年表`;
+    document.title = `${job.query} · タイムラインジェネレーター`;
     $("job-status").textContent = labels[job.state];
     $("job-status").dataset.state = job.state;
     $("result-meta").hidden = !job.result;

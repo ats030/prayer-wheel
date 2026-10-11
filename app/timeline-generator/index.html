@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="キーワードから歴史を調べ、出典付きの年表で読む個人用アプリ。">
-  <title>歴史年表</title>
+  <meta name="description" content="テーマからつくる、出典付きの年表">
+  <title>タイムラインジェネレーター</title>
   <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" defer></script>
@@ -12,10 +12,11 @@
 </head>
 <body>
   <a class="skip-link" href="#query">検索欄へ</a>
-  <header class="masthead"><a class="wordmark" href="/">歴史年表<span>History Timeline</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/quality">評価一覧</a><a class="quiet-link" href="/changelog">更新履歴</a></nav></header>
+  <header class="masthead"><a class="wordmark" href="/">タイムラインジェネレーター<span>Timeline Generator</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/quality">評価一覧</a><a class="quiet-link" href="/changelog">更新履歴</a></nav></header>
   <main>
     <section class="search-section" aria-labelledby="search-heading">
       <div class="page-head"><h1 id="search-heading">年表を生成する</h1></div>
+      <p class="intro">テーマからつくる、出典付きの年表</p>
       <form id="search-form" novalidate>
         <label class="sr-only" for="query">調べたいテーマ</label>
         <div class="search-row"><input id="query" name="query" type="text" maxlength="180" placeholder="半導体 日本" required aria-required="true" aria-describedby="query-help form-error" autocomplete="off"><button id="submit" type="submit">生成<span aria-hidden="true"> →</span></button></div>

@@ -117,7 +117,7 @@ def page(title, body, root):
 </head>
 <body>
   <a class="skip-link" href="#page-heading">本文へ</a>
-  <header class="masthead"><a class="wordmark" href="{root}">歴史年表<span>History Timeline</span></a></header>
+  <header class="masthead"><a class="wordmark" href="{root}">タイムラインジェネレーター<span>Timeline Generator</span></a></header>
   <main class="app-main">
 {body}
   </main>
@@ -149,16 +149,16 @@ def timeline_page(record):
 {source_items}
       </ul>
     </section>'''
-    return page(f'{record["theme"]}の年表 · 歴史年表', body, '../')
+    return page(f'{record["theme"]}の年表 · タイムラインジェネレーター', body, '../')
 
 
 def index_page(records):
     items = '\n'.join(f'      <li><a href="{e(r["slug"])}/">{e(r["theme"])}</a>（{len(r["events"])}件）</li>' for r in records)
     listing = f'    <ul>\n{items}\n    </ul>' if records else '    <p>公開している年表はまだありません。</p>'
-    body = f'''    <div class="page-head"><h1 id="page-heading" tabindex="-1">歴史年表</h1></div>
+    body = f'''    <div class="page-head"><h1 id="page-heading" tabindex="-1">タイムラインジェネレーター</h1></div>
     <p>テーマごとの主要な出来事を、Wikipediaの記事を出典として年表にまとめています。</p>
 {listing}'''
-    return page('歴史年表', body, '')
+    return page('タイムラインジェネレーター', body, '')
 
 
 def build(out_dir, approved_dir=APPROVED_DIR):

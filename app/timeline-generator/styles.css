@@ -14,7 +14,7 @@ p { margin: 0 0 8px; }
 .masthead, main, footer { width: min(100% - 24px, 1120px); margin-inline: auto; }
 .masthead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 8px; min-height: 56px; border-bottom: 1px solid var(--color-rule); }
 .masthead-nav { display: flex; flex-wrap: wrap; gap: 0 12px; }
-.wordmark { font-size: var(--text-lg); font-weight: 700; color: var(--color-ink); text-decoration: none; white-space: nowrap; }
+.wordmark { font-size: var(--text-lg); font-weight: 700; color: var(--color-ink); text-decoration: none; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .wordmark span { display: none; }
 .quiet-link, .text-button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; font-size: var(--text-sm); white-space: nowrap; }
 .text-button { background: none; border: 0; color: var(--color-accent); text-decoration: underline; padding: 0 4px; text-underline-offset: 3px; }
