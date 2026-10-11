@@ -13,7 +13,6 @@ from byok import MODEL, validate_key
 from byok_pipeline import FetchBudget, bounded_byok
 from byok_runtime import ByokLimits
 from public_security import result_view
-from quality_eval import evaluate_result
 
 ROOT = Path(__file__).resolve().parent
 HASHED = ("timeline.py", "milestones.py", "byok.py", "byok_pipeline.py", "byok_eval.py",
@@ -81,6 +80,9 @@ def measure(theme, route, key, options):
     result = next((r for r in records if r.get("kind") == "result"), None)
     usage = next((r["usage"] for r in reversed(records) if r.get("kind") == "usage"), None)
     error = next((r["error"] for r in reversed(records) if r.get("kind") == "ended"), "cancelled")
+    # quality_eval imports timeline. Keep it out of the spawn entry module so
+    # each child can select Wikipedia before timeline reads its environment.
+    from quality_eval import evaluate_result
     golds = [json.loads((ROOT / name).read_text()) for name in ("quality_gold.json", "quality_holdout.json")]
     gold = next(g for g in golds if theme in g["themes"])
     quality = evaluate_result(gold, result, theme)

@@ -1,5 +1,7 @@
 import copy
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -9,6 +11,12 @@ import byok_eval as ev
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_spawn_entry_does_not_preload_timeline_source_configuration(self):
+        check = subprocess.run([sys.executable, "-c",
+            "import sys; import byok_eval; assert 'timeline' not in sys.modules"],
+            cwd=ev.ROOT, capture_output=True, text=True)
+        self.assertEqual(check.returncode, 0, check.stderr)
+
     def test_matching_conditions_only_and_failed_cases_stay_in_comparison(self):
         left = {"route": "byok", "theme": "昭和", "conditions": {"sha256": "fixed"}, "passed": False}
         right = {**copy.deepcopy(left), "route": "operator", "passed": True}
