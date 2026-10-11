@@ -31,5 +31,12 @@
       "summaries.json": "87fac5c7b16ee7dffb55b857b9a085c21ea3ae4a9c23a8ceb49f9b19a56338e9",
       "official_summaries.json": "9d922f21243aae8465517bd90d011faa0b7bf771acaae1fc0f79506953457f55"
     }
+  },
+  "geo": {
+    "source": "geo-map",
+    "database": "geo.db",
+    "files": {
+      "geo.db": "8c3dc4a4ede7a88a570fe40a8921cfdb514e30b74eac010c6d47f3d722f2bafc"
+    }
   }
 }

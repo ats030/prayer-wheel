@@ -28,6 +28,8 @@ Cloud Runで広告を有効にする際はURL登録を先に済ませ、既存Se
 
 data/<kind>にDBと要約を隔離し、APIは/api/<kind>/<従来のAPIパスのapi以降>へ配置する（例 /api/onsen/onsen/）。元アプリのソース・DB・要約・収集スクリプトは保持する。更新は元アプリの収集スクリプトで出典・割当を検証し、統合版停止中にscripts/import-data.pyで取り込んで再ビルド・公開する。統合版で増えた要約を失わないよう、既存コピーがある場合は--replaceなしでは上書きしない。既存要約を別途保全してから置き換える。
 
+ジオパーク範囲は全タブ共通の重ね合わせレイヤー（地図左下のチェックボックス）で、正本は app/geo-map/data/geo.db。import-data.py が data/geo に取り込み、scripts/build-geo-layer.py が frontend/geo/geoparks.json（簡略化した範囲と各種別の範囲内件数）を生成する。点データを取り込み直したら build-geo-layer.py も再実行する。古いままだと build-cloudflare.py が停止する。
+
 cmd/warm-<kind>は統合版の種類別キャッシュへ書く。元版と統合版でデータ所有権を混ぜず、通常の閲覧は統合版のみで行う。migration-manifest.jsonは初回コピーのSHA256。
 
 戻す場合は元アプリのsystemdサービスをenable --nowし、各元アプリのdeploy-cloudrun.sh --deployで同名の旧Cloud Runサービスを再作成する。検証後に統合版への導線を戻す。ソースとデータは削除しない。

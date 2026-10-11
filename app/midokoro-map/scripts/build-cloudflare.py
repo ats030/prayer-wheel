@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Build an isolated public snapshot; never publish summary-work or private configuration."""
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 from datetime import date
 
@@ -25,6 +27,12 @@ def dump(path, value):
 def build():
     target = ROOT / 'cloudflare/assets'
     target.parent.mkdir(parents=True, exist_ok=True)
+    # The geopark popup counts are a snapshot of the point databases; refuse to publish a stale one.
+    spec = importlib.util.spec_from_file_location('geo_layer', ROOT / 'scripts/build-geo-layer.py')
+    geo_layer = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(geo_layer)
+    if (ROOT / 'frontend/geo/geoparks.json').read_text() != geo_layer.render(ROOT / 'data'):
+        sys.exit('frontend/geo/geoparks.json is stale: run scripts/build-geo-layer.py')
     with tempfile.TemporaryDirectory(prefix='midokoro-cloudflare-', dir=target.parent) as work:
         work = Path(work)
         assets = work / 'assets'

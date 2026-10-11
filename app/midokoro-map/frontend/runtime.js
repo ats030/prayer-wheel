@@ -16,6 +16,65 @@ function resizeWithoutMoving() {
   if (!sharedMap.getCenter().equals(center)) sharedMap.setView(center, zoom, {reset:true, animate:false});
 }
 
+const geoparkKinds = [['shiseki','史跡'],['omatsuri','祭り'],['onsen','温泉'],['tokusan','特産物']];
+
+function geoparkPopup(properties) {
+  const box = document.createElement('div');
+  const title = document.createElement('strong');
+  title.textContent = properties.name;
+  const lines = [title];
+  if (properties.unesco) lines.push('ユネスコ世界ジオパーク');
+  lines.push('構成自治体: '+properties.municipalities.join('、'));
+  if (properties.partial.length) lines.push('一部のみ: '+properties.partial.join('、')+'（範囲には含めていません）');
+  lines.push('範囲内: '+geoparkKinds.map(([kind,label])=>label+' '+properties.counts[kind]+'件').join(' / '));
+  const source = document.createElement('a');
+  source.href = properties.source; source.target = '_blank'; source.rel = 'noopener';
+  source.textContent = '日本ジオパークネットワーク';
+  const credit = document.createElement('span');
+  credit.append('出典: ', source, properties.fetched ? '（'+properties.fetched+'取得）' : '');
+  lines.push(credit);
+  for (const line of lines) {
+    const row = document.createElement('div');
+    row.append(line);
+    box.append(row);
+  }
+  return box;
+}
+
+// Geopark outlines are shared by every tab. Polygons stay non-interactive so they never cover a view's markers;
+// a map click that no marker handled looks up the region instead.
+function addGeoparkOverlay(map) {
+  map.createPane('geoparks').style.zIndex = 350;
+  const group = L.layerGroup();
+  let loading = null;
+  let regions = [];
+  const load = () => loading ||= fetch('/geo/geoparks.json').then(response => {
+    if (!response.ok) throw new Error('geopark layer unavailable');
+    return response.json();
+  }).then(data => {
+    regions = data.features;
+    L.geoJSON(data, {pane:'geoparks', interactive:false, style:{color:'#2f6f4f', weight:1.5, fillColor:'#2f6f4f', fillOpacity:.12}}).addTo(group);
+  }).catch(error => { loading = null; map.removeLayer(group); console.error(error); });
+  map.on('overlayadd', event => { if (event.layer === group) load(); });
+  map.on('click', event => {
+    if (!map.hasLayer(group) || event.sourceTarget !== map) return;
+    const {lng, lat} = event.latlng;
+    const hit = regions.find(feature => feature.geometry.coordinates.some(rings =>
+      insideRing(lng, lat, rings[0]) && !rings.slice(1).some(hole => insideRing(lng, lat, hole))));
+    if (hit) L.popup().setLatLng(event.latlng).setContent(geoparkPopup(hit.properties)).openOn(map);
+  });
+  L.control.layers(null, {'ジオパーク': group}, {collapsed:false, position:'bottomleft'}).addTo(map);
+}
+
+function insideRing(x, y, ring) {
+  let hit = false;
+  for (let i = 1; i < ring.length; i++) {
+    const [x1, y1] = ring[i-1], [x2, y2] = ring[i];
+    if ((y1 > y) !== (y2 > y) && x < x1 + (y - y1) * (x2 - x1) / (y2 - y1)) hit = !hit;
+  }
+  return hit;
+}
+
 function attachMap(context) {
   const region = context.root.querySelector('.map-region');
   if (!container) {
@@ -25,6 +84,7 @@ function attachMap(context) {
       attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom:19,
     }).addTo(sharedMap);
+    addGeoparkOverlay(sharedMap);
   } else {
     context.root.querySelector('#map')?.remove();
     region.prepend(container);
@@ -105,7 +165,7 @@ async function buildView(kind, config) {
   if (!response.ok) throw new Error('画面を読み込めませんでした。');
   const css = ['/vendor/leaflet.css','/vendor/MarkerCluster.css','/vendor/MarkerCluster.Default.css','/assets/'+kind+'/app.css','/assets/'+kind+'/detail-panel.css'];
   root.innerHTML = css.map(href=>`<link rel="stylesheet" href="${href}">`).join('') + await response.text() +
-    '<style>:host{display:block;height:100%;min-width:0;overflow-x:clip}h2{margin:0;font:700 1.3rem var(--font-display)}.app-shell{min-height:100%}#map{width:100%;height:100%}</style>';
+    '<style>:host{display:block;height:100%;min-width:0;overflow-x:clip}h2{margin:0;font:700 1.3rem var(--font-display)}.app-shell{min-height:100%}#map{width:100%;height:100%}.leaflet-control-layers-selector{width:auto;height:auto;margin:0 .3rem 0 0;padding:0;accent-color:#2f6f4f}</style>';
   const legend = root.querySelector('.map-legend');
   if (legend) {
     legend.id = 'map-legend';
