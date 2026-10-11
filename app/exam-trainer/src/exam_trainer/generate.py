@@ -190,8 +190,10 @@ def verify(
     if node_title and data.get("in_scope") is not True:
         reason = str(data.get("scope_reason", "")).strip()
         return False, f"シラバスの出題範囲に適合しません: {reason}".rstrip()
-    if data.get("unique") is False:
-        return False, f"抜粋から正解が一意に決まりません: {data.get('reason', '')}".strip()
+    if data.get("unique") is not True:
+        # 厳密に真 boolean のみ採用：欠落や "false"/"true" 等の文字列は判断不能として棄却。
+        reason = str(data.get("reason", "")).strip()
+        return False, f"抜粋から正解が一意に決まりません: {reason}".rstrip()
     try:
         verified_answer = int(data.get("answer", -1))
     except (TypeError, ValueError):

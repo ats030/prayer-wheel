@@ -629,6 +629,32 @@ def test_ambiguous_question_is_not_verified(monkeypatch):
     assert "一意" in reason
 
 
+def test_verifier_rejects_missing_unique(monkeypatch):
+    """unique が欠落しても正解一致だけでは通らせない（fail closed）。"""
+    from exam_trainer import generate, ollama_client
+
+    monkeypatch.setattr(
+        ollama_client, "generate_json",
+        lambda *a, **k: {"answer": 0, "reason": "正解は一致"},
+    )
+    agrees, reason = generate.verify("抜粋", "問題", ["ア", "イ", "ウ"], 0)
+    assert not agrees
+    assert "一意" in reason
+
+
+def test_verifier_rejects_string_unique(monkeypatch):
+    """unique が文字列（"true"）でも厳密に真 boolean だけを採用する。"""
+    from exam_trainer import generate, ollama_client
+
+    monkeypatch.setattr(
+        ollama_client, "generate_json",
+        lambda *a, **k: {"answer": 0, "unique": "true"},
+    )
+    agrees, reason = generate.verify("抜粋", "問題", ["ア", "イ", "ウ"], 0)
+    assert not agrees
+    assert "一意" in reason
+
+
 def test_verifier_failure_holds_rather_than_passes(monkeypatch):
     """検証を実行できないときに素通しさせない（fail closed）。"""
     from exam_trainer import generate, ollama_client
