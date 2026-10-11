@@ -103,8 +103,7 @@ async function buildView(kind, config) {
   const root = host.attachShadow({mode:'open'});
   const response = await fetch('/assets/'+kind+'/view.html');
   if (!response.ok) throw new Error('画面を読み込めませんでした。');
-  const css = ['/vendor/leaflet.css','/vendor/MarkerCluster.css','/vendor/MarkerCluster.Default.css','/assets/'+kind+'/app.css'];
-  if (kind !== 'geo') css.push('/assets/'+kind+'/detail-panel.css');
+  const css = ['/vendor/leaflet.css','/vendor/MarkerCluster.css','/vendor/MarkerCluster.Default.css','/assets/'+kind+'/app.css','/assets/'+kind+'/detail-panel.css'];
   root.innerHTML = css.map(href=>`<link rel="stylesheet" href="${href}">`).join('') + await response.text() +
     '<style>:host{display:block;height:100%;min-width:0;overflow-x:clip}h2{margin:0;font:700 1.3rem var(--font-display)}.app-shell{min-height:100%}#map{width:100%;height:100%}.leaflet-control-layers-selector{width:auto;height:auto;margin:0 .3rem 0 0;padding:0;accent-color:#2f6f4f}</style>';
   const legend = root.querySelector('.map-legend');

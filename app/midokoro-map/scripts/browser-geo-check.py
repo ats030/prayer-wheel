@@ -26,18 +26,33 @@ with sync_playwright() as p:
     assert host.locator('.geo-card').count()==sum(expected.values())
     host.locator('#geo-type').select_option('geosite')
     assert int(host.locator('#result-count').inner_text())==expected['geosites']
-    assert page.evaluate('()=>{let count=0;midokoro.map.eachLayer(layer=>{if(layer instanceof L.CircleMarker)count++});return count}')==expected['geosites']
+    assert page.evaluate('()=>{let count=0;midokoro.map.eachLayer(layer=>{if(layer instanceof L.CircleMarker&&layer.options.interactive!==false)count++});return count}')==expected['geosites']
     host.locator('.geo-card').first.click()
-    host.locator('.leaflet-popup-content').wait_for()
-    source=host.locator('.leaflet-popup-content a').first
+    panel=host.locator('#detail-panel')
+    panel.wait_for(state='visible')
+    assert host.locator('.app-shell.has-detail').count()==1
+    assert host.locator('.leaflet-popup').count()==0
+    assert host.locator('.geo-card').first.get_attribute('aria-current')=='true'
+    host.locator('.geo-marker.selected').wait_for()
+    source=panel.locator('.detail-links a').first
     assert source.get_attribute('target')=='_blank'
     assert 'noopener' in source.get_attribute('rel')
-    assert '指定基準' in host.locator('.leaflet-popup-content').inner_text()
+    assert '指定基準' in panel.inner_text()
+    panel.locator('.detail-close').click()
+    panel.wait_for(state='hidden')
+    assert host.locator('.app-shell.has-detail').count()==0
+    assert host.locator('.geo-marker.selected').count()==0
+    # A map marker opens the same side panel instead of a popup.
+    page.evaluate("()=>{let target;midokoro.map.eachLayer(layer=>{if(!target&&layer instanceof L.CircleMarker&&layer.options.interactive!==false)target=layer});target.fire('click')}")
+    panel.wait_for(state='visible')
+    assert host.locator('#detail-origin').inner_text()=='地図から選択'
+    assert host.locator('.leaflet-popup').count()==0
     host.locator('#geo-type').select_option('geopark')
     assert int(host.locator('#result-count').inner_text())==expected['geoparks']
+    panel.wait_for(state='hidden')
     host.locator('.geo-card').first.click()
-    host.locator('.leaflet-popup-content').filter(has_text='構成自治体').wait_for()
-    assert '構成自治体' in host.locator('.leaflet-popup-content').filter(has_text='構成自治体').inner_text()
+    panel.filter(has_text='構成自治体').wait_for(state='visible')
+    assert host.locator('.leaflet-popup').count()==0
     host.locator('#clear-filters').click()
     host.locator('#keyword').fill('熊本')
     filtered=host.locator('#result-count').inner_text()
