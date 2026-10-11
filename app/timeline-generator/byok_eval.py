@@ -57,17 +57,18 @@ def operator_child(query, unused_key, options, connection):
         connection.close()
 
 
-def configuration(time_limit, max_cost):
+def configuration(time_limit, max_cost, model_calls=60):
     # Experiment values are explicit, not production defaults or measured limits.
     limits = ByokLimits(concurrent=1, starts=1, owners=1, receipts=1, ttl=time_limit,
         time_limit=time_limit, fetch_calls=100, fetch_bytes=40_000_000,
-        model_calls=60, input_bytes=100_000, output_tokens=6000, max_cost_microusd=max_cost)
+        model_calls=model_calls, input_bytes=100_000, output_tokens=6000, max_cost_microusd=max_cost)
     return {**vars(limits), "model_min_call_interval_seconds": MIN_CALL_INTERVAL,
             "model_input_tokens_per_minute": INPUT_TOKENS_PER_MINUTE}
 
 
 def measure(theme, route, key, options):
     records, stopped = [], threading.Event()
+    hashes = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in HASHED}
     start = time.monotonic()
     try:
         if route == "byok":
@@ -87,19 +88,24 @@ def measure(theme, route, key, options):
     golds = [json.loads((ROOT / name).read_text()) for name in ("quality_gold.json", "quality_holdout.json")]
     gold = next(g for g in golds if theme in g["themes"])
     quality = evaluate_result(gold, result, theme)
+    changed = any(hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != digest
+                  for name, digest in hashes.items())
     passed = bool(result and quality.get("recall") == 1 and not quality["known_errors"] and not quality["duplicates"]
-                  and result.get("stop_reason") == "sources_exhausted")
+                  and result.get("stop_reason") == "sources_exhausted" and not changed)
     return {"theme": theme, "route": route, "model": MODEL if route == "byok" else os.environ.get("TIMELINE_MODEL", "gemma4:12b"),
             "verify_model": MODEL if route == "byok" else os.environ.get("TIMELINE_VERIFY_MODEL", "qwen3.8:27b"),
             "conditions": {"source": "wikipedia", "source_filter": os.environ.get("TIMELINE_SOURCE_FILTER", ""),
-                           "options": options, "sha256": {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in HASHED}},
-            "state": "complete" if result else "failed", "error": None if result else error,
+                           "options": options, "sha256": hashes},
+            "code_changed_during_run": changed,
+            "state": "complete" if result else "failed", "error": "code_changed" if changed else None if result else error,
             "elapsed_seconds": round(time.monotonic() - start, 1), "usage": usage, "quality": quality,
             "passed": passed, "result": result_view(result) if result else None,
             "limitations": "Live Wikipedia inputs can change; automatic recall is not an independent source audit. Operator fee is zero API fee, not zero infrastructure cost."}
 
 
 def compare(left, right):
+    if left.get("code_changed_during_run") or right.get("code_changed_during_run"):
+        raise ValueError("Code changed during measurement; cannot compare")
     if {left["route"], right["route"]} != {"byok", "operator"}:
         raise ValueError("One BYOK and one operator measurement required")
     if left["theme"] != right["theme"] or left["conditions"] != right["conditions"]:
@@ -114,6 +120,8 @@ def main(argv=None):
     parser.add_argument("--theme")
     parser.add_argument("--max-usd")
     parser.add_argument("--time-limit", type=int, default=3600)
+    parser.add_argument("--model-calls", type=int, default=60,
+                        help="Explicit BYOK call cap, 1 through 100; default 60")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--compare", nargs=2, type=Path)
     args = parser.parse_args(argv)
@@ -135,14 +143,15 @@ def main(argv=None):
                 amount = Decimal(args.max_usd) * 1_000_000
                 if not amount.is_finite() or amount != amount.to_integral_value():
                     raise ValueError
-                options = configuration(args.time_limit, int(amount))
+                options = configuration(args.time_limit, int(amount), args.model_calls)
             except (ValueError, InvalidOperation, OverflowError):
-                parser.error("Cost must be USD 0.000001 through 5; time-limit 1 through 3600")
+                parser.error("Cost must be USD 0.000001 through 5; time-limit 1 through 3600; model-calls 1 through 100")
             key = None
             if args.route == "byok":
                 if not os.isatty(0):
                     parser.error("A terminal is required for hidden key input; no key in argv/env/files")
                 print(f"Google Gemini {MODEL}; maximum USD {args.max_usd}, standard text rate estimate.\n"
+                      f"Maximum {args.model_calls} model calls; no automatic retries or resume.\n"
                       f"Calls start at least {MIN_CALL_INTERVAL} seconds apart; this is not a guarantee of free-tier quota.\n"
                       "Prompts/results go to Google. Free-tier data may be used for improvement and human review.\n"
                       "For adult developer evaluation only; public release is not enabled.\n"

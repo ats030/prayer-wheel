@@ -60,6 +60,7 @@ class ModelTests(unittest.TestCase):
         self.assertNotIn("temperature", data["generationConfig"])
         self.assertEqual(session.summary()["cost_microusd"], 34)
         self.assertFalse(session.summary()["cost_is_upper_bound"])
+        self.assertEqual(session.summary()["calls_by_stage"], {"other": 1})
         self.assertNotIn(KEY, repr(session.summary()))
         session.close()
         self.assertIsNone(session._key)
@@ -74,7 +75,7 @@ class ModelTests(unittest.TestCase):
             self.assertEqual(sends, [])
         session = self.session(max_calls=1)
         self.call(session)
-        with self.assertRaisesRegex(ByokError, "cost_budget"):
+        with self.assertRaisesRegex(ByokError, "call_budget"):
             self.call(session)
         self.assertEqual(session.summary()["calls"], 1)
 

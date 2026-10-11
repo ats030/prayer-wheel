@@ -65,7 +65,7 @@ HTTPの頻度・応答量には既存の `PublicLimits` も適用します。
 
 BYOKとお試しを同じHTTPサービスに接続する場合は、同じ `GenerationSlots` を両ランタイムへ渡します。
 異なる枠や未指定の枠では `make_server` が接続を拒否します。
-同時数は `server_busy`、頻度は `request_rate`、取得上限は `fetch_budget`、モデル費用・回数は `cost_budget` で区別します。
+同時数は `server_busy`、頻度は `request_rate`、取得上限は `fetch_budget`、モデル費用は `cost_budget`、回数は `call_budget` で区別します。
 別プロセスの私用ワーカー・比較測定はこの枠を共有しないので、一般公開前に配備側で競合を制御します。
 
 Googleの無料枠で16回目の呼出しが429になったため、モデル送信開始を処理ごとに15秒以上空けます。
@@ -111,9 +111,15 @@ BYOK受付を運営AI用へ付け替える操作はありません。
 DBを開かず、キーは端末の非表示入力で受け取り、引数・環境変数・ファイルから読みません。
 出力は権限600で新規作成し、存在する結果を上書き・自動再開しません。
 結果の主要項目・既知の誤り・重複、呼出回数、トークン、費用、時間、コード/goldハッシュを記録します。
+`calls_by_stage` には検索補助・資料選別・生成・検証・件数整理ごとの送信試行回数だけを記録します。
 原文引用・trace・キーを結果ファイルに保存しません。
 
+無料枠での昭和測定は429を回避しましたが、60回の呼出し上限で未完成になりました。
+評価CLIの `--model-calls` は既定60回、明示指定で1〜100回です。
+以下は100回での次の実験例です。費用USD0.50・時間・取得・送信頻度の上限は維持し、以前の結果を再開しません。
+
 同じコード・gold・検索設定・取得上限・時間上限で比較します。
+コード/goldハッシュは測定開始時に記録し、終了時と違った測定は不合格とし、比較も拒否します。
 Wikipediaの本文は測定間で変わりうるため、この比較だけでは入力が同一だったとは断定しません。
 各テーマで主要項目100%・既知の誤り0・重複0・資料処理完了を必要とし、失敗も比較から外しません。
 固定6テーマとholdout3テーマを実行した後、独立した出典監査も行います。
@@ -123,9 +129,9 @@ Wikipediaの本文は測定間で変わりうるため、この比較だけで�
 既存モデルの測定と私用生成が動いていないことを確認してから運営モデルの比較を行います。
 
 ```bash
-python3 byok_eval.py --route byok --theme 昭和 --max-usd 0.50 --output data/byok-eval/showa-google-free-byok.json
-python3 byok_eval.py --route operator --theme 昭和 --max-usd 0.50 --output data/byok-eval/showa-google-free-operator.json
-python3 byok_eval.py --compare data/byok-eval/showa-google-free-operator.json data/byok-eval/showa-google-free-byok.json --output data/byok-eval/showa-google-free-comparison.json
+python3 byok_eval.py --route byok --theme 昭和 --max-usd 0.50 --model-calls 100 --output data/byok-eval/showa-google-free-100-byok.json
+python3 byok_eval.py --route operator --theme 昭和 --max-usd 0.50 --model-calls 100 --output data/byok-eval/showa-google-free-100-operator.json
+python3 byok_eval.py --compare data/byok-eval/showa-google-free-100-operator.json data/byok-eval/showa-google-free-100-byok.json --output data/byok-eval/showa-google-free-100-comparison.json
 ```
 
 運営モデル側の金額0は外部AIのAPI料金だけを指します。電気代・検索・維持管理は残ります。

@@ -13,6 +13,15 @@ import byok_eval as ev
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_explicit_larger_call_cap_keeps_cost_time_and_rate_limits(self):
+        standard = ev.configuration(3600, 500000)
+        larger = ev.configuration(3600, 500000, 100)
+        self.assertEqual(standard["model_calls"], 60)
+        self.assertEqual(larger, {**standard, "model_calls": 100})
+        for cap in (0, 101, True):
+            with self.assertRaises(ValueError):
+                ev.configuration(3600, 500000, cap)
+
     def test_spawn_entry_does_not_preload_timeline_source_configuration(self):
         check = subprocess.run([sys.executable, "-c",
             "import sys; import byok_eval; assert 'timeline' not in sys.modules"],
@@ -26,6 +35,26 @@ class EvaluationTests(unittest.TestCase):
         right["conditions"]["sha256"] = "different"
         with self.assertRaisesRegex(ValueError, "conditions must match"):
             ev.compare(left, right)
+
+    def test_measurement_code_changes_cannot_pass_or_compare(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "byok.py").write_text("initial")
+            for name in ("quality_gold.json", "quality_holdout.json"):
+                (root / name).write_text(json.dumps({"themes": {"昭和": {}}}))
+            def generate(theme, key, options, emit, stopping):
+                (root / "byok.py").write_text("changed")
+                emit({"kind": "result", "stop_reason": "sources_exhausted"})
+            with patch.object(ev, "ROOT", root), patch.object(ev, "HASHED", ("byok.py",)), \
+                 patch.object(ev, "bounded_byok", side_effect=generate), \
+                 patch("quality_eval.evaluate_result", return_value={"recall": 1, "known_errors": [], "duplicates": []}), \
+                 patch.object(ev, "result_view", return_value={}):
+                report = ev.measure("昭和", "byok", None, {})
+            self.assertFalse(report["passed"])
+            self.assertEqual(report["error"], "code_changed")
+            self.assertEqual(report["conditions"]["sha256"]["byok.py"], ev.hashlib.sha256(b"initial").hexdigest())
+            with self.assertRaisesRegex(ValueError, "Code changed"):
+                ev.compare(report, {**report, "route": "operator"})
 
     def test_no_overwrite_or_automatic_paid_resume(self):
         with tempfile.TemporaryDirectory() as directory:

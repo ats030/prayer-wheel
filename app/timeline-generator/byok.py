@@ -19,6 +19,11 @@ MAX_RESPONSE = 512 * 1024
 MAX_ERROR_RESPONSE = 16 * 1024
 MIN_CALL_INTERVAL = 15
 INPUT_TOKENS_PER_MINUTE = 250_000
+MODEL_STAGES = {frozenset({"subject", "word"}): "search",
+                frozenset({"judgments"}): "source_filter",
+                frozenset({"theme", "events"}): "generate",
+                frozenset({"supported", "rejected"}): "verify",
+                frozenset({"ratings"}): "prune"}
 
 
 def token_cost(inputs, outputs):
@@ -156,6 +161,7 @@ class ModelSession:
         self.min_call_interval, self.clock = min_call_interval, clock
         self.last_started = None
         self.input_window = []
+        self.calls_by_stage = {}
 
     def wait_for_slot(self, deadline, input_bound):
         if input_bound > INPUT_TOKENS_PER_MINUTE:
@@ -188,6 +194,7 @@ class ModelSession:
                     "max_cost_microusd": self.max_cost,
                     "min_call_interval_seconds": self.min_call_interval,
                     "input_tokens_per_minute_limit": INPUT_TOKENS_PER_MINUTE,
+                    "calls_by_stage": dict(self.calls_by_stage),
                     "cost_basis": "standard_paid_rate_estimate"}
 
     def __call__(self, system, prompt, deadline, schema):
@@ -218,12 +225,16 @@ class ModelSession:
                 input_bound = len(payload) + 8192
                 output_bound = self.output_tokens + THINKING_BOUND
                 reservation = token_cost(input_bound, output_bound)
-                if self.calls >= self.max_calls or self.cost + reservation > self.max_cost:
+                if self.calls >= self.max_calls:
+                    raise ByokError("call_budget")
+                if self.cost + reservation > self.max_cost:
                     raise ByokError("cost_budget")
                 # Wait before reserving cost/call count; this is not a retry.
                 self.wait_for_slot(deadline, input_bound)
                 left = deadline - self.clock()
                 self.calls += 1
+                stage = MODEL_STAGES.get(frozenset(schema.get("properties", {})), "other")
+                self.calls_by_stage[stage] = self.calls_by_stage.get(stage, 0) + 1
                 self.cost += reservation
                 self.uncertain = True
                 if self.on_usage is not None:
