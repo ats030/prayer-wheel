@@ -13,7 +13,7 @@
   "vars": {
     "MIDOKORO_DEFAULT_KIND": "shiseki",
     "MIDOKORO_PUBLIC_ORIGIN": "https://midokoro-map.ats030.workers.dev",
-    "MIDOKORO_AFFILIATE_ORIGINS": ""
+    "MIDOKORO_AFFILIATE_ORIGINS": "https://midokoro-map.ats030.workers.dev"
   },
   "durable_objects": {"bindings": [{"name": "GEOCODING_GATE", "class_name": "GeocodingGate"}, {"name": "EXTERNAL_API", "class_name": "ExternalAPI"}]},
   "migrations": [{"tag": "v1", "new_sqlite_classes": ["GeocodingGate"]}, {"tag": "v2", "new_sqlite_classes": ["ExternalAPI"]}],
