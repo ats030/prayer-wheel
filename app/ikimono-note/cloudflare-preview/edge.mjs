@@ -72,6 +72,11 @@ export default {
       if (path === '/health') response.headers.set('X-Preview-Backend-Bundle-SHA256', pythonBundleDigest);
     }
     for (const [name, value] of Object.entries(headers)) response.headers.set(name, value);
+    // Only the deployment's listed public pages may be indexed; the app, API and shares stay noindex.
+    if (response.status === 200 && ['GET', 'HEAD'].includes(request.method) &&
+        (env.IKIMONO_INDEXABLE_PATHS || '').split(',').map(s => s.trim()).filter(Boolean).includes(path)) {
+      response.headers.delete('X-Robots-Tag');
+    }
     // Runtime observations are owned by the outer entrypoint for every route.
     response.headers.delete('X-Preview-Isolate'); response.headers.delete('X-Preview-Isolate-Invocation');
     response.headers.delete('X-Preview-Gemini-Engine');

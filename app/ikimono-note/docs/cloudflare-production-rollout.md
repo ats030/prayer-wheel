@@ -69,7 +69,9 @@ Google/Driveへの通信はなく、実利用者の記録や共有データは�
    Googleの戻り先・JavaScript生成元は利用者から登録完了報告があり、認証開始要求も確認した。
    実ログイン完了・新originでのDrive接続・保存再読込は未確認。
    本番の入口とPythonだけ `IKIMONO_LOGIN_REQUIRED=0` を明示した。検証版の認証は維持する。
-   本番のnoindexは全移行完了まで維持し、共有・アカウントの所有者確認、Host制限、CSP、
+   本番は入口 `IKIMONO_INDEXABLE_PATHS` に挙げた公開ページ（/login、/privacy、/terms、
+   /changelog）の200応答だけnoindexを外す。アプリ本体・API・共有ページ・検証版はnoindexのまま。
+   共有・アカウントの所有者確認、Host制限、CSP、
    秘密の非配信、出典・ライセンス表記を維持する。
 4. **公開候補を検査してから切り替える。** バックエンド→入口の順で同じ版を配備し、
    healthの両SHA照合、Googleログイン、実写真の候補表示、全写真のDrive保存・再読込、
