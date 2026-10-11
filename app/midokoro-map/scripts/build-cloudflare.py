@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import sqlite3
 import subprocess
 import sys
 import tempfile
@@ -27,12 +28,18 @@ def dump(path, value):
 def build():
     target = ROOT / 'cloudflare/assets'
     target.parent.mkdir(parents=True, exist_ok=True)
-    # The geopark popup counts are a snapshot of the point databases; refuse to publish a stale one.
+    # The geopark popup counts and the geosite dedup are snapshots of the point databases; refuse to publish stale ones.
     spec = importlib.util.spec_from_file_location('geo_layer', ROOT / 'scripts/build-geo-layer.py')
     geo_layer = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(geo_layer)
-    if (ROOT / 'frontend/geo/geoparks.json').read_text() != geo_layer.render(ROOT / 'data'):
-        sys.exit('frontend/geo/geoparks.json is stale: run scripts/build-geo-layer.py')
+    try:
+        rendered = geo_layer.render(ROOT / 'data')
+    except (sqlite3.Error, KeyError) as error:
+        sys.exit(f'data/geo/geo.db predates the geo layer ({error}): run scripts/import-data.py --kind geo --replace')
+    for name, text in rendered.items():
+        current = ROOT / 'frontend/geo' / name
+        if not current.exists() or current.read_text() != text:
+            sys.exit(f'frontend/geo/{name} is stale: run scripts/build-geo-layer.py')
     with tempfile.TemporaryDirectory(prefix='midokoro-cloudflare-', dir=target.parent) as work:
         work = Path(work)
         assets = work / 'assets'

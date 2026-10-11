@@ -6,12 +6,13 @@ import argparse
 import html
 import json
 import re
-import sqlite3
 import sys
 import time
 import zipfile
 from datetime import date
 from pathlib import Path
+
+from geodb import replace_tables
 
 ROOT = Path(__file__).resolve().parents[1]
 CACHE = Path.home() / "cache/geo-map"
@@ -204,24 +205,14 @@ def build(refresh: bool, out_path: Path) -> dict:
                      json.dumps(members, ensure_ascii=False),
                      json.dumps(mapping(area), separators=(",", ":")) if area else None,
                      *(area.bounds if area else (None,) * 4)))
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = out_path.with_suffix(".tmp")
-    temporary.unlink(missing_ok=True)
-    con = sqlite3.connect(temporary)
-    con.executescript("""
+    replace_tables(out_path, """
         create table geopark(slug text primary key, name text not null, source_url text not null, fetched text not null,
             certified text not null, unesco integer not null, municipalities text not null, geometry text,
             min_lon real, min_lat real, max_lon real, max_lat real);
-        create table meta(key text primary key, value text not null);
-    """)
-    con.executemany("insert into geopark values (?,?,?,?,?,?,?,?,?,?,?,?)", rows)
-    con.executemany("insert into meta values (?,?)", [
-        ("geopark_source", BASE), ("geopark_list_fetched", meta.get("index", "")),
-        ("boundary_source", f"国土数値情報 行政区域データ {N03} (https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2026.html)"),
-        ("boundary_simplify_degrees", str(SIMPLIFY)), ("built", date.today().isoformat())])
-    con.commit()
-    con.close()
-    temporary.replace(out_path)
+    """, {"geopark": rows}, {
+        "geopark_source": BASE, "geopark_list_fetched": meta.get("index", ""),
+        "boundary_source": f"国土数値情報 行政区域データ {N03} (https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2026.html)",
+        "boundary_simplify_degrees": str(SIMPLIFY), "built": date.today().isoformat()})
     report["geoparks"] = len(rows)
     report["without_area"] = [r[0] for r in rows if r[7] is None]
     return report

@@ -17,11 +17,27 @@ uv run pytest
 - 取得は1秒間隔です。ページは `~/cache/geo-map/pages`（取得日は `meta.json`）、N03 は `~/cache/geo-map/n03` に置きます。
 - 構成自治体を読めない地域、未解決の自治体、範囲なしの地域、自治体数の食い違いがあると終了コード1で止まります。
 
+## 天然記念物（地質鉱物）
+
+```bash
+uv run python scripts/geosites.py            # キャッシュから再生成
+uv run python scripts/geosites.py --refresh  # CSV と全詳細ページを再取得してから再生成
+```
+
+- 一覧: [国指定文化財等データベース](https://kunishitei.bunka.go.jp/bsys/index) の天然記念物・特別天然記念物 CSV（`~/cache/geo-map/tennen`）。
+- CSV に指定基準がないため、詳細ページ `https://kunishitei.bunka.go.jp/heritage/detail/401/{管理対象ID}` を1秒間隔で取得します（`~/cache/geo-map/tennen-detail`、ステータスと最終 URL は `tennen/meta.json`）。管理対象 ID のゼロ詰めは削りません。削るとエラーページへ転送されます。
+- 指定基準を地質鉱物（一）〜（十二）の語句全体で照合します。「岩石」「洞穴」だけでは判定しません。名勝の「五．岩石、洞穴」や植物の（九）と区別するためです。
+- 分類: `geo`（地質鉱物のみ）、`geo+bio`（動植物の基準も含む）、`bio`、`other`（名勝の基準だけなど）、`unknown`（指定基準が空）。`geosite` には `geo` と `geo+bio` だけを入れ、全件の内訳を meta の `geosite_counts` に残します。
+- 200 以外、転送、指定基準欄のないページがあると終了コード1で止まり、geo.db は書き換えません。
+
 ### geo.db
 
 | table | 内容 |
 | --- | --- |
 | `geopark` | `slug`, `name`, `source_url`, `fetched`, `certified`（日本ジオパーク認定年月）, `unesco`, `municipalities`（JSON: prefecture, district, name, code, partial）, `geometry`（GeoJSON）, bbox |
-| `meta` | 出典、N03 の版、簡略化の許容値、生成日 |
+| `geosite` | `heritage_id`（管理対象ID、ゼロ詰めのまま）, `name`, `designation`（national / special）, `designation_label`, `kind`（geo / geo+bio）, `criteria`, `prefecture`, `address`, `latitude`, `longitude`（CSV に座標がなければ null）, `source_url`, `fetched` |
+| `meta` | 出典、N03 の版、簡略化の許容値、天然記念物の分類内訳、生成日（ジオパークは `built`、天然記念物は `geosite_built`） |
+
+各スクリプトは自分のテーブルと meta のキーだけを置き換えます（`scripts/geodb.py`）。
 
 midokoro-map は `scripts/import-data.py` で `data/geo/geo.db` に取り込みます。
