@@ -151,8 +151,10 @@ def one_pass(issue: dict, worktree: Path, repo: Path, files: list[str],
         sources.append(f"### {name}\n{contents}")
     request_prompt = (
         "Return only valid JSON with this shape: "
-        '{"replacements":[{"file":"icons.py","old":"exact old text","new":"exact new text"}]}. '
-        "Each old text must occur exactly once in the provided file. "
+        + json.dumps({"replacements": [{"file": files[0], "old": "<exact old text>",
+                                        "new": "<exact new text>"}]})
+        + ". The file value must be one of the provided file paths. Each old text must be "
+        "non-empty, copied verbatim from the file, and occur exactly once in it. "
         "Change only the provided files. Do not claim tests passed. "
         "Keep the fix as small as the acceptance criteria allow.\n\n"
         f"Issue {issue['id']}: {issue['title']}\n"
