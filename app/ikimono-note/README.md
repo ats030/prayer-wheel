@@ -114,7 +114,7 @@ tailscale serve --https=8443 off         # やめるとき
 
 ### いま公開しているのはどこか
 
-**本番は Cloud Run。** `https://ikimono-note-736831430371.asia-northeast1.run.app`
+**本番は Cloudflare Workers。** `https://ikimono-note.ats030.workers.dev` (`cloudflare-production/README.md`)
 
 Tailscale Funnel での公開は 2026-08-14 に止めた (`ikimono-note-public.service` は
 stop + disable、`tailscale funnel --https=443 off`)。Personal プランは非商用限定で、
@@ -130,57 +130,21 @@ stop + disable、`tailscale funnel --https=443 off`)。Personal プランは非�
 - **評価** — `eval/run_eval.py` は `import pipeline` でモジュールを直接呼ぶ。Web サービスを
   経由しないので、Ollama (:11434) さえ動いていれば従来どおり回る
 - **Ollama** — 別プロセスなので影響を受けない
-- **設定値** — `~/.config/ikimono-note/settings.json` は残っており、`deploy-cloudrun.sh` が
-  ここからアフィリエイトと Amazon の値を読む。画面から編集できなくなったので、変えるときは
-  JSON を直接編集する
+- **設定値** — `~/.config/ikimono-note/settings.json` は残っている。画面から編集できなくなったので、
+  変えるときは JSON を直接編集する
 
 再開するときは `systemctl --user enable --now ikimono-note.service` と
 `tailscale serve --bg --https=8443 http://127.0.0.1:8523`。`~/.env` の
 `IKIMONO_PUBLIC_ORIGIN` は tailnet の URL のまま残してあるので、そのまま動く。
 
-### Cloud Run へ出す
+### 旧 Cloud Run 版 (2026-10-11 に廃止)
 
-```bash
-./deploy-cloudrun.sh            # 前提の確認だけ。何もしない
-./deploy-cloudrun.sh --deploy   # 実際に出す
-```
-
-前提は Console でしかできないものが3つあり、足りなければ確認で止まって何をすべきか言います。
-
-1. **請求先の紐づけ** — Cloud Run は無料枠を使う場合でも要ります
-2. **Firestore (ネイティブモード)** — ログイン情報の置き場 (`users.db` はディスクが無いので使えない)
-3. **OAuth の登録** — 承認済みリダイレクト URI に `<サービスURL>/auth/callback`、JS 生成元に
-   `<サービスURL>`。**Cloud Run は新旧2つのURLを配信する**ので、両方を登録します
-
-   | 形式 | 例 |
-   |---|---|
-   | 新 (サービス名-プロジェクト番号.リージョン.run.app) | `ikimono-note-736831430371.asia-northeast1.run.app` |
-   | 旧 (`status.url` が返すのはこちら) | `ikimono-note-vcxjhzkhsa-an.a.run.app` |
-
-   `IKIMONO_ALLOWED_HOSTS` も両方入れます。片方だけだと、もう片方は
-   `TrustedHostMiddleware` に 400 で弾かれます。
-
-   **登録できたかの確認はブラウザで行うこと。** curl では `/auth/google` が 302 を
-   返しますが、その行き先が同意画面かエラー画面かは追わないと分かりません。
-   実際にこれで `redirect_uri_mismatch` を「受理された」と読み違えました。
-
-秘密 (ログインのクライアントシークレット、セッション鍵、Amazon の資格情報) は Secret Manager
-へ入れ、**実行サービスアカウントにその秘密だけの読み取りを与えてから**参照します。作るだけでは
-読めず、ビルドが通ったあとリビジョン作成で落ちます。`--set-env-vars` で渡すと Console の環境変数欄に平文で並び、デプロイ
-履歴にも残るためです。広告の設定と Amazon の資格情報は運営者用の `settings.json` からも読みます
-(画面から入れたものがそこにあるため)。
-
-デプロイのたびにイメージが1つ増える (1回あたり約62MB)。Artifact Registry の無料枠は
-0.5GB なので、放っておくと数回で超える。自動の掃除を入れてある。
-
-```bash
-gcloud artifacts repositories describe cloud-run-source-deploy \
-  --location=asia-northeast1 --project=ikimono-note-12205 --format='yaml(cleanupPolicies)'
-```
-
-新しい3つを残し、7日より古いものを消す。3つ残すのは、いま出ているものと、
-戻せる先を2つ確保するため。Cloud Run のリビジョンは残るが、イメージを消した
-ぶんへは戻せなくなる。
+旧公開サイト `https://ikimono-note-736831430371.asia-northeast1.run.app` は Cloud Run サービスごと
+削除した (ats030-3brhi)。旧 URL は 404 を返す。旧 Firestore の利用者2件・共有1件は 2026-10-10 に
+D1 へ移行済みで、旧共有は新サイトの同じ `/s/<token>` で開ける。Firestore の最終内容は
+`~/data/ikimono-note/firestore-20261011-final.json` に退避した。Artifact Registry のイメージと Cloud Storage のソース zip も
+削除した。デプロイ用の `deploy-cloudrun.sh` と
+`setup-gcp.sh` も削除した。必要なら git 履歴から戻す。
 
 **運営者の Gemini キーは渡しません。** 公開版は BYOK で、サーバー側の鍵が要るのはお試し枠だけ。
 その枠は年齢条項で止めてある (ats030-rhfi) ので、鍵を置くとあとで黙って規約違反へ戻ります。

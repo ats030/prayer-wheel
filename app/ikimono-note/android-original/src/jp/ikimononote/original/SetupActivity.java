@@ -79,7 +79,7 @@ public final class SetupActivity extends Activity {
         Button site = new Button(this);
         site.setText("Braveで生きものノートを開く");
         site.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://ikimono-note-736831430371.asia-northeast1.run.app/"));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://ikimono-note.ats030.workers.dev/"));
             intent.setPackage("com.brave.browser");
             try { startActivity(intent); }
             catch (android.content.ActivityNotFoundException missing) {

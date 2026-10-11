@@ -9,7 +9,7 @@
 
 | 対象 | 現在の状態 |
 | --- | --- |
-| 旧公開サイト | https://ikimono-note-736831430371.asia-northeast1.run.app 、health200を確認。維持する |
+| 旧公開サイト | https://ikimono-note-736831430371.asia-northeast1.run.app 。2026年10月11日にCloud Runサービス、旧Firestore、イメージ、ソースzipを削除し、404を返す（ats030-3brhi） |
 | Cloudflare検証版 | https://ikimono-note-preview.ats030.workers.dev 、Basic認証付き |
 | JavaScript入口 | `e6369a23-5488-4a22-a881-771e3409e625` |
 | 非公開Python | `6fee16f6-abc0-41cb-8aee-b7a63fa2dfbb` 、外部URL無効 |
