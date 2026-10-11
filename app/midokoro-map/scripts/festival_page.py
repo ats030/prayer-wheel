@@ -68,3 +68,25 @@ def render_page(festival, today):
         "</html>"
     )
     return html
+
+
+def page_qids(festivals):
+    qids = set()
+    for festival in festivals:
+        qid = festival.get("qid", "")
+        if not qid:
+            continue
+        for occ in festival.get("occurrences", []):
+            try:
+                date.fromisoformat(occ["start"])
+            except (ValueError, KeyError, TypeError):
+                continue
+            source = occ.get("source", "")
+            if urlsplit(source).scheme in ("http", "https"):
+                qids.add(qid)
+                break
+    return sorted(qids)
+
+
+def sitemap_entries(qids):
+    return "".join(f"<url><loc>{ORIGIN}/festivals/{quote(qid)}</loc></url>\n" for qid in qids)
