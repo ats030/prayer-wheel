@@ -148,6 +148,17 @@ class BunkaShisekiTest(unittest.TestCase):
         self.assertEqual((shiseki["designation"], shiseki["heritage_id"]), ("special", "401/101"))
         self.assertEqual(shiseki["designation_source"], "https://kunishitei.bunka.go.jp/heritage/detail/401/101")
 
+    def test_zero_padded_ids_keep_the_padding_in_urls_but_not_in_ids(self):
+        rows, _ = merge_bunka([], [item(heritage="00003948", name="ゼロ詰め史跡")], {}, category)
+        self.assertEqual(rows[0]["source_url"], "https://kunishitei.bunka.go.jp/heritage/detail/401/00003948")
+        self.assertEqual(rows[0]["designation_source"], "https://kunishitei.bunka.go.jp/heritage/detail/401/00003948")
+        self.assertEqual((rows[0]["heritage_id"], rows[0]["id"]), ("401/3948", "bunka:401:3948"))
+
+    def test_zero_padded_meisho_keeps_the_padding_in_urls(self):
+        rows, _ = merge_meisho([], [item(heritage="00003449", name="ゼロ詰め名勝", kind1="名勝")], {}, category)
+        self.assertEqual(rows[0]["source_url"], "https://kunishitei.bunka.go.jp/heritage/detail/401/00003449")
+        self.assertEqual((rows[0]["heritage_id"], rows[0]["id"]), ("401/3449", "bunka:401:3449"))
+
     def test_components_reads_lines_after_the_name(self):
         self.assertEqual(components("黒部峡谷\n\u3000附\u3000猿飛並びに奥鐘山"), ["附 猿飛並びに奥鐘山"])
         self.assertEqual(components("六義園"), [])

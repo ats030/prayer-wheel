@@ -178,7 +178,8 @@ def merge_bunka(rows: list[dict], items: list[dict], p4275: dict[str, list[str]]
         heritage = str(int(item["管理対象ID"]))
         label = item["名称"].split("\n", 1)[0].strip()
         rank = designation_of(item)
-        url = DETAIL_URL.format(heritage)
+        # 詳細URLだけゼロ詰めIDをそのまま使う(00003441以降のエントリはゼロ詰めなしでURLが404になるため)
+        url = DETAIL_URL.format(item["管理対象ID"])
         qids = p4275.get(heritage, [])
         row, method = find_match(item, label, rows_by_qid, rows, qids)
         if row is not None:
@@ -294,7 +295,8 @@ def merge_meisho(rows: list[dict], items: list[dict], p4275: dict[str, list[str]
         label = item["名称"].split("\n", 1)[0].strip(" \u3000")
         kinds = kinds_of(item)
         rank = "special" if SPECIAL_KINDS & set(kinds) else "national"
-        url = DETAIL_URL.format(heritage)
+        # 詳細URLだけゼロ詰めIDをそのまま使う(00003441以降のエントリはゼロ詰めなしでURLが404になるため)
+        url = DETAIL_URL.format(item["管理対象ID"])
         row = by_heritage.get("401/" + heritage)
         method = "heritage_id"
         if row is None:
