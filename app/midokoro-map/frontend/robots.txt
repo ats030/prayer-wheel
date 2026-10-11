@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 Disallow: /api/
-Sitemap: https://midokoro-map-736831430371.asia-northeast1.run.app/sitemap.xml
+Sitemap: https://midokoro-map.ats030.workers.dev/sitemap.xml
