@@ -1,5 +1,26 @@
 reviewed_at: 2026-10-02
 intended_use: Personal internal historical research; public release is a separate review
+byok_provider_review:
+  reviewed_at: 2026-10-11
+  tool: Gemini Developer API candidate only
+  status: review_required
+  adoption: No adapter, dependency, provider call or model adoption in this review
+  candidate_model: gemini-3.5-flash-lite; availability and timeline quality remain untested
+  pricing_url: https://ai.google.dev/gemini-api/docs/pricing
+  terms_url: https://ai.google.dev/gemini-api/terms
+  lifecycle_url: https://ai.google.dev/gemini-api/docs/deprecations
+  evidence_retrieved: 2026-10-11
+  cost: Standard text input USD 0.30 and output including thinking USD 2.50 per million tokens; free quota is conditional, not unlimited or a zero-cost promise
+  commercial_use: Professional or business developer use is contemplated by the additional terms; generated content ownership is not claimed by Google, but API terms and applicable attribution remain mandatory
+  data_use: Unpaid input/output may be used for product improvement and human review; paid input/output is not used for improvement but may be logged temporarily for abuse prevention and legal disclosures
+  release_conditions:
+    - Resolve the restriction against API clients directed toward or likely accessed by under-18 users before public adoption; a history app cannot assume this condition is satisfied
+    - Verify available regions and the paid-services requirement for clients available in EEA, Switzerland or UK
+    - Do not use Gemini 2.5 as the new-user default; current lifecycle docs restrict those models to prior active users
+    - Recheck pricing, availability and exact account conditions before implementation and release
+    - Keep Wikipedia retrieval and citation verification; no Google Search grounding, caching or batch service adopted
+    - Bound calls and tokens, show user costs and data-use conditions, and never silently switch to operator AI
+  notes: Candidate research only. The provider remains unapproved for the public app; no API key was requested, read or transmitted, and no paid generation occurred.
 public_auth_review:
   reviewed_at: 2026-10-11
   tool: Google OpenID Connect server flow
