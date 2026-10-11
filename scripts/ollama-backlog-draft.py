@@ -26,7 +26,7 @@ ROOT = Path("/home/ats030")
 RESULTS = ROOT / "data/ollama-backlog"
 OPENCODE = ROOT / ".opencode/bin/opencode"
 VENV = ROOT / ".venv"
-ISSUE_ID = re.compile(r"^ats030-[a-z0-9]+$")
+ISSUE_ID = re.compile(r"^ats030-[a-z0-9]+(?:\.[0-9]+)*$")
 
 
 def command(args: list[str], *, cwd: Path | None = None, timeout: int = 30) -> subprocess.CompletedProcess[str]:

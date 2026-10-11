@@ -52,6 +52,9 @@ class SelectionTests(unittest.TestCase):
             path.write_text(json.dumps({"schema_version": 1,
                                         "issues": {"ats030-test": entry}}))
             self.assertEqual(pr.load_config(path)["ats030-test"], entry)
+            path.write_text(json.dumps({"schema_version": 1,
+                                        "issues": {"ats030-test.1": entry}}))
+            self.assertEqual(pr.load_config(path)["ats030-test.1"], entry)
             entry["files"] = ["../.ssh/id_rsa"]
             path.write_text(json.dumps({"schema_version": 1,
                                         "issues": {"ats030-test": entry}}))
