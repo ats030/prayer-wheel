@@ -68,7 +68,7 @@ function designationRank(o){
   return ['special','national','local','undesig','unknown'].includes(value)?value:'unknown';
 }
 function designationLabel(status){
-  return {special:'特別史跡',national:'国指定史跡',local:'地方指定史跡',undesig:'未指定',unknown:'指定不明'}[status];
+  return {special:'特別史跡・特別名勝',national:'国指定史跡',local:'地方指定史跡',undesig:'未指定',unknown:'指定不明'}[status];
 }
 function designationBadge(o){
   const status=designationRank(o);
@@ -201,7 +201,7 @@ function applyFilters(){
 }
 function renderList(){
   const list=document.querySelector('#shiseki-list');
-  if(!visible.length){list.innerHTML='<p class="empty-state">条件に合う史跡がありません。地域を変えてお試しください.</p>';return}
+  if(!visible.length){list.innerHTML='<p class="empty-state">条件に合う史跡・名勝がありません。地域を変えてお試しください.</p>';return}
   list.innerHTML=visible.map((o,index)=>{
     const key=shisekiKey(o,index);
     const category=categoryText(o);
@@ -229,7 +229,7 @@ const markerLayer=L.markerClusterGroup({
   iconCreateFunction:cluster=>{
     const count=cluster.getChildCount();
     const size=count<10?30:count<100?36:count<1000?42:48;
-    return L.divIcon({className:'shiseki-cluster-anchor',html:`<span class="shiseki-cluster" aria-label="${count}件の史跡">${count}</span>`,iconSize:[size,size]});
+    return L.divIcon({className:'shiseki-cluster-anchor',html:`<span class="shiseki-cluster" aria-label="${count}件の史跡・名勝">${count}</span>`,iconSize:[size,size]});
   },
 }).addTo(map);
 function markerStyle(o){
@@ -395,7 +395,7 @@ async function hydrateImage(o,key){
   const source=result.sourceUrl||commonsFilePage(result.url);
   const license=result.licenseUrl?`<a href="${esc(result.licenseUrl)}" target="_blank" rel="noopener noreferrer" aria-label="ライセンス ${esc(result.license)}">${esc(result.license)}<span aria-hidden="true">↗</span></a>`:esc(result.license);
   const creator=result.artist||result.credit;
-  content.dataset.state='success';container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(o.label_ja||'史跡')}の画像を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(o.label_ja||'史跡')}の画像"></button><p class="license">${creator?`${esc(creator)} · `:''}${license}${source?` · <a href="${esc(source)}" target="_blank" rel="noopener noreferrer" aria-label="Wikimedia Commonsの画像出典">Commons<span aria-hidden="true">↗</span></a>`:''}</p>`;
+  content.dataset.state='success';container.innerHTML=`<button class="detail-image-button" type="button" aria-label="${esc(o.label_ja||'史跡・名勝')}の画像を拡大"><img class="detail-image" src="${esc(result.url)}" alt="${esc(o.label_ja||'史跡・名勝')}の画像"></button><p class="license">${creator?`${esc(creator)} · `:''}${license}${source?` · <a href="${esc(source)}" target="_blank" rel="noopener noreferrer" aria-label="Wikimedia Commonsの画像出典">Commons<span aria-hidden="true">↗</span></a>`:''}</p>`;
   container.querySelector('button').addEventListener('click',()=>openLightbox(result.url,o.label_ja));
 }
 async function hydrateLinks(o,key){
@@ -420,7 +420,7 @@ async function hydrateLinks(o,key){
   ].join('');
   if(extra)nav.insertAdjacentHTML('afterbegin',extra);
 }
-function openLightbox(url,alt){const dialog=document.querySelector('#lightbox'),image=document.querySelector('#lightbox-image');image.src=url;image.alt=`${alt||'史跡'}の拡大画像`;dialog.showModal()}
+function openLightbox(url,alt){const dialog=document.querySelector('#lightbox'),image=document.querySelector('#lightbox-image');image.src=url;image.alt=`${alt||'史跡・名勝'}の拡大画像`;dialog.showModal()}
 function closeLightbox(){const dialog=document.querySelector('#lightbox');if(dialog.open)dialog.close();document.querySelector('#lightbox-image').src=''}
 
 document.querySelector('#keyword').addEventListener('input',applyFilters);
@@ -431,5 +431,5 @@ document.querySelector('.detail-close').addEventListener('click',()=>closeDetail
 document.querySelector('.lightbox-close').addEventListener('click',closeLightbox);
 document.querySelector('#lightbox').addEventListener('click',event=>{if(event.target.id==='lightbox')closeLightbox()});
 
-fetch('/api/shiseki/').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{shisekis=Array.isArray(data)?data:[];populatePrefectures();populateCategories();populateEras();applyFilters()}).catch(error=>{console.error('Shiseki data could not be loaded',error);document.querySelector('#shiseki-list').innerHTML='<p class="empty-state">史跡の情報を読み込めませんでした。時間をおいて再度お試しください。</p>';document.querySelector('#map-count').textContent='読み込み失敗'});
+fetch('/api/shiseki/').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{shisekis=Array.isArray(data)?data:[];populatePrefectures();populateCategories();populateEras();applyFilters()}).catch(error=>{console.error('Shiseki data could not be loaded',error);document.querySelector('#shiseki-list').innerHTML='<p class="empty-state">史跡・名勝の情報を読み込めませんでした。時間をおいて再度お試しください。</p>';document.querySelector('#map-count').textContent='読み込み失敗'});
 }

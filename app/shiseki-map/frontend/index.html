@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>史跡マップ｜指定区分と時代から日本各地の史跡を探す</title>
-  <meta name="description" content="指定区分や時代から、日本各地の史跡を検索・地図表示できます。国指定・地方指定の史跡を横断して調べられます。">
+  <meta name="description" content="指定区分や時代から、日本各地の史跡・名勝を検索・地図表示できます。国指定・地方指定の史跡・名勝を横断して調べられます。">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="史跡マップ">
   <meta property="og:title" content="史跡マップ｜指定区分と時代から日本各地の史跡を探す">
-  <meta property="og:description" content="指定区分や時代から、日本各地の史跡を検索・地図表示できます。国指定・地方指定の史跡を横断して調べられます。">
+  <meta property="og:description" content="指定区分や時代から、日本各地の史跡・名勝を検索・地図表示できます。国指定・地方指定の史跡・名勝を横断して調べられます。">
   <meta property="og:url" content="https://shiseki-map-736831430371.asia-northeast1.run.app/">
   <meta property="og:locale" content="ja_JP">
   <meta name="twitter:card" content="summary">
@@ -21,25 +21,25 @@
 </head>
 <body>
   <main class="app-shell">
-    <section class="workbench" aria-label="史跡を探す">
-      <header class="masthead"><h1>史跡マップ</h1><p class="lede">指定区分や時代から、日本各地の史跡を探せます。<a href="/changelog.html">更新履歴</a></p></header>
+    <section class="workbench" aria-label="史跡・名勝を探す">
+      <header class="masthead"><h1>史跡マップ</h1><p class="lede">指定区分や時代から、日本各地の史跡・名勝を探せます。<a href="/changelog.html">更新履歴</a></p></header>
       <div class="filters" role="search">
-        <label class="field field-wide">史跡名・地域<input id="keyword" type="search" placeholder="例：熊本城、奈良" autocomplete="off"></label>
+        <label class="field field-wide">史跡・名勝名・地域<input id="keyword" type="search" placeholder="例：熊本城、奈良" autocomplete="off"></label>
         <label class="field field-wide">都道府県<select id="prefecture"><option value="">すべて</option></select></label>
         <div class="field field-wide"><span id="era-label">時代</span><details class="multi-select" id="era"><summary aria-labelledby="era-label era-summary"><span class="multi-summary" id="era-summary">すべて</span></summary><div class="multi-options" id="era-options" role="group" aria-labelledby="era-label"></div></details></div>
         <div class="field field-wide"><span id="designation-label">指定区分</span><details class="multi-select" id="designation"><summary aria-labelledby="designation-label designation-summary"><span class="multi-summary" id="designation-summary">すべて</span></summary><div class="multi-options" id="designation-options" role="group" aria-labelledby="designation-label"><label class="multi-option"><input type="checkbox" value="special">特別史跡・特別名勝</label><label class="multi-option"><input type="checkbox" value="national">国指定</label><label class="multi-option"><input type="checkbox" value="local">地方指定</label><label class="multi-option"><input type="checkbox" value="undesig">未指定</label><label class="multi-option"><input type="checkbox" value="unknown">不明</label></div></details></div>
         <div class="field field-wide"><span id="category-label">カテゴリ</span><details class="multi-select" id="category"><summary aria-labelledby="category-label category-summary"><span class="multi-summary" id="category-summary">すべて</span></summary><div class="multi-options" id="category-options" role="group" aria-labelledby="category-label"></div></details></div>
       </div>
-      <div class="result-bar" aria-live="polite"><span><strong id="result-count">0</strong> 件の史跡</span><button id="clear-filters" type="button">条件をクリア</button></div>
+      <div class="result-bar" aria-live="polite"><span><strong id="result-count">0</strong> 件の史跡・名勝</span><button id="clear-filters" type="button">条件をクリア</button></div>
       <div class="shiseki-list" id="shiseki-list"></div>
     </section>
-    <section class="map-region" aria-label="史跡の地図"><div id="map"></div><div class="map-count" id="map-count">読み込み中</div><div class="map-legend" aria-label="カテゴリの凡例"></div></section>
+    <section class="map-region" aria-label="史跡・名勝の地図"><div id="map"></div><div class="map-count" id="map-count">読み込み中</div><div class="map-legend" aria-label="カテゴリの凡例"></div></section>
     <aside class="detail-panel" id="detail-panel" aria-labelledby="detail-panel-label" tabindex="-1" hidden>
-      <header class="detail-header"><div><p class="eyebrow" id="detail-panel-label">史跡の詳細</p><p class="detail-origin" id="detail-origin">選択中の史跡</p></div><button class="detail-close" type="button" aria-label="詳細を閉じる">×</button></header>
+      <header class="detail-header"><div><p class="eyebrow" id="detail-panel-label">史跡・名勝の詳細</p><p class="detail-origin" id="detail-origin">選択中の史跡・名勝</p></div><button class="detail-close" type="button" aria-label="詳細を閉じる">×</button></header>
       <div class="detail-content" id="detail-content" aria-live="polite"></div>
     </aside>
   </main>
-  <dialog id="lightbox" aria-label="史跡の画像"><button class="lightbox-close" type="button" aria-label="画像を閉じる">×</button><img id="lightbox-image" alt=""></dialog>
+  <dialog id="lightbox" aria-label="史跡・名勝の画像"><button class="lightbox-close" type="button" aria-label="画像を閉じる">×</button><img id="lightbox-image" alt=""></dialog>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" integrity="sha256-Hk4dIpcqOSb0hZjgyvFOP+cEmDXUKKNE/tT542ZbNQg=" crossorigin=""></script>
   <script src="http://ubuntu-server-app:8526/v.js" data-site="shiseki-map" defer></script>
