@@ -1,3 +1,4 @@
+import {esc, flyToItem, revealDetail, focusWithin, focusFirst} from '../detail-common.js';
 export function mount(context) {
 const {map, document, fetch} = context;
 
@@ -33,7 +34,6 @@ function persist(key,value){
 }
 function shisekiKey(o,index=0){return o.id||o.qid||`${o.label_ja}-${o.latitude}-${o.longitude}-${index}`}
 function wikiQID(o){return /^Q[1-9][0-9]*$/.test(o.qid||'')?o.qid:''}
-function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}}
 function plainText(value){const document=new DOMParser().parseFromString(String(value||''),'text/html');return document.body.textContent.trim()}
 function commonsFilePage(value){
@@ -277,7 +277,7 @@ function selectShiseki(key,origin){
   const entry=markers.get(key);if(!entry)return;selectedKey=key;selectedOrigin=origin;
   showSelectedMarker(key);
   document.querySelectorAll('.shiseki-card').forEach(card=>card.setAttribute('aria-current',String(card.dataset.key===key)));
-  if(origin==='list')map.flyTo(entry.marker.getLatLng(),Math.max(map.getZoom(),8),{duration:.55});
+  if(origin==='list')flyToItem(map,entry.marker.getLatLng());
   openDetail(entry.shiseki,key,origin);
 }
 function openDetail(o,key,origin){
@@ -286,7 +286,7 @@ function openDetail(o,key,origin){
   originLabel.textContent=origin==='marker'?'地図から選択':'検索結果から選択';
   const focusTarget=document.querySelector('#detail-title');
   panel.scrollTop=0;
-  requestAnimationFrame(()=>{map.invalidateSize();focusTarget?.focus({preventScroll:origin!=='marker'})});
+  revealDetail(map,panel,focusTarget);
   hydrateImage(o,key);
   hydrateLocation(o,key);
   if(context.summariesOnly)context.hydrateSummary(shisekiKey(o),()=>selectedKey===key);
@@ -371,12 +371,12 @@ async function hydrateLocation(o,key){
   if(element&&selectedKey===key)element.innerHTML=locationMarkup(location,o);
 }
 function closeDetail(restoreFocus=true){
-  const key=selectedKey,origin=selectedOrigin;selectedKey=null;selectedOrigin=null;document.querySelector('#detail-panel').hidden=true;document.querySelector('.app-shell').classList.remove('has-detail');
+  const key=selectedKey,origin=selectedOrigin,panel=document.querySelector('#detail-panel'),hadFocus=focusWithin(panel);selectedKey=null;selectedOrigin=null;panel.hidden=true;document.querySelector('.app-shell').classList.remove('has-detail');
   showSelectedMarker(null);document.querySelectorAll('.shiseki-card').forEach(card=>card.setAttribute('aria-current','false'));
   requestAnimationFrame(()=>map.invalidateSize());
-  if(restoreFocus&&key){
-    const target=origin==='marker'?document.querySelector('#map'):document.querySelector(`.shiseki-card[data-key="${CSS.escape(key)}"]`);
-    target?.focus();
+  if((restoreFocus&&key)||hadFocus){
+    const mapElement=document.querySelector('#map'),card=key&&document.querySelector(`.shiseki-card[data-key="${CSS.escape(key)}"]`);
+    focusFirst(origin==='marker'?mapElement:card,document.querySelector('#keyword'),mapElement);
   }
 }
 async function hydrateImage(o,key){

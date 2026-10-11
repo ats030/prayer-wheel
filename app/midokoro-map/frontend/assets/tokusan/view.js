@@ -1,3 +1,4 @@
+import {esc, reducedMotion, flyToItem, revealDetail, focusWithin, focusFirst} from '../detail-common.js';
 export function mount(context) {
 const {map, document, fetch} = context;
 
@@ -31,7 +32,7 @@ clusterLayer.on('clusterclick clusterkeypress',e=>{
   // Zooming cannot split a stack, nor anything at maximum zoom.
   const listed=(stacked||map.getZoom()>=map.getMaxZoom())&&children.length>=STACK_LIST_MIN;
   if(listed)openStackList(stacked?point:cluster.getLatLng(),children,stacked);
-  else if(!stacked&&map.getZoom()<map.getMaxZoom())cluster.zoomToBounds();
+  else if(!stacked&&map.getZoom()<map.getMaxZoom())zoomToCluster(cluster);
   else cluster.spiderfy();
   // Keyboard focus would fall to the page when the focused cluster icon is replaced.
   if(e.type==='clusterkeypress')(listed?document.querySelector('.stack-list button'):map.getContainer()).focus();
@@ -119,7 +120,6 @@ const CATEGORY_META=[
 function categoryCode(o){return CATEGORY_META.some(m=>m.code===o.category)?String(o.category):'none'}
 function categoryLabel(code){const meta=CATEGORY_META.find(m=>m.code===code);return meta?meta.label:'未分類'}
 
-function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function itemKey(o,index=0){return o.qid||`${o.label_ja}-${o.latitude}-${o.longitude}-${index}`}
 function hasCoordinates(o){const lat=Number(o.latitude),lng=Number(o.longitude);return Number.isFinite(lat)&&Number.isFinite(lng)&&(lat!==0||lng!==0)}
 function positionLabel(o){return o.coordinate_kind==='municipality_office'?'産地代表位置':o.coordinate_kind==='named_area_office'?'地域代表位置':o.prefecture_level?'都道府県代表位置':''}
@@ -218,8 +218,15 @@ function revealMarker(marker){
     clusterLayer.off('animationend',show);
     cancelReveal=()=>{};
   };
-  if(parent._zoom<Math.round(map.getZoom()))map.panTo(latlng);
-  else parent.zoomToBounds();
+  if(parent._zoom<Math.round(map.getZoom()))map.panTo(latlng,{animate:!reducedMotion()});
+  else zoomToCluster(parent);
+}
+// markercluster's zoomToBounds ignores options on its setView branches, so reduced motion jumps directly.
+function zoomToCluster(cluster){
+  if(!reducedMotion())return cluster.zoomToBounds();
+  const bounds=cluster.getBounds(),zoom=map.getZoom();
+  if(map.getBoundsZoom(bounds)<=zoom)map.setView(cluster.getLatLng(),zoom+1,{animate:false});
+  else map.fitBounds(bounds,{animate:false});
 }
 
 function renderMarkers(){
@@ -264,11 +271,9 @@ function selectItem(key,origin){
   if(origin==='list'&&marker){
     revealMarker(marker);
   }else if(origin==='list'&&hasCoordinates(item)){
-    map.flyTo([item.latitude,item.longitude],Math.max(map.getZoom(),8),{duration:.55});
+    flyToItem(map,[item.latitude,item.longitude]);
   }
-  const focusTarget=document.querySelector('#detail-title');
-  document.querySelector('#detail-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
-  requestAnimationFrame(()=>{map.invalidateSize();focusTarget?.focus({preventScroll:origin!=='marker'})});
+  revealDetail(map,document.querySelector('#detail-panel'),document.querySelector('#detail-title'));
 }
 
 const DETAIL_SECTIONS=[['about',o=>`${o.label_ja||'この特産物'}について`],['history',()=>'歴史'],['production',()=>'産地・製法'],['visit',()=>'購入・観光']];
@@ -344,7 +349,7 @@ function showDetail(o,origin){
   content.innerHTML=`<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(o.label_ja||o.label_en||o.qid)}</h2>${badge}</header>
     <dl class="detail-facts">${rows.map(([dt,dd])=>`<div><dt>${dt}</dt><dd>${dd}</dd></div>`).join('')}</dl>
     <section class="detail-section" aria-labelledby="detail-photo"><h3 id="detail-photo">写真</h3><div id="detail-image"><p class="detail-image-status">画像を読み込んでいます…</p></div></section>
-    <div id="detail-sections" aria-live="polite"></div>
+    <div id="detail-sections"></div>
     ${amazonLink(o)}
     ${furusatoLink(o)}
     ${links.length?`<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${links.map(([label,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label}<span aria-hidden="true">↗</span></a>`).join('')}</nav></section>`:''}
@@ -482,7 +487,7 @@ function openLightbox(url,alt){const dialog=document.querySelector('#lightbox'),
 function closeLightbox(){const dialog=document.querySelector('#lightbox');if(dialog.open)dialog.close();document.querySelector('#lightbox-image').src='';document.querySelector('#lightbox-image').removeAttribute('alt')}
 
 function closeDetail(){
-  const key=selectedKey,origin=selectedOrigin;
+  const key=selectedKey,origin=selectedOrigin,panel=document.querySelector('#detail-panel'),hadFocus=focusWithin(panel);
   if(selectedKey&&selectedItem){
     const m=markers.get(selectedKey);
     if(m)m.setIcon(markerIcon(selectedItem,false));
@@ -490,13 +495,13 @@ function closeDetail(){
   selectedItem=null;
   selectedKey=null;
   selectedOrigin=null;
-  document.querySelector('#detail-panel').hidden=true;
+  panel.hidden=true;
   document.querySelector('.app-shell').classList.remove('has-detail');
   document.querySelectorAll('.tokusan-card').forEach(card=>card.setAttribute('aria-current','false'));
   requestAnimationFrame(()=>map.invalidateSize());
-  if(key){
-    const target=origin==='marker'?document.querySelector('#map'):document.querySelector(`.tokusan-card[data-key="${CSS.escape(key)}"]`);
-    target?.focus();
+  if(key||hadFocus){
+    const mapElement=document.querySelector('#map'),card=key&&document.querySelector(`.tokusan-card[data-key="${CSS.escape(key)}"]`);
+    focusFirst(origin==='marker'?mapElement:card,document.querySelector('#keyword'),mapElement);
   }
 }
 

@@ -1,15 +1,9 @@
+import {esc, sourceLink, flyToItem, fitItem, revealDetail, focusWithin, focusFirst} from '../detail-common.js';
+
 const geoparkKinds = [['shiseki','史跡'],['omatsuri','祭り'],['onsen','温泉'],['tokusan','特産物']];
 const SELECTED_MARKER_Z_INDEX = 10000;
 const PARK_STYLE = {color:'#2f6f4f', weight:1.5, fillColor:'#2f6f4f', fillOpacity:.12};
 const PARK_SELECTED_STYLE = {color:'#2f6f4f', weight:3.5, fillColor:'#2f6f4f', fillOpacity:.24};
-
-function esc(value) {
-  return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[char]);
-}
-
-function sourceLink(href, label) {
-  return /^https?:\/\//.test(href || '') ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(label)}<span aria-hidden="true">↗</span></a>` : '';
-}
 
 function fetchedNote(fetched) {
   return fetched ? `<p class="detail-fetched">${esc(fetched)} 取得</p>` : '';
@@ -81,25 +75,24 @@ export function mount(context) {
     if (origin === 'list') {
       // Fit to the map width that remains after the detail column opens.
       map.invalidateSize({pan:false});
-      if (item.kind === 'geopark') map.fitBounds(item.layer.getBounds(), {maxZoom:10});
-      else map.flyTo(item.layer.getLatLng(), Math.max(map.getZoom(), 8), {duration:.55});
+      if (item.kind === 'geopark') fitItem(map, item.layer.getBounds(), {maxZoom:10});
+      else flyToItem(map, item.layer.getLatLng());
     }
     content.innerHTML = item.kind === 'geopark' ? geoparkDetail(item.feature.properties) : geositeDetail(item.feature.properties);
     root.querySelector('#detail-origin').textContent = origin === 'marker' ? '地図から選択' : '検索結果から選択';
     panel.scrollTop = 0;
-    const title = root.querySelector('#detail-title');
-    requestAnimationFrame(() => { map.invalidateSize(); title?.focus({preventScroll:origin !== 'marker'}); });
+    revealDetail(map, panel, root.querySelector('#detail-title'));
   }
   function closeDetail(restoreFocus = true) {
-    const key = selectedKey, origin = selectedOrigin;
+    const key = selectedKey, origin = selectedOrigin, hadFocus = focusWithin(panel);
     selectedKey = null; selectedOrigin = null;
     panel.hidden = true; shell.classList.remove('has-detail');
     showSelection(null);
     list.querySelectorAll('.geo-card').forEach(card => card.setAttribute('aria-current', 'false'));
     requestAnimationFrame(() => map.invalidateSize());
-    if (restoreFocus && key) {
-      const target = origin === 'marker' ? root.querySelector('#map') : list.querySelector(`.geo-card[data-key="${CSS.escape(key)}"]`);
-      target?.focus();
+    if ((restoreFocus && key) || hadFocus) {
+      const mapElement = root.querySelector('#map'), card = key && list.querySelector(`.geo-card[data-key="${CSS.escape(key)}"]`);
+      focusFirst(origin === 'marker' ? mapElement : card, keyword, mapElement);
     }
   }
   function draw() {
