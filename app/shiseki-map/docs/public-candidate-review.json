@@ -2358,8 +2358,8 @@
         "source_id_provisional_for_snapshot",
         "possible_alias_of_existing_map"
       ],
-      "current_evidence_url": "",
-      "current_evidence_finding": "",
+      "current_evidence_url": "https://oki-park.jp/shurijo/shuri-aruki/siseki/2014/03/post-114.html",
+      "current_evidence_finding": "文化庁と公園管理者が末吉宮の社殿跡・拝所・磴道を同一史跡群として説明。既存「末吉宮」ピン（26.230167,127.714056）は同一史跡群に位置する。候補点は参道・碑寄りだが、既存ピンが拝所・石碑・参道のいずれかを指すか未確定。独立追加しない。",
       "visit_data_conflict": false,
       "same_coordinate_as": [],
       "existing_name_match": [],
@@ -2451,8 +2451,8 @@
         "source_id_provisional_for_snapshot",
         "coordinate_shared_with_distinct_record"
       ],
-      "current_evidence_url": "",
-      "current_evidence_finding": "",
+      "current_evidence_url": "https://oki-park.jp/shurijo/info/6466/6482",
+      "current_evidence_finding": "那覇市の文化財一覧は龍潭を首里真和志町1丁目1外、園比屋武御嶽を同1丁目7と別文化財に分類。池は首里城公園（琉球王国の池）として管理者が説明するが、独立した見学入口・公開条件の管理者資料が確認できない。候補点は園比屋武御嶽と座標を共有しており、龍潭自体の位置特定に使えない。独立見学点とは判断できないため保留。",
       "visit_data_conflict": false,
       "same_coordinate_as": [
         "園比屋武御嶽"
@@ -2547,8 +2547,8 @@
         "source_id_provisional_for_snapshot",
         "coordinate_shared_with_distinct_record"
       ],
-      "current_evidence_url": "",
-      "current_evidence_finding": "",
+      "current_evidence_url": "https://www.pref.okinawa.jp/_res/projects/default_project/_page_/001/012/867/250813_06_meishou.pdf",
+      "current_evidence_finding": "沖縄県の公園整備資料は「国学・首里聖廟石垣」と「円覚寺跡」を別々の史跡として示す。ただし候補点は円覚寺跡と座標を共有しており、石垣自体の見学入口・公開条件の管理者資料が確認できない。広場整備計画だけで現行見学可とは判断できないため保留。",
       "visit_data_conflict": false,
       "same_coordinate_as": [
         "円覚寺跡"
