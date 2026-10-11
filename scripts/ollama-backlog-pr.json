@@ -11,6 +11,41 @@
         "python3 -c \"from shelf_life import classify; assert classify('水切り巾着') == ('豆腐・練物', 5, True); assert classify('水') == ('飲料', 180, True); assert classify('水切り') == ('豆腐・練物', 5, True)\""
       ],
       "read_only": []
+    },
+    "ats030-xglsh.1": {
+      "repo": ".",
+      "base": "master",
+      "files": [
+        "app/midokoro-map/scripts/festival_page.py"
+      ],
+      "tests": [
+        "python3 app/midokoro-map/scripts/test_festival_page.py"
+      ],
+      "read_only": []
+    },
+    "ats030-xglsh.2": {
+      "repo": ".",
+      "base": "master",
+      "files": [
+        "app/midokoro-map/scripts/festival_page.py"
+      ],
+      "tests": [
+        "python3 app/midokoro-map/scripts/test_festival_page_list.py",
+        "python3 app/midokoro-map/scripts/test_festival_page.py"
+      ],
+      "read_only": []
+    },
+    "ats030-xglsh.3": {
+      "repo": ".",
+      "base": "master",
+      "files": [
+        "app/midokoro-map/scripts/festival_calendar.py"
+      ],
+      "tests": [
+        "python3 app/midokoro-map/scripts/test_festival_calendar_pages.py",
+        "python3 app/midokoro-map/scripts/test_festival_calendar.py"
+      ],
+      "read_only": []
     }
   }
 }
