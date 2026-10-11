@@ -6,12 +6,13 @@
   <title>年表 · タイムラインジェネレーター</title>
   <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
   <link rel="stylesheet" href="/styles.css">
+  <script src="/local-library.js" defer></script>
   <script src="/app.js" defer></script>
   <script src="http://ubuntu-server-app:8526/v.js" data-site="timeline-generator" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#page-heading">本文へ</a>
-  <header class="masthead"><a class="wordmark" href="/">タイムラインジェネレーター<span>Timeline Generator</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/">年表を生成する</a><a class="quiet-link" href="/quality">評価一覧</a></nav></header>
+  <header class="masthead"><a class="wordmark" href="/">タイムラインジェネレーター<span>Timeline Generator</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/library">端末の年表</a><a class="quiet-link" href="/">年表を生成する</a><a class="quiet-link" href="/quality">評価一覧</a></nav></header>
   <main class="app-main detail-page">
     <div class="page-head">
       <h1 id="page-heading" tabindex="-1">年表を読み込んでいます</h1>
@@ -21,6 +22,8 @@
       <div class="result-tools">
         <p id="result-meta" hidden></p>
         <span id="job-status" class="job-state" role="status"></span>
+        <button id="local-save" class="text-button" type="button" hidden>この端末に保存</button>
+        <button id="local-download" class="text-button" type="button" hidden>ファイルへ書き出す</button>
         <a id="quality-link" class="quiet-link quality-link" href="#quality-section" hidden></a>
         <a id="milestone-link" class="quiet-link" href="#milestones-section" hidden></a>
         <details id="generation-info" class="metadata" hidden>
@@ -28,6 +31,7 @@
           <div class="info-body"><p id="saved-at"></p><p id="generation-meta"></p><p id="source-summary"></p><p id="generation-notice"></p><div id="review-notes"></div></div>
         </details>
       </div>
+      <p id="local-save-status" class="help" role="status"></p>
       <p id="job-message" class="help" hidden></p>
       <p id="page-error" class="error" role="alert" hidden></p>
       <section id="progress" class="progress-section" aria-labelledby="progress-heading" hidden>

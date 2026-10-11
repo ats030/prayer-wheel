@@ -83,7 +83,7 @@ with sync_playwright() as playwright:
     # Synthetic document responses have no private-address metadata in Chromium.
     # Read working-tree assets to verify changes before deployment; live mode
     # removes all fixture routes and checks the deployed HTML and assets.
-    asset_patterns = ["**/styles.css", "**/tokens.css", "**/app.js", "**/favicon.svg"]
+    asset_patterns = ["**/local-library.js", "**/styles.css", "**/tokens.css", "**/app.js", "**/favicon.svg"]
     for pattern in asset_patterns:
         asset = pattern.split('/')[-1]
         mime = 'text/javascript' if asset.endswith('.js') else 'image/svg+xml' if asset.endswith('.svg') else 'text/css'
@@ -162,6 +162,24 @@ with sync_playwright() as playwright:
         page.set_viewport_size({"width": width, "height": 900})
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), ("result", width)
         page.screenshot(path=f"/tmp/timeline-generator-saved-{width}.png", full_page=True)
+    # The real detail controls save a portable record, never the server quote.
+    page.locator('#local-save').click()
+    page.wait_for_function('document.querySelector("#local-save-status").textContent.includes("保存しました")')
+    portable = page.evaluate('TimelineLibrary.list()')
+    assert len(portable) == 1 and portable[0]['theme'] == RESULT['theme']
+    assert 'quote' not in portable[0]['events'][0]
+    with page.expect_download():
+        page.locator('#local-download').click()
+    # A slow save of the previous result must not confirm the replacement result.
+    page.evaluate('() => {window.originalSave = TimelineLibrary.save; TimelineLibrary.save = () => new Promise(resolve => {window.finishSave = () => resolve(1)});}')
+    page.locator('#local-save').click()
+    job = job | {'generated_at': '2026-10-11T15:01:00Z', 'result': RESULT | {'events': [RESULT['events'][0] | {'title': '更新された出来事'}]}}
+    page.wait_for_function('document.querySelector(".event-title").textContent === "更新された出来事"')
+    assert page.locator('#local-save-status').inner_text() == ''
+    page.evaluate('window.finishSave()')
+    page.wait_for_function('!document.querySelector("#local-save").disabled')
+    assert page.locator('#local-save-status').inner_text() == ''
+    page.evaluate('() => {TimelineLibrary.save = window.originalSave;}')
     # A long timeline and a partial-completion notice must fit all supported widths.
     hundred = RESULT | {'events': [RESULT['events'][0] | {'year': 1800 + i, 'date': f'{1800+i}年', 'title': f'出来事{i+1}'} for i in range(100)], 'stop_reason': 'time_limit', 'notice': '時間上限（60分）により終了しました。検証済みの出来事を保存しています。'}
     job = job | {'result': hundred, 'message': '時間上限により終了しました。検証済みの結果を保存しました。'}
@@ -170,6 +188,7 @@ with sync_playwright() as playwright:
         page.goto(URL + '/timelines/1')
         page.wait_for_function("document.querySelectorAll('.event').length === 100")
         assert '100件' in page.locator('#result-meta').inner_text()
+        assert page.locator("#local-save-status").inner_text() == ""
         assert '時間上限' in page.locator('#result-notice').inner_text()
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         page.locator('.event').last.scroll_into_view_if_needed()

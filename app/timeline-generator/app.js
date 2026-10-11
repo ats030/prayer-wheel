@@ -327,7 +327,20 @@ if ($("job-list")) {
 if ($("job-status")) {
   const id = location.pathname.split("/").pop();
   let timer, generatedAt, renderedResult, job, acting = false, generation = 0;
-  let editorRevision, editorDirty = false;
+  let editorRevision, editorDirty = false, portableVersion = "";
+  for (const action of ["save", "download"]) $("local-" + action).addEventListener("click", async () => {
+    const button = $("local-" + action);
+    const version = portableVersion;
+    button.disabled = true;
+    try {
+      const record = window.TimelineLibrary.fromJob(job);
+      if (action === "save") {
+        const added = await window.TimelineLibrary.save([record]);
+        if (version === portableVersion) $("local-save-status").textContent = added ? "このブラウザに保存しました。「端末の年表」から閲覧できます。自動公開はしません。" : "同じ内容は、このブラウザに保存済みです。";
+      } else window.TimelineLibrary.download([record]);
+    } catch (exc) { error("page-error", exc.message || "保存できませんでした。ファイルへの書き出しをお試しください。"); }
+    finally { button.disabled = false; }
+  });
   const milestoneRows = $("milestones-rows");
   function addMilestone(item = {}) {
     if (milestoneRows.children.length >= 12) return;
@@ -419,6 +432,9 @@ if ($("job-status")) {
     finally { acting = false; $("milestones-fields").disabled = active(job); timer = setTimeout(load, 2000); }
   });
   function show(current) {
+    const version = JSON.stringify([current.generated_at, current.result?.theme, current.result?.source_mode, current.result?.notice, current.result?.events]);
+    if (version !== portableVersion) $("local-save-status").textContent = "";
+    portableVersion = version;
     // Action responses omit evaluation metadata. Keep it for the same saved
     // result until GET refreshes it, including when POST still contains trace.
     if (current.quality === undefined && current.result && current.generated_at === job?.generated_at) current.quality = job?.quality;
@@ -429,6 +445,7 @@ if ($("job-status")) {
     document.title = `${job.query} · タイムラインジェネレーター`;
     $("job-status").textContent = labels[job.state];
     $("job-status").dataset.state = job.state;
+    $("local-save").hidden = $("local-download").hidden = !job.result;
     $("result-meta").hidden = !job.result;
     $("generation-info").hidden = !job.result;
     $("job-message").textContent = job.message || "";

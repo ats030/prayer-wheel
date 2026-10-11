@@ -121,7 +121,7 @@ robots.txtを尊重し、本文の取得に失敗したページは使いませ�
 
 書籍枠は初期案として確認済み書籍の手動アフィリエイトリンクを使い、広告表示を年表本文と分離します。楽天APIの限定利用環境・保存に関する条件を確認するまでは自動書籍検索を導入しません。現行の私用生成画面には認証・利用者別権限がないため、この対応だけで一般公開できる状態にはなりません。
 
-認証・所有者保護・無料運用の受付上限・公開前試験は [PUBLIC_GENERATION_DESIGN.md](PUBLIC_GENERATION_DESIGN.md) に定義しています。初期は招待制の少人数で、Access/Tunnelと既存のローカルキューを再利用する案です。設計段階であり、現行APIに認証や日次制限が導入済みという意味ではありません。
+ユーザー側の保存、少量のお試しと本人APIキーによる生成、公開を選んだ結果だけの共有は [PUBLIC_GENERATION_DESIGN.md](PUBLIC_GENERATION_DESIGN.md) に定義しています。招待10人・全員の履歴共有案を置き換えました。端末保存は導入済みですが、BYOK・公開認証・日次制限・サーバー結果の一時保存への移行は未実装です。
 
 ## 任意テーマへの改善と比較測定
 
@@ -159,12 +159,14 @@ python3 quality_benchmark.py --compare-sources after wikipedia
 ```sh
 python3 -m unittest discover -s app/timeline-generator -v
 node --check app/timeline-generator/app.js
+node --check app/timeline-generator/local-library.js
 python3 app/timeline-generator/smoke.py コーヒー
 python3 app/timeline-generator/smoke.py インターネット
 ```
 
 `smoke.py` は実際の検索・本文・モデルを使い、結果と時間を標準出力に出します。保存したサンプルで成功を装いません。
 ブラウザ検証は `browser_check.py` で、画面幅・100項目・操作・処理中・空結果・エラー・出典リンク・原文非描画・補足の折りたたみを確認します。
+`browser_library.py` は実IndexedDBとファイルを使い、APIなしの閲覧、書き出し/削除/復元、重複、不正取込の原子性、合計容量上限、保存拒否と5画面幅/200%を確認します。
 既存の開発用Playwright/Chromiumを使います。`--live インターネット` を追加すると、UIテスト後に実検索も検証します。
 停止は `systemctl --user stop timeline-generator.service`、無効化は `systemctl --user disable timeline-generator.service` です。
 DBを安全にバックアップするにはサービスを停止してから、`data/` をコピーしてください。停止中のDBは `PRAGMA integrity_check` で検査できます。
@@ -194,3 +196,9 @@ uv run --project ~ python publish.py withdraw <slug>
 ```
 
 承認済みの年表は `~/data/timeline-public/`、書き出しは `~/cache/timeline-public-build/` に置く。
+
+## 端末への保存とバックアップ
+
+年表詳細の「この端末に保存」で、このブラウザのIndexedDBへ結果を保存できます。`/library`（端末の年表）は生成APIを呼ばずに一覧・出典付き本文を表示し、削除、全件/1件のJSON書き出し、ファイル復元ができます。同内容は重複保存せず、最大100年表・各50出来事、端末保存全体と復元ファイルは8MiBまでです。引用原文・内部トレースは保存や書き出しに含めません。
+
+保存先はブラウザとURLごとに異なり、データ消去で失われます。URL変更や端末移行前に書き出してください。端末間同期やアプリ画面の完全オフライン起動はありません。端末保存は自動共有・公開を行わず、取り込みは品質や出典経路の認証ではありません。現行の生成結果はサーバーDBにも残るため、運営側の保存負担がなくなったという意味ではありません。

@@ -22,6 +22,8 @@ REQUEST_TIME_LIMIT = TIME_LIMIT
 ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/changelog": ("changelog.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/styles.css": ("styles.css", "text/css; charset=utf-8"), "/tokens.css": ("tokens.css", "text/css; charset=utf-8"), "/favicon.svg": ("favicon.svg", "image/svg+xml")}
 ASSETS["/timelines"] = ("index.html", "text/html; charset=utf-8")
 ASSETS["/quality"] = ("quality.html", "text/html; charset=utf-8")
+ASSETS["/library"] = ("library.html", "text/html; charset=utf-8")
+ASSETS["/local-library.js"] = ("local-library.js", "text/javascript; charset=utf-8")
 
 
 def pipeline_worker(query, connection):
