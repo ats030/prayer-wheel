@@ -1542,7 +1542,9 @@ def test_candidate_adverts_stay_within_a_request_budget():
     # まとめて投げない。上の候補から順に使う (下の候補ほど確からしさが低い)
     assert "for(const shell of document.querySelectorAll" in index
     assert "await loadProductShelf(shell," in index
-    assert "Promise.all" not in index
+    # 写真の下ごしらえは並列でよい。並べてはいけないのは棚を埋める商品APIだけ
+    shelves = index.split("async function loadAmazonProducts(){")[1].split("\n}\n")[0]
+    assert "Promise.all" not in shelves
     # 集めた品は棚をまたいで覚える。どの候補でも当たる一般書が3つ並ぶのを防ぐ
     assert "budget.seen.add(product.url)" in products
 
@@ -2591,7 +2593,7 @@ def test_the_backup_says_what_it_actually_carries():
     assert "APIキーは含めません" in backup
     settings_js = client.get("/assets/settings.js").text
     assert 'localStorage.setItem("species-public-settings"' in settings_js
-    assert "if(data.public_mode)setupPublicSettings(data)" in settings_js
+    assert "if(data.public_mode){setupPublicSettings(data);" in settings_js
 
     page = client.get("/settings").text
     help_text = page.split('aria-labelledby="backup-heading"')[1].split('<p class="help">')[1].split("</p>")[0]
@@ -3098,8 +3100,10 @@ def test_the_finishing_touches_live_in_one_place():
     assert '/api/local/prompt?' in index and '"/api/local/result"' in index
     assert "protected_species.json" not in index
 
-    # 両方の経路が同じ仕上げを通る。サーバー経由の識別も、手元の Ollama も
-    assert main_source.count("pipeline.finish(") == 1
+    # どの経路も同じ仕上げを通る。手元の Ollama も、ブラウザ経由の Gemini も
+    assert main_source.count("pipeline.finish(") == 2
+    gemini = main_source.split("def _finish_gemini(")[1].split("\n\n\n")[0]
+    assert "result = pipeline.finish(parsed)" in gemini
     assert pipeline_source.count("def finish(") == 1
 
 
