@@ -85,6 +85,7 @@ class TrialLedger:
                     PRIMARY KEY (owner, receipt_id))""")
                 db.execute("CREATE INDEX IF NOT EXISTS receipt_day ON receipts(day, refunded)")
                 db.execute("CREATE INDEX IF NOT EXISTS receipt_queue ON receipts(state, seq)")
+                db.execute("CREATE TABLE IF NOT EXISTS restore_guard (day TEXT PRIMARY KEY)")
                 # The first start stays recorded, so a restarted item is never refunded on a later cancel.
                 db.execute("UPDATE receipts SET state='queued', updated_at=? WHERE state='running'", (stamp(self.clock()),))
         except BaseException:
@@ -128,6 +129,9 @@ class TrialLedger:
     @staticmethod
     def counts(db, day):
         used = db.execute("SELECT count(*) FROM receipts WHERE day=? AND refunded=0", (day,)).fetchone()[0]
+        # A snapshot cannot prove how much AI was used after it was written.
+        if db.execute("SELECT 1 FROM restore_guard WHERE day=?", (day,)).fetchone():
+            used = max(used, DAILY_LIMIT)
         pending = db.execute("SELECT count(*) FROM receipts WHERE state IN ('queued','running')").fetchone()[0]
         return used, pending
 

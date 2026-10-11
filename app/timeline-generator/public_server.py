@@ -9,6 +9,7 @@ from urllib.parse import urlsplit
 
 from google_login import GoogleLogin, CALLBACK
 from public_security import PublicError
+from public_limits import PublicLimits, BudgetExceeded
 from trial import TrialLimit
 
 ROOT = Path(__file__).resolve().parent
@@ -33,8 +34,25 @@ class Handler(BaseHTTPRequestHandler):
         super().setup()
         self.connection.settimeout(15)
 
+    def parse_request(self):
+        if not super().parse_request():
+            return False
+        try:
+            # Count every parsed method, including unsupported HEAD/PUT/etc.
+            self.server.limits.check_request()
+        except BudgetExceeded as exc:
+            self.reply(429, {"error": exc.code}, retry_after=exc.retry_after)
+            return False
+        return True
+
     def reply(self, status, data, mime="application/json; charset=utf-8", cookies=(), location=None, retry_after=None):
         body = data if isinstance(data, bytes) else json.dumps(data, ensure_ascii=False).encode()
+        if self.command == "GET" and status == 200 and getattr(self, "response_owner", None) is not None:
+            try:
+                self.server.limits.check_response(self.response_owner, len(body))
+            except BudgetExceeded as exc:
+                status, retry_after = 429, exc.retry_after
+                body = json.dumps({"error": exc.code}).encode()
         self.send_response(status)
         for name, value in (("Content-Type", mime), ("Content-Length", str(len(body))),
                             ("Cache-Control", "no-store"), ("X-Content-Type-Options", "nosniff"),
@@ -50,7 +68,14 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Connection", "close")
         self.close_connection = True
         self.end_headers()
-        self.wfile.write(body)
+        if self.command != "HEAD":
+            self.wfile.write(body)
+
+    def authorize(self, *, write=False):
+        session = self.server.login.boundary.authorize(self.headers, write=write)
+        self.server.limits.check_owner(session.owner, write=write)
+        self.response_owner = session.owner
+        return session
 
     def json_body(self, *, empty=True):
         # No chunked/ambiguous bodies, no unbounded reads or client configuration.
@@ -94,17 +119,21 @@ class Handler(BaseHTTPRequestHandler):
                 name, mime = ASSETS[path]
                 return self.reply(200, (ROOT / name).read_bytes(), mime)
             if path == "/api/session":
+                self.authorize()
                 return self.reply(200, login.boundary.session_view(self.headers))
             route = RECEIPT_ROUTE.fullmatch(path)
             if route and self.server.ledger is not None:
                 if route[2]:
                     return self.reply(405, {"error": "post_required"})
+                self.authorize()
                 return self.reply(200, login.boundary.receipt(self.server.ledger, self.headers, route[1]))
             if path in ("/auth/google/start", "/auth/logout"):
                 return self.reply(405, {"error": "post_required"})
             return self.reply(404, {"error": "not_found"})
         except PublicError as exc:
             return self.reply(exc.status, {"error": exc.code})
+        except BudgetExceeded as exc:
+            return self.reply(429, {"error": exc.code}, retry_after=exc.retry_after)
 
     def do_POST(self):
         login = self.server.login
@@ -112,13 +141,13 @@ class Handler(BaseHTTPRequestHandler):
         try:
             login.boundary.check_origin(self.headers, write=True)
             if path == "/api/trial/receipts" and self.server.runtime is not None:
-                session = login.boundary.authorize(self.headers, write=True)
+                session = self.authorize(write=True)
                 row, created = self.server.runtime.accept(session.owner, self.json_body(empty=False))
                 return self.reply(201 if created else 200, row)
             route = RECEIPT_ROUTE.fullmatch(path)
             if route and route[2] and self.server.ledger is not None:
                 # Authenticate before reading input; owner/configuration cannot come from the client.
-                login.boundary.authorize(self.headers, write=True)
+                self.authorize(write=True)
                 self.json_body()
                 if route[2] == "cancel":
                     result = login.boundary.receipt(self.server.ledger, self.headers, route[1], cancel=True)
@@ -129,17 +158,21 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(404, {"error": "not_found"})
             self.json_body()
             if path == "/auth/google/start":
+                self.server.limits.check_request(start=True)
                 url, cookie = login.begin(self.headers)
                 return self.reply(200, {"url": url}, cookies=(cookie,))
+            self.authorize(write=True)
             cookie = login.boundary.logout(self.headers)
             return self.reply(200, {"authenticated": False}, cookies=(cookie,))
         except PublicError as exc:
             return self.reply(exc.status, {"error": exc.code})
         except TrialLimit as exc:
             return self.reply(429, {"error": exc.reason}, retry_after=exc.retry_after)
+        except BudgetExceeded as exc:
+            return self.reply(429, {"error": exc.code}, retry_after=exc.retry_after)
 
 
-def make_server(login, host="127.0.0.1", port=8534, *, ledger=None, runtime=None):
+def make_server(login, host="127.0.0.1", port=8534, *, ledger=None, runtime=None, limits=None):
     # Deliberately loopback-only. Public TLS/reverse-proxy configuration is a
     # separate deployment prerequisite, not trusted X-Forwarded-* headers.
     if host != "127.0.0.1":
@@ -152,6 +185,7 @@ def make_server(login, host="127.0.0.1", port=8534, *, ledger=None, runtime=None
     server.login = login
     server.ledger = ledger
     server.runtime = runtime
+    server.limits = PublicLimits() if limits is None else limits
     return server
 
 
