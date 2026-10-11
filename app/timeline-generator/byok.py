@@ -1,4 +1,4 @@
-"""Fixed Anthropic experiment. No SDK, proxy, redirects, persistence or retries."""
+"""Fixed Gemini experiment. No SDK, proxy, redirects, persistence or retries."""
 import copy
 import http.client
 import json
@@ -6,12 +6,20 @@ import re
 import threading
 import time
 
-HOST = "api.anthropic.com"
-PATH = "/v1/messages"
-MODEL = "claude-haiku-4-5-20251001"
-# USD millionths per token, standard uncached text rates reviewed 2026-10-11.
-INPUT_RATE, OUTPUT_RATE = 1, 5
+PROVIDER = "google"
+HOST = "generativelanguage.googleapis.com"
+MODEL = "gemini-3.5-flash-lite"
+PATH = "/v1beta/models/" + MODEL + ":generateContent"
+# Tenths of USD millionths per token; ceil each call without float arithmetic.
+INPUT_RATE, OUTPUT_RATE = 3, 25
+# Reserve the full model output limit for thoughts in addition to visible output.
+# minimal is an effort setting, not a hard guarantee of zero thought tokens.
+THINKING_BOUND = 65536
 MAX_RESPONSE = 512 * 1024
+
+
+def token_cost(inputs, outputs):
+    return (inputs * INPUT_RATE + outputs * OUTPUT_RATE + 9) // 10
 
 
 class ByokError(Exception):
@@ -22,7 +30,7 @@ class ByokError(Exception):
 
 
 def validate_key(key):
-    if not isinstance(key, str) or not re.fullmatch(r"sk-ant-[A-Za-z0-9_-]{20,300}", key):
+    if not isinstance(key, str) or not re.fullmatch(r"AIza[A-Za-z0-9_-]{35}", key):
         raise ByokError("invalid_api_key")
 
 
@@ -65,11 +73,11 @@ def transport(key, payload, timeout):
     connection = http.client.HTTPSConnection(HOST, timeout=timeout)
     try:
         connection.request("POST", PATH, body=payload, headers={
-            "x-api-key": key, "anthropic-version": "2023-06-01",
+            "x-goog-api-key": key,
             "Content-Type": "application/json", "Accept-Encoding": "identity"})
         response = connection.getresponse()
         if response.status != 200:
-            code = {401: "invalid_api_key", 403: "provider_denied",
+            code = {400: "provider_request", 401: "invalid_api_key", 403: "provider_denied",
                     429: "provider_rate"}.get(response.status, "provider_unavailable")
             raise ByokError(code)
         body = response.read(MAX_RESPONSE + 1)
@@ -108,10 +116,11 @@ class ModelSession:
 
     def summary(self):
         with self.lock:
-            return {"provider": "anthropic", "model": MODEL, "calls": self.calls,
+            return {"provider": PROVIDER, "model": MODEL, "calls": self.calls,
                     "input_tokens": self.input_tokens, "output_tokens": self.output_count,
                     "cost_microusd": self.cost, "cost_is_upper_bound": self.uncertain,
-                    "max_cost_microusd": self.max_cost}
+                    "max_cost_microusd": self.max_cost,
+                    "cost_basis": "standard_paid_rate_estimate"}
 
     def __call__(self, system, prompt, deadline, schema):
         # Serialize generation and verification. A failed call latches the job,
@@ -127,17 +136,20 @@ class ModelSession:
                 left = deadline - time.monotonic()
                 if left < 5:
                     raise ByokError("time_limit")
-                payload = json.dumps({"model": MODEL, "max_tokens": self.output_tokens,
-                    "temperature": 0, "system": system,
-                    "messages": [{"role": "user", "content": prompt}],
-                    "output_config": {"format": {"type": "json_schema", "schema": closed_schema(schema)}}},
+                payload = json.dumps({
+                    "systemInstruction": {"parts": [{"text": system}]},
+                    "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                    "generationConfig": {"maxOutputTokens": self.output_tokens,
+                        "thinkingConfig": {"thinkingLevel": "minimal", "includeThoughts": False},
+                        "responseMimeType": "application/json", "responseJsonSchema": closed_schema(schema)}},
                     ensure_ascii=False, allow_nan=False).encode()
                 if len(payload) > self.input_bytes:
                     raise ByokError("input_budget")
                 # UTF-8 bytes conservatively bound text tokens; reserve an extra
-                # 8192 for provider framing/schema overhead. No cache/tools/think.
+                # 8192 for provider framing/schema overhead. No tools or explicit cache.
                 input_bound = len(payload) + 8192
-                reservation = input_bound * INPUT_RATE + self.output_tokens * OUTPUT_RATE
+                output_bound = self.output_tokens + THINKING_BOUND
+                reservation = token_cost(input_bound, output_bound)
                 if self.calls >= self.max_calls or self.cost + reservation > self.max_cost:
                     raise ByokError("cost_budget")
                 self.calls += 1
@@ -146,28 +158,39 @@ class ModelSession:
                 if self.on_usage is not None:
                     self.on_usage(self.summary())
                 data = self.send(self._key, payload, min(120, left))
-                usage = data.get("usage") if isinstance(data, dict) else None
+                usage = data.get("usageMetadata") if isinstance(data, dict) else None
                 if (not isinstance(usage, dict) or any(type(usage.get(k)) is not int or usage[k] < 0
-                        for k in ("input_tokens", "output_tokens"))
-                        or usage["input_tokens"] > input_bound or usage["output_tokens"] > self.output_tokens
-                        or usage.get("cache_creation_input_tokens", 0) != 0
-                        or usage.get("cache_read_input_tokens", 0) != 0):
+                        for k in ("promptTokenCount", "candidatesTokenCount", "totalTokenCount"))
+                        or any(type(usage.get(k, 0)) is not int or usage.get(k, 0) < 0
+                               for k in ("thoughtsTokenCount", "cachedContentTokenCount", "toolUsePromptTokenCount"))
+                        or usage["promptTokenCount"] > input_bound
+                        or usage["candidatesTokenCount"] > self.output_tokens
+                        or usage.get("thoughtsTokenCount", 0) > THINKING_BOUND
+                        or usage.get("cachedContentTokenCount", 0) > usage["promptTokenCount"]
+                        or usage.get("toolUsePromptTokenCount", 0) != 0
+                        or usage["totalTokenCount"] != usage["promptTokenCount"] + usage["candidatesTokenCount"] + usage.get("thoughtsTokenCount", 0)):
                     raise ByokError("provider_usage")
-                self.input_tokens += usage["input_tokens"]
-                self.output_count += usage["output_tokens"]
-                self.cost += usage["input_tokens"] * INPUT_RATE + usage["output_tokens"] * OUTPUT_RATE - reservation
+                charged_output = usage["candidatesTokenCount"] + usage.get("thoughtsTokenCount", 0)
+                self.input_tokens += usage["promptTokenCount"]
+                self.output_count += charged_output
+                # Implicit cache discounts are deliberately ignored in the estimate.
+                self.cost += token_cost(usage["promptTokenCount"], charged_output) - reservation
                 self.uncertain = False
                 if self.on_usage is not None:
                     self.on_usage(self.summary())
                 if self.stopping.is_set():
                     raise ByokError("cancelled")
-                if data.get("stop_reason") != "end_turn":
+                candidates = data.get("candidates")
+                if (not isinstance(candidates, list) or len(candidates) != 1
+                        or not isinstance(candidates[0], dict) or candidates[0].get("finishReason") != "STOP"):
                     raise ByokError("provider_response")
-                content = data.get("content")
-                if (not isinstance(content, list) or len(content) != 1
-                        or not isinstance(content[0], dict) or content[0].get("type") != "text"):
+                content = candidates[0].get("content", {}).get("parts")
+                if (not isinstance(content, list) or not content
+                        or any(not isinstance(part, dict) or not isinstance(part.get("text"), str)
+                               or part.get("thought", False) is not False
+                               or set(part) - {"text", "thought", "thoughtSignature"} for part in content)):
                     raise ByokError("provider_response")
-                output = json.loads(content[0]["text"])
+                output = json.loads("".join(part["text"] for part in content))
                 validate_output(output, schema)
                 return output
             except Exception as exc:

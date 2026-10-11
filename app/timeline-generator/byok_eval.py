@@ -141,9 +141,11 @@ def main(argv=None):
             if args.route == "byok":
                 if not os.isatty(0):
                     parser.error("A terminal is required for hidden key input; no key in argv/env/files")
-                print(f"Anthropic {MODEL}; maximum USD {args.max_usd}, standard text rates.\n"
-                      "Prompts/results go to Anthropic. Cancellation cannot reverse an in-flight provider charge.")
-                key = getpass.getpass("Your Anthropic API key (not saved): ")
+                print(f"Google Gemini {MODEL}; maximum USD {args.max_usd}, standard text rate estimate.\n"
+                      "Prompts/results go to Google. Free-tier data may be used for improvement and human review.\n"
+                      "For adult developer evaluation only; public release is not enabled.\n"
+                      "Cancellation cannot reverse an in-flight provider charge.")
+                key = getpass.getpass("Your Google AI Studio API key (not saved): ")
                 validate_key(key)
             report = measure(args.theme, args.route, key, options)
             key = None

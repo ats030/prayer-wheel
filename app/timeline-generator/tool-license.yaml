@@ -1,11 +1,11 @@
 reviewed_at: 2026-10-02
 intended_use: Personal internal historical research; public release is a separate review
-byok_gemini_candidate_review:
+byok_provider_review:
   reviewed_at: 2026-10-11
-  tool: Gemini Developer API candidate only
-  status: declined
-  adoption: No adapter, dependency, provider call or model adoption in this review
-  candidate_model: gemini-3.5-flash-lite; availability and timeline quality remain untested
+  tool: Google Gemini Developer API
+  status: conditional
+  adoption: Default BYOK adapter for adult developer evaluation only; no public activation, provider call or new dependency
+  version_or_plan: gemini-3.5-flash-lite; standard text generateContent API; minimal thinking; quality remains untested
   pricing_url: https://ai.google.dev/gemini-api/docs/pricing
   terms_url: https://ai.google.dev/gemini-api/terms
   lifecycle_url: https://ai.google.dev/gemini-api/docs/deprecations
@@ -20,7 +20,9 @@ byok_gemini_candidate_review:
     - Recheck pricing, availability and exact account conditions before implementation and release
     - Keep Wikipedia retrieval and citation verification; no Google Search grounding, caching or batch service adopted
     - Bound calls and tokens, show user costs and data-use conditions, and never silently switch to operator AI
-  notes: User chose on 2026-10-11 to preserve the audience and investigate another provider. Declined for this age-unrestricted history app; no provider call or key transfer occurred.
+  api_url: https://ai.google.dev/api/generate-content
+  thinking_url: https://ai.google.dev/gemini-api/docs/generate-content/thinking
+  notes: User requested Google AI Studio keys as default on 2026-10-11. Conditional adult developer experiment only. Public age-unrestricted suitability remains unresolved. Estimate uses paid standard rates without free-tier or implicit-cache discounts; thoughts are included, reserving the full 65536 model output limit in addition to the visible output cap. No provider call or key transfer performed.
 byok_openai_candidate_review:
   reviewed_at: 2026-10-11
   tool: OpenAI API GPT-4.1 mini
@@ -36,12 +38,12 @@ byok_openai_candidate_review:
   minors_url: https://developers.openai.com/api/docs/guides/safety-checks/under-18-api-guidance
   evidence_retrieved: 2026-10-11
   notes: Do not assume the API-key-transfer clause permits accepting third-party keys on this server. Minors require parental consent and safeguards; children below digital-consent age need ZDR before processing personal data. This is an unresolved relay-suitability finding, not a claim that all BYOK is prohibited.
-byok_provider_review:
+byok_anthropic_previous_review:
   reviewed_at: 2026-10-11
   tool: Anthropic Claude API
   version_or_plan: claude-haiku-4-5-20251001; direct standard text Messages API with structured outputs
   status: conditional
-  adoption: Bounded offline-tested experiment only; no public connection, real API call, dependency installation or quality-pass claim
+  adoption: Previous default replaced by Google at user request; retained as historical review, no active Anthropic adapter
   commercial_use: Commercial Terms A.1 allows products offered to customers/end users; B assigns output rights and forbids training on Customer Content; D requires Usage Policy, supported regions and service-specific terms
   cost: Standard uncached input USD 1 and output USD 5 per million tokens; paid account and credits may be required; taxes excluded; no free quota promise
   data_use: General API retention is within 30 days with policy/legal exceptions (flagged inputs/outputs may be held up to 2 years). Structured-output docs describe ZDR prompt/response processing and schema caching up to 24 hours, excluding Covered Models. Do not generalize that feature statement to all accounts/models or claim zero retention at launch.

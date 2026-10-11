@@ -12,13 +12,14 @@ from byok import ByokError, ModelSession
 from byok_pipeline import FetchBudget, bounded_byok
 import timeline as t
 
-KEY = "sk-ant-offline-" + "x" * 32
+KEY = "AIza" + "x" * 35
 SCHEMA = {"type": "object", "properties": {"word": {"type": "string"}}, "required": ["word"]}
 
 
 def response(value=None, **extra):
-    return {"content": [{"type": "text", "text": json.dumps(value or {"word": "発明"})}],
-            "stop_reason": "end_turn", "usage": {"input_tokens": 30, "output_tokens": 10}, **extra}
+    return {"candidates": [{"content": {"parts": [{"text": json.dumps(value or {"word": "発明"})}]},
+                            "finishReason": "STOP"}],
+            "usageMetadata": {"promptTokenCount": 30, "candidatesTokenCount": 10, "totalTokenCount": 40}, **extra}
 
 
 def slow_byok_child(query, key, options, connection):
@@ -50,12 +51,14 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(key, KEY)
         self.assertNotIn(KEY.encode(), payload)
         data = json.loads(payload)
-        self.assertEqual(data["model"], byok.MODEL)
-        self.assertEqual(data["output_config"]["format"]["schema"]["additionalProperties"], False)
+        self.assertEqual(byok.MODEL, "gemini-3.5-flash-lite")
+        self.assertEqual(data["generationConfig"]["responseJsonSchema"]["additionalProperties"], False)
         self.assertEqual(SCHEMA, before)
         self.assertNotIn("tools", data)
-        self.assertNotIn("thinking", data)
-        self.assertEqual(session.summary()["cost_microusd"], 80)
+        self.assertEqual(data["generationConfig"]["thinkingConfig"],
+                         {"thinkingLevel": "minimal", "includeThoughts": False})
+        self.assertNotIn("temperature", data["generationConfig"])
+        self.assertEqual(session.summary()["cost_microusd"], 34)
         self.assertFalse(session.summary()["cost_is_upper_bound"])
         self.assertNotIn(KEY, repr(session.summary()))
         session.close()
@@ -75,11 +78,36 @@ class ModelTests(unittest.TestCase):
             self.call(session)
         self.assertEqual(session.summary()["calls"], 1)
 
+    def test_google_key_only_and_thinking_tokens_are_charged(self):
+        byok.validate_key(KEY)
+        for key in ("sk-ant-" + "x" * 40, KEY + "\n", KEY + "?key=x", "https://example.com"):
+            with self.assertRaisesRegex(ByokError, "invalid_api_key"):
+                byok.validate_key(key)
+        session = self.session(send=lambda *_: response(usageMetadata={
+            "promptTokenCount": 30, "candidatesTokenCount": 10,
+            "thoughtsTokenCount": 7, "totalTokenCount": 47, "cachedContentTokenCount": 20}))
+        self.call(session)
+        self.assertEqual(session.summary()["output_tokens"], 17)
+        self.assertEqual(session.summary()["cost_microusd"], 52)
+
+    def test_uncertain_usage_keeps_full_reservation_and_no_retry(self):
+        observed = []
+        session = self.session(send=lambda *_: observed.append(1) or response(usageMetadata={}))
+        with self.assertRaisesRegex(ByokError, "provider_usage"):
+            self.call(session)
+        self.assertTrue(session.summary()["cost_is_upper_bound"])
+        self.assertGreaterEqual(session.summary()["cost_microusd"], byok.token_cost(0, byok.THINKING_BOUND + 3000))
+        with self.assertRaisesRegex(ByokError, "provider_usage"):
+            self.call(session)
+        self.assertEqual(observed, [1])
+
     def test_failure_latches_no_paid_retry_or_secret_error(self):
-        for data in (response(stop_reason="max_tokens"), response(content=[]),
+        for data in (response(candidates=[]),
+                     response(candidates=[{"finishReason": "MAX_TOKENS"}]),
                      response({"unknown": "field"}), response({"word": 123}),
-                     response(content=[{"type": "text", "text": KEY}]),
-                     response(usage={}), response(usage={"input_tokens": 999999, "output_tokens": 1})):
+                     response(candidates=[{"finishReason": "STOP", "content": {"parts": [{"text": KEY}]}}]),
+                     response(usageMetadata={}),
+                     response(usageMetadata={"promptTokenCount": 999999, "candidatesTokenCount": 1, "totalTokenCount": 1000000})):
             sends = []
             session = self.session(send=lambda *_: sends.append(1) or data)
             for _ in range(2):
@@ -99,7 +127,7 @@ class ModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ByokError, "cancelled"):
             self.call(session)
         self.assertEqual(session.summary()["calls"], 1)
-        self.assertEqual(session.summary()["cost_microusd"], 80)
+        self.assertEqual(session.summary()["cost_microusd"], 34)
         with self.assertRaisesRegex(ByokError, "cancelled"):
             self.call(session)
 
@@ -122,8 +150,11 @@ class ModelTests(unittest.TestCase):
         with patch.object(byok.http.client, "HTTPSConnection", return_value=connection) as factory:
             with self.assertRaisesRegex(ByokError, "provider_unavailable"):
                 byok.transport(KEY, b"{}", 5)
-        factory.assert_called_once_with("api.anthropic.com", timeout=5)
-        self.assertEqual(connection.request.call_args.args[:2], ("POST", "/v1/messages"))
+        factory.assert_called_once_with("generativelanguage.googleapis.com", timeout=5)
+        self.assertEqual(connection.request.call_args.args[:2], ("POST", byok.PATH))
+        headers = connection.request.call_args.kwargs["headers"]
+        self.assertEqual(headers["x-goog-api-key"], KEY)
+        self.assertNotIn(KEY, byok.PATH)
         connection.getresponse.return_value.read.assert_not_called()
         connection.close.assert_called_once()
 

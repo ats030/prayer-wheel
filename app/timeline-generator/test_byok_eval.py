@@ -1,4 +1,6 @@
 import copy
+import contextlib
+import io
 import json
 import subprocess
 import sys
@@ -44,6 +46,20 @@ class EvaluationTests(unittest.TestCase):
                 self.assertEqual(ev.main(["--output", str(output), "--compare", str(root / "operator.json"), str(root / "byok.json")]), 1)
             self.assertFalse(json.loads(output.read_text())["passed"])
             self.assertEqual(output.stat().st_mode & 0o777, 0o600)
+
+    def test_default_key_prompt_and_model_are_google(self):
+        key = "AIza" + "x" * 35
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "google.json"
+            with patch.object(ev.os, "isatty", return_value=True), \
+                 patch.object(ev.getpass, "getpass", return_value=key) as prompt, \
+                 patch.object(ev, "measure", return_value={"passed": False}) as measure, \
+                 contextlib.redirect_stdout(io.StringIO()) as messages:
+                ev.main(["--route", "byok", "--theme", "昭和", "--max-usd", "0.50", "--output", str(output)])
+            self.assertIn("Google AI Studio", prompt.call_args.args[0])
+            self.assertIn("gemini-3.5-flash-lite", messages.getvalue())
+            self.assertNotIn(key, messages.getvalue() + output.read_text())
+            self.assertEqual(measure.call_args.args[2], key)
 
 
 if __name__ == "__main__":

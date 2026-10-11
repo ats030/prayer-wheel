@@ -6,7 +6,7 @@ import os
 import threading
 import time
 
-from byok import ByokError, MODEL, validate_key
+from byok import ByokError, MODEL, PROVIDER, validate_key
 from byok_pipeline import bounded_byok
 from public_security import PublicError, result_view
 from trial_runtime import request_input
@@ -83,7 +83,7 @@ class ByokRuntime:
 
     def view(self, row):
         output = {k: row[k] for k in ("receipt_id", "state", "error", "result", "usage", "charge_may_continue") if k in row}
-        output.update({"route": "byok", "provider": "anthropic", "model": MODEL,
+        output.update({"route": "byok", "provider": PROVIDER, "model": MODEL,
                        "expires_in": max(0, int(row["expires"] - self.clock()))})
         return output
 
@@ -162,7 +162,7 @@ class ByokRuntime:
             elif record.get("kind") == "ended":
                 known = {"time_limit", "cost_budget", "input_budget", "fetch_budget", "fetch_route",
                          "invalid_api_key", "provider_denied", "provider_rate", "provider_unavailable",
-                         "provider_response", "provider_usage", "processing_error"}
+                         "provider_response", "provider_usage", "provider_request", "processing_error"}
                 if record.get("error") is not None:
                     result = None
                     error = record.get("error") if record.get("error") in known else "processing_error"

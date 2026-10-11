@@ -3,14 +3,16 @@
 追跡課題: `ats030-c5o5r`。2026-10-11時点ではオフラインの接続・制限検証まで実装しています。
 実APIの品質・料金比較と一般公開は未完了です。通常の `public_server.py` 起動にはBYOKを接続しません。
 
-対象年齢を狭めない方針で、Geminiは採用しません。
-OpenAIは第三者とのAPIキー移転に関する条項の適用が未解決なので、今回のサーバー中継候補から外しました。
-固定候補は Anthropic `claude-haiku-4-5-20251001` です。
+2026-10-11の利用者指定により、開発用BYOKのデフォルトはGoogle AI Studioで発行したGemini APIキーです。
+固定モデルは `gemini-3.5-flash-lite` です。Anthropicのキーは受け付けません。
 条件と根拠は [tool-license.yaml](tool-license.yaml) の `byok_provider_review` にあります。
+Googleの規約は18歳以上の開発者利用を要求し、18歳未満が利用しそうなAPIクライアントを制限します。
+この変更は成人開発者の評価用で、年齢を限定しない一般公開への適合を承認するものではありません。
+無料枠の入力・出力は改善や人手確認に使われる場合があります。本人の地域・契約条件を確認してから実行します。
 
 ## 経路とキーの寿命
 
-`byok.py` は標準ライブラリだけを使い、証明書を確認するHTTPSで `api.anthropic.com/v1/messages` に送ります。
+`byok.py` は標準ライブラリだけを使い、証明書を確認するHTTPSで `generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent` に送ります。
 接続先・モデルは固定です。環境プロキシ、リダイレクト、SDK、自動HTTP再試行、外部ツール、キャッシュ指定を使いません。
 APIキーはヘッダーだけに置き、プロンプト、結果、ログ、設定、環境変数、SQLite、お試し台帳、バックアップへ保存しません。
 キーへの参照を終了時に解放しますが、Pythonの文字列を物理的にゼロ消去する保証はありません。
@@ -22,8 +24,12 @@ BYOKでは先行生成と未使用記事への追加の自動再生成を止め�
 プロバイダー失敗や上限到達で処理を終了し、他モデル・運営AIへ切り替えません。
 
 本人が承認した上限は、送信前に入力のUTF-8バイト数と出力トークン上限から保守的に予約します。
-プロバイダーの使用量を受け取った場合だけ実トークン費用へ精算します。
+プロバイダーの使用量を受け取った場合だけ実トークンの有料標準単価による見積額へ精算します。
 不明な使用量や送信後の通信失敗は予約額を上限として残します。
+入力USD 0.30、出力（推論込み）USD 2.50 / 100万トークンで計算し、無料枠や暗黙キャッシュの割引は差し引きません。
+`minimal` は推論ゼロの保証ではないため、出力上限に加えてモデルの最大出力枠65536トークンを推論用に保守的に予約します。
+このため、低い承認額では実費が少なくても送信前に `cost_budget` で停止する場合があります。
+使用量の候補出力・推論トークンを合算し、整数のUSD百万分の1へ切り上げます。
 固定した料金でのAPI本文の試算であり、税・為替・将来の料金変更・他のアカウント利用を含みません。
 料金やトークン仕様が変わった場合は予約式を再確認してから使います。
 
@@ -104,11 +110,11 @@ Wikipediaの本文は測定間で変わりうるため、この比較だけで�
 既存モデルの測定と私用生成が動いていないことを確認してから運営モデルの比較を行います。
 
 ```bash
-python3 byok_eval.py --route byok --theme 昭和 --max-usd 0.50 --output data/byok-eval/showa-byok.json
-python3 byok_eval.py --route operator --theme 昭和 --max-usd 0.50 --output data/byok-eval/showa-operator.json
-python3 byok_eval.py --compare data/byok-eval/showa-operator.json data/byok-eval/showa-byok.json --output data/byok-eval/showa-comparison.json
+python3 byok_eval.py --route byok --theme 昭和 --max-usd 0.50 --output data/byok-eval/showa-google-byok.json
+python3 byok_eval.py --route operator --theme 昭和 --max-usd 0.50 --output data/byok-eval/showa-google-operator.json
+python3 byok_eval.py --compare data/byok-eval/showa-google-operator.json data/byok-eval/showa-google-byok.json --output data/byok-eval/showa-google-comparison.json
 ```
 
 運営モデル側の金額0は外部AIのAPI料金だけを指します。電気代・検索・維持管理は残ります。
 比較CLIは開発用です。公開受付から運営モデル比較へ移る経路はありません。
-一般公開に必要な未成年向け保護、適用規約の日付確認、本人契約の条件、表示、定期清掃、実負荷調整は `ats030-c5o5r` / `ats030-zioew` で追跡します。
+一般公開に必要なGoogleの年齢・用途条件への適合、本人契約の条件、表示、定期清掃、実負荷調整は `ats030-c5o5r` / `ats030-zioew` で追跡します。
