@@ -1,6 +1,8 @@
 """Assemble only reviewed modules and resources; never copy settings or .env."""
 import json
 import hashlib
+import os
+import tempfile
 from pathlib import Path
 import shutil
 
@@ -57,9 +59,28 @@ def build():
         shutil.copyfile(APP / name, target / name)
     resources = {name: (APP / name).read_bytes() for name in manifest["resources"]}
     resources.update(vendor_resources())
-    (target / "_resources.py").write_text(
-        "BUNDLE_SHA256 = " + repr(bundle_digest(manifest)) + "\nRESOURCES = " + repr(resources) + "\n")
+    atomic_write(target / "_resources.py",
+                 "BUNDLE_SHA256 = " + repr(bundle_digest(manifest)) + "\nRESOURCES = " + repr(resources) + "\n")
     print(f"Assembled {len(manifest['modules'])} modules and {len(resources)} resources")
+
+
+def atomic_write(path, text):
+    """同じディレクトリの一時ファイルへ最後まで書いて閉じ、閉じ済みのものだけ原子置換する。
+
+    生成が途中で破断しても既存の完成ファイルは保持し、一時生成物は残さない。
+    """
+    directory = path.parent
+    fd, temp_name = tempfile.mkstemp(prefix="._resources.", suffix=".py", dir=directory)
+    temp = Path(temp_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp, path)
+    except BaseException:
+        temp.unlink(missing_ok=True)
+        raise
 
 
 if __name__ == "__main__":
