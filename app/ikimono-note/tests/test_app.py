@@ -703,7 +703,7 @@ def test_legal_pages_disclose_data_handling_and_contact():
     assert "192.168.11.13" not in privacy.text
     assert "Google ドライブへの保存" in privacy.text
     assert "1つのファイルへ書き出せます" not in privacy.text
-    assert "Google Cloud Run（東京リージョン）" in privacy.text   # 公開の入口。変わったらここも変える
+    assert "Cloudflare Workersで稼働" in privacy.text   # 公開の入口。変わったらここも変える
     assert "https://lit.link/ats030_main" in privacy.text
     assert "運営者プロフィール" in privacy.text
     assert "食用・毒性・採取許可" in terms.text
@@ -2790,8 +2790,12 @@ def test_the_privacy_policy_names_the_right_processor():
     """
     privacy = client.get("/privacy").text
     assert "Tailscale" not in privacy
-    assert "Google Cloud Run（東京リージョン）" in privacy
-    assert "Google Cloud Firestore（東京リージョン）" in privacy
+    # 2026-10 に Cloudflare へ移った。旧基盤は「以前の版との違い」にだけ残す
+    assert "本サービスはCloudflare Workersで稼働しており、接続情報はCloudflare, Inc.により処理されます" in privacy
+    assert "共有した記録の保存先はCloudflare D1です" in privacy
+    assert "Cloud Run（東京リージョン）で稼働" not in privacy
+    assert "Firestore（東京リージョン）に保存" not in privacy
+    assert "最大10分" not in privacy.split("以前の版との違い")[0]
 
 
 def test_the_newest_gemini_is_offered():
