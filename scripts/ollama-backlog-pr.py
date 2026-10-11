@@ -18,6 +18,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -27,6 +28,8 @@ CONFIG = ROOT / "scripts/ollama-backlog-pr.json"
 ENV_PATH = ROOT / ".env"
 RUNNER = ROOT / "scripts/ollama-backlog-draft.py"
 LABEL = "ollama-draft-pr"
+# Automatic selection skips an issue after this many failed runs since its last edit.
+FAILURE_LIMIT = 3
 ISSUE_ID = re.compile(r"^ats030-[a-z0-9]+(?:\.[0-9]+)*$")
 GITHUB_HTTPS = re.compile(r"^https://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+?)(?:\.git)?$")
 GITHUB_SSH = re.compile(r"^git@github\.com:([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+?)(?:\.git)?$")
@@ -138,8 +141,36 @@ def eligible(issue: dict, config: dict) -> bool:
             and LABEL in labels and not labels & {"human", "decision", "human-action"})
 
 
+def failed_runs(issue: dict) -> int:
+    """Count failed generation runs started after the issue was last updated.
+
+    Editing the issue (e.g. sharpening its acceptance criteria) resets the count.
+    Busy retries and runs without a report do not count.
+    """
+    try:
+        since = datetime.fromisoformat(issue.get("updated_at", "").replace("Z", "+00:00"))
+    except ValueError:
+        since = datetime.min.replace(tzinfo=timezone.utc)
+    count = 0
+    for run_dir in RESULTS.glob(f"{issue['id']}-*"):
+        stamp = run_dir.name[len(issue["id"]) + 1:]
+        if not re.fullmatch(r"\d{8}T\d{6}Z", stamp):
+            continue
+        started = datetime.strptime(stamp, "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+        if started < since:
+            continue
+        try:
+            report = json.loads((run_dir / "report.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if report.get("status") != "ready_for_review" and not report.get("retryable_busy"):
+            count += 1
+    return count
+
+
 def select_issue(rows: list[dict], config: dict, requested: str | None) -> dict | None:
-    candidates = sorted((row for row in rows if eligible(row, config)),
+    candidates = sorted((row for row in rows if eligible(row, config)
+                         and (requested or failed_runs(row) < FAILURE_LIMIT)),
                         key=lambda row: (row.get("priority", 4), row.get("created_at", ""), row["id"]))
     if requested:
         return next((row for row in candidates if row["id"] == requested), None)

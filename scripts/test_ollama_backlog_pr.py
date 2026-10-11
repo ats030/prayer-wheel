@@ -44,6 +44,38 @@ class SelectionTests(unittest.TestCase):
         self.assertFalse(pr.eligible({"id": "ats030-good", "status": "open",
                                       "labels": [pr.LABEL]}, config))
 
+    def test_repeatedly_failing_issue_yields_until_edited(self):
+        config = {"ats030-stuck": {}, "ats030-next": {}}
+        rows = [
+            {"id": "ats030-stuck", "status": "open", "labels": [pr.LABEL],
+             "acceptance_criteria": "done", "priority": 2,
+             "created_at": "2026-09-27T00:00:00Z", "updated_at": "2026-09-27T00:00:00Z"},
+            {"id": "ats030-next", "status": "open", "labels": [pr.LABEL],
+             "acceptance_criteria": "done", "priority": 2,
+             "created_at": "2026-10-11T00:00:00Z", "updated_at": "2026-10-11T00:00:00Z"},
+        ]
+
+        def run(results, name, report):
+            (results / name).mkdir()
+            if report is not None:
+                (results / name / "report.json").write_text(json.dumps(report))
+
+        with tempfile.TemporaryDirectory() as directory, \
+                patch.object(pr, "RESULTS", Path(directory)):
+            results = Path(directory)
+            run(results, "ats030-stuck-20260926T000000Z", {"status": "failed"})  # before the last edit
+            run(results, "ats030-stuck-20261001T000000Z", {"status": "failed"})
+            run(results, "ats030-stuck-20261002T000000Z", {"status": "busy", "retryable_busy": True})
+            run(results, "ats030-stuck-20261003T000000Z", None)
+            run(results, "ats030-stuck-20261004T000000Z", {"status": "failed"})
+            self.assertEqual(pr.select_issue(rows, config, None)["id"], "ats030-stuck")
+            run(results, "ats030-stuck-20261005T000000Z", {"status": "failed"})
+            self.assertEqual(pr.failed_runs(rows[0]), pr.FAILURE_LIMIT)
+            self.assertEqual(pr.select_issue(rows, config, None)["id"], "ats030-next")
+            self.assertEqual(pr.select_issue(rows, config, "ats030-stuck")["id"], "ats030-stuck")
+            rows[0]["updated_at"] = "2026-10-06T00:00:00Z"
+            self.assertEqual(pr.select_issue(rows, config, None)["id"], "ats030-stuck")
+
     def test_config_rejects_unsafe_or_oversized_scope(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "config.json"
