@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Geosites hide only when the shiseki tab already shows the same heritage."""
 import importlib.util
+import json
 from pathlib import Path
+import tempfile
 import unittest
 
 spec = importlib.util.spec_from_file_location("build_geo_layer", Path(__file__).with_name("build-geo-layer.py"))
@@ -37,6 +39,40 @@ class ShownByShiseki(unittest.TestCase):
     def test_same_name_far_away_is_another_place(self):
         site = {"heritage_id": "1", "name": "白糸ノ滝", "latitude": 35.31, "longitude": 138.59}
         self.assertIsNone(layer.shown_by_shiseki(site, {}, cells(("Q4", "白糸ノ滝", 36.35, 138.59))))
+
+
+class AttachWikidata(unittest.TestCase):
+    """data/geo/wikidata.json (from map-geosite-wikidata.py) adds qid and wikipedia_title to geosites."""
+    URL = "https://kunishitei.bunka.go.jp/heritage/detail/401/"
+
+    def site(self, number):
+        return {"type": "Feature", "properties": {"heritage_id": number, "source_url": self.URL + number}}
+
+    def test_mapped_site_gets_qid_and_title(self):
+        features = layer.attach_wikidata([self.site("00003511")], {"401/00003511": {"qid": "Q1", "title": "通り池", "via": "p4275"}})
+        self.assertEqual(features[0]["properties"]["qid"], "Q1")
+        self.assertEqual(features[0]["properties"]["wikipedia_title"], "通り池")
+
+    def test_mapping_without_title_adds_only_qid(self):
+        props = layer.attach_wikidata([self.site("1")], {"401/1": {"qid": "Q2", "title": None, "via": "p4275"}})[0]["properties"]
+        self.assertEqual(props["qid"], "Q2")
+        self.assertNotIn("wikipedia_title", props)
+
+    def test_unmapped_site_is_unchanged(self):
+        features = layer.attach_wikidata([self.site("2")], {"401/1": {"qid": "Q2", "title": "A", "via": "title"}})
+        self.assertEqual(features[0]["properties"], self.site("2")["properties"])
+
+    def test_load_reads_geo_dir_and_defaults_to_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            data = Path(tmp)
+            self.assertEqual(layer.load_wikidata(data), {})
+            (data / "geo").mkdir()
+            (data / "geo/wikidata.json").write_text(json.dumps({"401/1": {"qid": "Q3", "title": "B", "via": "p4275"}}))
+            self.assertEqual(layer.load_wikidata(data)["401/1"]["qid"], "Q3")
+
+    def test_build_sites_applies_mapping(self):
+        source = (Path(__file__).with_name("build-geo-layer.py")).read_text()
+        self.assertIn("attach_wikidata(features, load_wikidata(data))", source)
 
 
 if __name__ == "__main__":

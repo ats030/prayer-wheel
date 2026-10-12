@@ -70,6 +70,28 @@
         "python3 app/midokoro-map/scripts/test_festival_calendar.py"
       ],
       "read_only": []
+    },
+    "ats030-gkbnb.5": {
+      "repo": ".",
+      "base": "master",
+      "files": [
+        "app/midokoro-map/scripts/map-geosite-wikidata.py"
+      ],
+      "tests": [
+        "python3 app/midokoro-map/scripts/test_map_geosite_wikidata.py"
+      ],
+      "read_only": []
+    },
+    "ats030-gkbnb.2": {
+      "repo": ".",
+      "base": "master",
+      "files": [
+        "app/midokoro-map/scripts/build-geo-layer.py"
+      ],
+      "tests": [
+        "python3 app/midokoro-map/scripts/test_build_geo_layer.py"
+      ],
+      "read_only": []
     }
   }
 }
