@@ -152,19 +152,23 @@ export function mount(context) {
     try { const response = await fetch(url); return response.ok ? await response.json() : null; }
     catch { return null; }
   }
-  async function hydrateMedia(key, properties) {
+  // Photo and summaries render independently: an uncached summary can take minutes on a busy summarizer.
+  function hydrateMedia(key, properties) {
     const qid = properties.qid, title = properties.wikipedia_title;
-    const [photo, summary] = await Promise.all([
-      photos.has(qid) ? photos.get(qid) : loadJSON(`/api/geo/wiki/image?qid=${encodeURIComponent(qid)}`),
-      !title ? null : summaries.has(qid) ? summaries.get(qid) : loadJSON(`/api/geo/wiki/content?title=${encodeURIComponent(title)}&qid=${encodeURIComponent(qid)}`)]);
-    if (photo?.url) photos.set(qid, photo);
-    // An empty response can come from a busy summarizer; retry it on the next open.
-    if (hasSummary(summary)) summaries.set(qid, summary);
-    const photoBox = root.querySelector('#detail-photo'), summaryBox = root.querySelector('#detail-summaries');
-    if (selectedKey !== key || !photoBox || !summaryBox) return;
-    photoBox.innerHTML = photoHtml(photo && {url: photo.url, license: String(photo.license || '').trim(), licenseUrl: photo.license_url,
-      creator: plainText(photo.artist) || plainText(photo.credit), sourceUrl: photo.source_url}, properties.name);
-    summaryBox.innerHTML = sectionsHtml(summary);
+    const current = id => selectedKey === key ? root.querySelector(id) : null;
+    (photos.has(qid) ? Promise.resolve(photos.get(qid)) : loadJSON(`/api/geo/wiki/image?qid=${encodeURIComponent(qid)}`)).then(photo => {
+      if (photo?.url) photos.set(qid, photo);
+      const box = current('#detail-photo');
+      if (box) box.innerHTML = photoHtml(photo && {url: photo.url, license: String(photo.license || '').trim(), licenseUrl: photo.license_url,
+        creator: plainText(photo.artist) || plainText(photo.credit), sourceUrl: photo.source_url}, properties.name);
+    });
+    if (!title) return;
+    (summaries.has(qid) ? Promise.resolve(summaries.get(qid)) : loadJSON(`/api/geo/wiki/content?title=${encodeURIComponent(title)}&qid=${encodeURIComponent(qid)}`)).then(summary => {
+      // An empty response can come from a busy summarizer; retry it on the next open.
+      if (hasSummary(summary)) summaries.set(qid, summary);
+      const box = current('#detail-summaries');
+      if (box) box.innerHTML = sectionsHtml(summary);
+    });
   }
   function closeDetail(restoreFocus = true) {
     const key = selectedKey, origin = selectedOrigin;
