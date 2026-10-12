@@ -237,6 +237,38 @@ class ModelTests(unittest.TestCase):
         connection.getresponse.return_value.read.assert_not_called()
         connection.close.assert_called_once()
 
+    def test_transport_failure_diagnostics_are_fixed_and_latch_without_retry(self):
+        from unittest.mock import Mock
+        for failure, kind, status in ((None, "http", 503),
+                                      (TimeoutError(KEY), "timeout", None),
+                                      (byok.socket.gaierror(KEY), "dns", None),
+                                      (byok.ssl.SSLError(KEY), "tls", None),
+                                      (ConnectionResetError(KEY), "connection", None)):
+            with self.subTest(kind=kind):
+                connection = Mock()
+                connection.getresponse.return_value.status = status
+                if failure:
+                    connection.request.side_effect = failure
+                session = self.session(send=byok.transport)
+                with patch.object(byok.http.client, "HTTPSConnection", return_value=connection) as factory:
+                    with self.assertRaisesRegex(ByokError, "provider_unavailable"):
+                        self.call(session)
+                    detail = session.summary()["failure_detail"]
+                    self.assertEqual(detail, {"stage": "other", "kind": kind, "http_status": status})
+                    with self.assertRaisesRegex(ByokError, "provider_unavailable"):
+                        self.call(session)
+                    self.assertEqual(session.summary()["failure_detail"], detail)
+                factory.assert_called_once()
+                connection.getresponse.return_value.read.assert_not_called()
+                connection.close.assert_called_once()
+                self.assertNotIn(KEY, repr(session.summary()))
+
+    def test_error_diagnostic_rejects_arbitrary_text(self):
+        for value in (KEY, {}, [], True):
+            error = ByokError("provider_unavailable", http_status=value, failure_kind=value)
+            self.assertIsNone(error.http_status)
+            self.assertIsNone(error.failure_kind)
+
     def test_every_schema_routes_to_byok_without_operator_call(self):
         calls = []
         def model(system, prompt, deadline, schema):

@@ -1,6 +1,7 @@
 import contextlib
 import io
 import json
+import os
 from pathlib import Path
 import runpy
 import sys
@@ -19,7 +20,7 @@ class ProbeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "probe.json"
             script = Path(__file__).with_name("byok_material_probe.py")
-            with patch.object(sys, "argv", [str(script), "--output", str(output)]), \
+            with patch.dict(os.environ), patch.object(sys, "argv", [str(script), "--output", str(output)]), \
                  patch.object(timeline, "search", return_value=[]), \
                  patch.object(timeline, "fetch_sources", return_value=[source]), \
                  patch.object(timeline, "material_batches", return_value=iter([[source]])), \

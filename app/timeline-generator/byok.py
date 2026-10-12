@@ -3,6 +3,8 @@ import copy
 import http.client
 import json
 import re
+import socket
+import ssl
 import threading
 import time
 
@@ -63,9 +65,12 @@ def quota_error(body):
 
 class ByokError(Exception):
     """Fixed public code; deliberately not TimelineError (no local fallback)."""
-    def __init__(self, code):
+    def __init__(self, code, *, http_status=None, failure_kind=None):
         super().__init__(code)
         self.code = code
+        self.http_status = http_status if type(http_status) is int and 100 <= http_status <= 599 else None
+        self.failure_kind = failure_kind if type(failure_kind) is str and failure_kind in {
+            "http", "timeout", "dns", "tls", "connection", "network", "invalid_json", "transport"} else None
 
 
 def validate_key(key):
@@ -125,15 +130,21 @@ def transport(key, payload, timeout):
                         code = quota_error(body)
                 except Exception:
                     pass
-            raise ByokError(code)
+            raise ByokError(code, http_status=response.status, failure_kind="http")
         body = response.read(MAX_RESPONSE + 1)
         if len(body) > MAX_RESPONSE:
             raise ByokError("provider_response")
         return json.loads(body)
     except ByokError:
         raise
-    except Exception:
-        raise ByokError("provider_unavailable") from None
+    except Exception as exc:
+        kind = ("timeout" if isinstance(exc, TimeoutError) else
+                "tls" if isinstance(exc, ssl.SSLError) else
+                "dns" if isinstance(exc, socket.gaierror) else
+                "connection" if isinstance(exc, ConnectionError) else
+                "network" if isinstance(exc, OSError) else
+                "invalid_json" if isinstance(exc, (ValueError, UnicodeError)) else "transport")
+        raise ByokError("provider_unavailable", failure_kind=kind) from None
     finally:
         connection.close()
 
@@ -158,6 +169,7 @@ class ModelSession:
         self.calls = self.input_tokens = self.output_count = self.cost = 0
         self.uncertain = False
         self.failure = None
+        self.failure_detail = None
         self.min_call_interval, self.clock = min_call_interval, clock
         self.last_started = None
         self.input_window = []
@@ -197,6 +209,7 @@ class ModelSession:
                     "input_tokens_per_minute_limit": INPUT_TOKENS_PER_MINUTE,
                     "calls_by_stage": dict(self.calls_by_stage),
                     "request_bytes_by_stage": dict(self.request_bytes_by_stage),
+                    "failure_detail": dict(self.failure_detail) if self.failure_detail else None,
                     "cost_basis": "standard_paid_rate_estimate"}
 
     def __call__(self, system, prompt, deadline, schema):
@@ -283,5 +296,9 @@ class ModelSession:
                 return output
             except Exception as exc:
                 code = exc.code if isinstance(exc, ByokError) else "provider_response"
+                if self.failure is None and isinstance(exc, ByokError) and exc.failure_kind:
+                    self.failure_detail = {
+                        "stage": MODEL_STAGES.get(frozenset(schema.get("properties", {})), "other"),
+                        "kind": exc.failure_kind, "http_status": exc.http_status}
                 self.failure, self._key = code, None
                 raise ByokError(code) from None
