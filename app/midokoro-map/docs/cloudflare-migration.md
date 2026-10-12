@@ -129,3 +129,11 @@ python3 scripts/check-cloudflare-api.py https://midokoro-map.ats030.workers.dev 
 公開前にローカルWorkerで`browser-check.py`、`browser-explore-check.py`、`browser-geo-check.py`、`browser-workspace-check.py`が成功。
 公開URLで`browser-check.py`、`browser-explore-check.py`、`browser-workspace-check.py`、`browser-geo-check.py`が成功し、tokens.cssの配信とhealthを確認した。
 `browser-story-check.py`は既存の`.story-entry`重複で140行目まで（`ats030-rqlz4`）。
+
+## 2026-10-12の地形の点と祭り一覧廃止の公開
+
+`d99b1b93`（地形・地質タブで天然記念物の点を範囲より上に描画）と`a344b42a`（今月・来月の祭りページ廃止）を公開した。公開バージョンは`f93eddaa-b98f-4d91-87f9-2018274498c9`、直前の復旧先は`1d73390f-b76e-4d2c-898d-a14353e85b55`。
+`/festivals`は`/?kind=omatsuri`へ301。祭りの個別ページ（`/festivals/<qid>`）とsitemap掲載は維持した。
+
+未コミット史跡要約はビルド用コピーだけをHEADへ置き換え、manifestは`0263a66863bb8b18adff347e6500b3b726658293666c949547ae73ee85590d7f`。公開URLで追加2件のキーが無いことを確認した。
+Worker APIテストが成功。公開URLで`browser-check.py`、`browser-geo-check.py`、`browser-story-check.py`が成功し、301・個別ページ200・healthを確認した。
