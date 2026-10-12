@@ -92,6 +92,19 @@
         "python3 app/midokoro-map/scripts/test_build_geo_layer.py"
       ],
       "read_only": []
+    },
+    "ats030-gkbnb.7": {
+      "repo": ".",
+      "base": "master",
+      "files": [
+        "app/midokoro-map/frontend/assets/geo/media.mjs"
+      ],
+      "tests": [
+        "node --test app/midokoro-map/scripts/test-geo-media.mjs"
+      ],
+      "read_only": [
+        "app/midokoro-map/scripts/test-geo-media.mjs"
+      ]
     }
   }
 }
