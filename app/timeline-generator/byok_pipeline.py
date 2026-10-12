@@ -8,6 +8,7 @@ import time
 from urllib.parse import urlsplit
 
 from byok import ByokError, ModelSession
+from byok_metrics import MaterialMetrics
 
 
 class FetchBudget:
@@ -72,11 +73,13 @@ class FetchBudget:
 
 def generate_child(query, key, options, connection):
     model = None
+    metrics = None
     try:
         os.environ["TIMELINE_SOURCE"] = "wikipedia"
         import timeline
         if timeline.SOURCE != "wikipedia":
             raise ByokError("fetch_route")
+        metrics = MaterialMetrics(timeline)
         budget = FetchBudget(options["fetch_calls"], options["fetch_bytes"])
         # Only this disposable process is adapted; no private/operator worker
         # shares these bindings, and every retrieval thread shares the budget.
@@ -86,7 +89,8 @@ def generate_child(query, key, options, connection):
         model = ModelSession(key, threading.Event(), max_cost_microusd=options["max_cost_microusd"],
                              max_calls=options["model_calls"], input_bytes=options["input_bytes"],
                              output_tokens=options["output_tokens"],
-                             on_usage=lambda usage: connection.send({"kind": "usage", "usage": usage}))
+                             on_usage=lambda usage: connection.send({"kind": "usage", "usage": usage,
+                                                                     "material": metrics.summary()}))
         key = None
         def emit(record):
             # Public result whitelist runs in the parent; quotes/trace never
@@ -101,7 +105,8 @@ def generate_child(query, key, options, connection):
     finally:
         key = None
         if model is not None:
-            connection.send({"kind": "usage", "usage": model.summary()})
+            connection.send({"kind": "usage", "usage": model.summary(),
+                             "material": metrics.summary() if metrics else {}})
             model.close()
         connection.close()
 

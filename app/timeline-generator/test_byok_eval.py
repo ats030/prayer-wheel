@@ -13,6 +13,21 @@ import byok_eval as ev
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_failed_measurement_keeps_last_material_snapshot_and_filter(self):
+        def generate(theme, key, options, emit, stopping):
+            emit({"kind": "usage", "usage": {"calls": 1},
+                  "material": {"sources_fetched": 2, "batches_total": 9}})
+            emit({"kind": "usage", "usage": {"calls": 2}})
+            emit({"kind": "ended", "error": "call_budget"})
+        with patch.object(ev, "bounded_byok", side_effect=generate), \
+             patch.dict(ev.os.environ, {"TIMELINE_FOOTNOTE_FILTER": "1"}):
+            report = ev.measure("昭和", "byok", None, {})
+        self.assertEqual(report["error"], "call_budget")
+        self.assertEqual(report["usage"], {"calls": 2})
+        self.assertEqual(report["material"], {"sources_fetched": 2, "batches_total": 9})
+        self.assertEqual(report["conditions"]["footnote_filter"], "1")
+        self.assertFalse(report["passed"])
+
     def test_explicit_larger_call_cap_keeps_cost_time_and_rate_limits(self):
         standard = ev.configuration(3600, 500000)
         larger = ev.configuration(3600, 500000, 100)

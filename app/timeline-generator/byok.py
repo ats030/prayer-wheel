@@ -162,6 +162,7 @@ class ModelSession:
         self.last_started = None
         self.input_window = []
         self.calls_by_stage = {}
+        self.request_bytes_by_stage = {}
 
     def wait_for_slot(self, deadline, input_bound):
         if input_bound > INPUT_TOKENS_PER_MINUTE:
@@ -195,6 +196,7 @@ class ModelSession:
                     "min_call_interval_seconds": self.min_call_interval,
                     "input_tokens_per_minute_limit": INPUT_TOKENS_PER_MINUTE,
                     "calls_by_stage": dict(self.calls_by_stage),
+                    "request_bytes_by_stage": dict(self.request_bytes_by_stage),
                     "cost_basis": "standard_paid_rate_estimate"}
 
     def __call__(self, system, prompt, deadline, schema):
@@ -235,6 +237,7 @@ class ModelSession:
                 self.calls += 1
                 stage = MODEL_STAGES.get(frozenset(schema.get("properties", {})), "other")
                 self.calls_by_stage[stage] = self.calls_by_stage.get(stage, 0) + 1
+                self.request_bytes_by_stage[stage] = self.request_bytes_by_stage.get(stage, 0) + len(payload)
                 self.cost += reservation
                 self.uncertain = True
                 if self.on_usage is not None:

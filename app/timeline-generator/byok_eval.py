@@ -9,27 +9,31 @@ from pathlib import Path
 import threading
 import time
 
-from byok import MODEL, MIN_CALL_INTERVAL, INPUT_TOKENS_PER_MINUTE, validate_key
+from byok import MODEL, MODEL_STAGES, MIN_CALL_INTERVAL, INPUT_TOKENS_PER_MINUTE, validate_key
 from byok_pipeline import FetchBudget, bounded_byok
+from byok_metrics import MaterialMetrics
 from byok_runtime import ByokLimits
 from public_security import result_view
 
 ROOT = Path(__file__).resolve().parent
-HASHED = ("timeline.py", "milestones.py", "byok.py", "byok_pipeline.py", "byok_eval.py",
+HASHED = ("timeline.py", "milestones.py", "byok.py", "byok_pipeline.py", "byok_metrics.py", "byok_eval.py",
           "quality_eval.py", "quality_gold.json", "quality_holdout.json")
 
 
 def operator_child(query, unused_key, options, connection):
     """Explicit internal comparison only; never selected by a BYOK receipt."""
     usage = {"calls": 0, "input_tokens": 0, "output_tokens": 0, "cost_microusd": 0,
-             "max_cost_microusd": 0, "cost_is_upper_bound": False}
+             "max_cost_microusd": 0, "cost_is_upper_bound": False,
+             "calls_by_stage": {}, "request_bytes_by_stage": {}}
     send_lock, usage_lock = threading.Lock(), threading.Lock()
+    metrics = None
     def emit(record):
         with send_lock:
             connection.send(record)
     try:
         os.environ["TIMELINE_SOURCE"] = "wikipedia"
         import timeline
+        metrics = MaterialMetrics(timeline)
         budget = FetchBudget(options["fetch_calls"], options["fetch_bytes"])
         original = timeline.json_request
         def request(url, payload=None, timeout=20):
@@ -37,6 +41,11 @@ def operator_child(query, unused_key, options, connection):
                 return budget.json(url, payload, timeout)
             with usage_lock:
                 usage["calls"] += 1
+                stage = MODEL_STAGES.get(frozenset(payload.get("format", {}).get("properties", {})), "other")
+                usage["calls_by_stage"][stage] = usage["calls_by_stage"].get(stage, 0) + 1
+                usage["request_bytes_by_stage"][stage] = usage["request_bytes_by_stage"].get(stage, 0) + len(
+                    json.dumps(payload, ensure_ascii=False).encode())
+                emit({"kind": "usage", "usage": json.loads(json.dumps(usage)), "material": metrics.summary()})
             response = original(url, payload, timeout)
             with usage_lock:
                 for field, source in (("input_tokens", "prompt_eval_count"), ("output_tokens", "eval_count")):
@@ -45,6 +54,7 @@ def operator_child(query, unused_key, options, connection):
                         usage[field] += count
                     else:
                         usage["cost_is_upper_bound"] = True
+                emit({"kind": "usage", "usage": json.loads(json.dumps(usage)), "material": metrics.summary()})
             return response
         timeline.json_request = request
         article = timeline.WebReader.request
@@ -53,7 +63,7 @@ def operator_child(query, unused_key, options, connection):
     except Exception:
         emit({"kind": "error", "error": "processing_error"})
     finally:
-        emit({"kind": "usage", "usage": usage})
+        emit({"kind": "usage", "usage": usage, "material": metrics.summary() if metrics else {}})
         connection.close()
 
 
@@ -81,6 +91,7 @@ def measure(theme, route, key, options):
         key = None
     result = next((r for r in records if r.get("kind") == "result"), None)
     usage = next((r["usage"] for r in reversed(records) if r.get("kind") == "usage"), None)
+    material = next((r["material"] for r in reversed(records) if "material" in r), {})
     error = next((r["error"] for r in reversed(records) if r.get("kind") == "ended"), "cancelled")
     # quality_eval imports timeline. Keep it out of the spawn entry module so
     # each child can select Wikipedia before timeline reads its environment.
@@ -95,10 +106,11 @@ def measure(theme, route, key, options):
     return {"theme": theme, "route": route, "model": MODEL if route == "byok" else os.environ.get("TIMELINE_MODEL", "gemma4:12b"),
             "verify_model": MODEL if route == "byok" else os.environ.get("TIMELINE_VERIFY_MODEL", "qwen3.8:27b"),
             "conditions": {"source": "wikipedia", "source_filter": os.environ.get("TIMELINE_SOURCE_FILTER", ""),
+                           "footnote_filter": os.environ.get("TIMELINE_FOOTNOTE_FILTER", ""),
                            "options": options, "sha256": hashes},
             "code_changed_during_run": changed,
             "state": "complete" if result else "failed", "error": "code_changed" if changed else None if result else error,
-            "elapsed_seconds": round(time.monotonic() - start, 1), "usage": usage, "quality": quality,
+            "elapsed_seconds": round(time.monotonic() - start, 1), "usage": usage, "material": material, "quality": quality,
             "passed": passed, "result": result_view(result) if result else None,
             "limitations": "Live Wikipedia inputs can change; automatic recall is not an independent source audit. Operator fee is zero API fee, not zero infrastructure cost."}
 
