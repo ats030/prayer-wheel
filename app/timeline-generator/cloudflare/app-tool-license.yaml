@@ -18,7 +18,7 @@ conditions:
 adoption: approved_shared_ui_and_owner_only_backend
 backend_preparation:
   status: conditional
-  scope: Owner JWT verification and loopback gateway tested; one active VPC Service targets the existing tunnel and fixed gateway port. Production health forwarding and real owner login/history display are verified; production write operations remain under verification.
+  scope: Owner JWT verification and loopback gateway tested; one active VPC Service targets the existing tunnel and fixed gateway port. Production health forwarding is verified by a protected diagnostic Worker. Real owner login, history display, generation, cancellation and regeneration are verified by the owner's production actions and local reflection reports.
   condition: Owner reported Zero Trust onboarding complete; account billing plan could not be independently verified by subscription API. No paid subscription is created or changed by the agent.
 sources:
   - https://developers.cloudflare.com/workers/platform/pricing/
