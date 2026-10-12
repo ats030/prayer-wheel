@@ -1,4 +1,5 @@
-import {esc, sourceLink, flyToItem, fitItem, revealDetail, closeDetailPanel, focusFirst} from '../detail-common.js';
+import {esc, sourceLink, plainText, flyToItem, fitItem, revealDetail, closeDetailPanel, focusFirst} from '../detail-common.js';
+import {photoHtml, sectionsHtml, hasSummary} from './media.mjs';
 
 const geoparkKinds = [['shiseki','史跡'],['omatsuri','祭り'],['onsen','温泉'],['tokusan','特産物']];
 const SELECTED_MARKER_Z_INDEX = 10000;
@@ -40,7 +41,10 @@ function fetchedNote(fetched) {
 
 function geositeDetail(properties) {
   const place = [properties.prefecture, properties.address].filter(Boolean).join(' ');
-  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(properties.name)}</h2><p class="detail-kind">${esc(properties.designation_label)}（地質鉱物）</p></header>`+
+  // Monuments mapped to Wikidata get a photo and AI section summaries, filled in by hydrateMedia.
+  const media = properties.qid ? `<section class="detail-section" aria-labelledby="detail-photo-heading"><h3 id="detail-photo-heading">写真</h3><div id="detail-photo"><p class="detail-image-status">画像を読み込んでいます…</p></div></section>`
+    + `<div id="detail-summaries" aria-live="polite">${properties.wikipedia_title ? '<p class="detail-note">概要を読み込んでいます…</p>' : ''}</div>` : '';
+  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(properties.name)}</h2><p class="detail-kind">${esc(properties.designation_label)}（地質鉱物）</p></header>`+media+
     `<dl class="detail-facts"><div><dt>所在地</dt><dd>${esc(place || '未登録')}</dd></div>${properties.criteria ? `<div><dt>指定基準</dt><dd>${esc(properties.criteria)}</dd></div>` : ''}</dl>`+
     `<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${sourceLink(properties.source_url, '国指定文化財等データベース')}</nav>${fetchedNote(properties.fetched)}</section></article>`;
 }
@@ -120,6 +124,7 @@ export function mount(context) {
       else flyToItem(map, item.layer.getLatLng());
     }
     content.innerHTML = item.kind === 'nationalpark' ? nationalparkDetail(item.feature.properties) : item.kind === 'geopark' ? geoparkDetail(item.feature.properties) : geositeDetail(item.feature.properties);
+    if (item.kind === 'geosite' && item.feature.properties.qid) hydrateMedia(key, item.feature.properties);
     areaChoices.replaceChildren(); areaChoices.hidden = choices.length < 2;
     if (choices.length > 1) {
       const label = document.createElement('p'); label.textContent = 'この位置で重なる範囲';
@@ -141,6 +146,25 @@ export function mount(context) {
       const button = areaChoices.querySelector('button[aria-current="true"]');
       requestAnimationFrame(() => { map.invalidateSize(); focusFirst(button); });
     } else revealDetail(map, panel, root.querySelector('#detail-title'));
+  }
+  const photos = new Map(), summaries = new Map();
+  async function loadJSON(url) {
+    try { const response = await fetch(url); return response.ok ? await response.json() : null; }
+    catch { return null; }
+  }
+  async function hydrateMedia(key, properties) {
+    const qid = properties.qid, title = properties.wikipedia_title;
+    const [photo, summary] = await Promise.all([
+      photos.has(qid) ? photos.get(qid) : loadJSON(`/api/geo/wiki/image?qid=${encodeURIComponent(qid)}`),
+      !title ? null : summaries.has(qid) ? summaries.get(qid) : loadJSON(`/api/geo/wiki/content?title=${encodeURIComponent(title)}&qid=${encodeURIComponent(qid)}`)]);
+    if (photo?.url) photos.set(qid, photo);
+    // An empty response can come from a busy summarizer; retry it on the next open.
+    if (hasSummary(summary)) summaries.set(qid, summary);
+    const photoBox = root.querySelector('#detail-photo'), summaryBox = root.querySelector('#detail-summaries');
+    if (selectedKey !== key || !photoBox || !summaryBox) return;
+    photoBox.innerHTML = photoHtml(photo && {url: photo.url, license: String(photo.license || '').trim(), licenseUrl: photo.license_url,
+      creator: plainText(photo.artist) || plainText(photo.credit), sourceUrl: photo.source_url}, properties.name);
+    summaryBox.innerHTML = sectionsHtml(summary);
   }
   function closeDetail(restoreFocus = true) {
     const key = selectedKey, origin = selectedOrigin;
