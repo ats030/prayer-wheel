@@ -38,7 +38,34 @@ def match_p4275(features: list, bindings: list) -> dict:
     Returns {key: {"qid": "Q…", "title": "decoded title with spaces" or None, "via": "p4275"}}.
     Keys bound to more than one distinct item are left out.
     """
-    raise NotImplementedError
+    feature_keys = set()
+    for f in features:
+        key = heritage_key(f['properties']['source_url'])
+        if key:
+            feature_keys.add(key)
+    key_to_qids = {}
+    key_to_title = {}
+    for binding in bindings:
+        id_val = binding.get('id', {}).get('value')
+        if id_val not in feature_keys:
+            continue
+        item_val = binding.get('item', {}).get('value', '')
+        qid = item_val.rsplit('/', 1)[-1]
+        if not qid.startswith('Q'):
+            continue
+        key_to_qids.setdefault(id_val, set()).add(qid)
+        article_val = binding.get('article', {}).get('value')
+        if article_val:
+            idx = article_val.find('/wiki/')
+            if idx != -1:
+                key_to_title[id_val] = urllib.parse.unquote(article_val[idx + 6:]).replace('_', ' ')
+    result = {}
+    for key in feature_keys:
+        qids = key_to_qids.get(key)
+        if qids is None or len(qids) > 1:
+            continue
+        result[key] = {'qid': next(iter(qids)), 'title': key_to_title.get(key), 'via': 'p4275'}
+    return result
 
 
 def title_candidates(features: list, matched: dict, pages: dict) -> dict:
@@ -49,7 +76,22 @@ def title_candidates(features: list, matched: dict, pages: dict) -> dict:
     A page qualifies only if it is not missing, is not a disambiguation page and has a wikibase_item.
     Returns {key: {"qid": wikibase_item, "title": page title, "via": "title"}}.
     """
-    raise NotImplementedError
+    result = {}
+    for f in features:
+        key = heritage_key(f['properties']['source_url'])
+        if key is None or key in matched:
+            continue
+        page = pages.get(f['properties']['name'])
+        if page is None or page.get('missing'):
+            continue
+        pageprops = page.get('pageprops', {})
+        if 'disambiguation' in pageprops:
+            continue
+        wikibase_item = pageprops.get('wikibase_item')
+        if not wikibase_item:
+            continue
+        result[key] = {'qid': wikibase_item, 'title': page['title'], 'via': 'title'}
+    return result
 
 
 def get_json(url: str, params: dict) -> dict:
