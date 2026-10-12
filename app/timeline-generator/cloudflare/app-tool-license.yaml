@@ -1,0 +1,22 @@
+tool: Cloudflare Workers shared UI routing
+plan_or_version: Existing account and existing Wrangler 4.149.0; no paid upgrade
+reviewed_at: 2026-10-12
+status: conditional
+cost:
+  condition: Static assets have no additional charge. Dynamic routes count towards Workers usage; Free plan allows 100000 requests/day and 10ms CPU/invocation. No AI, database or paid add-on is enabled.
+license:
+  commercial_use: Existing Cloudflare service use remains subject to its subscription and application-service terms.
+  cli: Existing Wrangler Apache-2.0 distribution retained.
+conditions:
+  - Only the previously published, hash-verified snapshot supplies public event data.
+  - Missing source_mode remains unknown; old publication is not a new quality approval.
+  - No private DB, Gemini key, auth token, generation backend or log storage is uploaded.
+  - Public listing and detail stop polling when read-only, limiting Worker calls.
+  - Access and backend connection remain disabled pending a separately validated configuration.
+adoption: approved_shared_ui_and_readonly_public_adapter
+sources:
+  - https://developers.cloudflare.com/workers/platform/pricing/
+  - https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/
+  - https://www.cloudflare.com/terms/
+  - https://www.cloudflare.com/service-specific-terms-application-services/
+  - https://github.com/cloudflare/workers-sdk/blob/main/LICENSE-APACHE

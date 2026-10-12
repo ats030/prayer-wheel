@@ -4,7 +4,17 @@ const stages = ["search", "read", "generate", "verify"];
 const labels = {queued: "待機中", running: "生成中", complete: "完了", failed: "失敗", cancelled: "中止"};
 const active = job => ["queued", "running"].includes(job.state);
 const endings = {time_limit: "時間上限", processing_error: "途中終了"};
-const stateLabel = job => labels[job.state] + (job.state === "complete" && endings[job.stop_reason] ? `（${endings[job.stop_reason]}）` : "");
+const stateLabel = job => job.read_only ? "公開済み" : labels[job.state] + (job.state === "complete" && endings[job.stop_reason] ? `（${endings[job.stop_reason]}）` : "");
+let generationAvailable = false;
+function generationAvailability(available, notice = "") {
+  generationAvailable = available;
+  if (!$("search-form")) return;
+  $("query").disabled = !available;
+  $("submit").disabled = !available || $("search-form").hasAttribute("aria-busy");
+  $("generation-availability").hidden = available;
+  $("generation-availability").textContent = notice || "生成機能へ接続できません。年表の閲覧と端末保存は利用できます。";
+  document.querySelectorAll("[data-query]").forEach(button => { button.disabled = !available; });
+}
 function node(tag, className, text) {
   const element = document.createElement(tag);
   if (className) element.className = className;
@@ -12,7 +22,7 @@ function node(tag, className, text) {
   return element;
 }
 function date(value) { return new Date(value).toLocaleString("ja-JP"); }
-function shortDate(value) { return new Date(value).toLocaleString("ja-JP", {year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"}); }
+function shortDate(value) { return value ? new Date(value).toLocaleString("ja-JP", {year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"}) : "日時記録なし"; }
 async function api(path, body) {
   const response = await fetch(path, {method: body === undefined ? "GET" : "POST", headers: {"Content-Type": "application/json"}, body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(15000)});
   const data = await response.json();
@@ -124,7 +134,7 @@ function renderQuality(quality, requestMissing) {
 function render(data, job, requestMissing) {
   renderQuality(job.quality, requestMissing);
   $("result-meta").textContent = `${data.events.length}件`;
-  $("generation-meta").textContent = `${job.period || "全期間"} · 生成時間 ${data.elapsed_seconds}秒`;
+  $("generation-meta").textContent = `${job.period || "全期間"} · 生成時間 ${typeof data.elapsed_seconds === "number" ? `${data.elapsed_seconds}秒` : "記録なし"}`;
   $("source-summary").textContent = sourceSummary(data.events);
   $("generation-notice").textContent = data.notice;
   const alerts = [];
@@ -161,6 +171,7 @@ if ($("search-form")) {
   $("search-form").addEventListener("submit", async event => {
     event.preventDefault();
     if (submitting) return;
+    if (!generationAvailable) return;
     const query = $("query").value.trim();
     $("form-error").hidden = true;
     $("query").removeAttribute("aria-invalid");
@@ -190,7 +201,7 @@ if ($("search-form")) {
     }
     finally {
       submitting = false;
-      $("submit").disabled = false;
+      $("submit").disabled = !generationAvailable;
       $("search-form").removeAttribute("aria-busy");
     }
   });
@@ -212,6 +223,8 @@ if ($("job-list")) {
     loading = true;
     try {
       const data = await api(`/api/jobs?offset=${offset}`);
+      generationAvailability(data.generation_available !== false, data.notice);
+      if (data.generation_available === false) $("page-heading").textContent = "公開年表";
       if (deleting) return;
       if (offset > 0 && !data.jobs.length) { refreshPending = true; return; }
       $("page-error").hidden = true;
@@ -224,7 +237,7 @@ if ($("job-list")) {
         link.href = `/timelines/${job.id}`;
         const updated = node("time", "job-updated");
         updated.append(node("span", "job-updated-label", "更新 "), shortDate(job.updated_at));
-        updated.dateTime = job.updated_at;
+        if (job.updated_at) updated.dateTime = job.updated_at;
         const state = node("span", "job-state", stateLabel(job));
         state.dataset.state = job.state;
         // Narrow screens group state and time on one line; wide screens dissolve the group into table cells.
@@ -291,7 +304,7 @@ if ($("job-list")) {
         cell.append(...ops);
         row.append(link, meta, count, ...(ops.length ? [cell] : []));
         // Failure details and the time-limit notice live on the detail page; the list keeps progress only.
-        const notes = [job.legacy_period ? "期間限定・閲覧専用" : "", active(job) ? job.message : ""].filter(Boolean);
+        const notes = [job.read_only ? "公開年表・閲覧専用" : job.legacy_period ? "期間限定・閲覧専用" : "", active(job) ? job.message : ""].filter(Boolean);
         if (notes.length) row.append(node("p", "help", notes.join("。")));
         list.append(row);
       }
@@ -307,11 +320,11 @@ if ($("job-list")) {
       $("pagination").hidden = offset === 0 && data.total <= 50;
       $("previous").disabled = offset === 0;
       $("next").disabled = offset + data.jobs.length >= data.total;
-    } catch (exc) { error("page-error", `一覧を読み込めませんでした。${exc.message}`); }
+    } catch (exc) { generationAvailability(false); error("page-error", `一覧を読み込めませんでした。${exc.message}`); }
     finally {
       loading = false;
       if (refreshPending) { refreshPending = false; offset = 0; load(); }
-      else timer = setTimeout(load, 3000);
+      else if (generationAvailable || $("page-error").hidden === false) timer = setTimeout(load, 3000);
     }
   }
   document.addEventListener("job-registered", () => {
@@ -441,18 +454,24 @@ if ($("job-status")) {
     if (current.suggested_milestones === undefined) current.suggested_milestones = job?.suggested_milestones;
     job = current;
     showMilestones(current);
+    if (current.read_only) {
+      $("milestones-section").hidden = true;
+      $("milestone-link").hidden = true;
+    }
     $("page-heading").textContent = job.query;
     document.title = `${job.query} · タイムラインジェネレーター`;
-    $("job-status").textContent = labels[job.state];
+    $("job-status").textContent = stateLabel(job);
     $("job-status").dataset.state = job.state;
     $("local-save").hidden = $("local-download").hidden = !job.result;
     $("result-meta").hidden = !job.result;
     $("generation-info").hidden = !job.result;
     $("job-message").textContent = job.message || "";
     $("job-message").hidden = job.state !== "queued" && !(job.message || "").startsWith("処理を中止しました");
-    $("retry").hidden = job.legacy_period || !["failed", "cancelled"].includes(job.state);
+    $("retry").hidden = job.read_only || job.legacy_period || !["failed", "cancelled"].includes(job.state);
     $("cancel").hidden = !active(job);
-    $("regenerate").hidden = job.legacy_period || !job.has_result || active(job);
+    $("regenerate").hidden = job.read_only || job.legacy_period || !job.has_result || active(job);
+    $("refine").hidden = !!job.read_only;
+    $("publication-license").hidden = !job.read_only;
     $("refine").textContent = job.legacy_period ? "全期間で新規登録" : "条件を変える";
     $("refine").href = `/?query=${encodeURIComponent(job.legacy_period ? job.topic : job.query)}`;
     $("legacy-period").hidden = !job.legacy_period;
@@ -462,10 +481,10 @@ if ($("job-status")) {
     if (job.error) error("page-error", job.error);
     else $("page-error").hidden = true;
     if (job.result && (generatedAt !== job.generated_at || renderedResult !== JSON.stringify(job.result))) {
-      render(job.result, job, requestMissing);
+      render(job.result, job, job.read_only ? undefined : requestMissing);
       generatedAt = job.generated_at;
       renderedResult = JSON.stringify(job.result);
-      $("saved-at").textContent = `生成日時：${date(job.generated_at)}`;
+      $("saved-at").textContent = job.generated_at ? `生成日時：${date(job.generated_at)}` : "生成日時は公開資料に記録されていません。";
     }
     $("old-result").hidden = job.legacy_period || !job.has_result || job.state === "complete";
     document.querySelectorAll('[data-missing]').forEach(button => { button.disabled = active(job) || acting || job.legacy_period; });
@@ -479,7 +498,7 @@ if ($("job-status")) {
     } catch (exc) {
       if (version === generation && !acting) error("page-error", `状態を読み込めませんでした。${exc.message}`);
     }
-    if (version === generation && !acting) timer = setTimeout(load, 2000);
+    if (version === generation && !acting && !job?.read_only) timer = setTimeout(load, 2000);
   }
   for (const action of ["retry", "regenerate", "cancel"]) $(action).addEventListener("click", async () => {
     if (acting) return;
@@ -500,7 +519,7 @@ if ($("quality-axes")) {
   (async () => {
     try {
       const data = await api("/api/quality");
-      $("quality-summary").textContent = data.jobs.length ? `結果のある年表 ${data.jobs.length}件を比較しています（新しい順）。` : "比較できる年表がまだありません。";
+      $("quality-summary").textContent = data.jobs.length ? `結果のある年表 ${data.jobs.length}件を比較しています（新しい順）。` : data.notice || "比較できる年表がまだありません。";
       const sections = document.createDocumentFragment();
       // 正解集合外のテーマは軸が少ないため、軸の多い行の順を基準に全件の軸を集める。
       const axisKeys = new Map();

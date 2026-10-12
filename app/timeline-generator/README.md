@@ -189,8 +189,45 @@ DBを削除すると入力・待機分・結果が失われます。復旧はサ
 
 ## 公開サイト (Cloudflare)
 
-閲覧専用の公開先は https://history-timeline.ats030.workers.dev です。
-生成・BYOK・認証・個人DBは配備せず、承認済みの年表だけを静的に配信します。
+共通画面の公開先は https://timeline-generator.ats030.workers.dev です。
+ローカルと同じHTML・JS・CSSから配備し、公開済みの昭和50件の閲覧、端末保存、バックアップの書き出し・復元を利用できます。
+生成・再生成・中止は認証付きバックエンド接続の準備中です。画面とAPIの両方で未接続を明示し、私用の生成履歴を公開しません。
+旧 https://history-timeline.ats030.workers.dev の閲覧サイトも維持しています。
+
+```bash
+bash deploy-cloudflare-app.sh          # 共通画面・公開成果物の検証とdry-run
+bash deploy-cloudflare-app.sh --deploy # 新timeline-generator Workerへ配備
+python3 check_cloudflare_app.py https://timeline-generator.ats030.workers.dev
+python3 browser_cloudflare_app.py https://timeline-generator.ats030.workers.dev
+```
+
+配備CLIは `~/.env` の `CLOUDFLARE_API_TOKEN` だけを非実行・非展開で読みます（ファイルは600、重複設定は拒否）。
+プロセスの同名変数があればそれを優先します。既存OAuthを明示的に選ぶ場合は `python3 run_cloudflare.py --oauth deploy --config wrangler-app.jsonc` を使います。
+別アカウントへの自動切替や、失敗時の自動認証切替は行いません。
+
+共通画面の配備は `cloudflare/wrangler-app.jsonc`、旧閲覧サイトは `cloudflare/wrangler.jsonc` で分離します。
+共通画面ビルドは固定10ソースファイルと、ハッシュ照合済みの旧公開HTMLに表示されている項目だけを使います。
+私用DB・未公開JSON・キー・引用原文・処理traceは入力にしません。旧成果物にない生成日時や評価は作らず、出典方式はunknownのままです。
+元の出典リンクとCC BY-SA 4.0の説明は表示・書き出しに保持します。
+公開HTTPSから到達できないLANのvisit-logは、共通画面の公開ビルドでのみ除外します（例外と理由はats030-pc85t）。ローカルHTMLのタグは保持します。
+
+生成APIの接続方針は、Cloudflare Accessで本人を認証し、Workers VPC Serviceから既存Pythonの限定APIへ接続する方式です。
+VPC Serviceは独自ドメインを必要としません。現時点では接続設定・本人認証・直通防止の本番検証が未完了で、Workerにバックエンドbindingは設定していません。
+Workers VPCはベータ提供中で、正式提供への変更時には条件を再確認します（[公式接続手順](https://developers.cloudflare.com/workers-vpc/get-started/)、[料金](https://developers.cloudflare.com/workers-vpc/platform/pricing/)）。
+Access Apps and Policies、Access Organizations、Cloudflare Tunnel、Connectivity Directoryの適切なアカウント権限が必要です。
+認証なしの転送、期限やURLが変わるQuick Tunnel、公開ユーザーによる本人のGeminiキー利用は有効化しません。
+
+今回の統合では有料プランへの変更や有料add-onの追加を行いません。
+静的アセットは追加料金なしです。動的ルートはWorkers使用量に計上され、Freeプランなら1日100000リクエスト・1回10ms CPUが上限です。
+閲覧専用の一覧・詳細は自動ポーリングを止めます。既存アカウントの契約プラン自体はこの実装で変更しません。
+Gemini等のAI利用料は別の条件で、今回の公開画面には接続していません（[Workers公式料金](https://developers.cloudflare.com/workers/platform/pricing/)）。
+
+新URLの最初の配備バージョンは `81a318bd-72c2-4229-b95a-6dbeb1a01b52` です。
+ロールバック時はそのWorkerの検証済みバージョンへ戻すか、旧閲覧URLを案内します。端末保存はURLごとに分かれるため、移動前に書き出し、移動先で復元してください。
+
+### 旧閲覧サイトの配備
+
+旧サイトは生成・BYOK・認証・個人DBを配備せず、承認済みの年表だけを静的に配信します。
 2026-10-12の移行では、旧Cloud RunのURLが404だったため、2026-10-05の公開用書き出しを復元しました。
 昭和50件の旧承認記録には後から必須になった `source_mode` がなく、現行の新規承認条件は満たしません。
 移行は旧公開成果物の復元であり、検索経路の再認定や現在の品質試験の合格を意味しません。
