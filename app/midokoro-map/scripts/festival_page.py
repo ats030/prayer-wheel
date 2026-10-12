@@ -4,7 +4,14 @@ from datetime import date
 from html import escape
 from urllib.parse import quote, urlsplit
 
-from festival_calendar import ORIGIN, period
+ORIGIN = 'https://midokoro-map.ats030.workers.dev'
+
+
+def period(start, end, status):
+    text = f'{start.month}月{start.day}日'
+    if end != start:
+        text += f'〜{end.month}月{end.day}日' if end.month != start.month else f'〜{end.day}日'
+    return text + ('（予定）' if status == 'scheduled' else '')
 
 
 def render_page(festival, today):
@@ -85,7 +92,7 @@ def render_page(festival, today):
         '<body class="story-page"><a class="skip-link" href="#festival-main">本文へ</a>'
         '<header class="site-header"><a class="brand" href="/"><img src="/favicon.svg" alt="" width="28" height="28">'
         '<span>みどころマップ</span></a><nav class="story-nav" aria-label="サイト">'
-        '<a href="/festivals">今月・来月の祭り</a><a href="/?kind=omatsuri">祭りの地図</a></nav></header>\n'
+        '<a href="/?kind=omatsuri">祭りの地図</a></nav></header>\n'
         '<main id="festival-main"><section class="story-lead">\n'
         f'<p class="place-kicker">{escape(prefecture)}</p>\n'
         f"<h1>{escape(label_ja)}</h1>\n"

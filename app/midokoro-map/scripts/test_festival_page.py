@@ -45,9 +45,9 @@ class PageChecks(unittest.TestCase):
         html = render_page(dict(FESTIVAL, description_source=''), TODAY)
         self.assertNotIn('山車が出る。', html)
 
-    def test_links_back_to_map_and_listing(self):
+    def test_links_back_to_map(self):
         self.assertIn('href="/?kind=omatsuri&amp;qid=Q1"', self.html)
-        self.assertIn('href="/festivals"', self.html)
+        self.assertNotIn('href="/festivals"', self.html)
 
     def test_no_upcoming_dates_says_so(self):
         html = render_page(dict(FESTIVAL, occurrences=[]), TODAY)

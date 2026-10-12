@@ -400,7 +400,7 @@ function selectFestival(key,origin){
   if(origin==='list')flyToItem(map,entry.marker.getLatLng());
   openDetail(entry.festival,key,origin);
 }
-// /festivals links here with ?qid= so a listed festival opens in the detail panel.
+// Festival pages link here with ?qid= so the festival opens in the detail panel.
 function openLinkedFestival(){const qid=new URL(location.href).searchParams.get('qid');if(qid&&markers.has(qid))selectFestival(qid,'list')}
 function openDetail(f,key,origin){
   const panel=document.querySelector('#detail-panel'),content=document.querySelector('#detail-content'),originLabel=document.querySelector('#detail-origin');

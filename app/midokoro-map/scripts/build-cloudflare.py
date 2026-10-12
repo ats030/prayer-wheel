@@ -13,7 +13,6 @@ import sys
 import tempfile
 from datetime import date
 
-from festival_calendar import render as render_festival_calendar
 from festival_page import page_qids, render_page as render_festival_page, sitemap_entries
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,11 +73,9 @@ def build():
                 if p.is_file():
                     hashes[f'{kind}/{p.name}'] = hashlib.sha256(p.read_bytes()).hexdigest()
         dump(assets / '_data/specs.json', specs)
-        # Twelve months are built from the build date; /festivals/calendar.js picks this and next month in the browser.
         calendar = json.loads((assets / '_data/omatsuri/list.json').read_text())
         build_date = date.fromisoformat(os.environ.get('MIDOKORO_BUILD_DATE') or date.today().isoformat())
         (assets / 'festivals').mkdir(exist_ok=True)
-        (assets / 'festivals/index.html').write_text(render_festival_calendar(calendar, build_date))
         # One page per festival with a dated, sourced occurrence; past dates still get a page.
         festival_qids = page_qids(calendar)
         by_qid = {f['qid']: f for f in calendar if f.get('qid')}
@@ -91,7 +88,7 @@ def build():
         sitemap = assets / 'sitemap.xml'
         sitemap.write_text(sitemap.read_text().replace('</urlset>', sitemap_entries(festival_qids) + '</urlset>', 1))
         # Explicit canonical story routes; retain the source HTML and visit-log tag.
-        (assets / '_redirects').write_text('/ /index.html 200\n/stories /stories/index.html 200\n' + ''.join(f'/stories/{slug} /stories/{slug}.html 200\n' for slug in ('arita-porcelain', 'kusatsu-yumomi', 'kawagoe-festival')) + '/changelog /changelog.html 200\n/festivals /festivals/index.html 200\n' + ''.join(f'/festivals/{qid} /festivals/{qid}/index.html 200\n' for qid in festival_qids))
+        (assets / '_redirects').write_text('/ /index.html 200\n/stories /stories/index.html 200\n' + ''.join(f'/stories/{slug} /stories/{slug}.html 200\n' for slug in ('arita-porcelain', 'kusatsu-yumomi', 'kawagoe-festival')) + '/changelog /changelog.html 200\n/festivals /?kind=omatsuri 301\n' + ''.join(f'/festivals/{qid} /festivals/{qid}/index.html 200\n' for qid in festival_qids))
         (assets / '_headers').write_text('/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n/_data/*\n  Cache-Control: public, max-age=0, must-revalidate\n/*.html\n  Cache-Control: no-store\n')
         files = list(p for p in assets.rglob('*') if p.is_file())
         if len(files) + 1 > 20000 or any(p.stat().st_size > 25 * 1024 * 1024 for p in files):
