@@ -1,14 +1,14 @@
 import {prepare, activate} from './runtime.js';
 
-const kinds = ['shiseki','omatsuri','onsen','tokusan','geo'];
-const labels = {shiseki:'史跡',omatsuri:'祭り',onsen:'温泉',tokusan:'特産物',geo:'地形・地質'};
+const kinds = ['explore','shiseki','omatsuri','onsen','tokusan','geo'];
+const labels = {explore:'地域から探す',shiseki:'史跡',omatsuri:'祭り',onsen:'温泉',tokusan:'特産物',geo:'地形・地質'};
 const storageKey = 'midokoro-map:last-kind';
 let config;
 let requestNumber = 0;
 
 for (const button of document.querySelectorAll('[data-workspace-target]')) {
   button.addEventListener('click', () => {
-    const root = document.querySelector('.view-host:not([hidden])')?.shadowRoot;
+    const root = document.querySelector('#workspace > .view-host:not([hidden])')?.shadowRoot;
     const search = button.dataset.workspaceTarget === 'search';
     const region = root?.querySelector(search ? '.workbench' : '.map-region');
     if (!region) return;
@@ -38,9 +38,12 @@ async function choose(kind, focus=false) {
     }
     try { localStorage.setItem(storageKey,kind); } catch {}
     const url = new URL(location.href);
-    if (url.searchParams.get('kind') !== kind) url.searchParams.delete('qid');
+    if (url.searchParams.get('kind') !== kind) {
+      for (const key of ['qid','prefecture','category','keyword','bounds','map','item']) url.searchParams.delete(key);
+    }
     url.searchParams.set('kind',kind);
     history.replaceState(null,'',url);
+    context.onActivated?.();
     document.title = 'みどころマップ｜'+labels[kind];
     status.hidden = true;
     if (focus) document.querySelector('#tab-'+kind).focus({preventScroll:true});
@@ -70,7 +73,7 @@ try {
   config = await response.json();
   const explicit = new URL(location.href).searchParams.get('kind');
   const saved = storedKind();
-  await choose(kinds.includes(explicit)?explicit:kinds.includes(saved)?saved:config.defaultKind);
+  await choose(kinds.includes(explicit)?explicit:kinds.includes(saved)?saved:'explore');
 } catch (error) {
   document.querySelector('#status').textContent = '設定を読み込めませんでした。ページを再読み込みしてください。';
 }

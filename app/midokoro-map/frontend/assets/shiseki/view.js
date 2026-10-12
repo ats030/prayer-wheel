@@ -411,5 +411,6 @@ document.querySelector('.detail-close').addEventListener('click',()=>closeDetail
 document.querySelector('.lightbox-close').addEventListener('click',closeLightbox);
 document.querySelector('#lightbox').addEventListener('click',event=>{if(event.target.id==='lightbox')closeLightbox()});
 
-fetch('/api/shiseki/').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{shisekis=Array.isArray(data)?data:[];populatePrefectures();populateCategories();populateEras();applyFilters()}).catch(error=>{console.error('Shiseki data could not be loaded',error);document.querySelector('#shiseki-list').innerHTML='<p class="empty-state">史跡・名勝の情報を読み込めませんでした。時間をおいて再度お試しください。</p>';document.querySelector('#map-count').textContent='読み込み失敗'});
+context.openRecord = entry => { selectedKey=entry.localKey; selectedOrigin='list'; openDetail(entry.data, entry.localKey, 'list'); };
+context.ready = fetch('/api/shiseki/').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{shisekis=Array.isArray(data)?data:[];populatePrefectures();populateCategories();populateEras();applyFilters()}).catch(error=>{console.error('Shiseki data could not be loaded',error);document.querySelector('#shiseki-list').innerHTML='<p class="empty-state">史跡・名勝の情報を読み込めませんでした。時間をおいて再度お試しください。</p>';document.querySelector('#map-count').textContent='読み込み失敗'});
 }

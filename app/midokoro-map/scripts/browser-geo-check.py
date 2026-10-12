@@ -13,7 +13,7 @@ with sync_playwright() as p:
     page.on('pageerror',lambda error:errors.append(str(error)))
     # Basemap failure does not obscure data-layer checks or incur external requests.
     context.route('https://*.tile.openstreetmap.org/**',lambda route:route.abort())
-    page.goto(url,wait_until='domcontentloaded')
+    page.goto(url+("&" if "?" in url else "?")+"kind=shiseki",wait_until='domcontentloaded')
     page.wait_for_function("window.midokoro?.kind==='shiseki'")
     assert page.locator('#view-shiseki .leaflet-control-layers').count()==0
     page.evaluate('midokoro.map.setView([32.8,130.7],9,{animate:false})')
@@ -116,7 +116,7 @@ with sync_playwright() as p:
             assert rect and rect['width']>200 and rect['height']>200,(width,zoom,rect)
         page.evaluate('document.documentElement.style.fontSize="100%"')
     page.locator('#tab-geo').focus();page.keyboard.press('Home')
-    page.wait_for_function("midokoro.kind==='shiseki'")
+    page.wait_for_function("midokoro.kind==='explore'")
     page.keyboard.press('End');page.wait_for_function("midokoro.kind==='geo'")
     assert page.locator('#tab-geo').evaluate('element=>element===document.activeElement')
     page.reload();page.wait_for_function("window.midokoro?.kind==='geo'")

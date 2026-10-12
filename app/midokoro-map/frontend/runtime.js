@@ -5,9 +5,56 @@ const preparing = new Map();
 let activeKind = null;
 let sharedMap = null;
 let container = null;
+let detailContext = null;
+let detailRequest = 0;
+let detailReturn = null;
 const eventBindings = new Map();
 
 export function activeMap() { return sharedMap; }
+
+export function closeExplorerDetail(restoreFocus = true) {
+  ++detailRequest;
+  if (!detailContext) return;
+  const context = detailContext;
+  detailContext = null;
+  context.root.querySelector('dialog[open]')?.close();
+  context.root.querySelector('.detail-close')?.click();
+  context.host.hidden = true;
+  delete context.host.dataset.detailOnly;
+  document.querySelector('#workspace').append(context.host);
+  document.querySelector('#explore-detail')?.close();
+  if (restoreFocus) views.get('explore')?.onExplorerDetailClose?.();
+  if (restoreFocus) {
+    const target = detailReturn?.isConnected ? detailReturn : views.get('explore')?.root.querySelector('#keyword');
+    target?.focus({preventScroll:true});
+  }
+  detailReturn = null;
+}
+
+export async function openExplorerDetail(entry, config, opener) {
+  closeExplorerDetail(false);
+  const request = ++detailRequest;
+  const context = await prepare(entry.domain, config);
+  if (request !== detailRequest || activeKind !== 'explore') return false;
+  context.map ||= scopedMap(context);
+  if (!context.mounted) { context.module.mount(context); context.mounted = true; }
+  await context.ready;
+  if (request !== detailRequest || activeKind !== 'explore') return false;
+  if (!context.openRecord) throw new Error('詳細を開けませんでした。');
+  let dialog = document.querySelector('#explore-detail');
+  if (!dialog) {
+    dialog = document.createElement('dialog'); dialog.id = 'explore-detail';
+    dialog.setAttribute('aria-label', '選択したみどころの詳細');
+    dialog.addEventListener('cancel', event => { event.preventDefault(); closeExplorerDetail(); });
+    document.body.append(dialog);
+  }
+  detailContext = context; detailReturn = opener;
+  context.host.dataset.detailOnly = ''; context.host.hidden = false;
+  dialog.replaceChildren(context.host); dialog.showModal();
+  try { context.openRecord(entry); }
+  catch (error) { closeExplorerDetail(false); throw error; }
+  return true;
+}
 
 function resizeWithoutMoving() {
   if (!sharedMap) return;
@@ -103,7 +150,9 @@ async function buildView(kind, config) {
   const root = host.attachShadow({mode:'open'});
   const response = await fetch('/assets/'+kind+'/view.html');
   if (!response.ok) throw new Error('画面を読み込めませんでした。');
-  const css = ['/vendor/leaflet.css','/vendor/MarkerCluster.css','/vendor/MarkerCluster.Default.css','/assets/'+kind+'/app.css','/assets/'+kind+'/detail-panel.css','/workspace.css'];
+  const styleKind = kind === 'explore' ? 'shiseki' : kind;
+  const css = ['/vendor/leaflet.css','/vendor/MarkerCluster.css','/vendor/MarkerCluster.Default.css','/assets/'+styleKind+'/app.css','/assets/'+styleKind+'/detail-panel.css','/workspace.css'];
+  if (kind === 'explore') css.push('/assets/explore/app.css');
   root.innerHTML = css.map(href=>`<link rel="stylesheet" href="${href}">`).join('') + await response.text() +
     '<style>:host{display:block;height:100%;min-width:0;overflow-x:clip}h2{margin:0;font:700 1.3rem var(--font-display)}.app-shell{min-height:100%}#map{width:100%;height:100%}.leaflet-control-layers-selector{width:auto;height:auto;margin:0 .3rem 0 0;padding:0;accent-color:#2f6f4f}</style>';
   const legend = root.querySelector('.map-legend');
@@ -123,6 +172,7 @@ async function buildView(kind, config) {
   }
   document.querySelector('#workspace').append(host);
   const context = {kind, host, root, config, layers:new Set(), mounted:false};
+  host.addEventListener('detail-close', () => { if (detailContext === context) closeExplorerDetail(); });
   context.document = scopedDocument(root, host);
   context.fetch = (input, options) => {
     if (typeof input === 'string' && input.startsWith('/api/')) input = '/api/'+kind+input.slice(4);
@@ -144,10 +194,12 @@ async function buildView(kind, config) {
 }
 
 export async function activate(context) {
+  closeExplorerDetail(false);
   sharedMap?.stop();
   sharedMap?.closePopup();
   const previous = views.get(activeKind);
   if (previous) {
+    previous.onDeactivated?.();
     for (const layer of previous.layers) if (sharedMap.hasLayer(layer)) sharedMap.removeLayer(layer);
     previous.root.querySelector('dialog[open]')?.close();
     previous.host.hidden = true;

@@ -58,6 +58,7 @@ def build(data: Path) -> dict:
         features.append({"type": "Feature", "geometry": json.loads(r["display_geometry"]), "properties": {
             "slug": r["slug"], "name": r["name"], "unesco": bool(r["unesco"]), "certified": r["certified"],
             "municipalities": [m["name"] for m in members if not m["partial"]],
+            "prefectures": sorted({m["prefecture"] for m in members if not m["partial"]}),
             "partial": [m["name"] for m in members if m["partial"]],
             "counts": counts, "source": r["source_url"], "fetched": r["fetched"]}})
     return {"type": "FeatureCollection", "features": features,

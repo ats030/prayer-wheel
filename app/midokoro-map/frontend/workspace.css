@@ -29,6 +29,9 @@
 .map-count,.map-legend{border-radius:6px;box-shadow:0 2px 8px rgb(23 43 58/.08)}
 .map-region:focus-visible{outline:3px solid var(--color-focus);outline-offset:-3px}
 #geo-message:empty{display:none}
+:host([data-detail-only]) .workbench,:host([data-detail-only]) .map-region{display:none}
+:host([data-detail-only]) .app-shell{display:block;height:100%}
+:host([data-detail-only]) .detail-panel{position:static;width:100%;height:100%;border:0;overflow:auto;box-shadow:none}
 @media(min-width:769px){
   .filters .field-wide:not(:first-child):not(.date-range-field){grid-column:auto}
 }

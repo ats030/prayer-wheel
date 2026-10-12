@@ -213,5 +213,14 @@ export function mount(context) {
   root.querySelector('#clear-filters').onclick = () => { keyword.value = ''; type.value = ''; draw(); };
   root.querySelector('.detail-close').onclick = () => closeDetail();
   retry.onclick = load;
-  load();
+  context.openRecord = entry => {
+    selectedKey=entry.localKey; selectedOrigin='list';
+    panel.hidden=false; shell.classList.add('has-detail');
+    const props=entry.data.properties;
+    content.innerHTML=entry.kind==='nationalpark'?nationalparkDetail(props):entry.kind==='geopark'?geoparkDetail(props):geositeDetail(props);
+    areaChoices.hidden=true; areaChoices.replaceChildren();
+    root.querySelector('#detail-origin').textContent='地域の検索結果から選択';
+    panel.scrollTop=0; revealDetail(map,panel,root.querySelector('#detail-title'));
+  };
+  context.ready = load();
 }

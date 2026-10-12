@@ -501,7 +501,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
 
 loadImageCatalog().catch(()=>{});
 loadFurusatoAffiliateCatalog().catch(()=>{});
-Promise.all([fetchJSONWithRetry('/api/tokusan/'),fetchJSONWithRetry('/regions.json?v=202609296')]).then(([data,regions])=>{
+context.openRecord = entry => { selectedKey=entry.localKey; selectedItem=entry.data; selectedOrigin='list'; showDetail(entry.data, 'list'); revealDetail(map,document.querySelector('#detail-panel'),document.querySelector('#detail-title')); };
+context.ready = Promise.all([fetchJSONWithRetry('/api/tokusan/'),fetchJSONWithRetry('/regions.json?v=202609296')]).then(([data,regions])=>{
   if(!Array.isArray(regions))throw new Error('Invalid region definitions');
   regionsByPrefecture=new Map(regions.map(p=>[p.prefecture,p]));
   tokusan=Array.isArray(data)?data:[];

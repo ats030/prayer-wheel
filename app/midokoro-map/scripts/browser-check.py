@@ -10,7 +10,7 @@ with sync_playwright() as p:
     browser=p.chromium.launch(headless=True)
     context=browser.new_context(viewport={"width":1440,"height":960})
     page=context.new_page();errors=[];page.on("pageerror",lambda e:errors.append(str(e)))
-    page.goto(url,wait_until="domcontentloaded")
+    page.goto(url+("&" if "?" in url else "?")+"kind=shiseki",wait_until="domcontentloaded")
     page.wait_for_function("window.midokoro?.kind==='shiseki'")
     page.wait_for_function("document.querySelector('#view-shiseki').shadowRoot.querySelector('#result-count').textContent!=='0'")
     page.evaluate("()=>{midokoro.map.setView([32.8,130.7],9,{animate:false})}")
@@ -50,9 +50,9 @@ with sync_playwright() as p:
     page.wait_for_function("Number(document.querySelector('#view-tokusan').shadowRoot.querySelector('#result-count').textContent)>0")
     assert page.locator('.leaflet-container').count()==1
     # Arrow keys select categories and move focus.
-    page.locator("#tab-tokusan").focus();page.keyboard.press("Home")
-    page.wait_for_function("window.midokoro.kind==='shiseki'")
-    assert page.locator("#tab-shiseki").evaluate("el=>el===document.activeElement")
+    page.locator("#tab-tokusan").focus();page.keyboard.press("ArrowRight");page.keyboard.press("Home")
+    page.wait_for_function("window.midokoro.kind==='explore'")
+    assert page.locator("#tab-explore").evaluate("el=>el===document.activeElement")
     # Test rapid changes including first mount and restored views.
     for kind in ["omatsuri","onsen","shiseki","tokusan"]: page.locator("#tab-"+kind).click()
     page.wait_for_function("window.midokoro.kind==='tokusan' && document.querySelector('#status').hidden")

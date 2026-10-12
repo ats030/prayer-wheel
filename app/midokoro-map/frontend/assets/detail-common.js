@@ -79,6 +79,7 @@ export function closeDetailPanel(panel, {key, origin, cardSelector, restoreFocus
     const card = key && root.querySelector(`${cardSelector}[data-key="${CSS.escape(key)}"]`);
     focusFirst(origin === 'marker' ? mapElement : card, root.querySelector('#keyword'), mapElement);
   }
+  panel.dispatchEvent(new CustomEvent('detail-close', {bubbles:true, composed:true}));
 }
 
 const detailLoads = new WeakMap();
