@@ -4,7 +4,9 @@ from pathlib import Path
 import shlex
 
 
-def read_token(path=None):
+def read_token(path=None, *, name="CLOUDFLARE_API_TOKEN"):
+    if name not in {"CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCESS_API_TOKEN"}:
+        raise ValueError("Unsupported Cloudflare credential name")
     path = Path(path) if path is not None else Path.home() / ".env"
     if not path.exists():
         return None
@@ -17,8 +19,8 @@ def read_token(path=None):
             line = line[7:].lstrip()
         if "=" not in line or line.startswith("#"):
             continue
-        name, value = line.split("=", 1)
-        if name.strip() != "CLOUDFLARE_API_TOKEN":
+        variable, value = line.split("=", 1)
+        if variable.strip() != name:
             continue
         try:
             parts = shlex.split(value, comments=True)
@@ -31,6 +33,11 @@ def read_token(path=None):
     if len(values) > 1:
         raise ValueError("Duplicate Cloudflare credential assignments")
     return values[0] if values else None
+
+
+def access_token():
+    # Select once before an Access request, never retry a rejected request with another token.
+    return read_token(name="CLOUDFLARE_ACCESS_API_TOKEN") or read_token()
 
 
 def deployment_environment(use_oauth=False):

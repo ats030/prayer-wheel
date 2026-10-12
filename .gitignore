@@ -25,6 +25,7 @@
 /.config/*/settings.json
 /.config/web-search-yacy/
 /.config/web-search-opensearch/
+/.config/timeline-generator/
 /data/
 /cache/
 

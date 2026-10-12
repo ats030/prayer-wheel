@@ -40,6 +40,12 @@ class CredentialTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / ".env"
             self.assertIsNone(read_token(path))
+            path.write_text('CLOUDFLARE_API_TOKEN="' + "m" * 40 + '"\nCLOUDFLARE_ACCESS_API_TOKEN="' + "a" * 40 + '"\n')
+            path.chmod(0o600)
+            self.assertEqual(read_token(path), "m" * 40)
+            self.assertEqual(read_token(path, name="CLOUDFLARE_ACCESS_API_TOKEN"), "a" * 40)
+            with self.assertRaisesRegex(ValueError, "Unsupported"):
+                read_token(path, name="GEMINI_API_KEY")
             path.write_text("GEMINI_API_KEY=unrelated\n")
             path.chmod(0o600)
             self.assertIsNone(read_token(path))

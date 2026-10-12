@@ -227,7 +227,8 @@ Access Apps and Policies、Access Organizations、Cloudflare Tunnel、Connectivi
 Gatewayは127.0.0.1:8535に限定し、既存の100.94.207.13:8532へだけ転送します。
 専用TokenはAPI TokenやGeminiキーと別に作り、権限600の通常ファイルとWorker secretへ配置する契約です。
 `TIMELINE_GATEWAY_TOKEN_FILE` がなければ起動しません。Cookie・Access JWT・Gateway Tokenは既存Python APIへ渡しません。
-同時転送は4件、上流通信は10秒までです。GatewayとTunnelの常駐化、本番binding・本人用画面の接続はまだ行っていません。
+同時転送は4件、上流通信は10秒までです。Gatewayは `private-gateway.service` をユーザーサービス `timeline-generator-gateway.service` として常駐化済みです。
+専用Tokenの保存先はGit対象外の `~/.config/timeline-generator/gateway.token` です。認証なしのhealthは403、専用Token付きの既存Pythonへのhealth転送は200を確認しています。本番Workerのbinding・本人用画面の接続は未完了です。
 本人用の共通画面は `/manage` と `/manage/timelines/:id`、評価は `/manage/quality` として準備しています。
 画面自体もJWTを検証し、キャッシュを禁止します。設定前の `/manage` は503です。
 公開一覧は認証設定後にだけ「本人用の生成画面へ」を表示します。本人用JSは `/api/private/*` だけを使い、一覧・登録後のリンク・条件変更は本人用画面内に保ちます。
@@ -235,9 +236,10 @@ Gatewayは127.0.0.1:8535に限定し、既存の100.94.207.13:8532へだけ転�
 
 接続用VPC Service `timeline-generator-api` は既存の稼働Tunnelに作成済みで、127.0.0.1:8535のみを対象にします。
 既存Tunnelの公開ルート設定は変更しません。Service ID等の接続情報はGit対象外の `data/cloudflare-connection.json` に保存します。
-作成時点ではGatewayを起動せず、公開Workerにbindingも追加していません。取りやめる場合はこのVPC Serviceだけを削除し、既存Tunnelを削除しません。
-2026-10-12の再確認でVPC/Tunnel権限は通過し、AccessアプリAPIから `access.api.error.not_enabled` が返りました。
-Token権限だけでなく、対象アカウントのZero Trust初期設定も必要です。
+公開Workerにはbindingを追加していません。取りやめる場合はGatewayユーザーサービスを停止し、このVPC Serviceだけを削除します。既存Tunnelを削除しません。
+2026-10-12に本人からZero Trust初期設定の完了連絡があり、Accessアプリ一覧は取得できましたが、既存Tokenでのアプリ作成は403でした。
+Access操作には `~/.env` の `CLOUDFLARE_ACCESS_API_TOKEN` を優先して使い、配備用の `CLOUDFLARE_API_TOKEN` と分けます。値はToken本体のみとし、認証拒否後に別Tokenで再試行しません。
+VPC/Tunnelの管理APIは通過していますが、既存Wrangler OAuthにはVPCのbinding権限がなく、リモート接続検証は権限エラーでした。管理APIの成功だけでは本番接続の成功を保証しません。
 Cloudflareの[公式初期設定手順](https://developers.cloudflare.com/cloudflare-one/setup/)では、Freeでも支払い情報の登録が必要ですが、Free選択時は課金されないとされています。
 プラン選択・支払い情報登録は本人がダッシュボードで行います。エージェントは有料プランへの変更や支払い情報入力を行いません。
 
