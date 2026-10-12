@@ -7,7 +7,7 @@
   const markers = new Map(), lines = new Map(), visited = new Set(), sent = new Set();
   let map, selectedPlace = null, selectedRelation = null;
   const tokens = getComputedStyle(document.documentElement);
-  const lineColor = tokens.getPropertyValue('--color-ink').trim(), activeLineColor = tokens.getPropertyValue('--color-accent').trim();
+  const lineColor = tokens.getPropertyValue('--color-ink').trim(), activeLineColor = tokens.getPropertyValue('--color-selected').trim();
   const status = document.querySelector('#map-status');
   const selection = document.querySelector('#selection');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;

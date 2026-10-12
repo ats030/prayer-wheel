@@ -16,5 +16,5 @@
   --color-cat-sz: #596944;   /* 木材・自然素材 */
   --color-cat-se: #68678a;   /* 生活用品 */
   --color-cat-ka: #8e5673;   /* 花卉 */
-  --color-cat-none: var(--color-accent); /* 未分類 */
+  --color-cat-none: #7a7d80; /* 未分類 */
 }

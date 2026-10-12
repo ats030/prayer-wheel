@@ -26,6 +26,11 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--color-focus);outlin
 .kind-tabs button[aria-selected=true]{background:var(--color-ink);color:var(--color-surface);box-shadow:0 1px 3px rgb(23 43 58/.12)}
 .kind-tabs button:hover{background:var(--color-paper-2)}
 .kind-tabs button[aria-selected=true]:hover{background:#294252}
+/* Category identity dot; the regional tab shows all five colors. */
+.kind-tabs button::before{content:"";display:inline-block;width:.5rem;height:.5rem;margin-right:.4rem;border-radius:50%;background:var(--tab-color);vertical-align:.08em}
+.kind-tabs button[aria-selected=true]::before{box-shadow:0 0 0 1.5px var(--color-surface)}
+#tab-explore::before{width:.9rem;border-radius:.25rem;background:linear-gradient(90deg,var(--kind-shiseki) 0 20%,var(--kind-omatsuri) 20% 40%,var(--kind-onsen) 40% 60%,var(--kind-tokusan) 60% 80%,var(--kind-geo) 80%)}
+#tab-shiseki{--tab-color:var(--kind-shiseki)}#tab-omatsuri{--tab-color:var(--kind-omatsuri)}#tab-onsen{--tab-color:var(--kind-onsen)}#tab-tokusan{--tab-color:var(--kind-tokusan)}#tab-geo{--tab-color:var(--kind-geo)}
 .header-links{gap:.35rem 1rem;max-width:23rem}
 .story-entry{font-size:.75rem;text-decoration-color:var(--color-rule)}
 .header-links a:hover{text-decoration-color:currentColor}

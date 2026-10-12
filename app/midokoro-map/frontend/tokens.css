@@ -4,8 +4,10 @@
 :root,:host{
   --color-paper:#f7f4ec; --color-paper-2:#e8edef; --color-surface:#fffdf8;
   --color-ink:#172b3a; --color-ink-2:#526573; --color-rule:#cbd4d8;
-  --color-accent:#c4462d; --color-accent-ink:#fffaf2; --color-focus:#1473e6;
+  --color-accent:#28527f; --color-danger:#a3243b; --color-selected:#b07800; --color-accent-ink:#fffaf2; --color-focus:#1473e6;
   --color-shadow:rgb(23 43 58/.12); --color-marker-shadow:rgb(23 43 58/.35); --color-backdrop:rgb(12 24 33/.94);
+  /* UI accents are indigo; vermilion belongs to festivals, so errors use --color-danger.
+     Selected map items use yamabuki, which no category or sub-category uses (>= 3:1 on the map). */
   /* Category identity colors. White text on them must stay >= 4.5:1. */
   --kind-shiseki:#683a8e; --kind-omatsuri:#c4462d; --kind-onsen:#20646f; --kind-tokusan:#5e4108; --kind-geo:#3c7c5a;
   /* Geo sub-kinds inside the geo tab. */

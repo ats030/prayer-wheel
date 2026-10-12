@@ -1,6 +1,6 @@
 export const labels = {shiseki:'史跡・名勝',omatsuri:'祭り',onsen:'温泉',tokusan:'特産物',geo:'地形・地質',geosite:'天然記念物',geopark:'ジオパーク',nationalpark:'国立公園'};
 // Custom properties from /tokens.css; resolve them with readColors() in the browser.
-export const colorTokens = {shiseki:'--kind-shiseki',omatsuri:'--kind-omatsuri',onsen:'--kind-onsen',tokusan:'--kind-tokusan',geo:'--kind-geo',geosite:'--geo-geosite',geopark:'--geo-geopark',nationalpark:'--geo-nationalpark',selected:'--color-accent',outline:'--color-surface'};
+export const colorTokens = {shiseki:'--kind-shiseki',omatsuri:'--kind-omatsuri',onsen:'--kind-onsen',tokusan:'--kind-tokusan',geo:'--kind-geo',geosite:'--kind-geo',geopark:'--kind-geo',nationalpark:'--kind-geo',selected:'--color-selected',outline:'--color-surface'};
 export const readColors = element => {
   const style = getComputedStyle(element);
   return Object.fromEntries(Object.entries(colorTokens).map(([key, token]) => [key, style.getPropertyValue(token).trim()]));
