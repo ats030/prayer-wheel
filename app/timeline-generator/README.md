@@ -187,7 +187,35 @@ DBを削除すると入力・待機分・結果が失われます。復旧はサ
 
 見出しの年代、段落の文脈、伝承の留保、期間・原文一致を機械検査し、別モデルでも照合します。ただし出典自体の誤りや重要項目の見落としは残ります。件数や引用一致を史実の正答率とみなさないでください。
 
-## 公開サイト (Cloud Run)
+## 公開サイト (Cloudflare)
+
+閲覧専用の公開先は https://history-timeline.ats030.workers.dev です。
+生成・BYOK・認証・個人DBは配備せず、承認済みの年表だけを静的に配信します。
+2026-10-12の移行では、旧Cloud RunのURLが404だったため、2026-10-05の公開用書き出しを復元しました。
+昭和50件の旧承認記録には後から必須になった `source_mode` がなく、現行の新規承認条件は満たしません。
+移行は旧公開成果物の復元であり、検索経路の再認定や現在の品質試験の合格を意味しません。
+
+```bash
+bash deploy-cloudflare.sh --published-snapshot          # 保存された旧公開成果物のhash検査と配備確認
+bash deploy-cloudflare.sh --published-snapshot --deploy # 旧公開成果物を復元して配備
+python3 check_cloudflare.py https://history-timeline.ats030.workers.dev
+```
+
+旧公開成果物は `~/cache/timeline-public-build/site/` の固定5ファイルだけを使い、
+`cloudflare/published-snapshot-sha256.json` と一致しなければ停止します。
+保存物を失った場合は、現行条件を満たす結果を承認してから、`--published-snapshot` を外して配備します。
+新しい年表の公開と取り下げは下記の承認CLIを使い、通常の `bash deploy-cloudflare.sh --deploy` で再配備します。
+通常配備は旧承認記録を自動修復せず、不適合な記録が残っていれば拒否します。
+旧成果物復元は固定の昭和ページを復元するため、取り下げ後には使いません。
+Wranglerは既存4.149.0を検査して使い、版が変われば停止します。生成アプリの自宅サービスは変更しません。
+Cloud Runの削除・旧URLからの転送はこの移行には含めていません。
+ロールバックはCloudflareの直前バージョンへ戻すか、旧公開先を復旧します。
+初回公開に前バージョンがない場合は、Cloudflareの対象サイトを停止します。
+
+公開ネットワークからLANのvisit-logへ到達できず、既存CSPは外部scriptを許さないため、
+visit-log免除理由を `ats030-oehkq` に記録しています。CSPは維持します。
+
+### 旧Cloud Runの配備手順
 
 運用者が確認した年表だけを、閲覧専用の静的サイトとして出す（ats030-udy41）。出典がすべて ja/en Wikipedia の記事である年表に限る。
 
