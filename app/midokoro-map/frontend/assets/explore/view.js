@@ -34,7 +34,7 @@ export function mount(context) {
   let entries=[],results=[],ordered=[],limit=60,selected=null,styledKey=null,loading=false,selectionRequest=0,dataMessage='';
   const markerByKey=new Map();
   const layerCache=new Map();
-  const points=L.markerClusterGroup({maxClusterRadius:45,disableClusteringAtZoom:13,iconCreateFunction:cluster=>L.divIcon({html:`<span class="explore-cluster">${cluster.getChildCount()}</span>`,className:'',iconSize:[36,36]})}).addTo(map);
+  const points=L.markerClusterGroup({maxClusterRadius:45,disableClusteringAtZoom:13,iconCreateFunction:cluster=>{const count=cluster.getChildCount(),size=count<100?36:count<1000?40:count<10000?46:52;return L.divIcon({html:`<span class="explore-cluster">${count}</span>`,className:'',iconSize:[size,size]})}}).addTo(map);
   const areas=L.layerGroup().addTo(map);
 
   function urlState() {

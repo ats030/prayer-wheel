@@ -239,7 +239,8 @@ function renderMarkers(){
     bounds.push([o.latitude,o.longitude]);
   });
   clusterLayer.addLayers([...markers.values()]);
-  document.querySelector('#map-count').textContent=`${visible.length} 件中 ${markers.size} 件の位置を表示`;
+  const unlocated=visible.filter(o=>!hasCoordinates(o)).length;
+  document.querySelector('#map-count').textContent=`地図上に ${markers.size} 件`+(unlocated?`（位置未登録 ${unlocated} 件）`:'');
 }
 
 function selectItem(key,origin){

@@ -147,6 +147,7 @@ async function buildView(kind, config) {
   host.id = 'view-'+kind;
   host.setAttribute('role','tabpanel');
   host.setAttribute('aria-labelledby','tab-'+kind);
+  if (kind !== 'explore') host.style.setProperty('--view-kind', `var(--kind-${kind})`);
   const root = host.attachShadow({mode:'open'});
   const response = await fetch('/assets/'+kind+'/view.html');
   if (!response.ok) throw new Error('画面を読み込めませんでした。');

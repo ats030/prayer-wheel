@@ -23,9 +23,9 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--color-focus);outlin
 .site-header{padding:.6rem 1.25rem;gap:1.25rem;background:var(--color-surface)}
 .kind-tabs{gap:.2rem;padding:.2rem;border:1px solid var(--color-rule);border-radius:8px;background:var(--color-paper)}
 .kind-tabs button{min-height:44px;padding:.55rem .85rem;border:0;border-radius:5px;font-size:.85rem;font-weight:600;transition:background 140ms ease,color 140ms ease}
-.kind-tabs button[aria-selected=true]{background:var(--color-ink);color:var(--color-surface);box-shadow:0 1px 3px rgb(23 43 58/.12)}
+.kind-tabs button[aria-selected=true]{background:var(--color-ink);color:var(--color-surface);box-shadow:0 1px 3px var(--color-shadow)}
 .kind-tabs button:hover{background:var(--color-paper-2)}
-.kind-tabs button[aria-selected=true]:hover{background:#294252}
+.kind-tabs button[aria-selected=true]:hover{background:color-mix(in srgb,var(--color-ink) 88%,var(--color-surface))}
 /* Category identity dot; the regional tab shows all five colors. */
 .kind-tabs button::before{content:"";display:inline-block;width:.5rem;height:.5rem;margin-right:.4rem;border-radius:50%;background:var(--tab-color);vertical-align:.08em}
 .kind-tabs button[aria-selected=true]::before{box-shadow:0 0 0 1.5px var(--color-surface)}
@@ -36,9 +36,9 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--color-focus);outlin
 .header-links a:hover{text-decoration-color:currentColor}
 .workspace-tools{display:none}
 #explore-detail{position:fixed;inset:0 0 0 auto;margin:0;width:min(25rem,calc(100% - 2rem));height:100dvh;max-width:none;max-height:none;padding:0;border:0;border-left:1px solid var(--color-rule);background:var(--color-paper);color:var(--color-ink);overflow:hidden}
-#explore-detail::backdrop{background:rgb(23 43 58/.18)}
+#explore-detail::backdrop{background:color-mix(in srgb,var(--color-ink) 18%,transparent)}
 #explore-detail .view-host{height:100%}
-#status{border-radius:6px;box-shadow:0 4px 20px rgb(23 43 58/.12)}
+#status{border-radius:6px;box-shadow:0 4px 20px var(--color-shadow)}
 #status button{min-height:44px;border:1px solid var(--color-rule);border-radius:4px;background:var(--color-surface);padding:.4rem .75rem}
 button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:1150px){
