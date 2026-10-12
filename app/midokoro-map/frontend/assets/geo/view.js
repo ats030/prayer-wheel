@@ -71,6 +71,10 @@ export function mount(context) {
   const shell = root.querySelector('.app-shell');
   // Parks are added first so point symbols always stay above the polygons.
   const parkLayer = L.layerGroup().addTo(map), pointLayer = L.layerGroup().addTo(map);
+  // Points sit above the areas. SVG only captures events on the dots, so clicks elsewhere still reach the areas below.
+  const pointPane = map.getPane('geo-points') || map.createPane('geo-points');
+  pointPane.style.zIndex = '450';
+  const pointRenderer = L.svg({pane:'geo-points'});
   let entries = [], shown = new Map(), loading = false;
   let selectedKey = null, selectedOrigin = null, selectedMarker = null, markerColors = {};
 
@@ -166,8 +170,8 @@ export function mount(context) {
       } else {
         const [longitude, latitude] = feature.geometry.coordinates, latlng = [latitude, longitude];
         const style = markerStyle(properties.designation);
-        layer = L.circleMarker(latlng, style).addTo(pointLayer);
-        L.circleMarker(latlng, {radius:2.5, stroke:false, fillColor:style.color, fillOpacity:1, interactive:false}).addTo(pointLayer);
+        layer = L.circleMarker(latlng, {...style, pane:'geo-points', renderer:pointRenderer}).addTo(pointLayer);
+        L.circleMarker(latlng, {radius:2.5, stroke:false, fillColor:style.color, fillOpacity:1, interactive:false, pane:'geo-points', renderer:pointRenderer}).addTo(pointLayer);
         layer.bindTooltip(esc(properties.name), {direction:'top', offset:[0,-10]});
       }
       layer.on('click', event => {
