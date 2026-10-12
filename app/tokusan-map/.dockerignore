@@ -1,9 +1,0 @@
-app-server
-*.exe
-data/*
-!data/summaries.json
-!data/official_summaries.json
-.git/
-__pycache__/
-*.log
-node_modules/

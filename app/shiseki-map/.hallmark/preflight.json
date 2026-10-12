@@ -1,9 +1,0 @@
-{
-  "date": "2026-09-16",
-  "framework": "vanilla HTML, CSS and JavaScript with Leaflet",
-  "font": "system UI and Yu Gothic inherited from the shared map design",
-  "palette": "warm paper, indigo ink, vermilion accent",
-  "motion": "motion-cut; short state transitions only",
-  "spacing": "4px-derived named scale",
-  "design_source": "../omatsuri-map/DESIGN.md"
-}

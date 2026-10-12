@@ -1,8 +1,0 @@
-{
-  "name": "ikimono-note-image-compatibility-probe",
-  "main": "src/worker.py",
-  "base_dir": "src",
-  "compatibility_date": "2026-10-07",
-  "compatibility_flags": ["python_workers"],
-  "workers_dev": false
-}

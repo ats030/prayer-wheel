@@ -1,9 +1,0 @@
-[Unit]
-Description=Webアプリのブラウザスモークテスト (画面が壊れていないか)
-After=network-online.target
-
-[Service]
-Type=oneshot
-# playwright はプロジェクト依存に入れず、実行時に解決する
-ExecStart=/home/ats030/.local/bin/uv run --project /home/ats030 --with playwright python /home/ats030/app/smoke-test.py
-TimeoutStartSec=10min

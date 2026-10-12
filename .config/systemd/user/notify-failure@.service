@@ -1,6 +1,0 @@
-[Unit]
-Description=%i の失敗を通知する
-
-[Service]
-Type=oneshot
-ExecStart=/home/ats030/app/notify-failure.sh %i

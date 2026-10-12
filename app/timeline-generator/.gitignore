@@ -1,6 +1,0 @@
-__pycache__/
-*.pyc
-data/
-cloudflare/assets/
-cloudflare/app-assets/
-cloudflare/.wrangler/

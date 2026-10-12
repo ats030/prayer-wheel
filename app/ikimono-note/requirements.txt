@@ -1,9 +1,0 @@
-# Cloud Run で動かすための依存。ホーム全体の pyproject.toml には streamlit や
-# playwright など無関係なものが106個入っており、そのまま持ち込むと
-# イメージが太るうえビルドも遅い。実際に import しているものだけを書く。
-fastapi==0.136.1
-uvicorn==0.46.0
-httpx==0.28.1
-pillow==12.2.0
-pillow-heif==1.7.0
-python-multipart==0.0.27

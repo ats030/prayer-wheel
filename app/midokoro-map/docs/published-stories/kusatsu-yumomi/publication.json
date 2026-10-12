@@ -1,8 +1,0 @@
-{
-  "slug": "kusatsu-yumomi",
-  "editorial_review": "completed",
-  "response_sha256": "a4a366e23553c5187034d2e2e8fc5652536e2a8e5b8c77196482db48981c44b5",
-  "html_sha256": "d3caa37e25a4c32760123a68bdc27d01ce47c2a2add8235d690512271fa42cd5",
-  "reviewed_draft_sha256": "a7913127f33222a8b6838f4a57436bcadbbb7826fcd6d7adba90517fd2c306da",
-  "review_note": "入力の一次資料と各段落を照合。伝承・比較・配管・祭礼起源の範囲を確認。修正はeditorial-changes.jsonに記録。"
-}

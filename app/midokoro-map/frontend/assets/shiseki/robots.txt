@@ -1,5 +1,0 @@
-User-agent: *
-Disallow: /api/
-Allow: /
-
-Sitemap: https://shiseki-map-736831430371.asia-northeast1.run.app/sitemap.xml

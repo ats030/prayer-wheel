@@ -1,6 +1,0 @@
-{
-  "projects": ["ikimono-note-12205", "dekita-507214"],
-  "exclude": [],
-  "api_prefixes": ["/api", "/v1", "/v2"],
-  "static_prefixes": ["/static", "/assets", "/_next", "/media"]
-}

@@ -1,8 +1,0 @@
-/*
-  X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
-  Referrer-Policy: strict-origin-when-cross-origin
-  Cache-Control: no-cache
-
-/audio/*
-  Cache-Control: public, max-age=86400

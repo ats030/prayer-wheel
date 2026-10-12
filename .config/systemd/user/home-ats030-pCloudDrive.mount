@@ -1,9 +1,0 @@
-[Unit]
-After=network-online.target
-[Mount]
-Type=rclone
-What=pcloud:
-Where=/home/ats030/pCloudDrive/
-Options=vfs-cache-mode=full,cache-dir=/home/ats030/.local/var/rclone/
-[Install]
-WantedBy=default.target

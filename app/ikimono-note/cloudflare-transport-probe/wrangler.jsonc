@@ -1,7 +1,0 @@
-{
-  "name": "ikimono-note-local-transport-probe",
-  "main": "worker.mjs",
-  "compatibility_date": "2026-10-08",
-  "build": {"command": "python3 build.py"},
-  "workers_dev": false
-}

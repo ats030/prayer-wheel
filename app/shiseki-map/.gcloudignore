@@ -1,8 +1,0 @@
-.git/
-.gitignore
-app-server
-*.exe
-*.log
-__pycache__/
-*.pyc
-scripts/

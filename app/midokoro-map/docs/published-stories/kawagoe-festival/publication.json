@@ -1,8 +1,0 @@
-{
-  "slug": "kawagoe-festival",
-  "editorial_review": "completed",
-  "response_sha256": "7622f02bd202a31929c054b7e2ec59f9ad1d645aa6efa4de66b924836399e3c1",
-  "html_sha256": "85e7433a13f48397e8a516308eac70f6b91c5f9311b637864f4cd045ab6deb55",
-  "reviewed_draft_sha256": "49e4b6034b4167302732b6807ac0743e6d6f0f5fcab8a373bc209b440a55ac01",
-  "review_note": "入力の一次資料と各段落を照合。伝承・比較・配管・祭礼起源の範囲を確認。修正はeditorial-changes.jsonに記録。"
-}

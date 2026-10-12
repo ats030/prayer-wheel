@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" data-favicon-size="84" data-outline-color="#464a52" data-outline-width="5">
-  <g transform="translate(7.5 7.5) scale(.85)">
-    <rect x="8" y="8" width="84" height="84" rx="16" fill="#f7f8f8" stroke="#464a52" stroke-width="6"/>
-    <circle cx="31" cy="69" r="6" fill="#f97316"/>
-    <path d="M31 49A20 20 0 0 1 51 69M31 29A40 40 0 0 1 71 69" fill="none" stroke="#f97316" stroke-width="8" stroke-linecap="round"/>
-  </g>
-</svg>
