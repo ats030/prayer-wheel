@@ -212,12 +212,12 @@ python3 browser_cloudflare_app.py https://timeline-generator.ats030.workers.dev
 公開HTTPSから到達できないLANのvisit-logは、共通画面の公開ビルドでのみ除外します（例外と理由はats030-pc85t）。ローカルHTMLのタグは保持します。
 
 生成APIの接続方針は、Cloudflare Accessで本人を認証し、Workers VPC Serviceから既存Pythonの限定APIへ接続する方式です。
-VPC Serviceは独自ドメインを必要としません。現時点では接続設定・本人認証・直通防止の本番検証が未完了で、Workerにバックエンドbindingは設定していません。
+VPC Serviceは独自ドメインを必要としません。本番WorkerにバックエンドbindingとAccess設定を反映済みです。本人の実ログイン・履歴表示・生成操作の確認は未完了です。
 Workers VPCはベータ提供中で、正式提供への変更時には条件を再確認します（[公式接続手順](https://developers.cloudflare.com/workers-vpc/get-started/)、[料金](https://developers.cloudflare.com/workers-vpc/platform/pricing/)）。
 Access Apps and Policies、Access Organizations、Cloudflare Tunnel、Connectivity Directoryの適切なアカウント権限が必要です。
 認証なしの転送、期限やURLが変わるQuick Tunnel、公開ユーザーによる本人のGeminiキー利用は有効化しません。
 
-接続コードの準備として `cloudflare/private-api.mjs` と `private_gateway.py` を実装しています。
+接続コードは `cloudflare/private-api.mjs` と `private_gateway.py` です。
 `/api/private/*` は、VPC binding・Access issuer・AUD・本人メール・専用Gateway Tokenが揃わない間は503です。
 設定後も、Access JWTのRS256署名・issuer・AUD・本人メール・有効期限を検証し、不正なら403で拒否します。
 公開鍵は固定したCloudflareチームURLからだけ取得し、最大64KiB・3秒、60秒キャッシュです。鍵のローテーション直後は最大60秒、再試行が必要な場合があります。
@@ -228,20 +228,21 @@ Gatewayは127.0.0.1:8535に限定し、既存の100.94.207.13:8532へだけ転�
 専用TokenはAPI TokenやGeminiキーと別に作り、権限600の通常ファイルとWorker secretへ配置する契約です。
 `TIMELINE_GATEWAY_TOKEN_FILE` がなければ起動しません。Cookie・Access JWT・Gateway Tokenは既存Python APIへ渡しません。
 同時転送は4件、上流通信は10秒までです。Gatewayは `private-gateway.service` をユーザーサービス `timeline-generator-gateway.service` として常駐化済みです。
-専用Tokenの保存先はGit対象外の `~/.config/timeline-generator/gateway.token` です。認証なしのhealthは403、専用Token付きの既存Pythonへのhealth転送は200を確認しています。本番Workerのbinding・本人用画面の接続は未完了です。
-本人用の共通画面は `/manage` と `/manage/timelines/:id`、評価は `/manage/quality` として準備しています。
+専用Tokenの保存先はGit対象外の `~/.config/timeline-generator/gateway.token` です。認証なしのhealthは403、専用Token付きの既存Pythonへのhealth転送は200を確認しています。
+本人用の共通画面は `/manage` と `/manage/timelines/:id`、評価は `/manage/quality` です。
 画面自体もJWTを検証し、キャッシュを禁止します。設定前の `/manage` は503です。
 公開一覧は認証設定後にだけ「本人用の生成画面へ」を表示します。本人用JSは `/api/private/*` だけを使い、一覧・登録後のリンク・条件変更は本人用画面内に保ちます。
-無料プランの確認とAccess/VPC権限の修正後、本人認証・実バックエンド・画面を一緒に検証してから有効化します。
+接続設定は配備済みです。本人認証後の画面表示と生成操作は、実ログインで別途確認します。
 
 接続用VPC Service `timeline-generator-api` は既存の稼働Tunnelに作成済みで、127.0.0.1:8535のみを対象にします。
 既存Tunnelの公開ルート設定は変更しません。Service ID等の接続情報はGit対象外の `data/cloudflare-connection.json` に保存します。
-公開Workerにはbindingを追加していません。取りやめる場合はGatewayユーザーサービスを停止し、このVPC Serviceだけを削除します。既存Tunnelを削除しません。
+公開Workerの本人用APIにbindingを追加済みです。取りやめる場合は接続前の検証済みWorkerバージョンへ戻し、Gatewayユーザーサービスを停止します。このVPC Serviceだけを削除でき、既存Tunnelは削除しません。
 2026-10-12に本人からZero Trust初期設定の完了連絡があり、Accessアプリ一覧は取得できましたが、既存Tokenでのアプリ作成は403でした。
 Access操作には `~/.env` の `CLOUDFLARE_ACCESS_API_TOKEN` を優先して使い、配備用の `CLOUDFLARE_API_TOKEN` と分けます。値はToken本体のみとし、認証拒否後に別Tokenで再試行しません。
 Access専用Tokenの更新後、本人メールだけを許可する `timeline-generator owner` アプリを作成済みです。保護対象は `/manage` と `/api/private` の配下で、公開トップページは200、匿名の保護対象はAccessログインへの302を確認しています。
 本番の匿名検証は `python3 check_cloudflare_app.py https://timeline-generator.ats030.workers.dev --access-protected` を使います。ログイン先へ追従せず、本人用データを読みません。
-VPC/Tunnelの管理APIは通過していますが、既存Wrangler OAuthにはVPCのbinding権限がなく、リモート接続検証は権限エラーでした。管理APIの成功だけでは本番接続の成功を保証しません。
+現行のアカウント用Tokenでは開発用edge-previewが10196で拒否される一方、本番配備のVPC bindingは成功しました。原因は未確定で、追加権限を要求し続ける必要はありません。
+Tokenで保護した一時WorkerからVPC→Gateway→Pythonのhealth応答200を確認し、匿名403も検証しました。一時Workerは検証後に削除済みです。本番配備バージョンは `569dffd2-7e34-44e4-8c58-10df3ca7e17e` です。
 Cloudflareの[公式初期設定手順](https://developers.cloudflare.com/cloudflare-one/setup/)では、Freeでも支払い情報の登録が必要ですが、Free選択時は課金されないとされています。
 プラン選択・支払い情報登録は本人がダッシュボードで行います。エージェントは有料プランへの変更や支払い情報入力を行いません。
 
