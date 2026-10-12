@@ -217,6 +217,35 @@ Workers VPCはベータ提供中で、正式提供への変更時には条件を
 Access Apps and Policies、Access Organizations、Cloudflare Tunnel、Connectivity Directoryの適切なアカウント権限が必要です。
 認証なしの転送、期限やURLが変わるQuick Tunnel、公開ユーザーによる本人のGeminiキー利用は有効化しません。
 
+接続コードの準備として `cloudflare/private-api.mjs` と `private_gateway.py` を実装しています。
+`/api/private/*` は、VPC binding・Access issuer・AUD・本人メール・専用Gateway Tokenが揃わない間は503です。
+設定後も、Access JWTのRS256署名・issuer・AUD・本人メール・有効期限を検証し、不正なら403で拒否します。
+公開鍵は固定したCloudflareチームURLからだけ取得し、最大64KiB・3秒、60秒キャッシュです。鍵のローテーション直後は最大60秒、再試行が必要な場合があります。
+ブラウザのPOSTは同一OriginのJSONだけを許可し、入力は2048bytes（主要項目は65536bytes）、応答は4MiBまでです。
+許可するのはjobs一覧・詳細・生成/再試行/再生成/中止/削除/主要項目とquality/healthの固定経路です。任意URLへの転送やredirectは拒否します。
+
+Gatewayは127.0.0.1:8535に限定し、既存の100.94.207.13:8532へだけ転送します。
+専用TokenはAPI TokenやGeminiキーと別に作り、権限600の通常ファイルとWorker secretへ配置する契約です。
+`TIMELINE_GATEWAY_TOKEN_FILE` がなければ起動しません。Cookie・Access JWT・Gateway Tokenは既存Python APIへ渡しません。
+同時転送は4件、上流通信は10秒までです。GatewayとTunnelの常駐化、本番binding・本人用画面の接続はまだ行っていません。
+本人用の共通画面は `/manage` と `/manage/timelines/:id`、評価は `/manage/quality` として準備しています。
+画面自体もJWTを検証し、キャッシュを禁止します。設定前の `/manage` は503です。
+公開一覧は認証設定後にだけ「本人用の生成画面へ」を表示します。本人用JSは `/api/private/*` だけを使い、一覧・登録後のリンク・条件変更は本人用画面内に保ちます。
+無料プランの確認とAccess/VPC権限の修正後、本人認証・実バックエンド・画面を一緒に検証してから有効化します。
+
+接続用VPC Service `timeline-generator-api` は既存の稼働Tunnelに作成済みで、127.0.0.1:8535のみを対象にします。
+既存Tunnelの公開ルート設定は変更しません。Service ID等の接続情報はGit対象外の `data/cloudflare-connection.json` に保存します。
+作成時点ではGatewayを起動せず、公開Workerにbindingも追加していません。取りやめる場合はこのVPC Serviceだけを削除し、既存Tunnelを削除しません。
+2026-10-12の再確認でVPC/Tunnel権限は通過し、AccessアプリAPIから `access.api.error.not_enabled` が返りました。
+Token権限だけでなく、対象アカウントのZero Trust初期設定も必要です。
+Cloudflareの[公式初期設定手順](https://developers.cloudflare.com/cloudflare-one/setup/)では、Freeでも支払い情報の登録が必要ですが、Free選択時は課金されないとされています。
+プラン選択・支払い情報登録は本人がダッシュボードで行います。エージェントは有料プランへの変更や支払い情報入力を行いません。
+
+```bash
+python3 -m unittest test_private_gateway
+~/.nvm/versions/node/v24.19.0/bin/node cloudflare/test-private-api.mjs
+```
+
 今回の統合では有料プランへの変更や有料add-onの追加を行いません。
 静的アセットは追加料金なしです。動的ルートはWorkers使用量に計上され、Freeプランなら1日100000リクエスト・1回10ms CPUが上限です。
 閲覧専用の一覧・詳細は自動ポーリングを止めます。既存アカウントの契約プラン自体はこの実装で変更しません。

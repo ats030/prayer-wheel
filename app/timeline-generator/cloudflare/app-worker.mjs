@@ -1,5 +1,6 @@
 // Shared UI with a read-only adapter for already published content.
 // Private generation stays unavailable until an authenticated backend is verified.
+import {configured, privateApi, verifyOwner} from "./private-api.mjs";
 const notice = "公開年表の閲覧・端末保存を利用できます。生成・再生成・中止は接続準備中です。";
 const csp = "default-src 'none'; script-src 'self'; connect-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
 function json(body, status = 200) {
@@ -20,6 +21,21 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const path = url.pathname;
+    if (path.startsWith("/api/private/")) return privateApi(request, env);
+    if (path === "/manage" || path.startsWith("/manage/")) {
+      if (!configured(env)) return json({error: "本人用の生成接続は準備中です。"}, 503);
+      if (!await verifyOwner(request, env)) return json({error: "本人認証が必要です。"}, 403);
+      if (!["GET", "HEAD"].includes(request.method)) return json({error: "操作できません。"}, 405);
+      const page = path === "/manage" ? "/" : path === "/manage/quality" ? "/quality" :
+        /^\/manage\/timelines\/[1-9]\d{0,17}$/.test(path) ? "/detail" : null;
+      if (!page) return json({error: "画面が見つかりません。"}, 404);
+      url.pathname = page;
+      url.search = "";
+      const asset = await env.ASSETS.fetch(new Request(url, {method: request.method}));
+      const headers = new Headers(asset.headers);
+      headers.set("Cache-Control", "no-store");
+      return new Response(asset.body, {status: asset.status, headers});
+    }
     if (path.startsWith("/api/")) {
       if (request.method !== "GET") return json({error: notice}, 503);
       if (path === "/api/capabilities") return json({generation_available: false, notice});
@@ -36,7 +52,7 @@ export default {
         }
         const {result, ...summary} = job;
         return json({jobs: Number(raw) === 0 ? [summary] : [], total: 1,
-          generation_available: false, notice});
+          generation_available: false, notice, owner_login: configured(env) ? "/manage" : null});
       } catch {
         return json({error: "公開年表を読み込めませんでした。"}, 503);
       }

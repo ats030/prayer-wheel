@@ -39,6 +39,8 @@ assert status == 200 and job["read_only"] and len(job["result"]["events"]) == 50
 assert job["result"]["source_mode"] == "unknown" and job["quality"] is None
 assert request("/api/jobs", "POST")[0] == 503
 assert request("/api/jobs/pub-showa/regenerate", "POST")[0] == 503
+assert request("/api/private/jobs")[0] == 503
+assert request("/manage")[0] == 503
 assert request("/api/jobs?offset=-1")[0] == 400
 assert json.loads(request("/api/jobs?offset=50")[1])["jobs"] == []
 for path in ["/api/jobs/1", "/api/receipts/1", "/api/byok/receipts", "/timelines/1", "/data/timelines.sqlite3",

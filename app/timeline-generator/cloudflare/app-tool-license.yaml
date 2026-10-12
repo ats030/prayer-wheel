@@ -12,11 +12,20 @@ conditions:
   - Missing source_mode remains unknown; old publication is not a new quality approval.
   - No private DB, Gemini key, auth token, generation backend or log storage is uploaded.
   - Public listing and detail stop polling when read-only, limiting Worker calls.
-  - Access and backend connection remain disabled pending a separately validated configuration.
+  - Access verification and VPC bridge code are prepared with existing JavaScript Web Crypto and Python standard libraries; no new SDK is installed.
+  - Access and backend connection remain disabled pending permissions, Free-plan confirmation and a separately validated configuration.
+  - VPC is currently free during open beta; recheck pricing before activation and when beta ends. No paid upgrade is authorized by this implementation.
 adoption: approved_shared_ui_and_readonly_public_adapter
+backend_preparation:
+  status: conditional
+  scope: Owner JWT verification and loopback gateway tested; one VPC Service targets existing tunnel and fixed gateway port; gateway and public backend binding remain inactive.
+  condition: Owner completes Zero Trust Free onboarding and confirms plan; no paid subscription is created by the agent.
 sources:
   - https://developers.cloudflare.com/workers/platform/pricing/
   - https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/
   - https://www.cloudflare.com/terms/
   - https://www.cloudflare.com/service-specific-terms-application-services/
   - https://github.com/cloudflare/workers-sdk/blob/main/LICENSE-APACHE
+  - https://developers.cloudflare.com/workers-vpc/platform/pricing/
+  - https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/
+  - https://developers.cloudflare.com/cloudflare-one/setup/

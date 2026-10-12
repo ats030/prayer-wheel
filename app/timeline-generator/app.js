@@ -1,5 +1,11 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
+const ownerMode = location.pathname === "/manage" || location.pathname.startsWith("/manage/");
+const homePath = ownerMode ? "/manage" : "/";
+const jobPath = id => `${ownerMode ? "/manage" : ""}/timelines/${id}`;
+if (ownerMode) document.querySelectorAll('a[href="/"], a[href="/quality"]').forEach(link => {
+  link.href = link.getAttribute("href") === "/" ? "/manage" : "/manage/quality";
+});
 const stages = ["search", "read", "generate", "verify"];
 const labels = {queued: "待機中", running: "生成中", complete: "完了", failed: "失敗", cancelled: "中止"};
 const active = job => ["queued", "running"].includes(job.state);
@@ -24,7 +30,11 @@ function node(tag, className, text) {
 function date(value) { return new Date(value).toLocaleString("ja-JP"); }
 function shortDate(value) { return value ? new Date(value).toLocaleString("ja-JP", {year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"}) : "日時記録なし"; }
 async function api(path, body) {
+  if (ownerMode) path = path.replace(/^\/api\//, "/api/private/");
   const response = await fetch(path, {method: body === undefined ? "GET" : "POST", headers: {"Content-Type": "application/json"}, body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(15000)});
+  if (!response.headers.get("Content-Type")?.startsWith("application/json")) {
+    throw new Error(ownerMode ? "本人用の画面を開き直して、ログイン状態を確認してください。" : "接続を確認できませんでした。画面を開き直してください。");
+  }
   const data = await response.json();
   if (!response.ok) {
     const failure = new Error(data.error || "処理を完了できませんでした。");
@@ -186,11 +196,11 @@ if ($("search-form")) {
     $("search-form").setAttribute("aria-busy", "true");
     try {
       const job = await api("/api/jobs", {query});
-      if (job.has_result) { location.assign(`/timelines/${job.id}`); return; }
+      if (job.has_result) { location.assign(jobPath(job.id)); return; }
       $("receipt").hidden = false;
       $("receipt-heading").textContent = job.state === "failed" ? "前回の生成は失敗しました" : job.state === "cancelled" ? "前回の処理は中止しました" : "キューに登録されています";
       $("receipt-message").textContent = `${job.query} · ${labels[job.state]}。別のテーマも追加できます。`;
-      $("receipt-link").href = `/timelines/${job.id}`;
+      $("receipt-link").href = jobPath(job.id);
       document.dispatchEvent(new Event("job-registered"));
     } catch (exc) {
       error("form-error", exc.message || "接続できませんでした。もう一度お試しください。");
@@ -224,6 +234,7 @@ if ($("job-list")) {
     try {
       const data = await api(`/api/jobs?offset=${offset}`);
       generationAvailability(data.generation_available !== false, data.notice);
+      if ($("owner-entry")) $("owner-entry").hidden = data.owner_login !== "/manage" || ownerMode;
       if (data.generation_available === false) $("page-heading").textContent = "公開年表";
       if (deleting) return;
       if (offset > 0 && !data.jobs.length) { refreshPending = true; return; }
@@ -234,7 +245,7 @@ if ($("job-list")) {
       for (const job of data.jobs) {
         const row = node("li", "job-row");
         const link = node("a", "job-link", job.query);
-        link.href = `/timelines/${job.id}`;
+        link.href = jobPath(job.id);
         const updated = node("time", "job-updated");
         updated.append(node("span", "job-updated-label", "更新 "), shortDate(job.updated_at));
         if (job.updated_at) updated.dateTime = job.updated_at;
@@ -473,7 +484,7 @@ if ($("job-status")) {
     $("refine").hidden = !!job.read_only;
     $("publication-license").hidden = !job.read_only;
     $("refine").textContent = job.legacy_period ? "全期間で新規登録" : "条件を変える";
-    $("refine").href = `/?query=${encodeURIComponent(job.legacy_period ? job.topic : job.query)}`;
+    $("refine").href = `${homePath}?query=${encodeURIComponent(job.legacy_period ? job.topic : job.query)}`;
     $("legacy-period").hidden = !job.legacy_period;
     $("legacy-period").textContent = job.legacy_period ? `期間限定（${job.period}）の保存済み年表です。閲覧専用のため、年代条件を外して新しく登録してください。` : "";
     $("progress").hidden = job.state !== "running";
@@ -533,7 +544,7 @@ if ($("quality-axes")) {
           if (!axis) continue;
           const row = axisRow(axis, "", false);
           const link = node("a", "axis-label", job.query);
-          link.href = `/timelines/${job.id}`;
+          link.href = jobPath(job.id);
           row.firstChild.replaceWith(link);
           list.append(row);
         }
