@@ -1,0 +1,47 @@
+/* Shared finishing layer for the five category workspaces. */
+.app-shell{position:relative;grid-template-columns:minmax(16rem,21rem) minmax(0,1fr)}
+.app-shell.has-detail{grid-template-columns:minmax(16rem,21rem) minmax(0,1fr) minmax(19rem,23rem)}
+.masthead{padding:1.25rem 1.25rem 1rem}
+.masthead h2{letter-spacing:.02em}
+.masthead p{margin:.5rem 0 0;color:var(--color-ink-2);font-size:.82rem;line-height:1.65}
+.filters{gap:.75rem;padding:1rem 1.25rem;background:rgb(255 255 255/.24)}
+.filters .field{font-size:.75rem;gap:.35rem}
+.filters input:not([type=checkbox]),.filters select,.multi-select summary{min-height:44px;height:2.75rem;border-radius:6px;background:#fffdf8;transition:border-color 140ms ease,box-shadow 140ms ease}
+.filters input:not([type=checkbox]):hover,.filters select:hover,.multi-select summary:hover{border-color:var(--color-ink-2)}
+.filters input:not([type=checkbox]):focus-visible,.filters select:focus-visible,.multi-select summary:focus-visible{border-color:var(--color-focus);outline:2px solid var(--color-focus);outline-offset:2px}
+.filters input:not([type=checkbox])::placeholder{color:var(--color-ink-2);opacity:.85}
+.multi-options{grid-template-columns:repeat(auto-fill,minmax(min(8.5rem,100%),1fr));border-radius:6px;max-height:18rem;overflow:auto}
+.multi-option{min-height:44px;overflow-wrap:anywhere}
+.result-bar{padding:.5rem 1.25rem;align-items:center;font-size:.85rem;background:var(--color-paper)}
+.result-bar strong{font-size:1.1rem}
+.result-bar button{min-height:44px;padding:.4rem .5rem;border:0;border-radius:4px;font-size:.75rem}
+.result-bar button:hover{background:var(--color-paper-2)}
+:is(.shiseki-card,.festival-card,.onsen-card,.tokusan-card,.geo-card){padding:1rem 1.25rem;gap:.5rem;transition:background 140ms ease}
+.card-index{padding-top:.2rem;font-size:.68rem}
+.card-name{font-size:.95rem;line-height:1.5}
+.card-meta{line-height:1.6}
+:is(.shiseki-card,.festival-card,.onsen-card,.tokusan-card,.geo-card):focus-visible{outline:2px solid var(--color-focus);outline-offset:-3px}
+.detail-header{min-height:4rem;padding:.75rem 1.25rem}
+.detail-close{width:44px;height:44px;min-width:44px;flex-shrink:0}
+.detail-content{padding-inline:1.25rem}
+.detail-section h3{font-size:.82rem;letter-spacing:.04em}
+.detail-panel{box-shadow:-4px 0 16px rgb(23 43 58/.06)}
+.map-count,.map-legend{border-radius:6px;box-shadow:0 2px 8px rgb(23 43 58/.08)}
+.map-region:focus-visible{outline:3px solid var(--color-focus);outline-offset:-3px}
+#geo-message:empty{display:none}
+@media(min-width:769px){
+  .filters .field-wide:not(:first-child):not(.date-range-field){grid-column:auto}
+}
+@media(min-width:769px) and (max-width:1100px){
+  .app-shell.has-detail{grid-template-columns:minmax(16rem,21rem) minmax(0,1fr)}
+  .detail-panel{position:absolute;inset:0 0 0 auto;width:min(24rem,calc(100% - 2rem));z-index:700;box-shadow:-8px 0 24px rgb(23 43 58/.16)}
+}
+@media(max-width:768px){
+  .masthead{padding:1rem}
+  .filters,.result-bar{padding-inline:1rem}
+  .detail-panel{box-shadow:none}
+  .detail-header{padding-inline:1rem}
+  .detail-content{padding-inline:1rem}
+  .map-region{scroll-margin-top:0}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}

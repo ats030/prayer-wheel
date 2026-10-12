@@ -6,6 +6,19 @@ const storageKey = 'midokoro-map:last-kind';
 let config;
 let requestNumber = 0;
 
+for (const button of document.querySelectorAll('[data-workspace-target]')) {
+  button.addEventListener('click', () => {
+    const root = document.querySelector('.view-host:not([hidden])')?.shadowRoot;
+    const search = button.dataset.workspaceTarget === 'search';
+    const region = root?.querySelector(search ? '.workbench' : '.map-region');
+    if (!region) return;
+    region.scrollIntoView({block:'start', behavior:'instant'});
+    const target = search ? root.querySelector('#keyword') : region;
+    if (!search) target.tabIndex = -1;
+    target?.focus({preventScroll:true});
+  });
+}
+
 function storedKind() { try { return localStorage.getItem(storageKey); } catch { return null; } }
 async function choose(kind, focus=false) {
   if (!kinds.includes(kind) || !config) return;
