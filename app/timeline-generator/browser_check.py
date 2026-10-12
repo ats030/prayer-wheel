@@ -106,7 +106,7 @@ with sync_playwright() as playwright:
             if path == '/timelines':
                 assert page.locator('.pagination').is_hidden(), 'single page hides pagination'
             if width == 1280 and path == '/timelines/1':
-                assert page.locator('.job-actions').evaluate("e => {const a=e.getBoundingClientRect(), b=document.getElementById('page-heading').getBoundingClientRect(); return Math.abs((a.top+a.bottom)/2-(b.top+b.bottom)/2)<12;}"), (path, 'heading/actions alignment')
+                assert page.locator('.detail-controls').evaluate("e => e.getBoundingClientRect().top >= document.querySelector('.status-section').getBoundingClientRect().bottom"), (path, 'progress remains above controls')
         page.screenshot(path=f"/tmp/timeline-generator-queue-{width}.png", full_page=True)
     for path in ['/', '/timelines']:
         page.goto(URL + path)

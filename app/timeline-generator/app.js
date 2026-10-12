@@ -474,6 +474,7 @@ if ($("job-status")) {
     $("job-status").textContent = stateLabel(job);
     $("job-status").dataset.state = job.state;
     $("local-save").hidden = $("local-download").hidden = !job.result;
+    if ($("generation-actions")) $("generation-actions").hidden = Boolean(job.read_only);
     $("result-meta").hidden = !job.result;
     $("generation-info").hidden = !job.result;
     $("job-message").textContent = job.message || "";
