@@ -92,6 +92,26 @@ def shown_by_shiseki(site: dict, by_heritage: dict, cells: dict) -> str | None:
     return None
 
 
+def load_wikidata(data: Path) -> dict:
+    path = data / "geo/wikidata.json"
+    if path.exists():
+        return json.loads(path.read_text())
+    return {}
+
+
+def attach_wikidata(features: list, mapping: dict) -> list:
+    for feature in features:
+        url = feature["properties"].get("source_url", "")
+        m = re.search(r'/heritage/detail/(\d+/\d+)', url)
+        if m:
+            key = m.group(1)
+            if key in mapping:
+                feature["properties"]["qid"] = mapping[key]["qid"]
+                if mapping[key].get("title"):
+                    feature["properties"]["wikipedia_title"] = mapping[key]["title"]
+    return features
+
+
 def build_sites(data: Path) -> dict:
     with closing(sqlite3.connect(f"file:{data / 'geo/geo.db'}?mode=ro", uri=True)) as con:
         con.row_factory = sqlite3.Row
@@ -116,6 +136,7 @@ def build_sites(data: Path) -> dict:
                                                                    "kind", "criteria", "prefecture", "address",
                                                                    "source_url", "fetched")}
                                         | {"shiseki": site_id}})
+    features = attach_wikidata(features, load_wikidata(data))
     return {"type": "FeatureCollection", "features": features,
             "meta": {"source": meta["geosite_source"], "built": meta["geosite_built"], "geosites": len(sites),
                      "without_coordinates": missing, "shown_by_shiseki": shared}}
