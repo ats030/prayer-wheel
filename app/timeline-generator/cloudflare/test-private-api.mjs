@@ -20,7 +20,7 @@ let certRequests = 0;
 async function keys(url, options) {
   certRequests++;
   assert.equal(url, env.ACCESS_ISSUER + "/cdn-cgi/access/certs");
-  assert.equal(options.redirect, "error");
+  assert.equal(options.redirect, "manual");
   return Response.json({keys: [jwk]});
 }
 const valid = await token();
@@ -30,6 +30,11 @@ const request = (value = valid, method = "GET", path = "/api/private/jobs", extr
 assert.equal(configured({}), undefined);
 assert.equal(await verifyOwner(request(), {}, keys), false);
 assert.equal(await verifyOwner(new Request("https://example.org"), env, keys), false);
+assert.equal(await verifyOwner(request(), env, async (url, options) => {
+  assert.equal(url, env.ACCESS_ISSUER + "/cdn-cgi/access/certs");
+  assert.equal(options.redirect, "manual");
+  return new Response(null, {status: 302, headers: {Location: "https://evil.example/keys"}});
+}), false);
 assert.equal(await verifyOwner(request(), env, keys), true);
 for (const overrides of [{iss: "https://evil.example"}, {aud: ["b".repeat(64)]}, {email: "someone@example.com"},
   {exp: now - 1}, {exp: String(now + 60)}, {iat: now + 60}, {nbf: now + 30}, {sub: ""}, {type: "service"}]) {
@@ -76,6 +81,7 @@ assert.equal(response.headers.get("Content-Security-Policy").includes("frame-anc
 assert.equal((await response.json()).result.trace, undefined);
 assert.equal(forwarded.length, 1);
 assert.equal(forwarded[0].url, "http://127.0.0.1:8535/api/jobs");
+assert.equal(forwarded[0].options.redirect, "manual");
 assert.deepEqual(Object.keys(forwarded[0].options.headers).sort(), ["Authorization", "Content-Type"]);
 env.PRIVATE_API.fetch = async () => new Response(null, {status: 302, headers: {Location: "https://evil.example"}});
 assert.equal((await privateApi(request(), env)).status, 502);

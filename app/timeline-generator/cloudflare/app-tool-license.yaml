@@ -3,23 +3,23 @@ plan_or_version: Existing account and existing Wrangler 4.149.0; no paid upgrade
 reviewed_at: 2026-10-12
 status: conditional
 cost:
-  condition: Static assets have no additional charge. Dynamic routes count towards Workers usage; Free plan allows 100000 requests/day and 10ms CPU/invocation. No AI, database or paid add-on is enabled.
+  condition: Static assets have no additional charge. Dynamic routes count towards Workers usage; Free plan allows 100000 requests/day and 10ms CPU/invocation. No hosted AI, database or paid add-on is added; the owner's existing local Python generator remains on the home server.
 license:
   commercial_use: Existing Cloudflare service use remains subject to its subscription and application-service terms.
   cli: Existing Wrangler Apache-2.0 distribution retained.
 conditions:
   - Only the previously published, hash-verified snapshot supplies public event data.
   - Missing source_mode remains unknown; old publication is not a new quality approval.
-  - No private DB, Gemini key, auth token, generation backend or log storage is uploaded.
+  - No private DB, Gemini key, Python generation backend or log storage is uploaded. Gateway authentication is kept in a Worker secret and a private local file.
   - Public listing and detail stop polling when read-only, limiting Worker calls.
-  - Access verification and VPC bridge code are prepared with existing JavaScript Web Crypto and Python standard libraries; no new SDK is installed.
-  - Access and backend connection remain disabled pending permissions, Free-plan confirmation and a separately validated configuration.
-  - VPC is currently free during open beta; recheck pricing before activation and when beta ends. No paid upgrade is authorized by this implementation.
-adoption: approved_shared_ui_and_readonly_public_adapter
+  - Access verification and the active VPC bridge use existing JavaScript Web Crypto and Python standard libraries; no new SDK is installed.
+  - Owner-only Access login, private history display and production VPC health forwarding are verified. Public viewers cannot access the generation API.
+  - VPC is currently free during open beta; recheck pricing when beta ends. No paid upgrade is authorized by this implementation.
+adoption: approved_shared_ui_and_owner_only_backend
 backend_preparation:
   status: conditional
-  scope: Owner JWT verification and loopback gateway tested; one VPC Service targets existing tunnel and fixed gateway port; gateway and public backend binding remain inactive.
-  condition: Owner completes Zero Trust Free onboarding and confirms plan; no paid subscription is created by the agent.
+  scope: Owner JWT verification and loopback gateway tested; one active VPC Service targets the existing tunnel and fixed gateway port. Production health forwarding and real owner login/history display are verified; production write operations remain under verification.
+  condition: Owner reported Zero Trust onboarding complete; account billing plan could not be independently verified by subscription API. No paid subscription is created or changed by the agent.
 sources:
   - https://developers.cloudflare.com/workers/platform/pricing/
   - https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/

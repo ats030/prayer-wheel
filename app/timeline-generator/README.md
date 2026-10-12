@@ -212,7 +212,7 @@ python3 browser_cloudflare_app.py https://timeline-generator.ats030.workers.dev
 公開HTTPSから到達できないLANのvisit-logは、共通画面の公開ビルドでのみ除外します（例外と理由はats030-pc85t）。ローカルHTMLのタグは保持します。
 
 生成APIの接続方針は、Cloudflare Accessで本人を認証し、Workers VPC Serviceから既存Pythonの限定APIへ接続する方式です。
-VPC Serviceは独自ドメインを必要としません。本番WorkerにバックエンドbindingとAccess設定を反映済みです。本人の実ログイン・履歴表示・生成操作の確認は未完了です。
+VPC Serviceは独自ドメインを必要としません。本番WorkerにバックエンドbindingとAccess設定を反映済みで、本人の実ログイン・履歴表示を確認しています。生成・中止・再生成の本番実操作は未確認です。
 Workers VPCはベータ提供中で、正式提供への変更時には条件を再確認します（[公式接続手順](https://developers.cloudflare.com/workers-vpc/get-started/)、[料金](https://developers.cloudflare.com/workers-vpc/platform/pricing/)）。
 Access Apps and Policies、Access Organizations、Cloudflare Tunnel、Connectivity Directoryの適切なアカウント権限が必要です。
 認証なしの転送、期限やURLが変わるQuick Tunnel、公開ユーザーによる本人のGeminiキー利用は有効化しません。
@@ -232,7 +232,7 @@ Gatewayは127.0.0.1:8535に限定し、既存の100.94.207.13:8532へだけ転�
 本人用の共通画面は `/manage` と `/manage/timelines/:id`、評価は `/manage/quality` です。
 画面自体もJWTを検証し、キャッシュを禁止します。設定前の `/manage` は503です。
 公開一覧は認証設定後にだけ「本人用の生成画面へ」を表示します。本人用JSは `/api/private/*` だけを使い、一覧・登録後のリンク・条件変更は本人用画面内に保ちます。
-接続設定は配備済みです。本人認証後の画面表示と生成操作は、実ログインで別途確認します。
+接続設定は配備済みです。本人認証後の履歴表示は実ログインで確認済み、生成操作は模擬APIで検証しています。
 
 接続用VPC Service `timeline-generator-api` は既存の稼働Tunnelに作成済みで、127.0.0.1:8535のみを対象にします。
 既存Tunnelの公開ルート設定は変更しません。Service ID等の接続情報はGit対象外の `data/cloudflare-connection.json` に保存します。
@@ -243,6 +243,7 @@ Access専用Tokenの更新後、本人メールだけを許可する `timeline-g
 本番の匿名検証は `python3 check_cloudflare_app.py https://timeline-generator.ats030.workers.dev --access-protected` を使います。ログイン先へ追従せず、本人用データを読みません。
 現行のアカウント用Tokenでは開発用edge-previewが10196で拒否される一方、本番配備のVPC bindingは成功しました。原因は未確定で、追加権限を要求し続ける必要はありません。
 Tokenで保護した一時WorkerからVPC→Gateway→Pythonのhealth応答200を確認し、匿名403も検証しました。一時Workerは検証後に削除済みです。本番配備バージョンは `569dffd2-7e34-44e4-8c58-10df3ca7e17e` です。
+本人の実ログイン検証で、Workersのfetchが `redirect: "error"` を拒否することを確認しました。署名鍵取得とVPC転送を `manual` に修正し、3xxを拒否して追従しません。実Workersから署名鍵取得200と、本人用画面の履歴表示を確認済みです。修正後の本番バージョンは `f9a93e87-3451-42a8-bd81-2f909f9e4578` です。一時診断ログ・診断Workerは撤去しました。
 Cloudflareの[公式初期設定手順](https://developers.cloudflare.com/cloudflare-one/setup/)では、Freeでも支払い情報の登録が必要ですが、Free選択時は課金されないとされています。
 プラン選択・支払い情報登録は本人がダッシュボードで行います。エージェントは有料プランへの変更や支払い情報入力を行いません。
 

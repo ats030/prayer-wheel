@@ -56,7 +56,7 @@ export async function verifyOwner(request, env, getKeys = fetch) {
     // Only a fixed, configured Cloudflare issuer supplies keys. Token jku/x5u URLs are ignored.
     if (!keyCache || keyCache.issuer !== env.ACCESS_ISSUER || keyCache.until <= now) {
       const response = await getKeys(env.ACCESS_ISSUER + "/cdn-cgi/access/certs", {
-        redirect: "error", signal: AbortSignal.timeout(3000)
+        redirect: "manual", signal: AbortSignal.timeout(3000)
       });
       if (!response.ok) return false;
       const keys = JSON.parse(decoder.decode(await readLimited(response.body, 65536))).keys;
@@ -96,7 +96,7 @@ export async function privateApi(request, env) {
   }
   try {
     const response = await env.PRIVATE_API.fetch("http://127.0.0.1:8535" + path + url.search, {
-      method: request.method, body, redirect: "error", signal: AbortSignal.timeout(12000),
+      method: request.method, body, redirect: "manual", signal: AbortSignal.timeout(12000),
       headers: {"Authorization": "Bearer " + env.GATEWAY_TOKEN, "Content-Type": "application/json"}
     });
     if (response.status >= 300 && response.status < 400 || !response.headers.get("Content-Type")?.startsWith("application/json")) {
