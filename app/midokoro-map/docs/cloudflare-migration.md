@@ -86,3 +86,17 @@ Cloud Runとの比較で24,968件（史跡20,203、祭り1,428、温泉1,418、�
 ```sh
 python3 scripts/check-cloudflare-api.py https://midokoro-map.ats030.workers.dev --reference http://ubuntu-server-app:8533
 ```
+
+## 2026-10-12のUI公開
+
+`0c17587f`のUI/UX改善を公開した。公開バージョンは`e7bcae7a-fa84-4ed0-bd15-764f8cf9b871`。
+直前の復旧先は`ae170999-a434-4e3e-82cc-817bdfd1c1e2`。
+カテゴリナビ、検索欄、詳細パネル、スマートフォンの地図・検索移動に加え、未公開だった国立公園35件も反映した。
+
+未コミットの`data/shiseki/summaries.json`は公開に含めず、コピーしたビルド用データだけをHEADの内容へ置き換えた。
+そのSHA256は`0263a66863bb8b18adff347e6500b3b726658293666c949547ae73ee85590d7f`で、ビルドmanifestにも同じ値を記録した。
+要約のみ表示への切替は行っていない。
+
+公開資産1748件のビルドとWorker APIテストが成功。
+公開URLで`browser-check.py`、`browser-geo-check.py`、`browser-workspace-check.py`が成功し、5カテゴリの検索・詳細・条件保持・キーボード・モバイル移動、320〜1440px、文字サイズ200%、空結果・読込失敗時の再試行を確認した。
+ルートHTML、app.css、app.js、runtime.js、workspace.css、国立公園GeoJSONは検証済みビルドとバイト単位で一致した。
