@@ -1,15 +1,17 @@
-"""Explicit one-case comparison. Hidden key input; never resumes paid work."""
+"""Explicit one-case comparison. Owner-selected key file; no paid resume."""
 import argparse
 from decimal import Decimal, InvalidOperation
 import getpass
 import hashlib
 import json
 import os
+import re
+import shlex
 from pathlib import Path
 import threading
 import time
 
-from byok import MODEL, MODEL_STAGES, MIN_CALL_INTERVAL, INPUT_TOKENS_PER_MINUTE, validate_key
+from byok import ByokError, MODEL, MODEL_STAGES, MIN_CALL_INTERVAL, INPUT_TOKENS_PER_MINUTE, validate_key
 from byok_pipeline import FetchBudget, bounded_byok
 from byok_metrics import MaterialMetrics
 from byok_runtime import ByokLimits
@@ -18,6 +20,38 @@ from public_security import result_view
 ROOT = Path(__file__).resolve().parent
 HASHED = ("timeline.py", "milestones.py", "byok.py", "byok_pipeline.py", "byok_metrics.py", "byok_eval.py",
           "quality_eval.py", "quality_gold.json", "quality_holdout.json")
+
+
+def read_key_file(path, name):
+    """Read one literal dotenv assignment; never execute or expand its contents."""
+    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
+        raise ByokError("key_variable_invalid")
+    try:
+        with path.expanduser().open("rb") as stream:
+            raw = stream.read(1_048_577)
+        if len(raw) > 1_048_576:
+            raise ByokError("key_file_invalid")
+        lines = raw.decode("utf-8").splitlines()
+    except (OSError, UnicodeError):
+        raise ByokError("key_file_unavailable") from None
+    values = []
+    for line in lines:
+        assignment = re.match(r"\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=(.*)$", line)
+        if not assignment or assignment.group(1) != name:
+            continue
+        try:
+            parts = shlex.split(assignment.group(2), comments=True, posix=True)
+        except ValueError:
+            raise ByokError("key_file_invalid") from None
+        if len(parts) != 1:
+            raise ByokError("key_file_invalid")
+        values.extend(parts)
+    if not values:
+        raise ByokError("key_variable_missing")
+    if len(values) != 1:
+        raise ByokError("key_variable_duplicate")
+    validate_key(values[0])
+    return values[0]
 
 
 def operator_child(query, unused_key, options, connection):
@@ -136,9 +170,20 @@ def main(argv=None):
                         help="Explicit BYOK call cap, 1 through 100; default 60")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--compare", nargs=2, type=Path)
+    parser.add_argument("--key-env-file", type=Path, default=Path.home() / ".env",
+                        help="Owner-selected key file; default ~/.env; never executed")
+    parser.add_argument("--key-env-name", default="GEMINI_API_KEY")
+    parser.add_argument("--prompt-key", action="store_true",
+                        help="Use hidden terminal input instead of reading the key file")
     args = parser.parse_args(argv)
     if args.output.exists():
         parser.error("Output already exists; paid runs are never resumed or overwritten")
+    file_key = None
+    if not args.compare and args.route == "byok" and not args.prompt_key:
+        try:
+            file_key = read_key_file(args.key_env_file, args.key_env_name)
+        except ByokError as exc:
+            parser.error(f"Cannot load API key: {exc.code}; configure the selected key variable without sharing its value")
     args.output.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     # Reserve the output before any hidden key input or paid operation.
     fd = os.open(args.output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
@@ -160,15 +205,16 @@ def main(argv=None):
                 parser.error("Cost must be USD 0.000001 through 5; time-limit 1 through 3600; model-calls 1 through 100")
             key = None
             if args.route == "byok":
-                if not os.isatty(0):
-                    parser.error("A terminal is required for hidden key input; no key in argv/env/files")
+                if args.prompt_key and not os.isatty(0):
+                    parser.error("A terminal is required for --prompt-key")
                 print(f"Google Gemini {MODEL}; maximum USD {args.max_usd}, standard text rate estimate.\n"
                       f"Maximum {args.model_calls} model calls; no automatic retries or resume.\n"
                       f"Calls start at least {MIN_CALL_INTERVAL} seconds apart; this is not a guarantee of free-tier quota.\n"
                       "Prompts/results go to Google. Free-tier data may be used for improvement and human review.\n"
                       "For adult developer evaluation only; public release is not enabled.\n"
                       "Cancellation cannot reverse an in-flight provider charge.")
-                key = getpass.getpass("Your Google AI Studio API key (not saved): ")
+                key = getpass.getpass("Your Google AI Studio API key (not saved): ") if args.prompt_key else file_key
+                file_key = None
                 validate_key(key)
             report = measure(args.theme, args.route, key, options)
             key = None
@@ -179,6 +225,7 @@ def main(argv=None):
                           "passed": report["passed"], "usage": report.get("usage")}, ensure_ascii=False))
         return 0 if report["passed"] else 1
     finally:
+        file_key = key = None
         if fd is not None:
             os.close(fd)
 

@@ -13,6 +13,64 @@ import byok_eval as ev
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_key_file_supports_literal_quotes_comments_and_never_executes(self):
+        key = "AIza" + "x" * 35
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / ".env"
+            marker = Path(directory) / "must-not-exist"
+            for assignment in (f"GEMINI_API_KEY={key}", f'export GEMINI_API_KEY="{key}" # comment',
+                               f"GEMINI_API_KEY='{key}'"):
+                path.write_text(f"OTHER=$(touch {marker})\n{assignment}\n")
+                self.assertEqual(ev.read_key_file(path, "GEMINI_API_KEY"), key)
+                self.assertFalse(marker.exists())
+            path.write_text(f"GEMINI_API_KEY=$(touch {marker})\n")
+            with self.assertRaises(ev.ByokError):
+                ev.read_key_file(path, "GEMINI_API_KEY")
+            self.assertFalse(marker.exists())
+
+    def test_key_file_missing_invalid_duplicate_errors_do_not_echo_secrets(self):
+        key = "AIza" + "x" * 35
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / ".env"
+            for content, code in (("OTHER=value\n", "key_variable_missing"),
+                                  (f"GEMINI_API_KEY={key}\nGEMINI_API_KEY={key}\n", "key_variable_duplicate"),
+                                  (f'GEMINI_API_KEY="{key}\n', "key_file_invalid"),
+                                  ("GEMINI_API_KEY=invalid\n", "invalid_api_key")):
+                path.write_text(content)
+                with self.assertRaises(ev.ByokError) as error:
+                    ev.read_key_file(path, "GEMINI_API_KEY")
+                self.assertEqual(error.exception.code, code)
+                self.assertNotIn(key, str(error.exception))
+
+    def test_key_file_cli_is_noninteractive_and_does_not_export_key_or_file(self):
+        key = "AIza" + "x" * 35
+        with tempfile.TemporaryDirectory() as directory:
+            env = Path(directory) / ".env"
+            env.write_text(f"GEMINI_API_KEY={key}\n")
+            output = Path(directory) / "report.json"
+            with patch.object(ev.os, "isatty", return_value=False), \
+                 patch.object(ev.getpass, "getpass", side_effect=AssertionError("Prompt reached")), \
+                 patch.object(ev, "measure", return_value={"passed": False}) as measure, \
+                 contextlib.redirect_stdout(io.StringIO()) as messages:
+                ev.main(["--route", "byok", "--theme", "昭和", "--max-usd", "0.50",
+                         "--key-env-file", str(env), "--output", str(output)])
+            self.assertEqual(measure.call_args.args[2], key)
+            self.assertNotIn(key, messages.getvalue() + output.read_text())
+            self.assertEqual(env.read_text(), f"GEMINI_API_KEY={key}\n")
+            self.assertEqual(output.stat().st_mode & 0o777, 0o600)
+
+    def test_missing_file_key_stops_before_output_creation_or_provider_call(self):
+        with tempfile.TemporaryDirectory() as directory:
+            env = Path(directory) / ".env"
+            env.write_text("OTHER=value\n")
+            output = Path(directory) / "report.json"
+            with patch.object(ev, "measure", side_effect=AssertionError("Provider reached")), \
+                 contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit):
+                    ev.main(["--route", "byok", "--theme", "昭和", "--max-usd", "0.50",
+                             "--key-env-file", str(env), "--output", str(output)])
+            self.assertFalse(output.exists())
+
     def test_failed_measurement_keeps_last_material_snapshot_and_filter(self):
         def generate(theme, key, options, emit, stopping):
             emit({"kind": "usage", "usage": {"calls": 1},
@@ -75,7 +133,8 @@ class EvaluationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "already.json"
             path.write_text("existing")
-            with patch.object(ev.getpass, "getpass", side_effect=AssertionError("Key input reached")):
+            with patch.object(ev.getpass, "getpass", side_effect=AssertionError("Key input reached")), \
+                 patch.object(ev, "read_key_file", side_effect=AssertionError("Key file reached")):
                 with self.assertRaises(SystemExit):
                     ev.main(["--output", str(path), "--route", "byok", "--theme", "昭和", "--max-usd", "0.50"])
             self.assertEqual(path.read_text(), "existing")
@@ -99,7 +158,7 @@ class EvaluationTests(unittest.TestCase):
                  patch.object(ev.getpass, "getpass", return_value=key) as prompt, \
                  patch.object(ev, "measure", return_value={"passed": False}) as measure, \
                  contextlib.redirect_stdout(io.StringIO()) as messages:
-                ev.main(["--route", "byok", "--theme", "昭和", "--max-usd", "0.50", "--output", str(output)])
+                ev.main(["--route", "byok", "--theme", "昭和", "--max-usd", "0.50", "--prompt-key", "--output", str(output)])
             self.assertIn("Google AI Studio", prompt.call_args.args[0])
             self.assertIn("gemini-3.5-flash-lite", messages.getvalue())
             self.assertNotIn(key, messages.getvalue() + output.read_text())
