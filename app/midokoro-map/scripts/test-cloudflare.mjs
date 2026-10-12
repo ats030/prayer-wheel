@@ -110,6 +110,35 @@ test('Wikipedia identity, summaries, attribution and transient failures remain d
     assert.equal((await worker.fetch(request(path), testEnv)).status, 404);
   } finally { globalThis.fetch = originalFetch; }
 });
+test('Geo natural monuments use geo specs, the geo cache and shiseki response slots', async () => {
+  const originalFetch = globalThis.fetch;
+  const extract = '洞の概要。\n成因\n溶岩が冷えて柱状節理ができた。';
+  const cacheKey = await sha('検証洞|成り立ち|' + extract);
+  const specs = {geo: [{key: 'origin', label: '成り立ち', candidates: ['成因']}, {key: 'features', label: '特徴・見どころ', candidates: ['特徴']},
+    {key: 'access', label: 'アクセス', candidates: ['アクセス']}, {key: 'protection', label: '指定・保護', candidates: ['指定']}]};
+  const testEnv = {...env, ASSETS: {async fetch(r) {
+    const path = new URL(r.url).pathname;
+    if (path === '/_data/specs.json') return Response.json(specs);
+    if (path.startsWith('/_data/geo/cache/')) return Response.json(path.endsWith(`/${cacheKey.slice(0, 2)}.json`) ? {[cacheKey]: '溶岩が冷えて柱状節理になった。'} : {});
+    return env.ASSETS.fetch(r);
+  }}};
+  globalThis.fetch = async input => {
+    const p = new URL(input).searchParams;
+    if (p.get('action') === 'parse') return Response.json({parse: {sections: [{line: '成因', level: '2'}]}});
+    if (p.get('action') === 'wbgetentities') return Response.json({entities: {Q1: {claims: {}}}});
+    return Response.json({query: {pages: [{title: '検証洞', extract: p.has('exintro') ? '洞の概要。' : extract, pageprops: {wikibase_item: 'Q1'}}]}});
+  };
+  try {
+    const result = await (await worker.fetch(request('/api/geo/wiki/content?title=検証洞&qid=Q1'), testEnv)).json();
+    assert.equal(result.description, '洞の概要。');
+    assert.equal(result.history.summary, '溶岩が冷えて柱状節理になった。');
+    assert.equal(result.history.blocks, undefined);
+    assert.equal(result.origin, undefined);
+    assert.deepEqual(result.remains, {});
+    assert.equal((await worker.fetch(request('/api/geo/wiki/content?qid=Q1'), testEnv)).status, 400);
+    assert.equal((await worker.fetch(request('/api/geo/wiki/links?qid=Q1'), testEnv)).status, 404);
+  } finally { globalThis.fetch = originalFetch; }
+});
 test('Festival photo fallback uses label/prefecture, exact filenames and license fallback', async () => {
   const originalFetch = globalThis.fetch;
   let mismatch = false, mime = 'image/jpeg';

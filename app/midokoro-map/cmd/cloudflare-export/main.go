@@ -106,6 +106,21 @@ func main() {
 		}
 		fmt.Printf("%s: %d public records\n", kind, len(rows))
 	}
+	// Natural-monument summaries (geo tab) have no list API; publish their cache only.
+	geoCache := map[string]string{}
+	if body, err := os.ReadFile(filepath.Join(*data, "geo", "summaries.json")); err == nil {
+		if err := json.Unmarshal(body, &geoCache); err != nil {
+			log.Fatal(err)
+		}
+	} else if !os.IsNotExist(err) {
+		log.Fatal(err)
+	}
+	geoBody, err := json.Marshal(geoCache)
+	if err != nil {
+		log.Fatal(err)
+	}
+	write(*out, "geo/normalized-cache.json", geoBody)
+	fmt.Printf("geo: %d cached summaries\n", len(geoCache))
 }
 
 func kindEnv(s string) string {

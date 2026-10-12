@@ -17,11 +17,23 @@ from festival_page import page_qids, render_page as render_festival_page, sitema
 
 ROOT = Path(__file__).resolve().parents[1]
 KINDS = ('omatsuri', 'onsen', 'shiseki', 'tokusan')
+GEO_SUMMARIES = ROOT / 'data/geo/summaries.json'
 
 
 def dump(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, ensure_ascii=False, separators=(',', ':')))
+
+
+def section_specs(source: Path, name: str = 'sectionSpecs') -> list:
+    text = source.read_text().split(f'var {name} = []sectionSpec{{', 1)[1].split('\n}\n', 1)[0]
+    specs = []
+    for block in re.split(r'\n\s*\{\n', text)[1:]:
+        key = re.search(r'key:\s*"([^"]+)"', block).group(1)
+        label = re.search(r'label:\s*"([^"]+)"', block).group(1)
+        candidates = re.search(r'candidates:\s*\[\]string\{([^}]+)\}', block)
+        specs.append({'key': key, 'label': label, 'candidates': re.findall(r'"([^"]+)"', candidates.group(1)) if candidates else []})
+    return specs
 
 
 def build():
@@ -46,6 +58,10 @@ def build():
         data = work / 'data'
         for kind in KINDS:
             shutil.copytree(ROOT / 'data' / kind, data / kind)
+        # Natural-monument summaries only; geo.db stays out of the snapshot.
+        (data / 'geo').mkdir()
+        if GEO_SUMMARIES.exists():
+            shutil.copyfile(GEO_SUMMARIES, data / 'geo/summaries.json')
         env = dict(os.environ, MIDOKORO_DATA_DIR=str(data), GOTOOLCHAIN='go1.25.0')
         for key in list(env):
             if 'A8MAT' in key or key.startswith('MIDOKORO_AFFILIATE') or key in ('TOKUSAN_AMAZON_URL', 'MIDOKORO_PUBLIC_ORIGIN'):
@@ -62,16 +78,19 @@ def build():
                 dump(assets / '_data' / kind / 'cache' / f'{prefix}.json', {k: v for k, v in cache.items() if k.startswith(prefix)})
             normalized.unlink()
             source = ROOT / 'internal' / kind / 'services' / ('wikipedia_sections.go' if kind == 'tokusan' else 'wikipedia_content.go')
-            text = source.read_text().split('var sectionSpecs = []sectionSpec{', 1)[1].split('\n}\n', 1)[0]
-            specs[kind] = []
-            for block in re.split(r'\n\s*\{\n', text)[1:]:
-                key = re.search(r'key:\s*"([^"]+)"', block).group(1)
-                label = re.search(r'label:\s*"([^"]+)"', block).group(1)
-                candidates = re.search(r'candidates:\s*\[\]string\{([^}]+)\}', block)
-                specs[kind].append({'key': key, 'label': label, 'candidates': re.findall(r'"([^"]+)"', candidates.group(1)) if candidates else []})
+            specs[kind] = section_specs(source)
             for p in sorted((ROOT / 'data' / kind).iterdir()):
                 if p.is_file():
                     hashes[f'{kind}/{p.name}'] = hashlib.sha256(p.read_bytes()).hexdigest()
+        normalized = assets / '_data/geo/normalized-cache.json'
+        cache = json.loads(normalized.read_text())
+        for n in range(256):
+            prefix = f'{n:02x}'
+            dump(assets / '_data/geo/cache' / f'{prefix}.json', {k: v for k, v in cache.items() if k.startswith(prefix)})
+        normalized.unlink()
+        specs['geo'] = section_specs(ROOT / 'internal/shiseki/services/section_profile.go', 'geoSectionSpecs')
+        if GEO_SUMMARIES.exists():
+            hashes['geo/summaries.json'] = hashlib.sha256(GEO_SUMMARIES.read_bytes()).hexdigest()
         dump(assets / '_data/specs.json', specs)
         calendar = json.loads((assets / '_data/omatsuri/list.json').read_text())
         build_date = date.fromisoformat(os.environ.get('MIDOKORO_BUILD_DATE') or date.today().isoformat())

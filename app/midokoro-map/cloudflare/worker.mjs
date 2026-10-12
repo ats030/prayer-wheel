@@ -1,6 +1,9 @@
 // Public API adapter. The local SQLite databases and model remain the source of truth.
 const kinds = ['shiseki', 'omatsuri', 'onsen', 'tokusan'];
 const collections = {shiseki: 'shiseki', omatsuri: 'festivals', onsen: 'onsen', tokusan: 'tokusan'};
+// Geo natural monuments use the shiseki cache scheme with their own specs; specs fill these response slots in order.
+const geoSlots = ['history', 'remains', 'access', 'highlights'];
+const summaryKeyed = kind => kind === 'shiseki' || kind === 'geo';
 const slugs = ['arita-porcelain', 'kusatsu-yumomi', 'kawagoe-festival'];
 const events = ['view', 'entry-home', 'entry-shared', 'explore', 'follow', 'share-open', 'share-returned', 'copy-success'];
 const userAgent = 'midokoro-map/1.0 (https://github.com/ats030/ikimono-note)';
@@ -169,7 +172,7 @@ async function panel(env, kind, title, customSpecs) {
   if (!result.parse || !Array.isArray(result.parse.sections)) throw new APIError('Wikipedia sections unavailable');
   const headings = result.parse.sections.map(h => ({line: stripHTML(h.line), level: Number(h.level)}));
   const specs = customSpecs || (await data(env, 'specs.json'))[kind];
-  const headingKey = await sha('headingmap|' + title + '|' + headings.map(h => h.line).sort().join('\n'));
+  const headingKey = await sha('headingmap|' + (kind === 'geo' ? 'geo-v1|' : '') + title + '|' + headings.map(h => h.line).sort().join('\n'));
   let headingMap = {};
   const stored = await lookup(env, kind, headingKey);
   if (stored) { try { headingMap = JSON.parse(stored); } catch {} }
@@ -177,14 +180,14 @@ async function panel(env, kind, title, customSpecs) {
   let retry = false;
   for (const spec of specs) {
     const target = spec.candidates.map(line => headings.find(h => h.line === line)).find(Boolean) || headings.find(h => h.line === headingMap[spec.key]);
-    const blocks = (!spec.candidates.length || target) ? extractBlocks(page.extract, target, headings, kind === 'shiseki' ? 600 : 2000) : [];
+    const blocks = (!spec.candidates.length || target) ? extractBlocks(page.extract, target, headings, summaryKeyed(kind) ? 600 : 2000) : [];
     const section = {};
     if (blocks.length || kind === 'tokusan') {
-      const suffix = kind === 'shiseki' ? '|' + page.extract : '';
-      const version = kind === 'tokusan' ? ' v1' : kind === 'shiseki' ? '' : ' v3';
+      const suffix = summaryKeyed(kind) ? '|' + page.extract : '';
+      const version = kind === 'tokusan' ? ' v1' : summaryKeyed(kind) ? '' : ' v3';
       const cached = await lookup(env, kind, await sha(title + '|' + spec.label + version + suffix));
       if (cached && cached !== 'なし') {
-        if (kind === 'shiseki') section.summary = cached;
+        if (summaryKeyed(kind)) section.summary = cached;
         else {
           let value;
           try { value = JSON.parse(cached); } catch { value = {summary: cached}; }
@@ -238,12 +241,12 @@ async function wikipediaContent(env, kind, title, qid) {
       } catch (e) { if (e.status !== 404) response.sections_unavailable = true; }
     }
     const row = kind === 'shiseki' ? await item(env, kind, qid) : null;
-    for (const [key, section] of Object.entries(sections)) {
+    for (const [index, [key, section]] of Object.entries(sections).entries()) {
       if (kind !== 'shiseki' || ['special', 'national', 'local'].includes(row?.designation)) {
-        if (kind === 'shiseki' && !section.summary && section.blocks?.length) section.raw_omitted = true;
+        if (summaryKeyed(kind) && !section.summary && section.blocks?.length) section.raw_omitted = true;
         delete section.blocks;
       }
-      response[key] = section;
+      response[kind === 'geo' ? geoSlots[index] : key] = section;
     }
   } catch (e) { if (e.status !== 404) response.sections_unavailable = true; }
   return response;
@@ -335,6 +338,15 @@ async function route(request, env) {
     console.log(`story_event story=${parts[3]} event=${parts[4]}`);
     return new Response(null, {status: 204, headers: {'Cache-Control': 'no-store'}});
   }
+  const geo = /^\/api\/geo\/wiki\/(image|content)$/.exec(path);
+  if (geo) {
+    if (request.method !== 'GET') return error('Method not allowed', 405);
+    const p = url.searchParams, qid = p.get('qid') || '';
+    if (geo[1] === 'image') return json(await wikidataImage(qid));
+    const title = p.get('title');
+    if (!title || !qid || title.length > 300) return error('title and qid parameters are required', 400);
+    return json(await wikipediaContent(env, 'geo', title, qid));
+  }
   const match = /^\/api\/([^/]+)\/(.*)$/.exec(path);
   if (!match || !kinds.includes(match[1])) return error('Not found', 404);
   const kind = match[1], endpoint = match[2], p = url.searchParams;
@@ -409,7 +421,7 @@ export default {
       // SQLite-backed Durable Objects are available on Free and provide the
       // CPU budget needed for the existing article/attribution processing.
       const path = new URL(request.url).pathname;
-      if (request.method === 'GET' && /^\/api\/(shiseki|onsen|omatsuri|tokusan)\/(wiki\/(content|image|links)|wikiimage|commons\/image|sections\/)/.test(path) && env.EXTERNAL_API) {
+      if (request.method === 'GET' && /^\/api\/(shiseki|onsen|omatsuri|tokusan|geo)\/(wiki\/(content|image|links)|wikiimage|commons\/image|sections\/)/.test(path) && env.EXTERNAL_API) {
         const shard = await sha(request.url);
         return await env.EXTERNAL_API.get(env.EXTERNAL_API.idFromName(shard)).fetch(request);
       }
