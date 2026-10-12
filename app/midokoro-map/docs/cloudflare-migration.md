@@ -116,3 +116,16 @@ python3 scripts/check-cloudflare-api.py https://midokoro-map.ats030.workers.dev 
 熊本県271件の横断表示、5カテゴリ、名称・範囲検索、詳細・フォーカス・URL復元、部分読込失敗と再試行、320〜1440px・文字サイズ200%・スマートフォンの地域選択を確認した。
 自己ホストでは既存の詳細・地形・検索フォーム回帰検証も成功した。
 ルートHTML、共通UI資産、exploreの4資産、ジオパークGeoJSONが検証済みビルドと一致し、healthは正常。
+
+## 2026-10-12の配色統一公開
+
+`057241ac`・`38d63916`・`993cf3a6`の配色と部品の統一を公開した。公開バージョンは`1d73390f-b76e-4d2c-898d-a14353e85b55`、直前の復旧先は`43d18fac-3113-4fe6-8101-9632cebc997c`。
+共通トークン、カテゴリ識別色、タブの色点、カテゴリ色のクラスタ、地域横断の地形の緑統一、詳細タイトルの色、地形タブの検索欄を反映した。
+
+途中の`b5ee8051-d8d3-4f7d-aedc-cb7f6675c045`は`deploy-cloudflare.sh`で作業ツリーのまま公開したため、未コミットの史跡要約2件を含んでいた。
+従来どおりビルド用コピーだけをHEADへ置き換えて再公開し、公開URLで2件のキーがキャッシュに無いことを確認した。
+ビルドmanifestの`shiseki/summaries.json`は`0263a66863bb8b18adff347e6500b3b726658293666c949547ae73ee85590d7f`。作業ツリーの要約ファイルは変更していない。
+
+公開前にローカルWorkerで`browser-check.py`、`browser-explore-check.py`、`browser-geo-check.py`、`browser-workspace-check.py`が成功。
+公開URLで`browser-check.py`、`browser-explore-check.py`、`browser-workspace-check.py`、`browser-geo-check.py`が成功し、tokens.cssの配信とhealthを確認した。
+`browser-story-check.py`は既存の`.story-entry`重複で140行目まで（`ats030-rqlz4`）。
