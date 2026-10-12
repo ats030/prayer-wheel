@@ -1,5 +1,5 @@
 import {esc, sourceLink, plainText, flyToItem, fitItem, revealDetail, closeDetailPanel, focusFirst} from '../detail-common.js';
-import {photoHtml, sectionsHtml, hasSummary} from './media.mjs';
+import {photoHtml, sectionsHtml, hasSummary} from './media.js';
 
 const geoparkKinds = [['shiseki','史跡'],['omatsuri','祭り'],['onsen','温泉'],['tokusan','特産物']];
 const SELECTED_MARKER_Z_INDEX = 10000;

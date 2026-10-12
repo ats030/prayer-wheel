@@ -1,5 +1,5 @@
 // HTML for a natural monument's photo and AI section summaries in the geo detail panel.
-// Pure functions so scripts/test-geo-media.mjs can check them without a browser.
+// Pure functions so scripts/test-geo-media.mjs can check them without a browser; package.json here marks them as ES modules for Node.
 
 // Response slots of /api/geo/wiki/content in display order.
 export const SECTIONS = [['history', '成り立ち'], ['remains', '特徴・見どころ'], ['access', 'アクセス'], ['highlights', '指定・保護']];

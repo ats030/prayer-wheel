@@ -97,7 +97,7 @@
       "repo": ".",
       "base": "master",
       "files": [
-        "app/midokoro-map/frontend/assets/geo/media.mjs"
+        "app/midokoro-map/frontend/assets/geo/media.js"
       ],
       "tests": [
         "node --test app/midokoro-map/scripts/test-geo-media.mjs"

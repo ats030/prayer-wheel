@@ -1,7 +1,7 @@
 // Run: node --test scripts/test-geo-media.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {photoHtml, sectionsHtml, hasSummary} from '../frontend/assets/geo/media.mjs';
+import {photoHtml, sectionsHtml, hasSummary} from '../frontend/assets/geo/media.js';
 
 const NO_IMAGE = '<p class="detail-image-status">表示できる画像が登録されていません。</p>';
 const NO_LICENSE = '<p class="detail-image-status">画像のライセンス情報を確認できないため、表示していません。</p>';
