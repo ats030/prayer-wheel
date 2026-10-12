@@ -42,6 +42,8 @@ with sync_playwright() as p:
     page.locator("#job-list a").wait_for()
     assert page.locator("#job-list a").get_attribute("href") == "/manage/timelines/1"
     assert page.locator(".wordmark").get_attribute("href") == "/manage"
+    assert page.locator('.masthead-nav a[href="/library?from=manage"]').count() == 1
+    assert page.locator('.masthead-nav a[href="/changelog?from=manage"]').count() == 1
     page.locator("#query").fill("本人用テスト")
     page.locator("#submit").click()
     page.locator("#receipt").wait_for(state="visible")

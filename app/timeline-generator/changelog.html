@@ -7,17 +7,20 @@
   <title>更新履歴 · タイムラインジェネレーター</title>
   <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
   <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
   <script src="http://ubuntu-server-app:8526/v.js" data-site="timeline-generator" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#updates">更新履歴へ</a>
-  <header class="masthead"><a class="wordmark" href="/">タイムラインジェネレーター<span>Timeline Generator</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/">年表を生成する</a></nav></header>
+  <header class="masthead"><a class="wordmark" href="/">タイムラインジェネレーター<span>Timeline Generator</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/">年表</a><a class="quiet-link" href="/library">端末の年表</a><a class="quiet-link nav-secondary" href="/quality">評価</a><a class="quiet-link nav-secondary" href="/changelog" aria-current="page">更新履歴</a></nav></header>
   <main id="updates" class="changelog" tabindex="-1">
     <h1>更新履歴</h1>
     <p class="changelog-intro">使い方や表示が変わったところを、新しい順に掲載しています。日付は日本時間です。</p>
     <section class="release" aria-labelledby="release-20261012">
       <h2 id="release-20261012"><time datetime="2026-10-12">2026年10月12日</time></h2>
       <ul>
+        <li>全画面のナビゲーションと現在地表示を揃えました。本人用画面から端末保存や更新履歴へ移動しても、本人用の年表一覧へ戻れます。</li>
+        <li>公開トップを年表の閲覧と本人用画面への入口に整理しました。生成フォームでは入力例を選びやすくし、端末保存では書き出しと復元の操作をまとめました。</li>
         <li>年表の年代と出来事を見分けやすくし、本文の行間と余白を整えました。スマートフォンでは年代・出典、見出し、説明の順に表示します。</li>
         <li>詳細画面の保存操作と生成操作を分けました。公開年表では端末保存と書き出しを表示し、年表一覧へ戻るリンクも追加しました。</li>
       </ul>

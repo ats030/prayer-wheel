@@ -122,10 +122,10 @@ if (document.getElementById("local-list")) {
   let records = [], busy = false;
   async function action(task) {
     if (busy) return;
-    busy = true; error.hidden = true;
+    busy = true; error.hidden = true; status.textContent = "";
     document.querySelectorAll("main button, main input").forEach(element => { element.disabled = true; });
     try { await task(); } catch (exc) { fail(exc); }
-    finally { busy = false; document.querySelectorAll("main button, main input").forEach(element => { element.disabled = false; }); }
+    finally { busy = false; document.querySelectorAll("main button, main input").forEach(element => { element.disabled = false; }); document.getElementById("local-export").disabled = records.length === 0; }
   }
   async function refresh() {
     records = await library.list();
@@ -149,6 +149,7 @@ if (document.getElementById("local-list")) {
         const row = make("li", "", "event");
         row.append(make("div", event.date, "event-date"), make("h3", event.title, "event-title"), make("p", event.description, "event-description"));
         const link = make("a", "出典 ↗", "source-link"); link.href = event.source.url; link.target = "_blank"; link.rel = "noopener noreferrer"; link.title = event.source.title;
+        link.setAttribute("aria-label", `出典を読む：${event.source.title}（別タブ）`);
         row.append(link); timeline.append(row);
       }
       body.append(timeline);

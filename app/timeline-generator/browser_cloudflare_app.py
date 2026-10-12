@@ -16,9 +16,20 @@ with TemporaryDirectory() as directory, sync_playwright() as p:
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.goto(BASE)
     page.locator("#job-list a").wait_for()
-    assert page.locator("#generation-availability").inner_text().find("接続準備中") >= 0
+    assert "閲覧専用" in page.locator("#generation-availability").inner_text()
+    assert page.locator("#generation-availability").is_hidden()
+    assert page.locator("#search-form").is_hidden() and page.locator("#how").is_hidden()
+    assert page.locator("#search-heading").inner_text() == "公開年表を読む"
+    assert page.locator("#home-skip").get_attribute("href") == "#page-heading"
     assert page.locator("#query").is_disabled() and page.locator("#submit").is_disabled()
     assert page.locator("#job-list .job-delete").count() == 0
+    assert page.locator('.masthead-nav a[aria-current="page"]').inner_text() == "年表"
+    for width in [320, 375, 414, 768, 1280]:
+        page.set_viewport_size({"width": width, "height": 900})
+        for zoom in [1, 2]:
+            page.evaluate("zoom => document.documentElement.style.fontSize = `${zoom * 100}%`", zoom)
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), ("public home", width, zoom)
+        page.evaluate("document.documentElement.style.fontSize = '100%'")
     page.locator("#job-list a").click()
     page.locator("#timeline .event").first.wait_for()
     assert page.locator("#timeline .event").count() == 50
@@ -56,6 +67,7 @@ with TemporaryDirectory() as directory, sync_playwright() as p:
     page.goto(BASE)
     page.locator("#page-error").wait_for(state="visible")
     assert page.locator("#submit").is_disabled()
+    assert page.locator("#search-form").is_visible(), "Connection failure must not be classified as a public-view response"
     assert "接続テスト失敗" in page.locator("#page-error").inner_text()
     assert not errors, errors
     browser.close()

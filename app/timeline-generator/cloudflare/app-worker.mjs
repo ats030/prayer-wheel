@@ -1,7 +1,7 @@
 // Shared UI with a read-only adapter for already published content.
 // Private generation stays unavailable until an authenticated backend is verified.
 import {configured, privateApi, verifyOwner} from "./private-api.mjs";
-const notice = "公開年表の閲覧・端末保存を利用できます。生成・再生成・中止は接続準備中です。";
+const notice = "公開年表は閲覧専用です。このブラウザへの保存と書き出しを利用できます。";
 const csp = "default-src 'none'; script-src 'self'; connect-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
 function json(body, status = 200) {
   return Response.json(body, {status, headers: {

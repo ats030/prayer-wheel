@@ -25,7 +25,7 @@ with TemporaryDirectory() as directory, sync_playwright() as p:
             route.fulfill(status=503, content_type='application/json', body='{"error":"offline"}')
             return
         name = {'/library': 'library.html'}.get(path, path.lstrip('/'))
-        if name in {'library.html', 'local-library.js', 'styles.css', 'tokens.css', 'favicon.svg'}:
+        if name in {'library.html', 'local-library.js', 'app.js', 'styles.css', 'tokens.css', 'favicon.svg'}:
             mime = 'text/html' if name.endswith('.html') else 'text/javascript' if name.endswith('.js') else 'text/css' if name.endswith('.css') else 'image/svg+xml'
             route.fulfill(content_type=mime, body=(ROOT / name).read_bytes())
         else:
@@ -34,6 +34,13 @@ with TemporaryDirectory() as directory, sync_playwright() as p:
     page.goto(URL + '/library')
     page.wait_for_function('document.querySelector("#local-count").textContent.includes("0件")')
     assert page.locator('#local-empty').is_visible()
+    assert page.locator('#local-export').is_disabled()
+    page.goto(URL + '/library?from=manage')
+    page.wait_for_function('document.querySelector("#local-count").textContent.includes("0件")')
+    assert page.locator('.masthead-nav a[aria-current]').inner_text() == '端末の年表'
+    assert page.locator('.wordmark').get_attribute('href') == '/manage'
+    assert page.locator('.masthead-nav a[href="/manage/quality"]').count() == 1
+    assert not api_calls, api_calls
     assert page.evaluate('(record) => TimelineLibrary.save([record])', RECORD) == 1
     assert page.evaluate('(record) => TimelineLibrary.save([record])', RECORD) == 0
     page.reload()
@@ -75,6 +82,7 @@ with TemporaryDirectory() as directory, sync_playwright() as p:
     page.wait_for_function('!document.querySelector("#local-import").disabled')
     page.locator('#local-import').set_input_files(str(bad))
     page.wait_for_function('!document.querySelector("#local-error").hidden')
+    assert page.locator('#local-status').inner_text() == '', 'A failed import must not retain the previous success message'
     assert len(page.evaluate('TimelineLibrary.list()')) == 1
     for payload in ['not json', json.dumps(data | {'version': 99})]:
         bad.write_text(payload)

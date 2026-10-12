@@ -11,11 +11,13 @@
 </head>
 <body>
   <a class="skip-link" href="#page-heading">本文へ</a>
-  <header class="masthead"><a class="wordmark" href="/">タイムラインジェネレーター<span>Timeline Generator</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/">年表を生成する</a><a class="quiet-link" href="/changelog">更新履歴</a></nav></header>
+  <header class="masthead"><a class="wordmark" href="/">タイムラインジェネレーター<span>Timeline Generator</span></a><nav class="masthead-nav" aria-label="ページ"><a class="quiet-link" href="/">年表</a><a class="quiet-link" href="/library">端末の年表</a><a class="quiet-link nav-secondary" href="/quality" aria-current="page">評価</a><a class="quiet-link nav-secondary" href="/changelog">更新履歴</a></nav></header>
   <main class="app-main">
     <div class="page-head"><div class="heading-copy"><h1 id="page-heading" tabindex="-1">評価一覧</h1><p id="quality-summary" class="help" role="status">読み込んでいます。</p></div></div>
-    <p class="help">評価軸ごとに年表を並べます。再現率と既知の誤りは人手で選んだ主要項目との照合で、正解集合にないテーマは対象外です。出典の割合は機械的な集計で、内容の正しさの判定ではありません。縦線は目標値で、目標のない軸は灰色の棒で量だけを示します。欠落した主要項目などの詳細は各年表の画面で確認できます。</p>
+    <p class="intro">年表を評価項目ごとに比較できます。評価は内容全体の正しさを保証するものではありません。</p>
+    <details class="help-panel"><summary>評価の見方</summary><div class="info-body"><p class="help">評価軸ごとに年表を並べます。再現率と既知の誤りは人手で選んだ主要項目との照合で、正解集合にないテーマは対象外です。出典の割合は機械的な集計で、内容の正しさの判定ではありません。縦線は目標値で、目標のない軸は灰色の棒で量だけを示します。欠落した主要項目などの詳細は各年表の画面で確認できます。</p></div></details>
     <p id="page-error" class="error" role="alert" hidden></p>
+    <div id="quality-empty" class="empty-state" hidden><h2>比較できる評価はまだありません</h2><p id="quality-empty-help">生成結果のある年表の評価がここに並びます。</p><a class="quiet-link" href="/">年表一覧へ →</a></div>
     <div id="quality-axes"></div>
   </main>
 </body>

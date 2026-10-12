@@ -1,10 +1,12 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
 const ownerMode = location.pathname === "/manage" || location.pathname.startsWith("/manage/");
+const ownerNavigation = ownerMode || (["/library", "/changelog"].includes(location.pathname) && new URLSearchParams(location.search).get("from") === "manage");
 const homePath = ownerMode ? "/manage" : "/";
 const jobPath = id => `${ownerMode ? "/manage" : ""}/timelines/${id}`;
-if (ownerMode) document.querySelectorAll('a[href="/"], a[href="/quality"]').forEach(link => {
-  link.href = link.getAttribute("href") === "/" ? "/manage" : "/manage/quality";
+if (ownerNavigation) document.querySelectorAll('a[href="/"], a[href="/quality"], a[href="/library"], a[href="/changelog"]').forEach(link => {
+  const destinations = {"/": "/manage", "/quality": "/manage/quality", "/library": "/library?from=manage", "/changelog": "/changelog?from=manage"};
+  link.href = destinations[link.getAttribute("href")];
 });
 const stages = ["search", "read", "generate", "verify"];
 const labels = {queued: "待機中", running: "生成中", complete: "完了", failed: "失敗", cancelled: "中止"};
@@ -198,8 +200,8 @@ if ($("search-form")) {
       const job = await api("/api/jobs", {query});
       if (job.has_result) { location.assign(jobPath(job.id)); return; }
       $("receipt").hidden = false;
-      $("receipt-heading").textContent = job.state === "failed" ? "前回の生成は失敗しました" : job.state === "cancelled" ? "前回の処理は中止しました" : "キューに登録されています";
-      $("receipt-message").textContent = `${job.query} · ${labels[job.state]}。別のテーマも追加できます。`;
+      $("receipt-heading").textContent = job.state === "failed" ? "前回の生成は失敗しました" : job.state === "cancelled" ? "前回の処理は中止しました" : job.state === "running" ? "生成中です" : "順番を待っています";
+      $("receipt-message").textContent = `「${job.query}」の進捗は詳細画面で確認できます。続けて別のテーマも登録できます。`;
       $("receipt-link").href = jobPath(job.id);
       document.dispatchEvent(new Event("job-registered"));
     } catch (exc) {
@@ -235,7 +237,18 @@ if ($("job-list")) {
       const data = await api(`/api/jobs?offset=${offset}`);
       generationAvailability(data.generation_available !== false, data.notice);
       if ($("owner-entry")) $("owner-entry").hidden = data.owner_login !== "/manage" || ownerMode;
-      if (data.generation_available === false) $("page-heading").textContent = "公開年表";
+      const publicView = data.generation_available === false;
+      if (publicView) $("generation-availability").hidden = true;
+      $("page-heading").textContent = publicView ? "公開年表" : "年表一覧";
+      if ($("search-heading")) $("search-heading").textContent = publicView ? "公開年表を読む" : "年表をつくる";
+      if ($("home-intro")) $("home-intro").textContent = publicView ? "年表を読み、出典をたどり、このブラウザに保存できます。" : "調べたいテーマから、出典付きの年表をつくります。";
+      $("search-form").hidden = publicView;
+      if ($("how")) $("how").hidden = publicView;
+      if ($("home-skip")) $("home-skip").href = publicView ? "#page-heading" : "#query";
+      if ($("home-skip")) $("home-skip").textContent = publicView ? "年表一覧へ" : "テーマ入力へ";
+      if ($("empty-heading")) $("empty-heading").textContent = publicView ? "公開年表はまだありません" : "まだ年表がありません";
+      if ($("empty-help")) $("empty-help").textContent = publicView ? "公開された年表がここに並びます。" : "上の入力欄にテーマを入れると、ここで生成状況を確認できます。";
+      if ($("empty-entry")) $("empty-entry").hidden = publicView;
       if (deleting) return;
       if (offset > 0 && !data.jobs.length) { refreshPending = true; return; }
       $("page-error").hidden = true;
@@ -531,6 +544,8 @@ if ($("quality-axes")) {
   (async () => {
     try {
       const data = await api("/api/quality");
+      if ($("quality-empty")) $("quality-empty").hidden = data.jobs.length > 0;
+      if ($("quality-empty-help")) $("quality-empty-help").textContent = data.notice || "生成結果のある年表の評価がここに並びます。";
       $("quality-summary").textContent = data.jobs.length ? `結果のある年表 ${data.jobs.length}件を比較しています（新しい順）。` : data.notice || "比較できる年表がまだありません。";
       const sections = document.createDocumentFragment();
       // 正解集合外のテーマは軸が少ないため、軸の多い行の順を基準に全件の軸を集める。
