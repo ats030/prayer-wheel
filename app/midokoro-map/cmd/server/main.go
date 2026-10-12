@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"midokoro-map/internal/geo"
 	"midokoro-map/internal/omatsuri"
 	"midokoro-map/internal/onsen"
 	"midokoro-map/internal/shared"
@@ -49,7 +50,7 @@ func newHandler(dataDir, frontendDir string, config publicConfig) (http.Handler,
 	}
 	builders := map[string]func(string) (http.Handler, error){
 		"shiseki": shiseki.NewHandler, "omatsuri": omatsuri.NewHandler,
-		"onsen": onsen.NewHandler, "tokusan": tokusan.NewHandler,
+		"onsen": onsen.NewHandler, "tokusan": tokusan.NewHandler, "geo": geo.NewHandler,
 	}
 	for kind, build := range builders {
 		domain, err := build(dataDir)

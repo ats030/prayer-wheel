@@ -31,6 +31,7 @@ var summaryOnlyDesignations = map[string]bool{"special": true, "national": true,
 // site's designation by QID so the raw-text policy is decided server-side.
 type WikipediaContentHandler struct {
 	designation func(qid string) string
+	profile     *services.SectionProfile
 }
 
 func NewWikipediaContentHandler(service *services.ShisekiService) *WikipediaContentHandler {
@@ -39,7 +40,12 @@ func NewWikipediaContentHandler(service *services.ShisekiService) *WikipediaCont
 			return site.Designation
 		}
 		return ""
-	}}
+	}, profile: services.ShisekiProfile}
+}
+
+// NewGeoWikipediaContentHandler serves the geo tab's natural monuments.
+func NewGeoWikipediaContentHandler() *WikipediaContentHandler {
+	return &WikipediaContentHandler{designation: func(string) string { return "" }, profile: services.GeoProfile}
 }
 
 type WikipediaContentResponse struct {
@@ -99,14 +105,14 @@ func (h *WikipediaContentHandler) GetWikipediaContent(w http.ResponseWriter, r *
 	// client does not cache the empty result as if the article genuinely had no
 	// sections. A permanent failure (article does not resolve, no matching
 	// heading) is treated like any other empty result and cached normally.
-	history, remains, access, highlights, transient, _ := services.FetchPanelSections(r.Context(), title)
+	history, remains, access, highlights, transient, _ := h.profile.FetchPanelSections(r.Context(), title)
 	if transient {
 		// The lookup itself failed (rate limit, 5xx, network). Do not render
 		// the four empty sections as "the article has no such content"; flag it
 		// so the client keeps the panel visible and retries on the next open.
 		response.SectionsUnavailable = true
 	} else {
-		summaryOnly := summaryOnlyDesignations[h.designation(qid)]
+		summaryOnly := h.profile.SummaryOnly() || summaryOnlyDesignations[h.designation(qid)]
 		response.History = toPayload(history, summaryOnly)
 		response.Remains = toPayload(remains, summaryOnly)
 		response.Access = toPayload(access, summaryOnly)

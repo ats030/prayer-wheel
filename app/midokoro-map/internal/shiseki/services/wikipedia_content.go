@@ -183,8 +183,13 @@ type PanelSection struct {
 // worth retrying (rate limit, 5xx, network), so the client does not cache an
 // empty panel as "the article has no such sections".
 func FetchPanelSections(ctx context.Context, title string) (history, remains, access, highlights PanelSection, transient bool, err error) {
+	return ShisekiProfile.FetchPanelSections(ctx, title)
+}
+
+// FetchPanelSections resolves the profile's four sections; see the package-level FetchPanelSections.
+func (p *SectionProfile) FetchPanelSections(ctx context.Context, title string) (history, remains, access, highlights PanelSection, transient bool, err error) {
 	if SummaryDisabled() {
-		history, remains, access, highlights = resolveSectionsNoSummary(title)
+		history, remains, access, highlights = p.resolveSectionsNoSummary(title)
 		return history, remains, access, highlights, false, nil
 	}
 
@@ -197,11 +202,11 @@ func FetchPanelSections(ctx context.Context, title string) (history, remains, ac
 		return PanelSection{}, PanelSection{}, PanelSection{}, PanelSection{}, true, headingErr
 	}
 	sourceURL := wikipediaArticleURL(title)
-	headingMap := resolveSectionHeadings(ctx, title, headings)
-	history = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[0], headingMap)
-	remains = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[1], headingMap)
-	access = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[2], headingMap)
-	highlights = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[3], headingMap)
+	headingMap := p.resolveSectionHeadings(ctx, title, headings)
+	history = p.resolvePanelSection(ctx, title, fullText, headings, sourceURL, p.specs[0], headingMap)
+	remains = p.resolvePanelSection(ctx, title, fullText, headings, sourceURL, p.specs[1], headingMap)
+	access = p.resolvePanelSection(ctx, title, fullText, headings, sourceURL, p.specs[2], headingMap)
+	highlights = p.resolvePanelSection(ctx, title, fullText, headings, sourceURL, p.specs[3], headingMap)
 	return history, remains, access, highlights, false, nil
 }
 
@@ -210,7 +215,7 @@ func FetchPanelSections(ctx context.Context, title string) (history, remains, ac
 // back nor the per-section summary). Heading maps and summaries come only from
 // the cache that cmd/summary-warm baked into the image; sections without one
 // fall back to the exact-match candidate pass and carry no Summary.
-func resolveSectionsNoSummary(title string) (history, remains, access, highlights PanelSection) {
+func (p *SectionProfile) resolveSectionsNoSummary(title string) (history, remains, access, highlights PanelSection) {
 	ctx := context.Background()
 	fullText, _, err := fetchWikipediaPlainText(ctx, title)
 	if err != nil {
@@ -221,11 +226,11 @@ func resolveSectionsNoSummary(title string) (history, remains, access, highlight
 		return PanelSection{}, PanelSection{}, PanelSection{}, PanelSection{}
 	}
 	sourceURL := wikipediaArticleURL(title)
-	headingMap := resolveSectionHeadings(ctx, title, headings)
-	history = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[0], headingMap)
-	remains = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[1], headingMap)
-	access = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[2], headingMap)
-	highlights = resolvePanelSection(ctx, title, fullText, headings, sourceURL, sectionSpecs[3], headingMap)
+	headingMap := p.resolveSectionHeadings(ctx, title, headings)
+	history = p.resolvePanelSection(ctx, title, fullText, headings, sourceURL, p.specs[0], headingMap)
+	remains = p.resolvePanelSection(ctx, title, fullText, headings, sourceURL, p.specs[1], headingMap)
+	access = p.resolvePanelSection(ctx, title, fullText, headings, sourceURL, p.specs[2], headingMap)
+	highlights = p.resolvePanelSection(ctx, title, fullText, headings, sourceURL, p.specs[3], headingMap)
 	return history, remains, access, highlights
 }
 
@@ -238,10 +243,14 @@ func resolveSectionsNoSummary(title string) (history, remains, access, highlight
 // the returned map is empty and callers fall through to their exact-match
 // target.
 func resolveSectionHeadings(ctx context.Context, title string, headings []wikipediaHeading) map[string]string {
+	return ShisekiProfile.resolveSectionHeadings(ctx, title, headings)
+}
+
+func (p *SectionProfile) resolveSectionHeadings(ctx context.Context, title string, headings []wikipediaHeading) map[string]string {
 	// Fast pass: every section already matches an exact candidate => no LLM.
-	resolved := make(map[string]string, len(sectionSpecs))
+	resolved := make(map[string]string, len(p.specs))
 	anyMissing := false
-	for _, spec := range sectionSpecs {
+	for _, spec := range p.specs {
 		if hit := matchSectionHeading(headings, spec.candidates); hit != nil {
 			resolved[spec.key] = hit.Line
 		} else {
@@ -256,8 +265,8 @@ func resolveSectionHeadings(ctx context.Context, title string, headings []wikipe
 	for _, h := range headings {
 		headingLines = append(headingLines, h.Line)
 	}
-	key := headingMapCacheKey(title, headingLines)
-	if cached, ok := lookupSummary(key); ok {
+	key := headingMapCacheKey(p.headingKeyPrefix+title, headingLines)
+	if cached, ok := p.lookup(key); ok {
 		var m map[string]string
 		if err := json.Unmarshal([]byte(cached), &m); err != nil {
 			return resolved
@@ -277,7 +286,7 @@ func resolveSectionHeadings(ctx context.Context, title string, headings []wikipe
 	for _, h := range headings {
 		headingSet[h.Line] = true
 	}
-	llm, err := resolveSectionsForHeadings(ctx, title, sectionSpecs, headingLines)
+	llm, err := resolveSectionsForHeadings(ctx, title, p.specs, headingLines)
 	if err == nil {
 		// The model is instructed to return one of the article headings verbatim;
 		// guard against it fabricating a string that does not exist in the list
@@ -291,7 +300,7 @@ func resolveSectionHeadings(ctx context.Context, title string, headings []wikipe
 		// nothing so the next request retries the LLM instead of being
 		// pinned to the exact-match-only result indefinitely.
 		if b, err := json.Marshal(resolved); err == nil {
-			saveSummary(key, string(b))
+			p.save(key, string(b))
 		}
 	}
 	return resolved
@@ -312,6 +321,10 @@ func resolveSectionHeadings(ctx context.Context, title string, headings []wikipe
 //  5. When SHISEKI_SUMMARY_DISABLE is set, a cache miss returns blocks only
 //     instead of calling the LLM.
 func resolvePanelSection(ctx context.Context, title, fullText string, headings []wikipediaHeading, sourceURL string, spec sectionSpec, headingMap map[string]string) PanelSection {
+	return ShisekiProfile.resolvePanelSection(ctx, title, fullText, headings, sourceURL, spec, headingMap)
+}
+
+func (p *SectionProfile) resolvePanelSection(ctx context.Context, title, fullText string, headings []wikipediaHeading, sourceURL string, spec sectionSpec, headingMap map[string]string) PanelSection {
 	target := matchSectionHeading(headings, spec.candidates)
 	if target == nil && headingMap != nil {
 		if line, ok := headingMap[spec.key]; ok && line != "" {
@@ -332,7 +345,7 @@ func resolvePanelSection(ctx context.Context, title, fullText string, headings [
 	}
 
 	key := summaryCacheKey(title, spec.label, fullText)
-	if cached, ok := lookupSummary(key); ok {
+	if cached, ok := p.lookup(key); ok {
 		if cached == SummaryNone {
 			return PanelSection{Blocks: blocks, SourceURL: sourceURL}
 		}
@@ -347,7 +360,7 @@ func resolvePanelSection(ctx context.Context, title, fullText string, headings [
 		// LLM unavailable or errored: fall back to the raw blocks.
 		return PanelSection{Blocks: blocks, SourceURL: sourceURL}
 	}
-	saveSummary(key, summary)
+	p.save(key, summary)
 	if summary == SummaryNone {
 		return PanelSection{Blocks: blocks, SourceURL: sourceURL}
 	}
