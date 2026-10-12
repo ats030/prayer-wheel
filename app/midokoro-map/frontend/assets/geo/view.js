@@ -1,9 +1,28 @@
-import {esc, sourceLink, flyToItem, fitItem, revealDetail, closeDetailPanel} from '../detail-common.js';
+import {esc, sourceLink, flyToItem, fitItem, revealDetail, closeDetailPanel, focusFirst} from '../detail-common.js';
 
 const geoparkKinds = [['shiseki','史跡'],['omatsuri','祭り'],['onsen','温泉'],['tokusan','特産物']];
 const SELECTED_MARKER_Z_INDEX = 10000;
 const PARK_STYLE = {color:'#2f6f4f', weight:1.5, fillColor:'#2f6f4f', fillOpacity:.12};
 const PARK_SELECTED_STYLE = {color:'#2f6f4f', weight:3.5, fillColor:'#2f6f4f', fillOpacity:.24};
+const NATIONAL_PARK_STYLE = {color:'#245b78', weight:1.5, fillColor:'#245b78', fillOpacity:.10, dashArray:'5 3'};
+const NATIONAL_PARK_SELECTED_STYLE = {...NATIONAL_PARK_STYLE, weight:3.5, fillOpacity:.24};
+
+function areaStyle(kind, selected = false) {
+  return kind === 'nationalpark' ? (selected ? NATIONAL_PARK_SELECTED_STYLE : NATIONAL_PARK_STYLE) : (selected ? PARK_SELECTED_STYLE : PARK_STYLE);
+}
+
+function containsArea(geometry, latlng) {
+  function inside(ring) {
+    let hit = false;
+    for (let i = 1; i < ring.length; i++) {
+      const [x1,y1] = ring[i-1], [x2,y2] = ring[i];
+      if ((y1 > latlng.lat) !== (y2 > latlng.lat) && latlng.lng < x1 + (latlng.lat-y1)*(x2-x1)/(y2-y1)) hit = !hit;
+    }
+    return hit;
+  }
+  const polygons = geometry.type === 'MultiPolygon' ? geometry.coordinates : [geometry.coordinates];
+  return polygons.some(rings => inside(rings[0]) && !rings.slice(1).some(inside));
+}
 
 function fetchedNote(fetched) {
   return fetched ? `<p class="detail-fetched">${esc(fetched)} 取得</p>` : '';
@@ -25,12 +44,20 @@ function geoparkDetail(properties) {
     `<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${sourceLink(properties.source, '日本ジオパークネットワーク')}</nav>${fetchedNote(properties.fetched)}</section></article>`;
 }
 
+function nationalparkDetail(properties) {
+  return `<article class="detail"><header class="detail-lead"><h2 id="detail-title" tabindex="-1">${esc(properties.name)}</h2><p class="detail-kind">国立公園</p></header>`+
+    `<dl class="detail-facts"><div><dt>都道府県</dt><dd>${esc(properties.prefectures)}</dd></div><div><dt>指定</dt><dd>${esc(properties.designated)}</dd></div><div><dt>面積（環境省一覧）</dt><dd>${esc(properties.area_label)}</dd></div></dl>`+
+    `<p class="detail-note">環境省の公園区域データを、みどころマップが結合し表示用に簡略化しています。正確な区域は環境省の公式資料をご確認ください。</p>`+
+    `<section class="detail-section detail-sources" aria-labelledby="detail-sources"><h3 id="detail-sources">出典</h3><nav class="detail-links" aria-label="出典">${sourceLink(properties.source_url, '環境省・公園の公式情報')}${sourceLink('https://eadas.env.go.jp/eiadb/ebidbs/Service/About?title=Gis', '環境省EADAS・公園計画書／生物多様性センター区域データ')}${sourceLink('https://eadas.env.go.jp/eiadb/ebidbs/Service/AboutTermofuse', 'データ利用条件')}</nav><p class="detail-fetched">区域データ：${esc(properties.data_year)}整備</p>${fetchedNote(properties.fetched)}</section></article>`;
+}
+
 export function mount(context) {
   const root = context.root, map = context.map;
   const keyword = root.querySelector('#keyword'), type = root.querySelector('#geo-type');
   const list = root.querySelector('#geo-list'), count = root.querySelector('#result-count');
   const message = root.querySelector('#geo-message'), retry = root.querySelector('#geo-retry');
   const panel = root.querySelector('#detail-panel'), content = root.querySelector('#detail-content');
+  const areaChoices = root.querySelector('#geo-area-choices');
   const shell = root.querySelector('.app-shell');
   // Parks are added first so point symbols always stay above the polygons.
   const parkLayer = L.layerGroup().addTo(map), pointLayer = L.layerGroup().addTo(map);
@@ -56,16 +83,16 @@ export function mount(context) {
   }
   function showSelection(key) {
     if (selectedMarker) { map.removeLayer(selectedMarker); selectedMarker = null; }
-    for (const item of shown.values()) if (item.kind === 'geopark') item.layer.setStyle(PARK_STYLE);
+    for (const item of shown.values()) if (item.kind !== 'geosite') item.layer.setStyle(areaStyle(item.kind));
     const item = key && shown.get(key);
     if (!item) return;
     const properties = item.feature.properties;
-    if (item.kind === 'geopark') { item.layer.setStyle(PARK_SELECTED_STYLE); return; }
+    if (item.kind !== 'geosite') { item.layer.setStyle(areaStyle(item.kind, true)); return; }
     selectedMarker = L.marker(item.layer.getLatLng(), {icon:markerIcon(properties.designation), zIndexOffset:SELECTED_MARKER_Z_INDEX}).addTo(map);
     selectedMarker.bindTooltip(esc(properties.name), {direction:'top', offset:[0,-10]});
     selectedMarker.on('click', () => select(key, 'marker'));
   }
-  function select(key, origin) {
+  function select(key, origin, choices = [], keepChoiceFocus = false) {
     const item = shown.get(key);
     if (!item) return;
     selectedKey = key; selectedOrigin = origin;
@@ -75,13 +102,31 @@ export function mount(context) {
     if (origin === 'list') {
       // Fit to the map width that remains after the detail column opens.
       map.invalidateSize({pan:false});
-      if (item.kind === 'geopark') fitItem(map, item.layer.getBounds(), {maxZoom:10});
+      if (item.kind !== 'geosite') fitItem(map, item.layer.getBounds(), {maxZoom:10});
       else flyToItem(map, item.layer.getLatLng());
     }
-    content.innerHTML = item.kind === 'geopark' ? geoparkDetail(item.feature.properties) : geositeDetail(item.feature.properties);
+    content.innerHTML = item.kind === 'nationalpark' ? nationalparkDetail(item.feature.properties) : item.kind === 'geopark' ? geoparkDetail(item.feature.properties) : geositeDetail(item.feature.properties);
+    areaChoices.replaceChildren(); areaChoices.hidden = choices.length < 2;
+    if (choices.length > 1) {
+      const label = document.createElement('p'); label.textContent = 'この位置で重なる範囲';
+      areaChoices.append(label);
+      for (const choice of choices) {
+        const entry = shown.get(choice);
+        if (!entry) continue;
+        const button = document.createElement('button'); button.type = 'button';
+        button.textContent = entry.feature.properties.name;
+        button.setAttribute('aria-current', String(choice === key));
+        button.setAttribute('aria-controls', 'detail-content');
+        button.onclick = () => select(choice, 'marker', choices, true);
+        areaChoices.append(button);
+      }
+    }
     root.querySelector('#detail-origin').textContent = origin === 'marker' ? '地図から選択' : '検索結果から選択';
     panel.scrollTop = 0;
-    revealDetail(map, panel, root.querySelector('#detail-title'));
+    if (keepChoiceFocus) {
+      const button = areaChoices.querySelector('button[aria-current="true"]');
+      requestAnimationFrame(() => { map.invalidateSize(); focusFirst(button); });
+    } else revealDetail(map, panel, root.querySelector('#detail-title'));
   }
   function closeDetail(restoreFocus = true) {
     const key = selectedKey, origin = selectedOrigin;
@@ -92,6 +137,7 @@ export function mount(context) {
     closeDetailPanel(panel, {key, origin, cardSelector:'.geo-card', restoreFocus});
   }
   function draw() {
+    areaChoices.replaceChildren(); areaChoices.hidden = true;
     parkLayer.clearLayers(); pointLayer.clearLayers();
     shown = new Map();
     list.replaceChildren();
@@ -104,8 +150,8 @@ export function mount(context) {
       const feature = entry.feature, properties = feature.properties;
       const key = entry.key;
       let layer;
-      if (entry.kind === 'geopark') {
-        layer = L.geoJSON(feature, {style:PARK_STYLE}).addTo(parkLayer);
+      if (entry.kind !== 'geosite') {
+        layer = L.geoJSON(feature, {style:areaStyle(entry.kind)}).addTo(parkLayer);
         layer.bindTooltip(esc(properties.name), {sticky:true});
       } else {
         const [longitude, latitude] = feature.geometry.coordinates, latlng = [latitude, longitude];
@@ -114,7 +160,12 @@ export function mount(context) {
         L.circleMarker(latlng, {radius:2.5, stroke:false, fillColor:style.color, fillOpacity:1, interactive:false}).addTo(pointLayer);
         layer.bindTooltip(esc(properties.name), {direction:'top', offset:[0,-10]});
       }
-      layer.on('click', () => select(key, 'marker'));
+      layer.on('click', event => {
+        const choices = entry.kind !== 'geosite' && event.latlng ? [...shown.entries()]
+          .filter(([,item]) => item.kind !== 'geosite' && containsArea(item.feature.geometry, event.latlng)).map(([id]) => id) : [];
+        if (choices.length && !choices.includes(key)) choices.push(key);
+        select(key, 'marker', choices);
+      });
       shown.set(key, {kind:entry.kind, feature, layer});
       const button = document.createElement('button');
       button.type = 'button'; button.className = 'geo-card'; button.dataset.key = key;
@@ -124,7 +175,7 @@ export function mount(context) {
       const body = document.createElement('span');
       const title = document.createElement('span'); title.className = 'card-name'; title.textContent = properties.name;
       const description = document.createElement('span'); description.className = 'card-meta';
-      description.textContent = entry.kind === 'geopark' ? `ジオパーク · ${properties.municipalities.join('、')}` : `${properties.designation_label} · ${properties.prefecture || ''}`;
+      description.textContent = entry.kind === 'nationalpark' ? `国立公園 · ${properties.prefectures}` : entry.kind === 'geopark' ? `ジオパーク · ${properties.municipalities.join('、')}` : `${properties.designation_label} · ${properties.prefecture || ''}`;
       body.append(title, description);
       button.append(number, body);
       button.onclick = () => select(key, 'list');
@@ -139,7 +190,8 @@ export function mount(context) {
     message.textContent = '地形・地質のデータを読み込んでいます…';
     root.querySelector('#geo-empty').hidden = true;
     try {
-      const datasets = await Promise.all(['geoparks', 'geosites'].map(async name => {
+      const kinds = ['geopark', 'geosite', 'nationalpark'];
+      const datasets = await Promise.all(['geoparks', 'geosites', 'nationalparks'].map(async name => {
         const response = await fetch('/geo/' + name + '.json');
         if (!response.ok) throw new Error('地質データを取得できませんでした。');
         const data = await response.json();
@@ -147,12 +199,12 @@ export function mount(context) {
         return data.features;
       }));
       entries = datasets.flatMap((features, index) => features.map(feature => {
-        const kind = index === 0 ? 'geopark' : 'geosite', properties = feature.properties;
-        return {feature, kind, key:kind === 'geopark' ? 'geopark:'+properties.slug : 'geosite:'+properties.heritage_id,
-          search:[properties.name, ...(properties.municipalities || []), properties.prefecture || '', properties.address || ''].join(' ').normalize('NFKC').toLocaleLowerCase()};
+        const kind = kinds[index], properties = feature.properties;
+        return {feature, kind, key:kind+':'+(kind === 'geosite' ? properties.heritage_id : properties.slug),
+          search:[properties.name, ...(properties.municipalities || []), properties.prefecture || properties.prefectures || '', properties.address || ''].join(' ').normalize('NFKC').toLocaleLowerCase()};
       }));
       loading = false; draw();
-      message.textContent = 'ジオパークは構成自治体の範囲、天然記念物は地点を表示しています。一部のみの自治体は範囲に含めません。';
+      message.textContent = '国立公園は公園区域、ジオパークは構成自治体の範囲、天然記念物は地点を表示しています。ジオパークの一部のみの自治体は範囲に含めません。';
     } catch (error) {
       message.textContent = 'データを読み込めませんでした。再試行してください。'; retry.hidden = false;
     } finally { loading = false; }

@@ -1,0 +1,28 @@
+name: National park catalogue and boundaries
+reviewed: 2026-10-12
+status: approved
+adoption: approved
+sources:
+  catalogue: https://www.env.go.jp/park/parks/
+  boundaries: https://eadas.env.go.jp/eiadb/ebidbs/Service/About?title=Gis
+  layer: https://eadas.env.go.jp/arcgis3/rest/services/category02_07_02_202607/MapServer/1
+terms:
+  catalogue: https://www.env.go.jp/mail.html
+  boundaries: https://eadas.env.go.jp/eiadb/ebidbs/Service/AboutTermofuse
+  catalogue_license: PDL-1.0
+  boundary_license: Government Standard Terms of Use 2.0 (CC-BY-4.0 compatible)
+cost:
+  condition: Public anonymous download, no paid account or per-request bill; cache and reuse offline.
+commercial_use:
+  allowed: true
+  evidence: EADAS terms explicitly allow commercial use; source and processing credit required.
+conditions:
+  - Attribute MOE national park plans and Biodiversity Center boundary source through EADAS.
+  - Attribute MOE catalogue separately and link to each park's official page.
+  - Mark merging and simplification as processing by midokoro-map, with fetched date and source data year.
+  - Download only the national park area layer; no basemaps, imagery, logos, facilities, protected-species or third-party API layers.
+  - EADAS metadata says direct downloads from the retired Biodiversity GIS have separate terms. This workflow uses EADAS's own updated layer and its terms.
+  - Never publish guest session cookies or service tokens. They are obtained in memory for public read queries only.
+rejected_alternatives:
+  - Retired gis.biodic.go.jp is unavailable and national park GIS is excluded from Biodiversity Center's blanket PDL terms.
+  - OSM/Overpass was investigated but not adopted; public endpoints failed and official EADAS areas became available.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build frontend/geo/geoparks.json and geosites.json from geo.db.
+"""Build frontend/geo/geoparks.json, geosites.json and nationalparks.json from geo.db.
 
 geoparks.json: coarse geopark outlines plus the number of each kind inside them. Membership is counted against the
 full geo.db boundary; the drawn outline is the topology-preserving display_geometry built by geo-map.
@@ -124,8 +124,19 @@ def dumps(value: dict) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n"
 
 
+def build_nationalparks(data: Path) -> dict:
+    with closing(sqlite3.connect(f"file:{data / 'geo/geo.db'}?mode=ro", uri=True)) as con:
+        con.row_factory = sqlite3.Row
+        rows = [dict(row) for row in con.execute('select * from nationalpark order by slug')]
+    return {'type': 'FeatureCollection', 'features': [
+        {'type': 'Feature', 'geometry': json.loads(row.pop('display_geometry')), 'properties': row}
+        for row in rows], 'meta': {'source': 'https://eadas.env.go.jp/eiadb/ebidbs/Service/About?title=Gis',
+                                 'processing': 'midokoro-mapが区域を結合し表示用に簡略化'}}
+
+
 def render(data: Path) -> dict[str, str]:
-    return {"geoparks.json": dumps(build(data)), "geosites.json": dumps(build_sites(data))}
+    return {"geoparks.json": dumps(build(data)), "geosites.json": dumps(build_sites(data)),
+            "nationalparks.json": dumps(build_nationalparks(data))}
 
 
 def main():
@@ -137,7 +148,8 @@ def main():
     print(json.dumps({"geoparks": len(parks["features"]), "bytes": (target / "geoparks.json").stat().st_size,
                       "points": sum(sum(f["properties"]["counts"].values()) for f in parks["features"]),
                       "geosites": len(sites["features"]), "geosites_shown_by_shiseki": len(sites["meta"]["shown_by_shiseki"]),
-                      "geosites_without_coordinates": sites["meta"]["without_coordinates"]}, ensure_ascii=False))
+                      "geosites_without_coordinates": sites["meta"]["without_coordinates"],
+                      "nationalparks": len(json.loads((target / 'nationalparks.json').read_text())['features'])}, ensure_ascii=False))
 
 
 if __name__ == "__main__":

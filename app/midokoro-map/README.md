@@ -130,3 +130,9 @@ Ollamaで同じ形式の記事下書きを作れます。確認済みの資料�
 ジオパークの件数は所属判定用の約50m境界で数え、地図には正本で作成した約500mの表示用輪郭を使います。表示輪郭はShapelyでトポロジーを維持して簡略化します。境界付近ではクリックできる表示範囲と集計範囲が異なるため、詳細パネルにその差を明記します。所属判定を粗い表示範囲へ合わせません。
 
 `data/geo/geo.db` は統合版のビルドスナップショットです。正本DBの更新と統合版の公開を分け、Cloudflareビルドが公開JSONの鮮度を検査するために保持します。サーバーはこのDBを読まないため `.dockerignore` でDockerのビルド入力から除外します。4カテゴリのデータと `published-summaries.json` など既存の起動用データは維持します。通常のデータ取込はgeoを除外し、ジオデータを更新する際だけ `scripts/import-data.py --kind geo --replace` と `scripts/build-geo-layer.py` を実行します。
+
+## 国立公園の更新
+
+地形・地質タブで「国立公園」を選ぶと、公園区域を青い破線で表示します。名称・都道府県で検索でき、一覧または範囲から公式情報・指定・面積・区域の出典とデータ年度を開けます。国立公園の範囲は環境省EADASの公園区域を結合・簡略化したもので、ジオパークの構成自治体範囲とは区別します。重なる範囲をクリックすると詳細パネルの「この位置で重なる範囲」から表示対象を選べます。
+
+`app/geo-map` で `uv run python scripts/nationalparks.py`（再取得は `--refresh`）を実行し、統合版の `scripts/import-data.py --kind geo --replace` と `scripts/build-geo-layer.py` で取り込みます。`frontend/geo/nationalparks.json` もCloudflareビルドの鮮度検査対象です。戻す場合は同じ版のgeo.db・migration-manifest.json・3つの公開GeoJSONを戻し、対応するフロントエンドと一緒に更新します。

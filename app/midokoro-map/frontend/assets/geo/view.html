@@ -1,18 +1,19 @@
 <main class="app-shell">
   <section class="workbench" aria-label="地形・地質を探す">
-    <header class="masthead"><h2>地形・地質</h2><p>ジオパークと地質鉱物の天然記念物を探せます。</p></header>
+    <header class="masthead"><h2>地形・地質</h2><p>国立公園・ジオパーク・地質鉱物の天然記念物を探せます。</p></header>
     <div class="filters" role="search">
       <label>名称・地域<input id="keyword" type="search" placeholder="例：阿蘇、洞窟、熊本" autocomplete="off"></label>
-      <label>種別<select id="geo-type"><option value="">すべて</option><option value="geopark">ジオパーク</option><option value="geosite">天然記念物（地質鉱物）</option></select></label>
+      <label>種別<select id="geo-type"><option value="">すべて</option><option value="nationalpark">国立公園</option><option value="geopark">ジオパーク</option><option value="geosite">天然記念物（地質鉱物）</option></select></label>
     </div>
     <div class="result-bar"><span aria-live="polite"><strong id="result-count">0</strong> 件</span><button id="clear-filters" type="button">条件をクリア</button></div>
     <p id="geo-message" role="status"></p><button id="geo-retry" type="button" hidden>再試行</button>
     <p id="geo-empty" hidden>条件に一致する地点・範囲はありません。</p>
     <div id="geo-list"></div>
   </section>
-  <section class="map-region" aria-label="地形・地質の地図"><div id="map"></div><div class="map-count" id="map-count">読み込み中</div><div class="map-legend" aria-label="地図の凡例"><span><span class="legend-dot legend-dot--special"></span>特別天然記念物</span><span><span class="legend-dot"></span>天然記念物</span><span><span class="legend-area"></span>ジオパーク</span></div></section>
+  <section class="map-region" aria-label="地形・地質の地図"><div id="map"></div><div class="map-count" id="map-count">読み込み中</div><div class="map-legend" aria-label="地図の凡例"><span><span class="legend-dot legend-dot--special"></span>特別天然記念物</span><span><span class="legend-dot"></span>天然記念物</span><span><span class="legend-area"></span>ジオパーク</span><span><span class="legend-area legend-area--nationalpark"></span>国立公園</span></div></section>
   <aside class="detail-panel" id="detail-panel" aria-labelledby="detail-panel-label" tabindex="-1" hidden>
     <header class="detail-header"><div><p class="eyebrow" id="detail-panel-label">地形・地質の詳細</p><p class="detail-origin" id="detail-origin">選択中の地点</p></div><button class="detail-close" type="button" aria-label="詳細を閉じる">×</button></header>
+    <nav id="geo-area-choices" aria-label="重なる範囲の選択" hidden></nav>
     <div class="detail-content" id="detail-content"></div>
   </aside>
 </main>

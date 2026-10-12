@@ -5,7 +5,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 url=sys.argv[1] if len(sys.argv)>1 else 'http://127.0.0.1:18533/'
 root=Path(__file__).resolve().parents[1]
-expected={name:len(json.loads((root/'frontend/geo'/f'{name}.json').read_text())['features']) for name in ['geoparks','geosites']}
+expected={name:len(json.loads((root/'frontend/geo'/f'{name}.json').read_text())['features']) for name in ['geoparks','geosites','nationalparks']}
 with sync_playwright() as p:
     browser=p.chromium.launch(headless=True)
     context=browser.new_context(viewport={'width':1440,'height':960})
@@ -53,7 +53,42 @@ with sync_playwright() as p:
     host.locator('.geo-card').first.click()
     panel.filter(has_text='構成自治体').wait_for(state='visible')
     assert host.locator('.leaflet-popup').count()==0
+    # National parks are separate areas with official metadata and source links.
+    host.locator('#geo-type').select_option('nationalpark')
+    assert int(host.locator('#result-count').inner_text())==expected['nationalparks']
+    host.locator('.geo-card').first.click()
+    panel.wait_for(state='visible')
+    assert '指定' in panel.inner_text() and '面積（環境省一覧）' in panel.inner_text()
+    assert '環境省' in panel.inner_text() and '表示用に簡略化' in panel.inner_text()
+    assert panel.locator('.detail-links a').first.get_attribute('href').startswith('https://www.env.go.jp/park/')
+    panel.locator('.detail-close').click()
+    assert host.locator('.geo-card').first.evaluate('el=>el.getRootNode().activeElement===el')
+    page.evaluate("()=>{let target;midokoro.map.eachLayer(layer=>{if(!target&&layer.feature?.properties?.name?.endsWith('国立公園'))target=layer});target.fire('click',{},true)}")
+    panel.wait_for(state='visible')
+    assert host.locator('#detail-origin').inner_text()=='地図から選択'
+    host.locator('#keyword').fill('北海道')
+    assert int(host.locator('#result-count').inner_text())==7
+    host.locator('#keyword').fill('日高山脈')
+    assert int(host.locator('#result-count').inner_text())==1
+    host.locator('#keyword').fill('')
     host.locator('#clear-filters').click()
+    # A click in the shared Aso area exposes both national park and geopark choices.
+    host.locator('#keyword').fill('阿蘇')
+    page.evaluate("()=>{let target;midokoro.map.eachLayer(layer=>{if(!target&&layer.feature?.properties?.name==='阿蘇くじゅう国立公園')target=layer});target.fire('click',{latlng:L.latLng(32.88,131.08)},true)}")
+    choices=host.locator('#geo-area-choices')
+    assert choices.is_visible() and choices.locator('button').count()==2
+    choices.get_by_role('button',name='阿蘇ユネスコ世界ジオパーク',exact=True).click()
+    assert host.locator('#detail-title').inner_text()=='阿蘇ユネスコ世界ジオパーク'
+    page.wait_for_function("()=>document.querySelector('#view-geo').shadowRoot.activeElement?.textContent==='阿蘇ユネスコ世界ジオパーク'")
+    page.keyboard.press('Tab')
+    assert choices.get_by_role('button',name='阿蘇くじゅう国立公園',exact=True).evaluate('el=>el.getRootNode().activeElement===el')
+    page.keyboard.press('Enter')
+    assert host.locator('#detail-title').inner_text()=='阿蘇くじゅう国立公園'
+    page.wait_for_function("()=>document.querySelector('#view-geo').shadowRoot.activeElement?.textContent==='阿蘇くじゅう国立公園'")
+    page.keyboard.press('Shift+Tab')
+    assert choices.get_by_role('button',name='阿蘇ユネスコ世界ジオパーク',exact=True).evaluate('el=>el.getRootNode().activeElement===el')
+    host.locator('#clear-filters').click()
+    assert choices.is_hidden()
     host.locator('#keyword').fill('熊本')
     filtered=host.locator('#result-count').inner_text()
     assert 0<int(filtered)<sum(expected.values())
