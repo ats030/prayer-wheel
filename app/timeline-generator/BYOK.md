@@ -144,6 +144,9 @@ python3 byok_material_probe.py --output data/byok-eval/showa-material-probe-next
 エラー本文・メッセージ・URL・プロジェクトIDは保存せず、HTTP受付の公開usageには追加しません。
 この診断情報は次回の失敗を切り分けるためのもので、記録していなかった失敗の原因を遡って確定できません。
 自動再試行や運営モデルへの切替は行いません。
+Googleの[公式トラブルシューティング](https://ai.google.dev/gemini-api/docs/troubleshooting)は429/503等の再試行を案内していますが、
+この実験は本人負担と明示上限を優先し、SDKの自動再試行も導入しません。
+失敗後の再実行は本人の新しいキー入力と新しい結果ファイルによる別測定です。
 
 2026-10-12の工程別実測は149.4秒・9回で `provider_unavailable` により終了しました。
 資料選別後は6資料・2,454段落（日付パターン1,257）、65組・延べ1,283段落でした。
@@ -151,6 +154,21 @@ python3 byok_material_probe.py --output data/byok-eval/showa-material-probe-next
 件数整理はまだ発生しておらず、全組の生成・検証量や品質・回数削減は判断できません。
 使用量受信分は入力36,397・出力2,805 tokens、費用USD0.204832は失敗呼出しの予約を含む上限見積です。
 HTTP/通信分類は当時未記録で原因不明、コード変更なし、完成年表なし、品質判定は不合格です。
+
+### 検証済み範囲と残作業
+
+| 条件 | 確認済みの証拠 | 残る確認 |
+|---|---|---|
+| キー非保存・固定送信先 | `test_byok.py` の固定host/redirect拒否/失敗ラッチ、`test_byok_eval.py` の端末入力/上書き拒否 | 実運用の配備・ログ設定は公開課題 |
+| お試し日次枠との分離 | `test_byok_runtime.py` で日次10件満杯の新規/再送/中止/再試行とDB snapshot不変 | 公開運用の実負荷 |
+| 再起動・中止 | `test_byok_runtime.py` の再起動時キー/受付/結果なし、`test_byok.py` の待機中止/子終了 | 配備時のプロセスグループ停止 |
+| 費用・回数・取得・頻度・同時数 | `test_byok.py` / `test_byok_runtime.py` / `test_public_limits.py` の個別拒否と未送信時予約不変 | 公開に適した具体値の実測 |
+| 失敗診断の情報制限 | HTTP400/401/403/404/408/500/503/504、timeout/DNS/TLS/connection/network/invalid JSONを模擬検証。HTTP公開usageにfailure_detailを含めない | 実失敗のHTTP/通信分類 |
+| 品質・費用比較 | 実測の失敗と工程別集計を保存。未完成を合格にしない | 完成BYOK、同条件運営比較、6テーマ+holdout3テーマ、独立した出典監査 |
+
+各条件のオフライン合格は実品質や一般公開の合格を意味しません。
+品質比較が未完了のため `ats030-c5o5r` は継続中です。
+Googleの一般公開用途・年齢条件、公開UIと配備の検証は `PUBLIC_GENERATION_DESIGN.md` と `ats030-zioew` に従います。
 
 無料枠での昭和測定は429を回避しましたが、60回の呼出し上限で未完成になりました。
 評価CLIの `--model-calls` は既定60回、明示指定で1〜100回です。

@@ -73,7 +73,8 @@ class ByokHttpTests(unittest.TestCase):
             if stopping.is_set():
                 return
         emit({"kind": "usage", "usage": {"calls": 2, "input_tokens": 1000, "output_tokens": 100,
-            "cost_microusd": 1500, "max_cost_microusd": 100_000, "cost_is_upper_bound": False, "api_key": KEY}})
+            "cost_microusd": 1500, "max_cost_microusd": 100_000, "cost_is_upper_bound": False, "api_key": KEY,
+            "failure_detail": {"stage": "generate", "kind": "http", "http_status": 503, "message": KEY}}})
         emit(result())
 
     def submit(self, n, **extra):
@@ -107,7 +108,7 @@ class ByokHttpTests(unittest.TestCase):
         status, _, raw = self.request("GET", "/api/byok/receipts/" + rid(2), headers=self.headers)
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(raw)["usage"]["cost_microusd"], 1500)
-        for secret in (KEY.encode(), b'"api_key"', b'"owner"', b'"fingerprint"', b'"quote"', b'"trace"'):
+        for secret in (KEY.encode(), b'"api_key"', b'"owner"', b'"fingerprint"', b'"quote"', b'"trace"', b'"failure_detail"'):
             self.assertNotIn(secret, raw)
         self.assertEqual(self.snapshot(), before)
         # Explicit trial switch uses its own new intake and reserves quota before AI.

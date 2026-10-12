@@ -243,7 +243,9 @@ class ModelTests(unittest.TestCase):
                                       (TimeoutError(KEY), "timeout", None),
                                       (byok.socket.gaierror(KEY), "dns", None),
                                       (byok.ssl.SSLError(KEY), "tls", None),
-                                      (ConnectionResetError(KEY), "connection", None)):
+                                      (ConnectionResetError(KEY), "connection", None),
+                                      (OSError(KEY), "network", None),
+                                      (RuntimeError(KEY), "transport", None)):
             with self.subTest(kind=kind):
                 connection = Mock()
                 connection.getresponse.return_value.status = status
@@ -262,6 +264,38 @@ class ModelTests(unittest.TestCase):
                 connection.getresponse.return_value.read.assert_not_called()
                 connection.close.assert_called_once()
                 self.assertNotIn(KEY, repr(session.summary()))
+
+    def test_http_failures_preserve_public_code_and_do_not_read_error_body(self):
+        from unittest.mock import Mock
+        cases = ((400, "provider_request"), (401, "invalid_api_key"), (403, "provider_denied"),
+                 (404, "provider_unavailable"), (408, "provider_unavailable"),
+                 (500, "provider_unavailable"), (504, "provider_unavailable"))
+        for status, code in cases:
+            with self.subTest(status=status):
+                connection = Mock()
+                connection.getresponse.return_value.status = status
+                connection.getresponse.return_value.read.return_value = KEY.encode()
+                session = self.session(send=byok.transport)
+                with patch.object(byok.http.client, "HTTPSConnection", return_value=connection):
+                    with self.assertRaisesRegex(ByokError, code):
+                        self.call(session, schema=t.EVENT_SCHEMA)
+                self.assertEqual(session.summary()["failure_detail"],
+                                 {"stage": "generate", "kind": "http", "http_status": status})
+                connection.getresponse.return_value.read.assert_not_called()
+                self.assertNotIn(KEY, repr(session.summary()))
+
+    def test_invalid_provider_json_has_safe_diagnostic_without_body(self):
+        from unittest.mock import Mock
+        connection = Mock()
+        connection.getresponse.return_value.status = 200
+        connection.getresponse.return_value.read.return_value = KEY.encode()
+        session = self.session(send=byok.transport)
+        with patch.object(byok.http.client, "HTTPSConnection", return_value=connection):
+            with self.assertRaisesRegex(ByokError, "provider_unavailable"):
+                self.call(session)
+        self.assertEqual(session.summary()["failure_detail"],
+                         {"stage": "other", "kind": "invalid_json", "http_status": None})
+        self.assertNotIn(KEY, repr(session.summary()))
 
     def test_error_diagnostic_rejects_arbitrary_text(self):
         for value in (KEY, {}, [], True):
