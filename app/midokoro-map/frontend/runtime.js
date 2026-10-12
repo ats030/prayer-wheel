@@ -154,7 +154,7 @@ async function buildView(kind, config) {
   const css = ['/vendor/leaflet.css','/vendor/MarkerCluster.css','/vendor/MarkerCluster.Default.css','/assets/'+styleKind+'/app.css','/assets/'+styleKind+'/detail-panel.css','/workspace.css'];
   if (kind === 'explore') css.push('/assets/explore/app.css');
   root.innerHTML = css.map(href=>`<link rel="stylesheet" href="${href}">`).join('') + await response.text() +
-    '<style>:host{display:block;height:100%;min-width:0;overflow-x:clip}h2{margin:0;font:700 1.3rem var(--font-display)}.app-shell{min-height:100%}#map{width:100%;height:100%}.leaflet-control-layers-selector{width:auto;height:auto;margin:0 .3rem 0 0;padding:0;accent-color:#2f6f4f}</style>';
+    '<style>:host{display:block;height:100%;min-width:0;overflow-x:clip}h2{margin:0;font:700 1.3rem var(--font-display)}.app-shell{min-height:100%}#map{width:100%;height:100%}.leaflet-control-layers-selector{width:auto;height:auto;margin:0 .3rem 0 0;padding:0;accent-color:var(--geo-geopark)}</style>';
   const legend = root.querySelector('.map-legend');
   if (legend) {
     legend.id = 'map-legend';

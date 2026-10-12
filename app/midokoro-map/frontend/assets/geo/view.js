@@ -2,13 +2,23 @@ import {esc, sourceLink, flyToItem, fitItem, revealDetail, closeDetailPanel, foc
 
 const geoparkKinds = [['shiseki','史跡'],['omatsuri','祭り'],['onsen','温泉'],['tokusan','特産物']];
 const SELECTED_MARKER_Z_INDEX = 10000;
-const PARK_STYLE = {color:'#2f6f4f', weight:1.5, fillColor:'#2f6f4f', fillOpacity:.12};
-const PARK_SELECTED_STYLE = {color:'#2f6f4f', weight:3.5, fillColor:'#2f6f4f', fillOpacity:.24};
-const NATIONAL_PARK_STYLE = {color:'#245b78', weight:1.5, fillColor:'#245b78', fillOpacity:.10, dashArray:'5 3'};
-const NATIONAL_PARK_SELECTED_STYLE = {...NATIONAL_PARK_STYLE, weight:3.5, fillOpacity:.24};
+let areaStyles = null;
 
+// Colors come from /tokens.css, which the page loads before any view mounts.
 function areaStyle(kind, selected = false) {
-  return kind === 'nationalpark' ? (selected ? NATIONAL_PARK_SELECTED_STYLE : NATIONAL_PARK_STYLE) : (selected ? PARK_SELECTED_STYLE : PARK_STYLE);
+  if (!areaStyles) {
+    const style = getComputedStyle(document.documentElement);
+    const park = style.getPropertyValue('--geo-geopark').trim();
+    const national = style.getPropertyValue('--geo-nationalpark').trim();
+    const nationalStyle = {color:national, weight:1.5, fillColor:national, fillOpacity:.10, dashArray:'5 3'};
+    areaStyles = {
+      park:{color:park, weight:1.5, fillColor:park, fillOpacity:.12},
+      parkSelected:{color:park, weight:3.5, fillColor:park, fillOpacity:.24},
+      national:nationalStyle,
+      nationalSelected:{...nationalStyle, weight:3.5, fillOpacity:.24},
+    };
+  }
+  return kind === 'nationalpark' ? (selected ? areaStyles.nationalSelected : areaStyles.national) : (selected ? areaStyles.parkSelected : areaStyles.park);
 }
 
 function containsArea(geometry, latlng) {

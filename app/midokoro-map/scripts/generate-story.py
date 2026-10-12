@@ -400,7 +400,7 @@ def generate(packet_path, output, base, model, timeout=600, num_predict=4096, re
             (staging / name).write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
         (staging / "review.md").write_text(review_text(draft, packet, manifest))
         preview = staging / "preview"
-        for file in ["app.css", "favicon.svg", "vendor/leaflet.css", "vendor/leaflet.js", "vendor/leaflet-LICENSE", "stories/story.css", "stories/story.js"]:
+        for file in ["tokens.css", "app.css", "favicon.svg", "vendor/leaflet.css", "vendor/leaflet.js", "vendor/leaflet-LICENSE", "stories/story.css", "stories/story.js"]:
             target = preview / file
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / "frontend" / file, target)

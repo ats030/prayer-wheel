@@ -1,6 +1,6 @@
 import {esc} from '../detail-common.js';
 import {openExplorerDetail, closeExplorerDetail} from '../../runtime.js';
-import {labels, colors, pointEntries, geoEntries, filterEntries, balanced, contains} from './model.mjs';
+import {labels, readColors, pointEntries, geoEntries, filterEntries, balanced, contains} from './model.mjs';
 
 const sources = [
   ['shiseki','/api/shiseki/shiseki/'], ['omatsuri','/api/omatsuri/festivals/'],
@@ -16,6 +16,7 @@ function readNumbers(value, length) {
 
 export function mount(context) {
   const {root,map,config}=context;
+  const colors=readColors(root.host);
   const keyword=root.querySelector('#keyword'),prefecture=root.querySelector('#prefecture'),category=root.querySelector('#category');
   const mobilePrefecture=root.querySelector('#mobile-prefecture');
   const list=root.querySelector('#explore-list'),status=root.querySelector('#explore-status'),retry=root.querySelector('#explore-retry');
@@ -52,7 +53,7 @@ export function mount(context) {
       const item=layerCache.has(key)?markerByKey.get(key):null;
       if(!item)continue;
       const {layer,entry}=item;
-      layer.setStyle(entry.point?{weight:key===selected?3:2,color:key===selected?colors.omatsuri:'#fffdf8'}:{weight:key===selected?3.5:1.5,fillOpacity:key===selected ? .23 : .10});
+      layer.setStyle(entry.point?{weight:key===selected?3:2,color:key===selected?colors.selected:colors.outline}:{weight:key===selected?3.5:1.5,fillOpacity:key===selected ? .23 : .10});
     }
     styledKey=selected;
   }
@@ -96,7 +97,7 @@ export function mount(context) {
       let layer=layerCache.get(entry.key);
       if(!layer){
       if(entry.point){
-        layer=L.circleMarker(entry.point,{radius:7,color:'#fffdf8',weight:2,fillColor:colors[entry.kind],fillOpacity:.95});
+        layer=L.circleMarker(entry.point,{radius:7,color:colors.outline,weight:2,fillColor:colors[entry.kind],fillOpacity:.95});
         layer.on('click',()=>open(entry,root.querySelector('#keyword')));
       } else if(entry.geometry){
         const color=colors[entry.kind];

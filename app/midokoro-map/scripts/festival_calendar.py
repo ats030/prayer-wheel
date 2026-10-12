@@ -91,6 +91,7 @@ def render(festivals, today):
   <meta property="og:url" content="{ORIGIN}/festivals">
   <meta property="og:site_name" content="みどころマップ">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/tokens.css">
   <link rel="stylesheet" href="/app.css">
   <link rel="stylesheet" href="/stories/story.css">
   <script src="http://ubuntu-server-app:8526/v.js" data-site="midokoro-map" defer></script>

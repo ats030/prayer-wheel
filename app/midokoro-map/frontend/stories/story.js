@@ -6,6 +6,8 @@
   const relations = new Map([...document.querySelectorAll('.relation-articles li')].map(el => [el.id, el]));
   const markers = new Map(), lines = new Map(), visited = new Set(), sent = new Set();
   let map, selectedPlace = null, selectedRelation = null;
+  const tokens = getComputedStyle(document.documentElement);
+  const lineColor = tokens.getPropertyValue('--color-ink').trim(), activeLineColor = tokens.getPropertyValue('--color-accent').trim();
   const status = document.querySelector('#map-status');
   const selection = document.querySelector('#selection');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -51,7 +53,7 @@
       const relation = relations.get(id);
       const active = id === selectedRelation;
       const related = relation.dataset.from === selectedPlace || relation.dataset.to === selectedPlace;
-      line.setStyle({color:active ? '#c4462d' : '#172b3a', weight:active ? 5 : 2, opacity:active ? .95 : related ? .65 : .2});
+      line.setStyle({color:active ? activeLineColor : lineColor, weight:active ? 5 : 2, opacity:active ? .95 : related ? .65 : .2});
       if (active) line.bringToFront();
     }
   }
@@ -138,7 +140,7 @@
       status.textContent = '背景地図を読み込めません。番号の点と場所のリンクから、つながりをたどれます。';
     });
     for (const [id, rel] of relations) {
-      const line = L.polyline([coords(rel.dataset.from), coords(rel.dataset.to)], {color:'#172b3a', weight:2, opacity:.3, dashArray:'6 7'}).addTo(map);
+      const line = L.polyline([coords(rel.dataset.from), coords(rel.dataset.to)], {color:lineColor, weight:2, opacity:.3, dashArray:'6 7'}).addTo(map);
       line.bindTooltip(rel.querySelector('h3').textContent);
       line.on('click', () => select(rel.dataset.to, id, true));
       lines.set(id, line);

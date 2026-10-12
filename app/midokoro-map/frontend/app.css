@@ -1,11 +1,5 @@
 /* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V4 */
 /* Hallmark · macrostructure: Workbench · modern-minimal · warm paper/navy/vermilion · shared category navigation */
-:root {
-  --color-paper:#f7f4ec; --color-paper-2:#e8edef; --color-ink:#172b3a;
-  --color-ink-2:#526573; --color-rule:#cbd4d8; --color-accent:#c4462d;
-  --color-focus:#1473e6; --font-body:system-ui,-apple-system,"Yu Gothic",sans-serif;
-  --space-sm:.75rem; --space-md:1rem; --space-lg:1.5rem;
-}
 *{box-sizing:border-box}
 html,body{width:100%;height:100%;margin:0;min-width:0;overflow-x:clip}
 body{display:grid;grid-template-rows:auto minmax(0,1fr);height:100dvh;background:var(--color-paper);color:var(--color-ink);font-family:var(--font-body)}
@@ -26,10 +20,10 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--color-focus);outlin
 #status{position:absolute;z-index:1200;inset:1rem auto auto 50%;transform:translateX(-50%);max-width:calc(100% - 2rem);padding:.75rem 1rem;background:var(--color-paper);border:1px solid var(--color-rule);font-size:.9rem}
 #status button{margin-left:.5rem;font:inherit;white-space:nowrap;cursor:pointer}
 /* Header navigation stays visible while the workspace scrolls. */
-.site-header{padding:.6rem 1.25rem;gap:1.25rem;background:#fffdf8}
+.site-header{padding:.6rem 1.25rem;gap:1.25rem;background:var(--color-surface)}
 .kind-tabs{gap:.2rem;padding:.2rem;border:1px solid var(--color-rule);border-radius:8px;background:var(--color-paper)}
 .kind-tabs button{min-height:44px;padding:.55rem .85rem;border:0;border-radius:5px;font-size:.85rem;font-weight:600;transition:background 140ms ease,color 140ms ease}
-.kind-tabs button[aria-selected=true]{background:var(--color-ink);color:#fffdf8;box-shadow:0 1px 3px rgb(23 43 58/.12)}
+.kind-tabs button[aria-selected=true]{background:var(--color-ink);color:var(--color-surface);box-shadow:0 1px 3px rgb(23 43 58/.12)}
 .kind-tabs button:hover{background:var(--color-paper-2)}
 .kind-tabs button[aria-selected=true]:hover{background:#294252}
 .header-links{gap:.35rem 1rem;max-width:23rem}
@@ -40,7 +34,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--color-focus);outlin
 #explore-detail::backdrop{background:rgb(23 43 58/.18)}
 #explore-detail .view-host{height:100%}
 #status{border-radius:6px;box-shadow:0 4px 20px rgb(23 43 58/.12)}
-#status button{min-height:44px;border:1px solid var(--color-rule);border-radius:4px;background:#fffdf8;padding:.4rem .75rem}
+#status button{min-height:44px;border:1px solid var(--color-rule);border-radius:4px;background:var(--color-surface);padding:.4rem .75rem}
 button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:1150px){
   .site-header{flex-wrap:wrap;gap:.65rem}

@@ -1,5 +1,10 @@
 export const labels = {shiseki:'史跡・名勝',omatsuri:'祭り',onsen:'温泉',tokusan:'特産物',geo:'地形・地質',geosite:'天然記念物',geopark:'ジオパーク',nationalpark:'国立公園'};
-export const colors = {shiseki:'#172b3a',omatsuri:'#c4462d',onsen:'#247c85',tokusan:'#96651c',geo:'#2f6f4f',geosite:'#9a6a1d',geopark:'#2f6f4f',nationalpark:'#245b78'};
+// Custom properties from /tokens.css; resolve them with readColors() in the browser.
+export const colorTokens = {shiseki:'--kind-shiseki',omatsuri:'--kind-omatsuri',onsen:'--kind-onsen',tokusan:'--kind-tokusan',geo:'--kind-geo',geosite:'--geo-geosite',geopark:'--geo-geopark',nationalpark:'--geo-nationalpark',selected:'--color-accent',outline:'--color-surface'};
+export const readColors = element => {
+  const style = getComputedStyle(element);
+  return Object.fromEntries(Object.entries(colorTokens).map(([key, token]) => [key, style.getPropertyValue(token).trim()]));
+};
 export const normalize = value => String(value ?? '').normalize('NFKC').trim().toLocaleLowerCase('ja');
 const prefecturesOf = value => Array.isArray(value) ? value : (String(value || '').match(/(?:北海道|京都府|大阪府|東京都|[^\s、・,]+県)/g) || []);
 

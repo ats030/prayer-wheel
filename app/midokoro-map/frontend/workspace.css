@@ -6,7 +6,7 @@
 .masthead p{margin:.5rem 0 0;color:var(--color-ink-2);font-size:.82rem;line-height:1.65}
 .filters{gap:.75rem;padding:1rem 1.25rem;background:rgb(255 255 255/.24)}
 .filters .field{font-size:.75rem;gap:.35rem}
-.filters input:not([type=checkbox]),.filters select,.multi-select summary{min-height:44px;height:2.75rem;border-radius:6px;background:#fffdf8;transition:border-color 140ms ease,box-shadow 140ms ease}
+.filters input:not([type=checkbox]),.filters select,.multi-select summary{min-height:44px;height:2.75rem;border-radius:6px;background:var(--color-surface);transition:border-color 140ms ease,box-shadow 140ms ease}
 .filters input:not([type=checkbox]):hover,.filters select:hover,.multi-select summary:hover{border-color:var(--color-ink-2)}
 .filters input:not([type=checkbox]):focus-visible,.filters select:focus-visible,.multi-select summary:focus-visible{border-color:var(--color-focus);outline:2px solid var(--color-focus);outline-offset:2px}
 .filters input:not([type=checkbox])::placeholder{color:var(--color-ink-2);opacity:.85}
