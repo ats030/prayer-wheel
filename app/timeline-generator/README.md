@@ -239,6 +239,8 @@ Gatewayは127.0.0.1:8535に限定し、既存の100.94.207.13:8532へだけ転�
 公開Workerにはbindingを追加していません。取りやめる場合はGatewayユーザーサービスを停止し、このVPC Serviceだけを削除します。既存Tunnelを削除しません。
 2026-10-12に本人からZero Trust初期設定の完了連絡があり、Accessアプリ一覧は取得できましたが、既存Tokenでのアプリ作成は403でした。
 Access操作には `~/.env` の `CLOUDFLARE_ACCESS_API_TOKEN` を優先して使い、配備用の `CLOUDFLARE_API_TOKEN` と分けます。値はToken本体のみとし、認証拒否後に別Tokenで再試行しません。
+Access専用Tokenの更新後、本人メールだけを許可する `timeline-generator owner` アプリを作成済みです。保護対象は `/manage` と `/api/private` の配下で、公開トップページは200、匿名の保護対象はAccessログインへの302を確認しています。
+本番の匿名検証は `python3 check_cloudflare_app.py https://timeline-generator.ats030.workers.dev --access-protected` を使います。ログイン先へ追従せず、本人用データを読みません。
 VPC/Tunnelの管理APIは通過していますが、既存Wrangler OAuthにはVPCのbinding権限がなく、リモート接続検証は権限エラーでした。管理APIの成功だけでは本番接続の成功を保証しません。
 Cloudflareの[公式初期設定手順](https://developers.cloudflare.com/cloudflare-one/setup/)では、Freeでも支払い情報の登録が必要ですが、Free選択時は課金されないとされています。
 プラン選択・支払い情報登録は本人がダッシュボードで行います。エージェントは有料プランへの変更や支払い情報入力を行いません。

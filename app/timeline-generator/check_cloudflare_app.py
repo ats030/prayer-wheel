@@ -4,16 +4,24 @@ from pathlib import Path
 import sys
 import urllib.error
 import urllib.request
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent
 BASE = (sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:18767").rstrip("/")
+ACCESS_PROTECTED = "--access-protected" in sys.argv[2:]
 
 
-def request(path, method="GET"):
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None
+
+
+def request(path, method="GET", *, follow_redirects=True):
     req = urllib.request.Request(BASE + path, method=method,
                                  headers={"User-Agent": "TimelineGenerator-DeploymentCheck/1.0"})
     try:
-        with urllib.request.urlopen(req, timeout=20) as response:
+        opener = urllib.request.build_opener() if follow_redirects else urllib.request.build_opener(NoRedirect())
+        with opener.open(req, timeout=20) as response:
             return response.status, response.read(), response.headers
     except urllib.error.HTTPError as exc:
         return exc.code, exc.read(), exc.headers
@@ -39,8 +47,13 @@ assert status == 200 and job["read_only"] and len(job["result"]["events"]) == 50
 assert job["result"]["source_mode"] == "unknown" and job["quality"] is None
 assert request("/api/jobs", "POST")[0] == 503
 assert request("/api/jobs/pub-showa/regenerate", "POST")[0] == 503
-assert request("/api/private/jobs")[0] == 503
-assert request("/manage")[0] == 503
+for path in ["/api/private/jobs", "/manage"]:
+    status, _, headers = request(path, follow_redirects=False)
+    if ACCESS_PROTECTED:
+        target = urlsplit(headers.get("Location", ""))
+        assert status == 302 and target.scheme == "https" and target.hostname == "divine-boat-f31d.cloudflareaccess.com", path
+    else:
+        assert status == 503, path
 assert request("/api/jobs?offset=-1")[0] == 400
 assert json.loads(request("/api/jobs?offset=50")[1])["jobs"] == []
 for path in ["/api/jobs/1", "/api/receipts/1", "/api/byok/receipts", "/timelines/1", "/data/timelines.sqlite3",
