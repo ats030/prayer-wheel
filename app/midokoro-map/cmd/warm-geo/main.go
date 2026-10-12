@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"midokoro-map/internal/shared"
 	"midokoro-map/internal/shiseki/services"
 )
 
@@ -46,7 +47,7 @@ func loadTitles(path string) []string {
 }
 
 func main() {
-	path := flag.String("mapping", "data/geo/wikidata.json", "natural monument to Wikipedia mapping")
+	path := flag.String("mapping", shared.DataPath("geo", "wikidata.json"), "natural monument to Wikipedia mapping")
 	limit := flag.Int("limit", 0, "only process first N titles (0 = all)")
 	dryRun := flag.Bool("dry-run", false, "print the titles and exit (no LLM)")
 	flag.Parse()
@@ -92,4 +93,11 @@ func main() {
 		log.Printf("[%3d/%d] %s OK summaries=%d (%.0fs)", i+1, len(titles), title, n, time.Since(start).Seconds())
 	}
 	fmt.Printf("warm-geo complete: done=%d summarized=%d skipped=%d\n", done, summarized, skipped)
+	// 1 = some titles failed (rerun resumes), 3 = nothing summarized (e.g. Ollama unavailable).
+	if skipped > 0 {
+		os.Exit(1)
+	}
+	if summarized == 0 {
+		os.Exit(3)
+	}
 }

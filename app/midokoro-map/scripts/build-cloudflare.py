@@ -25,6 +25,18 @@ def dump(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, separators=(',', ':')))
 
 
+def shard_cache(kind_dir: Path):
+    """Split normalized-cache.json into the 256 two-hex-prefix files the Worker reads."""
+    normalized = kind_dir / 'normalized-cache.json'
+    shards = {f'{n:02x}': {} for n in range(256)}
+    for key, value in json.loads(normalized.read_text()).items():
+        if key[:2] in shards:  # only hex hash keys are served; other entries stay private
+            shards[key[:2]][key] = value
+    for prefix, shard in shards.items():
+        dump(kind_dir / 'cache' / f'{prefix}.json', shard)
+    normalized.unlink()
+
+
 def section_specs(source: Path, name: str = 'sectionSpecs') -> list:
     text = source.read_text().split(f'var {name} = []sectionSpec{{', 1)[1].split('\n}\n', 1)[0]
     specs = []
@@ -71,24 +83,19 @@ def build():
         specs = {}
         hashes = {}
         for kind in KINDS:
-            normalized = assets / '_data' / kind / 'normalized-cache.json'
-            cache = json.loads(normalized.read_text())
-            for n in range(256):
-                prefix = f'{n:02x}'
-                dump(assets / '_data' / kind / 'cache' / f'{prefix}.json', {k: v for k, v in cache.items() if k.startswith(prefix)})
-            normalized.unlink()
+            shard_cache(assets / '_data' / kind)
             source = ROOT / 'internal' / kind / 'services' / ('wikipedia_sections.go' if kind == 'tokusan' else 'wikipedia_content.go')
             specs[kind] = section_specs(source)
             for p in sorted((ROOT / 'data' / kind).iterdir()):
                 if p.is_file():
                     hashes[f'{kind}/{p.name}'] = hashlib.sha256(p.read_bytes()).hexdigest()
-        normalized = assets / '_data/geo/normalized-cache.json'
-        cache = json.loads(normalized.read_text())
-        for n in range(256):
-            prefix = f'{n:02x}'
-            dump(assets / '_data/geo/cache' / f'{prefix}.json', {k: v for k, v in cache.items() if k.startswith(prefix)})
-        normalized.unlink()
-        specs['geo'] = section_specs(ROOT / 'internal/shiseki/services/section_profile.go', 'geoSectionSpecs')
+        shard_cache(assets / '_data/geo')
+        profile = ROOT / 'internal/shiseki/services/section_profile.go'
+        specs['geo'] = section_specs(profile, 'geoSectionSpecs')
+        # The Worker maps these keys onto the shiseki response slots (geoSlots).
+        if [spec['key'] for spec in specs['geo']] != ['origin', 'features', 'access', 'protection']:
+            raise ValueError('geoSectionSpecs keys changed; update geoSlots in cloudflare/worker.mjs')
+        specs['geo_heading_prefix'] = re.search(r'headingKeyPrefix:\s*"([^"]+)"', profile.read_text()).group(1)
         if GEO_SUMMARIES.exists():
             hashes['geo/summaries.json'] = hashlib.sha256(GEO_SUMMARIES.read_bytes()).hexdigest()
         dump(assets / '_data/specs.json', specs)

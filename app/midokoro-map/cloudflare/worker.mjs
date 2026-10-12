@@ -1,8 +1,8 @@
 // Public API adapter. The local SQLite databases and model remain the source of truth.
 const kinds = ['shiseki', 'omatsuri', 'onsen', 'tokusan'];
 const collections = {shiseki: 'shiseki', omatsuri: 'festivals', onsen: 'onsen', tokusan: 'tokusan'};
-// Geo natural monuments use the shiseki cache scheme with their own specs; specs fill these response slots in order.
-const geoSlots = ['history', 'remains', 'access', 'highlights'];
+// Geo natural monuments use the shiseki cache scheme with their own specs; each geo key fills a shiseki response slot.
+const geoSlots = {origin: 'history', features: 'remains', access: 'access', protection: 'highlights'};
 const summaryKeyed = kind => kind === 'shiseki' || kind === 'geo';
 const slugs = ['arita-porcelain', 'kusatsu-yumomi', 'kawagoe-festival'];
 const events = ['view', 'entry-home', 'entry-shared', 'explore', 'follow', 'share-open', 'share-returned', 'copy-success'];
@@ -171,8 +171,8 @@ async function panel(env, kind, title, customSpecs) {
   const result = await upstream('https://ja.wikipedia.org', {action: 'parse', page: title, prop: 'sections'});
   if (!result.parse || !Array.isArray(result.parse.sections)) throw new APIError('Wikipedia sections unavailable');
   const headings = result.parse.sections.map(h => ({line: stripHTML(h.line), level: Number(h.level)}));
-  const specs = customSpecs || (await data(env, 'specs.json'))[kind];
-  const headingKey = await sha('headingmap|' + (kind === 'geo' ? 'geo-v1|' : '') + title + '|' + headings.map(h => h.line).sort().join('\n'));
+  const allSpecs = await data(env, 'specs.json'), specs = customSpecs || allSpecs[kind];
+  const headingKey = await sha('headingmap|' + (kind === 'geo' ? allSpecs.geo_heading_prefix : '') + title + '|' + headings.map(h => h.line).sort().join('\n'));
   let headingMap = {};
   const stored = await lookup(env, kind, headingKey);
   if (stored) { try { headingMap = JSON.parse(stored); } catch {} }
@@ -241,12 +241,12 @@ async function wikipediaContent(env, kind, title, qid) {
       } catch (e) { if (e.status !== 404) response.sections_unavailable = true; }
     }
     const row = kind === 'shiseki' ? await item(env, kind, qid) : null;
-    for (const [index, [key, section]] of Object.entries(sections).entries()) {
+    for (const [key, section] of Object.entries(sections)) {
       if (kind !== 'shiseki' || ['special', 'national', 'local'].includes(row?.designation)) {
         if (summaryKeyed(kind) && !section.summary && section.blocks?.length) section.raw_omitted = true;
         delete section.blocks;
       }
-      response[kind === 'geo' ? geoSlots[index] : key] = section;
+      response[kind === 'geo' ? geoSlots[key] : key] = section;
     }
   } catch (e) { if (e.status !== 404) response.sections_unavailable = true; }
   return response;
@@ -342,6 +342,7 @@ async function route(request, env) {
   if (geo) {
     if (request.method !== 'GET') return error('Method not allowed', 405);
     const p = url.searchParams, qid = p.get('qid') || '';
+    if (!/^Q\d+$/.test(qid)) return error('qid parameter is required', 400);
     if (geo[1] === 'image') return json(await wikidataImage(qid));
     const title = p.get('title');
     if (!title || !qid || title.length > 300) return error('title and qid parameters are required', 400);
@@ -421,7 +422,7 @@ export default {
       // SQLite-backed Durable Objects are available on Free and provide the
       // CPU budget needed for the existing article/attribution processing.
       const path = new URL(request.url).pathname;
-      if (request.method === 'GET' && /^\/api\/(shiseki|onsen|omatsuri|tokusan|geo)\/(wiki\/(content|image|links)|wikiimage|commons\/image|sections\/)/.test(path) && env.EXTERNAL_API) {
+      if (request.method === 'GET' && (/^\/api\/(shiseki|onsen|omatsuri|tokusan)\/(wiki\/(content|image|links)|wikiimage|commons\/image|sections\/)/.test(path) || /^\/api\/geo\/wiki\/(content|image)$/.test(path)) && env.EXTERNAL_API) {
         const shard = await sha(request.url);
         return await env.EXTERNAL_API.get(env.EXTERNAL_API.idFromName(shard)).fetch(request);
       }

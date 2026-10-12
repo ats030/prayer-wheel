@@ -37,7 +37,7 @@ var (
 var GeoProfile = &SectionProfile{specs: geoSectionSpecs, headingKeyPrefix: "geo-v1|", summaryOnly: true, cache: func() *SummaryCache {
 	geoSummaryCacheOnce.Do(func() {
 		if geoSummaryCache == nil {
-			geoSummaryCache = newSummaryCache(shared.DataPath("geo", "summaries.json"), 20000)
+			geoSummaryCache = newSummaryCache(shared.DataPath("geo", "summaries.json"), 200000)
 		}
 	})
 	return geoSummaryCache

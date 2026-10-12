@@ -112,19 +112,24 @@ test('Wikipedia identity, summaries, attribution and transient failures remain d
 });
 test('Geo natural monuments use geo specs, the geo cache and shiseki response slots', async () => {
   const originalFetch = globalThis.fetch;
-  const extract = '洞の概要。\n成因\n溶岩が冷えて柱状節理ができた。';
-  const cacheKey = await sha('検証洞|成り立ち|' + extract);
-  const specs = {geo: [{key: 'origin', label: '成り立ち', candidates: ['成因']}, {key: 'features', label: '特徴・見どころ', candidates: ['特徴']},
+  const extract = '洞の概要。\n成因\n溶岩が冷えて柱状節理ができた。\n岩の様子\n六角柱が並ぶ。';
+  const cacheKey = await sha('検証洞|成り立ち|' + extract), featuresKey = await sha('検証洞|特徴・見どころ|' + extract);
+  let sections = [{line: '成因', level: '2'}];
+  const headingKey = () => sha('headingmap|geo-v1|検証洞|' + sections.map(s => s.line).sort().join('\n'));
+  const specs = {geo_heading_prefix: 'geo-v1|', geo: [{key: 'origin', label: '成り立ち', candidates: ['成因']}, {key: 'features', label: '特徴・見どころ', candidates: ['特徴']},
     {key: 'access', label: 'アクセス', candidates: ['アクセス']}, {key: 'protection', label: '指定・保護', candidates: ['指定']}]};
   const testEnv = {...env, ASSETS: {async fetch(r) {
     const path = new URL(r.url).pathname;
     if (path === '/_data/specs.json') return Response.json(specs);
-    if (path.startsWith('/_data/geo/cache/')) return Response.json(path.endsWith(`/${cacheKey.slice(0, 2)}.json`) ? {[cacheKey]: '溶岩が冷えて柱状節理になった。'} : {});
+    if (path.startsWith('/_data/geo/cache/')) {
+      const entries = {[cacheKey]: '溶岩が冷えて柱状節理になった。', [featuresKey]: '六角柱の岩が並ぶ。', [await headingKey()]: JSON.stringify({features: '岩の様子'})};
+      return Response.json(Object.fromEntries(Object.entries(entries).filter(([key]) => path.endsWith(`/${key.slice(0, 2)}.json`))));
+    }
     return env.ASSETS.fetch(r);
   }}};
   globalThis.fetch = async input => {
     const p = new URL(input).searchParams;
-    if (p.get('action') === 'parse') return Response.json({parse: {sections: [{line: '成因', level: '2'}]}});
+    if (p.get('action') === 'parse') return Response.json({parse: {sections}});
     if (p.get('action') === 'wbgetentities') return Response.json({entities: {Q1: {claims: {}}}});
     return Response.json({query: {pages: [{title: '検証洞', extract: p.has('exintro') ? '洞の概要。' : extract, pageprops: {wikibase_item: 'Q1'}}]}});
   };
@@ -136,6 +141,11 @@ test('Geo natural monuments use geo specs, the geo cache and shiseki response sl
     assert.equal(result.origin, undefined);
     assert.deepEqual(result.remains, {});
     assert.equal((await worker.fetch(request('/api/geo/wiki/content?qid=Q1'), testEnv)).status, 400);
+    assert.equal((await worker.fetch(request('/api/geo/wiki/image?qid=undefined'), testEnv)).status, 400);
+    // A heading the model mapped (cached under the versioned geo heading key) also finds its summary.
+    sections = [{line: '成因', level: '2'}, {line: '岩の様子', level: '2'}];
+    const mapped = await (await worker.fetch(request('/api/geo/wiki/content?title=検証洞&qid=Q1'), testEnv)).json();
+    assert.equal(mapped.remains.summary, '六角柱の岩が並ぶ。');
     assert.equal((await worker.fetch(request('/api/geo/wiki/links?qid=Q1'), testEnv)).status, 404);
   } finally { globalThis.fetch = originalFetch; }
 });
