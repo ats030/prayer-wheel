@@ -1,0 +1,194 @@
+{
+  "engine": "VOICEVOX Nemo Engine",
+  "engineVersion": "0.24.0",
+  "voice": "男声1",
+  "voiceVersion": "0.15.0",
+  "speakerId": 10001,
+  "speakerUuid": "2171909e-d2d1-4bbb-aa45-442c12732665",
+  "credit": "VOICEVOX Nemo",
+  "settings": {
+    "speedScale": 0.85,
+    "intonationScale": 0.65,
+    "prePhonemeLength": 0.1,
+    "postPhonemeLength": 0.25,
+    "outputSamplingRate": 24000,
+    "outputStereo": false
+  },
+  "sutraSha256": "14ae3b8825f701dc32abf0fbffde61501f650f1c3b03b80563985864425c6fc8",
+  "files": [
+    {
+      "file": "01.wav",
+      "seconds": 3.147,
+      "sha256": "1e277e3d854dd35389ef4bcb9c1f75d6cdbf653a977c6d1351f4755ded8ffb96",
+      "kana": "マ'カ、ハ'ンニャ、ハラ'ミッタ、シン'ギョウ"
+    },
+    {
+      "file": "02.wav",
+      "seconds": 1.707,
+      "sha256": "849be2a1f19653aea93bcf04ae10bd072f8019e8828045d6794a9fc545b1ac1e",
+      "kana": "カ'ン/ジザイ'、ボサツ'"
+    },
+    {
+      "file": "03.wav",
+      "seconds": 2.667,
+      "sha256": "f9099618aa123cd9d79281062203d43033cd150f88cd0e32e2ad93e45c774567",
+      "kana": "ギョオジン'、ハ'ンニャ、ハラミッタ'ジ"
+    },
+    {
+      "file": "04.wav",
+      "seconds": 4.512,
+      "sha256": "451ee150568ae6e4ed09e6570a8766242cfe612cc6ff4c3be368a329fc29d71e",
+      "kana": "ショオケン'、ゴ'ウン、カイ'クウ、ド'、イッサイ'、ク'ヤク"
+    },
+    {
+      "file": "05.wav",
+      "seconds": 3.616,
+      "sha256": "262c3d0e27cdc7a8f3d622d5be9590c928a253ba97518efd1a5cec7717a2e873",
+      "kana": "シャ'リ/シ'、_シキ'、フイ'/ク'ウ、ク'ウ、フイ'/_シキ'"
+    },
+    {
+      "file": "06.wav",
+      "seconds": 3.008,
+      "sha256": "6f84e5a7df1104fdca8a98db724c0dc5681dc41ee6ecd41642e82ea8e66a673c",
+      "kana": "_シ'/キソク'、ゼ'/ク'ウ、ク'ウ/ソ'ク、ゼ'/_シキ'"
+    },
+    {
+      "file": "07.wav",
+      "seconds": 3.968,
+      "sha256": "89fbfef5dd51cfe36b63c7e407b2a80441c07c8fbbb6f20754c25312da874109",
+      "kana": "ジュ'、ソオ'、ギョ'ウ、_シキ'、ヤ'/ク'ブ、ニョ'ゼ"
+    },
+    {
+      "file": "08.wav",
+      "seconds": 3.051,
+      "sha256": "2ee293e90b277ae66f712b85925fa1fe10fdad350ebf422a433d22590f8f6c63",
+      "kana": "シャ'リ/シ'、ゼ'、ショ'ホオ、クウソオ'"
+    },
+    {
+      "file": "09.wav",
+      "seconds": 4.299,
+      "sha256": "50e6081f245b4b23dda255fdfff8b0645864645c2347ff7f2d8b04d03d5b1610",
+      "kana": "_フショオ'、フメツ'、_フク'、フジョオ'、フ'ゾウ、フゲン'"
+    },
+    {
+      "file": "10.wav",
+      "seconds": 5.184,
+      "sha256": "cbb07b4d3eb4170af151e9948398605092e7b5b7b3094ff6acda33ef382c834a",
+      "kana": "ゼ'/コ'、クウチュウ'、ムシ'キ、ム'、ジュ'、ソオ'、ギョ'ウ、_シキ'"
+    },
+    {
+      "file": "11.wav",
+      "seconds": 8.757,
+      "sha256": "ec5e5e836f297ec587410e81ac5405d9c0ffac269de72a55eaeca3f4e6a93989",
+      "kana": "ム'、ゲン'、ニ'、ビ'、ゼ'/ツ'、シ'ン、イ'、ム'、_シキ'、ショオ'、コオ'、ミ'、ソ'ク、ホ'オ"
+    },
+    {
+      "file": "12.wav",
+      "seconds": 2.752,
+      "sha256": "84d9b2e12c253ca7c25b8a4319fcc39f21fe0e7f5e1245ddac559d90c178e26b",
+      "kana": "ムゲンカ'イ、ナ'イシ、ムイ_シキカ'イ"
+    },
+    {
+      "file": "13.wav",
+      "seconds": 2.645,
+      "sha256": "7dfbb305270a3a7f0014ac58a45eb3b29ef032832e92fc4d7c33a8921336fb2e",
+      "kana": "ムム'ミョオ、ヤク'、ムムミョオ'ジン"
+    },
+    {
+      "file": "14.wav",
+      "seconds": 3.296,
+      "sha256": "4adf5e7e1b0434808fa9f4c47f4aae1da631c4464d65bfb4d939f0d703384847",
+      "kana": "ナ'イシ、ム'ロ/ウ'シ、ヤク'、ム'ロ/ウシジ'ン"
+    },
+    {
+      "file": "15.wav",
+      "seconds": 4.523,
+      "sha256": "611124596ecd3e1da9f439e3e9a87a4ffb908fd07da9b07eaf79b871c366a4f6",
+      "kana": "ム'、ク'、シュ'ウ、メ'ツ、ド'オ、ム'チ、ヤ'/クムト'ク"
+    },
+    {
+      "file": "16.wav",
+      "seconds": 3.008,
+      "sha256": "06094af790a1f9f1e3ce4c35584269b02f0174de3873ee2901b5337d66c00637",
+      "kana": "イ'、ム'ショト/ク'コ、ボダイ'、サ'ッタ"
+    },
+    {
+      "file": "17.wav",
+      "seconds": 3.605,
+      "sha256": "443857bbaebeb73059417a650a37cda2b9141aa56cdc1461ecd2f27fae1c5de4",
+      "kana": "エ'、ハ'ンニャ、ハラ'ミッ/タ'コ、シ'ン、ムケイゲ'"
+    },
+    {
+      "file": "18.wav",
+      "seconds": 2.261,
+      "sha256": "d226c9a0785a10d28c6f72d9f95d36727dd0782c65ed579a2c72defa13896e5e",
+      "kana": "ムケイゲ'/コ'、ム'ウ、_ク'/フ'"
+    },
+    {
+      "file": "19.wav",
+      "seconds": 4.512,
+      "sha256": "209e4e073bac433f9f0d616bc248aa075e2f300d2bc574fd364b7494fba9c87a",
+      "kana": "オ'ンリ、イッサイ'、テンドオ'、ム'ソオ、_クキョオ'、ネ'ハン"
+    },
+    {
+      "file": "20.wav",
+      "seconds": 3.787,
+      "sha256": "4970e6c5dd4cd85d84ffe4c7199b3bcda9abdc1b0b530235af06d1cd5957016f",
+      "kana": "サンゼ'、ショ'ブツ、エ'、ハ'ンニャ、ハラ'ミッ/タ'コ"
+    },
+    {
+      "file": "21.wav",
+      "seconds": 3.147,
+      "sha256": "26eeb33582f0f1e074faa378a3704574e817bdc05e278bd8616412c88ad58006",
+      "kana": "ト'ク、アノ'/ク'タラ、サンミャク'、サン'/ボダイ'"
+    },
+    {
+      "file": "22.wav",
+      "seconds": 2.347,
+      "sha256": "a6f163e409d7509e1958a9c64d0f109bbe82b47cc0e9d09fac7356920dcbfd78",
+      "kana": "コチ'、ハ'ンニャ、ハラ'ミッタ"
+    },
+    {
+      "file": "23.wav",
+      "seconds": 3.285,
+      "sha256": "94e4d15aa7bbfd5623fa54482a3790fefbef10f36b000a3fba57ec32065e46c1",
+      "kana": "ゼ'、ダイ'ジンシュ、ゼ'、ダイミョ'オ/シュ'"
+    },
+    {
+      "file": "24.wav",
+      "seconds": 3.157,
+      "sha256": "d54f9eb568095b35226ee47a53ffe7039dfe719e2850c9a7870b123e9ed69a4a",
+      "kana": "ゼ'、ムジョオ'/シュ'、ゼ'、ム'トオ/ド'オシュ"
+    },
+    {
+      "file": "25.wav",
+      "seconds": 3.093,
+      "sha256": "bd8f6e78890ec71dac9d3ae9559dc86809a6a608a8919ea04b9859c011338cd0",
+      "kana": "ノ'オ/ジョ'、イッ'サ/イク'、シンジツ'、_フコ'"
+    },
+    {
+      "file": "26.wav",
+      "seconds": 4.16,
+      "sha256": "4d33f320769658b8bc9b7e35accf511738db36b0becef7283d33af11b1e8b5eb",
+      "kana": "コセツ'、ハ'ンニャ、ハラ'ミッタ/シュ'、ソ_クセツ'、シュ'ワツ"
+    },
+    {
+      "file": "27.wav",
+      "seconds": 2.549,
+      "sha256": "0c445a061850bf081f3b8dac2afacd8145b2a9cee9f9ee730ec260fd6a3e6321",
+      "kana": "ギャ'テ/イ'、ギャ'テ/イ'、ハラギャ'テイ"
+    },
+    {
+      "file": "28.wav",
+      "seconds": 2.208,
+      "sha256": "0a607d56dd7918fbf396a9abf875d278cb57cd2947ab4352bf2647b35387e6d4",
+      "kana": "ハラソオ'/ギャ'テ/イ'、ボ'ジ/ソ'ワカ"
+    },
+    {
+      "file": "29.wav",
+      "seconds": 1.664,
+      "sha256": "ba45d3520d8d601af105c1cf0edcc07ef589848fc4ec51c17e6f569791afd023",
+      "kana": "ハ'ンニャ、シン'ギョウ"
+    }
+  ]
+}

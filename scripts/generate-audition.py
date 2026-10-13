@@ -63,7 +63,7 @@ def generate(host):
                 phrase['pause_mora']['vowel_length'] = 0.04
         data = generator.request(host, f'/synthesis?speaker={generator.SPEAKER_ID}&enable_interrogative_upspeak=false',
                                  json.dumps(query).encode())
-        original = (ROOT / 'audio' / f'{index:02d}.wav').read_bytes()
+        original = (ROOT / 'audition/baseline' / f'{index:02d}.wav').read_bytes()
         current.append(frames(original))
         adjusted.append(frames(data))
         sections.append({'section': index, 'text': chunk['text'], 'reading': reading,

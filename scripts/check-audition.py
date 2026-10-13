@@ -14,10 +14,10 @@ assert manifest['sutraSha256'] == hashlib.sha256(raw).hexdigest()
 assert manifest['engineVersion'] == '0.24.0' and manifest['speakerId'] == 10001
 assert [s['section'] for s in manifest['sections']] == list(range(2, 7))
 assert [s['text'] for s in manifest['sections']] == [s['text'] for s in json.loads(raw)['chunks'][1:6]]
-shipped = json.loads((ROOT / 'audio/manifest.json').read_text())
+shipped = json.loads((ROOT / 'audition/baseline/manifest.json').read_text())
 baseline = b''
 for section in manifest['sections']:
-    original = (ROOT / 'audio' / f"{section['section']:02d}.wav").read_bytes()
+    original = (ROOT / 'audition/baseline' / f"{section['section']:02d}.wav").read_bytes()
     assert hashlib.sha256(original).hexdigest() == section['currentSha256']
     with wave.open(io.BytesIO(original)) as wav:
         baseline += wav.readframes(wav.getnframes())
@@ -40,5 +40,5 @@ for entry in manifest['files']:
         samples = array.array('h', pcm)
         assert 100 < max(abs(v) for v in samples) < 32767
         if entry['file'] == 'current.wav':
-            assert pcm == baseline, 'Baseline no longer matches shipped audio'
+            assert pcm == baseline, 'Baseline no longer matches archived Nemo audio'
 print('Verified A/B audio hashes, five sections, baseline PCM, timing controls and unclipped signal')

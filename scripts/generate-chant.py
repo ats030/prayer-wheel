@@ -48,7 +48,9 @@ def rms(samples):
     return math.sqrt(sum(v * v for v in samples) / len(samples))
 
 
-def build_score(manifest, midi_key):
+def build_score(manifest, midi_key, breath_after=None):
+    if breath_after is None:
+        breath_after = BREATH_AFTER
     notes = [{'id': 'leading-rest', 'key': None, 'frame_length': 15, 'lyric': ''}]
     sections = []
     for section in manifest['sections']:
@@ -56,7 +58,7 @@ def build_score(manifest, midi_key):
         moras = [m['text'] for p in section['query']['accent_phrases'] for m in p['moras']]
         sections.append({'section': number, 'text': section['text'], 'reading': section['reading'], 'moras': moras})
         for index, mora in enumerate(moras, 1):
-            ending = (number, index) in BREATH_AFTER
+            ending = (number, index) in breath_after
             length = END_FRAMES if ending else MORA_FRAMES
             if mora == 'ッ':
                 # Keep the consonant closure short; sustain the preceding vowel instead.
@@ -91,8 +93,7 @@ def shape_pitch(query, score):
     query['volumeScale'] = 1.0
 
 
-def generate(host, variant):
-    config = VARIANTS[variant]
+def verify_engine(host, config):
     engine = json.loads(request(host, '/engine_manifest'))
     if engine['uuid'] != ENGINE_UUID or json.loads(request(host, '/version')) != ENGINE_VERSION:
         raise ValueError('Expected official VOICEVOX Engine 0.25.2')
@@ -109,6 +110,12 @@ def generate(host, variant):
         raise ValueError('Wrong singing teacher')
     if not math.isclose(engine['frame_rate'], 93.75):
         raise ValueError('Unexpected singing frame rate')
+    return engine, voice, teacher
+
+
+def generate(host, variant):
+    config = VARIANTS[variant]
+    engine, voice, teacher = verify_engine(host, config)
     previous_raw = (ROOT / 'audition/manifest.json').read_bytes()
     previous = json.loads(previous_raw)
     score, sections = build_score(previous, config["midi"])

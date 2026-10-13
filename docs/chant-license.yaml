@@ -1,6 +1,6 @@
 reviewed_at: 2026-10-13
-intended_use: 5節の合成読経試聴WAVを無料の静的Webアプリで配信、ダウンロード可能にする
-selected:
+intended_use: 5節の比較試聴WAVと、採用Dの全29節WhiteCUL WAVを無料の静的Webアプリで配信
+male_comparison:
   tool: VOICEVOX Engine
   engine_version: 0.25.2
   engine_uuid: 074fc39e-678b-4c13-8916-ffca8d505d1d
@@ -62,6 +62,7 @@ reference:
     - https://soto-tokai.net/copyright.html
 
 female_comparison:
+  adoption: D試聴版に加え、本体全29節へ採用
   tool: VOICEVOX Engine 0.25.2 / WhiteCUL ノーマル（ハミング）
   voice_version: 0.16.0
   speaker_id: 3023
@@ -74,7 +75,7 @@ female_comparison:
     - ページとREADMEにクレジット/規約リンク、再利用者にも規約遵守を義務づける
     - 合成WAVのみ配信。モデル/エンジン/キャラクター画像は再配布しない
     - 無断で音声素材を販売しない。音響モデル学習や声複製は行わない
-  religious_use: WhiteCUL固有規約に宗教活動の一律禁止条項はない。一般利用許諾に基づく試聴用途の判断
+  religious_use: WhiteCUL固有規約に宗教活動の一律禁止条項はない。一般利用許諾に基づく試聴版および本体の経文合成配信の判断。用途別の明示承認ではない
   sources:
     - https://voicevox.hiroshiba.jp/product/white_cul/
     - https://www.whitecul.com/guideline

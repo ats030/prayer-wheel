@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate static WAVs using a verified, local VOICEVOX Nemo engine (stdlib only)."""
+"""Generate legacy Nemo comparison WAVs into audition/baseline; never overwrite main audio."""
 import argparse
 import hashlib
 import io
@@ -36,8 +36,8 @@ def generate(host, sample):
         raise ValueError("Nemo 男声1 style ID does not match")
     raw = (ROOT / "data/sutra.json").read_bytes()
     sutra = json.loads(raw)
-    output = ROOT / "audio"
-    output.mkdir(exist_ok=True)
+    output = ROOT / "audition/baseline"
+    output.mkdir(parents=True, exist_ok=True)
     records = []
     for i, chunk in enumerate(sutra["chunks"]):
         if sample and i != 1:

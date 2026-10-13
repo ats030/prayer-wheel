@@ -68,22 +68,33 @@ npx wrangler@4.149.0 deploy
 現代語訳・解説・既存録音は転載していません。宗派によって字体・読み・唱え方に違いがあります。
 出典と編集方針はデータ内に記録しています。
 
-音声は**VOICEVOX Nemo 男声1**、エンジン0.24.0、音声ライブラリ0.15.0を使用。
-話速0.85、抑揚0.65で事前生成した読み上げです。僧侶の読経録音ではありません。
-生成設定、経文ハッシュ、各音声のハッシュ・長さ・生成された読みは`audio/manifest.json`に記録します。
-生成された読みとWAVの形式・音割れは機械的に検証できますが、聴感による最終確認とは区別します。
+本体は試聴Dで選んだ**VOICEVOX:WhiteCUL**のノーマル・ハミングを全29節に採用しています。
+エンジン0.25.2、音声ライブラリ0.16.0、歌唱クエリ生成は**VOICEVOX:波音リツ**です。
+MIDI55（196.0Hz）を中心に、母音を持続させ、まとまりの終わりで音を伸ばします。
+僧侶の録音や、宗派の正式な唱法を再現した音声ではありません。
 
-生成する場合だけ、公式のNemoエンジン0.24.0をローカルで起動して以下を実行します。
-Python標準ライブラリのみを使い、Nemo製品UUID・バージョン・音声IDを照合します。
+本体では一節ごとに停止・再開できるよう個別に生成し、各節の最後に休符を置きます。
+D試聴版の内部の呼吸位置は維持し、それ以外の節は読みの句点を基準に呼吸位置を設定します。
+最初のpau（無音）だけを短縮し、次の子音を切らずに節間の余分な間を抑えます。
+本体は節の終端でも区切るため、5節をひと続きに生成したD試聴音声と間は完全には同じではありません。
+生成query、スコア、経文・WAVのhash、長さ、読み、休符・音量調整は`audio/manifest.json`へ保存します。
+読み・音素・形式・音割れは機械的に検証しますが、全編の自然さは聴感による確認が必要です。
+
+生成時だけ、公式VOICEVOX 0.25.2（localhost:50021）と読み確認用Nemo0.24.0（localhost:50121）を起動します。
+利用者に音声エンジンの導入は不要です。生成コードはPython標準ライブラリのみで動きます。
 
 ```bash
-python3 scripts/generate-audio.py --sample
-python3 scripts/generate-audio.py
+python3 scripts/generate-recitation.py
+python3 scripts/check-audio.py
+python3 scripts/check-recitation-browser.py  # 全29節をUI上限1.4倍で実再生
 ```
 
-試聴は`audio/02.wav`（観自在菩薩）。利用規約の確認は[音声ライセンス記録](docs/audio-license.yaml)を参照。
-音声の利用・二次配信は[VOICEVOX Nemo利用規約](https://voicevox.hiroshiba.jp/nemo/term/)に従ってください。
-音声クレジット: **VOICEVOX Nemo**。
+全29節の合成・検証に成功してから本体のWAVとmanifestを更新します。
+今回の全29節採用コミットをrevertしてビルド・再公開すると、音声・生成設定・クレジットをまとめて採用前へ戻せます。
+採用音源と規約の記録は[音声利用条件](docs/audio-license.yaml)、詳細は[音源選定記録](docs/chant-license.yaml)を参照してください。
+再利用・再配信時は **VOICEVOX:WhiteCUL / VOICEVOX:波音リツ（歌唱クエリ生成）** を表記し、
+[VOICEVOX規約](https://voicevox.hiroshiba.jp/term/)、[WhiteCUL規約](https://www.whitecul.com/guideline)、
+[波音リツ規約](https://www.canon-voice.com/terms/)を守ってください。
 
 ## 検証
 
@@ -111,9 +122,9 @@ app-portalも公開アプリから同じファビコンを取得します。原�
 ## 読経調の試聴版
 
 [比較ページ](https://prayer-wheel.ats030.workers.dev/audition/)で「観自在菩薩」から5節を聴き比べられます。
-Aは現行WAVのPCMをそのまま連結、BはNemo男声1で現行と同じ読みと語の区切りを保ち、母音長と音高のばらつき・抑揚・節間を抑えた調整案です。
-本体の29節・予約再生・速度設定は変更していません。比較音声は1.0倍で再生します。
-自然さや読みの聞き取りやすさは試聴で判断し、全節への適用はその後に決めます。
+Aは本体変更前のNemo WAVのPCMをそのまま連結、BはNemo男声1で同じ読みと語の区切りを保ち、母音長と音高のばらつき・抑揚・節間を抑えた調整案です。
+現在の本体はD（WhiteCUL）の発声です。比較A〜Dは当時の音声を保持し、1.0倍で再生します。
+Dを選択したため本体の全節へ適用しました。自然さや読みの聞き取りやすさは試聴で確認します。
 Bは節を個別生成して連結するため、節境界のピッチや息継ぎの連続性までは保証しません。
 
 ```bash
@@ -122,13 +133,13 @@ python3 scripts/check-audition.py
 ```
 
 `audition/manifest.json`に5節の読み・生成query・設定・hashを保存します。比較用WAVとHTML/CSS/JSだけを公開し、manifestと生成スクリプトは配信しません。
-元の音声生成スクリプトの`--sample`は既存の`audio/02.wav`を上書きするため、この比較版生成には使いません。
+旧Nemoの比較元は`audition/baseline/`へ保存しました。`scripts/generate-audio.py`はこの保存先だけを更新し、本体の`audio/`は変更しません。
 
 ## 母音持続・低音のC試聴版
 
 同じ[比較ページ](https://prayer-wheel.ats030.workers.dev/audition/)にCを追加しました。
 Cは**VOICEVOX:麒ヶ島宗麟**のハミングで、歌唱クエリは**VOICEVOX:波音リツ**を使用します。
-既存ローカルエンジン0.25.2、両ライブラリ0.16.0です。Nemoの既存A/Bと本体29節は保持します。
+既存ローカルエンジン0.25.2、両ライブラリ0.16.0です。Nemoの既存A/Bを保持し、本体29節は後のD採用によりWhiteCULへ更新しました。
 Cでは声と生成方式が変わるため、A/Bとの違いはテンポだけではありません。
 
 低音の設計値はMIDI46（116.54Hz）、1モーラ約0.32秒、まとまりの最後は約0.48秒、

@@ -44,12 +44,14 @@ def check(base):
             assert content_type in ("text/javascript", "application/javascript"), content_type
         elif name.endswith(".html"):
             assert content_type == "text/html"
-            assert b"VOICEVOX Nemo" in body and b"ubuntu-server-app" not in body
+            assert b"VOICEVOX:WhiteCUL" in body and b"ubuntu-server-app" not in body
+            if name == "audition/index.html":
+                assert b"VOICEVOX Nemo" in body
         return len(body)
 
     with ThreadPoolExecutor(max_workers=6) as pool:
         size = sum(pool.map(verify, files))
-    for private in ("wrangler.jsonc", "README.md", "package.json", "audio/manifest.json",
+    for private in ("wrangler.jsonc", "README.md", "package.json", "audio/manifest.json", "audition/baseline/manifest.json", "audition/baseline/02.wav", "scripts/generate-recitation.py",
                     "assets/prayer-wheel-icon-source.png", "audition/manifest.json", "audition/chant-manifest.json", "audition/chant-female-manifest.json", "docs/chant-reference-analysis.json", "docs/chant-license.yaml", "scripts/generate-chant.py", "scripts/generate-audition.py", "scripts/generate-audio.py", "tests/player.test.js", "missing.wav"):
         try:
             with fetch(base + "/" + private):
