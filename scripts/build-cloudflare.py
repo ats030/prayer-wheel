@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Package only the application's public assets for Cloudflare HTTPS hosting."""
 import json
+import importlib.util
 import os
 from pathlib import Path
 import shutil
@@ -28,11 +29,16 @@ if out.exists():
     shutil.rmtree(out)
 out.mkdir()
 (out / "index.html").write_text(public_html, encoding="utf-8")
-for name in ("app.js", "player.js", "drum-motion.js", "style.css", "favicon.png", "favicon.ico"):
+for name in ("app.js", "player.js", "drum-motion.js", "character-scroll.js", "style.css", "favicon.png", "favicon.ico"):
     dest = out / name
     dest.parent.mkdir(exist_ok=True)
     shutil.copyfile(ROOT / name, dest)
 (out / "data").mkdir()
+spec = importlib.util.spec_from_file_location('character_timing', ROOT / 'scripts/character-timing.py')
+character_timing = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(character_timing)
+character_cues = character_timing.build()
+(out / 'data/character-timing.json').write_text(json.dumps(character_cues, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
 shutil.copyfile(ROOT / "data/sutra.json", out / "data/sutra-sections.json")
 shutil.copyfile(ROOT / "data/sutra-phrases.json", out / "data/sutra-phrases.json")
 shutil.copyfile(ROOT / "audition/baseline/sutra.json", out / "data/sutra.json")
@@ -52,6 +58,10 @@ for entry in manifest["files"]:
     target = out / "audio" / entry["file"]
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(ROOT / "audio" / entry["file"], target)
+for entry, cues in zip(manifest['files'], character_cues['sections']):
+    target = out / 'audio' / cues['file']
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ROOT / 'audio' / entry['file'], target)
 legacy = json.loads((ROOT / "audio/legacy-manifest.json").read_text())
 phrases = json.loads((ROOT / "audio/phrases-manifest.json").read_text())
 for entry in phrases['files']:
@@ -61,7 +71,7 @@ for entry in phrases['files']:
 for entry in legacy["files"]:
     shutil.copyfile(ROOT / "audio" / entry["file"], out / "audio" / entry["file"])
 files = [p for p in out.rglob("*") if p.is_file()]
-if len(files) != 17 + len(manifest["files"]) + len(legacy["files"]) + len(phrases['files']) or any(p.stat().st_size > 25 * 1024 * 1024 for p in files):
+if len(files) != 19 + 2 * len(manifest["files"]) + len(legacy["files"]) + len(phrases['files']) or any(p.stat().st_size > 25 * 1024 * 1024 for p in files):
     sys.exit("Unexpected asset count or Cloudflare asset size limit exceeded")
 print(f"Packaged {len(files)} public files ({sum(p.stat().st_size for p in files):,} bytes)")
 print(f"VISIT_LOG_EXEMPT_REASON: {reason}")

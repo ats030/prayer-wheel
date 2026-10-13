@@ -194,7 +194,7 @@ h1 {
   border-top: 1px solid var(--reel-rule);
   border-bottom: 1px solid var(--reel-rule);
   font-family: var(--font-reel);
-  font-size: clamp(18px, 2.2vw, 26px);
+  font-size: clamp(44px, 7vw, 60px);
   font-weight: 500;
   line-height: 1.4;
   letter-spacing: 0.04em;
@@ -202,7 +202,7 @@ h1 {
   transform: rotateX(var(--face-angle)) translateZ(var(--reel-radius));
 }
 .reel-face.is-selected { font-weight: 700; }
-.reel-face.is-long { font-size: clamp(16px, 1.9vw, 22px); }
+.reel-face.is-intro { font-size: clamp(18px, 2.2vw, 26px); }
 .reel-stop-line {
   position: absolute;
   top: 50%;

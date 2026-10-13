@@ -1,5 +1,5 @@
 import { SutraPlayer } from './player.js';
-import { DrumMotion } from './drum-motion.js';
+import { characterPosition } from './character-scroll.js';
 
 const $ = (id) => document.getElementById(id);
 const stage = $('stage');
@@ -10,13 +10,19 @@ audio.preservesPitch = true;
 let player;
 let wheelAcc = 0;
 let highlighted = null;
-let drumSequence = null;
+let drumPosition = -1;
+let activeCharacter = -1;
 let drumFaceCenter = null;
-let drumFaceSequence = null;
+let drumFaceCharacter = null;
+let characterTimings = [];
+let characterOffsets = [];
+let characterEntries = [];
+let scrollFrame = null;
+let displayedSequence = null;
+let displayedCharacter = null;
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const DRUM_FACES = 16;
 const DRUM_STEP = 360 / DRUM_FACES;
-const drumMotion = new DrumMotion(dial, -DRUM_STEP);
-drumMotion.onDraw = renderDrumFaces;
 
 function buildDrum() {
   for (let i = 0; i < DRUM_FACES; i++) {
@@ -28,40 +34,65 @@ function buildDrum() {
 }
 
 function renderDrumFaces() {
-  if (!player) return;
-  const sequence = player.currentSequence;
-  // Recycle hidden faces around the physical angle, even during large rewinds.
-  const center = Math.round(drumMotion.angle / DRUM_STEP);
-  if (center === drumFaceCenter && sequence === drumFaceSequence) return;
+  const center = Math.round(drumPosition);
+  if (center === drumFaceCenter && activeCharacter === drumFaceCharacter) return;
   const slot = ((center % DRUM_FACES) + DRUM_FACES) % DRUM_FACES;
   for (const [i, face] of Array.from(dial.children).entries()) {
     let offset = (i - slot + DRUM_FACES) % DRUM_FACES;
     if (offset > DRUM_FACES / 2) offset -= DRUM_FACES;
     const ordinal = center + offset;
-    const text = ordinal >= 0 ? player.chunks[ordinal % player.chunks.length].text
-      : ordinal === -1 ? '心経を回す' : '';
-    face.textContent = text;
-    face.classList.toggle('is-selected', ordinal === sequence);
-    face.classList.toggle('is-long', text.length > 14);
+    const entry = ordinal >= 0 ? characterEntries[ordinal % characterEntries.length] : null;
+    face.textContent = entry?.text ?? (ordinal === -1 ? '心経を回す' : '');
+    face.classList.toggle('is-selected', ordinal === activeCharacter);
+    face.classList.toggle('is-intro', ordinal < 0);
     face.dataset.sequence = String(ordinal);
+    face.dataset.section = String(entry ? Math.floor(ordinal / characterEntries.length) * player.chunks.length + entry.section : -1);
+    face.dataset.character = String(entry?.index ?? -1);
   }
   drumFaceCenter = center;
-  drumFaceSequence = sequence;
+  drumFaceCharacter = activeCharacter;
 }
 
 function renderDrum() {
-  // Actual playback advances the drum; queued operations never move it ahead.
+  if (!player) return;
   const sequence = player.currentSequence;
-  if (sequence === drumSequence) return;
-  drumMotion.moveTo(sequence * DRUM_STEP);
+  // A new source may reset currentTime while loading. Hold the last spoken position.
+  const ownsClock = Boolean(player.active?.started && player.active.sequence === sequence);
+  if (sequence < 0) {
+    drumPosition = activeCharacter = -1;
+  } else if (ownsClock) {
+    const section = sequence % player.chunks.length;
+    const cue = characterPosition(characterTimings[section].characters, audio.currentTime, reducedMotion.matches);
+    const base = Math.floor(sequence / player.chunks.length) * characterEntries.length + characterOffsets[section];
+    drumPosition = base + cue.position;
+    activeCharacter = base + cue.index;
+  }
+  const rotation = `${drumPosition * DRUM_STEP}deg`;
+  if (dial.style.getPropertyValue('--drum-turn') !== rotation) dial.style.setProperty('--drum-turn', rotation);
   renderDrumFaces();
-  const position = sequence < 0 ? 0 : sequence % player.chunks.length + 1;
-  $('drumPosition').textContent = `${position} / ${player.chunks.length} 節`;
-  $('drumSelection').textContent = sequence < 0
-    ? '読み上げの開始に合わせて、ドラムが同じ節へ回ります。'
-    : `読み上げの節：${player.chunks[position - 1].text}。`;
-  drumSequence = sequence;
+  const entry = activeCharacter >= 0 ? characterEntries[activeCharacter % characterEntries.length] : null;
+  if (sequence !== displayedSequence || activeCharacter !== displayedCharacter) {
+    $('drumPosition').textContent = !entry ? `0 / ${player.chunks.length} 節`
+      : `${sequence % player.chunks.length + 1} / ${player.chunks.length} 節 · ${entry.index + 1} / ${characterTimings[entry.section].characters.length} 字`;
+    $('drumSelection').textContent = entry ? `読み上げの文字：${entry.text}（${entry.reading}）`
+      : '読み上げに合わせて、経文が一文字ずつ流れます。';
+    displayedSequence = sequence;
+    displayedCharacter = activeCharacter;
+  }
+  const running = ownsClock && !player.paused && !player.error && !audio.paused && !audio.ended;
+  dial.dataset.moving = String(running && !reducedMotion.matches);
+  if (running && scrollFrame === null) {
+    scrollFrame = requestAnimationFrame(() => { scrollFrame = null; renderDrum(); });
+  } else if (!running && scrollFrame !== null) {
+    cancelAnimationFrame(scrollFrame);
+    scrollFrame = null;
+  }
 }
+
+for (const event of ['timeupdate', 'pause', 'waiting', 'stalled', 'ended', 'ratechange', 'seeking']) {
+  audio.addEventListener(event, renderDrum);
+}
+reducedMotion.addEventListener('change', renderDrum);
 
 function updateUI() {
   if (!player) return;
@@ -146,7 +177,6 @@ $('pauseBtn').addEventListener('click', () => player?.togglePause());
 $('retryBtn').addEventListener('click', () => player?.retry());
 $('restartBtn').addEventListener('click', () => {
   wheelAcc = 0;
-  drumMotion.snap(-DRUM_STEP);
   player?.restart();
 });
 $('rate').addEventListener('input', () => {
@@ -160,7 +190,8 @@ async function initialize() {
   try {
     const response = await fetch('data/sutra-sections.json', { signal: AbortSignal.timeout(15000) });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const sutra = await response.json();
+    const sutraText = await response.text();
+    const sutra = JSON.parse(sutraText);
     if (!Array.isArray(sutra.chunks) || !sutra.chunks.length
         || sutra.chunks.some(c => typeof c.text !== 'string' || typeof c.reading !== 'string')) throw new Error('Invalid sutra');
     if (sutra.audioDirectory !== 'audio/sections') throw new Error('Invalid audio directory');
@@ -172,6 +203,30 @@ async function initialize() {
       span.className = 'chunk';
       span.textContent = chunk.text + '　';
       $('textBlock').appendChild(span);
+    }
+    const timingResponse = await fetch('data/character-timing.json', { cache: 'no-store', signal: AbortSignal.timeout(15000) });
+    if (!timingResponse.ok) throw new Error('Character timing unavailable');
+    const timings = await timingResponse.json();
+    const sutraDigest = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(sutraText)))].map(b => b.toString(16).padStart(2, '0')).join('');
+    if (timings.sutraSha256 !== sutraDigest) throw new Error('Character timing source mismatch');
+    if (timings.version !== 1 || timings.sections.length !== chunks.length) throw new Error('Invalid character timing');
+    characterTimings = timings.sections;
+    for (const [section, timing] of characterTimings.entries()) {
+      if (!/^[a-f0-9]{64}$/.test(timing.audioSha256)
+          || timing.file !== `synced/${timing.audioSha256}/${String(section + 1).padStart(2, '0')}.wav`) {
+        throw new Error('Character audio version mismatch');
+      }
+      chunks[section].audio = `audio/${timing.file}`;
+      if (!timing.characters.length || timing.characters.map(c => c.text).join('') !== chunks[section].text.replaceAll('　', '')) {
+        throw new Error('Character text mismatch');
+      }
+      if (!Number.isFinite(timing.duration) || !timing.characters.every((cue, index) =>
+        Number.isFinite(cue.start) && Number.isFinite(cue.end) && cue.start >= 0 && cue.end > cue.start
+        && cue.end <= timing.duration && (index === 0 || cue.start >= timing.characters[index - 1].end))) {
+        throw new Error('Invalid character intervals');
+      }
+      characterOffsets.push(characterEntries.length);
+      timing.characters.forEach((cue, index) => characterEntries.push({ ...cue, section, index }));
     }
     player = new SutraPlayer(chunks, audio, updateUI);
     stage.setAttribute('aria-disabled', 'false');
