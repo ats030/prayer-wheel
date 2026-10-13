@@ -123,3 +123,60 @@ python3 scripts/check-audition.py
 
 `audition/manifest.json`に5節の読み・生成query・設定・hashを保存します。比較用WAVとHTML/CSS/JSだけを公開し、manifestと生成スクリプトは配信しません。
 元の音声生成スクリプトの`--sample`は既存の`audio/02.wav`を上書きするため、この比較版生成には使いません。
+
+## 母音持続・低音のC試聴版
+
+同じ[比較ページ](https://prayer-wheel.ats030.workers.dev/audition/)にCを追加しました。
+Cは**VOICEVOX:麒ヶ島宗麟**のハミングで、歌唱クエリは**VOICEVOX:波音リツ**を使用します。
+既存ローカルエンジン0.25.2、両ライブラリ0.16.0です。Nemoの既存A/Bと本体29節は保持します。
+Cでは声と生成方式が変わるため、A/Bとの違いはテンポだけではありません。
+
+低音の設計値はMIDI46（116.54Hz）、1モーラ約0.32秒、まとまりの最後は約0.48秒、
+息継ぎ相当の休符は約0.30秒です。促音「ッ」の音符は約0.19秒に短縮し、余りを直前の母音へ回します。
+休符は「行深般若波羅蜜多時」「照見五蘊皆空」「度一切苦厄」「空不異色」「空即是色」の後です。
+「観自在菩薩」や対になる短い句の間には休符を入れず、句点ごとに息継ぎする設計ではありません。
+69モーラを歌唱スコアで指定し、木魚・鐘・追加残響・声の重ね合わせは使いません。
+全体のRMSをAと揃えて大きさによる比較の偏りを抑えますが、知覚される音量が完全に同じとは限りません。
+読みのモーラ列を保持し、長母音、促音や撥音の聞き取りやすさはユーザー試聴で確認します。
+Cの自然さ・読経らしさ・宗派の唱法への一致は自動検査では保証しません。
+
+参考は[全国曹洞宗青年会の練習動画](https://sousei.gr.jp/2907/)です。
+補助資料として[曹洞宗東海管区教化センターの公開音声](https://soto-tokai.net/ok_han.html)を数値分析しました。
+80ms窓の自己相関で最初の120秒の音高を推定し、中央値は117.6Hzでした。
+鐘や複数声・オクターブ誤りが混ざり得る概算で、単独の発声や息継ぎの位置を聴いて確認したものではありません。
+数値記録は`docs/chant-reference-analysis.json`。Cの休符位置は経文のまとまりから独自に設計し、
+参考録音の切り出し・同梱・転載・声の複製はしていません。曹洞宗の公式音源・監修音声とは表示しません。
+
+```bash
+python3 scripts/generate-chant.py --engine http://127.0.0.1:50021
+python3 scripts/check-chant.py
+python3 scripts/check-audition-browser.py
+```
+
+`audition/chant-manifest.json`にスコア・生成query・音源ID/バージョン・生成物hash・音量調整を記録します。
+公開対象へ追加するのは`audition/chant.wav`と`audition/chant-female.wav`です。manifest・生成コード・参考分析は配信しません。
+C/D追加のコミットをrevertしてビルド・再公開すれば、パネル・許可リスト・検証件数をまとめて元のA/B版へ戻せます。
+
+費用・採否・条件は[音源選定記録](docs/chant-license.yaml)にまとめています。
+C音声を再利用・再配布する場合は **VOICEVOX:麒ヶ島宗麟 / VOICEVOX:波音リツ（歌唱クエリ生成）** と表記し、
+[VOICEVOX利用規約](https://voicevox.hiroshiba.jp/term/)、
+[VirVox利用規約](https://www.virvoxproject.com/voicevoxの利用規約)、
+[波音リツ利用規約](https://www.canon-voice.com/terms/)を守ってください。
+
+### 女性版Dとの比較
+
+Dは**VOICEVOX:WhiteCUL**のノーマル・ハミングです。男性Cは維持しています。
+本文・69モーラ・拍・促音の長さ・休符位置をCと揃え、音域はMIDI55（196.0Hz）へ変えています。
+音源と音域の両方が違うため、声質だけを同じ音高で比較する実験ではありません。
+Dも声のみで、AにRMSを合わせています。生成記録は`audition/chant-female-manifest.json`、公開音声は`audition/chant-female.wav`です。
+
+```bash
+python3 scripts/generate-chant.py --voice whitecul  # Dだけを再生成
+python3 scripts/generate-chant.py --voice sorin     # Cだけを再生成
+```
+
+`--voice`を省略すると両方生成します。D音声を再利用・再配布する場合は
+**VOICEVOX:WhiteCUL / VOICEVOX:波音リツ（歌唱クエリ生成）**と表記し、
+[VOICEVOX利用規約](https://voicevox.hiroshiba.jp/term/)、
+[WhiteCUL利用規約](https://www.whitecul.com/guideline)、
+[波音リツ利用規約](https://www.canon-voice.com/terms/)を守ってください。

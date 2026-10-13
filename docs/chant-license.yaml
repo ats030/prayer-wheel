@@ -1,0 +1,99 @@
+reviewed_at: 2026-10-13
+intended_use: 5節の合成読経試聴WAVを無料の静的Webアプリで配信、ダウンロード可能にする
+selected:
+  tool: VOICEVOX Engine
+  engine_version: 0.25.2
+  engine_uuid: 074fc39e-678b-4c13-8916-ffca8d505d1d
+  software_license: LGPL-3.0（既存ローカルエンジンを実行、エンジンやモデルは再配布しない）
+  method: sing_frame_audio_query + frame_synthesis
+  voice: 麒ヶ島宗麟 ノーマル（ハミング）
+  voice_version: 0.16.0
+  speaker_id: 3053
+  speaker_uuid: 7d1e7ba7-f957-40e5-a3fc-da49f769ab65
+  singing_teacher: 波音リツ ノーマル
+  singing_teacher_id: 6000
+  teacher_version: 0.16.0
+  cost: 公式製品ページで商用・非商用とも無料。既存CPUエンジンを利用、外部API課金なし
+  commercial_use: VOICEVOXとVirVox規約が商用・非商用利用および音声素材配布を明記
+  decision: conditional
+  attribution: VOICEVOX:麒ヶ島宗麟 / VOICEVOX:波音リツ（歌唱クエリ生成）
+  conditions:
+    - 比較ページとREADMEにクレジットと規約リンクを掲載
+    - 音声の再利用者にもクレジットと規約遵守を義務づける
+    - VirVoxの特定宗教の過度な称賛/毀損禁止等を遵守。特定団体の広告や公式監修として表示しない
+    - 機械学習・声質モデルの生成・録音の声複製を行わない
+    - 音声を販売しない。エンジン・モデル・キャラクター画像を同梱しない
+  religious_use: 経文の合成試聴は一般利用許諾に基づく判断。用途別の明示承認ではない
+  sources:
+    - https://voicevox.hiroshiba.jp/product/kigashima_sourin/
+    - https://voicevox.hiroshiba.jp/song/
+    - https://voicevox.hiroshiba.jp/term/
+    - https://www.virvoxproject.com/voicevoxの利用規約
+    - https://www.canon-voice.com/terms/
+    - https://github.com/VOICEVOX/voicevox_engine/blob/0.25.2/LICENSE
+    - https://github.com/VOICEVOX/voicevox_engine/blob/0.25.2/README.md
+alternatives:
+  - tool: VOICEVOX Nemo 0.24.0 男声1（既存読み上げ）
+    decision: declined
+    reason: 比較A/Bは保持。実エンジンsupported_features.sing=false、singers空。歌唱の長母音/フレーム音高指定が使えないため新Cには不採用
+    cost_and_rights: 無料、クレジット条件で商用非商用利用可能（docs/audio-license.yaml）
+    sources:
+      - https://voicevox.hiroshiba.jp/nemo/
+      - https://voicevox.hiroshiba.jp/nemo/term/
+  - tool: VOICEVOX 青山龍星 ハミング
+    decision: declined
+    reason: 企業・個人事業主等の公開利用には事前申請が必要。運用主体の追加確認を要しない麒ヶ島宗麟を優先
+    cost_and_rights: 無料だが主体により公開前申請が必要
+    sources:
+      - https://www.virvoxproject.com/voicevoxの利用規約
+  - tool: VOICEVOX ずんだもん ハミング
+    decision: blocked
+    reason: 音源共通規約が宗教活動またはそれらにつながる行為での利用を禁止。読経アプリでの許諾を確認できないため不採用
+    cost_and_rights: クレジット条件で無料商用利用は可能だが、用途制限は別途適用
+    sources:
+      - https://zunko.jp/con_ongen_kiyaku.html
+      - https://voicevox.hiroshiba.jp/product/zundamon/
+reference:
+  primary: https://sousei.gr.jp/2907/
+  supplementary: https://soto-tokai.net/ok_han.html
+  rights: 教化センターの参考録音は転載・改変・再配信不可。通常の公開再生相当の一時取得/数値分析のみ、アプリやgitへ録音を含めない
+  scope: 曹洞宗の参考として公開元を確認。音高の波形分析は聴感や宗派の発声監修の代わりにならない
+  sources:
+    - https://soto-tokai.net/copyright.html
+
+female_comparison:
+  tool: VOICEVOX Engine 0.25.2 / WhiteCUL ノーマル（ハミング）
+  voice_version: 0.16.0
+  speaker_id: 3023
+  speaker_uuid: 67d5d8da-acd7-4207-bb10-b5542d3a663b
+  decision: conditional
+  cost: 公式VOICEVOX製品ページで商用・非商用とも無料
+  commercial_use: WhiteCUL規約が商用非商用および音声素材配布を明記
+  attribution: VOICEVOX:WhiteCUL / VOICEVOX:波音リツ（歌唱クエリ生成）
+  conditions:
+    - ページとREADMEにクレジット/規約リンク、再利用者にも規約遵守を義務づける
+    - 合成WAVのみ配信。モデル/エンジン/キャラクター画像は再配布しない
+    - 無断で音声素材を販売しない。音響モデル学習や声複製は行わない
+  religious_use: WhiteCUL固有規約に宗教活動の一律禁止条項はない。一般利用許諾に基づく試聴用途の判断
+  sources:
+    - https://voicevox.hiroshiba.jp/product/white_cul/
+    - https://www.whitecul.com/guideline
+    - https://voicevox.hiroshiba.jp/term/
+other_candidates_reviewed:
+  - voice: 玄野武宏 / 雀松朱司
+    decision: conditional
+    scope: 未採用の男性比較候補、同じVirVox規約が適用。クレジットと素材再利用条件遵守
+    sources:
+      - https://www.virvoxproject.com/voicevoxの利用規約
+      - https://voicevox.hiroshiba.jp/product/kurono_takehiro/
+      - https://www.virvoxproject.com/投稿動画一覧
+  - voice: 冥鳴ひまり
+    decision: review_required
+    reason: 禁止事項に特定の思想・団体に当たる行為との記載。今回の読経用途の適用が明確でないため不採用
+    sources:
+      - https://www.meimeihimari.com/terms-of-use
+  - voice: 雨晴はう
+    decision: review_required
+    reason: 特定の思想運動の勧誘等の禁止。試聴用途の判断を要するため、今回は明確な一般条件のWhiteCULを優先
+    sources:
+      - https://amehau.com/rules/amehare-hau-rule

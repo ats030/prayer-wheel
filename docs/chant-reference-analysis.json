@@ -1,0 +1,14 @@
+{
+  "source": "https://soto-tokai.net/mp/hannyashingyou.mp3",
+  "sha256": "ce9b99e57fbcfe297f68a888738679d3921fe5bdc2194b2b626adb605b0a09a7",
+  "durationSeconds": 164.62,
+  "analyzedSeconds": 120,
+  "method": "80ms autocorrelation windows every200ms, 60-250Hz search, correlation>0.6; mono4kHz; no source reproduction",
+  "voicedEstimates": 409,
+  "f0MedianHz": 117.6,
+  "f0QuartilesHz": [
+    78.4,
+    121.2
+  ],
+  "limitation": "Pitch estimates may include bells, octave errors or multiple voices. No auditory judgment, breath alignment or religious authentication."
+}

@@ -22,7 +22,7 @@ def check(base):
         raise ValueError("The published site must use HTTPS")
     base = base.rstrip("/")
     files = ["index.html", "app.js", "player.js", "style.css", "data/sutra.json", "favicon.png", "favicon.ico"]
-    files.extend("audition/" + name for name in ("index.html", "audition.css", "audition.js", "current.wav", "adjusted.wav"))
+    files.extend("audition/" + name for name in ("index.html", "audition.css", "audition.js", "current.wav", "adjusted.wav", "chant.wav", "chant-female.wav"))
     manifest = json.loads((ROOT / "audio/manifest.json").read_text(encoding="utf-8"))
     files.extend("audio/" + entry["file"] for entry in manifest["files"])
 
@@ -50,7 +50,7 @@ def check(base):
     with ThreadPoolExecutor(max_workers=6) as pool:
         size = sum(pool.map(verify, files))
     for private in ("wrangler.jsonc", "README.md", "package.json", "audio/manifest.json",
-                    "assets/prayer-wheel-icon-source.png", "audition/manifest.json", "scripts/generate-audition.py", "scripts/generate-audio.py", "tests/player.test.js", "missing.wav"):
+                    "assets/prayer-wheel-icon-source.png", "audition/manifest.json", "audition/chant-manifest.json", "audition/chant-female-manifest.json", "docs/chant-reference-analysis.json", "docs/chant-license.yaml", "scripts/generate-chant.py", "scripts/generate-audition.py", "scripts/generate-audio.py", "tests/player.test.js", "missing.wav"):
         try:
             with fetch(base + "/" + private):
                 pass
@@ -58,7 +58,8 @@ def check(base):
             assert error.code == 404, (private, error.code)
         else:
             raise AssertionError("Unexpected public path: " + private)
-    print(f"HTTPS verified: {len(files)} exact assets, {size:,} bytes, all 29 WAV hashes and MIME types match")
+    wav_count = sum(name.endswith(".wav") for name in files)
+    print(f"HTTPS verified: {len(files)} exact assets, {size:,} bytes, all {wav_count} WAV hashes and MIME types match")
     print("Private configuration/source/metadata paths return 404; public HTML has no internal tracker")
 
 

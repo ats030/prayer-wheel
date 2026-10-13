@@ -13,7 +13,7 @@
 <body>
   <main class="page audition-page">
     <header class="top"><div><a href="../">← Prayer Wheelに戻る</a><h1>読経の試聴</h1></div></header>
-    <p>「観自在菩薩」から5節を、同じ男声で聴き比べます。アプリ本体は現行音声のままです。</p>
+    <p>「観自在菩薩」から5節を聴き比べます。A・Bは同じ声、C・Dは声と発声方法を変えた試作です。アプリ本体は現行音声のままです。</p>
     <div class="audition-grid">
       <section class="panel" aria-labelledby="currentTitle">
         <h2 id="currentTitle">A · 現行の読み上げ</h2>
@@ -27,16 +27,35 @@
         <audio id="adjustedAudio" controls preload="metadata" src="adjusted.wav" aria-label="拍を整えた試聴版"></audio>
         <a href="adjusted.wav" download>試聴版を保存</a>
       </section>
+      <section class="panel chant-panel" aria-labelledby="chantTitle">
+        <h2 id="chantTitle">C · 母音を伸ばす低音の試作</h2>
+        <p>低めの単独声で母音を持続させ、長いまとまりの終わりで音を伸ばして息継ぎの間を置きます。短い句はつなぎ、声だけで比較します。</p>
+        <audio id="chantAudio" controls preload="metadata" src="chant.wav" aria-label="母音を伸ばす低音の試作"></audio>
+        <a href="chant.wav" download>低音の試作を保存</a>
+        <p>Cの声: VOICEVOX:麒ヶ島宗麟</p>
+      </section>
+      <section class="panel" aria-labelledby="femaleTitle">
+        <h2 id="femaleTitle">D · 女性の声で母音を伸ばす試作</h2>
+        <p>Cと同じ拍・息継ぎの位置で、女性の声を比較します。音域はCより高めにしています。</p>
+        <audio id="femaleAudio" controls preload="metadata" src="chant-female.wav" aria-label="女性の声で母音を伸ばす試作"></audio>
+        <a href="chant-female.wav" download>女性の試作を保存</a>
+        <p>Dの声: VOICEVOX:WhiteCUL</p>
+      </section>
     </div>
     <p id="auditionStatus" role="status">再生ボタンで聴き比べられます。</p>
     <section class="panel"><h2>聴くポイント</h2>
-      <p>言葉の切れ方、拍の揃い方、節のつながりを比べてください。平坦すぎる、速すぎる、聞き取りにくい箇所も判断の材料になります。</p>
+      <p>母音の伸び、声の低さ、息継ぎのまとまりを比べてください。C・Dは声と生成方式も変わるため、間の調整だけの比較ではありません。平坦すぎる、速すぎる、聞き取りにくい箇所も判断の材料になります。</p>
       <ol class="sample-text">
         <li>観自在菩薩</li><li>行深般若波羅蜜多時</li>
         <li>照見五蘊皆空　度一切苦厄</li><li>舎利子　色不異空　空不異色</li><li>色即是空　空即是色</li>
       </ol>
     </section>
-    <footer class="foot"><p>音声: <a href="https://voicevox.hiroshiba.jp/nemo/">VOICEVOX Nemo</a>（男声1）</p>
+    <footer class="foot"><p>A・Bの音声: <a href="https://voicevox.hiroshiba.jp/nemo/">VOICEVOX Nemo</a>（男声1）</p>
+      <p>C: VOICEVOX:麒ヶ島宗麟 / VOICEVOX:波音リツ（歌唱クエリ生成）</p>
+      <p>C音声を再利用する際は上記クレジットを表記し、<a href="https://voicevox.hiroshiba.jp/term/">VOICEVOX規約</a>、<a href="https://www.virvoxproject.com/voicevoxの利用規約">VirVox規約</a>、<a href="https://www.canon-voice.com/terms/">波音リツ規約</a>を守ってください。</p>
+      <p>D: VOICEVOX:WhiteCUL / VOICEVOX:波音リツ（歌唱クエリ生成）</p>
+      <p>D音声を再利用する際は上記クレジットを表記し、<a href="https://voicevox.hiroshiba.jp/term/">VOICEVOX規約</a>、<a href="https://www.whitecul.com/guideline">WhiteCUL規約</a>、<a href="https://www.canon-voice.com/terms/">波音リツ規約</a>を守ってください。</p>
+      <p>参考: <a href="https://sousei.gr.jp/2907/">全国曹洞宗青年会の読経練習用動画</a>。参考録音は同梱していません。</p>
       <p>合成音声の調整案です。僧侶の録音や、特定宗派の節回しを再現したものではありません。</p>
     </footer>
   </main>
