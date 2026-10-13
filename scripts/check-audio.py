@@ -40,17 +40,27 @@ def check(audio_dir=None):
     assert manifest['design']['endingFrames'] == 30 and manifest['design']['breathFrames'] == 8
     assert manifest['design']['voicedVolumeBlend'] == .5
     assert manifest['design']['volumePolicy'] == 'vowel-swells-only'
-    assert len(manifest['files']) == len(sutra['chunks']) == 56
-    assert sutra['audioDirectory'] == 'audio/phrases'
+    assert len(manifest['files']) == len(sutra['chunks']) == 29
+    assert sutra['audioDirectory'] == 'audio/sections'
+    assert sutra['chunks'] == archived['chunks'], 'Semantic boundaries differ from original 29 sections'
+    phrases = json.loads((ROOT / 'audio/phrases-manifest.json').read_text())
+    old_sutra = json.loads((ROOT / 'data/sutra-phrases.json').read_text())
+    assert len(phrases['files']) == len(old_sutra['chunks']) == 56
+    assert old_sutra['audioDirectory'] == 'audio/phrases'
+    assert [r['file'] for r in phrases['files']] == [f'phrases/{i:02d}.wav' for i in range(1, 57)]
+    for old in phrases['files']:
+        assert hashlib.sha256((ROOT / 'audio' / old['file']).read_bytes()).hexdigest() == old['sha256'], 'Old 56-phrase audio changed'
+    assert hashlib.sha256((ROOT / 'data/sutra-phrases.json').read_bytes()).hexdigest() == phrases['sutraSha256']
     legacy = json.loads((ROOT / 'audio/legacy-manifest.json').read_text())
     assert len(legacy['files']) == 29 and legacy['speakerId'] == 3023
     for old in legacy['files']:
         assert hashlib.sha256((ROOT / 'audio' / old['file']).read_bytes()).hexdigest() == old['sha256'], 'Old-tab audio changed'
     total = 0
     for index, (record, chunk) in enumerate(zip(manifest['files'], sutra['chunks']), 1):
-        assert record['file'] == f'phrases/{index:02d}.wav' and record['section'] == index
+        assert record['file'] == f'sections/{index:02d}.wav' and record['section'] == index
         assert record['text'] == chunk['text'] and record['reading'] == chunk['reading']
         assert record['kana'] == record['sourceQuery']['kana']
+        assert normalize_kana(record['kana']) == normalize_kana(baseline['files'][index - 1]['kana']), 'Section pronunciation drift'
         moras = [m for p in record['sourceQuery']['accent_phrases'] for m in p['moras']]
         assert ''.join(m['text'] for m in moras) == re.sub("[_'/、？]", '', record['kana'])
         notes = record['score']['notes']
@@ -60,6 +70,18 @@ def check(audio_dir=None):
         assert len(set(n['id'] for n in notes)) == len(notes)
         assert notes[0]['key'] is None and notes[-1]['key'] is None
         assert record['breathAfter'][-1] == [index, len(moras)]
+        expected_points = {(index, len(moras))}
+        if 2 <= index <= 6:
+            expected_points.update(p for p in {(3, 13), (4, 11), (4, 19), (5, 15), (6, 14)} if p[0] == index)
+        else:
+            count = 0
+            for char in chunk['reading']:
+                if char not in '、。　 ゃゅょぁぃぅぇぉゎ':
+                    count += 1
+                if char == '。' and count:
+                    expected_points.add((index, count))
+            assert count == len(moras)
+        assert {tuple(p) for p in record['breathAfter']} == expected_points
         rests = [n for n in notes[1:] if n['key'] is None]
         assert len(rests) == len(record['breathAfter'])
         for nindex, note in enumerate(notes[1:], 1):

@@ -6,7 +6,7 @@ voice_library_version: 0.16.0
 speaker_id: 3023
 speaker_uuid: 67d5d8da-acd7-4207-bb10-b5542d3a663b
 singing_teacher: 波音リツ ノーマル（6000 / 0.16.0）
-intended_use: 現行56句と互換用の旧29節の事前生成読経WAVを無料静的Webアプリで配信
+intended_use: 現行29区切りと互換用の56句・旧29節の事前生成読経WAVを無料静的Webアプリで配信
 decision: conditional
 cost: 既存ローカルCPUエンジンで無料生成。外部有料APIや有料プランは使用しない
 commercial_use: WhiteCUL音源規約とVOICEVOX規約が商用・非商用利用を許諾
@@ -26,7 +26,7 @@ sources:
 legacy_comparisons:
   A_B: VOICEVOX Nemo 男声1。Nemo規約とクレジットを比較ページに維持
   C: VOICEVOX:麒ヶ島宗麟。VirVox規約とクレジットを比較ページに維持
-  D: 本体と同じWhiteCUL。ただし比較音声は5節連続、本体は句ごと生成
+  D: 本体と同じWhiteCUL。ただし比較音声は5節連続、本体は意味のまとまりごとに生成
   preserved_source: audition/baseline/（Gitのみ、非公開）
   sources:
     - https://voicevox.hiroshiba.jp/nemo/term/

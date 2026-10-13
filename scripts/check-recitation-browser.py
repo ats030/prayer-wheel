@@ -24,7 +24,7 @@ def check(base):
         page.wait_for_selector('#stage[aria-disabled="false"]')
         assert 'VOICEVOX:WhiteCUL' in page.locator('.foot').inner_text()
         count = page.locator('.chunk').count()
-        assert count == 56
+        assert count == 29
         page.evaluate('n => window.expectedSections = n', count)
         page.locator('#rate').evaluate("e => { e.value='1.4'; e.dispatchEvent(new Event('input')); }")
         page.locator('#stage').click()

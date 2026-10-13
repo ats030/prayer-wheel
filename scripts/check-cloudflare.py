@@ -25,6 +25,9 @@ def check(base):
     files.extend("audition/" + name for name in ("index.html", "audition.css", "audition.js", "current.wav", "adjusted.wav", "chant.wav", "chant-female.wav"))
     manifest = json.loads((ROOT / "audio/manifest.json").read_text(encoding="utf-8"))
     files.extend("audio/" + entry["file"] for entry in manifest["files"])
+    files.append('data/sutra-sections.json')
+    phrases = json.loads((ROOT / 'audio/phrases-manifest.json').read_text())
+    files.extend('audio/' + entry['file'] for entry in phrases['files'])
 
     legacy = json.loads((ROOT / "audio/legacy-manifest.json").read_text())
     files.extend("audio/" + entry["file"] for entry in legacy["files"])
@@ -54,7 +57,7 @@ def check(base):
 
     with ThreadPoolExecutor(max_workers=6) as pool:
         size = sum(pool.map(verify, files))
-    for private in ("wrangler.jsonc", "README.md", "package.json", "audio/manifest.json", "audio/legacy-manifest.json", "audition/baseline/manifest.json", "audition/baseline/02.wav", "audition/baseline/sutra.json", "scripts/generate-recitation.py",
+    for private in ("wrangler.jsonc", "README.md", "package.json", "audio/manifest.json", "audio/phrases-manifest.json", "audio/legacy-manifest.json", "audition/baseline/manifest.json", "audition/baseline/02.wav", "audition/baseline/sutra.json", "scripts/generate-recitation.py",
                     "assets/prayer-wheel-icon-source.png", "audition/manifest.json", "audition/chant-manifest.json", "audition/chant-female-manifest.json", "docs/chant-reference-analysis.json", "docs/chant-license.yaml", "scripts/generate-chant.py", "scripts/generate-audition.py", "scripts/generate-audio.py", "tests/player.test.js", "missing.wav"):
         try:
             with fetch(base + "/" + private):

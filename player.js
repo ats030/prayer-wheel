@@ -10,7 +10,7 @@ export class SutraPlayer {
   forward() {
     if (this.error || this.pending.length >= 5) {
       this.notice = this.error ? '音声を再試行してから回してください。'
-        : '予約は5句までです。読み上げをお待ちください。';
+        : '予約は5節までです。読み上げをお待ちください。';
       this.changed();
       return false;
     }
@@ -28,11 +28,11 @@ export class SutraPlayer {
       this.nextSequence = this.pending.pop().sequence;
       this.turns = Math.max(0, this.turns - 1);
       this.angle -= 30;
-      this.notice = '末尾の予約を1句取り消しました。';
+      this.notice = '末尾の予約を1節取り消しました。';
     } else {
       const sequence = this.active?.sequence ?? this.currentSequence;
       if (sequence <= 0) {
-        this.notice = 'ここが最初の句です。';
+        this.notice = 'ここが最初の節です。';
         this.changed();
         return false;
       }
@@ -42,7 +42,7 @@ export class SutraPlayer {
       this.nextSequence = sequence;
       this.turns = Math.max(0, this.turns - 1);
       this.angle -= 30;
-      this.notice = '前の句を読み直します。';
+      this.notice = '前の節を読み直します。';
       if (!this.paused) this.playActive(true);
     }
     this.changed();

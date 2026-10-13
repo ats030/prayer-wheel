@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate all main phrases with the selected WhiteCUL D voice, retaining auditions."""
+"""Generate all main semantic sections with the selected WhiteCUL D voice, retaining auditions."""
 import argparse
 import array
 import hashlib
@@ -21,8 +21,20 @@ spec.loader.exec_module(chant)
 
 
 def breath_points(reading, section, moras):
-    # Each short phrase is independently playable and ends with one release.
-    return {(section, len(moras))}
+    # The selected D sample supplies its explicit internal breathing points.
+    # Every separately playable section also gets a complete final release.
+    points = {point for point in chant.BREATH_AFTER if point[0] == section}
+    if not 2 <= section <= 6:
+        count = 0
+        for char in reading:
+            if char not in '、。　 ゃゅょぁぃぅぇぉゎ':
+                count += 1
+            if char == '。' and count:
+                points.add((section, count))
+        if count != len(moras):
+            raise ValueError(f'Mora count mismatch in section {section}')
+    points.add((section, len(moras)))
+    return points
 
 
 def generate(host, nemo):
@@ -45,7 +57,7 @@ def generate(host, nemo):
     # Finish every synthesis and integrity check before replacing shipped files.
     with tempfile.TemporaryDirectory(prefix='prayer-wheel-recitation-') as work:
         output = Path(work)
-        (output / 'phrases').mkdir()
+        (output / 'sections').mkdir()
         for index, chunk in enumerate(sutra['chunks'], 1):
             params = urllib.parse.urlencode({'speaker': 10001, 'text': chunk['reading']})
             source = json.loads(chant.audio_generator.request(nemo, '/audio_query?' + params, b''))
@@ -53,11 +65,15 @@ def generate(host, nemo):
             points = breath_points(chunk['reading'], index, moras)
             score, sections = chant.build_score({'sections': [{'section': index, **chunk, 'query': source}]},
                                                 50, points)
-            # Short independently playable phrases need less release than the audition.
-            score['notes'][-2]['frame_length'] = 30
-            score['notes'][-1]['frame_length'] = 8
+            # Keep short releases at the restored semantic breathing points.
+            ending_ids = set()
+            for position, note in enumerate(score['notes'][1:], 1):
+                if note['key'] is None:
+                    note['frame_length'] = 8
+                    score['notes'][position - 1]['frame_length'] = 30
+                    ending_ids.add(score['notes'][position - 1]['id'])
             query = json.loads(chant.request(host, f'/sing_frame_audio_query?speaker={chant.TEACHER_ID}', score))
-            chant.shape_pitch(query, score, {score['notes'][-2]['id']})
+            chant.shape_pitch(query, score, ending_ids)
             # Reduce the teacher's sung vowel swells; retain consonant and release envelopes.
             phones = [p['phoneme'] for p in query['phonemes'] for _ in range(p['frame_length'])]
             vowels = {'a', 'i', 'u', 'e', 'o', 'N'}
@@ -75,7 +91,7 @@ def generate(host, nemo):
             normalized = array.array('h', (round(v * gain) for v in samples))
             if sys.byteorder != 'little':
                 normalized.byteswap()
-            name = f'phrases/{index:02d}.wav'
+            name = f'sections/{index:02d}.wav'
             with wave.open(str(output / name), 'wb') as wav:
                 wav.setparams((1, 2, 24000, 0, 'NONE', 'not compressed'))
                 wav.writeframes(normalized.tobytes())
@@ -107,7 +123,7 @@ def generate(host, nemo):
         validator = importlib.util.module_from_spec(validator_spec)
         validator_spec.loader.exec_module(validator)
         validator.check(output)
-        (ROOT / 'audio/phrases').mkdir(exist_ok=True)
+        (ROOT / 'audio/sections').mkdir(exist_ok=True)
         for record in records:
             shutil.copyfile(output / record['file'], ROOT / 'audio' / record['file'])
         shutil.copyfile(output / 'manifest.json', ROOT / 'audio/manifest.json')

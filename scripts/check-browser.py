@@ -84,12 +84,12 @@ def check(base):
 
         # A failed file remains on the same section, and a gesture can retry it.
         page.locator("#restartBtn").click()
-        page.route("**/audio/phrases/01.wav", lambda route: route.fulfill(status=404, body="missing"))
+        page.route("**/audio/sections/01.wav", lambda route: route.fulfill(status=404, body="missing"))
         page.locator("#stage").click()
         page.wait_for_selector("#retryBtn:visible")
         assert page.locator(".chunk.active").count() == 0
         assert page.locator("#rounds").inner_text() == "0"
-        page.unroute("**/audio/phrases/01.wav")
+        page.unroute("**/audio/sections/01.wav")
         page.locator("#retryBtn").click()
         page.wait_for_function("testAudio.currentTime > .1")
         assert page.locator("#counter").inner_text() == "1"
@@ -138,13 +138,13 @@ def check(base):
         assert not errors, errors
 
         failed = context.new_page()
-        failed.route("**/data/sutra-phrases.json", lambda route: route.fulfill(status=503, body="unavailable"))
+        failed.route("**/data/sutra-sections.json", lambda route: route.fulfill(status=503, body="unavailable"))
         failed.goto(base)
         failed.wait_for_selector("#reloadBtn:visible")
         assert failed.locator("#stage").get_attribute("aria-disabled") == "true"
         assert failed.locator("#stage").get_attribute("data-state") == "error"
         assert failed.locator("#stage").evaluate("e=>getComputedStyle(e).cursor") == "default"
-        failed.unroute("**/data/sutra-phrases.json")
+        failed.unroute("**/data/sutra-sections.json")
         failed.locator("#reloadBtn").click()
         failed.wait_for_selector('#stage[aria-disabled="false"]')
 

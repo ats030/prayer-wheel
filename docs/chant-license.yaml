@@ -1,5 +1,5 @@
 reviewed_at: 2026-10-13
-intended_use: 5節の比較試聴WAVと、採用Dの56句WhiteCUL WAVと互換用の旧29節WAVを無料の静的Webアプリで配信
+intended_use: 5節の比較試聴WAVと、採用Dの調整版29区切りと互換用56句・旧29節のWhiteCUL WAVを無料の静的Webアプリで配信
 male_comparison:
   tool: VOICEVOX Engine
   engine_version: 0.25.2
@@ -62,7 +62,7 @@ reference:
     - https://soto-tokai.net/copyright.html
 
 female_comparison:
-  adoption: D試聴版に加え、本体に採用し、現行56句へ細分化
+  adoption: 本体はDの発声を低音へ調整し29の意味区切りで採用。D試聴版と旧56句も保持
   tool: VOICEVOX Engine 0.25.2 / WhiteCUL ノーマル（ハミング）
   voice_version: 0.16.0
   speaker_id: 3023
