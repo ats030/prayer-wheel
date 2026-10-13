@@ -389,8 +389,9 @@ input[type="range"] {
 /* ---------- Responsive & motion ---------- */
 
 @media (max-width: 900px) {
-  .grid { grid-template-columns: 1fr; }
-  .stage { width: min(340px, 88vw); }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .panel { min-width: 0; }
+  .stage { width: min(340px, 100%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
