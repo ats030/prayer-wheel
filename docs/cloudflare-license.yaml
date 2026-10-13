@@ -11,7 +11,7 @@ cost:
   static_requests: free and unlimited
   asset_storage: no additional cost
   script_execution: no Worker script supplied
-  limits: 20000 files on Free, 25 MiB per file; this deployment has 34 small files
+  limits: 20000 files on Free, 25 MiB per file; this deployment has 36 small files
 conditions:
   - No paid services, R2, D1, or plan upgrades for this app
   - Keep source and audio generation metadata in Git; only allowlisted runtime files are public

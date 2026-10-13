@@ -12,7 +12,7 @@ python3 -m http.server 8731 --bind 127.0.0.1
 ```
 
 `http://127.0.0.1:8731` を開きます。公開する場合は、このディレクトリのHTML、JS、CSS、
-`data/sutra.json`、`audio/*.wav`を同じHTTPSオリジンで静的配信してください。
+`data/sutra.json`、`audio/*.wav`、`favicon.png`、`favicon.ico`を同じHTTPSオリジンで静的配信してください。
 `file://` での直接起動は使いません。Node、Python、Nemoは利用者には不要です。
 ブラウザの自動再生制限により、最初のスクロールだけで再生できない場合はドラムをタップするか
 「音声を再試行」を押します。
@@ -30,7 +30,7 @@ npx wrangler@4.149.0 deploy --dry-run
 npx wrangler@4.149.0 deploy
 ```
 
-`dist/`へHTML・JS・CSS・経文・全29節のWAVだけをコピーします。
+`dist/`へHTML・JS・CSS・経文・ファビコン・全29節のWAVだけをコピーします。
 内部HTTP向けvisit-logタグは公開ネットワーク例外として公開版だけ省略し、ローカル原本は保持します。
 理由は課題`ats030-e5ozb`と[配信条件の記録](docs/cloudflare-license.yaml)に記録しています。
 設定・テスト・生成スクリプト・音声生成メタデータは公開しません。
@@ -99,3 +99,9 @@ Nodeのテストは予約・逆操作・周回・失敗復旧・古い再生通�
 実WAVの再生、PCとタッチ画面、エラー復旧を確認します。実機iOSでの検証とは区別します。
 
 `DESIGN.md`の既存デザインを維持し、HTMLのvisit-logタグも保持しています。
+
+## ファビコン
+
+黒・金・生成りの経文ドラムをimagegenで生成しました。原画像は
+`assets/prayer-wheel-icon-source.png`、配信用は64pxの`favicon.png`と32pxの`favicon.ico`です。
+app-portalも公開アプリから同じファビコンを取得します。原画像は公開パッケージに含めません。
