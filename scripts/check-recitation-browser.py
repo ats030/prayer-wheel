@@ -12,9 +12,20 @@ def check(base):
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.add_init_script("""(() => {
           window.completedSections = [];
+          window.syncFailures = [];
           const play = HTMLMediaElement.prototype.play;
           HTMLMediaElement.prototype.play = function() {
             const section = Number(new URL(this.src).pathname.split('/').pop().split('.')[0]);
+            const source = this.src;
+            this.addEventListener('playing', () => {
+              if (this.src !== source) return;
+              const face = document.querySelector('.reel-face.is-selected');
+              if (face?.dataset.sequence !== String(section - 1)
+                  || face.textContent !== document.getElementById('currentLine').textContent
+                  || !document.getElementById('drumPosition').textContent.startsWith(section + ' /')) {
+                syncFailures.push(section);
+              }
+            }, {once:true});
             const result = play.call(this);
             result.then(() => this.addEventListener('ended', () => completedSections.push(section), {once:true}));
             return result;
@@ -38,6 +49,7 @@ def check(base):
             page.wait_for_function('n => completedSections.length >= n', arg=completed, timeout=60000)
             print(f'Completed {completed}/{count} actual WAVs', flush=True)
         assert page.evaluate('completedSections') == list(range(1, count + 1))
+        assert page.evaluate('syncFailures') == [], page.evaluate('syncFailures')
         assert page.locator('#rounds').inner_text() == '1'
         assert page.locator('#queueCount').inner_text() == '0'
         assert page.locator('#counter').inner_text() == str(count)

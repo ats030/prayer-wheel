@@ -25,10 +25,10 @@
 
     <main class="grid">
       <section class="panel stage-panel" aria-label="経文ドラム">
-        <div class="drum-heading"><h2>経文ドラム</h2><span>操作した節</span></div>
+        <div class="drum-heading"><h2>経文ドラム</h2><span>読み上げの節</span></div>
         <div class="stage" id="stage" tabindex="0" role="button" aria-disabled="true"
              aria-keyshortcuts="Enter ArrowDown ArrowUp PageDown PageUp Space"
-             aria-describedby="drumSelection stageHint"
+             aria-describedby="stageHint"
              aria-label="ドラムを回す。タップ、クリック、Enter、下矢印で次へ。上矢印で予約取消か前の節へ。Spaceで一時停止・再開。">
           <div class="reel-window" aria-hidden="true">
             <div class="reel-rotor" id="dial"></div>
@@ -39,7 +39,7 @@
           <span id="drumPosition">— / — 節</span>
           <span class="counter-label">操作数 <b id="counter">0</b></span>
         </div>
-        <p class="drum-selection" id="drumSelection">中央は操作した節。音声は順番に読み上げます。</p>
+        <p class="drum-selection" id="drumSelection">読み上げの開始に合わせて、ドラムが同じ節へ回ります。</p>
         <p class="stage-hint" id="stageHint">スクロール／タップ: 次へ<br>逆スクロール／「戻る」: 予約取消・前の節へ<br>キー ↓ / ↑ ・ Space: 一時停止／再開</p>
       </section>
 

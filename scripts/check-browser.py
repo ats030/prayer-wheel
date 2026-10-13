@@ -27,12 +27,13 @@ def check(base):
         page.wait_for_selector('#stage[aria-disabled="false"]')
         assert page.locator("#currentLine").inner_text() == "ドラムを回すと、読経が始まります。"
         assert page.locator(".reel-face.is-selected").inner_text() == "心経を回す"
-        # Real frames: slow deceleration, continuous retargeting, reset and live motion preference.
+        # Real frames: playback-synchronized deceleration, queued operations, reset and motion preference.
         motion = page.evaluate("""async () => {
           const dial = document.getElementById('dial');
           const stage = document.getElementById('stage');
           const angle = () => Number.parseFloat(dial.style.getPropertyValue('--drum-turn'));
           stage.click();
+          await new Promise(resolve => testAudio.addEventListener('playing', resolve, {once:true}));
           const samples = [];
           const start = performance.now();
           await new Promise(resolve => {
@@ -47,20 +48,32 @@ def check(base):
           const before = angle();
           stage.click();
           const after = angle();
+          const queued = document.querySelector('.reel-face.is-selected').dataset.sequence;
+          // Accelerate only this retarget assertion; the playback checks below use real WAVs.
+          testAudio.dispatchEvent(new Event('ended'));
+          testAudio.dispatchEvent(new Event('playing'));
+          await new Promise(resolve => setTimeout(resolve, 100));
+          const running = angle();
+          testAudio.dispatchEvent(new Event('ended'));
+          testAudio.dispatchEvent(new Event('playing'));
+          const retargeted = angle();
           document.getElementById('restartBtn').click();
           await new Promise(resolve => setTimeout(resolve, 100));
-          return {samples, before, after, reset: angle(), moving: dial.dataset.moving};
+          return {samples, before, after, queued, running, retargeted, reset: angle(), moving: dial.dataset.moving};
         }""")
         samples = motion['samples']
         early = next(s for s in samples if s['time'] >= .28)
         assert -22.5 < early['angle'] < -5, early
         assert abs(samples[-1]['angle']) < .03, samples[-1]
         assert abs(motion['before'] - motion['after']) < .001, motion
+        assert motion['queued'] == '0', motion
+        assert motion['running'] > 0 and abs(motion['running'] - motion['retargeted']) < .001, motion
         assert motion['reset'] == -22.5 and motion['moving'] == 'false', motion
         page.locator('#stage').click()
         page.emulate_media(reduced_motion='reduce')
         page.wait_for_function("document.getElementById('dial').dataset.moving === 'false'", timeout=500)
         assert page.locator('#dial').get_attribute('data-moving') == 'false'
+        page.wait_for_function("document.querySelector('.reel-face.is-selected').dataset.sequence === '0'")
         assert page.locator('#dial').evaluate("e => parseFloat(e.style.getPropertyValue('--drum-turn'))") == 0
         page.locator('#restartBtn').click()
         page.emulate_media(reduced_motion='no-preference')
@@ -74,7 +87,7 @@ def check(base):
         page.evaluate("for(let i=0;i<5;i++)document.getElementById('stage').click()")
         assert page.locator("#queueCount").inner_text() == "5"
         assert page.locator("#counter").inner_text() == "6"
-        assert page.locator(".reel-face.is-selected").get_attribute("data-sequence") == "5"
+        assert page.locator(".reel-face.is-selected").get_attribute("data-sequence") == "0"
         selected = page.locator(".reel-face.is-selected").inner_text()
         page.evaluate("document.getElementById('stage').click()")
         assert page.locator("#counter").inner_text() == "6"
@@ -82,8 +95,9 @@ def check(base):
         assert page.locator("#currentLine").inner_text() == "摩訶般若波羅蜜多心経"
         page.locator("#backBtn").click()
         assert page.locator("#queueCount").inner_text() == "4"
-        assert page.locator(".reel-face.is-selected").get_attribute("data-sequence") == "4"
+        assert page.locator(".reel-face.is-selected").get_attribute("data-sequence") == "0"
         page.locator("#pauseBtn").click()
+        assert page.locator('.reel-face.is-selected').get_attribute('data-sequence') == '0'
         before = page.evaluate("testAudio.currentTime")
         page.wait_for_timeout(250)
         assert abs(page.evaluate("testAudio.currentTime") - before) < .05
@@ -218,6 +232,7 @@ def check(base):
               const count = document.querySelectorAll('.chunk').length;
               for (let i=0;i<count;i++) {
                 document.getElementById('stage').click();
+                testAudio.dispatchEvent(new Event('playing'));
                 const face = document.querySelector('.reel-face.is-selected');
                 if (face.dataset.sequence !== String(i) || face.scrollHeight > face.clientHeight
                     || face.scrollWidth > face.clientWidth) failures.push(i);
@@ -230,13 +245,12 @@ def check(base):
                   if (text.left < windowRect.left - 1 || text.right > windowRect.right + 1
                       || text.top < windowRect.top - 1 || text.bottom > windowRect.bottom + 1) failures.push('text-'+i);
                 }
-                testAudio.dispatchEvent(new Event('playing'));
                 testAudio.dispatchEvent(new Event('ended'));
               }
               const completedState = document.getElementById('stage').dataset.state;
               document.getElementById('stage').click();
-              const wrapped = document.querySelector('.reel-face.is-selected');
               testAudio.dispatchEvent(new Event('playing'));
+              const wrapped = document.querySelector('.reel-face.is-selected');
               testAudio.dispatchEvent(new Event('ended'));
               return {count, failures, layoutFailures, completedState, idleState: document.getElementById('stage').dataset.state,
                 sequence: wrapped.dataset.sequence,
@@ -251,10 +265,12 @@ def check(base):
             assert result["transition"] == "0s"
             assert layout.locator('#dial').get_attribute('data-moving') == 'false'
             assert layout.locator('#dial').evaluate("e => parseFloat(e.style.getPropertyValue('--drum-turn'))") == result['count'] * 22.5
-            layout.locator("#stage").click()
-            layout.locator("#pauseBtn").click()
+            layout.evaluate("""() => {
+              document.getElementById('stage').click();
+              document.getElementById('pauseBtn').click();
+              document.getElementById('backBtn').click();
+            }""")
             assert layout.locator("#stage").get_attribute("data-state") == "paused"
-            layout.locator("#backBtn").click()
             assert layout.locator(".reel-face.is-selected").get_attribute("data-sequence") == str(result["count"])
             assert layout.locator("#pauseBtn").inner_text() == "再開"
             layout.locator("#restartBtn").click()

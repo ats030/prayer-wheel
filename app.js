@@ -29,7 +29,7 @@ function buildDrum() {
 
 function renderDrumFaces() {
   if (!player) return;
-  const sequence = player.nextSequence - 1;
+  const sequence = player.currentSequence;
   // Recycle hidden faces around the physical angle, even during large rewinds.
   const center = Math.round(drumMotion.angle / DRUM_STEP);
   if (center === drumFaceCenter && sequence === drumFaceSequence) return;
@@ -50,16 +50,16 @@ function renderDrumFaces() {
 }
 
 function renderDrum() {
-  // The player's next position already includes reservations and rewinds.
-  const sequence = player.nextSequence - 1;
+  // Actual playback advances the drum; queued operations never move it ahead.
+  const sequence = player.currentSequence;
   if (sequence === drumSequence) return;
   drumMotion.moveTo(sequence * DRUM_STEP);
   renderDrumFaces();
   const position = sequence < 0 ? 0 : sequence % player.chunks.length + 1;
   $('drumPosition').textContent = `${position} / ${player.chunks.length} 節`;
   $('drumSelection').textContent = sequence < 0
-    ? '中央は操作した節。音声は順番に読み上げます。'
-    : `操作した節：${player.chunks[position - 1].text}。音声は順番に読み上げます。`;
+    ? '読み上げの開始に合わせて、ドラムが同じ節へ回ります。'
+    : `読み上げの節：${player.chunks[position - 1].text}。`;
   drumSequence = sequence;
 }
 
