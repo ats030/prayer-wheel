@@ -40,10 +40,10 @@ function renderDrum() {
   }
   dial.style.setProperty('--drum-turn', `${sequence * DRUM_STEP}deg`);
   const position = sequence < 0 ? 0 : sequence % player.chunks.length + 1;
-  $('drumPosition').textContent = `${position} / ${player.chunks.length} 節`;
+  $('drumPosition').textContent = `${position} / ${player.chunks.length} 句`;
   $('drumSelection').textContent = sequence < 0
-    ? '中央は操作した節。音声は順番に読み上げます。'
-    : `操作した節：${player.chunks[position - 1].text}。音声は順番に読み上げます。`;
+    ? '中央は操作した句。音声は順番に読み上げます。'
+    : `操作した句：${player.chunks[position - 1].text}。音声は順番に読み上げます。`;
   drumSequence = sequence;
 }
 
@@ -77,7 +77,7 @@ function updateUI() {
   }
   const position = index + 1;
   $('progressFill').style.width = `${position / player.chunks.length * 100}%`;
-  $('progressLabel').textContent = `読み上げ ${position} / ${player.chunks.length} 節`;
+  $('progressLabel').textContent = `読み上げ ${position} / ${player.chunks.length} 句`;
   $('pauseBtn').textContent = player.paused ? '再開' : '一時停止';
   $('pauseBtn').disabled = Boolean(player.error) || (!player.active && !player.pending.length);
   $('retryBtn').hidden = !player.error;
@@ -144,13 +144,14 @@ $('reloadBtn').addEventListener('click', () => location.reload());
 
 async function initialize() {
   try {
-    const response = await fetch('data/sutra.json', { signal: AbortSignal.timeout(15000) });
+    const response = await fetch('data/sutra-phrases.json', { signal: AbortSignal.timeout(15000) });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const sutra = await response.json();
     if (!Array.isArray(sutra.chunks) || !sutra.chunks.length
         || sutra.chunks.some(c => typeof c.text !== 'string' || typeof c.reading !== 'string')) throw new Error('Invalid sutra');
+    if (sutra.audioDirectory !== 'audio/phrases') throw new Error('Invalid audio directory');
     const chunks = sutra.chunks.map((chunk, i) => ({ ...chunk,
-      audio: `audio/${String(i + 1).padStart(2, '0')}.wav`,
+      audio: `${sutra.audioDirectory}/${String(i + 1).padStart(2, '0')}.wav`,
     }));
     for (const chunk of chunks) {
       const span = document.createElement('span');

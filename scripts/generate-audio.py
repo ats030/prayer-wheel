@@ -34,7 +34,7 @@ def generate(host, sample):
     voice = next(s for s in speakers if s["speaker_uuid"] == SPEAKER_UUID)
     if not any(s["id"] == SPEAKER_ID for s in voice["styles"]):
         raise ValueError("Nemo 男声1 style ID does not match")
-    raw = (ROOT / "data/sutra.json").read_bytes()
+    raw = (ROOT / "audition/baseline/sutra.json").read_bytes()
     sutra = json.loads(raw)
     output = ROOT / "audition/baseline"
     output.mkdir(parents=True, exist_ok=True)

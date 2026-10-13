@@ -84,12 +84,12 @@ def check(base):
 
         # A failed file remains on the same section, and a gesture can retry it.
         page.locator("#restartBtn").click()
-        page.route("**/audio/01.wav", lambda route: route.fulfill(status=404, body="missing"))
+        page.route("**/audio/phrases/01.wav", lambda route: route.fulfill(status=404, body="missing"))
         page.locator("#stage").click()
         page.wait_for_selector("#retryBtn:visible")
         assert page.locator(".chunk.active").count() == 0
         assert page.locator("#rounds").inner_text() == "0"
-        page.unroute("**/audio/01.wav")
+        page.unroute("**/audio/phrases/01.wav")
         page.locator("#retryBtn").click()
         page.wait_for_function("testAudio.currentTime > .1")
         assert page.locator("#counter").inner_text() == "1"
@@ -117,7 +117,7 @@ def check(base):
         page.set_viewport_size({"width": 390, "height": 844})
         page.locator("#restartBtn").click()
         page.evaluate("""() => {
-          for (let i=0;i<20;i++) {
+          for (let i=0;i<document.querySelectorAll('.chunk').length;i++) {
             document.getElementById('stage').click();
             // This isolated scroll assertion accelerates media progression.
             testAudio.dispatchEvent(new Event('playing'));
@@ -138,13 +138,13 @@ def check(base):
         assert not errors, errors
 
         failed = context.new_page()
-        failed.route("**/data/sutra.json", lambda route: route.fulfill(status=503, body="unavailable"))
+        failed.route("**/data/sutra-phrases.json", lambda route: route.fulfill(status=503, body="unavailable"))
         failed.goto(base)
         failed.wait_for_selector("#reloadBtn:visible")
         assert failed.locator("#stage").get_attribute("aria-disabled") == "true"
         assert failed.locator("#stage").get_attribute("data-state") == "error"
         assert failed.locator("#stage").evaluate("e=>getComputedStyle(e).cursor") == "default"
-        failed.unroute("**/data/sutra.json")
+        failed.unroute("**/data/sutra-phrases.json")
         failed.locator("#reloadBtn").click()
         failed.wait_for_selector('#stage[aria-disabled="false"]')
 
@@ -163,7 +163,8 @@ def check(base):
                 const rect = box.getBoundingClientRect();
                 if (rect.left < -1 || rect.right > innerWidth + 1) layoutFailures.push(box.className);
               }
-              for (let i=0;i<29;i++) {
+              const count = document.querySelectorAll('.chunk').length;
+              for (let i=0;i<count;i++) {
                 document.getElementById('stage').click();
                 const face = document.querySelector('.reel-face.is-selected');
                 if (face.dataset.sequence !== String(i) || face.scrollHeight > face.clientHeight
@@ -185,7 +186,7 @@ def check(base):
               const wrapped = document.querySelector('.reel-face.is-selected');
               testAudio.dispatchEvent(new Event('playing'));
               testAudio.dispatchEvent(new Event('ended'));
-              return {failures, layoutFailures, completedState, idleState: document.getElementById('stage').dataset.state,
+              return {count, failures, layoutFailures, completedState, idleState: document.getElementById('stage').dataset.state,
                 sequence: wrapped.dataset.sequence,
                 width: document.documentElement.scrollWidth,
                 transition: getComputedStyle(document.getElementById('dial')).transitionDuration};
@@ -194,13 +195,13 @@ def check(base):
             assert not result["layoutFailures"], (width, result)
             assert result["completedState"] == "success" and result["idleState"] == "ready", result
             assert result["width"] <= width, (width, result)
-            assert result["sequence"] == "29"
+            assert result["sequence"] == str(result["count"])
             assert result["transition"] == "0s"
             layout.locator("#stage").click()
             layout.locator("#pauseBtn").click()
             assert layout.locator("#stage").get_attribute("data-state") == "paused"
             layout.locator("#backBtn").click()
-            assert layout.locator(".reel-face.is-selected").get_attribute("data-sequence") == "29"
+            assert layout.locator(".reel-face.is-selected").get_attribute("data-sequence") == str(result["count"])
             assert layout.locator("#pauseBtn").inner_text() == "再開"
             layout.locator("#restartBtn").click()
             assert layout.locator(".reel-face.is-selected").inner_text() == "心経を回す"

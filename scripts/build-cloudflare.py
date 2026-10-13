@@ -28,10 +28,13 @@ if out.exists():
     shutil.rmtree(out)
 out.mkdir()
 (out / "index.html").write_text(public_html, encoding="utf-8")
-for name in ("app.js", "player.js", "style.css", "data/sutra.json", "favicon.png", "favicon.ico"):
+for name in ("app.js", "player.js", "style.css", "favicon.png", "favicon.ico"):
     dest = out / name
     dest.parent.mkdir(exist_ok=True)
     shutil.copyfile(ROOT / name, dest)
+(out / "data").mkdir()
+shutil.copyfile(ROOT / "data/sutra.json", out / "data/sutra-phrases.json")
+shutil.copyfile(ROOT / "audition/baseline/sutra.json", out / "data/sutra.json")
 (out / "audition").mkdir()
 audition_html = (ROOT / "audition/index.html").read_text(encoding="utf-8")
 if audition_html.count(TAG) != 1:
@@ -45,9 +48,14 @@ for name in ("audition.css", "audition.js", "current.wav", "adjusted.wav", "chan
 manifest = json.loads((ROOT / "audio/manifest.json").read_text(encoding="utf-8"))
 (out / "audio").mkdir()
 for entry in manifest["files"]:
+    target = out / "audio" / entry["file"]
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ROOT / "audio" / entry["file"], target)
+legacy = json.loads((ROOT / "audio/legacy-manifest.json").read_text())
+for entry in legacy["files"]:
     shutil.copyfile(ROOT / "audio" / entry["file"], out / "audio" / entry["file"])
 files = [p for p in out.rglob("*") if p.is_file()]
-if len(files) != 14 + len(manifest["files"]) or any(p.stat().st_size > 25 * 1024 * 1024 for p in files):
+if len(files) != 15 + len(manifest["files"]) + len(legacy["files"]) or any(p.stat().st_size > 25 * 1024 * 1024 for p in files):
     sys.exit("Unexpected asset count or Cloudflare asset size limit exceeded")
 print(f"Packaged {len(files)} public files ({sum(p.stat().st_size for p in files):,} bytes)")
 print(f"VISIT_LOG_EXEMPT_REASON: {reason}")

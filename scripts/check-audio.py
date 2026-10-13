@@ -20,7 +20,16 @@ def check(audio_dir=None):
     manifest = json.loads((audio_dir / 'manifest.json').read_text())
     baseline_raw = (ROOT / 'audition/baseline/manifest.json').read_bytes()
     baseline = json.loads(baseline_raw)
-    assert manifest['sutraSha256'] == baseline['sutraSha256'] == hashlib.sha256(raw).hexdigest()
+    archived_raw = (ROOT / 'audition/baseline/sutra.json').read_bytes()
+    archived = json.loads(archived_raw)
+    assert baseline['sutraSha256'] == manifest['sourceSutraSha256'] == hashlib.sha256(archived_raw).hexdigest()
+    assert manifest['sutraSha256'] == hashlib.sha256(raw).hexdigest()
+    normalize_text = lambda chunks: ''.join(c['text'].replace('　', '') for c in chunks)
+    normalize_reading = lambda chunks: re.sub('[、。　 ]', '', ''.join(c['reading'] for c in chunks))
+    assert normalize_text(sutra['chunks']) == normalize_text(archived['chunks']), 'Text lost/reordered during split'
+    assert normalize_reading(sutra['chunks']) == normalize_reading(archived['chunks']), 'Reading lost/reordered during split'
+    normalize_kana = lambda kana: re.sub("[_'/、？]", '', kana)
+    assert ''.join(normalize_kana(r['kana']) for r in manifest['files']) == ''.join(normalize_kana(r['kana']) for r in baseline['files']), 'Pronunciation changed during split'
     assert manifest['baselineManifestSha256'] == hashlib.sha256(baseline_raw).hexdigest()
     assert manifest['engineVersion'] == '0.25.2' and manifest['engineUuid'] == '074fc39e-678b-4c13-8916-ffca8d505d1d'
     assert manifest['speakerId'] == 3023 and manifest['speakerUuid'] == '67d5d8da-acd7-4207-bb10-b5542d3a663b'
@@ -28,12 +37,17 @@ def check(audio_dir=None):
     assert manifest['voiceVersion'] == manifest['teacherVersion'] == '0.16.0'
     assert manifest['frameRate'] == 93.75 and manifest['design']['midiKey'] == 55
     assert manifest['design']['effects'] == []
-    assert len(manifest['files']) == len(sutra['chunks']) == 29
+    assert len(manifest['files']) == len(sutra['chunks']) == 56
+    assert sutra['audioDirectory'] == 'audio/phrases'
+    legacy = json.loads((ROOT / 'audio/legacy-manifest.json').read_text())
+    assert len(legacy['files']) == 29 and legacy['speakerId'] == 3023
+    for old in legacy['files']:
+        assert hashlib.sha256((ROOT / 'audio' / old['file']).read_bytes()).hexdigest() == old['sha256'], 'Old-tab audio changed'
     total = 0
     for index, (record, chunk) in enumerate(zip(manifest['files'], sutra['chunks']), 1):
-        assert record['file'] == f'{index:02d}.wav' and record['section'] == index
+        assert record['file'] == f'phrases/{index:02d}.wav' and record['section'] == index
         assert record['text'] == chunk['text'] and record['reading'] == chunk['reading']
-        assert record['kana'] == record['sourceQuery']['kana'] == baseline['files'][index - 1]['kana']
+        assert record['kana'] == record['sourceQuery']['kana']
         moras = [m for p in record['sourceQuery']['accent_phrases'] for m in p['moras']]
         assert ''.join(m['text'] for m in moras) == re.sub("[_'/、？]", '', record['kana'])
         notes = record['score']['notes']
@@ -85,7 +99,7 @@ def check(audio_dir=None):
         rms = math.sqrt(sum(v*v for v in samples) / len(samples))
         assert abs(20 * math.log10(rms / manifest['design']['targetRms'])) < .5
         total += seconds
-    print(f'Verified 29 WhiteCUL WAVs: {total:.1f}s; exact pronunciation/phonemes, sustained vowels, hashes and no clipping')
+    print(f"Verified {len(manifest['files'])} WhiteCUL WAVs: {total:.1f}s; exact pronunciation/phonemes, sustained vowels, hashes and no clipping")
 
 
 if __name__ == '__main__':

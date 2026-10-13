@@ -9,7 +9,7 @@ import wave
 
 ROOT = Path(__file__).resolve().parents[1]
 manifest = json.loads((ROOT / 'audition/manifest.json').read_text())
-raw = (ROOT / 'data/sutra.json').read_bytes()
+raw = (ROOT / 'audition/baseline/sutra.json').read_bytes()
 assert manifest['sutraSha256'] == hashlib.sha256(raw).hexdigest()
 assert manifest['engineVersion'] == '0.24.0' and manifest['speakerId'] == 10001
 assert [s['section'] for s in manifest['sections']] == list(range(2, 7))

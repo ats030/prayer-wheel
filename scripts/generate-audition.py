@@ -41,7 +41,7 @@ def generate(host):
     voice = next(v for v in json.loads(generator.request(host, '/speakers'))
                  if v['speaker_uuid'] == generator.SPEAKER_UUID)
     assert any(s['id'] == generator.SPEAKER_ID for s in voice['styles'])
-    raw = (ROOT / 'data/sutra.json').read_bytes()
+    raw = (ROOT / 'audition/baseline/sutra.json').read_bytes()
     chunks = json.loads(raw)['chunks'][1:6]
     output = ROOT / 'audition'
     output.mkdir(exist_ok=True)

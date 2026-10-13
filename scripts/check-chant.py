@@ -16,7 +16,7 @@ def check(label, manifest_name, file_name, speaker_id, speaker_uuid, midi_key):
     previous_raw = (ROOT / 'audition/manifest.json').read_bytes()
     previous = json.loads(previous_raw)
     assert m['priorManifestSha256'] == hashlib.sha256(previous_raw).hexdigest()
-    assert m['sutraSha256'] == hashlib.sha256((ROOT / 'data/sutra.json').read_bytes()).hexdigest()
+    assert m['sutraSha256'] == hashlib.sha256((ROOT / 'audition/baseline/sutra.json').read_bytes()).hexdigest()
     assert m['engineVersion'] == '0.25.2' and m['engineUuid'] == '074fc39e-678b-4c13-8916-ffca8d505d1d'
     assert m['speakerId'] == speaker_id and m['speakerUuid'] == speaker_uuid
     assert m['teacherId'] == 6000 and m['teacherUuid'] == 'b1a81618-b27b-40d2-b0ea-27a9ad408c4b'

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate all main sections with the selected WhiteCUL D voice, retaining auditions."""
+"""Generate all main phrases with the selected WhiteCUL D voice, retaining auditions."""
 import argparse
 import array
 import hashlib
@@ -20,20 +20,8 @@ spec.loader.exec_module(chant)
 
 
 def breath_points(reading, section, moras):
-    # The selected D sample supplies its explicit internal breathing points.
-    # Every separately playable section also gets a complete final release.
-    points = {point for point in chant.BREATH_AFTER if point[0] == section}
-    if not 2 <= section <= 6:
-        count = 0
-        for char in reading:
-            if char not in '、。　 ゃゅょぁぃぅぇぉゎ':
-                count += 1
-            if char == '。' and count:
-                points.add((section, count))
-        if count != len(moras):
-            raise ValueError(f'Mora count mismatch in section {section}')
-    points.add((section, len(moras)))
-    return points
+    # Each short phrase is independently playable and ends with one release.
+    return {(section, len(moras))}
 
 
 def generate(host, nemo):
@@ -46,8 +34,9 @@ def generate(host, nemo):
     if nemo_manifest['uuid'] != '208cf94d-43d2-4cf5-abc0-9783cac36d29' or nemo_version != '0.24.0':
         raise ValueError('Pronunciation source must be official Nemo 0.24.0')
     raw_sutra = (ROOT / 'data/sutra.json').read_bytes()
-    if hashlib.sha256(raw_sutra).hexdigest() != baseline['sutraSha256']:
-        raise ValueError('Pronunciation baseline no longer matches sutra')
+    source_sutra = (ROOT / 'audition/baseline/sutra.json').read_bytes()
+    if hashlib.sha256(source_sutra).hexdigest() != baseline['sutraSha256']:
+        raise ValueError('Archived pronunciation baseline changed')
     sutra = json.loads(raw_sutra)
     reference = chant.read_pcm((ROOT / 'audition/current.wav').read_bytes())
     target_rms = chant.rms(reference)
@@ -55,11 +44,10 @@ def generate(host, nemo):
     # Finish every synthesis and integrity check before replacing shipped files.
     with tempfile.TemporaryDirectory(prefix='prayer-wheel-recitation-') as work:
         output = Path(work)
+        (output / 'phrases').mkdir()
         for index, chunk in enumerate(sutra['chunks'], 1):
             params = urllib.parse.urlencode({'speaker': 10001, 'text': chunk['reading']})
             source = json.loads(chant.audio_generator.request(nemo, '/audio_query?' + params, b''))
-            if source['kana'] != baseline['files'][index - 1]['kana']:
-                raise ValueError(f'Pronunciation drift in section {index}')
             moras = [m for phrase in source['accent_phrases'] for m in phrase['moras']]
             points = breath_points(chunk['reading'], index, moras)
             score, sections = chant.build_score({'sections': [{'section': index, **chunk, 'query': source}]},
@@ -75,7 +63,7 @@ def generate(host, nemo):
             normalized = array.array('h', (round(v * gain) for v in samples))
             if sys.byteorder != 'little':
                 normalized.byteswap()
-            name = f'{index:02d}.wav'
+            name = f'phrases/{index:02d}.wav'
             with wave.open(str(output / name), 'wb') as wav:
                 wav.setparams((1, 2, 24000, 0, 'NONE', 'not compressed'))
                 wav.writeframes(normalized.tobytes())
@@ -95,6 +83,7 @@ def generate(host, nemo):
                     'credit': 'VOICEVOX:WhiteCUL / VOICEVOX:波音リツ（歌唱クエリ生成）',
                     'frameRate': engine['frame_rate'], 'sutraSha256': hashlib.sha256(raw_sutra).hexdigest(),
                     'baselineManifestSha256': hashlib.sha256(baseline_raw).hexdigest(),
+                    'sourceSutraSha256': hashlib.sha256(source_sutra).hexdigest(),
                     'design': {'midiKey': 55, 'moraFrames': 30, 'endingFrames': 45, 'closureFrames': 18,
                                'breathFrames': 28, 'endFallSemitones': .8, 'effects': [], 'targetRms': target_rms},
                     'files': records}
@@ -103,6 +92,7 @@ def generate(host, nemo):
         validator = importlib.util.module_from_spec(validator_spec)
         validator_spec.loader.exec_module(validator)
         validator.check(output)
+        (ROOT / 'audio/phrases').mkdir(exist_ok=True)
         for record in records:
             shutil.copyfile(output / record['file'], ROOT / 'audio' / record['file'])
         shutil.copyfile(output / 'manifest.json', ROOT / 'audio/manifest.json')
