@@ -104,7 +104,8 @@ Nodeのテストは予約・逆操作・周回・失敗復旧・古い再生通�
 
 黒・金・生成りの経文ドラムをimagegenで生成しました。原画像は
 `assets/prayer-wheel-icon-source.png`です。UIに合わせて時計回り90°に回転した編集版を
-`assets/prayer-wheel-icon-horizontal.png`に保存し、64pxの`favicon.png`と32pxの`favicon.ico`に使用しています。
+`assets/prayer-wheel-icon-horizontal.png`に保存しています。背景除去版は
+`assets/prayer-wheel-icon-transparent.png`で、透過RGBAの64px `favicon.png`と32bitの32px `favicon.ico`に使用しています。
 app-portalも公開アプリから同じファビコンを取得します。原画像は公開パッケージに含めません。
 
 ## 読経調の試聴版
