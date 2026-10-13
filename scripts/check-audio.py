@@ -37,6 +37,7 @@ def check(audio_dir=None):
     assert manifest['voiceVersion'] == manifest['teacherVersion'] == '0.16.0'
     assert manifest['frameRate'] == 93.75 and manifest['design']['midiKey'] == 55
     assert manifest['design']['effects'] == []
+    assert manifest['design']['endingFrames'] == 36 and manifest['design']['breathFrames'] == 8
     assert len(manifest['files']) == len(sutra['chunks']) == 56
     assert sutra['audioDirectory'] == 'audio/phrases'
     legacy = json.loads((ROOT / 'audio/legacy-manifest.json').read_text())
@@ -61,17 +62,23 @@ def check(audio_dir=None):
         assert len(rests) == len(record['breathAfter'])
         for nindex, note in enumerate(notes[1:], 1):
             if note['key'] is None:
-                assert note['frame_length'] == 28
+                assert note['frame_length'] == 8
                 assert notes[nindex - 1]['id'] in {f'{s}:{m}' for s, m in record['breathAfter']}
             elif note['lyric'] == 'ッ':
                 assert note['frame_length'] == 18 and notes[nindex - 1]['frame_length'] >= 42
         query = record['query']
+        assert notes[-2]['frame_length'] == 36
         frames = sum(n['frame_length'] for n in notes)
         assert len(query['f0']) == len(query['volume']) == sum(p['frame_length'] for p in query['phonemes']) == frames
         assert query['outputSamplingRate'] == 24000 and not query['outputStereo']
         assert all(math.isfinite(x) and 0 <= x <= 197 for x in query['f0'])
         positive = [x for x in query['f0'] if x > 0]
         assert 195 <= statistics.median(positive) <= 197
+        start = sum(n['frame_length'] for n in notes[:-2])
+        for offset, hz in enumerate(query['f0'][start:start + 36]):
+            if hz > 0:
+                expected = 440 * 2 ** ((55 - 69 - .8 * offset / 35) / 12)
+                assert abs(hz - expected) < .0001, 'Phrase ending pitch fall changed'
         phones = defaultdict(list)
         for phone in query['phonemes']:
             assert phone['frame_length'] >= 0

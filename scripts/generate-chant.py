@@ -72,7 +72,7 @@ def build_score(manifest, midi_key, breath_after=None):
     return {'notes': notes}, sections
 
 
-def shape_pitch(query, score):
+def shape_pitch(query, score, ending_ids=None):
     # No added vibrato. Hold each breath group near one note, with a small end fall.
     total = sum(n['frame_length'] for n in score['notes'])
     if len(query['f0']) != total or len(query['volume']) != total:
@@ -86,7 +86,8 @@ def shape_pitch(query, score):
             frame = start + offset
             if query['f0'][frame] > 0:
                 progress = offset / max(length - 1, 1)
-                fall = -0.8 * progress if length == END_FRAMES else 0
+                ending = note['id'] in ending_ids if ending_ids is not None else length == END_FRAMES
+                fall = -0.8 * progress if ending else 0
                 query['f0'][frame] = base_hz * 2 ** (fall / 12)
         start += length
     query['outputSamplingRate'], query['outputStereo'] = 24000, False

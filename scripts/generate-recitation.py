@@ -52,8 +52,11 @@ def generate(host, nemo):
             points = breath_points(chunk['reading'], index, moras)
             score, sections = chant.build_score({'sections': [{'section': index, **chunk, 'query': source}]},
                                                 config['midi'], points)
+            # Short independently playable phrases need less release than the audition.
+            score['notes'][-2]['frame_length'] = 36
+            score['notes'][-1]['frame_length'] = 8
             query = json.loads(chant.request(host, f'/sing_frame_audio_query?speaker={chant.TEACHER_ID}', score))
-            chant.shape_pitch(query, score)
+            chant.shape_pitch(query, score, {score['notes'][-2]['id']})
             if query['phonemes'][0]['phoneme'] != 'pau':
                 raise ValueError('Cannot safely trim leading silence')
             trim_frames = max(0, query['phonemes'][0]['frame_length'] - 2)
@@ -84,8 +87,8 @@ def generate(host, nemo):
                     'frameRate': engine['frame_rate'], 'sutraSha256': hashlib.sha256(raw_sutra).hexdigest(),
                     'baselineManifestSha256': hashlib.sha256(baseline_raw).hexdigest(),
                     'sourceSutraSha256': hashlib.sha256(source_sutra).hexdigest(),
-                    'design': {'midiKey': 55, 'moraFrames': 30, 'endingFrames': 45, 'closureFrames': 18,
-                               'breathFrames': 28, 'endFallSemitones': .8, 'effects': [], 'targetRms': target_rms},
+                    'design': {'midiKey': 55, 'moraFrames': 30, 'endingFrames': 36, 'closureFrames': 18,
+                               'breathFrames': 8, 'endFallSemitones': .8, 'effects': [], 'targetRms': target_rms},
                     'files': records}
         (output / 'manifest.json').write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + '\n')
         validator_spec = importlib.util.spec_from_file_location('validation', ROOT / 'scripts/check-audio.py')
