@@ -1,0 +1,30 @@
+reviewed_at: 2026-10-13
+tool: Cloudflare Workers Static Assets
+plan: Workers Free-compatible static asset serving; existing account, no plan upgrade
+cli_version: Wrangler 4.149.0
+cli_license: MIT OR Apache-2.0
+node_version_used: 24.19.0
+decision: conditional
+commercial_use: Cloudflare agreement permits individual and entity service use subject to its conditions
+hosting_rights: Developer Platform terms explicitly permit content hosting, subject to content and third-party rights
+cost:
+  static_requests: free and unlimited
+  asset_storage: no additional cost
+  script_execution: no Worker script supplied
+  limits: 20000 files on Free, 25 MiB per file; this deployment has 34 small files
+conditions:
+  - No paid services, R2, D1, or plan upgrades for this app
+  - Keep source and audio generation metadata in Git; only allowlisted runtime files are public
+  - Retain VOICEVOX Nemo attribution and comply with its output terms
+  - Recheck terms before changing use or hosting model
+sources:
+  - https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/
+  - https://developers.cloudflare.com/workers/platform/limits/
+  - https://www.cloudflare.com/terms/
+  - https://www.cloudflare.com/service-specific-terms-developer-platform/
+  - https://www.npmjs.com/package/wrangler/v/4.149.0
+visit_log:
+  exemption_reason: 公開HTTPSから内部HTTP ubuntu-server-app:8526へ接続できないため公開配信のみタグを省略
+  issue: ats030-e5ozb
+  implementation: Explicit exception in the packaging script; self-hosted index.html keeps the tag
+  csp: not weakened

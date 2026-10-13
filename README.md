@@ -17,6 +17,27 @@ python3 -m http.server 8731 --bind 127.0.0.1
 ブラウザの自動再生制限により、最初のスクロールだけで再生できない場合は輪をタップするか
 「音声を再試行」を押します。
 
+## Cloudflareへの公開
+
+公開URL: **https://prayer-wheel.ats030.workers.dev**
+
+`wrangler.jsonc`は静的アセットだけを配信するWorkers設定です。
+Node 22以上とWrangler 4.149.0、Cloudflareへのログインが必要です。
+
+```bash
+VISIT_LOG_EXEMPT_REASON='公開HTTPSから内部HTTPのvisit-logへ接続できないため' python3 scripts/build-cloudflare.py
+npx wrangler@4.149.0 deploy --dry-run
+npx wrangler@4.149.0 deploy
+```
+
+`dist/`へHTML・JS・CSS・経文・全29節のWAVだけをコピーします。
+内部HTTP向けvisit-logタグは公開ネットワーク例外として公開版だけ省略し、ローカル原本は保持します。
+理由は課題`ats030-e5ozb`と[配信条件の記録](docs/cloudflare-license.yaml)に記録しています。
+設定・テスト・生成スクリプト・音声生成メタデータは公開しません。
+公開後の確認は `python3 scripts/check-browser.py --url <公開URL>` で実行できます。
+`python3 scripts/check-cloudflare.py`で全公開ファイルのハッシュ・音声MIMEと非公開パスの404も確認できます。
+再デプロイ時も音声検査を含むビルドを先に実行してください。
+
 ## 操作と進行
 
 | 操作 | 動作 |
