@@ -2,5 +2,5 @@
   "name": "prayer-wheel",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node tests/player.test.js" }
+  "scripts": { "test": "node --test tests/*.test.js" }
 }

@@ -1,4 +1,5 @@
 import { SutraPlayer } from './player.js';
+import { DrumMotion } from './drum-motion.js';
 
 const $ = (id) => document.getElementById(id);
 const stage = $('stage');
@@ -10,8 +11,12 @@ let player;
 let wheelAcc = 0;
 let highlighted = null;
 let drumSequence = null;
+let drumFaceCenter = null;
+let drumFaceSequence = null;
 const DRUM_FACES = 16;
 const DRUM_STEP = 360 / DRUM_FACES;
+const drumMotion = new DrumMotion(dial, -DRUM_STEP);
+drumMotion.onDraw = renderDrumFaces;
 
 function buildDrum() {
   for (let i = 0; i < DRUM_FACES; i++) {
@@ -22,23 +27,34 @@ function buildDrum() {
   }
 }
 
+function renderDrumFaces() {
+  if (!player) return;
+  const sequence = player.nextSequence - 1;
+  // Recycle hidden faces around the physical angle, even during large rewinds.
+  const center = Math.round(drumMotion.angle / DRUM_STEP);
+  if (center === drumFaceCenter && sequence === drumFaceSequence) return;
+  const slot = ((center % DRUM_FACES) + DRUM_FACES) % DRUM_FACES;
+  for (const [i, face] of Array.from(dial.children).entries()) {
+    let offset = (i - slot + DRUM_FACES) % DRUM_FACES;
+    if (offset > DRUM_FACES / 2) offset -= DRUM_FACES;
+    const ordinal = center + offset;
+    const text = ordinal >= 0 ? player.chunks[ordinal % player.chunks.length].text
+      : ordinal === -1 ? '心経を回す' : '';
+    face.textContent = text;
+    face.classList.toggle('is-selected', ordinal === sequence);
+    face.classList.toggle('is-long', text.length > 14);
+    face.dataset.sequence = String(ordinal);
+  }
+  drumFaceCenter = center;
+  drumFaceSequence = sequence;
+}
+
 function renderDrum() {
   // The player's next position already includes reservations and rewinds.
   const sequence = player.nextSequence - 1;
   if (sequence === drumSequence) return;
-  const slot = ((sequence % DRUM_FACES) + DRUM_FACES) % DRUM_FACES;
-  for (const [i, face] of Array.from(dial.children).entries()) {
-    let offset = (i - slot + DRUM_FACES) % DRUM_FACES;
-    if (offset > DRUM_FACES / 2) offset -= DRUM_FACES;
-    const ordinal = sequence + offset;
-    const text = ordinal >= 0 ? player.chunks[ordinal % player.chunks.length].text
-      : ordinal === -1 ? '心経を回す' : '';
-    face.textContent = text;
-    face.classList.toggle('is-selected', offset === 0);
-    face.classList.toggle('is-long', text.length > 14);
-    face.dataset.sequence = String(ordinal);
-  }
-  dial.style.setProperty('--drum-turn', `${sequence * DRUM_STEP}deg`);
+  drumMotion.moveTo(sequence * DRUM_STEP);
+  renderDrumFaces();
   const position = sequence < 0 ? 0 : sequence % player.chunks.length + 1;
   $('drumPosition').textContent = `${position} / ${player.chunks.length} 節`;
   $('drumSelection').textContent = sequence < 0
@@ -130,10 +146,8 @@ $('pauseBtn').addEventListener('click', () => player?.togglePause());
 $('retryBtn').addEventListener('click', () => player?.retry());
 $('restartBtn').addEventListener('click', () => {
   wheelAcc = 0;
-  dial.style.transition = 'none';
+  drumMotion.snap(-DRUM_STEP);
   player?.restart();
-  void dial.getBoundingClientRect();
-  dial.style.transition = '';
 });
 $('rate').addEventListener('input', () => {
   audio.playbackRate = Number($('rate').value);

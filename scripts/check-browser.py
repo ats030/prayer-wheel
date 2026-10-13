@@ -27,6 +27,43 @@ def check(base):
         page.wait_for_selector('#stage[aria-disabled="false"]')
         assert page.locator("#currentLine").inner_text() == "ドラムを回すと、読経が始まります。"
         assert page.locator(".reel-face.is-selected").inner_text() == "心経を回す"
+        # Real frames: slow deceleration, continuous retargeting, reset and live motion preference.
+        motion = page.evaluate("""async () => {
+          const dial = document.getElementById('dial');
+          const stage = document.getElementById('stage');
+          const angle = () => Number.parseFloat(dial.style.getPropertyValue('--drum-turn'));
+          stage.click();
+          const samples = [];
+          const start = performance.now();
+          await new Promise(resolve => {
+            const sample = time => {
+              samples.push({time: (time-start)/1000, angle: angle()});
+              if (time-start < 1600) requestAnimationFrame(sample); else resolve();
+            };
+            requestAnimationFrame(sample);
+          });
+          stage.click();
+          await new Promise(resolve => setTimeout(resolve, 100));
+          const before = angle();
+          stage.click();
+          const after = angle();
+          document.getElementById('restartBtn').click();
+          await new Promise(resolve => setTimeout(resolve, 100));
+          return {samples, before, after, reset: angle(), moving: dial.dataset.moving};
+        }""")
+        samples = motion['samples']
+        early = next(s for s in samples if s['time'] >= .28)
+        assert -22.5 < early['angle'] < -5, early
+        assert abs(samples[-1]['angle']) < .03, samples[-1]
+        assert abs(motion['before'] - motion['after']) < .001, motion
+        assert motion['reset'] == -22.5 and motion['moving'] == 'false', motion
+        page.locator('#stage').click()
+        page.emulate_media(reduced_motion='reduce')
+        page.wait_for_function("document.getElementById('dial').dataset.moving === 'false'", timeout=500)
+        assert page.locator('#dial').get_attribute('data-moving') == 'false'
+        assert page.locator('#dial').evaluate("e => parseFloat(e.style.getPropertyValue('--drum-turn'))") == 0
+        page.locator('#restartBtn').click()
+        page.emulate_media(reduced_motion='no-preference')
         page.locator("#stage").focus()
         page.keyboard.press("Space")
         assert page.locator("#pauseBtn").inner_text() == "一時停止"
@@ -74,7 +111,7 @@ def check(base):
         page.keyboard.press("Space")
         assert page.locator("#pauseBtn").inner_text() == "再開"
         assert page.locator("#stage").get_attribute("data-state") == "paused"
-        page.locator("#dial").evaluate("e => Promise.all(e.getAnimations().map(a => a.finished.catch(() => {})))")
+        page.wait_for_function("document.getElementById('dial').dataset.moving === 'false'")
         assert page.evaluate("""() => {
           const face = document.querySelector('.reel-face.is-selected').getBoundingClientRect();
           const line = document.querySelector('.reel-stop-line').getBoundingClientRect();
@@ -109,7 +146,7 @@ def check(base):
         touch.wait_for_selector(".chunk.active")
         assert touch.locator("#counter").inner_text() == "1"
         assert touch.evaluate("document.documentElement.scrollWidth") <= 390
-        touch.locator("#dial").evaluate("e => Promise.all(e.getAnimations().map(a => a.finished.catch(() => {})))")
+        touch.wait_for_function("document.getElementById('dial').dataset.moving === 'false'")
         touch.screenshot(path="/tmp/prayer-wheel-mobile.png", full_page=True)
         touch.locator("#pauseBtn").tap()
         assert touch.locator("#pauseBtn").inner_text() == "再開"
@@ -129,6 +166,21 @@ def check(base):
           const active = document.querySelector('.chunk.active').getBoundingClientRect();
           const panel = document.getElementById('textBlock').getBoundingClientRect();
           return active.top >= panel.top && active.bottom <= panel.bottom;
+        }""")
+        # A large target jump must not relabel the face still physically in view.
+        page.wait_for_function("document.getElementById('dial').dataset.moving === 'false'")
+        assert page.evaluate("""async () => {
+          const dial = document.getElementById('dial');
+          const aligned = () => {
+            const center = Math.round(parseFloat(dial.style.getPropertyValue('--drum-turn')) / 22.5);
+            const slot = ((center % 16) + 16) % 16;
+            return dial.children[slot].dataset.sequence === String(center);
+          };
+          if (!aligned()) return false;
+          for (let i=0;i<28;i++) document.getElementById('backBtn').click();
+          if (!aligned()) return false;
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+          return aligned();
         }""")
         touch.locator("#stage").tap()
         assert touch.locator("#queueCount").inner_text() == "1"
@@ -197,6 +249,8 @@ def check(base):
             assert result["width"] <= width, (width, result)
             assert result["sequence"] == str(result["count"])
             assert result["transition"] == "0s"
+            assert layout.locator('#dial').get_attribute('data-moving') == 'false'
+            assert layout.locator('#dial').evaluate("e => parseFloat(e.style.getPropertyValue('--drum-turn'))") == result['count'] * 22.5
             layout.locator("#stage").click()
             layout.locator("#pauseBtn").click()
             assert layout.locator("#stage").get_attribute("data-state") == "paused"

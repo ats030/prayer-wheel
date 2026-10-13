@@ -26,6 +26,7 @@ def check(base):
     manifest = json.loads((ROOT / "audio/manifest.json").read_text(encoding="utf-8"))
     files.extend("audio/" + entry["file"] for entry in manifest["files"])
     files.append('data/sutra-sections.json')
+    files.append('drum-motion.js')
     phrases = json.loads((ROOT / 'audio/phrases-manifest.json').read_text())
     files.extend('audio/' + entry['file'] for entry in phrases['files'])
 
