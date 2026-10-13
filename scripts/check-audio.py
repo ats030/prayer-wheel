@@ -35,9 +35,11 @@ def check(audio_dir=None):
     assert manifest['speakerId'] == 3023 and manifest['speakerUuid'] == '67d5d8da-acd7-4207-bb10-b5542d3a663b'
     assert manifest['teacherId'] == 6000 and manifest['teacherUuid'] == 'b1a81618-b27b-40d2-b0ea-27a9ad408c4b'
     assert manifest['voiceVersion'] == manifest['teacherVersion'] == '0.16.0'
-    assert manifest['frameRate'] == 93.75 and manifest['design']['midiKey'] == 55
+    assert manifest['frameRate'] == 93.75 and manifest['design']['midiKey'] == 50
     assert manifest['design']['effects'] == []
-    assert manifest['design']['endingFrames'] == 36 and manifest['design']['breathFrames'] == 8
+    assert manifest['design']['endingFrames'] == 30 and manifest['design']['breathFrames'] == 8
+    assert manifest['design']['voicedVolumeBlend'] == .5
+    assert manifest['design']['volumePolicy'] == 'vowel-swells-only'
     assert len(manifest['files']) == len(sutra['chunks']) == 56
     assert sutra['audioDirectory'] == 'audio/phrases'
     legacy = json.loads((ROOT / 'audio/legacy-manifest.json').read_text())
@@ -54,7 +56,7 @@ def check(audio_dir=None):
         notes = record['score']['notes']
         voiced_notes = [n for n in notes if n['key'] is not None]
         assert [n['lyric'] for n in voiced_notes] == [m['text'] for m in moras]
-        assert all(n['key'] == 55 for n in voiced_notes)
+        assert all(n['key'] == 50 for n in voiced_notes)
         assert len(set(n['id'] for n in notes)) == len(notes)
         assert notes[0]['key'] is None and notes[-1]['key'] is None
         assert record['breathAfter'][-1] == [index, len(moras)]
@@ -67,17 +69,27 @@ def check(audio_dir=None):
             elif note['lyric'] == 'ッ':
                 assert note['frame_length'] == 18 and notes[nindex - 1]['frame_length'] >= 42
         query = record['query']
-        assert notes[-2]['frame_length'] == 36
+        assert notes[-2]['frame_length'] == 30
         frames = sum(n['frame_length'] for n in notes)
         assert len(query['f0']) == len(query['volume']) == sum(p['frame_length'] for p in query['phonemes']) == frames
         assert query['outputSamplingRate'] == 24000 and not query['outputStereo']
-        assert all(math.isfinite(x) and 0 <= x <= 197 for x in query['f0'])
+        assert all(math.isfinite(x) and 0 <= x <= 147 for x in query['f0'])
         positive = [x for x in query['f0'] if x > 0]
-        assert 195 <= statistics.median(positive) <= 197
+        assert 146 <= statistics.median(positive) <= 147
+        volume = record['sourceVolume']
+        assert len(volume) == frames and all(math.isfinite(v) for v in volume)
+        frame_phones = [p['phoneme'] for p in query['phonemes'] for _ in range(p['frame_length'])]
+        level = statistics.median([v for v, phone in zip(volume, frame_phones)
+                                   if phone in ('a', 'i', 'u', 'e', 'o', 'N') and v > 0])
+        assert level == record['voicedVolumeTarget']
+        for original, actual, phone in zip(volume, query['volume'], frame_phones):
+            expected = (original + level) / 2 if phone in ('a', 'i', 'u', 'e', 'o', 'N') and original > level else original
+            assert abs(actual - expected) < 1e-9, 'Vowel volume adjustment changed'
+            assert actual <= original, 'Volume adjustment must never raise a frame'
         start = sum(n['frame_length'] for n in notes[:-2])
-        for offset, hz in enumerate(query['f0'][start:start + 36]):
+        for offset, hz in enumerate(query['f0'][start:start + 30]):
             if hz > 0:
-                expected = 440 * 2 ** ((55 - 69 - .8 * offset / 35) / 12)
+                expected = 440 * 2 ** ((50 - 69 - .8 * offset / 29) / 12)
                 assert abs(hz - expected) < .0001, 'Phrase ending pitch fall changed'
         phones = defaultdict(list)
         for phone in query['phonemes']:

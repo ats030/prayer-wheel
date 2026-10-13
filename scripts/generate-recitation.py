@@ -8,6 +8,7 @@ import io
 import json
 from pathlib import Path
 import shutil
+import statistics
 import sys
 import tempfile
 import urllib.parse
@@ -51,12 +52,20 @@ def generate(host, nemo):
             moras = [m for phrase in source['accent_phrases'] for m in phrase['moras']]
             points = breath_points(chunk['reading'], index, moras)
             score, sections = chant.build_score({'sections': [{'section': index, **chunk, 'query': source}]},
-                                                config['midi'], points)
+                                                50, points)
             # Short independently playable phrases need less release than the audition.
-            score['notes'][-2]['frame_length'] = 36
+            score['notes'][-2]['frame_length'] = 30
             score['notes'][-1]['frame_length'] = 8
             query = json.loads(chant.request(host, f'/sing_frame_audio_query?speaker={chant.TEACHER_ID}', score))
             chant.shape_pitch(query, score, {score['notes'][-2]['id']})
+            # Reduce the teacher's sung vowel swells; retain consonant and release envelopes.
+            phones = [p['phoneme'] for p in query['phonemes'] for _ in range(p['frame_length'])]
+            vowels = {'a', 'i', 'u', 'e', 'o', 'N'}
+            voiced = [v for v, phone in zip(query['volume'], phones) if phone in vowels and v > 0]
+            level = statistics.median(voiced)
+            source_volume = query['volume'][:]
+            query['volume'] = [(v + level) / 2 if phone in vowels and v > level else v
+                               for v, phone in zip(query['volume'], phones)]
             if query['phonemes'][0]['phoneme'] != 'pau':
                 raise ValueError('Cannot safely trim leading silence')
             trim_frames = max(0, query['phonemes'][0]['frame_length'] - 2)
@@ -74,6 +83,7 @@ def generate(host, nemo):
                       'kana': source['kana'], 'seconds': len(samples) / 24000,
                       'sha256': hashlib.sha256((output / name).read_bytes()).hexdigest(),
                       'sourceQuery': source, 'score': score, 'query': query,
+                      'sourceVolume': source_volume, 'voicedVolumeTarget': level,
                       'breathAfter': [list(point) for point in sorted(points)],
                       'trimLeadingFrames': trim_frames, 'gain': gain}
             records.append(record)
@@ -87,8 +97,10 @@ def generate(host, nemo):
                     'frameRate': engine['frame_rate'], 'sutraSha256': hashlib.sha256(raw_sutra).hexdigest(),
                     'baselineManifestSha256': hashlib.sha256(baseline_raw).hexdigest(),
                     'sourceSutraSha256': hashlib.sha256(source_sutra).hexdigest(),
-                    'design': {'midiKey': 55, 'moraFrames': 30, 'endingFrames': 36, 'closureFrames': 18,
-                               'breathFrames': 8, 'endFallSemitones': .8, 'effects': [], 'targetRms': target_rms},
+                    'design': {'midiKey': 50, 'moraFrames': 30, 'endingFrames': 30, 'closureFrames': 18,
+                               'breathFrames': 8, 'endFallSemitones': .8, 'voicedVolumeBlend': .5,
+                               'volumePolicy': 'vowel-swells-only',
+                               'effects': [], 'targetRms': target_rms},
                     'files': records}
         (output / 'manifest.json').write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + '\n')
         validator_spec = importlib.util.spec_from_file_location('validation', ROOT / 'scripts/check-audio.py')
