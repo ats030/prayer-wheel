@@ -106,3 +106,19 @@ Nodeのテストは予約・逆操作・周回・失敗復旧・古い再生通�
 `assets/prayer-wheel-icon-source.png`です。UIに合わせて時計回り90°に回転した編集版を
 `assets/prayer-wheel-icon-horizontal.png`に保存し、64pxの`favicon.png`と32pxの`favicon.ico`に使用しています。
 app-portalも公開アプリから同じファビコンを取得します。原画像は公開パッケージに含めません。
+
+## 読経調の試聴版
+
+[比較ページ](https://prayer-wheel.ats030.workers.dev/audition/)で「観自在菩薩」から5節を聴き比べられます。
+Aは現行WAVのPCMをそのまま連結、BはNemo男声1で現行と同じ読みと語の区切りを保ち、母音長と音高のばらつき・抑揚・節間を抑えた調整案です。
+本体の29節・予約再生・速度設定は変更していません。比較音声は1.0倍で再生します。
+自然さや読みの聞き取りやすさは試聴で判断し、全節への適用はその後に決めます。
+Bは節を個別生成して連結するため、節境界のピッチや息継ぎの連続性までは保証しません。
+
+```bash
+python3 scripts/generate-audition.py --engine http://127.0.0.1:50121
+python3 scripts/check-audition.py
+```
+
+`audition/manifest.json`に5節の読み・生成query・設定・hashを保存します。比較用WAVとHTML/CSS/JSだけを公開し、manifestと生成スクリプトは配信しません。
+元の音声生成スクリプトの`--sample`は既存の`audio/02.wav`を上書きするため、この比較版生成には使いません。

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>読経の試聴 · Prayer Wheel</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="../favicon.png">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="audition.css">
+  <script src="http://ubuntu-server-app:8526/v.js" data-site="prayer-wheel" defer></script>
+</head>
+<body>
+  <main class="page audition-page">
+    <header class="top"><div><a href="../">← Prayer Wheelに戻る</a><h1>読経の試聴</h1></div></header>
+    <p>「観自在菩薩」から5節を、同じ男声で聴き比べます。アプリ本体は現行音声のままです。</p>
+    <div class="audition-grid">
+      <section class="panel" aria-labelledby="currentTitle">
+        <h2 id="currentTitle">A · 現行の読み上げ</h2>
+        <p>現在の音声を5節続けたもの。区切りと抑揚を比較する基準です。</p>
+        <audio id="currentAudio" controls preload="metadata" src="current.wav" aria-label="現行の読み上げ"></audio>
+        <a href="current.wav" download>現行音声を保存</a>
+      </section>
+      <section class="panel" aria-labelledby="adjustedTitle">
+        <h2 id="adjustedTitle">B · 拍を整えた試聴版</h2>
+        <p>語の区切りを保ったまま間を短くし、抑揚と母音の長さのばらつきを抑え、節間を短くしています。</p>
+        <audio id="adjustedAudio" controls preload="metadata" src="adjusted.wav" aria-label="拍を整えた試聴版"></audio>
+        <a href="adjusted.wav" download>試聴版を保存</a>
+      </section>
+    </div>
+    <p id="auditionStatus" role="status">再生ボタンで聴き比べられます。</p>
+    <section class="panel"><h2>聴くポイント</h2>
+      <p>言葉の切れ方、拍の揃い方、節のつながりを比べてください。平坦すぎる、速すぎる、聞き取りにくい箇所も判断の材料になります。</p>
+      <ol class="sample-text">
+        <li>観自在菩薩</li><li>行深般若波羅蜜多時</li>
+        <li>照見五蘊皆空　度一切苦厄</li><li>舎利子　色不異空　空不異色</li><li>色即是空　空即是色</li>
+      </ol>
+    </section>
+    <footer class="foot"><p>音声: <a href="https://voicevox.hiroshiba.jp/nemo/">VOICEVOX Nemo</a>（男声1）</p>
+      <p>合成音声の調整案です。僧侶の録音や、特定宗派の節回しを再現したものではありません。</p>
+    </footer>
+  </main>
+  <script type="module" src="audition.js"></script>
+</body>
+</html>

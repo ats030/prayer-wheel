@@ -22,11 +22,12 @@ def check(base):
         raise ValueError("The published site must use HTTPS")
     base = base.rstrip("/")
     files = ["index.html", "app.js", "player.js", "style.css", "data/sutra.json", "favicon.png", "favicon.ico"]
+    files.extend("audition/" + name for name in ("index.html", "audition.css", "audition.js", "current.wav", "adjusted.wav"))
     manifest = json.loads((ROOT / "audio/manifest.json").read_text(encoding="utf-8"))
     files.extend("audio/" + entry["file"] for entry in manifest["files"])
 
     def verify(name):
-        path = "/" if name == "index.html" else "/" + name
+        path = "/" if name == "index.html" else "/audition/" if name == "audition/index.html" else "/" + name
         with fetch(base + path) as response:
             assert response.status == 200
             body = response.read()
@@ -41,7 +42,7 @@ def check(base):
             assert content_type in ("image/x-icon", "image/vnd.microsoft.icon"), content_type
         elif name.endswith(".js"):
             assert content_type in ("text/javascript", "application/javascript"), content_type
-        elif name == "index.html":
+        elif name.endswith(".html"):
             assert content_type == "text/html"
             assert b"VOICEVOX Nemo" in body and b"ubuntu-server-app" not in body
         return len(body)
@@ -49,7 +50,7 @@ def check(base):
     with ThreadPoolExecutor(max_workers=6) as pool:
         size = sum(pool.map(verify, files))
     for private in ("wrangler.jsonc", "README.md", "package.json", "audio/manifest.json",
-                    "assets/prayer-wheel-icon-source.png", "scripts/generate-audio.py", "tests/player.test.js", "missing.wav"):
+                    "assets/prayer-wheel-icon-source.png", "audition/manifest.json", "scripts/generate-audition.py", "scripts/generate-audio.py", "tests/player.test.js", "missing.wav"):
         try:
             with fetch(base + "/" + private):
                 pass
