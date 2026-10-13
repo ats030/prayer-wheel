@@ -9,24 +9,42 @@ audio.preservesPitch = true;
 let player;
 let wheelAcc = 0;
 let highlighted = null;
+let drumSequence = null;
+const DRUM_FACES = 16;
+const DRUM_STEP = 360 / DRUM_FACES;
 
-function buildWheel() {
-  const polar = (r, deg) => {
-    const a = deg * Math.PI / 180;
-    return [200 + r * Math.sin(a), 200 - r * Math.cos(a)];
-  };
-  const NS = 'http://www.w3.org/2000/svg';
-  for (let i = 0; i < 12; i++) {
-    const [x1, y1] = polar(62, i * 30);
-    const [x2, y2] = polar(146, i * 30);
-    const line = document.createElementNS(NS, 'line');
-    for (const [key, value] of Object.entries({ x1, y1, x2, y2, class: 'spoke' })) line.setAttribute(key, value);
-    $('spokes').appendChild(line);
-    const [cx, cy] = polar(104, i * 30 + 15);
-    const dot = document.createElementNS(NS, 'circle');
-    for (const [key, value] of Object.entries({ cx, cy, r: 3, class: 'petal' })) dot.setAttribute(key, value);
-    $('petals').appendChild(dot);
+function buildDrum() {
+  for (let i = 0; i < DRUM_FACES; i++) {
+    const face = document.createElement('div');
+    face.className = 'reel-face';
+    face.style.setProperty('--face-angle', `${-i * DRUM_STEP}deg`);
+    dial.appendChild(face);
   }
+}
+
+function renderDrum() {
+  // The player's next position already includes reservations and rewinds.
+  const sequence = player.nextSequence - 1;
+  if (sequence === drumSequence) return;
+  const slot = ((sequence % DRUM_FACES) + DRUM_FACES) % DRUM_FACES;
+  for (const [i, face] of Array.from(dial.children).entries()) {
+    let offset = (i - slot + DRUM_FACES) % DRUM_FACES;
+    if (offset > DRUM_FACES / 2) offset -= DRUM_FACES;
+    const ordinal = sequence + offset;
+    const text = ordinal >= 0 ? player.chunks[ordinal % player.chunks.length].text
+      : ordinal === -1 ? '心経を回す' : '';
+    face.textContent = text;
+    face.classList.toggle('is-selected', offset === 0);
+    face.classList.toggle('is-long', text.length > 14);
+    face.dataset.sequence = String(ordinal);
+  }
+  dial.style.setProperty('--drum-turn', `${sequence * DRUM_STEP}deg`);
+  const position = sequence < 0 ? 0 : sequence % player.chunks.length + 1;
+  $('drumPosition').textContent = `${position} / ${player.chunks.length} 節`;
+  $('drumSelection').textContent = sequence < 0
+    ? '中央は操作した節。音声は順番に読み上げます。'
+    : `操作した節：${player.chunks[position - 1].text}。音声は順番に読み上げます。`;
+  drumSequence = sequence;
 }
 
 function updateUI() {
@@ -34,8 +52,13 @@ function updateUI() {
   $('counter').textContent = String(player.turns);
   $('rounds').textContent = String(player.completedCycles.size);
   $('queueCount').textContent = String(player.pending.length);
-  dial.style.transform = `rotate(${player.angle}deg)`;
+  renderDrum();
   const index = player.currentSequence < 0 ? -1 : player.currentSequence % player.chunks.length;
+  const finishedCycle = !player.active && index === player.chunks.length - 1
+    && player.completedCycles.has(Math.floor(player.currentSequence / player.chunks.length));
+  stage.dataset.state = player.error ? 'error' : player.paused ? 'paused'
+    : player.active && !player.active.started ? 'loading'
+    : finishedCycle ? 'success' : 'ready';
   if (index !== highlighted) {
     const spans = $('textBlock').querySelectorAll('.chunk');
     spans.forEach((span, i) => {
@@ -43,7 +66,7 @@ function updateUI() {
       if (i === index) span.setAttribute('aria-current', 'true');
       else span.removeAttribute('aria-current');
     });
-    $('currentLine').textContent = index < 0 ? '輪を回すと、読経が始まります。' : player.chunks[index].text;
+    $('currentLine').textContent = index < 0 ? 'ドラムを回すと、読経が始まります。' : player.chunks[index].text;
     $('currentReading').textContent = index < 0 ? '' : player.chunks[index].reading;
     highlighted = index;
     if (index >= 0) {
@@ -60,7 +83,7 @@ function updateUI() {
   $('retryBtn').hidden = !player.error;
   $('voiceBanner').hidden = !player.error;
   $('voiceBanner').textContent = player.error;
-  let status = '準備完了。輪を回してください。';
+  let status = '準備完了。ドラムを回してください。';
   let mode = 'idle';
   if (player.error) { status = '音声を停止しています。再試行できます。'; mode = 'warn'; }
   else if (player.paused) { status = '一時停止中。再開を押すと続きます。'; mode = 'paused'; }
@@ -135,13 +158,13 @@ async function initialize() {
       span.textContent = chunk.text + '　';
       $('textBlock').appendChild(span);
     }
-    $('rimTextPath').textContent = chunks.map(c => c.text).join('').slice(0, 60);
     player = new SutraPlayer(chunks, audio, updateUI);
     stage.setAttribute('aria-disabled', 'false');
     $('restartBtn').disabled = false;
     $('backBtn').disabled = false;
     updateUI();
   } catch {
+    stage.dataset.state = 'error';
     $('voiceBanner').hidden = false;
     $('voiceBanner').textContent = '経文を読み込めませんでした。接続を確認してページを再読み込みしてください。';
     $('reloadBtn').hidden = false;
@@ -149,5 +172,5 @@ async function initialize() {
   }
 }
 
-buildWheel();
+buildDrum();
 initialize();

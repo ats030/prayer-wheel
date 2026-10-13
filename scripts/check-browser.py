@@ -25,7 +25,8 @@ def check(base):
         page.on("request", lambda request: requests.append(request.url))
         page.goto(base)
         page.wait_for_selector('#stage[aria-disabled="false"]')
-        assert page.locator("#currentLine").inner_text() == "輪を回すと、読経が始まります。"
+        assert page.locator("#currentLine").inner_text() == "ドラムを回すと、読経が始まります。"
+        assert page.locator(".reel-face.is-selected").inner_text() == "心経を回す"
         page.locator("#stage").focus()
         page.keyboard.press("Space")
         assert page.locator("#pauseBtn").inner_text() == "一時停止"
@@ -36,11 +37,15 @@ def check(base):
         page.evaluate("for(let i=0;i<5;i++)document.getElementById('stage').click()")
         assert page.locator("#queueCount").inner_text() == "5"
         assert page.locator("#counter").inner_text() == "6"
+        assert page.locator(".reel-face.is-selected").get_attribute("data-sequence") == "5"
+        selected = page.locator(".reel-face.is-selected").inner_text()
         page.evaluate("document.getElementById('stage').click()")
         assert page.locator("#counter").inner_text() == "6"
+        assert page.locator(".reel-face.is-selected").inner_text() == selected
         assert page.locator("#currentLine").inner_text() == "摩訶般若波羅蜜多心経"
         page.locator("#backBtn").click()
         assert page.locator("#queueCount").inner_text() == "4"
+        assert page.locator(".reel-face.is-selected").get_attribute("data-sequence") == "4"
         page.locator("#pauseBtn").click()
         before = page.evaluate("testAudio.currentTime")
         page.wait_for_timeout(250)
@@ -56,6 +61,7 @@ def check(base):
         assert page.locator("#counter").inner_text() == "0"
         assert page.locator("#queueCount").inner_text() == "0"
         assert page.locator(".chunk.active").count() == 0
+        assert page.locator(".reel-face.is-selected").inner_text() == "心経を回す"
         # Actual wheel input and key controls.
         page.locator("#stage").hover()
         page.mouse.wheel(0, 120)
@@ -67,6 +73,13 @@ def check(base):
         assert page.locator("#counter").inner_text() == "1"
         page.keyboard.press("Space")
         assert page.locator("#pauseBtn").inner_text() == "再開"
+        assert page.locator("#stage").get_attribute("data-state") == "paused"
+        page.locator("#dial").evaluate("e => Promise.all(e.getAnimations().map(a => a.finished.catch(() => {})))")
+        assert page.evaluate("""() => {
+          const face = document.querySelector('.reel-face.is-selected').getBoundingClientRect();
+          const line = document.querySelector('.reel-stop-line').getBoundingClientRect();
+          return Math.abs((face.top + face.bottom) / 2 - (line.top + line.bottom) / 2) < 2;
+        }""")
         page.screenshot(path="/tmp/prayer-wheel-desktop.png", full_page=True)
 
         # A failed file remains on the same section, and a gesture can retry it.
@@ -96,6 +109,7 @@ def check(base):
         touch.wait_for_selector(".chunk.active")
         assert touch.locator("#counter").inner_text() == "1"
         assert touch.evaluate("document.documentElement.scrollWidth") <= 390
+        touch.locator("#dial").evaluate("e => Promise.all(e.getAnimations().map(a => a.finished.catch(() => {})))")
         touch.screenshot(path="/tmp/prayer-wheel-mobile.png", full_page=True)
         touch.locator("#pauseBtn").tap()
         assert touch.locator("#pauseBtn").inner_text() == "再開"
@@ -128,12 +142,72 @@ def check(base):
         failed.goto(base)
         failed.wait_for_selector("#reloadBtn:visible")
         assert failed.locator("#stage").get_attribute("aria-disabled") == "true"
+        assert failed.locator("#stage").get_attribute("data-state") == "error"
+        assert failed.locator("#stage").evaluate("e=>getComputedStyle(e).cursor") == "default"
         failed.unroute("**/data/sutra.json")
         failed.locator("#reloadBtn").click()
         failed.wait_for_selector('#stage[aria-disabled="false"]')
+
+        # Exercise every section's layout at the four component-design widths.
+        # Media events are accelerated here only; playback above uses real WAVs.
+        layout = context.new_page()
+        layout.emulate_media(reduced_motion="reduce")
+        for width in (320, 375, 414, 768, 1280):
+            layout.set_viewport_size({"width": width, "height": 900})
+            layout.goto(base)
+            layout.wait_for_selector('#stage[aria-disabled="false"]')
+            result = layout.evaluate("""() => {
+              const failures = [];
+              const layoutFailures = [];
+              for (const box of document.querySelectorAll('.grid,.panel,.stage,.drum-heading,.drum-meter,.drum-selection,.controls,.btn')) {
+                const rect = box.getBoundingClientRect();
+                if (rect.left < -1 || rect.right > innerWidth + 1) layoutFailures.push(box.className);
+              }
+              for (let i=0;i<29;i++) {
+                document.getElementById('stage').click();
+                const face = document.querySelector('.reel-face.is-selected');
+                if (face.dataset.sequence !== String(i) || face.scrollHeight > face.clientHeight
+                    || face.scrollWidth > face.clientWidth) failures.push(i);
+                const windowRect = document.querySelector('.reel-window').getBoundingClientRect();
+                for (const row of document.querySelectorAll('.reel-face')) {
+                  if (Math.abs(Number(row.dataset.sequence)-i) > 1 || !row.textContent) continue;
+                  const range = document.createRange();
+                  range.selectNodeContents(row);
+                  const text = range.getBoundingClientRect();
+                  if (text.left < windowRect.left - 1 || text.right > windowRect.right + 1
+                      || text.top < windowRect.top - 1 || text.bottom > windowRect.bottom + 1) failures.push('text-'+i);
+                }
+                testAudio.dispatchEvent(new Event('playing'));
+                testAudio.dispatchEvent(new Event('ended'));
+              }
+              const completedState = document.getElementById('stage').dataset.state;
+              document.getElementById('stage').click();
+              const wrapped = document.querySelector('.reel-face.is-selected');
+              testAudio.dispatchEvent(new Event('playing'));
+              testAudio.dispatchEvent(new Event('ended'));
+              return {failures, layoutFailures, completedState, idleState: document.getElementById('stage').dataset.state,
+                sequence: wrapped.dataset.sequence,
+                width: document.documentElement.scrollWidth,
+                transition: getComputedStyle(document.getElementById('dial')).transitionDuration};
+            }""")
+            assert not result["failures"], (width, result)
+            assert not result["layoutFailures"], (width, result)
+            assert result["completedState"] == "success" and result["idleState"] == "ready", result
+            assert result["width"] <= width, (width, result)
+            assert result["sequence"] == "29"
+            assert result["transition"] == "0s"
+            layout.locator("#stage").click()
+            layout.locator("#pauseBtn").click()
+            assert layout.locator("#stage").get_attribute("data-state") == "paused"
+            layout.locator("#backBtn").click()
+            assert layout.locator(".reel-face.is-selected").get_attribute("data-sequence") == "29"
+            assert layout.locator("#pauseBtn").inner_text() == "再開"
+            layout.locator("#restartBtn").click()
+            assert layout.locator(".reel-face.is-selected").inner_text() == "心経を回す"
         browser.close()
     print("Desktop and touch Chromium: real WAV playback, queue, reverse, pause/resume, rate, reset, recovery PASS")
     print("Screenshots: /tmp/prayer-wheel-desktop.png /tmp/prayer-wheel-mobile.png")
+    print("Drum states/selection/cancellation/wrap/reset; center and neighbor text at 320/375/414/768/1280px; reduced motion PASS")
 
 
 if __name__ == "__main__":

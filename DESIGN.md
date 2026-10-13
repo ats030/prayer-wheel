@@ -531,6 +531,19 @@ Linear's depth is carried by surface ladder + hairline borders. The brand resist
 
 ## Iteration Guide
 
+### prayer-wheel: 経文ドラム（2026-10-13の合意）
+
+操作部分は1本の機械式ドラムとし、暗い筐体、金色の枠、明るいアイボリーのリール面を使う。
+経文は円筒上に配置し、中央に最後に操作した節、上下に前後の節を表示する。
+音声の位置は既存の読経欄に分けて示す。
+操作ごとに短く回転して止まり、連続操作でも長い演出待ちを作らない。
+音声・予約・周回の意味は変えず、OSの動きを減らす設定では回転アニメーションを省く。
+既存の本文フォントと黒・金の配色を維持し、リールの経文にだけ明朝系フォントを使う。
+配色・フォントはstyle.cssの名前付きトークンで管理する。
+320 / 375 / 414 / 768pxで文字の収まりと操作状態を確認する。
+
+### Shared baseline iteration
+
 1. Focus on ONE component at a time and reference it by its `components:` token name.
 2. When introducing a section, decide first which surface lift it lives on.
 3. Default body to `{typography.body}` at weight 400.
