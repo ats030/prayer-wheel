@@ -26,6 +26,17 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+.current-reading, .queue-label { color: var(--ink-subtle); font-size: 13px; }
+.current-reading { min-height: 2.5em; }
+.text-block { position: relative; }
+.queue-label b { color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.btn { min-height: 44px; }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.stage[aria-disabled="true"] { opacity: 0.45; cursor: wait; }
+.stage { touch-action: manipulation; }
+.foot a { color: var(--ink-subtle); }
 
 html, body { margin: 0; }
 
@@ -373,6 +384,7 @@ input[type="range"] {
 }
 
 .foot p { margin: 0; }
+.stage-hint, .progress-label, .counter-label, .foot { color: var(--ink-subtle); }
 
 /* ---------- Responsive & motion ---------- */
 

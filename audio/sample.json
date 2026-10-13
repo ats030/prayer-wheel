@@ -1,0 +1,26 @@
+{
+  "engine": "VOICEVOX Nemo Engine",
+  "engineVersion": "0.24.0",
+  "voice": "男声1",
+  "voiceVersion": "0.15.0",
+  "speakerId": 10001,
+  "speakerUuid": "2171909e-d2d1-4bbb-aa45-442c12732665",
+  "credit": "VOICEVOX Nemo",
+  "settings": {
+    "speedScale": 0.85,
+    "intonationScale": 0.65,
+    "prePhonemeLength": 0.1,
+    "postPhonemeLength": 0.25,
+    "outputSamplingRate": 24000,
+    "outputStereo": false
+  },
+  "sutraSha256": "14ae3b8825f701dc32abf0fbffde61501f650f1c3b03b80563985864425c6fc8",
+  "files": [
+    {
+      "file": "02.wav",
+      "seconds": 1.707,
+      "sha256": "849be2a1f19653aea93bcf04ae10bd072f8019e8828045d6794a9fc545b1ac1e",
+      "kana": "カ'ン/ジザイ'、ボサツ'"
+    }
+  ]
+}

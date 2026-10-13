@@ -1,0 +1,34 @@
+reviewed_at: 2026-10-13
+tool: VOICEVOX Nemo
+engine_version: 0.24.0
+voice: 男声1
+voice_library_version: 0.15.0
+speaker_id: 10001
+speaker_uuid: 2171909e-d2d1-4bbb-aa45-442c12732665
+intended_use: 心経の事前生成音声を静的Webアプリと同一オリジンで配信
+decision: conditional
+cost: 商用・非商用とも無料と公式製品ページに明記
+commercial_use: クレジット表記を条件に生成音声の利用を許可
+credit: VOICEVOX Nemo
+output_license: Nemo固有の音声利用規約（SPDX識別子なし）
+software_distribution: エンジン・モデルは配信しない。生成したWAVのみ同梱
+religious_use: Nemo規約に宗教活動の一律禁止条項はない。一般利用許諾に基づく判断であり、用途別の明示承認ではない
+conditions:
+  - 画面とREADMEにVOICEVOX Nemoクレジットを掲載
+  - Nemo規約の内容・権利・機械学習等の禁止事項を遵守
+  - 二次利用者にも音声の利用規約が適用されることをREADMEで案内
+  - 公開時に公式規約を再確認
+character_assets: 使用しない
+engine_archive:
+  url: https://github.com/VOICEVOX/voicevox_nemo_engine/releases/download/0.24.0/voicevox_engine-linux-cpu-x64-0.24.0.vvpp
+  sha256: 8e8409d0b6cbd035ec9c5cc8f22e35563b2df8de7aba095859eb15cebf446ee3
+  bundled_policy: resources/character_info/2171909e-d2d1-4bbb-aa45-442c12732665/policy.md
+sources:
+  - https://voicevox.hiroshiba.jp/nemo/
+  - https://voicevox.hiroshiba.jp/nemo/term/
+  - https://github.com/VOICEVOX/voicevox_nemo_engine/releases/tag/0.24.0
+rejected:
+  tool: VOICEVOX ずんだもん音源
+  decision: blocked
+  reason: 共通規約の宗教活動またはそれにつながる行為への利用禁止に抵触するおそれ
+  source: https://zunko.jp/con_ongen_kiyaku.html
