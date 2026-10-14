@@ -11,6 +11,14 @@
 現在は所有確認の準備段階で、広告スクリプト・広告枠は追加していません。
 AdSenseの「サイト」へ公開URLを登録し、「メタタグ」の方法で所有確認を行って審査をリクエストしてください。
 登録可能なドメインと審査結果はAdSense画面で確認します。サイト承認を保証するものではありません。
+メタタグで所有確認に失敗する場合は、確認方法を「ads.txt」に切り替えられます。
+`https://prayer-wheel.ats030.workers.dev/ads.txt`にも同じIDの確認行を公開しています。
+AdSenseに登録したドメインが公開先と一致するかも確認してください。
+現在AdSenseに表示されている登録先は`ats030.workers.dev`ですが、このホストは名前解決できず、
+確認タグやads.txtを取得できません。実配信は`prayer-wheel.ats030.workers.dev`です。
+Public Suffix Listには`workers.dev`が登録されており、現配信URLはその直下の`ats030.workers.dev`のさらに下です。
+AdSenseが上位ドメインにまとめる場合は、到達可能な独自ドメインなどに公開先を変更して申請する必要があります。
+根拠: [AdSenseのサイト管理](https://support.google.com/adsense/answer/12170421?hl=ja)、[Public Suffix List](https://publicsuffix.org/list/public_suffix_list.dat)。
 手順は[AdSense公式のサイト追加案内](https://support.google.com/adsense/answer/12169212?hl=ja)を参照してください。
 承認後の広告は読経操作から離れたページ下部1枠を予定し、ドラム操作による更新は行いません。
 
@@ -220,7 +228,7 @@ WhiteCULの低音・均等拍・母音の膨らみを抑える調整と短い休
 以前から開いているタブ用に、56句の`data/sutra-phrases.json`と`audio/phrases/`、
 初期29節の`data/sutra.json`と`audio/01.wav`〜`29.wav`もそのまま公開します。
 旧音声のhashは非公開の`audio/phrases-manifest.json`と`audio/legacy-manifest.json`で検証します。
-公開162ファイル・147WAVです。
+公開163ファイル・147WAVです。
 
 ## 一文字ずつの音声同期
 

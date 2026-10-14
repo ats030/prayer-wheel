@@ -21,7 +21,7 @@ def check(base):
     if urllib.parse.urlsplit(base).scheme != "https":
         raise ValueError("The published site must use HTTPS")
     base = base.rstrip("/")
-    files = ["index.html", "app.js", "player.js", "style.css", "data/sutra.json", "data/sutra-phrases.json", "favicon.png", "favicon.ico"]
+    files = ["index.html", "app.js", "player.js", "style.css", "data/sutra.json", "data/sutra-phrases.json", "favicon.png", "favicon.ico", "ads.txt"]
     files.extend("audition/" + name for name in ("index.html", "audition.css", "audition.js", "current.wav", "adjusted.wav", "chant.wav", "chant-female.wav"))
     manifest = json.loads((ROOT / "audio/manifest.json").read_text(encoding="utf-8"))
     files.extend("audio/" + entry["file"] for entry in manifest["files"])
@@ -52,6 +52,9 @@ def check(base):
             assert content_type in ("image/x-icon", "image/vnd.microsoft.icon"), content_type
         elif name.endswith(".js"):
             assert content_type in ("text/javascript", "application/javascript"), content_type
+        elif name == "ads.txt":
+            assert content_type == "text/plain", content_type
+            assert body == b"google.com, pub-8787627445197940, DIRECT, f08c47fec0942fa0\n"
         elif name.endswith(".html"):
             assert content_type == "text/html"
             assert b"VOICEVOX:WhiteCUL" in body and b"ubuntu-server-app" not in body
