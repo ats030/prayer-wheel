@@ -44,6 +44,33 @@ python3 -m http.server 8731 --bind 127.0.0.1 --directory dist
 
 ## Cloudflareへの公開
 
+### Pagesへの追加公開
+
+AdSenseの登録ドメイン問題を避けるため、Pagesの`<プロジェクト名>.pages.dev`へ追加配信する方針です。
+公開URL: **https://prayer-wheel-ats030.pages.dev/**
+プロジェクト名は`prayer-wheel-ats030`、本番ブランチは`master`です。
+AdSenseへは`prayer-wheel-ats030.pages.dev`を新しいサイトとして登録します。
+既存Workersは維持しています。AdSense側での所有確認と審査は未完了です。
+
+```bash
+VISIT_LOG_EXEMPT_REASON='公開HTTPSから内部HTTPのvisit-logへ接続できないため' python3 scripts/build-pages.py
+npx wrangler@4.149.0 pages project create prayer-wheel-ats030 --production-branch master --force
+npx wrangler@4.149.0 pages deploy ../dist-pages --cwd pages --project-name prayer-wheel-ats030 --branch master
+python3 scripts/check-cloudflare.py --url <実際のPages公開URL> --package dist-pages
+python3 scripts/check-browser.py --url <実際のPages公開URL>
+```
+
+プロジェクト作成は初回だけです。既存プロジェクトの更新はbuildとdeployだけを実行します。
+
+Pagesは`dist-pages/`だけをアップロードします。トップレベルの`404.html`を追加し、
+非公開ファイルや存在しないパスがSPAのトップ画面で200を返すことを防ぎます。
+確認タグ・ads.txt・音声はWorkers版と同じです。Pages Freeの静的配信だけを使い、Functionsは使いません。
+Direct Uploadを選ぶため、同じプロジェクトを後からGit連携方式へ切り替えることはできません。
+条件は[Pages利用条件の記録](docs/cloudflare-pages-license.yaml)です。
+停止する場合はWorkersのURLへ戻します。AdSenseの所有確認・審査は別途必要です。
+
+### 既存Workers
+
 公開URL: **https://prayer-wheel.ats030.workers.dev**
 
 `wrangler.jsonc`は静的アセットだけを配信するWorkers設定です。

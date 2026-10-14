@@ -1,3 +1,5 @@
 /dist/
+/dist-pages/
 /.wrangler/
+/pages/.wrangler/
 __pycache__/

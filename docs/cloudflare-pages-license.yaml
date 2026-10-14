@@ -1,0 +1,28 @@
+reviewed_at: 2026-10-14
+tool: Cloudflare Pages
+plan: Free static assets; direct upload in the existing account
+cli_version: Wrangler 4.149.0
+cli_license: MIT OR Apache-2.0
+decision: conditional
+commercial_use: governed by the existing Cloudflare subscription agreement and Developer Platform terms
+hosting_rights: Developer Platform hosting is subject to content and third-party rights
+cost:
+  static_requests: free and unlimited
+  functions: none
+  limits: 20000 files on Free; 25 MiB per asset; package has 164 files
+conditions:
+  - No plan upgrade, Functions, R2, D1 or new paid service
+  - Only the allowlisted public package is uploaded; private source remains in Git
+  - Retain existing WhiteCUL and singing-teacher attribution and audio terms
+  - Keep Workers live while Pages is checked; AdSense acceptance is not guaranteed
+  - Direct Upload projects cannot later switch to Git integration without a new project
+sources:
+  - https://developers.cloudflare.com/pages/get-started/direct-upload/
+  - https://developers.cloudflare.com/pages/functions/pricing/
+  - https://developers.cloudflare.com/pages/platform/limits/
+  - https://www.cloudflare.com/terms/
+  - https://www.cloudflare.com/service-specific-terms-developer-platform/
+visit_log:
+  exemption_reason: 公開HTTPSから内部HTTPへ接続できないためindexと生成404の公開版はvisit-logを省略
+  issue: ats030-cplsb
+  implementation: Existing explicit exception required by both packaging scripts

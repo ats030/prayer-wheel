@@ -17,7 +17,7 @@ def fetch(url):
     return urllib.request.urlopen(request, timeout=30)
 
 
-def check(base):
+def check(base, package='dist'):
     if urllib.parse.urlsplit(base).scheme != "https":
         raise ValueError("The published site must use HTTPS")
     base = base.rstrip("/")
@@ -28,7 +28,7 @@ def check(base):
     files.append('data/sutra-sections.json')
     files.append('drum-motion.js')
     files.extend(['character-scroll.js', 'data/character-timing.json'])
-    character_cues = json.loads((ROOT / 'dist/data/character-timing.json').read_text(encoding='utf-8'))
+    character_cues = json.loads((ROOT / package / 'data/character-timing.json').read_text(encoding='utf-8'))
     files.extend('audio/' + s['file'] for s in character_cues['sections'])
     phrases = json.loads((ROOT / 'audio/phrases-manifest.json').read_text())
     files.extend('audio/' + entry['file'] for entry in phrases['files'])
@@ -38,11 +38,14 @@ def check(base):
 
     def verify(name):
         path = "/" if name == "index.html" else "/audition/" if name == "audition/index.html" else "/" + name
-        with fetch(base + path) as response:
-            assert response.status == 200
-            body = response.read()
-            content_type = response.headers.get_content_type()
-        expected = (ROOT / "dist" / name).read_bytes()
+        try:
+            with fetch(base + path) as response:
+                assert response.status == 200
+                body = response.read()
+                content_type = response.headers.get_content_type()
+        except urllib.error.HTTPError as error:
+            raise AssertionError(f'{name}: HTTP {error.code}') from error
+        expected = (ROOT / package / name).read_bytes()
         assert hashlib.sha256(body).digest() == hashlib.sha256(expected).digest(), name
         if name.endswith(".wav"):
             assert content_type in ("audio/wav", "audio/wave", "audio/x-wav"), content_type
@@ -64,13 +67,15 @@ def check(base):
 
     with ThreadPoolExecutor(max_workers=6) as pool:
         size = sum(pool.map(verify, files))
-    for private in ("support-config.json", "scripts/support-link.py", "docs/support-license.yaml", "docs/support.md", "wrangler.jsonc", "README.md", "package.json", "data/character-readings.json", "scripts/character-timing.py", "audio/manifest.json", "audio/phrases-manifest.json", "audio/legacy-manifest.json", "audition/baseline/manifest.json", "audition/baseline/02.wav", "audition/baseline/sutra.json", "scripts/generate-recitation.py",
+    for private in ("pages/wrangler.jsonc", "scripts/build-pages.py", "docs/cloudflare-pages-license.yaml", "support-config.json", "scripts/support-link.py", "docs/support-license.yaml", "docs/support.md", "wrangler.jsonc", "README.md", "package.json", "data/character-readings.json", "scripts/character-timing.py", "audio/manifest.json", "audio/phrases-manifest.json", "audio/legacy-manifest.json", "audition/baseline/manifest.json", "audition/baseline/02.wav", "audition/baseline/sutra.json", "scripts/generate-recitation.py",
                     "assets/prayer-wheel-icon-source.png", "audition/manifest.json", "audition/chant-manifest.json", "audition/chant-female-manifest.json", "docs/chant-reference-analysis.json", "docs/chant-license.yaml", "scripts/generate-chant.py", "scripts/generate-audition.py", "scripts/generate-audio.py", "tests/player.test.js", "missing.wav"):
         try:
             with fetch(base + "/" + private):
                 pass
         except urllib.error.HTTPError as error:
             assert error.code == 404, (private, error.code)
+            if package == 'dist-pages':
+                assert error.read() == (ROOT / package / '404.html').read_bytes(), private
         else:
             raise AssertionError("Unexpected public path: " + private)
     wav_count = sum(name.endswith(".wav") for name in files)
@@ -81,4 +86,6 @@ def check(base):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--url", default="https://prayer-wheel.ats030.workers.dev")
-    check(parser.parse_args().url)
+    parser.add_argument('--package', choices=('dist', 'dist-pages'), default='dist')
+    args = parser.parse_args()
+    check(args.url, args.package)
