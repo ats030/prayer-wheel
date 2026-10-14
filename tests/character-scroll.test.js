@@ -28,3 +28,10 @@ test('every voiced interval centers its glyph at midpoint, and section boundarie
 test('reduced motion changes the character without interpolating rotation', () => {
   assert.deepEqual(characterPosition(cues, .625, true), {index: 1, position: 1});
 });
+test('one blank row crosses during the existing final rest, without moving voiced glyphs', () => {
+  assert.equal(characterPosition(cues, 1.3, false, 1.5).position, characterPosition(cues, 1.3).position);
+  assert.ok(Math.abs(characterPosition(cues, 1.45, false, 1.5).position - 3) < 1e-9);
+  assert.equal(characterPosition(cues, 1.5, false, 1.5).position, 3.5);
+  assert.equal(characterPosition(cues, 1.5, false, 1.5).position, cues.length + 1 + characterPosition(cues, 0).position);
+  assert.deepEqual(characterPosition(cues, 1.45, true, 1.5), {index: 2, position: 2});
+});

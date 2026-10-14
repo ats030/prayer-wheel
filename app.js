@@ -21,7 +21,7 @@ let scrollFrame = null;
 let displayedSequence = null;
 let displayedCharacter = null;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-const DRUM_FACES = 16;
+const DRUM_FACES = 48;
 const DRUM_STEP = 360 / DRUM_FACES;
 
 function buildDrum() {
@@ -62,7 +62,7 @@ function renderDrum() {
     drumPosition = activeCharacter = -1;
   } else if (ownsClock) {
     const section = sequence % player.chunks.length;
-    const cue = characterPosition(characterTimings[section].characters, audio.currentTime, reducedMotion.matches);
+    const cue = characterPosition(characterTimings[section].characters, audio.currentTime, reducedMotion.matches, characterTimings[section].duration);
     const base = Math.floor(sequence / player.chunks.length) * characterEntries.length + characterOffsets[section];
     drumPosition = base + cue.position;
     activeCharacter = base + cue.index;
@@ -227,6 +227,7 @@ async function initialize() {
       }
       characterOffsets.push(characterEntries.length);
       timing.characters.forEach((cue, index) => characterEntries.push({ ...cue, section, index }));
+      characterEntries.push({ text: '', reading: '', section, index: -1 });
     }
     player = new SutraPlayer(chunks, audio, updateUI);
     stage.setAttribute('aria-disabled', 'false');

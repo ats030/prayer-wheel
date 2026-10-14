@@ -51,6 +51,7 @@ def build():
             characters.append({'text': char, 'reading': reading, 'start': start, 'end': end})
             cursor += count
         assert cursor == len(moras)
+        assert characters[-1]['end'] < record['seconds'], 'A section spacer needs the existing final rest'
         sections.append({'audioSha256': record['sha256'],
                          'file': f"synced/{record['sha256']}/{index:02d}.wav",
                          'duration': record['seconds'], 'characters': characters})

@@ -30,7 +30,6 @@
   --font-reel: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
   --reel-paper: #f3eddf;
   --reel-ink: #28231b;
-  --reel-rule: #c7bdab;
   --reel-metal: #796341;
   --reel-chassis-light: #2d2922;
   --reel-chassis-dark: #151412;
@@ -39,7 +38,7 @@
   --reel-clear: rgba(24, 21, 16, 0);
   --reel-highlight: rgba(255, 253, 245, 0.5);
   --reel-shadow: rgba(0, 0, 0, 0.6);
-  --reel-face-height: 120px;
+  --reel-face-height: 40.6px;
   --reel-radius: 310px;
 }
 
@@ -173,7 +172,7 @@ h1 {
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
-  transform: translateZ(calc(-1 * var(--reel-radius))) rotateX(var(--drum-turn, -22.5deg));
+  transform: translateZ(calc(-1 * var(--reel-radius))) rotateX(var(--drum-turn, -7.5deg));
   will-change: transform;
 }
 .reel-face {
@@ -183,7 +182,7 @@ h1 {
   width: 84%;
   height: var(--reel-face-height);
   margin-top: calc(-0.5 * var(--reel-face-height));
-  padding: 8px 10px;
+  padding: 0 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -191,12 +190,10 @@ h1 {
   overflow-wrap: anywhere;
   color: var(--reel-ink);
   background: var(--reel-paper);
-  border-top: 1px solid var(--reel-rule);
-  border-bottom: 1px solid var(--reel-rule);
   font-family: var(--font-reel);
-  font-size: clamp(44px, 7vw, 60px);
+  font-size: clamp(26px, 4vw, 30px);
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1;
   letter-spacing: 0.04em;
   backface-visibility: hidden;
   transform: rotateX(var(--face-angle)) translateZ(var(--reel-radius));
@@ -210,8 +207,6 @@ h1 {
   right: 14px;
   height: var(--reel-face-height);
   transform: translateY(-50%);
-  border-top: 2px solid var(--accent);
-  border-bottom: 2px solid var(--accent);
   pointer-events: none;
 }
 .reel-stop-line::before, .reel-stop-line::after {

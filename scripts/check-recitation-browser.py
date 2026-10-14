@@ -33,8 +33,8 @@ def check(base):
                   syncFailures.push({section, index, time});
                 } else {
                   (seenCharacters[section] ??= new Set()).add(index);
-                  const position = parseFloat(document.getElementById('dial').style.getPropertyValue('--drum-turn')) / 22.5;
-                  if (Math.abs(position - expectedOffsets[section - 1] - index) > .55) {
+                  const position = parseFloat(document.getElementById('dial').style.getPropertyValue('--drum-turn')) / 7.5;
+                  if (!(index === cues.length - 1 && time > cue.end) && Math.abs(position - expectedOffsets[section - 1] - index) > .55) {
                     syncFailures.push({section, index, time, position});
                   }
                 }
@@ -57,7 +57,7 @@ def check(base):
           window.expectedTimings = (await (await fetch('data/character-timing.json')).json()).sections;
           window.expectedOffsets = [];
           let count = 0;
-          for (const section of expectedTimings) { expectedOffsets.push(count); count += section.characters.length; }
+          for (const section of expectedTimings) { expectedOffsets.push(count); count += section.characters.length + 1; }
           return expectedTimings.map(s => s.characters.length);
         }""")
         page.locator('#rate').evaluate("e => { e.value='1.4'; e.dispatchEvent(new Event('input')); }")

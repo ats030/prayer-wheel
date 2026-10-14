@@ -53,10 +53,10 @@ def check(base):
         page.emulate_media(reduced_motion='reduce')
         page.wait_for_function("document.getElementById('dial').dataset.moving === 'false'", timeout=500)
         page.wait_for_function("""() => {
-          const position = parseFloat(document.getElementById('dial').style.getPropertyValue('--drum-turn')) / 22.5;
+          const position = parseFloat(document.getElementById('dial').style.getPropertyValue('--drum-turn')) / 7.5;
           return position === Math.round(position);
         }""", timeout=500)
-        position = page.locator('#dial').evaluate("e => parseFloat(e.style.getPropertyValue('--drum-turn')) / 22.5")
+        position = page.locator('#dial').evaluate("e => parseFloat(e.style.getPropertyValue('--drum-turn')) / 7.5")
         assert position == int(position)
         page.locator('#restartBtn').click()
         assert page.locator('.reel-face.is-selected').inner_text() == '心経を回す'
@@ -172,8 +172,8 @@ def check(base):
         assert page.evaluate("""async () => {
           const dial = document.getElementById('dial');
           const aligned = () => {
-            const center = Math.round(parseFloat(dial.style.getPropertyValue('--drum-turn')) / 22.5);
-            const slot = ((center % 16) + 16) % 16;
+            const center = Math.round(parseFloat(dial.style.getPropertyValue('--drum-turn')) / 7.5);
+            const slot = ((center % 48) + 48) % 48;
             return dial.children[slot].dataset.sequence === String(center);
           };
           if (!aligned()) return false;
@@ -238,8 +238,14 @@ def check(base):
                 if (face.dataset.section !== String(i) || face.scrollHeight > face.clientHeight
                     || face.scrollWidth > face.clientWidth) failures.push(i);
                 const windowRect = document.querySelector('.reel-window').getBoundingClientRect();
+                const previous = [...document.querySelectorAll('.reel-face')].find(row => Number(row.dataset.sequence) === Number(face.dataset.sequence) - 1);
+                if (i > 0 && (!previous || previous.textContent !== '')) failures.push('spacer-'+i);
+                for (const rule of document.querySelectorAll('.reel-face,.reel-stop-line')) {
+                  const css = getComputedStyle(rule);
+                  if (css.borderTopWidth !== '0px' || css.borderBottomWidth !== '0px') failures.push('rule-'+i);
+                }
                 for (const row of document.querySelectorAll('.reel-face')) {
-                  if (Math.abs(Number(row.dataset.sequence) - Number(face.dataset.sequence)) > 1 || !row.textContent) continue;
+                  if (Math.abs(Number(row.dataset.sequence) - Number(face.dataset.sequence)) > 4 || !row.textContent) continue;
                   const range = document.createRange();
                   range.selectNodeContents(row);
                   const text = range.getBoundingClientRect();
@@ -252,6 +258,8 @@ def check(base):
               document.getElementById('stage').click();
               testAudio.dispatchEvent(new Event('playing'));
               const wrapped = document.querySelector('.reel-face.is-selected');
+              const wrapSpacer = [...document.querySelectorAll('.reel-face')].find(row => Number(row.dataset.sequence) === Number(wrapped.dataset.sequence) - 1);
+              if (!wrapSpacer || wrapSpacer.textContent !== '') failures.push('wrap-spacer');
               testAudio.dispatchEvent(new Event('ended'));
               return {count, failures, layoutFailures, completedState, idleState: document.getElementById('stage').dataset.state,
                 sequence: wrapped.dataset.section,
@@ -265,7 +273,7 @@ def check(base):
             assert result["sequence"] == str(result["count"])
             assert result["transition"] == "0s"
             layout.wait_for_function("document.getElementById('dial').dataset.moving === 'false'")
-            assert layout.locator('#dial').evaluate("e => parseFloat(e.style.getPropertyValue('--drum-turn'))") == layout.locator('.reel-face.is-selected').evaluate("e => Number(e.dataset.sequence) * 22.5")
+            assert layout.locator('#dial').evaluate("e => parseFloat(e.style.getPropertyValue('--drum-turn'))") == layout.locator('.reel-face.is-selected').evaluate("e => Number(e.dataset.sequence) * 7.5")
             layout.evaluate("""() => {
               document.getElementById('stage').click();
               document.getElementById('pauseBtn').click();
