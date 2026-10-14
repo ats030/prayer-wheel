@@ -1,0 +1,24 @@
+tool: Buy Me a Coffee
+plan: free creator page; one-time support
+checked_at: 2026-10-14
+decision: review_required
+adopted: false
+commercial_use: creator support is offered, including programmers; exact intended use remains unconfirmed
+cost:
+  monthly: none
+  platform: 5 percent per transaction
+  processing: official page lists 2.9 percent plus USD 0.30
+  payout: official page lists 0.5 percent
+  other: international, recurring and currency fees may apply; confirm Japan Standard Connect conditions
+eligibility:
+  region: Japan listed under Stripe Standard Connect
+  blocker: Stripe terms also apply; Japan lists donations to individuals as prohibited
+  required: confirm Japanese individual developer may receive one-time support without rewards before enabling
+privacy: external link only; no provider SDK or supporter data stored by this app
+attribution: custom text link only; no provider marks or copied assets
+sources:
+  - https://buymeacoffee.com/terms
+  - https://help.buymeacoffee.com/en/articles/4539170-frequently-asked-questions
+  - https://help.buymeacoffee.com/en/articles/6258038-supported-countries-for-payouts-on-buy-me-a-coffee
+  - https://help.buymeacoffee.com/en/articles/8105744-how-to-calculate-charges-on-your-payment
+  - https://stripe.com/jp/legal/restricted-businesses

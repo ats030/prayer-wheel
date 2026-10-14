@@ -417,7 +417,7 @@ input[type="range"] {
 
 /* ---------- Focus & footer ---------- */
 
-:is(button, select, input, .stage):focus-visible {
+:is(button, select, input, .stage, .support-link):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -431,6 +431,19 @@ input[type="range"] {
 }
 
 .foot p { margin: 0; }
+.support { margin-bottom: 18px; }
+.support[hidden] { display: none; }
+.foot .support-link {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 8px;
+  color: var(--accent);
+  text-decoration: none;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.support-external { font-size: 12px; }
 .stage-hint, .progress-label, .counter-label, .foot { color: var(--ink-subtle); }
 
 /* ---------- Responsive & motion ---------- */

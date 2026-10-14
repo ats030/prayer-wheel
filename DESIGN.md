@@ -545,6 +545,12 @@ OSの動きを減らす設定では補間せず、文字を切り替える。
 配色・フォントはstyle.cssの名前付きトークンで管理する。
 320 / 375 / 414 / 768pxで文字の収まりと操作状態を確認する。
 
+### prayer-wheel: 任意の開発支援
+
+喜捨による開発支援はフッターに控えめな外部リンクとして置く。
+読経は無料と明記し、支援先未設定時は非表示にする。読経の途中に支援案内を出さない。
+黒・金の既存ボタンを使い、支援先は別タブで開く。
+
 ### Shared baseline iteration
 
 1. Focus on ONE component at a time and reference it by its `components:` token name.

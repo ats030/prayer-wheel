@@ -17,6 +17,10 @@ subprocess.run([sys.executable, str(ROOT / "scripts/check-audio.py")], check=Tru
 subprocess.run([sys.executable, str(ROOT / "scripts/check-audition.py")], check=True)
 subprocess.run([sys.executable, str(ROOT / "scripts/check-chant.py")], check=True)
 html = (ROOT / "index.html").read_text(encoding="utf-8")
+support_spec = importlib.util.spec_from_file_location('support_link', ROOT / 'scripts/support-link.py')
+support_link = importlib.util.module_from_spec(support_spec)
+support_spec.loader.exec_module(support_link)
+html = support_link.render(html, json.loads((ROOT / 'support-config.json').read_text(encoding='utf-8')))
 if html.count(TAG) != 1:
     sys.exit("Expected exactly one self-hosted visit-log tag; update the exception explicitly")
 public_html = html.replace("  " + TAG + "\n", "")
