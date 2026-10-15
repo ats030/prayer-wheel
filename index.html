@@ -44,6 +44,10 @@
           <p class="reading-heading">般若心経</p>
           <blockquote class="current" id="currentLine">—</blockquote>
           <p class="current-reading" id="currentReading"></p>
+          <div class="current-translation" id="translationBlock" hidden>
+            <p class="translation-label">現代語訳（意訳）</p>
+            <p id="currentTranslation"></p>
+          </div>
           <div class="reading-bottom">
             <div class="progress" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
             <div class="reading-meta"><p class="progress-label" id="progressLabel">—</p><span class="rounds">完了 <b id="rounds">0</b> 巡</span></div>
@@ -63,6 +67,7 @@
       <div class="secondary">
         <details class="disclosure" id="sutraDetails">
           <summary>経文をひらく<span>全文</span></summary>
+          <p class="translation-note">現代語訳はこのアプリ独自の意訳です。宗派によって解釈が異なり、真言の訳も一例です。</p>
           <div class="text-block" id="textBlock" tabindex="0" role="region" aria-label="般若心経の全文"></div>
         </details>
         <details class="disclosure" id="settingsDetails">

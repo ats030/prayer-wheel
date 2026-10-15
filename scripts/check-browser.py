@@ -27,6 +27,7 @@ def check(base):
         page.goto(base)
         page.wait_for_selector('#stage[aria-disabled="false"]')
         assert page.locator("#currentLine").inner_text() == "マニ車を回すと、読経が始まります。"
+        assert page.locator('#translationBlock').is_hidden()
         assert page.locator(".reel-face.is-selected").inner_text() == ""
         page.locator('#stage').click()
         page.wait_for_function("window.testAudio && testAudio.currentTime > .4")
@@ -68,6 +69,8 @@ def check(base):
         page.locator("#stage").click()
         page.wait_for_function("window.testAudio && testAudio.currentTime > 0.1")
         assert page.locator(".chunk.active").text_content().strip() == "摩訶般若波羅蜜多心経"
+        assert page.locator('#currentTranslation').inner_text() == '大いなる智慧の完成、その核心を説く経。'
+        assert page.locator('#translationBlock').is_visible()
         # Add five waiting sections without letting real playback finish first.
         page.evaluate("for(let i=0;i<5;i++)document.getElementById('stage').click()")
         assert page.locator("#queueCount").text_content() == "5"
@@ -90,8 +93,18 @@ def check(base):
         page.wait_for_function("testAudio.currentTime > " + str(before + .1))
         page.wait_for_function("document.getElementById('currentLine').textContent === '観自在菩薩'")
         assert page.evaluate("testAudio.playbackRate") == 1.25
+        assert page.locator('#currentTranslation').inner_text() == '観自在菩薩は、'
+        page.locator('#stage').press('Space')
+        while page.locator('#queueCount').text_content() != '0':
+            page.locator('#stage').press('ArrowUp')
+        page.locator('#stage').press('ArrowUp')
+        page.locator('#stage').press('Space')
+        page.wait_for_function("document.getElementById('currentLine').textContent === '摩訶般若波羅蜜多心経'")
+        assert page.locator('#currentTranslation').inner_text() == '大いなる智慧の完成、その核心を説く経。'
         assert page.locator("#rounds").inner_text() == "0"
         page.locator("#restartBtn").click()
+        assert page.locator('#translationBlock').is_hidden()
+        assert page.locator('#currentTranslation').text_content() == ''
         assert page.locator("#counter").text_content() == "0"
         assert page.locator("#queueCount").text_content() == "0"
         assert page.locator(".chunk.active").count() == 0
@@ -249,6 +262,11 @@ def check(base):
               for (let i=0;i<count;i++) {
                 document.getElementById('stage').click();
                 testAudio.dispatchEvent(new Event('playing'));
+                const translation = document.getElementById('currentTranslation');
+                const translated = translation.getBoundingClientRect();
+                const support = document.querySelector('.support-link').getBoundingClientRect();
+                if (!translation.textContent.trim() || document.getElementById('translationBlock').hidden) failures.push('translation-'+i);
+                if (translated.left < 0 || translated.right > innerWidth || translated.bottom > support.top) layoutFailures.push('translation-'+i);
                 const face = document.querySelector('.reel-face.is-selected');
                 if (face.dataset.section !== String(i) || face.scrollHeight > face.clientHeight
                     || face.scrollWidth > face.clientWidth) failures.push(i);

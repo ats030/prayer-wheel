@@ -1,5 +1,6 @@
 import { SutraPlayer } from './player.js';
 import { characterPosition } from './character-scroll.js';
+import { modernTranslations } from './modern-translations.js';
 
 const $ = (id) => document.getElementById(id);
 const stage = $('stage');
@@ -115,6 +116,8 @@ function updateUI() {
     });
     $('currentLine').textContent = index < 0 ? 'マニ車を回すと、読経が始まります。' : player.chunks[index].text;
     $('currentReading').textContent = index < 0 ? '' : player.chunks[index].reading;
+    $('currentTranslation').textContent = index < 0 ? '' : modernTranslations.get(player.chunks[index].text);
+    $('translationBlock').hidden = index < 0;
     $('currentLine').classList.toggle('is-waiting', index < 0);
     highlighted = index;
     if (index >= 0) {
@@ -198,6 +201,7 @@ async function initialize() {
     const sutra = JSON.parse(sutraText);
     if (!Array.isArray(sutra.chunks) || !sutra.chunks.length
         || sutra.chunks.some(c => typeof c.text !== 'string' || typeof c.reading !== 'string')) throw new Error('Invalid sutra');
+    if (sutra.chunks.some(chunk => !modernTranslations.get(chunk.text)?.trim())) throw new Error('Missing modern translation');
     if (sutra.audioDirectory !== 'audio/sections') throw new Error('Invalid audio directory');
     const chunks = sutra.chunks.map((chunk, i) => ({ ...chunk,
       audio: `${sutra.audioDirectory}/${String(i + 1).padStart(2, '0')}.wav`,

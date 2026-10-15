@@ -531,3 +531,13 @@ h1 { font-family: var(--font-reel); font-size: 30px; font-weight: 500; letter-sp
 .reading-bottom .support-external { font-size: 9px; }
 .reading-bottom .support p { text-align: left; font-size: 10px; line-height: 1.8; }
 .controls:has(> button[hidden]:only-child) { display: none; }
+
+/* Interpretive translation follows the currently voiced passage. */
+.current-translation { margin: 0 0 20px; padding-top: 12px; border-top: 1px solid var(--hairline); }
+.translation-label { margin: 0 0 6px; font-size: 10px; letter-spacing: .06em; color: var(--accent); }
+#currentTranslation { margin: 0; font-size: 13px; line-height: 1.9; color: var(--ink-muted); overflow-wrap: anywhere; }
+.translation-note { font-size: 11px; line-height: 1.8; color: var(--ink-subtle); }
+@media (max-width: 600px) {
+  .current-translation { margin-bottom: 14px; padding-top: 10px; }
+  #currentTranslation { font-size: 12px; line-height: 1.85; }
+}

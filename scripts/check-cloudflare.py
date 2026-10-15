@@ -21,7 +21,7 @@ def check(base, package='dist'):
     if urllib.parse.urlsplit(base).scheme != "https":
         raise ValueError("The published site must use HTTPS")
     base = base.rstrip("/")
-    files = ["index.html", "app.js", "player.js", "style.css", "data/sutra.json", "data/sutra-phrases.json", "favicon.png", "favicon.ico", "ads.txt"]
+    files = ["index.html", "app.js", "modern-translations.js", "player.js", "style.css", "data/sutra.json", "data/sutra-phrases.json", "favicon.png", "favicon.ico", "ads.txt"]
     files.extend("audition/" + name for name in ("index.html", "audition.css", "audition.js", "current.wav", "adjusted.wav", "chant.wav", "chant-female.wav"))
     manifest = json.loads((ROOT / "audio/manifest.json").read_text(encoding="utf-8"))
     files.extend("audio/" + entry["file"] for entry in manifest["files"])

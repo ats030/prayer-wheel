@@ -33,7 +33,7 @@ if out.exists():
     shutil.rmtree(out)
 out.mkdir()
 (out / "index.html").write_text(public_html, encoding="utf-8")
-for name in ("app.js", "player.js", "drum-motion.js", "character-scroll.js", "style.css", "favicon.png", "favicon.ico", "ads.txt"):
+for name in ("app.js", "modern-translations.js", "player.js", "drum-motion.js", "character-scroll.js", "style.css", "favicon.png", "favicon.ico", "ads.txt"):
     dest = out / name
     dest.parent.mkdir(exist_ok=True)
     shutil.copyfile(ROOT / name, dest)
@@ -75,7 +75,7 @@ for entry in phrases['files']:
 for entry in legacy["files"]:
     shutil.copyfile(ROOT / "audio" / entry["file"], out / "audio" / entry["file"])
 files = [p for p in out.rglob("*") if p.is_file()]
-if len(files) != 20 + 2 * len(manifest["files"]) + len(legacy["files"]) + len(phrases['files']) or any(p.stat().st_size > 25 * 1024 * 1024 for p in files):
+if len(files) != 21 + 2 * len(manifest["files"]) + len(legacy["files"]) + len(phrases['files']) or any(p.stat().st_size > 25 * 1024 * 1024 for p in files):
     sys.exit("Unexpected asset count or Cloudflare asset size limit exceeded")
 print(f"Packaged {len(files)} public files ({sum(p.stat().st_size for p in files):,} bytes)")
 print(f"VISIT_LOG_EXEMPT_REASON: {reason}")
