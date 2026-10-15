@@ -20,7 +20,7 @@ shutil.copytree(ROOT / 'dist', out)
 # return index.html with HTTP 200 for private/missing paths. This entry uses the
 # same recorded public-network visit-log exception as the existing package.
 (out / '404.html').write_text('''<!DOCTYPE html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ページが見つかりません · Prayer Wheel</title><link rel="stylesheet" href="/style.css"></head>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ページが見つかりません · Webマニ車</title><link rel="stylesheet" href="/style.css"></head>
 <body><main class="page"><h1>ページが見つかりません</h1><p><a href="/">読経の画面に戻る</a></p></main></body></html>
 ''', encoding='utf-8')
 files = [p for p in out.rglob('*') if p.is_file()]
