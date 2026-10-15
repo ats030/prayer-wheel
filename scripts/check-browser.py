@@ -30,7 +30,8 @@ def check(base):
         assert page.locator("#currentLine").inner_text() == "マニ車を回すと、読経が始まります。"
         assert page.locator('#translationBlock').is_hidden()
         assert page.locator(".reel-face.is-selected").inner_text() == ""
-        page.locator('#stage').click()
+        page.locator('#stage').hover()
+        page.mouse.wheel(0, -120)
         page.wait_for_function("window.testAudio && testAudio.currentTime > .4")
         trace = page.evaluate("""async () => {
           const samples = [];
@@ -38,6 +39,7 @@ def check(base):
           await new Promise(resolve => {
             const sample = () => {
               samples.push({time: testAudio.currentTime,
+                surfaceY: document.getElementById('dial').children[0].getBoundingClientRect().top,
                 angle: parseFloat(document.getElementById('dial').style.getPropertyValue('--drum-turn')),
                 character: document.querySelector('.reel-face.is-selected').dataset.character});
               if (performance.now()-started < 1000) requestAnimationFrame(sample); else resolve();
@@ -47,6 +49,7 @@ def check(base):
           return samples;
         }""")
         assert trace[-1]['angle'] > trace[0]['angle'], trace
+        assert trace[-1]['surfaceY'] < trace[0]['surfaceY'], 'Upward wheel input must move the surface upward'
         assert len({s['character'] for s in trace}) >= 2, trace
         page.locator("#stage").press("Space")
         frozen = page.locator('#dial').evaluate("e => e.style.getPropertyValue('--drum-turn')")
@@ -96,9 +99,11 @@ def check(base):
         assert page.evaluate("testAudio.playbackRate") == 1.25
         assert page.locator('#currentTranslation').inner_text() == '観自在菩薩は、'
         page.locator('#stage').press('Space')
-        while page.locator('#queueCount').text_content() != '0':
-            page.locator('#stage').press('ArrowUp')
-        page.locator('#stage').press('ArrowUp')
+        assert int(page.locator('#queueCount').text_content()) > 0
+        page.locator('#stage').hover()
+        page.mouse.wheel(0, 120)
+        page.wait_for_function("document.getElementById('queueCount').textContent === '0'")
+        assert page.locator('#stage').get_attribute('data-state') == 'paused'
         page.locator('#stage').press('Space')
         page.wait_for_function("document.getElementById('currentLine').textContent === '摩訶般若波羅蜜多心経'")
         assert page.locator('#currentTranslation').inner_text() == '大いなる智慧の完成、その核心を説く経。'
@@ -112,13 +117,19 @@ def check(base):
         assert page.locator(".reel-face.is-selected").inner_text() == ""
         # Actual wheel input and key controls.
         page.locator("#stage").hover()
-        page.mouse.wheel(0, 120)
+        page.mouse.wheel(0, -120)
         page.wait_for_function("document.getElementById('counter').textContent === '1'")
         page.locator("#stage").focus()
         page.keyboard.press("ArrowDown")
         assert page.locator("#counter").text_content() == "2"
         page.keyboard.press("ArrowUp")
         assert page.locator("#counter").text_content() == "1"
+        page.keyboard.press('ArrowDown')
+        page.keyboard.press('ArrowDown')
+        page.mouse.wheel(0, 120)
+        page.wait_for_function("document.getElementById('queueCount').textContent === '0'")
+        assert page.locator('#counter').text_content() == '1'
+        assert page.locator('#currentLine').text_content() == '摩訶般若波羅蜜多心経'
         page.keyboard.press("Space")
         assert page.locator("#stage").get_attribute("data-state") == "paused"
         page.wait_for_function("document.getElementById('dial').dataset.moving === 'false'")
@@ -141,7 +152,7 @@ def check(base):
         # A large wheel recovery gesture retries once without reserving sections.
         play_count = page.evaluate('testPlayCount')
         page.locator('#stage').hover()
-        page.mouse.wheel(0, 600)
+        page.mouse.wheel(0, -600)
         page.wait_for_function('testPlayCount > ' + str(play_count))
         page.wait_for_selector('#stage[data-state="error"]')
         assert page.evaluate('testPlayCount') == play_count + 1

@@ -23,7 +23,13 @@ export class SutraPlayer {
     return true;
   }
 
-  backward() {
+  backward({ clearPending = false } = {}) {
+    if (clearPending && this.pending.length) {
+      this.nextSequence = this.pending[0].sequence;
+      this.turns = Math.max(0, this.turns - this.pending.length);
+      this.angle -= 30 * this.pending.length;
+      this.pending = [];
+    }
     if (this.pending.length) {
       this.nextSequence = this.pending.pop().sequence;
       this.turns = Math.max(0, this.turns - 1);

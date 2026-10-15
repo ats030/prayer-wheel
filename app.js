@@ -242,7 +242,7 @@ function prepareAudio(sequence) {
   preparedAudio.set(chunk, task);
 }
 
-function turn(direction) {
+function turn(direction, { clearPending = false } = {}) {
   if (!player) return;
   if (direction > 0) {
     if (player.error) {
@@ -253,14 +253,14 @@ function turn(direction) {
     prepareAudio(player.nextSequence);
     prepareAudio(player.nextSequence + 1);
   }
-  else player.backward();
+  else player.backward({ clearPending });
 }
 
 stage.addEventListener('wheel', (event) => {
   if (!player || event.ctrlKey) return;
   event.preventDefault();
   const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1;
-  const delta = event.deltaY * unit;
+  const delta = -event.deltaY * unit;
   if (Math.sign(delta) !== Math.sign(wheelAcc)) wheelAcc = 0;
   wheelAcc += delta;
   if (player.error && wheelAcc >= 120) {
@@ -272,7 +272,7 @@ stage.addEventListener('wheel', (event) => {
   while (Math.abs(wheelAcc) >= 120) {
     const direction = Math.sign(wheelAcc);
     wheelAcc -= direction * 120;
-    turn(direction);
+    turn(direction, { clearPending: true });
   }
 }, { passive: false });
 stage.addEventListener('click', () => turn(1));

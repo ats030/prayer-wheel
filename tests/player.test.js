@@ -55,6 +55,64 @@ test('reverse without reservations replays previous section; beginning is bounde
   assert.equal(p.active.sequence, 1);
 });
 
+test('immediate reverse discards every reservation and replays the previous section', (t) => {
+  const { p, audio } = setup(t);
+  p.forward(); audio.emit('playing'); audio.emit('ended');
+  p.forward(); audio.emit('playing');
+  p.forward(); p.forward(); p.forward();
+  assert.equal(p.backward({ clearPending: true }), true);
+  assert.deepEqual(p.pending, []);
+  assert.equal(p.active.sequence, 0);
+  assert.equal(p.nextSequence, 1);
+  assert.equal(p.turns, 1);
+  assert.equal(p.angle, 30);
+  audio.emit('playing'); audio.emit('ended'); p.forward();
+  assert.equal(p.active.sequence, 1);
+});
+
+test('immediate reverse at the beginning clears reservations without wrapping', (t) => {
+  const { p, audio } = setup(t);
+  p.forward(); audio.emit('playing'); p.forward(); p.forward();
+  const active = p.active;
+  assert.equal(p.backward({ clearPending: true }), false);
+  assert.equal(p.active, active);
+  assert.deepEqual(p.pending, []);
+  assert.equal(p.nextSequence, 1);
+  assert.equal(p.turns, 1);
+  audio.emit('ended'); p.forward();
+  assert.equal(p.active.sequence, 1);
+});
+
+test('immediate reverse preserves pause and resumes from the previous source', (t) => {
+  const { p, audio } = setup(t);
+  p.forward(); audio.emit('playing'); audio.emit('ended');
+  p.forward(); audio.emit('playing'); p.forward(); p.togglePause();
+  const loads = audio.sources.length;
+  p.backward({ clearPending: true });
+  assert.equal(p.paused, true);
+  assert.equal(p.active.sequence, 0);
+  assert.equal(p.pending.length, 0);
+  assert.equal(audio.sources.length, loads);
+  p.togglePause();
+  assert.equal(audio.src, '0.wav');
+  audio.emit('playing');
+  assert.equal(p.currentSequence, 0);
+});
+
+test('immediate reverse recovers a failed section and retains cycle accounting', (t) => {
+  const { p, audio } = setup(t);
+  for (let i = 0; i < 3; i++) { p.forward(); audio.emit('playing'); audio.emit('ended'); }
+  p.forward(); p.forward(); audio.emit('error');
+  p.backward({ clearPending: true });
+  assert.equal(p.error, '');
+  assert.equal(p.active.sequence, 2);
+  assert.equal(p.nextSequence, 3);
+  assert.deepEqual(p.pending, []);
+  assert.equal(p.completedCycles.size, 1);
+  audio.emit('playing'); audio.emit('ended');
+  assert.equal(p.completedCycles.size, 1);
+});
+
 test('cycles count only on successful final playback and do not duplicate on rewind', (t) => {
   const { p, audio } = setup(t);
   for (let i = 0; i < 3; i++) { p.forward(); audio.emit('playing'); audio.emit('ended'); }
