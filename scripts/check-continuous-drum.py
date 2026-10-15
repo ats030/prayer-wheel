@@ -13,15 +13,16 @@ def check(base):
           const play = HTMLMediaElement.prototype.play;
           HTMLMediaElement.prototype.play = function() {
             window.testAudio = this;
+            window.testPlayCount = (window.testPlayCount || 0) + 1;
             return play.call(this);
           };
         ''')
-        for sutra in ('hannya', 'kannon'):
+        for sutra in ('hannya', 'enmei', 'rokuji', 'komyo'):
             page.goto(base)
             page.wait_for_selector('#stage[aria-disabled="false"]')
-            if sutra == 'kannon':
+            if sutra != 'hannya':
                 page.select_option('#sutraSelect', sutra)
-                page.wait_for_function("document.querySelector('#sutraName').textContent.includes('観音経') && document.querySelector('#stage').getAttribute('aria-disabled') === 'false'")
+                page.wait_for_selector('#stage[aria-disabled="false"]')
             page.locator('#stage').click()
             page.locator('#stage').press('ArrowDown')
             page.locator('#stage').press('ArrowDown')
@@ -34,7 +35,7 @@ def check(base):
               const started = lastChange;
               await new Promise((resolve, reject) => {
                 function sample(now) {
-                  sources.add(testAudio.src);
+                  sources.add(testAudio.src + "|" + window.testPlayCount);
                   const transform = getComputedStyle(dial).transform;
                   if (now - lastFrame > 50) lastChange = now;
                   if (transform !== previous) {

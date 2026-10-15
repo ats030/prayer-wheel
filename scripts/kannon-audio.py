@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate or verify Kannon verse audio with explicit kana and the existing voice."""
+"""Generate or verify selected verse audio with explicit kana and the existing voice."""
 import argparse
 import array
 import hashlib
@@ -27,11 +27,15 @@ chant = module('chant', 'generate-chant.py')
 timing = module('timing', 'character-timing.py')
 
 
-def check():
-    source = json.loads((ROOT / 'data/kannon.json').read_text())
-    manifest = json.loads((ROOT / 'audio/kannon-manifest.json').read_text())
-    assert len(source['chunks']) == len(manifest['files']) == 52
-    assert sum(len(c['text'].replace('　', '')) for c in source['chunks']) == 520
+SUTRA_SHAPES = {'kannon': (52, 520), 'enmei': (10, 42), 'rokuji': (1, 6), 'komyo': (5, 27)}
+
+
+def check(sutra_id='kannon'):
+    section_count, character_count = SUTRA_SHAPES[sutra_id]
+    source = json.loads((ROOT / f'data/{sutra_id}.json').read_text())
+    manifest = json.loads((ROOT / f'audio/{sutra_id}-manifest.json').read_text())
+    assert len(source['chunks']) == len(manifest['files']) == section_count
+    assert sum(len(c['text'].replace('　', '')) for c in source['chunks']) == character_count
     assert manifest['speakerId'] == 3023 and manifest['teacherId'] == 6000
     for chunk, record in zip(source['chunks'], manifest['files']):
         assert chunk['text'] == record['text'] and chunk['reading'] == record['reading']
@@ -41,19 +45,19 @@ def check():
         assert len(samples) / 24000 == record['seconds']
         assert 0 < max(abs(v) for v in samples) <= 30000
     mapping = [{'text': c['text'].replace('　', ''), 'readings': c['characterReadings']} for c in source['chunks']]
-    cues = timing.build(ROOT / 'data/kannon.json', ROOT / 'audio/kannon-manifest.json', mapping)
-    print(f"Kannon: {len(cues['sections'])} WAVs, 520 character cues and source/audio hashes PASS")
+    cues = timing.build(ROOT / f'data/{sutra_id}.json', ROOT / f'audio/{sutra_id}-manifest.json', mapping)
+    print(f"{source['title']}: {len(cues['sections'])} WAVs, {character_count} character cues and source/audio hashes PASS")
     return cues
 
 
-def generate(host):
+def generate(host, sutra_id='kannon'):
     config = chant.VARIANTS['whitecul']
     engine, voice, teacher = chant.verify_engine(host, config)
-    raw = (ROOT / 'data/kannon.json').read_bytes()
+    raw = (ROOT / f'data/{sutra_id}.json').read_bytes()
     source = json.loads(raw)
     target = chant.rms(chant.read_pcm((ROOT / 'audition/current.wav').read_bytes()))
     records = []
-    with tempfile.TemporaryDirectory(prefix='prayer-kannon-') as tmp:
+    with tempfile.TemporaryDirectory(prefix=f'prayer-{sutra_id}-') as tmp:
         work = Path(tmp)
         for number, chunk in enumerate(source['chunks'], 1):
             # The kana parser preserves traditional readings, avoiding TTS guesses.
@@ -89,27 +93,28 @@ def generate(host):
             with wave.open(str(work / name), 'wb') as wav:
                 wav.setparams((1, 2, 24000, 0, 'NONE', 'not compressed'))
                 wav.writeframes(normalized.tobytes())
-            records.append({'file': 'kannon/' + name, 'text': chunk['text'], 'reading': chunk['reading'],
+            records.append({'file': sutra_id + '/' + name, 'text': chunk['text'], 'reading': chunk['reading'],
                             'sourceQuery': query_source, 'query': query, 'score': score,
                             'trimLeadingFrames': trim, 'gain': gain,
                             'seconds': len(samples) / 24000,
                             'sha256': hashlib.sha256((work / name).read_bytes()).hexdigest()})
-            print(f'{number}/52 {chunk["text"]} {records[-1]["seconds"]:.2f}s', flush=True)
+            print(f'{number}/{len(source["chunks"])} {chunk["text"]} {records[-1]["seconds"]:.2f}s', flush=True)
         manifest = {'engineVersion': '0.25.2', 'voiceVersion': voice['version'], 'speakerId': 3023,
                     'teacherId': 6000, 'teacherVersion': teacher['version'],
                     'credit': 'VOICEVOX:WhiteCUL / VOICEVOX:波音リツ（歌唱クエリ生成）',
                     'pronunciation': 'VOICEVOX explicit kana parser; no automatic kanji reading',
                     'sutraSha256': hashlib.sha256(raw).hexdigest(), 'files': records}
-        (ROOT / 'audio/kannon').mkdir(exist_ok=True)
+        (ROOT / f'audio/{sutra_id}').mkdir(exist_ok=True)
         for record in records:
             shutil.copyfile(work / Path(record['file']).name, ROOT / 'audio' / record['file'])
-        (ROOT / 'audio/kannon-manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
-    check()
+        (ROOT / f'audio/{sutra_id}-manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
+    check(sutra_id)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--sutra', choices=tuple(SUTRA_SHAPES), default='kannon')
     parser.add_argument('--generate', action='store_true')
     parser.add_argument('--engine', default='http://127.0.0.1:50021')
     args = parser.parse_args()
-    generate(args.engine.rstrip('/')) if args.generate else check()
+    generate(args.engine.rstrip('/'), args.sutra) if args.generate else check(args.sutra)

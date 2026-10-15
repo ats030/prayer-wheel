@@ -1,0 +1,27 @@
+{
+  "id": "rokuji",
+  "title": "六字真言",
+  "fullTitle": "観音菩薩の六字真言",
+  "sources": [
+    "https://tibethouse.jp/オム・マニ・ペメ・フム/",
+    "https://theme.npm.edu.tw/exh105/BuddhistArt/ch/index.html"
+  ],
+  "editorialNote": "六字は六つの音節を指す。漢字音写「唵嘛呢叭咪吽」と、チベット系の読みの日本語表記例「オム・マニ・ペメ・フム」を採用。意味の説明は独自作成し、真言の確定的な逐語訳としては扱わない。宗派や伝承によって表記・発音・解釈は異なる。",
+  "translationLabel": "意味（参考）",
+  "chunks": [
+    {
+      "text": "唵嘛呢叭咪吽",
+      "reading": "おむまにぺめふむ。",
+      "characterReadings": [
+        "おむ",
+        "ま",
+        "に",
+        "ぺ",
+        "め",
+        "ふむ"
+      ],
+      "translation": "観音菩薩の慈悲と智慧を念じる真言です。逐語訳ではなく、意味を知るための説明です。"
+    }
+  ],
+  "audioDirectory": "audio/rokuji"
+}

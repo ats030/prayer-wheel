@@ -28,9 +28,10 @@ def check(base, package='dist'):
     files.append('data/sutra-sections.json')
     files.append('drum-motion.js')
     files.extend(['character-scroll.js', 'data/character-timing.json'])
-    files.extend(['data/kannon.json', 'data/kannon-timing.json'])
-    kannon_cues = json.loads((ROOT / package / 'data/kannon-timing.json').read_text())
-    files.extend('audio/' + s['file'] for s in kannon_cues['sections'])
+    for sutra_id in ('enmei', 'rokuji', 'komyo'):
+        files.extend([f'data/{sutra_id}.json', f'data/{sutra_id}-timing.json'])
+        cues = json.loads((ROOT / package / f'data/{sutra_id}-timing.json').read_text())
+        files.extend('audio/' + s['file'] for s in cues['sections'])
     character_cues = json.loads((ROOT / package / 'data/character-timing.json').read_text(encoding='utf-8'))
     files.extend('audio/' + s['file'] for s in character_cues['sections'])
     phrases = json.loads((ROOT / 'audio/phrases-manifest.json').read_text())
@@ -70,10 +71,16 @@ def check(base, package='dist'):
 
     with ThreadPoolExecutor(max_workers=6) as pool:
         size = sum(pool.map(verify, files))
-    for private in ("audio/kannon-manifest.json", "scripts/kannon-audio.py", "docs/sutra-selection.md", "pages/wrangler.jsonc", "scripts/build-pages.py", "docs/cloudflare-pages-license.yaml", "support-config.json", "scripts/support-link.py", "docs/support-license.yaml", "docs/support.md", "wrangler.jsonc", "README.md", "package.json", "data/character-readings.json", "scripts/character-timing.py", "audio/manifest.json", "audio/phrases-manifest.json", "audio/legacy-manifest.json", "audition/baseline/manifest.json", "audition/baseline/02.wav", "audition/baseline/sutra.json", "scripts/generate-recitation.py",
+    removed_hash = json.loads((ROOT / 'audio/kannon-manifest.json').read_text())['files'][0]['sha256']
+    release = hashlib.sha256((ROOT / package / 'index.html').read_bytes()).hexdigest()[:16]
+    removed = {'data/kannon.json', 'data/kannon-timing.json', f'audio/synced/{removed_hash}/01.wav'}
+    for private in ("data/kannon.json", "data/kannon-timing.json", f"audio/synced/{removed_hash}/01.wav", "audio/rokuji-manifest.json", "audio/komyo-manifest.json", "audio/enmei-manifest.json", "docs/enmei-license.yaml", "audio/kannon-manifest.json", "scripts/kannon-audio.py", "docs/sutra-selection.md", "pages/wrangler.jsonc", "scripts/build-pages.py", "docs/cloudflare-pages-license.yaml", "support-config.json", "scripts/support-link.py", "docs/support-license.yaml", "docs/support.md", "wrangler.jsonc", "README.md", "package.json", "data/character-readings.json", "scripts/character-timing.py", "audio/manifest.json", "audio/phrases-manifest.json", "audio/legacy-manifest.json", "audition/baseline/manifest.json", "audition/baseline/02.wav", "audition/baseline/sutra.json", "scripts/generate-recitation.py",
                     "assets/prayer-wheel-icon-source.png", "audition/manifest.json", "audition/chant-manifest.json", "audition/chant-female-manifest.json", "docs/chant-reference-analysis.json", "docs/chant-license.yaml", "scripts/generate-chant.py", "scripts/generate-audition.py", "scripts/generate-audio.py", "tests/player.test.js", "missing.wav"):
         try:
-            with fetch(base + "/" + private):
+            # Pages may retain previously public immutable URLs at the edge.
+            # A release query verifies the current deployment's missing-path routing.
+            suffix = '?release=' + release if private in removed else ''
+            with fetch(base + "/" + private + suffix):
                 pass
         except urllib.error.HTTPError as error:
             assert error.code == 404, (private, error.code)

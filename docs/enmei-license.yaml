@@ -1,0 +1,40 @@
+reviewed_at: 2026-10-15
+intended_use: 無料公開のWebマニ車に延命十句観音経・六字真言・光明真言を追加
+scope: 古典原文の独自入力、伝統的音写と読みの一例、独自の参考説明、既存ローカル音声合成
+ancient_text:
+  decision: conditional
+  cost: 参照は無料。外部API・有料データセットは追加しない
+  commercial_use: 古典本文と伝統的音写を独自入力。現代の編集物の利用許諾を前提にしない
+  conditions:
+    - 寺院や博物館の解説・現代語訳・写真・録音を転載しない
+    - 意訳と意味の説明は本アプリ用に独自作成する
+    - 宗派による読み/表記/解釈の差を記録し公式監修を称さない
+    - 真言の説明を確定的な逐語訳や効能の保証として扱わない
+  sources:
+    - https://www.engakuji.or.jp/blog/39271/
+    - https://zenshoan.com/okyo_text/
+    - https://tibethouse.jp/オム・マニ・ペメ・フム/
+    - https://theme.npm.edu.tw/exh105/BuddhistArt/ch/index.html
+    - https://www.koyasan-u.ac.jp/cms/wp-content/uploads/2025/03/250322_R7学生生活の手引き（奥之院参拝次第）.pdf
+    - https://www.city.tsuchiura.lg.jp/data/doc/1562386776_doc_44_0.pdf
+modern_assets:
+  decision: declined
+  reason: 寺院サイトの現代語訳・和讃・写真・録音には独自の権利があるため取り込まない
+  sources:
+    - https://soto-tokai.net/copyright.html
+voice:
+  decision: conditional
+  engine_version: 0.25.2
+  voice_version: 0.16.0
+  teacher_version: 0.16.0
+  synthesis: VOICEVOX WhiteCUL ハミング3023 / 波音リツ 歌唱クエリ6000
+  cost: 既存CPUエンジンのみ。外部API課金なし
+  conditions:
+    - docs/chant-license.yaml の既存条件を維持する
+    - 情報パネルとREADMEにVOICEVOXと両声のクレジット/規約リンクを維持する
+    - エンジン・音声モデル・キャラクター画像は再配布しない
+  sources:
+    - https://voicevox.hiroshiba.jp/term/
+    - https://www.whitecul.com/guideline
+    - https://www.canon-voice.com/terms/
+notes: スキルが参照するtemplates/tool-license.yamlはインストール内に存在しなかったため既存のプロジェクト記録形式に準拠

@@ -46,9 +46,13 @@ character_cues = character_timing.build()
 kannon_spec = importlib.util.spec_from_file_location('kannon_audio', ROOT / 'scripts/kannon-audio.py')
 kannon_audio = importlib.util.module_from_spec(kannon_spec)
 kannon_spec.loader.exec_module(kannon_audio)
-kannon_cues = kannon_audio.check()
-shutil.copyfile(ROOT / 'data/kannon.json', out / 'data/kannon.json')
-(out / 'data/kannon-timing.json').write_text(json.dumps(kannon_cues, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
+verse_packages = []
+for sutra_id in ('enmei', 'rokuji', 'komyo'):
+    cues = kannon_audio.check(sutra_id)
+    verse_manifest = json.loads((ROOT / f'audio/{sutra_id}-manifest.json').read_text())
+    verse_packages.append((verse_manifest, cues))
+    shutil.copyfile(ROOT / f'data/{sutra_id}.json', out / f'data/{sutra_id}.json')
+    (out / f'data/{sutra_id}-timing.json').write_text(json.dumps(cues, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
 shutil.copyfile(ROOT / "data/sutra.json", out / "data/sutra-sections.json")
 shutil.copyfile(ROOT / "data/sutra-phrases.json", out / "data/sutra-phrases.json")
 shutil.copyfile(ROOT / "audition/baseline/sutra.json", out / "data/sutra.json")
@@ -72,11 +76,11 @@ for entry, cues in zip(manifest['files'], character_cues['sections']):
     target = out / 'audio' / cues['file']
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(ROOT / 'audio' / entry['file'], target)
-kannon_manifest = json.loads((ROOT / 'audio/kannon-manifest.json').read_text())
-for record, cues in zip(kannon_manifest['files'], kannon_cues['sections']):
-    target = out / 'audio' / cues['file']
-    target.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(ROOT / 'audio' / record['file'], target)
+for verse_manifest, verse_cues in verse_packages:
+    for record, cues in zip(verse_manifest['files'], verse_cues['sections']):
+        target = out / 'audio' / cues['file']
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / 'audio' / record['file'], target)
 legacy = json.loads((ROOT / "audio/legacy-manifest.json").read_text())
 phrases = json.loads((ROOT / "audio/phrases-manifest.json").read_text())
 for entry in phrases['files']:
@@ -86,7 +90,7 @@ for entry in phrases['files']:
 for entry in legacy["files"]:
     shutil.copyfile(ROOT / "audio" / entry["file"], out / "audio" / entry["file"])
 files = [p for p in out.rglob("*") if p.is_file()]
-if len(files) != 23 + len(kannon_manifest['files']) + 2 * len(manifest["files"]) + len(legacy["files"]) + len(phrases['files']) or any(p.stat().st_size > 25 * 1024 * 1024 for p in files):
+if len(files) != 21 + 2 * len(verse_packages) + sum(len(m['files']) for m, _ in verse_packages) + 2 * len(manifest["files"]) + len(legacy["files"]) + len(phrases['files']) or any(p.stat().st_size > 25 * 1024 * 1024 for p in files):
     sys.exit("Unexpected asset count or Cloudflare asset size limit exceeded")
 print(f"Packaged {len(files)} public files ({sum(p.stat().st_size for p in files):,} bytes)")
 print(f"VISIT_LOG_EXEMPT_REASON: {reason}")

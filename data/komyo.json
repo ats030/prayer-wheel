@@ -1,0 +1,76 @@
+{
+  "id": "komyo",
+  "title": "光明真言",
+  "fullTitle": "不空羂索毘盧遮那仏大灌頂光真言",
+  "sources": [
+    "https://www.koyasan-u.ac.jp/cms/wp-content/uploads/2025/03/250322_R7学生生活の手引き（奥之院参拝次第）.pdf",
+    "https://www.city.tsuchiura.lg.jp/data/doc/1562386776_doc_44_0.pdf"
+  ],
+  "editorialNote": "古典真言の漢字音写と、日本で唱えられるカナ読みの一例を採用。唱える流れに合わせ五節に区切る。意味の説明は独自作成した参考説明であり、真言の確定的な逐語訳ではない。宗派や伝承によって表記・発音・解釈は異なる。",
+  "translationLabel": "意味（参考）",
+  "chunks": [
+    {
+      "text": "唵阿謨伽",
+      "reading": "おんあぼきゃ。",
+      "characterReadings": [
+        "おん",
+        "あ",
+        "ぼ",
+        "きゃ"
+      ],
+      "translation": "仏のはたらきが空しく終わらないことを念じ、祈りを始める部分です。"
+    },
+    {
+      "text": "尾盧左曩",
+      "reading": "べいろしゃのう。",
+      "characterReadings": [
+        "べい",
+        "ろ",
+        "しゃ",
+        "のう"
+      ],
+      "translation": "光をあまねく照らす仏、大日如来を表す名にあたります。"
+    },
+    {
+      "text": "摩訶母捺囉　麽抳",
+      "reading": "まかぼだらまに。",
+      "characterReadings": [
+        "ま",
+        "か",
+        "ぼ",
+        "だ",
+        "ら",
+        "ま",
+        "に"
+      ],
+      "translation": "大いなる印と宝珠を表す言葉が含まれます。"
+    },
+    {
+      "text": "鉢納麽　入嚩攞",
+      "reading": "はんどまじんばら。",
+      "characterReadings": [
+        "はん",
+        "ど",
+        "ま",
+        "じん",
+        "ば",
+        "ら"
+      ],
+      "translation": "蓮華と光明を表す言葉が含まれます。"
+    },
+    {
+      "text": "鉢囉韈哆野吽",
+      "reading": "はらばりたやうん。",
+      "characterReadings": [
+        "は",
+        "ら",
+        "ばり",
+        "た",
+        "や",
+        "うん"
+      ],
+      "translation": "光のはたらきを願い、結びの聖音で唱え終える部分です。"
+    }
+  ],
+  "audioDirectory": "audio/komyo"
+}

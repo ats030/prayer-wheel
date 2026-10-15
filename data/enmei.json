@@ -1,0 +1,126 @@
+{
+  "id": "enmei",
+  "title": "延命十句観音経",
+  "fullTitle": "延命十句観音経",
+  "sources": [
+    "https://www.engakuji.or.jp/blog/39271/",
+    "https://zenshoan.com/okyo_text/",
+    "https://www.daizouin.com/延命十句観音経　現代語訳｜明石の禅寺　大蔵院/"
+  ],
+  "editorialNote": "古典原文42字を現行字体で独自入力し、十句をそのまま十節に区切る。伝統的な読みの一例を一字ごとに明示。意訳は本アプリ用に独自作成し、他者の現代語訳・和讃・録音は使用しない。宗派によって読みや解釈は異なる。一巡は一誦とし、自動的な三誦は行わない。",
+  "chunks": [
+    {
+      "text": "観世音",
+      "reading": "かんぜおん。",
+      "characterReadings": [
+        "かん",
+        "ぜ",
+        "おん"
+      ],
+      "translation": "人々の苦しみの声を受けとめる観音さまに、心を向けます。"
+    },
+    {
+      "text": "南無仏",
+      "reading": "なむぶつ。",
+      "characterReadings": [
+        "な",
+        "む",
+        "ぶつ"
+      ],
+      "translation": "仏をよりどころとして、敬い信じます。"
+    },
+    {
+      "text": "与仏有因",
+      "reading": "よぶつういん。",
+      "characterReadings": [
+        "よ",
+        "ぶつ",
+        "う",
+        "いん"
+      ],
+      "translation": "私たちには、仏となるもとが備わっています。"
+    },
+    {
+      "text": "与仏有縁",
+      "reading": "よぶつうえん。",
+      "characterReadings": [
+        "よ",
+        "ぶつ",
+        "う",
+        "えん"
+      ],
+      "translation": "私たちは、仏につながる縁に結ばれています。"
+    },
+    {
+      "text": "仏法僧縁",
+      "reading": "ぶっぽうそうえん。",
+      "characterReadings": [
+        "ぶっ",
+        "ぽう",
+        "そう",
+        "えん"
+      ],
+      "translation": "仏と、その教えと、ともに学ぶ人々を縁とします。"
+    },
+    {
+      "text": "常楽我浄",
+      "reading": "じょうらくがじょう。",
+      "characterReadings": [
+        "じょう",
+        "らく",
+        "が",
+        "じょう"
+      ],
+      "translation": "変わらぬ安らぎ、真の自己、清らかさという悟りの徳を見つめます。"
+    },
+    {
+      "text": "朝念観世音",
+      "reading": "ちょうねんかんぜおん。",
+      "characterReadings": [
+        "ちょう",
+        "ねん",
+        "かん",
+        "ぜ",
+        "おん"
+      ],
+      "translation": "朝に観音さまを念じます。"
+    },
+    {
+      "text": "暮念観世音",
+      "reading": "ぼねんかんぜおん。",
+      "characterReadings": [
+        "ぼ",
+        "ねん",
+        "かん",
+        "ぜ",
+        "おん"
+      ],
+      "translation": "夕べにも観音さまを念じます。"
+    },
+    {
+      "text": "念念従心起",
+      "reading": "ねんねんじゅうしんき。",
+      "characterReadings": [
+        "ねん",
+        "ねん",
+        "じゅう",
+        "しん",
+        "き"
+      ],
+      "translation": "一つひとつの念は、心から起こります。"
+    },
+    {
+      "text": "念念不離心",
+      "reading": "ねんねんふりしん。",
+      "characterReadings": [
+        "ねん",
+        "ねん",
+        "ふ",
+        "り",
+        "しん"
+      ],
+      "translation": "その一つひとつの念を、心から離さず保ちます。"
+    }
+  ],
+  "audioDirectory": "audio/enmei"
+}
