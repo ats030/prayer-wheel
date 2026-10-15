@@ -188,12 +188,11 @@ function updateUI() {
   const position = index + 1;
   $('progressFill').style.width = `${position / player.chunks.length * 100}%`;
   $('progressLabel').textContent = `読み上げ ${position} / ${player.chunks.length} 節`;
-  $('retryBtn').hidden = !player.error;
   $('voiceBanner').hidden = !player.error;
   $('voiceBanner').textContent = player.error;
   let status = '準備完了。マニ車を回してください。';
   let mode = 'idle';
-  if (player.error) { status = '音声を停止しています。再試行できます。'; mode = 'warn'; }
+  if (player.error) { status = 'マニ車をタップして再開してください。'; mode = 'warn'; }
   else if (player.paused) { status = '一時停止中。Spaceで再開できます。'; mode = 'paused'; }
   else if (player.active) {
     status = player.active.started ? '読経中' : '音声を読み込んでいます…';
@@ -246,6 +245,10 @@ function prepareAudio(sequence) {
 function turn(direction) {
   if (!player) return;
   if (direction > 0) {
+    if (player.error) {
+      player.retry();
+      return;
+    }
     player.forward();
     prepareAudio(player.nextSequence);
     prepareAudio(player.nextSequence + 1);
@@ -260,6 +263,12 @@ stage.addEventListener('wheel', (event) => {
   const delta = event.deltaY * unit;
   if (Math.sign(delta) !== Math.sign(wheelAcc)) wheelAcc = 0;
   wheelAcc += delta;
+  if (player.error && wheelAcc >= 120) {
+    // Consume the whole recovery gesture instead of also creating reservations.
+    wheelAcc = 0;
+    turn(1);
+    return;
+  }
   while (Math.abs(wheelAcc) >= 120) {
     const direction = Math.sign(wheelAcc);
     wheelAcc -= direction * 120;
@@ -276,7 +285,6 @@ stage.addEventListener('keydown', (event) => {
     event.preventDefault(); player?.togglePause();
   }
 });
-$('retryBtn').addEventListener('click', () => player?.retry());
 $('restartBtn').addEventListener('click', () => {
   wheelAcc = 0;
   player?.restart();
@@ -320,7 +328,7 @@ async function initialize(id = 'hannya') {
   $('currentLine').classList.add('is-waiting');
   $('currentReading').textContent = $('currentTranslation').textContent = '';
   $('translationBlock').hidden = true;
-  $('voiceBanner').hidden = $('reloadBtn').hidden = $('retryBtn').hidden = true;
+  $('voiceBanner').hidden = $('reloadBtn').hidden = true;
   $('restartBtn').disabled = true;
   $('counter').textContent = $('rounds').textContent = $('queueCount').textContent = '0';
   $('progressLabel').textContent = $('drumPosition').textContent = '—';

@@ -17,6 +17,7 @@ def check(base):
           const originalPlay = HTMLMediaElement.prototype.play;
           HTMLMediaElement.prototype.play = function() {
             window.testAudio = this;
+            window.testPlayCount = (window.testPlayCount || 0) + 1;
             return originalPlay.call(this);
           };
         """)
@@ -133,14 +134,25 @@ def check(base):
         page.locator("#restartBtn").click()
         page.route("**/audio/synced/*/01.wav", lambda route: route.fulfill(status=404, body="missing"))
         page.locator("#stage").click()
-        page.wait_for_selector("#retryBtn:visible")
+        page.wait_for_selector('#stage[data-state="error"]')
+        assert page.locator('#retryBtn').count() == 0
         assert page.locator(".chunk.active").count() == 0
         assert page.locator("#rounds").inner_text() == "0"
+        # A large wheel recovery gesture retries once without reserving sections.
+        play_count = page.evaluate('testPlayCount')
+        page.locator('#stage').hover()
+        page.mouse.wheel(0, 600)
+        page.wait_for_function('testPlayCount > ' + str(play_count))
+        page.wait_for_selector('#stage[data-state="error"]')
+        assert page.evaluate('testPlayCount') == play_count + 1
+        assert page.locator('#counter').text_content() == '1'
+        assert page.locator('#queueCount').text_content() == '0'
         page.unroute("**/audio/synced/*/01.wav")
-        page.locator("#retryBtn").click()
+        page.locator("#stage").click()
         page.wait_for_function("testAudio.currentTime > .1")
         assert page.locator("#counter").text_content() == "1"
-        assert page.locator("#retryBtn").is_hidden()
+        assert page.locator('#voiceBanner').is_hidden()
+        assert page.locator('#queueCount').text_content() == '0'
         assert not any(":50021" in url or ":50121" in url for url in requests)
         assert not errors, errors
 

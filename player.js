@@ -9,7 +9,7 @@ export class SutraPlayer {
 
   forward() {
     if (this.error || this.pending.length >= 5) {
-      this.notice = this.error ? '音声を再試行してから回してください。'
+      this.notice = this.error ? 'マニ車をタップして再開してください。'
         : '予約は5節までです。読み上げをお待ちください。';
       this.changed();
       return false;
@@ -119,7 +119,7 @@ export class SutraPlayer {
     waiting();
     try {
       this.audio.play()?.catch((err) => fail(err.name === 'NotAllowedError'
-        ? '音声の再生には操作が必要です。「音声を再試行」を押してください。'
+        ? '音声の再生には操作が必要です。マニ車をタップしてください。'
         : '音声を再生できませんでした。再試行してください。'));
     } catch { failed(); }
   }
