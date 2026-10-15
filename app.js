@@ -35,6 +35,28 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const DRUM_FACES = 48;
 const DRUM_STEP = 360 / DRUM_FACES;
 
+// Use page scrolling only when fixed controls leave too little readable space.
+function fitReaderViewport() {
+  const page = document.querySelector('.page');
+  const grid = document.querySelector('.grid');
+  const pageStyle = getComputedStyle(page);
+  const gridStyle = getComputedStyle(grid);
+  const fixed = ['.top', '.secondary', '.reading-bottom', '#voiceBanner', '#reloadBtn', 'noscript']
+    .reduce((sum, selector) => sum + (document.querySelector(selector)?.getBoundingClientRect().height || 0), 0);
+  const required = fixed + parseFloat(pageStyle.paddingTop) + parseFloat(pageStyle.paddingBottom)
+    + parseFloat(gridStyle.marginTop) + parseFloat(gridStyle.marginBottom) + 80;
+  document.body.classList.toggle('is-constrained', required > window.innerHeight);
+}
+let fitFrame;
+const fitObserver = new ResizeObserver(() => {
+  cancelAnimationFrame(fitFrame);
+  fitFrame = requestAnimationFrame(fitReaderViewport);
+});
+for (const selector of ['.top', '.secondary', '.reading-bottom', '#voiceBanner', '#reloadBtn']) {
+  fitObserver.observe(document.querySelector(selector));
+}
+window.addEventListener('resize', fitReaderViewport);
+
 function buildDrum() {
   for (let i = 0; i < DRUM_FACES; i++) {
     const face = document.createElement('div');
@@ -141,6 +163,7 @@ function updateUI() {
     : player.active && !player.active.started ? 'loading'
     : finishedCycle ? 'success' : 'ready';
   if (index !== highlighted) {
+    $('readingCopy').scrollTop = 0;
     const spans = $('textBlock').querySelectorAll('.chunk');
     spans.forEach((span, i) => {
       span.classList.toggle('active', i === index);
@@ -176,6 +199,16 @@ function updateUI() {
   if (player.notice) status = player.notice;
   $('statusText').textContent = status;
   $('statusDot').className = `dot ${mode}`;
+}
+
+// Also enforce exclusive panels on browsers without named-details support.
+for (const panel of document.querySelectorAll('.secondary details')) {
+  panel.addEventListener('toggle', () => {
+    if (!panel.open) return;
+    for (const other of document.querySelectorAll('.secondary details')) {
+      if (other !== panel) other.open = false;
+    }
+  });
 }
 
 // A closed details has no layout; align the current passage after it opens.

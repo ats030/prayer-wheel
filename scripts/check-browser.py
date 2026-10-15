@@ -169,7 +169,9 @@ def check(base):
         assert page.locator('#textBlock').is_visible()
         # A lower section in the text panel must actually become visible.
         page.set_viewport_size({"width": 390, "height": 844})
+        page.locator('#settingsDetails summary').click()
         page.locator("#restartBtn").click()
+        page.locator('#sutraDetails summary').click()
         page.evaluate("""() => {
           for (let i=0;i<document.querySelectorAll('.chunk').length;i++) {
             document.getElementById('stage').click();

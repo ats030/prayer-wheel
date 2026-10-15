@@ -11,13 +11,14 @@
   <link rel="stylesheet" href="style.css">
   <script src="http://ubuntu-server-app:8526/v.js" data-site="prayer-wheel" defer></script>
 </head>
-<body>
+<body class="reader-app">
   <div class="page">
     <header class="top">
       <h1>Webマニ車</h1>
       <label class="sutra-picker"><span>お経</span><select id="sutraSelect"><option value="hannya">般若心経</option><option value="kannon">観音経（偈文）</option></select></label>
     </header>
 
+    <noscript><p>読経を進めるにはJavaScriptを有効にしてください。</p></noscript>
     <div class="voice-banner" id="voiceBanner" role="alert" hidden></div>
     <button class="btn" id="reloadBtn" hidden>経文を再読み込み</button>
 
@@ -36,16 +37,18 @@
         </section>
 
         <section class="read-panel" aria-label="読み上げ本文">
-          <div class="statusline">
-            <span class="dot" id="statusDot"></span>
-            <span class="status-text" id="statusText" role="status">読み込み中…</span>
-          </div>
-          <p class="reading-heading" id="sutraName">般若心経</p>
-          <blockquote class="current" id="currentLine">—</blockquote>
-          <p class="current-reading" id="currentReading"></p>
-          <div class="current-translation" id="translationBlock" hidden>
-            <p class="translation-label">現代語訳（意訳）</p>
-            <p id="currentTranslation"></p>
+          <div id="readingCopy" class="reading-copy" tabindex="0" role="region" aria-label="現在の一節と現代語訳">
+            <div class="statusline">
+              <span class="dot" id="statusDot"></span>
+              <span class="status-text" id="statusText" role="status">読み込み中…</span>
+            </div>
+            <p class="reading-heading" id="sutraName">般若心経</p>
+            <blockquote class="current" id="currentLine">—</blockquote>
+            <p class="current-reading" id="currentReading"></p>
+            <div class="current-translation" id="translationBlock" hidden>
+              <p class="translation-label">現代語訳（意訳）</p>
+              <p id="currentTranslation"></p>
+            </div>
           </div>
           <div class="reading-bottom">
             <div class="progress" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
@@ -64,14 +67,15 @@
       </div>
 
       <div class="secondary">
-        <details class="disclosure" id="sutraDetails">
+        <details class="disclosure" id="sutraDetails" name="reader-panel">
           <summary>全文</summary>
-          <p class="translation-note">現代語訳はこのアプリ独自の意訳です。読み方・解釈は宗派によって異なります。観音経は後半の偈文（世尊偈）です。</p>
-          <div class="text-block" id="textBlock" tabindex="0" role="region" aria-label="般若心経の全文"></div>
+          <div class="drawer-content">
+            <div class="text-block" id="textBlock" tabindex="0" role="region" aria-label="般若心経の全文"></div>
+          </div>
         </details>
-        <details class="disclosure" id="settingsDetails">
+        <details class="disclosure" id="settingsDetails" name="reader-panel">
           <summary>設定・操作</summary>
-          <div class="settings-content">
+          <div class="drawer-content settings-content">
             <label class="field"><span>速度 <b id="rateOut">1.0×</b></span><input type="range" id="rate" min="0.6" max="1.4" step="0.05" value="1"></label>
             <button class="btn" id="restartBtn" disabled>最初から</button>
             <p class="stage-hint">タップ・↓・スクロール：次へ<br>↑・逆スクロール：予約取消／前へ<br>Space：一時停止／再開</p>
@@ -79,17 +83,21 @@
             <div class="session-meta"><span class="counter-label">操作数 <b id="counter">0</b></span><span class="queue-label">待っている節 <b id="queueCount">0</b> / 5</span></div>
           </div>
         </details>
+        <details class="disclosure" id="infoDetails" name="reader-panel">
+          <summary>情報</summary>
+          <div class="drawer-content">
+            <p class="translation-note">現代語訳はこのアプリ独自の意訳です。読み方・解釈は宗派によって異なります。観音経は後半の偈文（世尊偈）です。</p>
+            <footer class="foot">
+              <p>音声: <a href="https://voicevox.hiroshiba.jp/product/white_cul/">VOICEVOX:WhiteCUL</a> / VOICEVOX:波音リツ（歌唱クエリ生成）
+              </p>
+              <p><a href="audition/">音声の試聴</a> · <a href="https://voicevox.hiroshiba.jp/term/">VOICEVOX規約</a> · <a href="https://www.whitecul.com/guideline">WhiteCUL規約</a> · <a href="https://www.canon-voice.com/terms/">波音リツ規約</a></p>
+            </footer>
+          </div>
+        </details>
       </div>
     </main>
 
-    <footer class="foot">
-
-      <p>音声: <a href="https://voicevox.hiroshiba.jp/product/white_cul/">VOICEVOX:WhiteCUL</a> / VOICEVOX:波音リツ（歌唱クエリ生成）
-      </p>
-      <p><a href="audition/">音声の試聴</a> · <a href="https://voicevox.hiroshiba.jp/term/">VOICEVOX規約</a> · <a href="https://www.whitecul.com/guideline">WhiteCUL規約</a> · <a href="https://www.canon-voice.com/terms/">波音リツ規約</a></p>
-    </footer>
   </div>
-  <noscript><p>読経を進めるにはJavaScriptを有効にしてください。</p></noscript>
   <script type="module" src="app.js"></script>
 </body>
 </html>

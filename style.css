@@ -549,3 +549,78 @@ h1 { font-family: var(--font-reel); font-size: 30px; font-weight: 500; letter-sp
 .sutra-picker > span { flex-shrink: 0; }
 .sutra-picker select { min-width: 0; min-height: 44px; font-size: 14px; }
 .sutra-switch-hint { margin: 6px 0 0; color: var(--ink-subtle); font-size: 10px; }
+
+/* Keep the wheel available while reading an auxiliary panel. */
+.reader-app { height: 100vh; height: 100dvh; overflow: hidden; }
+.reader-app .page { height: 100%; padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); display: flex; flex-direction: column; }
+.reader-app .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; flex-shrink: 0; }
+.reader-app h1 { margin: 0; font-size: 24px; white-space: nowrap; }
+.reader-app .sutra-picker { margin: 0; min-width: 0; }
+.reader-app .sutra-picker > span { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); overflow: hidden; }
+.reader-app .sutra-picker select { width: 100%; font-size: 12px; padding: 8px; }
+.reader-app main { flex: 1; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+.reader-app .grid { align-items: stretch; min-height: 0; margin: 14px 0; gap: 28px; }
+.reader-app .stage-panel { display: flex; flex-direction: column; min-height: 0; }
+.reader-app .stage { flex: 1; min-height: 44px; max-height: 420px; }
+.reader-app .reel-window { height: 100%; }
+.reader-app .drum-meter { flex-shrink: 0; margin-top: 8px; }
+.reader-app .stage-panel > .stage-hint { margin: 4px 0 0; }
+.reader-app .read-panel { min-height: 0; padding: 0; }
+.reader-app .reading-copy { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 0 4px; }
+.reader-app .reading-copy:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.reader-app .statusline { min-height: 24px; }
+.reader-app .reading-heading { margin-top: 6px; }
+.reader-app .current { min-height: 0; }
+.reader-app .current-reading { margin: 8px 0 12px; }
+.reader-app .current-translation { margin-bottom: 8px; }
+.reader-app .reading-bottom { flex-shrink: 0; margin-top: 4px; }
+.reader-app .reading-bottom .support { margin-top: 8px; }
+.reader-app .reading-bottom .support-link { min-height: 44px; padding: 6px; font-size: 22px; }
+.reader-app .support p { margin-top: 4px; }
+.reader-app .secondary { position: relative; height: 44px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.reader-app .secondary:has(details[open]) { height: clamp(160px, 30dvh, 260px); }
+.reader-app .disclosure { min-width: 0; border: 0; }
+.reader-app .disclosure summary { min-height: 44px; padding: 10px 8px; text-align: center; }
+.reader-app .disclosure[open] summary { color: var(--accent); border-bottom: 2px solid var(--accent); }
+.reader-app .drawer-content { position: absolute; inset: 46px 0 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 8px 4px; scrollbar-width: thin; }
+.reader-app #sutraDetails .drawer-content { display: flex; flex-direction: column; overflow: hidden; }
+.reader-app .translation-note { flex-shrink: 0; margin: 0 0 8px; font-size: 10px; }
+.reader-app .text-block { flex: 1; min-height: 0; max-height: none; margin: 0; font-size: 17px; }
+.reader-app .settings-content { display: block; }
+.reader-app .settings-content > * { margin: 0 0 12px; }
+.reader-app .foot { margin: 0; }
+.reader-app .voice-banner:not([hidden]) { max-height: 18dvh; flex-shrink: 0; overflow-y: auto; margin: 8px 0; }
+.reader-app #reloadBtn { flex-shrink: 0; }
+@media (max-width: 600px) {
+  .reader-app h1 { font-size: 20px; letter-spacing: .04em; }
+  .reader-app .grid { gap: 14px; grid-template-columns: minmax(0, 100px) minmax(0, 1fr); }
+  .reader-app .current { font-size: 22px; }
+  .reader-app .drum-meter { font-size: 10px; }
+}
+@media (max-height: 500px) {
+  .reader-app .page { padding-top: 6px; padding-bottom: 6px; }
+  .reader-app .top { padding-bottom: 4px; }
+  .reader-app .grid { margin: 8px 0; }
+  .reader-app .secondary:has(details[open]) { height: 120px; }
+  .reader-app .support-link { position: relative; }
+  .reader-app .drum-meter, .reader-app .stage-panel > .stage-hint { display: none; }
+  .reader-app .reading-meta { display: none; }
+}
+
+/* Preserve access under extreme viewport constraints and text enlargement. */
+.reader-app.is-constrained { height: auto; min-height: 100dvh; overflow-y: auto; }
+.reader-app.is-constrained .page { height: auto; min-height: 100dvh; }
+.reader-app.is-constrained .top { flex-wrap: wrap; }
+.reader-app.is-constrained main { flex: none; display: block; }
+.reader-app.is-constrained .grid { height: auto; min-height: 300px; align-items: start; }
+.reader-app.is-constrained .stage { flex: none; height: 300px; }
+.reader-app.is-constrained .reading-copy { flex: none; overflow: visible; }
+@media (max-height: 360px) {
+  .reader-app { height: auto; min-height: 100dvh; overflow-y: auto; }
+  .reader-app .page { height: auto; min-height: 100dvh; }
+  .reader-app .top { flex-wrap: wrap; }
+  .reader-app main { flex: none; display: block; }
+  .reader-app .grid { height: auto; min-height: 300px; align-items: start; }
+  .reader-app .stage { flex: none; height: 300px; }
+  .reader-app .reading-copy { flex: none; overflow: visible; }
+}
