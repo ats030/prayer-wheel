@@ -173,7 +173,8 @@ h1 {
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
-  transform: translateZ(calc(-1 * var(--reel-radius))) rotateX(var(--drum-turn, -7.5deg));
+  /* Forward wheel input moves the visible surface downward. Keep cue order logical. */
+  transform: translateZ(calc(-1 * var(--reel-radius))) rotateX(calc(-1 * var(--drum-turn, -7.5deg)));
   will-change: transform;
 }
 .reel-rotor[data-moving="true"], .reel-rotor[data-settling="true"] {
@@ -200,7 +201,7 @@ h1 {
   line-height: 1;
   letter-spacing: 0.04em;
   backface-visibility: hidden;
-  transform: rotateX(var(--face-angle)) translateZ(var(--reel-radius));
+  transform: rotateX(calc(-1 * var(--face-angle))) translateZ(var(--reel-radius));
 }
 .reel-face.is-selected { font-weight: 700; }
 .reel-face.is-intro { font-size: 18px; letter-spacing: 0; white-space: nowrap; }

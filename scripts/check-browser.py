@@ -29,7 +29,8 @@ def check(base):
         assert page.locator("#currentLine").inner_text() == "マニ車を回すと、読経が始まります。"
         assert page.locator('#translationBlock').is_hidden()
         assert page.locator(".reel-face.is-selected").inner_text() == ""
-        page.locator('#stage').click()
+        page.locator('#stage').hover()
+        page.mouse.wheel(0, 120)
         page.wait_for_function("window.testAudio && testAudio.currentTime > .4")
         trace = page.evaluate("""async () => {
           const samples = [];
@@ -37,6 +38,7 @@ def check(base):
           await new Promise(resolve => {
             const sample = () => {
               samples.push({time: testAudio.currentTime,
+                surfaceY: document.getElementById('dial').children[0].getBoundingClientRect().top,
                 angle: parseFloat(document.getElementById('dial').style.getPropertyValue('--drum-turn')),
                 character: document.querySelector('.reel-face.is-selected').dataset.character});
               if (performance.now()-started < 1000) requestAnimationFrame(sample); else resolve();
@@ -46,6 +48,7 @@ def check(base):
           return samples;
         }""")
         assert trace[-1]['angle'] > trace[0]['angle'], trace
+        assert trace[-1]['surfaceY'] > trace[0]['surfaceY'], 'Downward wheel input must move the visible surface down'
         assert len({s['character'] for s in trace}) >= 2, trace
         page.locator("#stage").press("Space")
         frozen = page.locator('#dial').evaluate("e => e.style.getPropertyValue('--drum-turn')")
@@ -97,9 +100,14 @@ def check(base):
         page.locator('#stage').press('Space')
         while page.locator('#queueCount').text_content() != '0':
             page.locator('#stage').press('ArrowUp')
-        page.locator('#stage').press('ArrowUp')
+        reverse_angle = page.locator('#dial').evaluate("e => { const m = new DOMMatrix(getComputedStyle(e).transform); return Math.atan2(m.m23, m.m22) * 180 / Math.PI; }")
+        page.locator('#stage').hover()
+        page.mouse.wheel(0, -120)
         page.locator('#stage').press('Space')
         page.wait_for_function("document.getElementById('currentLine').textContent === '摩訶般若波羅蜜多心経'")
+        page.wait_for_timeout(200)
+        restored_angle = page.locator('#dial').evaluate("e => { const m = new DOMMatrix(getComputedStyle(e).transform); return Math.atan2(m.m23, m.m22) * 180 / Math.PI; }")
+        assert restored_angle > reverse_angle + 30, ('Upward wheel input must rotate the surface back up', reverse_angle, restored_angle)
         assert page.locator('#currentTranslation').inner_text() == '大いなる智慧の完成、その核心を説く経。'
         assert page.locator("#rounds").inner_text() == "0"
         page.locator("#restartBtn").click()
