@@ -15,8 +15,7 @@
   <div class="page">
     <header class="top">
       <h1>Webマニ車</h1>
-      <label class="sutra-picker"><span>お経</span><select id="sutraSelect" aria-describedby="sutraSwitchHint"><option value="hannya">般若心経</option><option value="kannon">観音経（偈文）</option></select></label>
-      <p class="sutra-switch-hint" id="sutraSwitchHint">切替で最初に戻ります。</p>
+      <label class="sutra-picker"><span>お経</span><select id="sutraSelect"><option value="hannya">般若心経</option><option value="kannon">観音経（偈文）</option></select></label>
     </header>
 
     <div class="voice-banner" id="voiceBanner" role="alert" hidden></div>
@@ -53,7 +52,7 @@
             <div class="reading-meta"><p class="progress-label" id="progressLabel">—</p><span class="rounds">完了 <b id="rounds">0</b> 巡</span></div>
             <!-- SUPPORT:START -->
             <div class="support" hidden>
-              <a class="btn support-link" target="_blank" rel="noopener noreferrer">浄財<span class="support-external">（外部サイト）</span></a>
+              <a class="btn support-link" target="_blank" rel="noopener noreferrer" aria-label="浄財（外部サイトを新しいタブで開く）">浄財</a>
               <p>開発者への任意の支援です。全機能を無料で使えます。</p>
             </div>
             <!-- SUPPORT:END -->
