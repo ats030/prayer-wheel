@@ -247,7 +247,7 @@ def check(base):
             layout.set_viewport_size({"width": width, "height": 900})
             layout.goto(base)
             layout.wait_for_selector('#stage[aria-disabled="false"]')
-            assert not layout.locator('#sutraDetails').evaluate('e => e.open')
+            assert layout.locator('#sutraDetails').evaluate('e => e.open')
             assert not layout.locator('#settingsDetails').evaluate('e => e.open')
             assert layout.locator('.support-link').get_attribute('href') == 'https://buymeacoffee.com/ats030'
             assert layout.locator('.support-link').is_visible()

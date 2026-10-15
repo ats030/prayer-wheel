@@ -13,8 +13,11 @@ def check(url):
             page.set_viewport_size({'width':width,'height':height})
             page.goto(url)
             page.wait_for_selector('#stage[aria-disabled="false"]')
+            assert page.locator('#sutraDetails').evaluate('e=>e.open')
+            assert page.locator('#textBlock').is_visible()
             for drawer in ['sutraDetails','settingsDetails','infoDetails']:
-                page.locator(f'#{drawer} summary').click()
+                if not page.locator(f'#{drawer}').evaluate('e=>e.open'):
+                    page.locator(f'#{drawer} summary').click()
                 page.wait_for_timeout(80)
                 result = page.evaluate('''() => {
                   const rect = e => { const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,b:r.bottom}; };
@@ -59,14 +62,14 @@ def check(url):
         page.set_viewport_size({'width':568,'height':320})
         page.goto(url)
         page.wait_for_selector('#stage[aria-disabled="false"]')
-        page.locator('#sutraDetails summary').click()
+        assert page.locator('#sutraDetails').evaluate('e=>e.open')
         assert page.evaluate('document.documentElement.scrollHeight > innerHeight')
         page.locator('#textBlock').scroll_into_view_if_needed()
         assert page.locator('#textBlock').is_visible()
         page.set_viewport_size({'width':390,'height':667})
         page.goto(url)
         page.wait_for_selector('#stage[aria-disabled="false"]')
-        page.locator('#sutraDetails summary').click()
+        assert page.locator('#sutraDetails').evaluate('e=>e.open')
         page.add_style_tag(content='.top, .reading-bottom { font-size: 40px; } .reader-app h1 { font-size: 60px; } .reader-app .support p { font-size: 30px; }')
         page.wait_for_function("document.body.classList.contains('is-constrained')")
         page.locator('#textBlock').scroll_into_view_if_needed()
