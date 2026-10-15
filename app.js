@@ -42,7 +42,7 @@ function renderDrumFaces() {
     if (offset > DRUM_FACES / 2) offset -= DRUM_FACES;
     const ordinal = center + offset;
     const entry = ordinal >= 0 ? characterEntries[ordinal % characterEntries.length] : null;
-    face.textContent = entry?.text ?? (ordinal === -1 ? '心経を回す' : '');
+    face.textContent = entry?.text ?? '';
     face.classList.toggle('is-selected', ordinal === activeCharacter);
     face.classList.toggle('is-intro', ordinal < 0);
     face.dataset.sequence = String(ordinal);

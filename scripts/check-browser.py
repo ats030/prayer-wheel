@@ -27,7 +27,7 @@ def check(base):
         page.goto(base)
         page.wait_for_selector('#stage[aria-disabled="false"]')
         assert page.locator("#currentLine").inner_text() == "ドラムを回すと、読経が始まります。"
-        assert page.locator(".reel-face.is-selected").inner_text() == "心経を回す"
+        assert page.locator(".reel-face.is-selected").inner_text() == ""
         page.locator('#stage').click()
         page.wait_for_function("window.testAudio && testAudio.currentTime > .4")
         trace = page.evaluate("""async () => {
@@ -60,7 +60,7 @@ def check(base):
         assert position == int(position)
         page.locator('#settingsDetails').evaluate('e => e.open = true')
         page.locator('#restartBtn').click()
-        assert page.locator('.reel-face.is-selected').inner_text() == '心経を回す'
+        assert page.locator('.reel-face.is-selected').inner_text() == ''
         page.emulate_media(reduced_motion='no-preference')
         page.locator("#stage").focus()
         page.keyboard.press("Space")
@@ -95,7 +95,7 @@ def check(base):
         assert page.locator("#counter").text_content() == "0"
         assert page.locator("#queueCount").text_content() == "0"
         assert page.locator(".chunk.active").count() == 0
-        assert page.locator(".reel-face.is-selected").inner_text() == "心経を回す"
+        assert page.locator(".reel-face.is-selected").inner_text() == ""
         # Actual wheel input and key controls.
         page.locator("#stage").hover()
         page.mouse.wheel(0, 120)
@@ -299,7 +299,7 @@ def check(base):
             layout.locator("#settingsDetails summary").click()
             assert layout.locator("#rate").is_visible()
             layout.locator("#restartBtn").click()
-            assert layout.locator(".reel-face.is-selected").inner_text() == "心経を回す"
+            assert layout.locator(".reel-face.is-selected").inner_text() == ""
         browser.close()
     print("Desktop and touch Chromium: real WAV playback, queue, reverse, pause/resume, rate, reset, recovery PASS")
     print("Screenshots: /tmp/prayer-wheel-desktop.png /tmp/prayer-wheel-mobile.png")
