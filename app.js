@@ -27,6 +27,10 @@ let characterEntries = [];
 let scrollFrame = null;
 let displayedSequence = null;
 let displayedCharacter = null;
+let audioStalled = false;
+let stalledAt = 0;
+const preparedAudio = new Map();
+const audioObjectUrls = new Set();
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const DRUM_FACES = 48;
 const DRUM_STEP = 360 / DRUM_FACES;
@@ -65,6 +69,19 @@ function renderDrum() {
   const sequence = player.currentSequence;
   // A new source may reset currentTime while loading. Hold the last spoken position.
   const ownsClock = Boolean(player.active?.started && player.active.sequence === sequence);
+  const running = ownsClock && !player.paused && !player.error && !audioStalled
+    && !audio.paused && !audio.ended;
+  const crossingBoundary = sequence >= 0 && (audio.ended && player.pending.length > 0
+    || player.active && !player.active.started && player.active.sequence === sequence + 1);
+  const moving = Boolean((running || crossingBoundary) && !player.paused
+    && !player.error && !audioStalled && !reducedMotion.matches);
+  const settling = Boolean(audio.ended && !player.active && !player.pending.length
+    && !player.paused && !player.error && !audioStalled && !reducedMotion.matches);
+  if (!moving && !settling && dial.dataset.moving === 'true') {
+    // Disabling a CSS transition would otherwise snap to its destination.
+    dial.style.transform = getComputedStyle(dial).transform;
+  }
+  if (moving || settling || reducedMotion.matches || sequence < 0) dial.style.removeProperty('transform');
   if (sequence < 0) {
     drumPosition = activeCharacter = -1;
   } else if (ownsClock) {
@@ -86,8 +103,8 @@ function renderDrum() {
     displayedSequence = sequence;
     displayedCharacter = activeCharacter;
   }
-  const running = ownsClock && !player.paused && !player.error && !audio.paused && !audio.ended;
-  dial.dataset.moving = String(running && !reducedMotion.matches);
+  dial.dataset.moving = String(moving);
+  dial.dataset.settling = String(settling);
   if (running && scrollFrame === null) {
     scrollFrame = requestAnimationFrame(() => { scrollFrame = null; renderDrum(); });
   } else if (!running && scrollFrame !== null) {
@@ -97,8 +114,18 @@ function renderDrum() {
 }
 
 for (const event of ['timeupdate', 'pause', 'waiting', 'stalled', 'ended', 'ratechange', 'seeking']) {
-  audio.addEventListener(event, renderDrum);
+  audio.addEventListener(event, () => {
+    if (event === 'stalled' || event === 'waiting' && player?.active?.started) {
+      audioStalled = true;
+      stalledAt = audio.currentTime;
+    }
+    // A stalled network request can recover using buffered data without playing.
+    if (event === 'timeupdate' && audio.currentTime > stalledAt
+        && !audio.paused && !audio.ended) audioStalled = false;
+    renderDrum();
+  });
 }
+audio.addEventListener('playing', () => { audioStalled = false; renderDrum(); });
 reducedMotion.addEventListener('change', renderDrum);
 
 function updateUI() {
@@ -158,9 +185,35 @@ $('sutraDetails').addEventListener('toggle', () => {
   if (target) $('textBlock').scrollTop = Math.max(0, target.offsetTop - $('textBlock').clientHeight / 2);
 });
 
+function prepareAudio(sequence) {
+  const owner = player;
+  if (!owner || sequence < 0) return;
+  const chunk = owner.chunks[sequence % owner.chunks.length];
+  if (preparedAudio.has(chunk)) return;
+  const signal = loadController.signal;
+  const task = fetch(chunk.audio, { signal, cache: 'force-cache' })
+    .then(response => {
+      if (!response.ok) throw new Error('Audio unavailable');
+      return response.blob();
+    }).then(blob => {
+      if (signal.aborted || player !== owner) return;
+      const url = URL.createObjectURL(blob);
+      audioObjectUrls.add(url);
+      chunk.audio = url;
+    }).catch(() => {
+      // Playback retains its original URL and normal retry path on failure.
+      preparedAudio.delete(chunk);
+    });
+  preparedAudio.set(chunk, task);
+}
+
 function turn(direction) {
   if (!player) return;
-  if (direction > 0) player.forward();
+  if (direction > 0) {
+    player.forward();
+    prepareAudio(player.nextSequence);
+    prepareAudio(player.nextSequence + 1);
+  }
   else player.backward();
 }
 
@@ -209,9 +262,14 @@ async function initialize(id = 'hannya') {
   loadController = controller;
   const timeout = setTimeout(() => controller.abort(), 15000);
   player?.stopAudio();
+  for (const url of audioObjectUrls) URL.revokeObjectURL(url);
+  audioObjectUrls.clear();
+  preparedAudio.clear();
   player = undefined;
   if (scrollFrame !== null) cancelAnimationFrame(scrollFrame);
   scrollFrame = null;
+  audioStalled = false;
+  dial.style.removeProperty('transform');
   characterTimings = []; characterOffsets = []; characterEntries = [];
   highlighted = drumFaceCenter = drumFaceCharacter = displayedSequence = displayedCharacter = null;
   drumPosition = activeCharacter = -1;

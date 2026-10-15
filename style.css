@@ -176,6 +176,9 @@ h1 {
   transform: translateZ(calc(-1 * var(--reel-radius))) rotateX(var(--drum-turn, -7.5deg));
   will-change: transform;
 }
+.reel-rotor[data-moving="true"], .reel-rotor[data-settling="true"] {
+  transition: transform 120ms linear;
+}
 .reel-face {
   position: absolute;
   top: 50%;
