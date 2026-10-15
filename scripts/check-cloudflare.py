@@ -28,7 +28,7 @@ def check(base, package='dist'):
     files.append('data/sutra-sections.json')
     files.append('drum-motion.js')
     files.extend(['character-scroll.js', 'data/character-timing.json'])
-    for sutra_id in ('enmei', 'rokuji', 'komyo'):
+    for sutra_id in ('enmei', 'komyo', 'hachidai', 'amida'):
         files.extend([f'data/{sutra_id}.json', f'data/{sutra_id}-timing.json'])
         cues = json.loads((ROOT / package / f'data/{sutra_id}-timing.json').read_text())
         files.extend('audio/' + s['file'] for s in cues['sections'])
@@ -71,11 +71,13 @@ def check(base, package='dist'):
 
     with ThreadPoolExecutor(max_workers=6) as pool:
         size = sum(pool.map(verify, files))
-    removed_hash = json.loads((ROOT / 'audio/kannon-manifest.json').read_text())['files'][0]['sha256']
     release = hashlib.sha256((ROOT / package / 'index.html').read_bytes()).hexdigest()[:16]
-    removed = {'data/kannon.json', 'data/kannon-timing.json', f'audio/synced/{removed_hash}/01.wav'}
-    for private in ("data/kannon.json", "data/kannon-timing.json", f"audio/synced/{removed_hash}/01.wav", "audio/rokuji-manifest.json", "audio/komyo-manifest.json", "audio/enmei-manifest.json", "docs/enmei-license.yaml", "audio/kannon-manifest.json", "scripts/kannon-audio.py", "docs/sutra-selection.md", "pages/wrangler.jsonc", "scripts/build-pages.py", "docs/cloudflare-pages-license.yaml", "support-config.json", "scripts/support-link.py", "docs/support-license.yaml", "docs/support.md", "wrangler.jsonc", "README.md", "package.json", "data/character-readings.json", "scripts/character-timing.py", "audio/manifest.json", "audio/phrases-manifest.json", "audio/legacy-manifest.json", "audition/baseline/manifest.json", "audition/baseline/02.wav", "audition/baseline/sutra.json", "scripts/generate-recitation.py",
-                    "assets/prayer-wheel-icon-source.png", "audition/manifest.json", "audition/chant-manifest.json", "audition/chant-female-manifest.json", "docs/chant-reference-analysis.json", "docs/chant-license.yaml", "scripts/generate-chant.py", "scripts/generate-audition.py", "scripts/generate-audio.py", "tests/player.test.js", "missing.wav"):
+    removed = set()
+    for sutra_id in ('kannon', 'rokuji'):
+        old = json.loads((ROOT / f'audio/{sutra_id}-manifest.json').read_text())
+        removed.update({f'data/{sutra_id}.json', f'data/{sutra_id}-timing.json', f"audio/synced/{old['files'][0]['sha256']}/01.wav"})
+    for private in (*sorted(removed), "audio/hachidai-manifest.json", "audio/amida-manifest.json", "docs/additional-sutras-license.yaml", "audio/rokuji-manifest.json", "audio/komyo-manifest.json", "audio/enmei-manifest.json", "docs/enmei-license.yaml", "audio/kannon-manifest.json", "scripts/kannon-audio.py", "docs/sutra-selection.md", "pages/wrangler.jsonc", "scripts/build-pages.py", "docs/cloudflare-pages-license.yaml", "support-config.json", "scripts/support-link.py", "docs/support-license.yaml", "docs/support.md", "wrangler.jsonc", "README.md", "package.json", "data/character-readings.json", "scripts/character-timing.py", "audio/manifest.json", "audio/phrases-manifest.json", "audio/legacy-manifest.json", "audition/baseline/manifest.json", "audition/baseline/02.wav", "audition/baseline/sutra.json", "scripts/generate-recitation.py",
+                    "scripts/check-sutra-texts.py", "audio/amida/01.wav", "audio/hachidai/01.wav", "assets/prayer-wheel-icon-source.png", "audition/manifest.json", "audition/chant-manifest.json", "audition/chant-female-manifest.json", "docs/chant-reference-analysis.json", "docs/chant-license.yaml", "scripts/generate-chant.py", "scripts/generate-audition.py", "scripts/generate-audio.py", "tests/player.test.js", "missing.wav"):
         try:
             # Pages may retain previously public immutable URLs at the edge.
             # A release query verifies the current deployment's missing-path routing.

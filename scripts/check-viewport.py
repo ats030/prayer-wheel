@@ -4,15 +4,22 @@ import argparse
 from playwright.sync_api import sync_playwright
 
 
-def check(url):
+def check(url, sutra_id='hannya'):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         page.route('**/v.js', lambda route: route.abort())
-        for width, height in [(320,568),(375,667),(390,844),(768,1024),(1280,900),(844,390)]:
-            page.set_viewport_size({'width':width,'height':height})
+
+        def load():
             page.goto(url)
             page.wait_for_selector('#stage[aria-disabled="false"]')
+            if sutra_id != 'hannya':
+                page.select_option('#sutraSelect', sutra_id)
+                page.wait_for_selector('#stage[aria-disabled="false"]')
+
+        for width, height in [(320,568),(375,667),(390,844),(768,1024),(1280,900),(844,390)]:
+            page.set_viewport_size({'width':width,'height':height})
+            load()
             assert page.locator('#sutraDetails').evaluate('e=>e.open')
             assert page.locator('#textBlock').is_visible()
             for drawer in ['sutraDetails','settingsDetails','infoDetails']:
@@ -47,7 +54,7 @@ def check(url):
             if width >= 768 and height >= 600 and page.locator('#translationBlock').is_visible():
                 gap = page.evaluate("document.querySelector('.support-link').getBoundingClientRect().top - document.querySelector('#translationBlock').getBoundingClientRect().bottom")
                 assert 0 <= gap <= 110, ('Excessive space before support', width, height, gap)
-            page.screenshot(path=f'/tmp/prayer-wheel-viewport-{width}x{height}.png')
+            page.screenshot(path=f'/tmp/prayer-wheel-viewport-{sutra_id}-{width}x{height}.png')
             page.evaluate('''() => {
               document.querySelector('#currentLine').textContent = '観世音菩薩の教えを心に留める。'.repeat(10);
               document.querySelector('#currentTranslation').textContent = '苦しむ人々に寄り添い、心の安らぎへ導きます。'.repeat(10);
@@ -58,17 +65,15 @@ def check(url):
             assert page.locator('#readingCopy').evaluate('e=>e.scrollTop>0')
             page.locator('#stage').click()
             assert page.evaluate('scrollY')==0
-            print(f'{width}x{height}: fixed viewport, all drawers, wheel input, internal scroll PASS')
+            print(f'{sutra_id} {width}x{height}: fixed viewport, all drawers, wheel input, internal scroll PASS')
         page.set_viewport_size({'width':568,'height':320})
-        page.goto(url)
-        page.wait_for_selector('#stage[aria-disabled="false"]')
+        load()
         assert page.locator('#sutraDetails').evaluate('e=>e.open')
         assert page.evaluate('document.documentElement.scrollHeight > innerHeight')
         page.locator('#textBlock').scroll_into_view_if_needed()
         assert page.locator('#textBlock').is_visible()
         page.set_viewport_size({'width':390,'height':667})
-        page.goto(url)
-        page.wait_for_selector('#stage[aria-disabled="false"]')
+        load()
         assert page.locator('#sutraDetails').evaluate('e=>e.open')
         page.add_style_tag(content='.top, .reading-bottom { font-size: 40px; } .reader-app h1 { font-size: 60px; } .reader-app .support p { font-size: 30px; }')
         page.wait_for_function("document.body.classList.contains('is-constrained')")
@@ -88,4 +93,6 @@ def check(url):
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--url',default='http://127.0.0.1:8743/')
-    check(parser.parse_args().url)
+    parser.add_argument('--sutra', choices=('hannya','enmei','komyo','hachidai','amida'), default='hannya')
+    args=parser.parse_args()
+    check(args.url, args.sutra)

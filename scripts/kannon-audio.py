@@ -27,7 +27,7 @@ chant = module('chant', 'generate-chant.py')
 timing = module('timing', 'character-timing.py')
 
 
-SUTRA_SHAPES = {'kannon': (52, 520), 'enmei': (10, 42), 'rokuji': (1, 6), 'komyo': (5, 27)}
+SUTRA_SHAPES = {'kannon': (52, 520), 'enmei': (10, 42), 'rokuji': (1, 6), 'komyo': (5, 27), 'hachidai': (45, 372), 'amida': (112, 1857)}
 
 
 def check(sutra_id='kannon'):

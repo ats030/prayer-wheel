@@ -1,0 +1,39 @@
+reviewed_at: 2026-10-15
+intended_use: Webマニ車に仏説八大人覚経・仏説阿弥陀経の古典本文全文と独自意訳・同期音声を追加
+ancient_text:
+  decision: conditional
+  cost: 無料の公開資料を参照。外部API・有料データセットを追加しない
+  commercial_use: 古典漢訳本文を独自入力。近現代の訳・編集・画像・録音の利用許諾は前提にしない
+  attribution: 八大人覚経は安世高訳と伝わる漢訳、阿弥陀経は鳩摩羅什訳
+  conditions:
+    - 古典本文のみを現行字体で独自入力し、出典と編集範囲を記録
+    - 現代語訳は本アプリ用に独自作成し、既存の訳文・解説・録音・画像を転載しない
+    - 日本漢字音による読みの一例とし、特定宗派の公式な唱え方を称さない
+    - 未監修の意訳であることを記録し、経典中の救済を効能の保証として広告しない
+  sources:
+    - https://zh.wikisource.org/wiki/佛說八大人覺經
+    - https://zh.wikisource.org/wiki/佛說阿彌陀經
+    - https://ja.wikisource.org/wiki/仏説阿弥陀経
+    - https://ci.nii.ac.jp/ncid/BA33482410
+    - https://tsukijihongwanji.jp/wtkjp/wp-content/uploads/2020/06/2020-0621-2.pdf
+  public_domain_evidence: 中国語Wikisourceの両古典ページは公有領域表示。古典本文のみを対象にし、現代の訳やページ編集情報は取り込まない
+modern_assets:
+  decision: declined
+  reason: 現代語訳・解説・宗派固有の録音・版面・画像は採用しない
+voice:
+  decision: conditional
+  adoption: 既存のローカル音声合成とクレジットを継続。新しいツール・モデル・依存・サービスは追加しない
+  engine_version: 0.25.2
+  voice_version: 0.16.0
+  teacher_version: 0.16.0
+  synthesis: VOICEVOX WhiteCUL ハミング3023 / 波音リツ 歌唱クエリ6000
+  cost: 既存CPUエンジンのみ。外部API課金なし
+  conditions:
+    - docs/chant-license.yaml の既存条件と画面/READMEの両声クレジット・規約リンクを維持
+    - エンジン・音声モデル・キャラクター画像は再配布しない
+  sources:
+    - https://voicevox.hiroshiba.jp/term/
+    - https://voicevox.hiroshiba.jp/product/white_cul/
+    - https://www.whitecul.com/guideline
+    - https://www.canon-voice.com/terms/
+  verification_note: VOICEVOXとカノンの公式規約を再確認。WhiteCULの規約URLは取得時にTLS/タイムアウトで参照できず、既存採用時のchant-license.yamlの条件を維持する。新規の声・モデルの採用判断は行わない

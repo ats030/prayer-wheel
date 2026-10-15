@@ -16,6 +16,7 @@ if not reason:
 subprocess.run([sys.executable, str(ROOT / "scripts/check-audio.py")], check=True)
 subprocess.run([sys.executable, str(ROOT / "scripts/check-audition.py")], check=True)
 subprocess.run([sys.executable, str(ROOT / "scripts/check-chant.py")], check=True)
+subprocess.run([sys.executable, str(ROOT / "scripts/check-sutra-texts.py")], check=True)
 html = (ROOT / "index.html").read_text(encoding="utf-8")
 support_spec = importlib.util.spec_from_file_location('support_link', ROOT / 'scripts/support-link.py')
 support_link = importlib.util.module_from_spec(support_spec)
@@ -47,7 +48,7 @@ kannon_spec = importlib.util.spec_from_file_location('kannon_audio', ROOT / 'scr
 kannon_audio = importlib.util.module_from_spec(kannon_spec)
 kannon_spec.loader.exec_module(kannon_audio)
 verse_packages = []
-for sutra_id in ('enmei', 'rokuji', 'komyo'):
+for sutra_id in ('enmei', 'komyo', 'hachidai', 'amida'):
     cues = kannon_audio.check(sutra_id)
     verse_manifest = json.loads((ROOT / f'audio/{sutra_id}-manifest.json').read_text())
     verse_packages.append((verse_manifest, cues))

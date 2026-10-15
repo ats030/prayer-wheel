@@ -17,7 +17,7 @@ def check(base):
             return play.call(this);
           };
         ''')
-        for sutra in ('hannya', 'enmei', 'rokuji', 'komyo'):
+        for sutra in ('hannya', 'enmei', 'komyo', 'hachidai', 'amida'):
             page.goto(base)
             page.wait_for_selector('#stage[aria-disabled="false"]')
             if sutra != 'hannya':

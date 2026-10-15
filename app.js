@@ -11,8 +11,9 @@ audio.preservesPitch = true;
 const sutras = {
   hannya: { title: '般若心経', source: 'data/sutra-sections.json', timing: 'data/character-timing.json', audioDirectory: 'audio/sections' },
   enmei: { title: '延命十句観音経', source: 'data/enmei.json', timing: 'data/enmei-timing.json', audioDirectory: 'audio/enmei' },
-  rokuji: { title: '六字真言', source: 'data/rokuji.json', timing: 'data/rokuji-timing.json', audioDirectory: 'audio/rokuji' },
   komyo: { title: '光明真言', source: 'data/komyo.json', timing: 'data/komyo-timing.json', audioDirectory: 'audio/komyo' },
+  hachidai: { title: '仏説八大人覚経', source: 'data/hachidai.json', timing: 'data/hachidai-timing.json', audioDirectory: 'audio/hachidai' },
+  amida: { title: '仏説阿弥陀経', source: 'data/amida.json', timing: 'data/amida-timing.json', audioDirectory: 'audio/amida' },
 };
 let player;
 let loadVersion = 0;

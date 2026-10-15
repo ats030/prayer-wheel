@@ -32,7 +32,7 @@ def check(base, sutra_id='enmei'):
 
         page.goto(base)
         ready()
-        assert page.locator('#sutraSelect option').evaluate_all("items => items.map(e => e.value)") == ['hannya','enmei','rokuji','komyo']
+        assert page.locator('#sutraSelect option').evaluate_all("items => items.map(e => e.value)") == ['hannya','enmei','komyo','hachidai','amida']
         page.locator('#stage').tap()
         page.wait_for_function('window.testAudio && testAudio.currentTime > .3')
         page.locator('#stage').tap()
@@ -128,6 +128,6 @@ def check(base, sutra_id='enmei'):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--url', default='http://127.0.0.1:8743')
-    parser.add_argument('--sutra', choices=['enmei','rokuji','komyo'], default='enmei')
+    parser.add_argument('--sutra', choices=['enmei','komyo','hachidai','amida'], default='enmei')
     args = parser.parse_args()
     check(args.url, args.sutra)
