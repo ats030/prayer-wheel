@@ -24,18 +24,6 @@
 
     <main>
       <div class="grid">
-        <section class="stage-panel" aria-label="経文マニ車">
-          <div class="stage" id="stage" tabindex="0" role="button" aria-disabled="true"
-               aria-keyshortcuts="Enter ArrowDown ArrowUp PageDown PageUp Space"
-               aria-describedby="stageHint"
-               aria-label="マニ車を回す。タップ、クリック、Enter、下矢印で次へ。上矢印で予約取消か前の節へ。Spaceで一時停止・再開。">
-            <div class="reel-window" aria-hidden="true"><div class="reel-rotor" id="dial"></div></div>
-            <div class="reel-stop-line" aria-hidden="true"></div>
-          </div>
-          <div class="drum-meter"><span id="drumPosition">— / — 節</span></div>
-          <p class="stage-hint" id="stageHint">タップで次へ</p>
-        </section>
-
         <section class="read-panel" aria-label="読み上げ本文">
           <div id="readingCopy" class="reading-copy" tabindex="0" role="region" aria-label="現在の一節と現代語訳">
             <div class="statusline">
@@ -63,6 +51,18 @@
               <button class="btn" id="retryBtn" hidden>音声を再試行</button>
             </div>
           </div>
+        </section>
+
+        <section class="stage-panel" aria-label="経文マニ車">
+          <div class="stage" id="stage" tabindex="0" role="button" aria-disabled="true"
+               aria-keyshortcuts="Enter ArrowDown ArrowUp PageDown PageUp Space"
+               aria-describedby="stageHint"
+               aria-label="マニ車を回す。タップ、クリック、Enter、下矢印で次へ。上矢印で予約取消か前の節へ。Spaceで一時停止・再開。">
+            <div class="reel-window" aria-hidden="true"><div class="reel-rotor" id="dial"></div></div>
+            <div class="reel-stop-line" aria-hidden="true"></div>
+          </div>
+          <div class="drum-meter"><span id="drumPosition">— / — 節</span></div>
+          <p class="stage-hint" id="stageHint">タップで次へ</p>
         </section>
       </div>
 

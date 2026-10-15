@@ -28,6 +28,7 @@ def check(url):
                 assert result['scroll'] <= height+1, (width,height,drawer,result)
                 assert result['overflow'] <= width, (width,height,drawer,result)
                 assert result['open']==1, result
+                assert result['copy']['x'] + result['copy']['w'] <= result['stage']['x'], ('Wheel must be on the right', result)
                 for key in ['stage','copy','support','drawer']:
                     r=result[key]
                     assert r['h']>(60 if key=='stage' else 20) and r['y']>=0 and r['b']<=height, (width,height,drawer,key,result)
@@ -40,6 +41,9 @@ def check(url):
             page.wait_for_timeout(100)
             page.locator('#textBlock').evaluate('e=>e.scrollTop=e.scrollHeight')
             assert page.locator('#textBlock').evaluate('e=>e.scrollHeight<=e.clientHeight || e.scrollTop>0')
+            if width >= 768 and height >= 600 and page.locator('#translationBlock').is_visible():
+                gap = page.evaluate("document.querySelector('.support-link').getBoundingClientRect().top - document.querySelector('#translationBlock').getBoundingClientRect().bottom")
+                assert 0 <= gap <= 110, ('Excessive space before support', width, height, gap)
             page.screenshot(path=f'/tmp/prayer-wheel-viewport-{width}x{height}.png')
             page.evaluate('''() => {
               document.querySelector('#currentLine').textContent = '観世音菩薩の教えを心に留める。'.repeat(10);

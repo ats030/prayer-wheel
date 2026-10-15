@@ -559,21 +559,21 @@ h1 { font-family: var(--font-reel); font-size: 30px; font-weight: 500; letter-sp
 .reader-app .sutra-picker > span { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); overflow: hidden; }
 .reader-app .sutra-picker select { width: 100%; font-size: 12px; padding: 8px; }
 .reader-app main { flex: 1; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
-.reader-app .grid { align-items: stretch; min-height: 0; margin: 14px 0; gap: 28px; }
-.reader-app .stage-panel { display: flex; flex-direction: column; min-height: 0; }
+.reader-app .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 190px); align-items: stretch; min-height: 0; margin: 14px 0; gap: 28px; }
+.reader-app .stage-panel { display: flex; flex-direction: column; justify-content: center; min-height: 0; }
 .reader-app .stage { flex: 1; min-height: 44px; max-height: 420px; }
 .reader-app .reel-window { height: 100%; }
 .reader-app .drum-meter { flex-shrink: 0; margin-top: 8px; }
 .reader-app .stage-panel > .stage-hint { margin: 4px 0 0; }
-.reader-app .read-panel { min-height: 0; padding: 0; }
-.reader-app .reading-copy { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 0 4px; }
+.reader-app .read-panel { justify-content: center; min-height: 0; padding: 0; }
+.reader-app .reading-copy { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 0 4px; }
 .reader-app .reading-copy:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .reader-app .statusline { min-height: 24px; }
 .reader-app .reading-heading { margin-top: 6px; }
 .reader-app .current { min-height: 0; }
 .reader-app .current-reading { margin: 8px 0 12px; }
 .reader-app .current-translation { margin-bottom: 8px; }
-.reader-app .reading-bottom { flex-shrink: 0; margin-top: 4px; }
+.reader-app .reading-bottom { flex-shrink: 0; margin-top: 12px; }
 .reader-app .reading-bottom .support { margin-top: 8px; }
 .reader-app .reading-bottom .support-link { min-height: 44px; padding: 6px; font-size: 22px; }
 .reader-app .support p { margin-top: 4px; }
@@ -593,7 +593,7 @@ h1 { font-family: var(--font-reel); font-size: 30px; font-weight: 500; letter-sp
 .reader-app #reloadBtn { flex-shrink: 0; }
 @media (max-width: 600px) {
   .reader-app h1 { font-size: 20px; letter-spacing: .04em; }
-  .reader-app .grid { gap: 14px; grid-template-columns: minmax(0, 100px) minmax(0, 1fr); }
+  .reader-app .grid { gap: 14px; grid-template-columns: minmax(0, 1fr) minmax(0, 100px); }
   .reader-app .current { font-size: 22px; }
   .reader-app .drum-meter { font-size: 10px; }
 }
