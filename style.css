@@ -1,4 +1,5 @@
 /* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V4
+ * Genre: reading app · quiet · gold anchor · drum/sutra split with support below.
  * Component: sutra drum · Existing dark/gold theme, ivory reel surface.
  * States: default, hover, focus, active, disabled, loading, error, success.
  */
@@ -199,7 +200,7 @@ h1 {
   transform: rotateX(var(--face-angle)) translateZ(var(--reel-radius));
 }
 .reel-face.is-selected { font-weight: 700; }
-.reel-face.is-intro { font-size: clamp(18px, 2.2vw, 26px); }
+.reel-face.is-intro { font-size: 18px; letter-spacing: 0; white-space: nowrap; }
 .reel-stop-line {
   position: absolute;
   top: 50%;
@@ -446,24 +447,80 @@ input[type="range"] {
 .support-external { font-size: 12px; }
 .stage-hint, .progress-label, .counter-label, .foot { color: var(--ink-subtle); }
 
-/* ---------- Responsive & motion ---------- */
-
-@media (max-width: 900px) {
-  .grid { grid-template-columns: minmax(0, 1fr); }
-  .panel { min-width: 0; }
-  .stage { width: 100%; }
+/* ---------- Reading space: drum, sutra, support ---------- */
+.page { max-width: 800px; padding: 36px 32px 28px; }
+.top { padding-bottom: 24px; border-bottom: 1px solid var(--hairline); }
+.eyebrow { letter-spacing: .1em; color: var(--ink-subtle); }
+h1 { font-family: var(--font-reel); font-size: 30px; font-weight: 500; letter-spacing: .12em; }
+.tagline { margin-top: 4px; font-size: 13px; }
+.grid { grid-template-columns: minmax(0, 190px) minmax(0, 1fr); gap: 44px; margin: 32px 0 28px; }
+.stage-panel, .read-panel { min-width: 0; }
+.stage { padding: 12px; }
+.reel-stop-line { left: 12px; right: 12px; }
+.drum-meter { justify-content: center; margin-top: 12px; font-size: 11px; color: var(--ink-subtle); }
+.stage-hint { margin-top: 8px; font-size: 11px; color: var(--ink-subtle); }
+.read-panel { display: flex; flex-direction: column; align-self: stretch; padding: 4px 0 0; }
+.statusline { gap: 7px; min-height: 36px; align-items: flex-start; font-size: 12px; line-height: 1.6; }
+.dot { width: 6px; height: 6px; margin-top: 6px; }
+.reading-heading { margin: 20px 0 8px; font-size: 12px; letter-spacing: .15em; color: var(--accent); }
+.current { border: 0; padding: 0; margin: 0; min-height: 3em; font-family: var(--font-reel); font-weight: 500; font-size: clamp(26px, 4vw, 36px); line-height: 1.65; letter-spacing: .08em; overflow-wrap: anywhere; }
+.current.is-waiting { font-family: var(--font); font-size: 20px; letter-spacing: .02em; line-height: 1.9; color: var(--ink-muted); }
+.current-reading { margin: 12px 0 20px; font-size: 12px; line-height: 1.9; overflow-wrap: anywhere; min-height: 0; }
+.reading-bottom { margin-top: auto; }
+.progress { height: 2px; margin-top: 12px; }
+.reading-meta { display: flex; align-items: baseline; gap: 8px; justify-content: space-between; }
+.progress-label, .rounds { font-size: 11px; margin-left: 0; }
+.controls { flex-direction: row; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.controls .btn { justify-content: center; flex: 1; padding: 9px 10px; font-size: 12px; white-space: nowrap; }
+.support { padding: 22px 0 24px; margin: 0; border-top: 1px solid var(--hairline-strong); }
+.support .support-link { display: flex; align-items: baseline; justify-content: center; gap: 14px; width: 100%; min-height: 68px; padding: 14px 20px; border: 1px solid var(--accent); background: var(--accent); color: var(--reel-ink); font-family: var(--font-reel); font-size: 26px; letter-spacing: .18em; text-decoration: none; border-radius: var(--radius-sm); }
+.support .support-link:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--reel-ink); }
+.support-external { font-family: var(--font); font-size: 11px; letter-spacing: 0; }
+.support p { margin: 10px 0 0; color: var(--ink-subtle); font-size: 11px; line-height: 1.8; text-align: center; }
+.secondary { border-top: 1px solid var(--hairline); }
+.disclosure { border-bottom: 1px solid var(--hairline); }
+.disclosure summary { cursor: pointer; min-height: 52px; padding: 15px 0; font-size: 13px; color: var(--ink-muted); }
+.disclosure summary::marker { color: var(--accent); font-size: 11px; }
+.disclosure summary > span { float: right; font-size: 11px; color: var(--ink-subtle); }
+.disclosure summary:hover { color: var(--accent-hover); }
+.disclosure summary:focus-visible, .text-block:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.text-block { margin: 4px 0 22px; max-height: 320px; font-family: var(--font-reel); font-size: 18px; line-height: 2.2; }
+.settings-content { display: grid; gap: 18px; padding: 8px 0 24px; }
+.settings-content .field { max-width: 360px; }
+.settings-content > .btn { justify-self: start; }
+.settings-content .stage-hint { text-align: left; line-height: 1.9; }
+.settings-content .drum-selection { margin: 0; }
+.session-meta { display: flex; flex-wrap: wrap; gap: 24px; align-items: baseline; }
+.counter-label b { font-size: 14px; }
+.foot { border: 0; margin: 24px 0 0; padding: 0; font-size: 10px; line-height: 1.9; }
+.foot p + p { margin-top: 8px; }
+.foot a { display: inline-block; white-space: nowrap; }
+@media (max-width: 600px) {
+  .page { padding: 22px 20px 24px; }
+  .top { padding-bottom: 18px; }
+  h1 { font-size: 26px; }
+  .eyebrow { font-size: 10px; }
+  .tagline { font-size: 12px; }
+  .grid { grid-template-columns: minmax(0, 116px) minmax(0, 1fr); gap: 22px; margin: 24px 0; }
+  .stage { padding: 9px; }
+  .reel-stop-line { left: 9px; right: 9px; }
+  .reel-face.is-intro { font-size: 12px; }
+  .statusline { font-size: 11px; min-height: 48px; }
+  .reading-heading { margin-top: 14px; font-size: 11px; }
+  .current { font-size: 25px; line-height: 1.65; letter-spacing: .03em; }
+  .current.is-waiting { font-size: 16px; }
+  .current-reading { font-size: 11px; margin: 8px 0 14px; }
+  .reading-meta { flex-wrap: wrap; gap: 0 8px; }
+  .support { padding: 18px 0 20px; }
 }
-
-@media (max-width: 414px) {
-  .page { padding: 28px 16px 40px; }
-  .panel { padding: 18px; }
-  .stage { padding: 10px; }
-  .reel-stop-line { left: 10px; right: 10px; }
-  .btn { white-space: nowrap; }
+@media (max-width: 360px) {
+  .page { padding-left: 16px; padding-right: 16px; }
+  .grid { grid-template-columns: minmax(0, 100px) minmax(0, 1fr); gap: 16px; }
+  .controls { gap: 6px; }
+  .controls .btn { padding-inline: 7px; font-size: 11px; }
+  .current { font-size: 23px; }
 }
-
 @media (prefers-reduced-motion: reduce) {
-  .stage { transition: none; }
-  .progress-fill { transition: none; }
+  .stage, .progress-fill { transition: none; }
   .dot.speaking { animation: none; }
 }

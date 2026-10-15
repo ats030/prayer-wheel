@@ -14,78 +14,75 @@
 <body>
   <div class="page">
     <header class="top">
-      <div>
-        <p class="eyebrow">Prayer Wheel · 音声マニ車</p>
-        <h1>転じて読める</h1>
-      </div>
-      <p class="tagline">ドラムを回すたび、心経を意味のまとまりごとに。スクロール、タップ、矢印キーで進められます。</p>
+      <p class="eyebrow">Prayer Wheel · 音声マニ車</p>
+      <h1>心経を回す</h1>
+      <p class="tagline">一文字ずつ、声とともに。</p>
     </header>
 
     <div class="voice-banner" id="voiceBanner" role="alert" hidden></div>
     <button class="btn" id="reloadBtn" hidden>ページを再読み込み</button>
 
-    <main class="grid">
-      <section class="panel stage-panel" aria-label="経文ドラム">
-        <div class="drum-heading"><h2>経文ドラム</h2><span>読み上げの文字</span></div>
-        <div class="stage" id="stage" tabindex="0" role="button" aria-disabled="true"
-             aria-keyshortcuts="Enter ArrowDown ArrowUp PageDown PageUp Space"
-             aria-describedby="stageHint"
-             aria-label="ドラムを回す。タップ、クリック、Enter、下矢印で次へ。上矢印で予約取消か前の節へ。Spaceで一時停止・再開。">
-          <div class="reel-window" aria-hidden="true">
-            <div class="reel-rotor" id="dial"></div>
+    <main>
+      <div class="grid">
+        <section class="stage-panel" aria-label="経文ドラム">
+          <div class="stage" id="stage" tabindex="0" role="button" aria-disabled="true"
+               aria-keyshortcuts="Enter ArrowDown ArrowUp PageDown PageUp Space"
+               aria-describedby="stageHint"
+               aria-label="ドラムを回す。タップ、クリック、Enter、下矢印で次へ。上矢印で予約取消か前の節へ。Spaceで一時停止・再開。">
+            <div class="reel-window" aria-hidden="true"><div class="reel-rotor" id="dial"></div></div>
+            <div class="reel-stop-line" aria-hidden="true"></div>
           </div>
-          <div class="reel-stop-line" aria-hidden="true"></div>
-        </div>
-        <div class="drum-meter">
-          <span id="drumPosition">— / — 節</span>
-          <span class="counter-label">操作数 <b id="counter">0</b></span>
-        </div>
-        <p class="drum-selection" id="drumSelection">読み上げに合わせて、経文が一文字ずつ流れます。</p>
-        <p class="stage-hint" id="stageHint">スクロール／タップ: 次へ<br>逆スクロール／「戻る」: 予約取消・前の節へ<br>キー ↓ / ↑ ・ Space: 一時停止／再開</p>
-      </section>
+          <div class="drum-meter"><span id="drumPosition">— / — 節</span></div>
+          <p class="stage-hint" id="stageHint">触れて、次の一節へ</p>
+        </section>
 
-      <section class="panel read-panel" aria-label="読み上げ本文">
-        <div class="statusline">
-          <span class="dot" id="statusDot"></span>
-          <span class="status-text" id="statusText" role="status">経文を読み込んでいます…</span>
-          <span class="rounds">完了 <b id="rounds">0</b> 巡</span>
-        </div>
-
-        <p class="reading-heading">音声の位置</p>
-        <blockquote class="current" id="currentLine">—</blockquote>
-        <p class="current-reading" id="currentReading"></p>
-        <p class="queue-label">待っている節 <b id="queueCount">0</b> / 5</p>
-
-        <div class="text-block" id="textBlock"></div>
-
-        <div class="progress" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
-        <p class="progress-label" id="progressLabel">—</p>
-
-        <div class="controls">
-          <div class="control-row">
-            <label class="field">
-              <span>速度 <b id="rateOut">1.0×</b></span>
-              <input type="range" id="rate" min="0.6" max="1.4" step="0.05" value="1">
-            </label>
+        <section class="read-panel" aria-label="読み上げ本文">
+          <div class="statusline">
+            <span class="dot" id="statusDot"></span>
+            <span class="status-text" id="statusText" role="status">読み込み中…</span>
           </div>
-          <div class="control-row">
-            <button class="btn" id="backBtn" disabled>戻る</button>
-            <button class="btn btn-primary" id="restartBtn" disabled>最初から</button>
-            <button class="btn" id="pauseBtn" disabled>一時停止</button>
-            <button class="btn" id="retryBtn" hidden>音声を再試行</button>
+          <p class="reading-heading">般若心経</p>
+          <blockquote class="current" id="currentLine">—</blockquote>
+          <p class="current-reading" id="currentReading"></p>
+          <div class="reading-bottom">
+            <div class="progress" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="reading-meta"><p class="progress-label" id="progressLabel">—</p><span class="rounds">完了 <b id="rounds">0</b> 巡</span></div>
+            <div class="controls">
+              <button class="btn" id="backBtn" disabled>戻る</button>
+              <button class="btn" id="pauseBtn" disabled>一時停止</button>
+              <button class="btn" id="retryBtn" hidden>音声を再試行</button>
+            </div>
           </div>
-        </div>
-      </section>
-    </main>
+        </section>
+      </div>
 
-    <footer class="foot">
       <!-- SUPPORT:START -->
       <div class="support" hidden>
         <a class="btn support-link" target="_blank" rel="noopener noreferrer">浄財<span class="support-external">（外部サイト）</span></a>
         <p>このアプリへのお礼として、開発者を任意で支援できます。支援の有無によって利用できる機能は変わりません。</p>
       </div>
       <!-- SUPPORT:END -->
-      <p>心経の音声を収録済み。音声エンジンのインストールは不要です。</p>
+
+      <div class="secondary">
+        <details class="disclosure" id="sutraDetails">
+          <summary>経文をひらく<span>全文</span></summary>
+          <div class="text-block" id="textBlock" tabindex="0" role="region" aria-label="般若心経の全文"></div>
+        </details>
+        <details class="disclosure" id="settingsDetails">
+          <summary>読み方を整える<span>設定・操作</span></summary>
+          <div class="settings-content">
+            <label class="field"><span>速度 <b id="rateOut">1.0×</b></span><input type="range" id="rate" min="0.6" max="1.4" step="0.05" value="1"></label>
+            <button class="btn" id="restartBtn" disabled>最初から</button>
+            <p class="stage-hint">スクロール／タップ: 次へ<br>逆スクロール／「戻る」: 予約取消・前の節へ<br>キー ↓ / ↑ ・ Space: 一時停止／再開</p>
+            <p class="drum-selection" id="drumSelection">読み上げに合わせて、経文が一文字ずつ流れます。</p>
+            <div class="session-meta"><span class="counter-label">操作数 <b id="counter">0</b></span><span class="queue-label">待っている節 <b id="queueCount">0</b> / 5</span></div>
+          </div>
+        </details>
+      </div>
+    </main>
+
+    <footer class="foot">
+
       <p>音声: <a href="https://voicevox.hiroshiba.jp/product/white_cul/">VOICEVOX:WhiteCUL</a> / VOICEVOX:波音リツ（歌唱クエリ生成）
       </p>
       <p><a href="audition/">A〜Dの試聴比較</a> · <a href="https://voicevox.hiroshiba.jp/term/">VOICEVOX規約</a> · <a href="https://www.whitecul.com/guideline">WhiteCUL規約</a> · <a href="https://www.canon-voice.com/terms/">波音リツ規約</a></p>

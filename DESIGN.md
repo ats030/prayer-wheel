@@ -568,3 +568,13 @@ OSの動きを減らす設定では補間せず、文字を切り替える。
 - Light mode is not documented because the marketing site does not ship a light theme.
 - Linear's actual product UI uses a richer color-tag palette (red, orange, yellow, green, blue, purple) for issue priorities and project labels — those colors live in the in-product surfaces shown in mockups.
 - The custom display, text, and mono families are proprietary; an open-source substitute is acceptable.
+
+### prayer-wheel: 没入する読経画面（2026-10-15の合意）
+
+ドラム・現在の一節・浄財を主役にする。スマホもドラムと一節を左右に並べる。
+黒・金・生成りと既存の機械式ドラムを維持し、外側のカード枠を減らす。
+現在の一節を明朝で大きく見せ、読み仮名を添える。全文は閉じたdetailsに収める。
+戻る・一時停止/再開は常設、速度と最初から・操作説明・詳細カウンタは設定detailsへ。
+大きな金色の浄財ボタンを読経エリアの直下に置き、任意支援である旨を添える。
+全文を開いた際には読み上げ中の一節へ位置を合わせる。再生ロジックは維持する。
+320/375/414/768/1280pxで検証する。動作低減、キーボード操作、音声エラー表示を維持。

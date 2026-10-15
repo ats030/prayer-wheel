@@ -1,6 +1,6 @@
 # 浄財による開発支援
 
-フッターの「浄財」ボタンは https://buymeacoffee.com/ats030 を別タブで開きます。
+読経エリア直下の「浄財」ボタンは https://buymeacoffee.com/ats030 を別タブで開きます。
 公開ビルド時に`support-config.json`を読み、外部リンクとして出力します。
 アプリに決済SDKや決済状態は追加しません。URL未設定時は非表示です。
 ソースのindex.htmlを直接配信する場合は非表示のままです。

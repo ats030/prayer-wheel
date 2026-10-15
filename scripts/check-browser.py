@@ -58,6 +58,7 @@ def check(base):
         }""", timeout=500)
         position = page.locator('#dial').evaluate("e => parseFloat(e.style.getPropertyValue('--drum-turn')) / 7.5")
         assert position == int(position)
+        page.locator('#settingsDetails').evaluate('e => e.open = true')
         page.locator('#restartBtn').click()
         assert page.locator('.reel-face.is-selected').inner_text() == '心経を回す'
         page.emulate_media(reduced_motion='no-preference')
@@ -66,17 +67,17 @@ def check(base):
         assert page.locator("#pauseBtn").inner_text() == "一時停止"
         page.locator("#stage").click()
         page.wait_for_function("window.testAudio && testAudio.currentTime > 0.1")
-        assert page.locator(".chunk.active").inner_text().strip() == "摩訶般若波羅蜜多心経"
+        assert page.locator(".chunk.active").text_content().strip() == "摩訶般若波羅蜜多心経"
         # Add five waiting sections without letting real playback finish first.
         page.evaluate("for(let i=0;i<5;i++)document.getElementById('stage').click()")
-        assert page.locator("#queueCount").inner_text() == "5"
-        assert page.locator("#counter").inner_text() == "6"
+        assert page.locator("#queueCount").text_content() == "5"
+        assert page.locator("#counter").text_content() == "6"
         assert page.locator(".reel-face.is-selected").get_attribute("data-section") == "0"
         page.evaluate("document.getElementById('stage').click()")
-        assert page.locator("#counter").inner_text() == "6"
+        assert page.locator("#counter").text_content() == "6"
         assert page.locator("#currentLine").inner_text() == "摩訶般若波羅蜜多心経"
         page.locator("#backBtn").click()
-        assert page.locator("#queueCount").inner_text() == "4"
+        assert page.locator("#queueCount").text_content() == "4"
         assert page.locator(".reel-face.is-selected").get_attribute("data-section") == "0"
         page.locator("#pauseBtn").click()
         assert page.locator('.reel-face.is-selected').get_attribute('data-section') == '0'
@@ -91,8 +92,8 @@ def check(base):
         assert page.evaluate("testAudio.playbackRate") == 1.25
         assert page.locator("#rounds").inner_text() == "0"
         page.locator("#restartBtn").click()
-        assert page.locator("#counter").inner_text() == "0"
-        assert page.locator("#queueCount").inner_text() == "0"
+        assert page.locator("#counter").text_content() == "0"
+        assert page.locator("#queueCount").text_content() == "0"
         assert page.locator(".chunk.active").count() == 0
         assert page.locator(".reel-face.is-selected").inner_text() == "心経を回す"
         # Actual wheel input and key controls.
@@ -101,9 +102,9 @@ def check(base):
         page.wait_for_function("document.getElementById('counter').textContent === '1'")
         page.locator("#stage").focus()
         page.keyboard.press("ArrowDown")
-        assert page.locator("#counter").inner_text() == "2"
+        assert page.locator("#counter").text_content() == "2"
         page.keyboard.press("ArrowUp")
-        assert page.locator("#counter").inner_text() == "1"
+        assert page.locator("#counter").text_content() == "1"
         page.keyboard.press("Space")
         assert page.locator("#pauseBtn").inner_text() == "再開"
         assert page.locator("#stage").get_attribute("data-state") == "paused"
@@ -126,7 +127,7 @@ def check(base):
         page.unroute("**/audio/synced/*/01.wav")
         page.locator("#retryBtn").click()
         page.wait_for_function("testAudio.currentTime > .1")
-        assert page.locator("#counter").inner_text() == "1"
+        assert page.locator("#counter").text_content() == "1"
         assert page.locator("#retryBtn").is_hidden()
         assert not any(":50021" in url or ":50121" in url for url in requests)
         assert not errors, errors
@@ -144,13 +145,16 @@ def check(base):
         touch.goto(base)
         touch.wait_for_selector('#stage[aria-disabled="false"]')
         touch.locator("#stage").tap()
-        touch.wait_for_selector(".chunk.active")
-        assert touch.locator("#counter").inner_text() == "1"
+        touch.wait_for_selector(".chunk.active", state="attached")
+        assert touch.locator("#counter").text_content() == "1"
         assert touch.evaluate("document.documentElement.scrollWidth") <= 390
         touch.wait_for_function("testAudio.currentTime > .4")
         touch.screenshot(path="/tmp/prayer-wheel-mobile.png", full_page=True)
         touch.locator("#pauseBtn").tap()
         assert touch.locator("#pauseBtn").inner_text() == "再開"
+        # The full text is opt-in; opening it restores active-passage alignment.
+        page.locator('#sutraDetails summary').click()
+        assert page.locator('#textBlock').is_visible()
         # A lower section in the text panel must actually become visible.
         page.set_viewport_size({"width": 390, "height": 844})
         page.locator("#restartBtn").click()
@@ -168,6 +172,12 @@ def check(base):
           const panel = document.getElementById('textBlock').getBoundingClientRect();
           return active.top >= panel.top && active.bottom <= panel.bottom;
         }""")
+        page.locator('#sutraDetails summary').click()
+        assert page.locator('#textBlock').is_hidden()
+        page.locator('#sutraDetails summary').focus()
+        page.keyboard.press('Enter')
+        assert page.locator('#textBlock').is_visible()
+        assert page.locator('.chunk.active').evaluate("e => { const a=e.getBoundingClientRect(), b=document.getElementById('textBlock').getBoundingClientRect(); return a.top>=b.top && a.bottom<=b.bottom; }")
         # A large target jump must not relabel the face still physically in view.
         assert page.evaluate("""async () => {
           const dial = document.getElementById('dial');
@@ -183,9 +193,9 @@ def check(base):
           return aligned();
         }""")
         touch.locator("#stage").tap()
-        assert touch.locator("#queueCount").inner_text() == "1"
+        assert touch.locator("#queueCount").text_content() == "1"
         touch.locator("#backBtn").tap()
-        assert touch.locator("#queueCount").inner_text() == "0"
+        assert touch.locator("#queueCount").text_content() == "0"
         assert touch.locator("#pauseBtn").inner_text() == "再開"
         assert not errors, errors
 
@@ -223,6 +233,10 @@ def check(base):
             layout.set_viewport_size({"width": width, "height": 900})
             layout.goto(base)
             layout.wait_for_selector('#stage[aria-disabled="false"]')
+            assert not layout.locator('#sutraDetails').evaluate('e => e.open')
+            assert not layout.locator('#settingsDetails').evaluate('e => e.open')
+            assert layout.locator('.support-link').get_attribute('href') == 'https://buymeacoffee.com/ats030'
+            assert layout.locator('.support-link').is_visible()
             result = layout.evaluate("""() => {
               const failures = [];
               const layoutFailures = [];
@@ -282,6 +296,8 @@ def check(base):
             assert layout.locator("#stage").get_attribute("data-state") == "paused"
             assert layout.locator(".reel-face.is-selected").get_attribute("data-section") == str(result["count"])
             assert layout.locator("#pauseBtn").inner_text() == "再開"
+            layout.locator("#settingsDetails summary").click()
+            assert layout.locator("#rate").is_visible()
             layout.locator("#restartBtn").click()
             assert layout.locator(".reel-face.is-selected").inner_text() == "心経を回す"
         browser.close()

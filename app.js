@@ -115,6 +115,7 @@ function updateUI() {
     });
     $('currentLine').textContent = index < 0 ? 'ドラムを回すと、読経が始まります。' : player.chunks[index].text;
     $('currentReading').textContent = index < 0 ? '' : player.chunks[index].reading;
+    $('currentLine').classList.toggle('is-waiting', index < 0);
     highlighted = index;
     if (index >= 0) {
       const target = spans[index];
@@ -142,6 +143,13 @@ function updateUI() {
   $('statusText').textContent = status;
   $('statusDot').className = `dot ${mode}`;
 }
+
+// A closed details has no layout; align the current passage after it opens.
+$('sutraDetails').addEventListener('toggle', () => {
+  if (!$('sutraDetails').open) return;
+  const target = $('textBlock').querySelector('.chunk.active');
+  if (target) $('textBlock').scrollTop = Math.max(0, target.offsetTop - $('textBlock').clientHeight / 2);
+});
 
 function turn(direction) {
   if (!player) return;
