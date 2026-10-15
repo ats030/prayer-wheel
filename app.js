@@ -113,7 +113,7 @@ function updateUI() {
       if (i === index) span.setAttribute('aria-current', 'true');
       else span.removeAttribute('aria-current');
     });
-    $('currentLine').textContent = index < 0 ? 'ドラムを回すと、読経が始まります。' : player.chunks[index].text;
+    $('currentLine').textContent = index < 0 ? 'マニ車を回すと、読経が始まります。' : player.chunks[index].text;
     $('currentReading').textContent = index < 0 ? '' : player.chunks[index].reading;
     $('currentLine').classList.toggle('is-waiting', index < 0);
     highlighted = index;
@@ -129,7 +129,7 @@ function updateUI() {
   $('retryBtn').hidden = !player.error;
   $('voiceBanner').hidden = !player.error;
   $('voiceBanner').textContent = player.error;
-  let status = '準備完了。ドラムを回してください。';
+  let status = '準備完了。マニ車を回してください。';
   let mode = 'idle';
   if (player.error) { status = '音声を停止しています。再試行できます。'; mode = 'warn'; }
   else if (player.paused) { status = '一時停止中。Spaceで再開できます。'; mode = 'paused'; }

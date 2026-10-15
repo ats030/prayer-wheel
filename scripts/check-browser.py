@@ -26,7 +26,7 @@ def check(base):
         page.on("request", lambda request: requests.append(request.url))
         page.goto(base)
         page.wait_for_selector('#stage[aria-disabled="false"]')
-        assert page.locator("#currentLine").inner_text() == "ドラムを回すと、読経が始まります。"
+        assert page.locator("#currentLine").inner_text() == "マニ車を回すと、読経が始まります。"
         assert page.locator(".reel-face.is-selected").inner_text() == ""
         page.locator('#stage').click()
         page.wait_for_function("window.testAudio && testAudio.currentTime > .4")
