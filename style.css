@@ -541,3 +541,8 @@ h1 { font-family: var(--font-reel); font-size: 30px; font-weight: 500; letter-sp
   .current-translation { margin-bottom: 14px; padding-top: 10px; }
   #currentTranslation { font-size: 12px; line-height: 1.85; }
 }
+
+.sutra-picker { display: flex; align-items: center; gap: 12px; max-width: 350px; margin-top: 18px; color: var(--ink-muted); font-size: 12px; }
+.sutra-picker > span { flex-shrink: 0; }
+.sutra-picker select { min-width: 0; min-height: 44px; font-size: 14px; }
+.sutra-switch-hint { margin: 6px 0 0; color: var(--ink-subtle); font-size: 10px; }

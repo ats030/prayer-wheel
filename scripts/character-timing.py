@@ -12,13 +12,14 @@ def canonical(text):
     return re.sub(r'([こごそぞとどのほぼぽもよろょ])う', r'\1お', text)
 
 
-def build():
-    raw = (ROOT / 'data/sutra.json').read_bytes()
+def build(sutra_path=None, manifest_path=None, mapping=None):
+    raw = (sutra_path or ROOT / 'data/sutra.json').read_bytes()
     sutra = json.loads(raw)
-    manifest = json.loads((ROOT / 'audio/manifest.json').read_text(encoding='utf-8'))
-    mapping = json.loads((ROOT / 'data/character-readings.json').read_text(encoding='utf-8'))['sections']
+    manifest = json.loads((manifest_path or ROOT / 'audio/manifest.json').read_text(encoding='utf-8'))
+    if mapping is None:
+        mapping = json.loads((ROOT / 'data/character-readings.json').read_text(encoding='utf-8'))['sections']
     assert manifest['sutraSha256'] == hashlib.sha256(raw).hexdigest()
-    assert len(mapping) == len(sutra['chunks']) == len(manifest['files']) == 29
+    assert len(mapping) == len(sutra['chunks']) == len(manifest['files'])
     sections = []
     for index, (chunk, record, group) in enumerate(zip(sutra['chunks'], manifest['files'], mapping), 1):
         assert group['text'] == chunk['text'].replace('　', '')

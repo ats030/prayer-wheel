@@ -1,4 +1,4 @@
-reviewed_at: 2026-10-13
+reviewed_at: 2026-10-15
 tool: VOICEVOX Engine
 engine_version: 0.25.2
 voice: WhiteCUL ノーマル（ハミング）
@@ -6,7 +6,7 @@ voice_library_version: 0.16.0
 speaker_id: 3023
 speaker_uuid: 67d5d8da-acd7-4207-bb10-b5542d3a663b
 singing_teacher: 波音リツ ノーマル（6000 / 0.16.0）
-intended_use: 現行29区切りと互換用の56句・旧29節の事前生成読経WAVを無料静的Webアプリで配信
+intended_use: 般若心経29区切り、観音経偈文52区切り、および既存互換音声を無料静的Webアプリで配信
 decision: conditional
 cost: 既存ローカルCPUエンジンで無料生成。外部有料APIや有料プランは使用しない
 commercial_use: WhiteCUL音源規約とVOICEVOX規約が商用・非商用利用を許諾
@@ -31,3 +31,9 @@ legacy_comparisons:
   sources:
     - https://voicevox.hiroshiba.jp/nemo/term/
     - https://www.virvoxproject.com/voicevoxの利用規約
+
+kannon:
+  source: data/kannon.json
+  manifest: audio/kannon-manifest.json
+  phonetics: エンジンの明示カナ解析。漢字の自動推定やNemoは使用しない
+  text_and_translations: 古典本文を独自入力、意訳を独自作成、既存録音や現代語訳を転載しない

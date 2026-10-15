@@ -8,7 +8,13 @@ const dial = $('dial');
 const audio = new Audio();
 audio.preload = 'auto';
 audio.preservesPitch = true;
+const sutras = {
+  hannya: { title: '般若心経', source: 'data/sutra-sections.json', timing: 'data/character-timing.json', audioDirectory: 'audio/sections' },
+  kannon: { title: '観音経（偈文）', source: 'data/kannon.json', timing: 'data/kannon-timing.json', audioDirectory: 'audio/kannon' },
+};
 let player;
+let loadVersion = 0;
+let loadController;
 let wheelAcc = 0;
 let highlighted = null;
 let drumPosition = -1;
@@ -116,7 +122,7 @@ function updateUI() {
     });
     $('currentLine').textContent = index < 0 ? 'マニ車を回すと、読経が始まります。' : player.chunks[index].text;
     $('currentReading').textContent = index < 0 ? '' : player.chunks[index].reading;
-    $('currentTranslation').textContent = index < 0 ? '' : modernTranslations.get(player.chunks[index].text);
+    $('currentTranslation').textContent = index < 0 ? '' : player.chunks[index].translation;
     $('translationBlock').hidden = index < 0;
     $('currentLine').classList.toggle('is-waiting', index < 0);
     highlighted = index;
@@ -191,35 +197,68 @@ $('rate').addEventListener('input', () => {
   audio.defaultPlaybackRate = audio.playbackRate;
   $('rateOut').textContent = `${audio.playbackRate.toFixed(2).replace(/0$/, '')}×`;
 });
-$('reloadBtn').addEventListener('click', () => location.reload());
+$('reloadBtn').addEventListener('click', () => initialize($('sutraSelect').value));
+$('sutraSelect').addEventListener('change', () => initialize($('sutraSelect').value));
 
-async function initialize() {
+async function initialize(id = 'hannya') {
+  const definition = sutras[id];
+  if (!definition) return;
+  const version = ++loadVersion;
+  loadController?.abort();
+  const controller = new AbortController();
+  loadController = controller;
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  player?.stopAudio();
+  player = undefined;
+  if (scrollFrame !== null) cancelAnimationFrame(scrollFrame);
+  scrollFrame = null;
+  characterTimings = []; characterOffsets = []; characterEntries = [];
+  highlighted = drumFaceCenter = drumFaceCharacter = displayedSequence = displayedCharacter = null;
+  drumPosition = activeCharacter = -1;
+  wheelAcc = 0;
+  dial.replaceChildren();
+  buildDrum();
+  $('textBlock').replaceChildren();
+  $('textBlock').scrollTop = 0;
+  $('textBlock').setAttribute('aria-label', definition.title + 'の全文');
+  $('sutraName').textContent = definition.title;
+  $('currentLine').textContent = '経文を読み込んでいます…';
+  $('currentLine').classList.add('is-waiting');
+  $('currentReading').textContent = $('currentTranslation').textContent = '';
+  $('translationBlock').hidden = true;
+  $('voiceBanner').hidden = $('reloadBtn').hidden = $('retryBtn').hidden = true;
+  $('restartBtn').disabled = true;
+  $('counter').textContent = $('rounds').textContent = $('queueCount').textContent = '0';
+  $('progressLabel').textContent = $('drumPosition').textContent = '—';
+  $('progressFill').style.width = '0%';
+  $('drumSelection').textContent = '読み上げに合わせて、経文が一文字ずつ流れます。';
+  $('statusText').textContent = '経文を読み込んでいます…';
+  $('statusDot').className = 'dot busy';
+  stage.setAttribute('aria-disabled', 'true');
+  stage.dataset.state = 'loading';
+  dial.dataset.moving = 'false';
   try {
-    const response = await fetch('data/sutra-sections.json', { signal: AbortSignal.timeout(15000) });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const sutraText = await response.text();
+    const [response, timingResponse] = await Promise.all([
+      fetch(definition.source, { signal: controller.signal }),
+      fetch(definition.timing, { cache: 'no-store', signal: controller.signal }),
+    ]);
+    if (!response.ok || !timingResponse.ok) throw new Error('Sutra unavailable');
+    const [sutraText, timings] = await Promise.all([response.text(), timingResponse.json()]);
     const sutra = JSON.parse(sutraText);
     if (!Array.isArray(sutra.chunks) || !sutra.chunks.length
         || sutra.chunks.some(c => typeof c.text !== 'string' || typeof c.reading !== 'string')) throw new Error('Invalid sutra');
-    if (sutra.chunks.some(chunk => !modernTranslations.get(chunk.text)?.trim())) throw new Error('Missing modern translation');
-    if (sutra.audioDirectory !== 'audio/sections') throw new Error('Invalid audio directory');
+    if (sutra.chunks.some(c => typeof (c.translation ?? modernTranslations.get(c.text)) !== 'string'
+        || !(c.translation ?? modernTranslations.get(c.text)).trim())) throw new Error('Missing modern translation');
+    if (sutra.audioDirectory !== definition.audioDirectory) throw new Error('Invalid audio directory');
     const chunks = sutra.chunks.map((chunk, i) => ({ ...chunk,
+      translation: chunk.translation ?? modernTranslations.get(chunk.text),
       audio: `${sutra.audioDirectory}/${String(i + 1).padStart(2, '0')}.wav`,
     }));
-    for (const chunk of chunks) {
-      const span = document.createElement('span');
-      span.className = 'chunk';
-      span.textContent = chunk.text + '　';
-      $('textBlock').appendChild(span);
-    }
-    const timingResponse = await fetch('data/character-timing.json', { cache: 'no-store', signal: AbortSignal.timeout(15000) });
-    if (!timingResponse.ok) throw new Error('Character timing unavailable');
-    const timings = await timingResponse.json();
     const sutraDigest = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(sutraText)))].map(b => b.toString(16).padStart(2, '0')).join('');
     if (timings.sutraSha256 !== sutraDigest) throw new Error('Character timing source mismatch');
     if (timings.version !== 1 || timings.sections.length !== chunks.length) throw new Error('Invalid character timing');
-    characterTimings = timings.sections;
-    for (const [section, timing] of characterTimings.entries()) {
+    const nextEntries = [], nextOffsets = [];
+    for (const [section, timing] of timings.sections.entries()) {
       if (!/^[a-f0-9]{64}$/.test(timing.audioSha256)
           || timing.file !== `synced/${timing.audioSha256}/${String(section + 1).padStart(2, '0')}.wav`) {
         throw new Error('Character audio version mismatch');
@@ -233,22 +272,35 @@ async function initialize() {
         && cue.end <= timing.duration && (index === 0 || cue.start >= timing.characters[index - 1].end))) {
         throw new Error('Invalid character intervals');
       }
-      characterOffsets.push(characterEntries.length);
-      timing.characters.forEach((cue, index) => characterEntries.push({ ...cue, section, index }));
-      characterEntries.push({ text: '', reading: '', section, index: -1 });
+      nextOffsets.push(nextEntries.length);
+      timing.characters.forEach((cue, index) => nextEntries.push({ ...cue, section, index }));
+      nextEntries.push({ text: '', reading: '', section, index: -1 });
+    }
+    if (version !== loadVersion) return;
+    characterTimings = timings.sections;
+    characterOffsets = nextOffsets;
+    characterEntries = nextEntries;
+    for (const chunk of chunks) {
+      const span = document.createElement('span');
+      span.className = 'chunk';
+      span.textContent = chunk.text + '　';
+      $('textBlock').appendChild(span);
     }
     player = new SutraPlayer(chunks, audio, updateUI);
     stage.setAttribute('aria-disabled', 'false');
     $('restartBtn').disabled = false;
     updateUI();
   } catch {
+    if (version !== loadVersion) return;
     stage.dataset.state = 'error';
     $('voiceBanner').hidden = false;
-    $('voiceBanner').textContent = '経文を読み込めませんでした。接続を確認してページを再読み込みしてください。';
+    $('voiceBanner').textContent = '経文を読み込めませんでした。接続を確認して経文を再読み込みしてください。';
     $('reloadBtn').hidden = false;
     $('statusText').textContent = '読み込みに失敗しました。';
+    $('statusDot').className = 'dot warn';
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
-buildDrum();
 initialize();
