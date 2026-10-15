@@ -84,7 +84,7 @@ def check(base):
             page.wait_for_timeout(200)
             assert page.locator('#dial').evaluate('''e => {
               const matrix = new DOMMatrixReadOnly(getComputedStyle(e).transform);
-              const radians = -parseFloat(e.style.getPropertyValue('--drum-turn')) * Math.PI / 180;
+              const radians = parseFloat(e.style.getPropertyValue('--drum-turn')) * Math.PI / 180;
               return !e.style.transform && Math.abs(matrix.m22 - Math.cos(radians)) < .00001
                 && Math.abs(matrix.m23 - Math.sin(radians)) < .00001;
             }'''), 'Normal completion did not settle at its target'
