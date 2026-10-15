@@ -16,7 +16,7 @@
     <header class="top">
       <h1>Webマニ車</h1>
       <label class="sutra-picker"><span>お経</span><select id="sutraSelect" aria-describedby="sutraSwitchHint"><option value="hannya">般若心経</option><option value="kannon">観音経（偈文）</option></select></label>
-      <p class="sutra-switch-hint" id="sutraSwitchHint">切り替えると、位置と予約は最初に戻ります。</p>
+      <p class="sutra-switch-hint" id="sutraSwitchHint">切替で最初に戻ります。</p>
     </header>
 
     <div class="voice-banner" id="voiceBanner" role="alert" hidden></div>
@@ -33,7 +33,7 @@
             <div class="reel-stop-line" aria-hidden="true"></div>
           </div>
           <div class="drum-meter"><span id="drumPosition">— / — 節</span></div>
-          <p class="stage-hint" id="stageHint">触れて、次の一節へ</p>
+          <p class="stage-hint" id="stageHint">タップで次へ</p>
         </section>
 
         <section class="read-panel" aria-label="読み上げ本文">
@@ -54,7 +54,7 @@
             <!-- SUPPORT:START -->
             <div class="support" hidden>
               <a class="btn support-link" target="_blank" rel="noopener noreferrer">浄財<span class="support-external">（外部サイト）</span></a>
-              <p>このアプリへのお礼として、開発者を任意で支援できます。支援の有無によって利用できる機能は変わりません。</p>
+              <p>開発者への任意の支援です。全機能を無料で使えます。</p>
             </div>
             <!-- SUPPORT:END -->
             <div class="controls">
@@ -66,16 +66,16 @@
 
       <div class="secondary">
         <details class="disclosure" id="sutraDetails">
-          <summary>経文をひらく<span>全文</span></summary>
+          <summary>全文</summary>
           <p class="translation-note">現代語訳はこのアプリ独自の意訳です。読み方・解釈は宗派によって異なります。観音経は後半の偈文（世尊偈）です。</p>
           <div class="text-block" id="textBlock" tabindex="0" role="region" aria-label="般若心経の全文"></div>
         </details>
         <details class="disclosure" id="settingsDetails">
-          <summary>読み方を整える<span>設定・操作</span></summary>
+          <summary>設定・操作</summary>
           <div class="settings-content">
             <label class="field"><span>速度 <b id="rateOut">1.0×</b></span><input type="range" id="rate" min="0.6" max="1.4" step="0.05" value="1"></label>
             <button class="btn" id="restartBtn" disabled>最初から</button>
-            <p class="stage-hint">スクロール／タップ: 次へ<br>逆スクロール／↑キー: 予約取消・前の節へ<br>キー ↓ / ↑ ・ Space: 一時停止／再開</p>
+            <p class="stage-hint">タップ・↓・スクロール：次へ<br>↑・逆スクロール：予約取消／前へ<br>Space：一時停止／再開</p>
             <p class="drum-selection" id="drumSelection">読み上げに合わせて、経文が一文字ずつ流れます。</p>
             <div class="session-meta"><span class="counter-label">操作数 <b id="counter">0</b></span><span class="queue-label">待っている節 <b id="queueCount">0</b> / 5</span></div>
           </div>
@@ -87,7 +87,7 @@
 
       <p>音声: <a href="https://voicevox.hiroshiba.jp/product/white_cul/">VOICEVOX:WhiteCUL</a> / VOICEVOX:波音リツ（歌唱クエリ生成）
       </p>
-      <p><a href="audition/">A〜Dの試聴比較</a> · <a href="https://voicevox.hiroshiba.jp/term/">VOICEVOX規約</a> · <a href="https://www.whitecul.com/guideline">WhiteCUL規約</a> · <a href="https://www.canon-voice.com/terms/">波音リツ規約</a></p>
+      <p><a href="audition/">音声の試聴</a> · <a href="https://voicevox.hiroshiba.jp/term/">VOICEVOX規約</a> · <a href="https://www.whitecul.com/guideline">WhiteCUL規約</a> · <a href="https://www.canon-voice.com/terms/">波音リツ規約</a></p>
     </footer>
   </div>
   <noscript><p>読経を進めるにはJavaScriptを有効にしてください。</p></noscript>
