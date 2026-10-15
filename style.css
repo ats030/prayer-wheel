@@ -585,7 +585,7 @@ h1 { font-family: var(--font-reel); font-size: 30px; font-weight: 500; letter-sp
 .reader-app .drawer-content { position: absolute; inset: 46px 0 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 8px 4px; scrollbar-width: thin; }
 .reader-app #sutraDetails .drawer-content { display: flex; flex-direction: column; overflow: hidden; }
 .reader-app .translation-note { flex-shrink: 0; margin: 0 0 8px; font-size: 10px; }
-.reader-app .text-block { flex: 1; min-height: 0; max-height: none; margin: 0; font-size: 17px; }
+.reader-app .text-block { flex: 1; min-height: 0; max-height: none; margin: 0; font-size: 15px; line-height: 2; }
 .reader-app .settings-content { display: block; }
 .reader-app .settings-content > * { margin: 0 0 12px; }
 .reader-app .foot { margin: 0; }
