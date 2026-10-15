@@ -524,3 +524,10 @@ h1 { font-family: var(--font-reel); font-size: 30px; font-weight: 500; letter-sp
   .stage, .progress-fill { transition: none; }
   .dot.speaking { animation: none; }
 }
+
+/* Support replaces the former back/pause controls in the reading column. */
+.reading-bottom .support { margin-top: 14px; padding: 0; border: 0; }
+.reading-bottom .support-link { min-height: 64px; padding: 12px; gap: 6px; font-size: 24px; white-space: nowrap; }
+.reading-bottom .support-external { font-size: 9px; }
+.reading-bottom .support p { text-align: left; font-size: 10px; line-height: 1.8; }
+.controls:has(> button[hidden]:only-child) { display: none; }

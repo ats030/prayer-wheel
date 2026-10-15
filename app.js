@@ -126,15 +126,13 @@ function updateUI() {
   const position = index + 1;
   $('progressFill').style.width = `${position / player.chunks.length * 100}%`;
   $('progressLabel').textContent = `読み上げ ${position} / ${player.chunks.length} 節`;
-  $('pauseBtn').textContent = player.paused ? '再開' : '一時停止';
-  $('pauseBtn').disabled = Boolean(player.error) || (!player.active && !player.pending.length);
   $('retryBtn').hidden = !player.error;
   $('voiceBanner').hidden = !player.error;
   $('voiceBanner').textContent = player.error;
   let status = '準備完了。ドラムを回してください。';
   let mode = 'idle';
   if (player.error) { status = '音声を停止しています。再試行できます。'; mode = 'warn'; }
-  else if (player.paused) { status = '一時停止中。再開を押すと続きます。'; mode = 'paused'; }
+  else if (player.paused) { status = '一時停止中。Spaceで再開できます。'; mode = 'paused'; }
   else if (player.active) {
     status = player.active.started ? '読経中' : '音声を読み込んでいます…';
     mode = 'speaking';
@@ -180,8 +178,6 @@ stage.addEventListener('keydown', (event) => {
     event.preventDefault(); player?.togglePause();
   }
 });
-$('backBtn').addEventListener('click', () => turn(-1));
-$('pauseBtn').addEventListener('click', () => player?.togglePause());
 $('retryBtn').addEventListener('click', () => player?.retry());
 $('restartBtn').addEventListener('click', () => {
   wheelAcc = 0;
@@ -240,7 +236,6 @@ async function initialize() {
     player = new SutraPlayer(chunks, audio, updateUI);
     stage.setAttribute('aria-disabled', 'false');
     $('restartBtn').disabled = false;
-    $('backBtn').disabled = false;
     updateUI();
   } catch {
     stage.dataset.state = 'error';

@@ -46,7 +46,7 @@ def check(base):
         }""")
         assert trace[-1]['angle'] > trace[0]['angle'], trace
         assert len({s['character'] for s in trace}) >= 2, trace
-        page.locator('#pauseBtn').click()
+        page.locator("#stage").press("Space")
         frozen = page.locator('#dial').evaluate("e => e.style.getPropertyValue('--drum-turn')")
         page.wait_for_timeout(250)
         assert page.locator('#dial').evaluate("e => e.style.getPropertyValue('--drum-turn')") == frozen
@@ -64,7 +64,7 @@ def check(base):
         page.emulate_media(reduced_motion='no-preference')
         page.locator("#stage").focus()
         page.keyboard.press("Space")
-        assert page.locator("#pauseBtn").inner_text() == "一時停止"
+        assert page.locator("#stage").get_attribute("data-state") != "paused"
         page.locator("#stage").click()
         page.wait_for_function("window.testAudio && testAudio.currentTime > 0.1")
         assert page.locator(".chunk.active").text_content().strip() == "摩訶般若波羅蜜多心経"
@@ -76,17 +76,17 @@ def check(base):
         page.evaluate("document.getElementById('stage').click()")
         assert page.locator("#counter").text_content() == "6"
         assert page.locator("#currentLine").inner_text() == "摩訶般若波羅蜜多心経"
-        page.locator("#backBtn").click()
+        page.locator("#stage").press("ArrowUp")
         assert page.locator("#queueCount").text_content() == "4"
         assert page.locator(".reel-face.is-selected").get_attribute("data-section") == "0"
-        page.locator("#pauseBtn").click()
+        page.locator("#stage").press("Space")
         assert page.locator('.reel-face.is-selected').get_attribute('data-section') == '0'
         before = page.evaluate("testAudio.currentTime")
         page.wait_for_timeout(250)
         assert abs(page.evaluate("testAudio.currentTime") - before) < .05
         page.locator("#rate").evaluate("e=>{e.value='1.25';e.dispatchEvent(new Event('input'))}")
         assert page.evaluate("testAudio.playbackRate") == 1.25
-        page.locator("#pauseBtn").click()
+        page.locator("#stage").press("Space")
         page.wait_for_function("testAudio.currentTime > " + str(before + .1))
         page.wait_for_function("document.getElementById('currentLine').textContent === '観自在菩薩'")
         assert page.evaluate("testAudio.playbackRate") == 1.25
@@ -106,7 +106,6 @@ def check(base):
         page.keyboard.press("ArrowUp")
         assert page.locator("#counter").text_content() == "1"
         page.keyboard.press("Space")
-        assert page.locator("#pauseBtn").inner_text() == "再開"
         assert page.locator("#stage").get_attribute("data-state") == "paused"
         page.wait_for_function("document.getElementById('dial').dataset.moving === 'false'")
         assert page.evaluate("""() => {
@@ -150,8 +149,8 @@ def check(base):
         assert touch.evaluate("document.documentElement.scrollWidth") <= 390
         touch.wait_for_function("testAudio.currentTime > .4")
         touch.screenshot(path="/tmp/prayer-wheel-mobile.png", full_page=True)
-        touch.locator("#pauseBtn").tap()
-        assert touch.locator("#pauseBtn").inner_text() == "再開"
+        touch.locator("#stage").press("Space")
+        assert touch.locator("#stage").get_attribute("data-state") == "paused"
         # The full text is opt-in; opening it restores active-passage alignment.
         page.locator('#sutraDetails summary').click()
         assert page.locator('#textBlock').is_visible()
@@ -187,16 +186,16 @@ def check(base):
             return dial.children[slot].dataset.sequence === String(center);
           };
           if (!aligned()) return false;
-          for (let i=0;i<28;i++) document.getElementById('backBtn').click();
+          for (let i=0;i<28;i++) document.getElementById('stage').dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowUp', bubbles: true}));
           if (!aligned()) return false;
           await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
           return aligned();
         }""")
         touch.locator("#stage").tap()
         assert touch.locator("#queueCount").text_content() == "1"
-        touch.locator("#backBtn").tap()
+        touch.locator("#stage").press("ArrowUp")
         assert touch.locator("#queueCount").text_content() == "0"
-        assert touch.locator("#pauseBtn").inner_text() == "再開"
+        assert touch.locator("#stage").get_attribute("data-state") == "paused"
         assert not errors, errors
 
         failed = context.new_page()
@@ -237,6 +236,8 @@ def check(base):
             assert not layout.locator('#settingsDetails').evaluate('e => e.open')
             assert layout.locator('.support-link').get_attribute('href') == 'https://buymeacoffee.com/ats030'
             assert layout.locator('.support-link').is_visible()
+            assert layout.locator('#backBtn, #pauseBtn').count() == 0
+            assert layout.locator('.reading-bottom .support-link').count() == 1
             result = layout.evaluate("""() => {
               const failures = [];
               const layoutFailures = [];
@@ -290,12 +291,11 @@ def check(base):
             assert layout.locator('#dial').evaluate("e => parseFloat(e.style.getPropertyValue('--drum-turn'))") == layout.locator('.reel-face.is-selected').evaluate("e => Number(e.dataset.sequence) * 7.5")
             layout.evaluate("""() => {
               document.getElementById('stage').click();
-              document.getElementById('pauseBtn').click();
-              document.getElementById('backBtn').click();
+              document.getElementById('stage').dispatchEvent(new KeyboardEvent('keydown', {code: 'Space', bubbles: true}));
+              document.getElementById('stage').dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowUp', bubbles: true}));
             }""")
             assert layout.locator("#stage").get_attribute("data-state") == "paused"
             assert layout.locator(".reel-face.is-selected").get_attribute("data-section") == str(result["count"])
-            assert layout.locator("#pauseBtn").inner_text() == "再開"
             layout.locator("#settingsDetails summary").click()
             assert layout.locator("#rate").is_visible()
             layout.locator("#restartBtn").click()

@@ -47,21 +47,18 @@
           <div class="reading-bottom">
             <div class="progress" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
             <div class="reading-meta"><p class="progress-label" id="progressLabel">—</p><span class="rounds">完了 <b id="rounds">0</b> 巡</span></div>
+            <!-- SUPPORT:START -->
+            <div class="support" hidden>
+              <a class="btn support-link" target="_blank" rel="noopener noreferrer">浄財<span class="support-external">（外部サイト）</span></a>
+              <p>このアプリへのお礼として、開発者を任意で支援できます。支援の有無によって利用できる機能は変わりません。</p>
+            </div>
+            <!-- SUPPORT:END -->
             <div class="controls">
-              <button class="btn" id="backBtn" disabled>戻る</button>
-              <button class="btn" id="pauseBtn" disabled>一時停止</button>
               <button class="btn" id="retryBtn" hidden>音声を再試行</button>
             </div>
           </div>
         </section>
       </div>
-
-      <!-- SUPPORT:START -->
-      <div class="support" hidden>
-        <a class="btn support-link" target="_blank" rel="noopener noreferrer">浄財<span class="support-external">（外部サイト）</span></a>
-        <p>このアプリへのお礼として、開発者を任意で支援できます。支援の有無によって利用できる機能は変わりません。</p>
-      </div>
-      <!-- SUPPORT:END -->
 
       <div class="secondary">
         <details class="disclosure" id="sutraDetails">
@@ -73,7 +70,7 @@
           <div class="settings-content">
             <label class="field"><span>速度 <b id="rateOut">1.0×</b></span><input type="range" id="rate" min="0.6" max="1.4" step="0.05" value="1"></label>
             <button class="btn" id="restartBtn" disabled>最初から</button>
-            <p class="stage-hint">スクロール／タップ: 次へ<br>逆スクロール／「戻る」: 予約取消・前の節へ<br>キー ↓ / ↑ ・ Space: 一時停止／再開</p>
+            <p class="stage-hint">スクロール／タップ: 次へ<br>逆スクロール／↑キー: 予約取消・前の節へ<br>キー ↓ / ↑ ・ Space: 一時停止／再開</p>
             <p class="drum-selection" id="drumSelection">読み上げに合わせて、経文が一文字ずつ流れます。</p>
             <div class="session-meta"><span class="counter-label">操作数 <b id="counter">0</b></span><span class="queue-label">待っている節 <b id="queueCount">0</b> / 5</span></div>
           </div>
