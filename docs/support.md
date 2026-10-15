@@ -1,26 +1,19 @@
 # 浄財による開発支援
 
-フッターに「浄財」ボタンを準備していますが、支援の受け付けは始まっていません。
-`support-config.json`のURL未設定時は非表示です。公開ビルド時に設定を読み、
-HTMLの外部リンクとして出力します。アプリに決済SDKや決済状態は追加しません。
+フッターの「浄財」ボタンは https://buymeacoffee.com/ats030 を別タブで開きます。
+公開ビルド時に`support-config.json`を読み、外部リンクとして出力します。
+アプリに決済SDKや決済状態は追加しません。URL未設定時は非表示です。
 ソースのindex.htmlを直接配信する場合は非表示のままです。
 
-## 支援先の候補と未確認事項
+## 用途の整理
 
-第一候補はBuy Me a Coffeeです。支援者の登録不要を優先します。
-日本は入金対象国ですが、Stripe規約も適用されるため、返礼なしの個人開発支援に
-使えるとはまだ判断できません。確認記録は[利用条件](support-license.yaml)です。
-初回入金時の審査が案内されており、登録だけで受け取りを保証するものではありません。
-
-問い合わせ文の案（未送信）:
-
-> I am an individual developer based in Japan. I maintain a free browser app
-> called prayer-wheel, which displays Buddhist sutra text with synthesized
-> recitation. I would like to accept optional, one-time support for its
-> development and hosting, without rewards, products, or paid access.
-> Is this use eligible for Buy Me a Coffee and its Stripe Standard Connect
-> payouts in Japan, given Stripe's restriction on donations to individuals?
-> Please also confirm the fees and supported payment currencies for this use.
+提供済みの無料アプリへのお礼として、開発者が任意のチップを受け取ります。
+追加の商品・返礼や有料機能はありません。宗教団体への寄付の受付ではありません。
+Stripe公式は、提供した商品・サービス（コンテンツなど）へのチップと寄付を区別しています。
+Buy Me a Coffee公式も開発者向けの単発チップを案内しています。
+2026-10-15にこの説明をユーザーに提示し、公開の指示を受けました。
+提供者による個別の承認や、本人・銀行登録、入金完了を確認したものではありません。
+根拠と条件は[利用条件](support-license.yaml)に記録しています。
 
 ## 支援ページの説明文案
 
@@ -30,7 +23,7 @@ prayer-wheelは、マニ車を回しながら般若心経の文字と音声を�
 
 ## 公開時の設定
 
-1. 提供者から用途への対応を確認し、必要な本人・銀行情報の登録を終えて支援ページを公開します。
+1. 実際の用途を公式要件と照合し、支援ページを公開します。本人確認・入金設定は所有者がサービス側で行います。
 2. 確認結果を`docs/support-license.yaml`に記録し、`support-config.json`の`url`へ実際のHTTPS URLを設定、`usageConfirmed`を`true`にします。
 3. 通常の公開ビルドと検証を実行してデプロイします。URLありで用途未確認の場合、ビルドは失敗します。
 

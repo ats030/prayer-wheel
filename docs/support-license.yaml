@@ -1,9 +1,9 @@
 tool: Buy Me a Coffee
 plan: free creator page; one-time support
-checked_at: 2026-10-14
-decision: review_required
-adopted: false
-commercial_use: creator support is offered, including programmers; exact intended use remains unconfirmed
+checked_at: 2026-10-15
+decision: conditional
+adopted: true
+commercial_use: official guidance offers developer support and one-time tips for published work
 cost:
   monthly: none
   platform: 5 percent per transaction
@@ -12,8 +12,12 @@ cost:
   other: international, recurring and currency fees may apply; confirm Japan Standard Connect conditions
 eligibility:
   region: Japan listed under Stripe Standard Connect
-  blocker: Stripe terms also apply; Japan lists donations to individuals as prohibited
-  required: confirm Japanese individual developer may receive one-time support without rewards before enabling
+  interpretation: tips for an already provided free app; not personal fundraising or charitable donations
+  basis: Stripe distinguishes tips for provided goods/services/content from donations; Buy Me a Coffee offers developer tips
+  owner_authorization: user instructed publication after explanation on 2026-10-15
+  required: accurate creator page; provider identity and payout verification; comply with regional terms
+  unverified: individual provider approval, payout setup and actual receipt of funds
+  page: https://buymeacoffee.com/ats030
 privacy: external link only; no provider SDK or supporter data stored by this app
 attribution: custom text link only; no provider marks or copied assets
 sources:
@@ -22,3 +26,5 @@ sources:
   - https://help.buymeacoffee.com/en/articles/6258038-supported-countries-for-payouts-on-buy-me-a-coffee
   - https://help.buymeacoffee.com/en/articles/8105744-how-to-calculate-charges-on-your-payment
   - https://stripe.com/jp/legal/restricted-businesses
+  - https://support.stripe.com/questions/requirements-for-accepting-tips-or-donations?locale=ja-JP
+  - https://help.buymeacoffee.com/en/articles/10182730-what-is-buy-me-a-coffee-and-how-does-it-work
