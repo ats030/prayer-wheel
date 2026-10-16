@@ -20,6 +20,8 @@ let startedByUser = false;
 let loadVersion = 0;
 let loadController;
 let wheelAcc = 0;
+let swipe = null;
+let suppressPointerClick = false;
 let highlighted = null;
 let drumPosition = -1;
 let activeCharacter = -1;
@@ -281,7 +283,66 @@ stage.addEventListener('wheel', (event) => {
     turn(direction, { clearPending: true });
   }
 }, { passive: false });
+function cancelSwipe() {
+  if (swipe) suppressPointerClick = true;
+  swipe = null;
+}
+
+// A second finger anywhere cancels the gesture, including a pinch outside the drum.
+document.addEventListener('pointerdown', (event) => {
+  if (event.pointerType === 'touch' && swipe && event.pointerId !== swipe.id) cancelSwipe();
+}, { capture: true });
+stage.addEventListener('pointerdown', (event) => {
+  suppressPointerClick = false;
+  if (event.pointerType !== 'touch') return;
+  if (!event.isPrimary) {
+    suppressPointerClick = true;
+    cancelSwipe();
+    return;
+  }
+  swipe = { id: event.pointerId, x: event.clientX, y: event.clientY,
+    moved: false, owner: player, started: startedByUser };
+  stage.setPointerCapture(event.pointerId);
+});
+stage.addEventListener('pointermove', (event) => {
+  if (!swipe || event.pointerId !== swipe.id) return;
+  if (Math.hypot(event.clientX - swipe.x, event.clientY - swipe.y) >= 12) {
+    swipe.moved = true;
+    suppressPointerClick = true;
+  }
+});
+stage.addEventListener('pointerup', (event) => {
+  if (!swipe || event.pointerId !== swipe.id) return;
+  const gesture = swipe;
+  swipe = null;
+  const dx = event.clientX - gesture.x, dy = event.clientY - gesture.y;
+  const moved = gesture.moved || Math.hypot(dx, dy) >= 12;
+  suppressPointerClick = true;
+  if (!player || gesture.owner !== player) return;
+  // Handle taps here too: pointer capture can change native click targeting.
+  // Suppress the subsequent compatibility click so a tap is counted only once.
+  if (!moved) {
+    if (!startedByUser && !event.isTrusted) return;
+    startedByUser = true;
+    turn(1);
+    return;
+  }
+  if (!gesture.started
+      || Math.abs(dy) < 32 || Math.abs(dy) < Math.abs(dx) * 1.25) return;
+  wheelAcc = 0;
+  turn(dy < 0 ? 1 : -1, { clearPending: true });
+});
+for (const type of ['pointercancel', 'lostpointercapture']) {
+  stage.addEventListener(type, (event) => {
+    if (swipe && swipe.id === event.pointerId) cancelSwipe();
+  });
+}
+
 stage.addEventListener('click', (event) => {
+  if (suppressPointerClick && (event.pointerType === 'touch' || event.detail > 0)) {
+    event.preventDefault();
+    return;
+  }
   if (!player || !startedByUser && !event.isTrusted) return;
   startedByUser = true;
   turn(1);
@@ -299,6 +360,7 @@ stage.addEventListener('keydown', (event) => {
   }
 });
 $('restartBtn').addEventListener('click', () => {
+  cancelSwipe();
   wheelAcc = 0;
   player?.restart();
 });
@@ -313,6 +375,7 @@ $('sutraSelect').addEventListener('change', () => initialize($('sutraSelect').va
 async function initialize(id = 'hannya') {
   const definition = sutras[id];
   if (!definition) return;
+  cancelSwipe();
   const version = ++loadVersion;
   loadController?.abort();
   const controller = new AbortController();

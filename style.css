@@ -53,7 +53,7 @@
 .btn { min-height: 44px; }
 .btn:disabled { opacity: 0.45; cursor: default; }
 .stage[aria-disabled="true"] { opacity: 0.45; cursor: wait; }
-.stage { touch-action: manipulation; }
+.stage { touch-action: pan-x pinch-zoom; user-select: none; -webkit-user-select: none; }
 .foot a { color: var(--ink-subtle); }
 
 html, body { margin: 0; overflow-x: clip; }
