@@ -57,8 +57,15 @@ def check(url):
             send('touchCancel' if cancel else 'touchEnd', [])
             time.sleep(.1)  # Include any compatibility click in the assertions.
 
-        def tap():
-            send('touchStart', [finger(point())]); send('touchEnd', [])
+        def tap(lower=False, mouse=False):
+            p = point(); p['y'] += 40 if lower else -40
+            if mouse:
+                for kind in ('mousePressed', 'mouseReleased'):
+                    cdp.send('Input.dispatchMouseEvent', {
+                        'type':kind, **p, 'button':'left', 'clickCount':1,
+                    })
+            else:
+                send('touchStart', [finger(p)]); send('touchEnd', [])
             time.sleep(.05)
 
         def counts():
@@ -76,6 +83,9 @@ def check(url):
         swipe(-100)
         assert counts() == [0, 0] and read('playCount') == 0
         assert read('document.querySelector("#voiceBanner").hidden') is True
+        tap(lower=True)
+        tap(lower=True, mouse=True)
+        assert counts() == [0, 0] and read('playCount') == 0, 'Initial lower tap/click must not advance'
         tap()
         wait('window.testAudio && testAudio.currentTime > .1')
         assert counts() == [1, 0], 'A swipe before startup must not leak a click'
@@ -103,6 +113,17 @@ def check(url):
         assert counts() == [1, 0], ('Down swipe must clear all reservations and rewind', counts())
         swipe(-80); swipe(-80); swipe(80)
         assert counts() == [1, 0], 'At beginning, down swipe must only clear reservations'
+
+        for mouse in (False, True):
+            tap(mouse=mouse); tap(mouse=mouse)
+            assert counts() == [3, 2], ('Upper tap/click must advance once', mouse, counts())
+            read('testAudio.dispatchEvent(new Event("ended"))')
+            wait('document.querySelector("#currentLine").textContent === "観自在菩薩"')
+            tap(lower=True, mouse=mouse)
+            wait('document.querySelector("#currentLine").textContent === "摩訶般若波羅蜜多心経"')
+            assert counts() == [1, 0], ('Lower tap/click must clear queue and rewind', mouse, counts())
+            tap(lower=True, mouse=mouse)
+            assert counts() == [1, 0], 'Lower tap/click at beginning must stay at beginning'
 
         # A second finger outside the drum cancels the first finger's gesture.
         p = point(); outside = {'x':30,'y':p['y']}

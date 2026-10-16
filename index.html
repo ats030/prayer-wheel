@@ -53,7 +53,7 @@
         <section class="stage-panel" aria-label="経文マニ車">
           <div class="stage" id="stage" tabindex="0" role="button" aria-disabled="true"
                aria-keyshortcuts="Enter ArrowDown ArrowUp PageDown PageUp Space"
-               aria-label="マニ車を回す。最初はタップで開始。上スワイプで次へ、下スワイプで前の節へ。タップ、クリック、Enter、下矢印でも次へ。上矢印で予約取消か前の節へ。Spaceで一時停止・再開。">
+               aria-label="マニ車を回す。上半分のタップ・クリックで次へ、下半分で予約を解除して前の節へ。最初は上半分をタップで開始。上スワイプで次へ、下スワイプで前の節へ。Enter、下矢印でも次へ。上矢印で予約取消か前の節へ。Spaceで一時停止・再開。">
             <div class="reel-window" aria-hidden="true"><div class="reel-rotor" id="dial"></div></div>
             <div class="reel-stop-line" aria-hidden="true"></div>
           </div>
@@ -73,7 +73,7 @@
           <div class="drawer-content settings-content">
             <label class="field"><span>速度 <b id="rateOut">1.0×</b></span><input type="range" id="rate" min="0.6" max="1.4" step="0.05" value="1"></label>
             <button class="btn" id="restartBtn" disabled>最初から</button>
-            <p class="stage-hint">上スワイプ・上スクロール：次へ<br>下スワイプ・下スクロール：予約を解除して前へ<br>タップ・↓キー：次へ／↑キー：予約取消・前へ<br>Space：一時停止／再開</p>
+            <p class="stage-hint">上半分タップ・上スワイプ・上スクロール：次へ<br>下半分タップ・下スワイプ・下スクロール：予約を解除して前へ<br>↓キー：次へ／↑キー：予約取消・前へ<br>Space：一時停止／再開</p>
             <p class="drum-selection" id="drumSelection">読み上げに合わせて、経文が一文字ずつ流れます。</p>
             <div class="session-meta"><span class="counter-label">操作数 <b id="counter">0</b></span><span class="queue-label">待っている節 <b id="queueCount">0</b> / 5</span></div>
           </div>

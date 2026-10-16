@@ -282,6 +282,16 @@ stage.addEventListener('wheel', (event) => {
     turn(direction, { clearPending: true });
   }
 }, { passive: false });
+function tapStage(event, y = null) {
+  if (!player || !startedByUser && !event.isTrusted) return;
+  const bounds = stage.getBoundingClientRect();
+  const direction = y !== null && y > bounds.top + bounds.height / 2 ? -1 : 1;
+  if (direction < 0 && !startedByUser) return;
+  startedByUser = true;
+  wheelAcc = 0;
+  turn(direction, { clearPending: true });
+}
+
 function cancelSwipe() {
   if (swipe) suppressPointerClick = true;
   swipe = null;
@@ -321,9 +331,7 @@ stage.addEventListener('pointerup', (event) => {
   // Handle taps here too: pointer capture can change native click targeting.
   // Suppress the subsequent compatibility click so a tap is counted only once.
   if (!moved) {
-    if (!startedByUser && !event.isTrusted) return;
-    startedByUser = true;
-    turn(1);
+    tapStage(event, gesture.y);
     return;
   }
   if (!gesture.started
@@ -342,9 +350,8 @@ stage.addEventListener('click', (event) => {
     event.preventDefault();
     return;
   }
-  if (!player || !startedByUser && !event.isTrusted) return;
-  startedByUser = true;
-  turn(1);
+  // Keyboard and assistive-technology clicks have no spatial target.
+  tapStage(event, event.detail > 0 || event.pointerType === 'touch' ? event.clientY : null);
 });
 stage.addEventListener('keydown', (event) => {
   if (['ArrowDown', 'PageDown', 'Enter'].includes(event.key)) {
