@@ -188,14 +188,12 @@ Nodeのテストは予約・逆操作・周回・失敗復旧・古い再生通�
 
 ## ファビコン
 
-黒・金・生成りの経文マニ車をimagegenでフラット化しました。
-現在の透過マスターは`assets/prayer-wheel-icon-flat-clean.png`です。上下中央の突起を除去しています。陰影と装飾を抑え、
-マニ車をほぼ正方形に広げて外周の余白を詰めています。
-64pxのRGBA `favicon.png`と、16/32/48/64pxを含む`favicon.ico`に使用します。
-既存環境のPillow 12.2.0でマスターをLANCZOS縮小し、ICOの複数サイズも同じマスターから生成します。
-本体と試聴ページの参照URLには`?v=clean-20261015`を付け、旧画像のキャッシュと区別します。
-旧画像は`assets/prayer-wheel-icon-source.png`、`assets/prayer-wheel-icon-horizontal.png`、
-`assets/prayer-wheel-icon-transparent.png`として保持しています。
+黒地に金色の八本スポークを持つ法輪を使用します。
+`scripts/generate-favicon.py`が既存環境のPillowでオリジナル図形を描画し、
+64pxのRGBA `favicon.png`と16/32/48/64pxの`favicon.ico`を生成します。
+再生成コマンド：`/home/ats030/.venv/bin/python scripts/generate-favicon.py`。
+本体と試聴ページの参照URLには`?v=dharma-20261016`を付け、旧画像のキャッシュと区別します。
+旧マニ車画像は`assets/`に保持しています。
 app-portalも公開アプリから同じファビコンを取得します。原画像は公開パッケージに含めません。
 
 ## 読経調の試聴版
