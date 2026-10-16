@@ -27,11 +27,10 @@ def check(base):
         page.on("request", lambda request: requests.append(request.url))
         page.goto(base)
         page.wait_for_selector('#stage[aria-disabled="false"]')
-        assert page.locator("#currentLine").inner_text() == "マニ車を回すと、読経が始まります。"
+        assert page.locator("#currentLine").inner_text() == "タップして開始"
         assert page.locator('#translationBlock').is_hidden()
         assert page.locator(".reel-face.is-selected").inner_text() == ""
-        page.locator('#stage').hover()
-        page.mouse.wheel(0, -120)
+        page.locator('#stage').click()
         page.wait_for_function("window.testAudio && testAudio.currentTime > .4")
         trace = page.evaluate("""async () => {
           const samples = [];
@@ -270,6 +269,8 @@ def check(base):
             layout.set_viewport_size({"width": width, "height": 900})
             layout.goto(base)
             layout.wait_for_selector('#stage[aria-disabled="false"]')
+            layout.locator('#stage').click()
+            layout.evaluate("document.getElementById('restartBtn').click()")
             assert layout.locator('#sutraDetails').evaluate('e => e.open')
             assert not layout.locator('#settingsDetails').evaluate('e => e.open')
             assert layout.locator('.support-link').get_attribute('href') == 'https://buymeacoffee.com/ats030'

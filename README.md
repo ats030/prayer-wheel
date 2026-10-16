@@ -41,7 +41,8 @@ python3 -m http.server 8731 --bind 127.0.0.1 --directory dist
 `http://127.0.0.1:8731` を開きます。公開する場合も、生成した`dist/`全体を同じHTTPSオリジンで配信します。
 新アプリは`data/sutra-sections.json`と`audio/sections/*.wav`を使用し、旧データ・音声は以前のタブ用に保持します。
 `file://` での直接起動は使いません。Node、Python、Nemoは利用者には不要です。
-ブラウザの自動再生制限により、最初のスクロールだけで再生できない場合はマニ車をタップします。
+初回はマニ車をクリック・タップ、またはマニ車にフォーカスしてEnterを押して開始します。
+開始前のホイール操作は読み上げや予約を進めません。開始後は上スクロールで進み、下スクロールで戻れます。
 
 ## Cloudflareへの公開
 
@@ -169,12 +170,17 @@ python3 scripts/check-recitation-browser.py  # 全29区切りをUI上限1.4倍�
 npm test
 python3 scripts/check-audio.py
 python3 scripts/check-browser.py
+python3 scripts/check-initial-audio.py --url http://127.0.0.1:8731/
 ```
 
 Nodeのテストは予約・逆操作・周回・失敗復旧・古い再生通知の無効化を確認します。
 音声検査は経文と全音声のハッシュ・形式・音割れを確認します。
 ブラウザ検査は配信中の`http://127.0.0.1:8731`を使用し、既存のPython Playwright/Chromium環境で
 実WAVの再生、PCとタッチ画面、エラー復旧を確認します。実機iOSでの検証とは区別します。
+
+初回音声の検証は標準の自動再生制限を有効にし、CDPの`userGesture: false`で状態を読み取ります。
+通常のPlaywrightの評価処理で操作済みになる検査と分け、未操作のホイールでは再生・エラー・予約が発生しないことと、実クリック/Enter後の再生を確認します。
+制約の参照：[Chromeの自動再生ポリシー](https://developer.chrome.com/blog/autoplay/)・[HTMLのユーザー操作判定](https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event)。
 
 `DESIGN.md`の既存デザインを維持し、HTMLのvisit-logタグも保持しています。
 

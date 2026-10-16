@@ -16,6 +16,7 @@ const sutras = {
   amida: { title: '仏説阿弥陀経', source: 'data/amida.json', timing: 'data/amida-timing.json', audioDirectory: 'audio/amida' },
 };
 let player;
+let startedByUser = false;
 let loadVersion = 0;
 let loadController;
 let wheelAcc = 0;
@@ -173,7 +174,7 @@ function updateUI() {
       if (i === index) span.setAttribute('aria-current', 'true');
       else span.removeAttribute('aria-current');
     });
-    $('currentLine').textContent = index < 0 ? 'マニ車を回すと、読経が始まります。' : player.chunks[index].text;
+    $('currentLine').textContent = index < 0 ? 'タップして開始' : player.chunks[index].text;
     $('currentReading').textContent = index < 0 ? '' : player.chunks[index].reading;
     $('currentTranslation').textContent = index < 0 ? '' : player.chunks[index].translation;
     $('translationBlock').hidden = index < 0;
@@ -190,7 +191,8 @@ function updateUI() {
   $('progressLabel').textContent = `読み上げ ${position} / ${player.chunks.length} 節`;
   $('voiceBanner').hidden = !player.error;
   $('voiceBanner').textContent = player.error;
-  let status = '準備完了。マニ車を回してください。';
+  $('stageHint').textContent = startedByUser ? 'タップで次へ' : 'タップして開始';
+  let status = startedByUser ? '準備完了。マニ車を回してください。' : 'マニ車をタップしてください。';
   let mode = 'idle';
   if (player.error) { status = 'マニ車をタップして再開してください。'; mode = 'warn'; }
   else if (player.paused) { status = '一時停止中。Spaceで再開できます。'; mode = 'paused'; }
@@ -259,6 +261,10 @@ function turn(direction, { clearPending = false } = {}) {
 stage.addEventListener('wheel', (event) => {
   if (!player || event.ctrlKey) return;
   event.preventDefault();
+  if (!startedByUser) {
+    wheelAcc = 0;
+    return;
+  }
   const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1;
   const delta = -event.deltaY * unit;
   if (Math.sign(delta) !== Math.sign(wheelAcc)) wheelAcc = 0;
@@ -275,10 +281,17 @@ stage.addEventListener('wheel', (event) => {
     turn(direction, { clearPending: true });
   }
 }, { passive: false });
-stage.addEventListener('click', () => turn(1));
+stage.addEventListener('click', (event) => {
+  if (!player || !startedByUser && !event.isTrusted) return;
+  startedByUser = true;
+  turn(1);
+});
 stage.addEventListener('keydown', (event) => {
   if (['ArrowDown', 'PageDown', 'Enter'].includes(event.key)) {
-    event.preventDefault(); turn(1);
+    event.preventDefault();
+    if (!player || !startedByUser && !event.isTrusted) return;
+    startedByUser = true;
+    turn(1);
   } else if (['ArrowUp', 'PageUp'].includes(event.key)) {
     event.preventDefault(); turn(-1);
   } else if (event.code === 'Space') {
