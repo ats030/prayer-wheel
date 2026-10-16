@@ -193,8 +193,6 @@ function updateUI() {
   $('progressLabel').textContent = `読み上げ ${position} / ${player.chunks.length} 節`;
   $('voiceBanner').hidden = !player.error;
   $('voiceBanner').textContent = player.error;
-  $('stageHint').textContent = startedByUser ? '' : 'タップして開始';
-  $('stageHint').hidden = startedByUser;
   let status = startedByUser ? '準備完了。マニ車を回してください。' : 'マニ車をタップしてください。';
   let mode = 'idle';
   if (player.error) { status = 'マニ車をタップして再開してください。'; mode = 'warn'; }
