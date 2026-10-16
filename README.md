@@ -188,11 +188,11 @@ Nodeのテストは予約・逆操作・周回・失敗復旧・古い再生通�
 
 ## ファビコン
 
-黒地に金色の八本スポークを持つ法輪を使用します。
+背景が透過した金色の八本スポークを持つ法輪を使用します。
 `scripts/generate-favicon.py`が既存環境のPillowでオリジナル図形を描画し、
 64pxのRGBA `favicon.png`と16/32/48/64pxの`favicon.ico`を生成します。
 再生成コマンド：`/home/ats030/.venv/bin/python scripts/generate-favicon.py`。
-本体と試聴ページの参照URLには`?v=dharma-20261016`を付け、旧画像のキャッシュと区別します。
+本体と試聴ページの参照URLには`?v=dharma-transparent-20261016`を付け、旧画像のキャッシュと区別します。
 旧マニ車画像は`assets/`に保持しています。
 app-portalも公開アプリから同じファビコンを取得します。原画像は公開パッケージに含めません。
 
