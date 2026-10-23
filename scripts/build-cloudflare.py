@@ -91,6 +91,8 @@ for entry in phrases['files']:
 for entry in legacy["files"]:
     shutil.copyfile(ROOT / "audio" / entry["file"], out / "audio" / entry["file"])
 files = [p for p in out.rglob("*") if p.is_file()]
+for page in out.rglob('*.html'):
+    page.write_text(page.read_text().replace('</head>', '<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon=\'{"token":"5e4989fc48e244a2bc8c0472f16b3d64"}\'></script>\n</head>'))
 if len(files) != 21 + 2 * len(verse_packages) + sum(len(m['files']) for m, _ in verse_packages) + 2 * len(manifest["files"]) + len(legacy["files"]) + len(phrases['files']) or any(p.stat().st_size > 25 * 1024 * 1024 for p in files):
     sys.exit("Unexpected asset count or Cloudflare asset size limit exceeded")
 print(f"Packaged {len(files)} public files ({sum(p.stat().st_size for p in files):,} bytes)")
